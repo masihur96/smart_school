@@ -8,7 +8,8 @@ import '../domain/entities/attendance.dart';
 import 'package:intl/intl.dart';
 
 class AttendanceScreen extends ConsumerStatefulWidget {
-  const AttendanceScreen({super.key});
+  final bool hideAppBar;
+  const AttendanceScreen({super.key, this.hideAppBar = false});
 
   @override
   ConsumerState<AttendanceScreen> createState() => _AttendanceScreenState();
@@ -51,7 +52,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
     ref.read(attendanceProvider.notifier).saveAttendance(records);
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Attendance saved successfully!')));
-    context.pop();
+    if (!widget.hideAppBar) {
+      context.pop();
+    }
   }
 
   @override
@@ -65,7 +68,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
         : [];
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: widget.hideAppBar ? null : AppBar(
         title: const Text('Take Attendance'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,

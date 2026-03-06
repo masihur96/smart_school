@@ -7,7 +7,8 @@ import '../../admin/providers/student_provider.dart';
 import '../providers/result_provider.dart';
 
 class MarkEntryScreen extends ConsumerStatefulWidget {
-  const MarkEntryScreen({super.key});
+  final bool hideAppBar;
+  const MarkEntryScreen({super.key, this.hideAppBar = false});
 
   @override
   ConsumerState<MarkEntryScreen> createState() => _MarkEntryScreenState();
@@ -32,7 +33,7 @@ class _MarkEntryScreenState extends ConsumerState<MarkEntryScreen> {
     final students = ref.watch(studentsProvider);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: widget.hideAppBar ? null : AppBar(
         title: const Text('Mark Entry'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
