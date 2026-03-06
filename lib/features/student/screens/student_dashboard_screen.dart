@@ -113,7 +113,7 @@ class _StudentDashboardScreenState extends ConsumerState<StudentDashboardScreen>
       onTap: () => setState(() => _selectedIndex = 1),
       child: Card(
         elevation: 0,
-        color: Colors.green.withOpacity(0.1),
+        color: Colors.green.withValues(alpha: 0.1),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -151,7 +151,7 @@ class _StudentDashboardScreenState extends ConsumerState<StudentDashboardScreen>
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.1),
+          backgroundColor: color.withValues(alpha: 0.1),
           child: Icon(icon, color: color),
         ),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),

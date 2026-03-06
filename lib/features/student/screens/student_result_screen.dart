@@ -64,7 +64,7 @@ class _StudentResultScreenState extends ConsumerState<StudentResultScreen> {
                   ...publishedExams.map((exam) {
                     final result = results.where((r) => r.examId == exam.id).firstOrNull;
                     return _buildResultCard(exam, result);
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
@@ -107,7 +107,7 @@ class _StudentResultScreenState extends ConsumerState<StudentResultScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.3),
+            color: Colors.green.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -132,7 +132,7 @@ class _StudentResultScreenState extends ConsumerState<StudentResultScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.emoji_events, color: Colors.white, size: 32),
@@ -238,7 +238,7 @@ class _StudentResultScreenState extends ConsumerState<StudentResultScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isPassed ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+        color: isPassed ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(

@@ -17,11 +17,18 @@ warning • The value of the local variable 'subjects' isn't used • lib/featur
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/screens/login_screen.dart:162:24 • deprecated_member_use
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/student/screens/student_attendance_screen.dart:35:35 • deprecated_member_use
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/student/screens/student_attendance_screen.dart:46:51 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/student/screens/student_dashboard_screen.dart:116:29 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/student/screens/student_dashboard_screen.dart:154:34 • deprecated_member_use
 warning • Unused import: '../../admin/providers/teacher_provider.dart' • lib/features/student/screens/student_homework_screen.dart:5:8 • unused_import
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/student/screens/student_homework_screen.dart:58:53 • deprecated_member_use
 warning • Unused import: '../../../models/school_models.dart' • lib/features/student/screens/student_notice_screen.dart:6:8 • unused_import
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/student/screens/student_notice_screen.dart:50:72 • deprecated_member_use
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/student/screens/student_notice_screen.dart:50:104 • deprecated_member_use
+   info • Unnecessary use of 'toList' in a spread • lib/features/student/screens/student_result_screen.dart:67:22 • unnecessary_to_list_in_spreads
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/student/screens/student_result_screen.dart:110:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/student/screens/student_result_screen.dart:135:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/student/screens/student_result_screen.dart:241:40 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/student/screens/student_result_screen.dart:241:70 • deprecated_member_use
 warning • Unused import: '../../../models/school_models.dart' • lib/features/student/screens/student_routine_screen.dart:9:8 • unused_import
    info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/teacher/screens/attendance_screen.dart:112:25 • deprecated_member_use
    info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/teacher/screens/attendance_screen.dart:124:25 • deprecated_member_use
@@ -34,4 +41,4 @@ warning • Unused import: '../../admin/providers/teacher_provider.dart' • lib
    info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/teacher/screens/mark_entry_screen.dart:46:15 • deprecated_member_use
    info • Don't use 'BuildContext's across async gaps • lib/features/teacher/screens/mark_entry_screen.dart:146:30 • use_build_context_synchronously
 
-33 issues found. (ran in 1.3s)
+40 issues found. (ran in 1.4s)

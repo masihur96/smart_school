@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../teacher/providers/homework_provider.dart';
 import '../../admin/providers/student_provider.dart';
-import '../../admin/providers/teacher_provider.dart';
+import '../../admin/providers/student_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../models/school_models.dart';
 import 'package:intl/intl.dart';
