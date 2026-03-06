@@ -20,7 +20,7 @@ class TeacherDashboardScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildWelcomeCard(context),
-            const SizedBox(height: 24),
+             SizedBox(height: 24),
             Text(
               'My Classes Today',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
