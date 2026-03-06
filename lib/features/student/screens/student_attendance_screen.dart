@@ -6,7 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 class StudentAttendanceScreen extends ConsumerWidget {
-  const StudentAttendanceScreen({super.key});
+  final bool hideAppBar;
+  const StudentAttendanceScreen({super.key, this.hideAppBar = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,7 +22,7 @@ class StudentAttendanceScreen extends ConsumerWidget {
     final attendancePercentage = totalDays == 0 ? 0.0 : presentDays / totalDays;
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: hideAppBar ? null : AppBar(
         title: const Text('My Attendance'),
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,

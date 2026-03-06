@@ -8,7 +8,8 @@ import '../../../models/school_models.dart';
 import 'package:intl/intl.dart';
 
 class StudentHomeworkScreen extends ConsumerWidget {
-  const StudentHomeworkScreen({super.key});
+  final bool hideAppBar;
+  const StudentHomeworkScreen({super.key, this.hideAppBar = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,7 +26,7 @@ class StudentHomeworkScreen extends ConsumerWidget {
     final subjects = ref.watch(subjectsProvider);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: hideAppBar ? null : AppBar(
         title: const Text('My Homework'),
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,

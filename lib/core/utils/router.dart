@@ -13,7 +13,7 @@ import '../../features/admin/screens/notice_management_screen.dart';
 import '../../features/teacher/screens/teacher_dashboard_screen.dart';
 import '../../features/teacher/screens/attendance_screen.dart';
 import '../../features/teacher/screens/homework_management_screen.dart';
-import '../../features/student/screens/dashboard_screen.dart';
+import '../../features/student/screens/student_dashboard_screen.dart';
 import '../../features/student/screens/student_attendance_screen.dart';
 import '../../features/student/screens/student_routine_screen.dart';
 import '../../features/student/screens/student_homework_screen.dart';
