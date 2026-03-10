@@ -55,18 +55,69 @@ class _MarkEntryScreenState extends ConsumerState<MarkEntryScreen> {
         : <Exam>[];
 
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: widget.hideAppBar ? null : AppBar(
-        title: const Text('Mark Entry'),
-        backgroundColor: Colors.blue,
+        title: const Text('Mark Entry System'),
+        backgroundColor: Colors.blue[700],
         foregroundColor: Colors.white,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            onPressed: () {}, // Help info
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+      body: Column(
+        children: [
+
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSelectionCard(
+                    uniqueExamNames, 
+                    classesForSelectedExam, 
+                    studentsForSelectedClass
+                  ),
+                  const SizedBox(height: 28),
+                  if (_selectedStudentId != null) ...[
+                    _buildMarkEntrySection(examsToEnterMarks, subjects, results),
+                    const SizedBox(height: 32),
+                    if (examsToEnterMarks.isNotEmpty)
+                      _buildSaveButton(examsToEnterMarks),
+                    const SizedBox(height: 40),
+                  ] else
+                    _buildEmptySelectionState(),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+
+  Widget _buildSelectionCard(
+    List<String> uniqueExamNames,
+    List<ClassRoom> classesForSelectedExam,
+    List<Student> studentsForSelectedClass,
+  ) {
+    return Card(
+      elevation: 4,
+      shadowColor: Colors.black12,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDropdown<String>(
-              label: 'Select Exam Name',
+            _buildDropdownField<String>(
+              label: 'Examination',
+              icon: Icons.assignment,
               value: _selectedExamName,
               items: uniqueExamNames.map((name) => DropdownMenuItem(value: name, child: Text(name))).toList(),
               onChanged: (val) {
@@ -79,8 +130,9 @@ class _MarkEntryScreenState extends ConsumerState<MarkEntryScreen> {
               },
             ),
             const SizedBox(height: 16),
-            _buildDropdown<String>(
-              label: 'Select Class',
+            _buildDropdownField<String>(
+              label: 'Classroom',
+              icon: Icons.meeting_room,
               value: _selectedClassId,
               items: classesForSelectedExam.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
               onChanged: _selectedExamName == null ? null : (val) {
@@ -92,8 +144,9 @@ class _MarkEntryScreenState extends ConsumerState<MarkEntryScreen> {
               },
             ),
             const SizedBox(height: 16),
-            _buildDropdown<String>(
-              label: 'Select Student',
+            _buildDropdownField<String>(
+              label: 'Student',
+              icon: Icons.person_search,
               value: _selectedStudentId,
               items: studentsForSelectedClass.map((s) => DropdownMenuItem(value: s.userId, child: Text(s.user?.name ?? 'Unknown'))).toList(),
               onChanged: _selectedClassId == null ? null : (val) {
@@ -106,85 +159,15 @@ class _MarkEntryScreenState extends ConsumerState<MarkEntryScreen> {
                 }
               },
             ),
-            const SizedBox(height: 24),
-            if (_selectedStudentId != null && examsToEnterMarks.isNotEmpty) ...[
-              const Text(
-                'Enter Marks for Subjects',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              ...examsToEnterMarks.map((exam) {
-                final subject = subjects.firstWhere((s) => s.id == exam.subjectId, orElse: () => Subject(id: '', name: 'Unknown'));
-                
-                if (!_markControllers.containsKey(exam.id)) {
-                  final existingResult = results.where((r) => r.examId == exam.id && r.studentId == _selectedStudentId).firstOrNull;
-                  _markControllers[exam.id] = TextEditingController(
-                    text: existingResult != null ? existingResult.marksObtained.toString() : '',
-                  );
-                }
-
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(subject.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                              Text('Exam: ${exam.name}', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          width: 80,
-                          child: TextField(
-                            controller: _markControllers[exam.id],
-                            keyboardType: TextInputType.number,
-                            textAlign: TextAlign.center,
-                            decoration: const InputDecoration(
-                              hintText: 'Marks',
-                              border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => _saveMarks(examsToEnterMarks),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.all(16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: const Text('Save All Marks', style: TextStyle(fontSize: 16)),
-                ),
-              ),
-            ] else if (_selectedStudentId != null)
-              const Center(child: Text('No exams found for the selected criteria.'))
-            else
-              const Center(child: Padding(
-                padding: EdgeInsets.only(top: 40),
-                child: Text('Please select Exam, Class, and Student to enter marks.'),
-              )),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDropdown<T>({
+  Widget _buildDropdownField<T>({
     required String label,
+    required IconData icon,
     required T? value,
     required List<DropdownMenuItem<T>> items,
     required ValueChanged<T?>? onChanged,
@@ -193,13 +176,181 @@ class _MarkEntryScreenState extends ConsumerState<MarkEntryScreen> {
       value: value,
       decoration: InputDecoration(
         labelText: label,
-        border: const OutlineInputBorder(),
-        filled: items.isEmpty && onChanged != null,
-        fillColor: Colors.grey[100],
+        prefixIcon: Icon(icon, color: Colors.blue[700]),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        filled: true,
+        fillColor: Colors.blue.withValues(alpha: 0.05),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
       items: items,
       onChanged: onChanged,
-      disabledHint: Text('Select previous option first'),
+      icon: Icon(Icons.keyboard_arrow_down, color: Colors.blue[700]),
+      style: const TextStyle(fontSize: 16, color: Colors.black87),
+      disabledHint: Text('Select previous step first', style: TextStyle(color: Colors.grey[400])),
+    );
+  }
+
+  Widget _buildMarkEntrySection(List<Exam> exams, List<Subject> subjects, List<Result> results) {
+    if (exams.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: Column(
+            children: [
+              Icon(Icons.warning_amber_rounded, size: 60, color: Colors.amber[300]),
+              const SizedBox(height: 16),
+              const Text('No exams found for this selection.', style: TextStyle(fontSize: 16, color: Colors.grey)),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Row(
+          children: [
+            Icon(Icons.edit_note, color: Colors.blue),
+            SizedBox(width: 8),
+            Text(
+              'Enter Subject Marks',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        ...exams.map((exam) {
+          final subject = subjects.firstWhere((s) => s.id == exam.subjectId, orElse: () => Subject(id: '', name: 'Unknown'));
+          
+          if (!_markControllers.containsKey(exam.id)) {
+            final existingResult = results.where((r) => r.examId == exam.id && r.studentId == _selectedStudentId).firstOrNull;
+            _markControllers[exam.id] = TextEditingController(
+              text: existingResult != null ? existingResult.marksObtained.toString() : '',
+            );
+          }
+
+          final marksText = _markControllers[exam.id]?.text ?? '';
+          final double? marks = double.tryParse(marksText);
+          final bool isPass = marks != null && marks >= 40;
+
+          return Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            elevation: 1,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: Colors.grey.withValues(alpha: 0.2), width: 1),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.book, color: Colors.blue[700]),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(subject.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text('Total: 100 Marks', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    width: 100,
+                    child: TextField(
+                      controller: _markControllers[exam.id],
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      onChanged: (val) => setState(() {}),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      decoration: InputDecoration(
+                        hintText: '00',
+                        suffixText: marks != null ? (isPass ? 'P' : 'F') : null,
+                        suffixStyle: TextStyle(
+                          color: isPass ? Colors.green : Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildSaveButton(List<Exam> exams) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        gradient: LinearGradient(
+          colors: [Colors.blue[800]!, Colors.blue[600]!],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withValues(alpha: 0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: () => _saveMarks(exams),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          minimumSize: const Size(double.infinity, 50),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.save_rounded, color: Colors.white),
+            SizedBox(width: 12),
+            Text(
+              'Confirm & Save Results',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptySelectionState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 40),
+        child: Column(
+          children: [
+            Icon(Icons.manage_search, size: 100, color: Colors.grey[200]),
+            const SizedBox(height: 20),
+            Text(
+              'Ready to Record Marks?',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey[800]),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Select exam and student above to proceed',
+              style: TextStyle(color: Colors.grey[500]),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
