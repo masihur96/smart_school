@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:smart_school/models/school_models.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../teacher/providers/attendance_provider.dart';
@@ -106,7 +107,7 @@ class _StudentDashboardScreenState extends ConsumerState<StudentDashboardScreen>
     final currentUser = ref.watch(authProvider).user;
     final attendanceRecords = ref.watch(attendanceProvider).where((r) => r.studentId == currentUser?.id).toList();
     final totalDays = attendanceRecords.length;
-    final presentDays = attendanceRecords.where((r) => r.isPresent).length;
+    final presentDays = attendanceRecords.where((r) => r.status == AttendanceStatus.present).length;
     final percentage = totalDays == 0 ? 0.0 : presentDays / totalDays;
 
     return InkWell(

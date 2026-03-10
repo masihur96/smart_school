@@ -57,12 +57,12 @@ class MockDatabaseService {
         final date = DateTime(monthDate.year, monthDate.month, day);
         // Simulate attendance for 'student1'
         // Random presence between 70% and 95%
-        final isPresent = (day % 10 != 0); // Mostly present
+        final status = (day % 10 != 0) ? AttendanceStatus.present : AttendanceStatus.absent;
         records.add(Attendance(
           id: 'att_${monthDate.month}_$day',
           studentId: 'student1',
           date: date,
-          isPresent: isPresent,
+          status: status,
           takenBy: 'teacher1',
         ));
       }

@@ -35,18 +35,20 @@ class Subject {
   Map<String, dynamic> toJson() => {'id': id, 'name': name};
 }
 
+enum AttendanceStatus { present, absent, leave }
+
 class Attendance {
   final String id;
   final String studentId;
   final DateTime date;
-  final bool isPresent;
+  final AttendanceStatus status;
   final String takenBy; // teacher id
 
   Attendance({
     required this.id,
     required this.studentId,
     required this.date,
-    required this.isPresent,
+    required this.status,
     required this.takenBy,
   });
 
@@ -54,7 +56,7 @@ class Attendance {
         id: json['id'],
         studentId: json['studentId'],
         date: DateTime.parse(json['date']),
-        isPresent: json['isPresent'],
+        status: AttendanceStatus.values.firstWhere((e) => e.name == json['status'], orElse: () => AttendanceStatus.absent),
         takenBy: json['takenBy'],
       );
 
@@ -62,7 +64,7 @@ class Attendance {
         'id': id,
         'studentId': studentId,
         'date': date.toIso8601String(),
-        'isPresent': isPresent,
+        'status': status.name,
         'takenBy': takenBy,
       };
 }

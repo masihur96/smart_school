@@ -33,7 +33,9 @@ class AttendanceNotifier extends Notifier<List<AttendanceEntity>> {
 
   Future<void> saveAttendance(List<AttendanceEntity> records) async {
     await _repository.saveAttendance(records);
-    await _load(DateTime.now());
+    if (records.isNotEmpty) {
+      await _load(records.first.date);
+    }
   }
 
   List<AttendanceEntity> getRecordsForDate(DateTime date) {

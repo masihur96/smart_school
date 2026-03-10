@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_school/models/school_models.dart';
 import '../../teacher/providers/attendance_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import 'package:intl/intl.dart';
@@ -18,7 +19,9 @@ class StudentAttendanceScreen extends ConsumerWidget {
     attendanceRecords.sort((a, b) => b.date.compareTo(a.date));
 
     final totalDays = attendanceRecords.length;
-    final presentDays = attendanceRecords.where((r) => r.isPresent).length;
+    final presentDays = attendanceRecords.where((r) => r.status == AttendanceStatus.present).length;
+    final leaveDays = attendanceRecords.where((r) => r.status == AttendanceStatus.leave).length;
+    final absentDays = attendanceRecords.where((r) => r.status == AttendanceStatus.absent).length;
     final attendancePercentage = totalDays == 0 ? 0.0 : presentDays / totalDays;
 
     return Scaffold(
@@ -51,7 +54,8 @@ class StudentAttendanceScreen extends ConsumerWidget {
                     children: [
                       _buildStatItem('Total Days', totalDays.toString()),
                       _buildStatItem('Present', presentDays.toString(), color: Colors.green),
-                      _buildStatItem('Absent', (totalDays - presentDays).toString(), color: Colors.red),
+                      _buildStatItem('Leave', leaveDays.toString(), color: Colors.orange),
+                      _buildStatItem('Absent', absentDays.toString(), color: Colors.red),
                     ],
                   ),
                 ],
@@ -70,12 +74,22 @@ class StudentAttendanceScreen extends ConsumerWidget {
                 itemCount: attendanceRecords.length,
                 itemBuilder: (context, index) {
                   final record = attendanceRecords[index];
+                  final isPresent = record.status == AttendanceStatus.present;
+                  final isLeave = record.status == AttendanceStatus.leave;
+                  
                   return ListTile(
-                    leading: Icon(record.isPresent ? Icons.check_circle : Icons.cancel, 
-                                 color: record.isPresent ? Colors.green : Colors.red),
+                    leading: Icon(
+                      isPresent ? Icons.check_circle : (isLeave ? Icons.info : Icons.cancel), 
+                      color: isPresent ? Colors.green : (isLeave ? Colors.orange : Colors.red),
+                    ),
                     title: Text(DateFormat('EEEE, MMM d, yyyy').format(record.date)),
-                    trailing: Text(record.isPresent ? 'Present' : 'Absent', 
-                                   style: TextStyle(color: record.isPresent ? Colors.green : Colors.red)),
+                    trailing: Text(
+                      record.status.name.substring(0, 1).toUpperCase() + record.status.name.substring(1), 
+                      style: TextStyle(
+                        color: isPresent ? Colors.green : (isLeave ? Colors.orange : Colors.red),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   );
                 },
               ),

@@ -19,7 +19,7 @@ class AttendanceRepositoryImpl implements IAttendanceRepository {
               id: r.id,
               studentId: r.studentId,
               date: r.date,
-              isPresent: r.isPresent,
+              status: r.status,
               takenBy: r.takenBy,
             ))
         .toList();
@@ -32,7 +32,7 @@ class AttendanceRepositoryImpl implements IAttendanceRepository {
               id: r.id,
               studentId: r.studentId,
               date: r.date,
-              isPresent: r.isPresent,
+              status: r.status,
               takenBy: r.takenBy,
             ))
         .toList();
@@ -45,7 +45,7 @@ class AttendanceRepositoryImpl implements IAttendanceRepository {
         id: entity.id,
         studentId: entity.studentId,
         date: entity.date,
-        isPresent: entity.isPresent,
+        status: entity.status,
         takenBy: entity.takenBy,
       );
 

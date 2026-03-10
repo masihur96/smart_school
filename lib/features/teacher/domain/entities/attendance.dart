@@ -1,15 +1,18 @@
+import 'package:smart_school/models/school_models.dart';
+
+
 class AttendanceEntity {
   final String id;
   final String studentId;
   final DateTime date;
-  final bool isPresent;
+  final AttendanceStatus status;
   final String takenBy; // teacher id
 
   AttendanceEntity({
     required this.id,
     required this.studentId,
     required this.date,
-    required this.isPresent,
+    required this.status,
     required this.takenBy,
   });
 

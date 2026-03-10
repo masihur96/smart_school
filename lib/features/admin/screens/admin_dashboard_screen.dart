@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:smart_school/models/school_models.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../teacher/providers/attendance_provider.dart';
 import '../../teacher/domain/entities/attendance.dart';
@@ -275,7 +276,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
           barGroups: sortedDays.asMap().entries.map((entry) {
             final dayRecords = dailyData[entry.value]!;
             final total = dayRecords.length;
-            final present = dayRecords.where((r) => r.isPresent).length;
+            final present = dayRecords.where((r) => r.status == AttendanceStatus.present).length;
             final percentage = total == 0 ? 0.0 : (present / total) * 100;
 
             return BarChartGroupData(
