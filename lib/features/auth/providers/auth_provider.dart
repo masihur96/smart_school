@@ -40,6 +40,31 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
+  Future<void> register({
+    required String name,
+    required String email,
+    required String password,
+    required String role,
+    required String schoolId,
+    required String phone,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    final user = await _authService.register(
+      name: name,
+      email: email,
+      password: password,
+      role: role,
+      schoolId: schoolId,
+      phone: phone,
+    );
+
+    if (user != null) {
+      state = state.copyWith(user: user, isLoading: false);
+    } else {
+      state = state.copyWith(isLoading: false, error: 'Registration failed');
+    }
+  }
+
   Future<void> logout() async {
     await _authService.logout();
     state = AuthState();

@@ -10,6 +10,8 @@ class User {
   final String email;
   final UserRole role;
   final String? profileImageUrl;
+  final String? schoolId;
+  final String? phone;
 
   User({
     required this.id,
@@ -17,6 +19,8 @@ class User {
     required this.email,
     required this.role,
     this.profileImageUrl,
+    this.schoolId,
+    this.phone,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -26,6 +30,8 @@ class User {
       email: json['email'],
       role: UserRole.values.firstWhere((e) => e.name == json['role']),
       profileImageUrl: json['profileImageUrl'],
+      schoolId: json['schoolId'],
+      phone: json['phone'],
     );
   }
 
@@ -36,6 +42,8 @@ class User {
       'email': email,
       'role': role.name,
       'profileImageUrl': profileImageUrl,
+      'schoolId': schoolId,
+      'phone': phone,
     };
   }
 }

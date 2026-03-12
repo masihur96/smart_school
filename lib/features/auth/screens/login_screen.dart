@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -96,6 +97,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: authState.isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text('Login', style: TextStyle(fontSize: 18)),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Don't have an account?", style: TextStyle(color: Colors.grey[600])),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                      );
+                    },
+                    child: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF6750A4))),
+                  ),
+                ],
               ),
               const SizedBox(height: 40),
               Row(

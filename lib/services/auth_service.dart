@@ -37,6 +37,30 @@ class MockAuthService {
     }
   }
 
+  Future<User?> register({
+    required String name,
+    required String email,
+    required String password,
+    required String role,
+    required String schoolId,
+    required String phone,
+  }) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 1));
+
+    final newUser = User(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name,
+      email: email,
+      role: UserRole.values.firstWhere((e) => e.name == role, orElse: () => UserRole.student),
+      schoolId: schoolId,
+      phone: phone,
+    );
+
+    _mockUsers.add(newUser);
+    return newUser;
+  }
+
   Future<void> logout() async {
     await Future.delayed(const Duration(milliseconds: 500));
   }
