@@ -16,7 +16,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _schoolIdController = TextEditingController();
   final _phoneController = TextEditingController();
-  String _selectedRole = 'student';
 
   @override
   void dispose() {
@@ -30,13 +29,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   void _register() {
     if (_formKey.currentState!.validate()) {
+      final name = _nameController.text.trim();
+      final email = _emailController.text.trim();
+      final password = _passwordController.text;
+      const role = 'admin';
+      final schoolId = _schoolIdController.text.trim();
+      final phone = _phoneController.text.trim();
+
+      // Log the registration payload to console
+      debugPrint('Registration Payload: {');
+      debugPrint('  name: $name,');
+      debugPrint('  email: $email,');
+      debugPrint('  password: $password,');
+      debugPrint('  role: $role,');
+      debugPrint('  schoolId: $schoolId,');
+      debugPrint('  phone: $phone');
+      debugPrint('}');
+
       ref.read(authProvider.notifier).register(
-            name: _nameController.text.trim(),
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-            role: _selectedRole,
-            schoolId: _schoolIdController.text.trim(),
-            phone: _phoneController.text.trim(),
+            name: name,
+            email: email,
+            password: password,
+            role: role,
+            schoolId: schoolId,
+            phone: phone,
           );
     }
   }
@@ -56,7 +72,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registration successful!'), backgroundColor: Colors.green),
         );
-        Navigator.pop(context); // Go back to login or it will auto-navigate if there's a listener at higher level
+        Navigator.pop(context); // Go back to login
       }
     });
 
@@ -84,7 +100,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Enter your details to register.',
+                  'Enter your details to register as Admin.',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -141,27 +157,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   keyboardType: TextInputType.phone,
                   validator: (value) =>
                       value == null || value.isEmpty ? 'Please enter your phone number' : null,
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: _selectedRole,
-                  decoration: const InputDecoration(
-                    labelText: 'Role',
-                    prefixIcon: Icon(Icons.badge_outlined),
-                  ),
-                  items: ['admin', 'teacher', 'student']
-                      .map((role) => DropdownMenuItem(
-                            value: role,
-                            child: Text(role.toUpperCase()),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        _selectedRole = value;
-                      });
-                    }
-                  },
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
