@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/models/student_model.dart';
 import '../../../models/school_models.dart';
@@ -8,15 +8,15 @@ import '../../admin/providers/exam_provider.dart';
 import '../../admin/providers/student_provider.dart';
 import '../providers/result_provider.dart';
 
-class MarkEntryScreen extends ConsumerStatefulWidget {
+class MarkEntryScreen extends StatefulWidget {
   final bool hideAppBar;
   const MarkEntryScreen({super.key, this.hideAppBar = false});
 
   @override
-  ConsumerState<MarkEntryScreen> createState() => _MarkEntryScreenState();
+  State<MarkEntryScreen> createState() => _MarkEntryScreenState();
 }
 
-class _MarkEntryScreenState extends ConsumerState<MarkEntryScreen> {
+class _MarkEntryScreenState extends State<MarkEntryScreen> {
   String? _selectedExamName;
   String? _selectedClassId;
   String? _selectedStudentId;
@@ -32,11 +32,11 @@ class _MarkEntryScreenState extends ConsumerState<MarkEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(authProvider).user;
-    final allExams = ref.watch(examsProvider).where((e) => e.teacherId == user?.id).toList();
-    final allStudents = ref.watch(studentsProvider);
-    final classes = ref.watch(classSetupProvider);
-    final subjects = ref.watch(subjectSetupProvider);
+    final user = context.watch<AuthNotifier>().user;
+    final allExams = context.watch<ExamsNotifier>().state.where((e) => e.teacherId == user?.id).toList();
+    final allStudents = context.watch<StudentsNotifier>().students;
+    final classes = context.watch<ClassSetupNotifier>().classes;
+    final subjects = context.watch<SubjectSetupNotifier>().subjects;
 
     final uniqueExamNames = allExams.map((e) => e.name).toSet().toList();
     
@@ -48,7 +48,7 @@ class _MarkEntryScreenState extends ConsumerState<MarkEntryScreen> {
         ? <Student>[]
         : allStudents.where((s) => s.classId == _selectedClassId).toList();
 
-    final results = ref.watch(resultsProvider);
+    final results = context.watch<ResultsNotifier>().state;
 
     final examsToEnterMarks = (_selectedExamName != null && _selectedClassId != null && _selectedStudentId != null)
         ? allExams.where((e) => e.name == _selectedExamName && e.classId == _selectedClassId).toList()
@@ -155,7 +155,7 @@ class _MarkEntryScreenState extends ConsumerState<MarkEntryScreen> {
                   _markControllers.clear();
                 });
                 if (val != null) {
-                  ref.read(resultsProvider.notifier).loadResultsForStudent(val);
+                  context.read<ResultsNotifier>().loadResultsForStudent(val);
                 }
               },
             ),
@@ -380,7 +380,7 @@ class _MarkEntryScreenState extends ConsumerState<MarkEntryScreen> {
       return;
     }
 
-    ref.read(resultsProvider.notifier).saveResults(results).then((_) {
+    context.read<ResultsNotifier>().saveResults(results).then((_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Marks saved successfully!')),

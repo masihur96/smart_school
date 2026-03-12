@@ -1,55 +1,54 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import '../../../models/school_models.dart';
 import '../../../services/database_service.dart';
-import 'student_provider.dart';
 
-class ClassSetupNotifier extends Notifier<List<ClassRoom>> {
-  late final MockDatabaseService _dbService;
-  @override
-  List<ClassRoom> build() {
-    _dbService = ref.watch(databaseServiceProvider);
-    return [..._dbService.classes];
+class ClassSetupNotifier extends ChangeNotifier {
+  final DatabaseService _dbService;
+  List<ClassRoom> _classes = [];
+
+  ClassSetupNotifier(this._dbService) {
+    _classes = [..._dbService.classes];
   }
+
+  List<ClassRoom> get classes => _classes;
+
   void addClass(String name) {
     _dbService.classes.add(ClassRoom(id: DateTime.now().toString(), name: name));
-    state = [..._dbService.classes];
+    _classes = [..._dbService.classes];
+    notifyListeners();
   }
 }
 
-class SectionSetupNotifier extends Notifier<List<Section>> {
-  late final MockDatabaseService _dbService;
-  @override
-  List<Section> build() {
-    _dbService = ref.watch(databaseServiceProvider);
-    return [..._dbService.sections];
+class SectionSetupNotifier extends ChangeNotifier {
+  final DatabaseService _dbService;
+  List<Section> _sections = [];
+
+  SectionSetupNotifier(this._dbService) {
+    _sections = [..._dbService.sections];
   }
+
+  List<Section> get sections => _sections;
+
   void addSection(String classId, String name) {
     _dbService.sections.add(Section(id: DateTime.now().toString(), classId: classId, name: name));
-    state = [..._dbService.sections];
+    _sections = [..._dbService.sections];
+    notifyListeners();
   }
 }
 
-class SubjectSetupNotifier extends Notifier<List<Subject>> {
-  late final MockDatabaseService _dbService;
-  @override
-  List<Subject> build() {
-    _dbService = ref.watch(databaseServiceProvider);
-    return [..._dbService.subjects];
+class SubjectSetupNotifier extends ChangeNotifier {
+  final DatabaseService _dbService;
+  List<Subject> _subjects = [];
+
+  SubjectSetupNotifier(this._dbService) {
+    _subjects = [..._dbService.subjects];
   }
+
+  List<Subject> get subjects => _subjects;
+
   void addSubject(String name) {
     _dbService.subjects.add(Subject(id: DateTime.now().toString(), name: name));
-    state = [..._dbService.subjects];
+    _subjects = [..._dbService.subjects];
+    notifyListeners();
   }
 }
-
-final classSetupProvider = NotifierProvider<ClassSetupNotifier, List<ClassRoom>>(() {
-  return ClassSetupNotifier();
-});
-
-final sectionSetupProvider = NotifierProvider<SectionSetupNotifier, List<Section>>(() {
-  return SectionSetupNotifier();
-});
-
-final subjectSetupProvider = NotifierProvider<SubjectSetupNotifier, List<Subject>>(() {
-  return SubjectSetupNotifier();
-});

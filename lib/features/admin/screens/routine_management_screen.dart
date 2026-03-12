@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import '../providers/routine_provider.dart';
-import '../providers/student_provider.dart';
+import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
 import '../../../models/school_models.dart';
 
-class RoutineManagementScreen extends ConsumerStatefulWidget {
+class RoutineManagementScreen extends StatefulWidget {
   const RoutineManagementScreen({super.key});
 
   @override
-  ConsumerState<RoutineManagementScreen> createState() => _RoutineManagementScreenState();
+  State<RoutineManagementScreen> createState() => _RoutineManagementScreenState();
 }
 
-class _RoutineManagementScreenState extends ConsumerState<RoutineManagementScreen> {
+class _RoutineManagementScreenState extends State<RoutineManagementScreen> {
   String? _selectedClass;
   String? _selectedSection;
 
   @override
   Widget build(BuildContext context) {
-    final classes = ref.watch(classesProvider);
-    final sections = ref.watch(sectionsProvider);
+    final classes = context.watch<ClassSetupNotifier>().classes;
+    final sections = context.watch<SectionSetupNotifier>().sections;
     final routineEntries = (_selectedClass != null && _selectedSection != null)
-        ? ref.watch(routineProvider)['${_selectedClass}_$_selectedSection'] ?? []
+        ? context.watch<RoutineNotifier>().state['${_selectedClass}_$_selectedSection'] ?? []
         : <RoutineEntry>[];
 
     return Scaffold(
@@ -63,15 +63,15 @@ class _RoutineManagementScreenState extends ConsumerState<RoutineManagementScree
                     itemCount: routineEntries.length,
                     itemBuilder: (context, index) {
                       final entry = routineEntries[index];
-                      final subjectName = ref.read(subjectsProvider).firstWhere((s) => s.id == entry.subjectId).name;
-                      final teacherName = ref.read(teachersProvider).firstWhere((t) => t.userId == entry.teacherId).user?.name ?? 'Unknown';
+                      final subjectName = context.read<SubjectSetupNotifier>().subjects.firstWhere((s) => s.id == entry.subjectId).name;
+                      final teacherName = context.read<TeachersNotifier>().teachers.firstWhere((t) => t.userId == entry.teacherId).user?.name ?? 'Unknown';
                       return ListTile(
                         leading: CircleAvatar(child: Text(entry.day[0])),
                         title: Text('$subjectName (${entry.day})'),
                         subtitle: Text('$teacherName | ${entry.startTime} - ${entry.endTime}'),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete, color: Colors.grey),
-                          onPressed: () => ref.read(routineProvider.notifier).removeEntry(_selectedClass!, _selectedSection!, index),
+                          onPressed: () => context.read<RoutineNotifier>().removeEntry(_selectedClass!, _selectedSection!, index),
                         ),
                       );
                     },
@@ -81,16 +81,16 @@ class _RoutineManagementScreenState extends ConsumerState<RoutineManagementScree
       ),
       floatingActionButton: (_selectedClass != null && _selectedSection != null)
           ? FloatingActionButton(
-              onPressed: () => _addEntryDialog(context, ref),
+              onPressed: () => _addEntryDialog(context),
               child: const Icon(Icons.add),
             )
           : null,
     );
   }
 
-  void _addEntryDialog(BuildContext context, WidgetRef ref) {
-    final subjects = ref.read(subjectsProvider);
-    final teachers = ref.read(teachersProvider);
+  void _addEntryDialog(BuildContext context) {
+    final subjects = context.read<SubjectSetupNotifier>().subjects;
+    final teachers = context.read<TeachersNotifier>().teachers;
     final days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     String? day = days[0];
     String? subjectId;
@@ -132,7 +132,7 @@ class _RoutineManagementScreenState extends ConsumerState<RoutineManagementScree
           ElevatedButton(
             onPressed: () {
               if (day != null && subjectId != null && teacherId != null) {
-                ref.read(routineProvider.notifier).addEntry(
+                context.read<RoutineNotifier>().addEntry(
                       _selectedClass!,
                       _selectedSection!,
                       RoutineEntry(

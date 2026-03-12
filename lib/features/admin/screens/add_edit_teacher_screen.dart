@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/teacher_provider.dart';
-import '../providers/student_provider.dart';
+import '../providers/setup_provider.dart';
 import '../../../models/teacher_model.dart';
 import '../../../models/user_model.dart';
 
-class AddEditTeacherScreen extends ConsumerStatefulWidget {
+class AddEditTeacherScreen extends StatefulWidget {
   const AddEditTeacherScreen({super.key});
 
   @override
-  ConsumerState<AddEditTeacherScreen> createState() => _AddEditTeacherScreenState();
+  State<AddEditTeacherScreen> createState() => _AddEditTeacherScreenState();
 }
 
-class _AddEditTeacherScreenState extends ConsumerState<AddEditTeacherScreen> {
+class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -39,7 +39,7 @@ class _AddEditTeacherScreenState extends ConsumerState<AddEditTeacherScreen> {
         ),
       );
 
-      ref.read(teachersProvider.notifier).addTeacher(newTeacher);
+      context.read<TeachersNotifier>().addTeacher(newTeacher);
       context.pop();
     }
   }
@@ -51,9 +51,9 @@ class _AddEditTeacherScreenState extends ConsumerState<AddEditTeacherScreen> {
         String? selectedClass;
         String? selectedSection;
         String? selectedSub;
-        final classes = ref.watch(classesProvider);
-        final sections = ref.watch(sectionsProvider);
-        final subjects = ref.watch(subjectsProvider);
+        final classes = context.watch<ClassSetupNotifier>().classes;
+        final sections = context.watch<SectionSetupNotifier>().sections;
+        final subjects = context.watch<SubjectSetupNotifier>().subjects;
 
         return StatefulBuilder(
           builder: (context, setDialogState) {
@@ -106,8 +106,8 @@ class _AddEditTeacherScreenState extends ConsumerState<AddEditTeacherScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final classes = ref.watch(classesProvider);
-    final subjects = ref.watch(subjectsProvider);
+    final classes = context.watch<ClassSetupNotifier>().classes;
+    final subjects = context.watch<SubjectSetupNotifier>().subjects;
 
     return Scaffold(
       appBar: AppBar(

@@ -1,17 +1,20 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/student_provider.dart';
+import '../../../services/database_service.dart';
+import '../../../models/school_models.dart';
 
-class StudentManagementScreen extends ConsumerWidget {
+class StudentManagementScreen extends StatelessWidget {
   final bool hideAppBar;
   const StudentManagementScreen({super.key, this.hideAppBar = false});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final students = ref.watch(studentsProvider);
-    final classes = ref.watch(classesProvider);
-    final sections = ref.watch(sectionsProvider);
+  Widget build(BuildContext context) {
+    final studentsNotifier = context.watch<StudentsNotifier>();
+    final students = studentsNotifier.students;
+    final dbService = context.watch<DatabaseService>();
+    final classes = dbService.classes;
+    final sections = dbService.sections;
 
     return Scaffold(
       appBar: hideAppBar ? null : AppBar(
@@ -59,11 +62,11 @@ class StudentManagementScreen extends ConsumerWidget {
                     child: Text(student.user?.name[0] ?? '?'),
                   ),
                   title: Text(student.user?.name ?? 'Unknown'),
-                  subtitle: Text('Roll: ${student.rollId} | ${classes.firstWhere((c) => c.id == student.classId).name}'),
+                  subtitle: Text('Roll: ${student.rollId} | ${classes.firstWhere((c) => c.id == student.classId, orElse: () => ClassRoom(id: '', name: 'Unknown')).name}'),
                   trailing: Switch(
                     value: student.isActive,
                     onChanged: (val) {
-                      ref.read(studentsProvider.notifier).toggleStudentStatus(student.userId);
+                      context.read<StudentsNotifier>().toggleStudentStatus(student.userId);
                     },
                     activeColor: Colors.green,
                   ),

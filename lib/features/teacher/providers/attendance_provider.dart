@@ -1,34 +1,25 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import '../domain/entities/attendance.dart';
 import '../domain/repositories/i_attendance_repository.dart';
-import '../data/repositories/attendance_repository_impl.dart';
-import '../../admin/providers/student_provider.dart';
 
-final attendanceRepositoryProvider = Provider<IAttendanceRepository>((ref) {
-  final dbService = ref.watch(databaseServiceProvider);
-  return AttendanceRepositoryImpl(dbService);
-});
+class AttendanceNotifier extends ChangeNotifier {
+  final IAttendanceRepository _repository;
+  List<AttendanceEntity> _state = [];
 
-final attendanceProvider = NotifierProvider<AttendanceNotifier, List<AttendanceEntity>>(() {
-  return AttendanceNotifier();
-});
-
-class AttendanceNotifier extends Notifier<List<AttendanceEntity>> {
-  late final IAttendanceRepository _repository;
-
-  @override
-  List<AttendanceEntity> build() {
-    _repository = ref.watch(attendanceRepositoryProvider);
+  AttendanceNotifier(this._repository) {
     _load(DateTime.now());
-    return [];
   }
 
+  List<AttendanceEntity> get state => _state;
+
   Future<void> _load(DateTime date) async {
-    state = await _repository.getAttendanceForDate(date);
+    _state = await _repository.getAttendanceForDate(date);
+    notifyListeners();
   }
 
   Future<void> loadAll() async {
-    state = await _repository.getAllAttendance();
+    _state = await _repository.getAllAttendance();
+    notifyListeners();
   }
 
   Future<void> saveAttendance(List<AttendanceEntity> records) async {
@@ -39,7 +30,7 @@ class AttendanceNotifier extends Notifier<List<AttendanceEntity>> {
   }
 
   List<AttendanceEntity> getRecordsForDate(DateTime date) {
-    return state.where((r) => 
+    return _state.where((r) => 
       r.date.year == date.year && 
       r.date.month == date.month && 
       r.date.day == date.day

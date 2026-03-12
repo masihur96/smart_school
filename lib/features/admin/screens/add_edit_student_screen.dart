@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/student_provider.dart';
+import '../providers/setup_provider.dart';
 import '../../../models/student_model.dart';
 import '../../../models/user_model.dart';
 
-class AddEditStudentScreen extends ConsumerStatefulWidget {
+class AddEditStudentScreen extends StatefulWidget {
   const AddEditStudentScreen({super.key});
 
   @override
-  ConsumerState<AddEditStudentScreen> createState() => _AddEditStudentScreenState();
+  State<AddEditStudentScreen> createState() => _AddEditStudentScreenState();
 }
 
-class _AddEditStudentScreenState extends ConsumerState<AddEditStudentScreen> {
+class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -46,15 +47,15 @@ class _AddEditStudentScreenState extends ConsumerState<AddEditStudentScreen> {
         ),
       );
 
-      ref.read(studentsProvider.notifier).addStudent(newStudent);
+      context.read<StudentsNotifier>().addStudent(newStudent);
       context.pop();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final classes = ref.watch(classesProvider);
-    final sections = ref.watch(sectionsProvider);
+    final classes = context.watch<ClassSetupNotifier>().classes;
+    final sections = context.watch<SectionSetupNotifier>().sections;
 
     return Scaffold(
       appBar: AppBar(

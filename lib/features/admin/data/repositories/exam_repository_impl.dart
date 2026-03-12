@@ -3,7 +3,7 @@ import '../../../../services/database_service.dart';
 import '../../domain/repositories/i_exam_repository.dart';
 
 class ExamRepositoryImpl implements IExamRepository {
-  final MockDatabaseService _dbService;
+  final DatabaseService _dbService;
 
   ExamRepositoryImpl(this._dbService);
 

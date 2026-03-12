@@ -1,40 +1,37 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import '../../../models/school_models.dart';
 
 // Key format: classId_sectionId
-final routineProvider = NotifierProvider<RoutineNotifier, Map<String, List<RoutineEntry>>>(() {
-  return RoutineNotifier();
-});
+class RoutineNotifier extends ChangeNotifier {
+  Map<String, List<RoutineEntry>> _state = {};
 
-class RoutineNotifier extends Notifier<Map<String, List<RoutineEntry>>> {
-  @override
-  Map<String, List<RoutineEntry>> build() {
-    return {};
-  }
+  Map<String, List<RoutineEntry>> get state => _state;
 
   void addEntry(String classId, String sectionId, RoutineEntry entry) {
     final key = '${classId}_$sectionId';
-    final currentEntries = state[key] ?? [];
-    state = {
-      ...state,
+    final currentEntries = _state[key] ?? [];
+    _state = {
+      ..._state,
       key: [...currentEntries, entry],
     };
+    notifyListeners();
   }
 
   void removeEntry(String classId, String sectionId, int index) {
     final key = '${classId}_$sectionId';
-    final currentEntries = state[key] ?? [];
+    final currentEntries = _state[key] ?? [];
     if (index >= 0 && index < currentEntries.length) {
       final newList = [...currentEntries];
       newList.removeAt(index);
-      state = {
-        ...state,
+      _state = {
+        ..._state,
         key: newList,
       };
+      notifyListeners();
     }
   }
 
   List<RoutineEntry> getRoutine(String classId, String sectionId) {
-    return state['${classId}_$sectionId'] ?? [];
+    return _state['${classId}_$sectionId'] ?? [];
   }
 }

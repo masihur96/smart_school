@@ -1,39 +1,36 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import '../../../models/student_model.dart';
 import '../../../services/database_service.dart';
 
-final databaseServiceProvider = Provider((ref) => MockDatabaseService());
+class StudentsNotifier extends ChangeNotifier {
+  final DatabaseService _dbService;
+  List<Student> _students = [];
 
-final studentsProvider = NotifierProvider<StudentsNotifier, List<Student>>(() {
-  return StudentsNotifier();
-});
-
-class StudentsNotifier extends Notifier<List<Student>> {
-  late final MockDatabaseService _dbService;
-
-  @override
-  List<Student> build() {
-    _dbService = ref.watch(databaseServiceProvider);
-    return _dbService.students;
+  StudentsNotifier(this._dbService) {
+    _students = [..._dbService.students];
   }
+
+  List<Student> get students => _students;
 
   void addStudent(Student student) {
     _dbService.students.add(student);
-    state = [..._dbService.students];
+    _students = [..._dbService.students];
+    notifyListeners();
   }
 
   void updateStudent(Student student) {
     final index = _dbService.students.indexWhere((s) => s.userId == student.userId);
     if (index != -1) {
       _dbService.students[index] = student;
-      state = [..._dbService.students];
+      _students = [..._dbService.students];
+      notifyListeners();
     }
   }
 
   void toggleStudentStatus(String userId) {
     final index = _dbService.students.indexWhere((s) => s.userId == userId);
     if (index != -1) {
-      final student = _dbService.students[index];
+      final student = _students[index];
       _dbService.students[index] = Student(
         userId: student.userId,
         rollId: student.rollId,
@@ -43,11 +40,8 @@ class StudentsNotifier extends Notifier<List<Student>> {
         isActive: !student.isActive,
         user: student.user,
       );
-      state = [..._dbService.students];
+      _students[index] = _dbService.students[index];
+      notifyListeners();
     }
   }
 }
-
-final classesProvider = Provider((ref) => ref.watch(databaseServiceProvider).classes);
-final sectionsProvider = Provider((ref) => ref.watch(databaseServiceProvider).sections);
-final subjectsProvider = Provider((ref) => ref.watch(databaseServiceProvider).subjects);

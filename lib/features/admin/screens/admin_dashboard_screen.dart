@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:smart_school/models/school_models.dart';
@@ -10,21 +10,25 @@ import 'student_management_screen.dart';
 import 'exam_management_screen.dart';
 import 'notice_management_screen.dart';
 
-class AdminDashboardScreen extends ConsumerStatefulWidget {
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
 
   @override
-  ConsumerState<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
 
-class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
     // Load all attendance data for the chart
-    Future.microtask(() => ref.read(attendanceProvider.notifier).loadAll());
+    Future.microtask(() {
+      if (mounted) {
+        context.read<AttendanceNotifier>().loadAll();
+      }
+    });
   }
 
   void _onItemTapped(int index) {
@@ -50,7 +54,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final attendanceRecords = ref.watch(attendanceProvider);
+    final attendanceRecords = context.watch<AttendanceNotifier>().state;
 
     return Scaffold(
       appBar: AppBar(

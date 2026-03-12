@@ -1,47 +1,37 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import '../../../models/user_model.dart';
 import '../../../services/auth_service.dart';
 
-final authServiceProvider = Provider((ref) => AuthService());
+class AuthNotifier extends ChangeNotifier {
+  final AuthService _authService = AuthService();
+  User? _user;
+  bool _isLoading = false;
+  String? _error;
 
-class AuthState {
-  final User? user;
-  final bool isLoading;
-  final String? error;
-
-  AuthState({this.user, this.isLoading = false, this.error});
-
-  AuthState copyWith({User? user, bool? isLoading, String? error}) {
-    return AuthState(
-      user: user ?? this.user,
-      isLoading: isLoading ?? this.isLoading,
-      error: error,
-    );
-  }
-}
-
-class AuthNotifier extends Notifier<AuthState> {
-  late final AuthService _authService;
-
-  @override
-  AuthState build() {
-    _authService = ref.watch(authServiceProvider);
-    return AuthState();
-  }
+  User? get user => _user;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
 
   Future<void> login(String email, String password) async {
-    state = state.copyWith(isLoading: true, error: null);
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
     try {
       final user = await _authService.login(email, password);
       if (user != null) {
-        state = state.copyWith(user: user, isLoading: false);
+        _user = user;
+        _isLoading = false;
       } else {
-        state = state.copyWith(isLoading: false, error: 'Login failed');
+        _isLoading = false;
+        _error = 'Login failed';
       }
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: 'Network error or invalid credentials');
+      _isLoading = false;
+      _error = 'Network error or invalid credentials';
     }
+    notifyListeners();
   }
 
   Future<void> register({
@@ -52,7 +42,10 @@ class AuthNotifier extends Notifier<AuthState> {
     required String schoolId,
     required String phone,
   }) async {
-    state = state.copyWith(isLoading: true, error: null);
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
     try {
       final user = await _authService.register(
         name: name,
@@ -64,25 +57,28 @@ class AuthNotifier extends Notifier<AuthState> {
       );
 
       if (user != null) {
-        state = state.copyWith(user: user, isLoading: false);
+        _user = user;
+        _isLoading = false;
       } else {
-        state = state.copyWith(isLoading: false, error: 'Registration failed');
+        _isLoading = false;
+        _error = 'Registration failed';
       }
     } catch (e) {
       String errorMessage = 'Registration failed';
       if (e is DioException) {
         errorMessage = e.response?.data?['message'] ?? 'Network error';
       }
-      state = state.copyWith(isLoading: false, error: errorMessage);
+      _isLoading = false;
+      _error = errorMessage;
     }
+    notifyListeners();
   }
 
   Future<void> logout() async {
     await _authService.logout();
-    state = AuthState();
+    _user = null;
+    _error = null;
+    _isLoading = false;
+    notifyListeners();
   }
 }
-
-final authProvider = NotifierProvider<AuthNotifier, AuthState>(() {
-  return AuthNotifier();
-});

@@ -3,7 +3,7 @@ import '../../../../services/database_service.dart';
 import '../../domain/repositories/i_result_repository.dart';
 
 class ResultRepositoryImpl implements IResultRepository {
-  final MockDatabaseService _dbService;
+  final DatabaseService _dbService;
 
   ResultRepositoryImpl(this._dbService);
 

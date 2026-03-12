@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/teacher_provider.dart';
-import '../providers/student_provider.dart';
+import '../providers/setup_provider.dart';
 
-class TeacherManagementScreen extends ConsumerWidget {
+class TeacherManagementScreen extends StatelessWidget {
   const TeacherManagementScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final teachers = ref.watch(teachersProvider);
-    final classes = ref.watch(classesProvider);
-    final subjects = ref.watch(subjectsProvider);
+  Widget build(BuildContext context) {
+    final teachers = context.watch<TeachersNotifier>().teachers;
+    final classes = context.watch<ClassSetupNotifier>().classes;
+    final subjects = context.watch<SubjectSetupNotifier>().subjects;
 
     return Scaffold(
       appBar: AppBar(

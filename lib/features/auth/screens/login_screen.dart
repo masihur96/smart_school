@@ -1,16 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'register_screen.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -22,7 +21,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _login() {
-    ref.read(authProvider.notifier).login(
+    context.read<AuthNotifier>().login(
           _emailController.text.trim(),
           _passwordController.text,
         );
@@ -36,13 +35,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
+    final authNotifier = context.watch<AuthNotifier>();
 
-    // Listen for errors
-    ref.listen(authProvider, (previous, next) {
-      if (next.error != null) {
+    // Listen for errors using a post-frame callback
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (authNotifier.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.error!), backgroundColor: Colors.red),
+          SnackBar(content: Text(authNotifier.error!), backgroundColor: Colors.red),
         );
       }
     });
@@ -93,8 +92,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: authState.isLoading ? null : _login,
-                child: authState.isLoading
+                onPressed: authNotifier.isLoading ? null : _login,
+                child: authNotifier.isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text('Login', style: TextStyle(fontSize: 18)),
               ),

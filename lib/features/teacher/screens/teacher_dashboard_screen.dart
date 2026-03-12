@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../auth/providers/auth_provider.dart';
 import 'attendance_screen.dart';
 import 'mark_entry_screen.dart';
 import 'homework_management_screen.dart';
 
-class TeacherDashboardScreen extends ConsumerStatefulWidget {
+class TeacherDashboardScreen extends StatefulWidget {
   const TeacherDashboardScreen({super.key});
 
   @override
-  ConsumerState<TeacherDashboardScreen> createState() => _TeacherDashboardScreenState();
+  State<TeacherDashboardScreen> createState() => _TeacherDashboardScreenState();
 }
 
-class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen> {
+class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
@@ -39,7 +39,7 @@ class _TeacherDashboardScreenState extends ConsumerState<TeacherDashboardScreen>
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(authProvider).user;
+    final user = context.watch<AuthNotifier>().user;
 
     return Scaffold(
       appBar: AppBar(

@@ -4,7 +4,7 @@ import '../../domain/entities/attendance.dart';
 import '../../domain/repositories/i_attendance_repository.dart';
 
 class AttendanceRepositoryImpl implements IAttendanceRepository {
-  final MockDatabaseService _dbService;
+  final DatabaseService _dbService;
 
   AttendanceRepositoryImpl(this._dbService);
 

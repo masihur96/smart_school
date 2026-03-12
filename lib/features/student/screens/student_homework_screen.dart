@@ -1,29 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import '../../teacher/providers/homework_provider.dart';
 import '../../admin/providers/student_provider.dart';
-import '../../admin/providers/student_provider.dart';
+import '../../admin/providers/setup_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../models/school_models.dart';
 import 'package:intl/intl.dart';
 
-class StudentHomeworkScreen extends ConsumerWidget {
+class StudentHomeworkScreen extends StatelessWidget {
   final bool hideAppBar;
   const StudentHomeworkScreen({super.key, this.hideAppBar = false});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final currentUser = ref.watch(authProvider).user;
+  Widget build(BuildContext context) {
+    final currentUser = context.watch<AuthNotifier>().user;
     if (currentUser == null) return const Scaffold(body: Center(child: Text('Not logged in')));
 
-    final student = ref.watch(studentsProvider).firstWhere((s) => s.userId == currentUser.id);
-    final homeworkList = ref.watch(homeworkProvider).where((h) => 
-      h.classId == student.classId && h.sectionId == student.sectionId
-    ).toList();
+    final student = context.watch<StudentsNotifier>().students.firstWhere((s) => s.userId == currentUser.id);
+    final homeworkList = context.watch<HomeworkNotifier>().getHomeworkForStudent(student.classId, student.sectionId);
     
     homeworkList.sort((a, b) => a.dueDate.compareTo(b.dueDate));
 
-    final subjects = ref.watch(subjectsProvider);
+    final subjects = context.watch<SubjectSetupNotifier>().subjects;
 
     return Scaffold(
       appBar: hideAppBar ? null : AppBar(

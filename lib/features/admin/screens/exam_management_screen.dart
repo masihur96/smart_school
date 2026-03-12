@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../../models/school_models.dart';
 import '../providers/exam_provider.dart';
-import '../providers/student_provider.dart';
+import '../providers/setup_provider.dart';
+import '../../../services/database_service.dart';
 
-class ExamManagementScreen extends ConsumerStatefulWidget {
+class ExamManagementScreen extends StatefulWidget {
   final bool hideAppBar;
   const ExamManagementScreen({super.key, this.hideAppBar = false});
 
   @override
-  ConsumerState<ExamManagementScreen> createState() => _ExamManagementScreenState();
+  State<ExamManagementScreen> createState() => _ExamManagementScreenState();
 }
 
-class _ExamManagementScreenState extends ConsumerState<ExamManagementScreen> {
+class _ExamManagementScreenState extends State<ExamManagementScreen> {
   @override
   Widget build(BuildContext context) {
-    final exams = ref.watch(examsProvider);
-    final classes = ref.watch(classesProvider);
-    final subjects = ref.watch(subjectsProvider);
+    final exams = context.watch<ExamsNotifier>().state;
+    final classes = context.watch<ClassSetupNotifier>().classes;
+    final subjects = context.watch<SubjectSetupNotifier>().subjects;
 
     return Scaffold(
       appBar: widget.hideAppBar ? null : AppBar(
@@ -59,7 +60,7 @@ class _ExamManagementScreenState extends ConsumerState<ExamManagementScreen> {
                           ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => ref.read(examsProvider.notifier).deleteExam(exam.id),
+                          onPressed: () => context.read<ExamsNotifier>().deleteExam(exam.id),
                         ),
                       ],
                     ),
@@ -85,7 +86,7 @@ class _ExamManagementScreenState extends ConsumerState<ExamManagementScreen> {
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
-              ref.read(examsProvider.notifier).publishResult(exam.id);
+              context.read<ExamsNotifier>().publishResult(exam.id);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Results published successfully!')),
@@ -111,10 +112,10 @@ class _ExamManagementScreenState extends ConsumerState<ExamManagementScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            final classes = ref.watch(classesProvider);
-            final subjects = ref.watch(subjectsProvider);
+            final classes = context.watch<ClassSetupNotifier>().classes;
+            final subjects = context.watch<SubjectSetupNotifier>().subjects;
             // We need a list of teachers, let's assume we can get it from databaseServiceProvider or similar
-            final db = ref.read(databaseServiceProvider);
+            final db = context.read<DatabaseService>();
             final teachersList = db.teachers;
 
             return AlertDialog(
@@ -192,7 +193,7 @@ class _ExamManagementScreenState extends ConsumerState<ExamManagementScreen> {
                         sectionId: 's1', // Default section for now
                         dateTime: selectedDate,
                       );
-                      ref.read(examsProvider.notifier).addExam(exam);
+                      context.read<ExamsNotifier>().addExam(exam);
                       if (context.mounted) Navigator.pop(context);
                     }
                   },

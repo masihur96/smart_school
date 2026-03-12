@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 
-class RegisterScreen extends ConsumerStatefulWidget {
+class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -46,7 +46,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       debugPrint('  phone: $phone');
       debugPrint('}');
 
-      ref.read(authProvider.notifier).register(
+      context.read<AuthNotifier>().register(
             name: name,
             email: email,
             password: password,
@@ -59,20 +59,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
+    final authNotifier = context.watch<AuthNotifier>();
 
-    // Listen for errors or success
-    ref.listen(authProvider, (previous, next) {
-      if (next.error != null) {
+    // Listen for errors or success using a post-frame callback
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (authNotifier.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.error!), backgroundColor: Colors.red),
+          SnackBar(content: Text(authNotifier.error!), backgroundColor: Colors.red),
         );
-      } else if (next.user != null && previous?.user == null) {
-        // Registration successful
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registration successful!'), backgroundColor: Colors.green),
-        );
-        Navigator.pop(context); // Go back to login
       }
     });
 
@@ -160,7 +154,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
-                  onPressed: authState.isLoading ? null : _register,
+                  onPressed: authNotifier.isLoading ? null : _register,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -172,7 +166,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       return const Color(0xFF6750A4);
                     }),
                   ),
-                  child: authState.isLoading
+                  child: authNotifier.isLoading
                       ? const SizedBox(
                           height: 20,
                           width: 20,

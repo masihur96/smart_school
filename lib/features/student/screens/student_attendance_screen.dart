@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_school/models/school_models.dart';
 import '../../teacher/providers/attendance_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
-class StudentAttendanceScreen extends ConsumerWidget {
+class StudentAttendanceScreen extends StatelessWidget {
   final bool hideAppBar;
   const StudentAttendanceScreen({super.key, this.hideAppBar = false});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final currentUser = ref.watch(authProvider).user;
+  Widget build(BuildContext context) {
+    final currentUser = context.watch<AuthNotifier>().user;
     if (currentUser == null) return const Scaffold(body: Center(child: Text('Not logged in')));
 
-    final attendanceRecords = ref.watch(attendanceProvider).where((r) => r.studentId == currentUser.id).toList();
+    final attendanceRecords = context.watch<AttendanceNotifier>().state.where((r) => r.studentId == currentUser.id).toList();
     attendanceRecords.sort((a, b) => b.date.compareTo(a.date));
 
     final totalDays = attendanceRecords.length;

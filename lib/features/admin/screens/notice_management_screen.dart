@@ -1,18 +1,19 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import '../providers/notice_provider.dart';
-import '../providers/student_provider.dart';
+import '../../services/database_service.dart';
 import '../../../models/school_models.dart';
 import 'package:intl/intl.dart';
 
-class NoticeManagementScreen extends ConsumerWidget {
+class NoticeManagementScreen extends StatelessWidget {
   final bool hideAppBar;
   const NoticeManagementScreen({super.key, this.hideAppBar = false});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final notices = ref.watch(noticesProvider);
-    final classes = ref.watch(classesProvider);
+  Widget build(BuildContext context) {
+    final noticesNotifier = context.watch<NoticesNotifier>();
+    final notices = noticesNotifier.notices;
+    final dbService = context.watch<DatabaseService>();
+    final classes = dbService.classes;
 
     return Scaffold(
       appBar: hideAppBar ? null : AppBar(
@@ -45,7 +46,7 @@ class NoticeManagementScreen extends ConsumerWidget {
               ),
               trailing: IconButton(
                 icon: const Icon(Icons.delete, color: Colors.grey),
-                onPressed: () => ref.read(noticesProvider.notifier).removeNotice(notice.id),
+                onPressed: () => context.read<NoticesNotifier>().removeNotice(notice.id),
               ),
               isThreeLine: true,
             ),
@@ -53,18 +54,18 @@ class NoticeManagementScreen extends ConsumerWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addNoticeDialog(context, ref),
+        onPressed: () => _addNoticeDialog(context),
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void _addNoticeDialog(BuildContext context, WidgetRef ref) {
+  void _addNoticeDialog(BuildContext context) {
     final titleController = TextEditingController();
     final contentController = TextEditingController();
     String? selectedClass;
     bool isImportant = false;
-    final classes = ref.read(classesProvider);
+    final classes = context.read<DatabaseService>().classes;
 
     showDialog(
       context: context,
@@ -100,7 +101,7 @@ class NoticeManagementScreen extends ConsumerWidget {
             ElevatedButton(
               onPressed: () {
                 if (titleController.text.isNotEmpty && contentController.text.isNotEmpty) {
-                  ref.read(noticesProvider.notifier).addNotice(Notice(
+                  context.read<NoticesNotifier>().addNotice(Notice(
                     id: DateTime.now().millisecondsSinceEpoch.toString(),
                     title: titleController.text,
                     content: contentController.text,

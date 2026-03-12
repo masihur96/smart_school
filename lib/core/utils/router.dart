@@ -1,5 +1,4 @@
 import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/admin/screens/admin_dashboard_screen.dart';
@@ -23,13 +22,12 @@ import '../../features/teacher/screens/mark_entry_screen.dart';
 import '../../features/student/screens/student_result_screen.dart';
 import '../../models/user_model.dart';
 
-final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
-
+GoRouter getRouter(AuthNotifier authNotifier) {
   return GoRouter(
     initialLocation: '/login',
+    refreshListenable: authNotifier,
     redirect: (context, state) {
-      final isLoggedIn = authState.user != null;
+      final isLoggedIn = authNotifier.user != null;
       final isLoggingIn = state.matchedLocation == '/login';
 
       if (!isLoggedIn) {
@@ -37,7 +35,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       if (isLoggingIn) {
-        final role = authState.user!.role;
+        final role = authNotifier.user!.role;
         switch (role) {
           case UserRole.admin:
             return '/admin';
@@ -143,4 +141,4 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
-});
+}

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/models/school_models.dart';
@@ -9,15 +9,15 @@ import '../../auth/providers/auth_provider.dart';
 import '../domain/entities/attendance.dart';
 import 'package:intl/intl.dart';
 
-class AttendanceScreen extends ConsumerStatefulWidget {
+class AttendanceScreen extends StatefulWidget {
   final bool hideAppBar;
   const AttendanceScreen({super.key, this.hideAppBar = false});
 
   @override
-  ConsumerState<AttendanceScreen> createState() => _AttendanceScreenState();
+  State<AttendanceScreen> createState() => _AttendanceScreenState();
 }
 
-class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
+class _AttendanceScreenState extends State<AttendanceScreen> {
   DateTime _selectedDate = DateTime.now();
   String? _selectedClass;
   String? _selectedSection;
@@ -25,11 +25,11 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
   void _loadStudents() {
     if (_selectedClass != null && _selectedSection != null) {
-      final students = ref.read(studentsProvider).where((s) => 
+      final students = context.read<StudentsNotifier>().students.where((s) => 
         s.classId == _selectedClass && s.sectionId == _selectedSection && s.isActive
       ).toList();
       
-      final existingRecords = ref.read(attendanceProvider.notifier).getRecordsForDate(_selectedDate);
+      final existingRecords = context.read<AttendanceNotifier>().getRecordsForDate(_selectedDate);
       
       setState(() {
         _attendanceMap = {
@@ -44,7 +44,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
   }
 
   void _save() {
-    final currentUser = ref.read(authProvider).user;
+    final currentUser = context.read<AuthNotifier>().user;
     if (currentUser == null) return;
 
     final records = _attendanceMap.entries.map((e) => AttendanceEntity(
@@ -55,7 +55,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
       takenBy: currentUser.id,
     )).toList();
 
-    ref.read(attendanceProvider.notifier).saveAttendance(records);
+    context.read<AttendanceNotifier>().saveAttendance(records);
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Attendance saved successfully!')));
     if (!widget.hideAppBar) {
       context.pop();
@@ -64,10 +64,12 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final classes = ref.watch(classSetupProvider); // Using classSetupProvider
-    final sections = ref.watch(sectionSetupProvider); // Using sectionSetupProvider
+    final classes = context.watch<ClassSetupNotifier>().classes;
+    final sections = context.watch<SectionSetupNotifier>().sections;
+    final studentsList = context.watch<StudentsNotifier>().students;
+    
     final students = (_selectedClass != null && _selectedSection != null)
-        ? ref.watch(studentsProvider).where((s) => 
+        ? studentsList.where((s) => 
             s.classId == _selectedClass && s.sectionId == _selectedSection && s.isActive
           ).toList()
         : [];

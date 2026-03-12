@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import '../providers/setup_provider.dart';
 import '../../../models/school_models.dart';
 
-class SetupScreen extends ConsumerWidget {
+class SetupScreen extends StatelessWidget {
   const SetupScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -38,10 +38,10 @@ class SetupScreen extends ConsumerWidget {
   }
 }
 
-class _ClassList extends ConsumerWidget {
+class _ClassList extends StatelessWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final classes = ref.watch(classSetupProvider);
+  Widget build(BuildContext context) {
+    final classes = context.watch<ClassSetupNotifier>().classes;
     return Scaffold(
       body: ListView.builder(
         itemCount: classes.length,
@@ -51,18 +51,18 @@ class _ClassList extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addDialog(context, 'Class', (name) => ref.read(classSetupProvider.notifier).addClass(name)),
+        onPressed: () => _addDialog(context, 'Class', (name) => context.read<ClassSetupNotifier>().addClass(name)),
         child: const Icon(Icons.add),
       ),
     );
   }
 }
 
-class _SectionList extends ConsumerWidget {
+class _SectionList extends StatelessWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final sections = ref.watch(sectionSetupProvider);
-    final classes = ref.watch(classSetupProvider);
+  Widget build(BuildContext context) {
+    final sections = context.watch<SectionSetupNotifier>().sections;
+    final classes = context.watch<ClassSetupNotifier>().classes;
     return Scaffold(
       body: ListView.builder(
         itemCount: sections.length,
@@ -76,14 +76,14 @@ class _SectionList extends ConsumerWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addSectionDialog(context, ref),
+        onPressed: () => _addSectionDialog(context),
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void _addSectionDialog(BuildContext context, WidgetRef ref) {
-    final classes = ref.watch(classSetupProvider);
+  void _addSectionDialog(BuildContext context) {
+    final classes = context.read<ClassSetupNotifier>().classes;
     String? selectedClass;
     final controller = TextEditingController();
 
@@ -107,7 +107,7 @@ class _SectionList extends ConsumerWidget {
           ElevatedButton(
             onPressed: () {
               if (selectedClass != null && controller.text.isNotEmpty) {
-                ref.read(sectionSetupProvider.notifier).addSection(selectedClass!, controller.text);
+                context.read<SectionSetupNotifier>().addSection(selectedClass!, controller.text);
                 Navigator.pop(context);
               }
             },
@@ -119,17 +119,17 @@ class _SectionList extends ConsumerWidget {
   }
 }
 
-class _SubjectList extends ConsumerWidget {
+class _SubjectList extends StatelessWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final subjects = ref.watch(subjectSetupProvider);
+  Widget build(BuildContext context) {
+    final subjects = context.watch<SubjectSetupNotifier>().subjects;
     return Scaffold(
       body: ListView.builder(
         itemCount: subjects.length,
         itemBuilder: (context, index) => ListTile(title: Text(subjects[index].name)),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addDialog(context, 'Subject', (name) => ref.read(subjectSetupProvider.notifier).addSubject(name)),
+        onPressed: () => _addDialog(context, 'Subject', (name) => context.read<SubjectSetupNotifier>().addSubject(name)),
         child: const Icon(Icons.add),
       ),
     );

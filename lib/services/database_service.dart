@@ -3,7 +3,7 @@ import '../models/student_model.dart';
 import '../models/teacher_model.dart';
 import '../models/school_models.dart';
 
-class MockDatabaseService {
+class DatabaseService {
   // Mock Data
   final List<ClassRoom> classes = [
     ClassRoom(id: 'c1', name: 'Class 9'),

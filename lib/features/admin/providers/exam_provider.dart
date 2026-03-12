@@ -1,30 +1,20 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import '../../../models/school_models.dart';
-import './student_provider.dart';
 import '../domain/repositories/i_exam_repository.dart';
-import '../data/repositories/exam_repository_impl.dart';
 
-final examRepositoryProvider = Provider<IExamRepository>((ref) {
-  final dbService = ref.watch(databaseServiceProvider);
-  return ExamRepositoryImpl(dbService);
-});
+class ExamsNotifier extends ChangeNotifier {
+  final IExamRepository _repository;
+  List<Exam> _state = [];
 
-final examsProvider = NotifierProvider<ExamsNotifier, List<Exam>>(() {
-  return ExamsNotifier();
-});
-
-class ExamsNotifier extends Notifier<List<Exam>> {
-  late final IExamRepository _repository;
-
-  @override
-  List<Exam> build() {
-    _repository = ref.watch(examRepositoryProvider);
+  ExamsNotifier(this._repository) {
     _load();
-    return [];
   }
 
+  List<Exam> get state => _state;
+
   Future<void> _load() async {
-    state = await _repository.getExams();
+    _state = await _repository.getExams();
+    notifyListeners();
   }
 
   Future<void> addExam(Exam exam) async {

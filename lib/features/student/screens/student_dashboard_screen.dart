@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:smart_school/models/school_models.dart';
 import '../../../core/widgets/app_drawer.dart';
@@ -9,14 +9,14 @@ import 'student_attendance_screen.dart';
 import 'student_result_screen.dart';
 import 'student_homework_screen.dart';
 
-class StudentDashboardScreen extends ConsumerStatefulWidget {
+class StudentDashboardScreen extends StatefulWidget {
   const StudentDashboardScreen({super.key});
 
   @override
-  ConsumerState<StudentDashboardScreen> createState() => _StudentDashboardScreenState();
+  State<StudentDashboardScreen> createState() => _StudentDashboardScreenState();
 }
 
-class _StudentDashboardScreenState extends ConsumerState<StudentDashboardScreen> {
+class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
@@ -52,7 +52,7 @@ class _StudentDashboardScreenState extends ConsumerState<StudentDashboardScreen>
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          _buildDashboardOverview(context, ref),
+          _buildDashboardOverview(context),
           const StudentAttendanceScreen(hideAppBar: true),
           const StudentResultScreen(hideAppBar: true),
           const StudentHomeworkScreen(hideAppBar: true),
@@ -74,13 +74,13 @@ class _StudentDashboardScreenState extends ConsumerState<StudentDashboardScreen>
     );
   }
 
-  Widget _buildDashboardOverview(BuildContext context, WidgetRef ref) {
+  Widget _buildDashboardOverview(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildAttendanceCard(context, ref),
+          _buildAttendanceCard(context),
           const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -103,9 +103,9 @@ class _StudentDashboardScreenState extends ConsumerState<StudentDashboardScreen>
     );
   }
 
-  Widget _buildAttendanceCard(BuildContext context, WidgetRef ref) {
-    final currentUser = ref.watch(authProvider).user;
-    final attendanceRecords = ref.watch(attendanceProvider).where((r) => r.studentId == currentUser?.id).toList();
+  Widget _buildAttendanceCard(BuildContext context) {
+    final currentUser = context.watch<AuthNotifier>().user;
+    final attendanceRecords = context.watch<AttendanceNotifier>().state.where((r) => r.studentId == currentUser?.id).toList();
     final totalDays = attendanceRecords.length;
     final presentDays = attendanceRecords.where((r) => r.status == AttendanceStatus.present).length;
     final percentage = totalDays == 0 ? 0.0 : presentDays / totalDays;

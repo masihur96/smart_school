@@ -1,36 +1,27 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import '../../../models/school_models.dart';
-import '../../admin/providers/student_provider.dart';
 import '../domain/repositories/i_result_repository.dart';
-import '../data/repositories/result_repository_impl.dart';
 
-final resultRepositoryProvider = Provider<IResultRepository>((ref) {
-  final dbService = ref.watch(databaseServiceProvider);
-  return ResultRepositoryImpl(dbService);
-});
+class ResultsNotifier extends ChangeNotifier {
+  final IResultRepository _repository;
+  List<Result> _state = [];
 
-final resultsProvider = NotifierProvider<ResultsNotifier, List<Result>>(() {
-  return ResultsNotifier();
-});
+  ResultsNotifier(this._repository);
 
-class ResultsNotifier extends Notifier<List<Result>> {
-  late final IResultRepository _repository;
-
-  @override
-  List<Result> build() {
-    _repository = ref.watch(resultRepositoryProvider);
-    return [];
-  }
+  List<Result> get state => _state;
 
   Future<void> loadResultsForExam(String examId) async {
-    state = await _repository.getResultsForExam(examId);
+    _state = await _repository.getResultsForExam(examId);
+    notifyListeners();
   }
 
   Future<void> loadResultsForStudent(String studentId) async {
-    state = await _repository.getResultsForStudent(studentId);
+    _state = await _repository.getResultsForStudent(studentId);
+    notifyListeners();
   }
 
   Future<void> saveResults(List<Result> results) async {
     await _repository.saveResults(results);
+    notifyListeners();
   }
 }

@@ -1,36 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../admin/providers/exam_provider.dart';
 import '../../teacher/providers/result_provider.dart';
 import '../../admin/providers/student_provider.dart';
 
-class StudentResultScreen extends ConsumerStatefulWidget {
+class StudentResultScreen extends StatefulWidget {
   final bool hideAppBar;
   const StudentResultScreen({super.key, this.hideAppBar = false});
 
   @override
-  ConsumerState<StudentResultScreen> createState() => _StudentResultScreenState();
+  State<StudentResultScreen> createState() => _StudentResultScreenState();
 }
 
-class _StudentResultScreenState extends ConsumerState<StudentResultScreen> {
+class _StudentResultScreenState extends State<StudentResultScreen> {
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
-      final user = ref.read(authProvider).user;
+      if (!mounted) return;
+      final user = context.read<AuthNotifier>().user;
       if (user != null) {
-        ref.read(resultsProvider.notifier).loadResultsForStudent(user.id);
+        context.read<ResultsNotifier>().loadResultsForStudent(user.id);
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(authProvider).user;
-    final allExams = ref.watch(examsProvider);
-    final results = ref.watch(resultsProvider);
-    final students = ref.watch(studentsProvider);
+    final user = context.watch<AuthNotifier>().user;
+    final allExams = context.watch<ExamsNotifier>().state;
+    final results = context.watch<ResultsNotifier>().state;
+    final students = context.watch<StudentsNotifier>().students;
     
     final student = students.where((s) => s.userId == user?.id).firstOrNull;
     if (student == null) return const Center(child: Text('Student data not found.'));

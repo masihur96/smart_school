@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/homework_provider.dart';
 import '../../admin/providers/student_provider.dart';
-import '../../admin/providers/teacher_provider.dart';
+import '../../admin/providers/setup_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../models/school_models.dart';
 import 'package:intl/intl.dart';
 
-class HomeworkManagementScreen extends ConsumerWidget {
+class HomeworkManagementScreen extends StatelessWidget {
   final bool hideAppBar;
   const HomeworkManagementScreen({super.key, this.hideAppBar = false});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final currentUser = ref.watch(authProvider).user;
+  Widget build(BuildContext context) {
+    final currentUser = context.watch<AuthNotifier>().user;
     if (currentUser == null) return const Scaffold(body: Center(child: Text('Please login')));
 
-    final homeworkList = ref.watch(homeworkProvider).where((h) => h.teacherId == currentUser.id).toList();
-    final classes = ref.watch(classesProvider);
-    final subjects = ref.watch(subjectsProvider);
+    final homeworkList = context.watch<HomeworkNotifier>().getHomeworkForTeacher(currentUser.id);
+    final classes = context.watch<ClassSetupNotifier>().classes;
+    final subjects = context.watch<SubjectSetupNotifier>().subjects;
 
     return Scaffold(
       appBar: hideAppBar ? null : AppBar(
@@ -50,7 +50,7 @@ class HomeworkManagementScreen extends ConsumerWidget {
                     ),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete, color: Colors.grey),
-                      onPressed: () => ref.read(homeworkProvider.notifier).removeHomework(hw.id),
+                      onPressed: () => context.read<HomeworkNotifier>().removeHomework(hw.id),
                     ),
                     isThreeLine: true,
                   ),
@@ -58,13 +58,13 @@ class HomeworkManagementScreen extends ConsumerWidget {
               },
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addHomeworkDialog(context, ref),
+        onPressed: () => _addHomeworkDialog(context),
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void _addHomeworkDialog(BuildContext context, WidgetRef ref) {
+  void _addHomeworkDialog(BuildContext context) {
     final titleController = TextEditingController();
     final descController = TextEditingController();
     String? selectedClass;
@@ -72,10 +72,10 @@ class HomeworkManagementScreen extends ConsumerWidget {
     String? selectedSubject;
     DateTime selectedDate = DateTime.now().add(const Duration(days: 1));
     
-    final classes = ref.read(classesProvider);
-    final sections = ref.read(sectionsProvider);
-    final subjects = ref.read(subjectsProvider);
-    final currentUser = ref.read(authProvider).user!;
+    final classes = context.read<ClassSetupNotifier>().classes;
+    final sections = context.read<SectionSetupNotifier>().sections;
+    final subjects = context.read<SubjectSetupNotifier>().subjects;
+    final currentUser = context.read<AuthNotifier>().user!;
 
     showDialog(
       context: context,
@@ -133,7 +133,7 @@ class HomeworkManagementScreen extends ConsumerWidget {
             ElevatedButton(
               onPressed: () {
                 if (titleController.text.isNotEmpty && selectedClass != null && selectedSubject != null) {
-                  ref.read(homeworkProvider.notifier).addHomework(Homework(
+                  context.read<HomeworkNotifier>().addHomework(Homework(
                     id: DateTime.now().millisecondsSinceEpoch.toString(),
                     title: titleController.text,
                     description: descController.text,
