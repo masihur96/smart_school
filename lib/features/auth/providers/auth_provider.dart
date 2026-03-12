@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 import '../../../models/user_model.dart';
 import '../../../services/auth_service.dart';
 
-final authServiceProvider = Provider((ref) => MockAuthService());
+final authServiceProvider = Provider((ref) => AuthService());
 
 class AuthState {
   final User? user;
@@ -21,7 +22,7 @@ class AuthState {
 }
 
 class AuthNotifier extends Notifier<AuthState> {
-  late final MockAuthService _authService;
+  late final AuthService _authService;
 
   @override
   AuthState build() {
@@ -31,12 +32,15 @@ class AuthNotifier extends Notifier<AuthState> {
 
   Future<void> login(String email, String password) async {
     state = state.copyWith(isLoading: true, error: null);
-    final user = await _authService.login(email, password);
-    
-    if (user != null) {
-      state = state.copyWith(user: user, isLoading: false);
-    } else {
-      state = state.copyWith(isLoading: false, error: 'Invalid email or password');
+    try {
+      final user = await _authService.login(email, password);
+      if (user != null) {
+        state = state.copyWith(user: user, isLoading: false);
+      } else {
+        state = state.copyWith(isLoading: false, error: 'Login failed');
+      }
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: 'Network error or invalid credentials');
     }
   }
 
@@ -49,19 +53,27 @@ class AuthNotifier extends Notifier<AuthState> {
     required String phone,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
-    final user = await _authService.register(
-      name: name,
-      email: email,
-      password: password,
-      role: role,
-      schoolId: schoolId,
-      phone: phone,
-    );
+    try {
+      final user = await _authService.register(
+        name: name,
+        email: email,
+        password: password,
+        role: role,
+        schoolId: schoolId,
+        phone: phone,
+      );
 
-    if (user != null) {
-      state = state.copyWith(user: user, isLoading: false);
-    } else {
-      state = state.copyWith(isLoading: false, error: 'Registration failed');
+      if (user != null) {
+        state = state.copyWith(user: user, isLoading: false);
+      } else {
+        state = state.copyWith(isLoading: false, error: 'Registration failed');
+      }
+    } catch (e) {
+      String errorMessage = 'Registration failed';
+      if (e is DioException) {
+        errorMessage = e.response?.data?['message'] ?? 'Network error';
+      }
+      state = state.copyWith(isLoading: false, error: errorMessage);
     }
   }
 

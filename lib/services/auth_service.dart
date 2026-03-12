@@ -1,39 +1,32 @@
-import 'dart:async';
+import 'package:dio/dio.dart';
 import '../models/user_model.dart';
+import '../core/constants/api_path.dart';
 
-class MockAuthService {
-  // Mock users
-  final List<User> _mockUsers = [
-    User(
-      id: 'admin1',
-      name: 'Principal John',
-      email: 'admin@school.com',
-      role: UserRole.admin,
-    ),
-    User(
-      id: 'teacher1',
-      name: 'Ms. Sarah',
-      email: 'teacher@school.com',
-      role: UserRole.teacher,
-    ),
-    User(
-      id: 'student1',
-      name: 'Masihur Rahman',
-      email: 'student@school.com',
-      role: UserRole.student,
-    ),
-  ];
+class AuthService {
+  final Dio _dio = Dio();
 
   Future<User?> login(String email, String password) async {
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 1));
-
     try {
-      return _mockUsers.firstWhere(
-        (user) => user.email == email,
+      final response = await _dio.post(
+        APIPath.login,
+        data: {
+          'email': email,
+          'password': password,
+        },
       );
-    } catch (e) {
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Assuming the response contains the user data directly or in a 'user' field
+        // And potentially a token that should be stored
+        final data = response.data;
+        if (data['user'] != null) {
+          return User.fromJson(data['user']);
+        }
+        return User.fromJson(data);
+      }
       return null;
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -45,23 +38,33 @@ class MockAuthService {
     required String schoolId,
     required String phone,
   }) async {
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final response = await _dio.post(
+        APIPath.register,
+        data: {
+          'name': name,
+          'email': email,
+          'password': password,
+          'role': role,
+          'schoolId': schoolId,
+          'phone': phone,
+        },
+      );
 
-    final newUser = User(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      name: name,
-      email: email,
-      role: UserRole.values.firstWhere((e) => e.name == role, orElse: () => UserRole.student),
-      schoolId: schoolId,
-      phone: phone,
-    );
-
-    _mockUsers.add(newUser);
-    return newUser;
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data['user'] != null) {
+          return User.fromJson(data['user']);
+        }
+        return User.fromJson(data);
+      }
+      return null;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> logout() async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    // Implement logout logic (e.g., clearing tokens)
   }
 }
