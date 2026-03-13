@@ -27,4 +27,10 @@ class HomeworkNotifier extends ChangeNotifier {
   List<Homework> getHomeworkForTeacher(String teacherId) {
     return _homeworkRecords.where((h) => h.teacherId == teacherId).toList();
   }
+
+  List<Homework> getHomeworkForStudent(String classId, String sectionId) {
+    return _homeworkRecords
+        .where((h) => h.classId == classId && h.sectionId == sectionId)
+        .toList();
+  }
 }
