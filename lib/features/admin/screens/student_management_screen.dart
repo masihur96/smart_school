@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/student_provider.dart';
 import '../../../services/database_service.dart';
 import '../../../models/school_models.dart';
+import 'package:flutter/material.dart';
 
 class StudentManagementScreen extends StatelessWidget {
   final bool hideAppBar;

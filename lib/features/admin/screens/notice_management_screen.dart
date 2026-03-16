@@ -1,8 +1,9 @@
 import 'package:provider/provider.dart';
+import 'package:smart_school/services/database_service.dart';
 import '../providers/notice_provider.dart';
-import '../../services/database_service.dart';
 import '../../../models/school_models.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
 
 class NoticeManagementScreen extends StatelessWidget {
   final bool hideAppBar;
