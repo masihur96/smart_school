@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
+import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/features/student/screens/student_dashboard_screen.dart';
+import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
+import 'package:smart_school/models/user_model.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -37,10 +42,43 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   Future<void> _checkAuth() async {
     // Ensuring animation plays for at least 2 seconds for branding
-    await Future.wait([
-      Future.delayed(const Duration(seconds: 2)),
-      context.read<AuthNotifier>().checkAuthStatus(),
-    ]);
+    await Future.delayed(const Duration(seconds: 2));
+    
+    if (!mounted) return;
+    
+    final authNotifier = context.read<AuthNotifier>();
+    await authNotifier.checkAuthStatus();
+
+    if (!mounted) return;
+
+    final user = authNotifier.user;
+    if (user != null) {
+      switch (user.role) {
+        case UserRole.admin:
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => AdminDashboardScreen()),
+                (Route<dynamic> route) => false,
+          );
+          break;
+        case UserRole.teacher:
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => TeacherDashboardScreen()),
+                (Route<dynamic> route) => false,
+          );
+          break;
+        case UserRole.student:
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => StudentDashboardScreen()),
+                (Route<dynamic> route) => false,
+          );
+          break;
+      }
+    } else {
+      context.go('/login');
+    }
   }
 
   @override

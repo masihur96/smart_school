@@ -36,13 +36,13 @@ GoRouter getRouter(AuthNotifier authNotifier) {
       final isLoggingIn = state.matchedLocation == '/login';
       final isRegistering = state.matchedLocation == '/register';
 
-      // While loading (auth check), stay on splash
-      if (authNotifier.isLoading && isSplash) return null;
+      // While loading (auth check) or on splash, let the splash screen handle it
+      if (isSplash) return null;
 
       if (!isLoggedIn) {
-        // If not logged in, and not already on login/register/splash, go to login
-        if (isLoggingIn || isRegistering || isSplash) {
-          return isSplash ? '/login' : null;
+        // If not logged in, and not already on login/register, go to login
+        if (isLoggingIn || isRegistering) {
+          return null;
         }
         return '/login';
       }
