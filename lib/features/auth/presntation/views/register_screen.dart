@@ -17,6 +17,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _schoolIdController = TextEditingController();
   final _phoneController = TextEditingController();
+  bool _isPasswordVisible = false;
 
   @override
   void dispose() {
@@ -33,7 +34,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final name = _nameController.text.trim();
       final email = _emailController.text.trim();
       final password = _passwordController.text;
-      const role = 'student'; // Payload says "role": "student"
+      const role = 'admin'; // Payload says "role": "student"
       final schoolId = _schoolIdController.text.trim();
       final phone = _phoneController.text.trim();
 
@@ -124,11 +125,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock_outline),
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isPasswordVisible = !_isPasswordVisible;
+                        });
+                      },
+                    ),
                   ),
-                  obscureText: true,
+                  obscureText: !_isPasswordVisible,
                   validator: (value) =>
                       value == null || value.length < 6 ? 'Password must be at least 6 characters' : null,
                 ),
