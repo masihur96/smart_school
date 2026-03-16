@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../models/user_model.dart';
 import '../domain/usecases/login_usecase.dart';
 import '../domain/usecases/register_usecase.dart';
@@ -6,6 +8,7 @@ import '../domain/usecases/register_usecase.dart';
 class AuthNotifier extends ChangeNotifier {
   final LoginUseCase loginUseCase;
   final RegisterUseCase registerUseCase;
+  final _storage = const FlutterSecureStorage();
 
   AuthNotifier({
     required this.loginUseCase,
@@ -21,6 +24,32 @@ class AuthNotifier extends ChangeNotifier {
   String? _error;
   String? get error => _error;
 
+  Future<void> checkAuthStatus() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final userJson = await _storage.read(key: 'user_session');
+      if (userJson != null) {
+        final userData = jsonDecode(userJson);
+        _user = User(
+          id: userData['id'],
+          name: userData['name'],
+          email: userData['email'],
+          role: UserRole.values.firstWhere(
+            (e) => e.name == userData['role'],
+            orElse: () => UserRole.student,
+          ),
+        );
+      }
+    } catch (e) {
+      await _storage.delete(key: 'user_session');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> login(String email, String password) async {
     _isLoading = true;
     _error = null;
@@ -28,9 +57,8 @@ class AuthNotifier extends ChangeNotifier {
 
     try {
       final userEntity = await loginUseCase(email, password);
-      // Mapping UserEntity to User model
       _user = User(
-        id: '1', // Placeholder, ideally from entity/token
+        id: '1', // Placeholder
         name: userEntity.name,
         email: userEntity.email,
         role: UserRole.values.firstWhere(
@@ -38,6 +66,16 @@ class AuthNotifier extends ChangeNotifier {
           orElse: () => UserRole.student,
         ),
       );
+
+      // Save session
+      final userData = {
+        'id': _user!.id,
+        'name': _user!.name,
+        'email': _user!.email,
+        'role': _user!.role.name,
+      };
+      await _storage.write(key: 'user_session', value: jsonEncode(userData));
+
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -72,9 +110,6 @@ class AuthNotifier extends ChangeNotifier {
       );
       
       _isLoading = false;
-      if (success) {
-        _error = null;
-      }
       notifyListeners();
       return success;
     } catch (e) {
@@ -87,8 +122,9 @@ class AuthNotifier extends ChangeNotifier {
     }
   }
 
-  void logout() {
+  Future<void> logout() async {
     _user = null;
+    await _storage.delete(key: 'user_session');
     notifyListeners();
   }
 

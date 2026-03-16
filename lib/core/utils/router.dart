@@ -1,5 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
+import 'package:smart_school/features/auth/presntation/views/splash_screen.dart';
+import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
 
 import '../../features/admin/screens/admin_dashboard_screen.dart';
@@ -26,17 +28,27 @@ import 'package:smart_school/features/auth/presntation/views/register_screen.dar
 
 GoRouter getRouter(AuthNotifier authNotifier) {
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/splash',
     refreshListenable: authNotifier,
     redirect: (context, state) {
       final isLoggedIn = authNotifier.user != null;
+      final isSplash = state.matchedLocation == '/splash';
       final isLoggingIn = state.matchedLocation == '/login';
+      final isRegistering = state.matchedLocation == '/register';
+
+      // While loading (auth check), stay on splash
+      if (authNotifier.isLoading && isSplash) return null;
 
       if (!isLoggedIn) {
-        return isLoggingIn ? null : '/login';
+        // If not logged in, and not already on login/register/splash, go to login
+        if (isLoggingIn || isRegistering || isSplash) {
+          return isSplash ? '/login' : null;
+        }
+        return '/login';
       }
 
-      if (isLoggingIn) {
+      // If logged in and on splash or login/register, go to appropriate dashboard
+      if (isSplash || isLoggingIn || isRegistering) {
         final role = authNotifier.user!.role;
         switch (role) {
           case UserRole.admin:
@@ -52,12 +64,20 @@ GoRouter getRouter(AuthNotifier authNotifier) {
     },
     routes: [
       GoRoute(
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const ProfileScreen(),
       ),
       GoRoute(
         path: '/admin',

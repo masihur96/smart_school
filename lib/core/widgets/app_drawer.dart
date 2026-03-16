@@ -35,6 +35,8 @@ class AppDrawer extends StatelessWidget {
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
+                _buildDrawerItem(Icons.person_outline, 'My Profile', () => context.push('/profile'), context),
+                const Divider(),
                 if (user.role == UserRole.admin) ..._buildAdminItems(context),
                 if (user.role == UserRole.teacher) ..._buildTeacherItems(context),
                 if (user.role == UserRole.student) ..._buildStudentItems(context),

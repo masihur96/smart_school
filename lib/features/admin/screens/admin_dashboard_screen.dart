@@ -61,6 +61,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         title: Text(_getTitle()),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: () => context.push('/profile'),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       drawer: const AppDrawer(),
       body: IndexedStack(
