@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_school/features/auth/screens/login_screen.dart';
+import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
 import 'package:smart_school/features/splash_screen.dart';
 
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/router.dart';
@@ -16,9 +17,29 @@ import 'features/teacher/providers/result_provider.dart';
 import 'features/teacher/data/repositories/attendance_repository_impl.dart';
 import 'features/teacher/data/repositories/result_repository_impl.dart';
 import 'services/database_service.dart';
+import 'configs/network/data_provider.dart';
+import 'features/auth/data/datasources/auth_remote_data_source.dart';
+import 'features/auth/data/repositories/auth_repository_impl.dart';
+import 'features/auth/domain/usecases/login_usecase.dart';
+import 'features/auth/domain/usecases/register_usecase.dart';
 
 void main() {
   final databaseService = DatabaseService();
+  final dataProvider = DataProvider();
+  
+  // Auth dependencies
+  final authRemoteDataSource = AuthRemoteDataSource(dataProvider);
+  final authRepository = AuthRepositoryImpl(authRemoteDataSource);
+  final loginUseCase = LoginUseCase(authRepository);
+  final registerUseCase = RegisterUseCase(authRepository);
+
+  final authNotifier = AuthNotifier(
+    loginUseCase: loginUseCase,
+    registerUseCase: registerUseCase,
+  );
+
+  final router = getRouter(authNotifier);
+
   final attendanceRepository = AttendanceRepositoryImpl(databaseService);
   final resultRepository = ResultRepositoryImpl(databaseService);
   final examRepository = ExamRepositoryImpl(databaseService);
@@ -27,7 +48,8 @@ void main() {
     MultiProvider(
       providers: [
         Provider.value(value: databaseService),
-        ChangeNotifierProvider(create: (_) => AuthNotifier()),
+        Provider.value(value: dataProvider),
+        ChangeNotifierProvider.value(value: authNotifier),
         ChangeNotifierProvider(create: (_) => NoticesNotifier(databaseService)),
         ChangeNotifierProvider(create: (_) => StudentsNotifier(databaseService)),
         ChangeNotifierProvider(create: (_) => ClassSetupNotifier(databaseService)),
@@ -40,18 +62,17 @@ void main() {
         ChangeNotifierProvider(create: (_) => AttendanceNotifier(attendanceRepository)),
         ChangeNotifierProvider(create: (_) => ResultsNotifier(resultRepository)),
       ],
-      child: const MyApp(),
+      child: MyApp(router: router),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final GoRouter router;
+  const MyApp({super.key, required this.router});
 
   @override
   Widget build(BuildContext context) {
-    final authNotifier = Provider.of<AuthNotifier>(context);
-    final router = getRouter(authNotifier);
 
     return MaterialApp.router(
       title: 'Smart School',

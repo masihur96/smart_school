@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
+import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
-import '../../features/auth/screens/login_screen.dart';
+
 import '../../features/admin/screens/admin_dashboard_screen.dart';
 import '../../features/admin/screens/student_management_screen.dart';
 import '../../features/admin/screens/add_edit_student_screen.dart';
@@ -21,6 +22,7 @@ import '../../features/admin/screens/exam_management_screen.dart';
 import '../../features/teacher/screens/mark_entry_screen.dart';
 import '../../features/student/screens/student_result_screen.dart';
 import '../../models/user_model.dart';
+import 'package:smart_school/features/auth/presntation/views/register_screen.dart';
 
 GoRouter getRouter(AuthNotifier authNotifier) {
   return GoRouter(
@@ -52,6 +54,10 @@ GoRouter getRouter(AuthNotifier authNotifier) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/register',
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: '/admin',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
+import 'package:smart_school/features/auth/providers/auth_provider.dart';
+
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -27,26 +28,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  void _register() {
+  void _register() async {
     if (_formKey.currentState!.validate()) {
       final name = _nameController.text.trim();
       final email = _emailController.text.trim();
       final password = _passwordController.text;
-      const role = 'admin';
+      const role = 'student'; // Payload says "role": "student"
       final schoolId = _schoolIdController.text.trim();
       final phone = _phoneController.text.trim();
 
-      // Log the registration payload to console
-      debugPrint('Registration Payload: {');
-      debugPrint('  name: $name,');
-      debugPrint('  email: $email,');
-      debugPrint('  password: $password,');
-      debugPrint('  role: $role,');
-      debugPrint('  schoolId: $schoolId,');
-      debugPrint('  phone: $phone');
-      debugPrint('}');
-
-      context.read<AuthNotifier>().register(
+      final success = await context.read<AuthNotifier>().register(
             name: name,
             email: email,
             password: password,
@@ -54,6 +45,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
             schoolId: schoolId,
             phone: phone,
           );
+      
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Registration successful! Please login.')),
+          );
+          Navigator.pop(context);
+        }
+      }
     }
   }
 
@@ -67,6 +67,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(authNotifier.error!), backgroundColor: Colors.red),
         );
+        authNotifier.clearError();
       }
     });
 
@@ -94,7 +95,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Enter your details to register as Admin.',
+                  'Enter your details to register as Student.',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Colors.grey[600],
                       ),
