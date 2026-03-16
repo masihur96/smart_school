@@ -4,15 +4,18 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../models/user_model.dart';
 import '../domain/usecases/login_usecase.dart';
 import '../domain/usecases/register_usecase.dart';
+import '../domain/usecases/get_profile_usecase.dart';
 
 class AuthNotifier extends ChangeNotifier {
   final LoginUseCase loginUseCase;
   final RegisterUseCase registerUseCase;
+  final GetProfileUseCase getProfileUseCase;
   final _storage = const FlutterSecureStorage();
 
   AuthNotifier({
     required this.loginUseCase,
     required this.registerUseCase,
+    required this.getProfileUseCase,
   });
 
   User? _user;
@@ -32,15 +35,7 @@ class AuthNotifier extends ChangeNotifier {
       final userJson = await _storage.read(key: 'user_session');
       if (userJson != null) {
         final userData = jsonDecode(userJson);
-        _user = User(
-          id: userData['id'],
-          name: userData['name'],
-          email: userData['email'],
-          role: UserRole.values.firstWhere(
-            (e) => e.name == userData['role'],
-            orElse: () => UserRole.student,
-          ),
-        );
+        _user = User.fromJson(userData);
       }
     } catch (e) {
       await _storage.delete(key: 'user_session');
@@ -56,25 +51,25 @@ class AuthNotifier extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final userEntity = await loginUseCase(email, password);
+      await loginUseCase(email, password);
+      
+      // Fetch full profile after login
+      final profile = await getProfileUseCase();
+      
       _user = User(
-        id: '1', // Placeholder
-        name: userEntity.name,
-        email: userEntity.email,
+        id: profile.id,
+        name: profile.name,
+        email: profile.email,
         role: UserRole.values.firstWhere(
-          (e) => e.name == userEntity.role,
+          (e) => e.name == profile.role,
           orElse: () => UserRole.student,
         ),
+        schoolId: profile.schoolId,
+        phone: profile.phone,
       );
 
       // Save session
-      final userData = {
-        'id': _user!.id,
-        'name': _user!.name,
-        'email': _user!.email,
-        'role': _user!.role.name,
-      };
-      await _storage.write(key: 'user_session', value: jsonEncode(userData));
+      await _storage.write(key: 'user_session', value: jsonEncode(_user!.toJson()));
 
       _isLoading = false;
       notifyListeners();
@@ -95,6 +90,7 @@ class AuthNotifier extends ChangeNotifier {
     required String schoolId,
     required String phone,
   }) async {
+// ... lines omitted for brevity ...
     _isLoading = true;
     _error = null;
     notifyListeners();

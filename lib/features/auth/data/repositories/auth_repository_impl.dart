@@ -15,9 +15,25 @@ class AuthRepositoryImpl implements AuthRepository {
     log("result from auth repository impl: $result");
 
     return UserEntity(
+      id: result.id,
       name: result.name,
       email: result.email,
       role: result.role,
+      schoolId: result.schoolId,
+      phone: result.phone,
+    );
+  }
+
+  @override
+  Future<UserEntity> getProfile() async {
+    final result = await remoteDataSource.getProfile();
+    return UserEntity(
+      id: result.id,
+      name: result.name,
+      email: result.email,
+      role: result.role,
+      schoolId: result.schoolId,
+      phone: result.phone,
     );
   }
 

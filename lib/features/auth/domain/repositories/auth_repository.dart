@@ -12,4 +12,5 @@ abstract class AuthRepository {
     required String schoolId,
     required String phone,
   });
+  Future<UserEntity> getProfile();
 }

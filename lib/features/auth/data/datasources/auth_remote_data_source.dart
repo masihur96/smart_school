@@ -119,4 +119,31 @@ class AuthRemoteDataSource {
 
     return response.statusCode! >= 200 && response.statusCode! < 300;
   }
+
+  /// Fetches the current user's profile.
+  Future<AuthResponseModel> getProfile() async {
+    final token = await StorageService.getToken();
+    if (token == null) {
+      throw Exception('No authentication token found');
+    }
+
+    final response = await _dataProvider.performRequest(
+      'GET',
+      APIPath.profile,
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    log('Get profile response: ${response?.statusCode} - ${response?.data}');
+
+    if (response == null || response.statusCode == null) {
+      throw Exception('No response from server');
+    }
+
+    if (response.statusCode! >= 200 && response.statusCode! < 300) {
+      return AuthResponseModel.fromJson(response.data);
+    } else {
+      final message = response.data?['message'] ?? 'Failed to fetch profile';
+      throw Exception(message);
+    }
+  }
 }

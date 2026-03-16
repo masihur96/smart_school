@@ -89,13 +89,13 @@ class ProfileScreen extends StatelessWidget {
               context,
               icon: Icons.school_outlined,
               label: 'School ID',
-              value: user?.schoolId??"", // Mock data
+              value: user?.schoolId ?? 'Not available',
             ),
             _buildProfileItem(
               context,
               icon: Icons.phone_outlined,
               label: 'Phone',
-              value: '+880 1234 567890', // Mock data
+              value: user?.phone ?? 'Not available',
             ),
             const Padding(
               padding: EdgeInsets.all(24.0),
@@ -141,24 +141,26 @@ class ProfileScreen extends StatelessWidget {
           children: [
             Icon(icon, color: Theme.of(context).primaryColor),
             const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
                   ),
-                ),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

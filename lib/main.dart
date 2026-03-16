@@ -22,6 +22,7 @@ import 'features/auth/data/datasources/auth_remote_data_source.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/domain/usecases/login_usecase.dart';
 import 'features/auth/domain/usecases/register_usecase.dart';
+import 'features/auth/domain/usecases/get_profile_usecase.dart';
 
 void main() {
   final databaseService = DatabaseService();
@@ -32,10 +33,12 @@ void main() {
   final authRepository = AuthRepositoryImpl(authRemoteDataSource);
   final loginUseCase = LoginUseCase(authRepository);
   final registerUseCase = RegisterUseCase(authRepository);
+  final getProfileUseCase = GetProfileUseCase(authRepository);
 
   final authNotifier = AuthNotifier(
     loginUseCase: loginUseCase,
     registerUseCase: registerUseCase,
+    getProfileUseCase: getProfileUseCase,
   );
 
   final router = getRouter(authNotifier);
