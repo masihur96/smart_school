@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:smart_school/core/utils/storage_service.dart';
+import 'dart:developer';
 import '../../../models/user_model.dart';
 import '../domain/usecases/login_usecase.dart';
 import '../domain/usecases/register_usecase.dart';
@@ -10,7 +10,6 @@ class AuthNotifier extends ChangeNotifier {
   final LoginUseCase loginUseCase;
   final RegisterUseCase registerUseCase;
   final GetProfileUseCase getProfileUseCase;
-  final _storage = const FlutterSecureStorage();
 
   AuthNotifier({
     required this.loginUseCase,
@@ -29,16 +28,33 @@ class AuthNotifier extends ChangeNotifier {
 
   Future<void> checkAuthStatus() async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
 
     try {
-      final userJson = await _storage.read(key: 'user_session');
-      if (userJson != null) {
-        final userData = jsonDecode(userJson);
-        _user = User.fromJson(userData);
+      final token = await StorageService.getToken();
+      if (token != null) {
+        // Fetch full profile by token
+        final profile = await getProfileUseCase();
+        
+        _user = User(
+          id: profile.id,
+          name: profile.name,
+          email: profile.email,
+          role: UserRole.values.firstWhere(
+            (e) => e.name == profile.role,
+            orElse: () => UserRole.student,
+          ),
+          schoolId: profile.schoolId,
+          phone: profile.phone,
+        );
+      } else {
+        _user = null;
       }
     } catch (e) {
-      await _storage.delete(key: 'user_session');
+      log("Auth check error: $e");
+      _user = null;
+      await StorageService.clear();
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -68,9 +84,6 @@ class AuthNotifier extends ChangeNotifier {
         phone: profile.phone,
       );
 
-      // Save session
-      await _storage.write(key: 'user_session', value: jsonEncode(_user!.toJson()));
-
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -90,7 +103,6 @@ class AuthNotifier extends ChangeNotifier {
     required String schoolId,
     required String phone,
   }) async {
-// ... lines omitted for brevity ...
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -120,7 +132,7 @@ class AuthNotifier extends ChangeNotifier {
 
   Future<void> logout() async {
     _user = null;
-    await _storage.delete(key: 'user_session');
+    await StorageService.clear();
     notifyListeners();
   }
 

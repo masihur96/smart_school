@@ -1,3 +1,4 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
@@ -7,24 +8,26 @@ class StorageService {
   static const String _userEmailKey = 'user_email';
   static const String _userPasswordKey = 'user_password';
 
+  static const _storage = FlutterSecureStorage();
+
   static Future<void> saveToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_tokenKey, token);
+    await _storage.write(key: _tokenKey, value: token);
   }
 
   static Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_tokenKey);
+    return await _storage.read(key: _tokenKey);
+  }
+
+  static Future<void> deleteToken() async {
+    await _storage.delete(key: _tokenKey);
   }
 
   static Future<void> saveSmallToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_tempTokenKey, token);
+    await _storage.write(key: _tempTokenKey, value: token);
   }
 
   static Future<String?> getSmallToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_tempTokenKey);
+    return await _storage.read(key: _tempTokenKey);
   }
 
   static Future<void> saveIsForcePasswordReset(bool value) async {
@@ -66,5 +69,6 @@ class StorageService {
   static Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+    await _storage.deleteAll();
   }
 }
