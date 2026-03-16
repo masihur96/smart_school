@@ -89,7 +89,7 @@ class ProfileScreen extends StatelessWidget {
               context,
               icon: Icons.school_outlined,
               label: 'School ID',
-              value: 'SCH-2024-001', // Mock data
+              value: user?.schoolId??"", // Mock data
             ),
             _buildProfileItem(
               context,
