@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/configs/route_generator.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/router.dart';
 import 'features/auth/providers/auth_provider.dart';
@@ -41,7 +42,7 @@ void main() {
     getProfileUseCase: getProfileUseCase,
   );
 
-  final router = getRouter(authNotifier);
+
 
   final attendanceRepository = AttendanceRepositoryImpl(databaseService);
   final resultRepository = ResultRepositoryImpl(databaseService);
@@ -65,23 +66,24 @@ void main() {
         ChangeNotifierProvider(create: (_) => AttendanceNotifier(attendanceRepository)),
         ChangeNotifierProvider(create: (_) => ResultsNotifier(resultRepository)),
       ],
-      child: MyApp(router: router),
+      child: MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  final GoRouter router;
-  const MyApp({super.key, required this.router});
+
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
 
-    return MaterialApp.router(
+    return MaterialApp(
       title: 'Smart School',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      routerConfig: router,
+      onGenerateRoute: RouteGenerator.generateRoute,
+      initialRoute: RouteGenerator.splashRoute,
     );
   }
 }

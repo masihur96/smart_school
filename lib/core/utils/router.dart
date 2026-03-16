@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
-import 'package:smart_school/features/auth/presntation/views/splash_screen.dart';
+import 'package:smart_school/features/splash_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
 

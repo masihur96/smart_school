@@ -48,6 +48,8 @@ class AuthNotifier extends ChangeNotifier {
           schoolId: profile.schoolId,
           phone: profile.phone,
         );
+
+
       } else {
         _user = null;
       }
