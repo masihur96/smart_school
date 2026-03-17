@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:smart_school/features/admin/screens/setup_screen.dart';
+import 'package:smart_school/features/admin/screens/teacher_management_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/models/school_models.dart';
 import '../../../core/widgets/app_drawer.dart';
@@ -119,8 +121,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             childAspectRatio: 1,
             children: [
               _buildStatCard(context, 'Total Students', '450', Icons.people, Colors.blue, onTap: () => setState(() => _selectedIndex = 1)),
-              _buildStatCard(context, 'Total Teachers', '25', Icons.person, Colors.orange, onTap: () => context.push('/admin/teachers')),
-              _buildStatCard(context, 'Total Classes', '12', Icons.class_, Colors.green, onTap: () => context.push('/admin/setup')),
+              _buildStatCard(context, 'Total Teachers', '25', Icons.person, Colors.orange, onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_)=>TeacherManagementScreen()));
+              }),
+              _buildStatCard(context, 'Total Classes', '12', Icons.class_, Colors.green, onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_)=>SetupScreen()));
+              }),
               _buildStatCard(context, 'Active Notices', '5', Icons.announcement, Colors.red, onTap: () => setState(() => _selectedIndex = 3)),
             ],
           ),

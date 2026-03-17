@@ -1,5 +1,6 @@
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart';
 import '../providers/student_provider.dart';
 import '../../../services/database_service.dart';
 import '../../../models/school_models.dart';
@@ -81,7 +82,12 @@ class StudentManagementScreen extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/admin/students/add'),
+        onPressed: () {
+
+
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>AddEditStudentScreen()));
+
+        },
         backgroundColor: Colors.purple,
         child: const Icon(Icons.add, color: Colors.white),
       ),
