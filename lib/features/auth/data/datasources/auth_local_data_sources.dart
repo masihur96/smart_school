@@ -1,6 +1,1 @@
-
-
-class AuthLocalDataSources {
-
-
-}
+class AuthLocalDataSources {}

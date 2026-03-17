@@ -1,20 +1,16 @@
-
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
 
 import 'package:flutter/foundation.dart';
 
-
 class DataProvider {
   static final BaseOptions _options = BaseOptions(
-
-      // baseUrl: APIPath.baseUrl, // Replace with your actual base URL
-      // headers: {
-      //   'apikey': SecretFile.secretKey,
-      //   'Authorization': 'Bearer ${SecretFile.apiAuthorizationKey}', // Replace with your actual authorization key
-      // },
-
+    // baseUrl: APIPath.baseUrl, // Replace with your actual base URL
+    // headers: {
+    //   'apikey': SecretFile.secretKey,
+    //   'Authorization': 'Bearer ${SecretFile.apiAuthorizationKey}', // Replace with your actual authorization key
+    // },
     sendTimeout: const Duration(milliseconds: 30000),
     receiveTimeout: const Duration(milliseconds: 30000),
   );
@@ -37,7 +33,6 @@ class DataProvider {
     // // }
   }
 
-
   Future<Response<dynamic>?> performRequest(
     String method,
     String url, {
@@ -45,21 +40,14 @@ class DataProvider {
     dynamic query,
     dynamic header,
   }) async {
-
-
     try {
-
       DateTime startTime = DateTime.now();
-
 
       Response response = await _dio.request(
         url,
         data: data,
         queryParameters: query,
-        options: Options(
-          headers: header,
-          method: method.toUpperCase(),
-        ),
+        options: Options(headers: header, method: method.toUpperCase()),
       );
       DateTime endTime = DateTime.now();
       Duration diff = endTime.difference(startTime);
@@ -76,7 +64,6 @@ class DataProvider {
         log("Dio query: ${query}");
         log("Dio data: ${data}");
         log("Dio header: ${header}");
-
       }
       return exception.response;
     }

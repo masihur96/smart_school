@@ -20,7 +20,9 @@ class ResultRepositoryImpl implements IResultRepository {
   @override
   Future<void> saveResults(List<Result> results) async {
     for (var result in results) {
-      final index = _dbService.results.indexWhere((r) => r.examId == result.examId && r.studentId == result.studentId);
+      final index = _dbService.results.indexWhere(
+        (r) => r.examId == result.examId && r.studentId == result.studentId,
+      );
       if (index != -1) {
         _dbService.results[index] = result;
       } else {

@@ -70,13 +70,19 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
           children: [
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Full Name', prefixIcon: Icon(Icons.person)),
+              decoration: const InputDecoration(
+                labelText: 'Full Name',
+                prefixIcon: Icon(Icons.person),
+              ),
               validator: (val) => val!.isEmpty ? 'Please enter name' : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email Address', prefixIcon: Icon(Icons.email)),
+              decoration: const InputDecoration(
+                labelText: 'Email Address',
+                prefixIcon: Icon(Icons.email),
+              ),
               validator: (val) => val!.isEmpty ? 'Please enter email' : null,
             ),
             const SizedBox(height: 16),
@@ -85,7 +91,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 Expanded(
                   child: TextFormField(
                     controller: _rollController,
-                    decoration: const InputDecoration(labelText: 'Roll / ID', prefixIcon: Icon(Icons.numbers)),
+                    decoration: const InputDecoration(
+                      labelText: 'Roll / ID',
+                      prefixIcon: Icon(Icons.numbers),
+                    ),
                     validator: (val) => val!.isEmpty ? 'Required' : null,
                   ),
                 ),
@@ -93,7 +102,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 Expanded(
                   child: TextFormField(
                     controller: _guardianController,
-                    decoration: const InputDecoration(labelText: 'Guardian Contact', prefixIcon: Icon(Icons.phone)),
+                    decoration: const InputDecoration(
+                      labelText: 'Guardian Contact',
+                      prefixIcon: Icon(Icons.phone),
+                    ),
                     validator: (val) => val!.isEmpty ? 'Required' : null,
                   ),
                 ),
@@ -101,17 +113,32 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: 'Class', prefixIcon: Icon(Icons.class_)),
+              decoration: const InputDecoration(
+                labelText: 'Class',
+                prefixIcon: Icon(Icons.class_),
+              ),
               value: _selectedClass,
-              items: classes.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
+              items: classes
+                  .map(
+                    (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
+                  )
+                  .toList(),
               onChanged: (val) => setState(() => _selectedClass = val),
               validator: (val) => val == null ? 'Please select class' : null,
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: 'Section', prefixIcon: Icon(Icons.grid_view)),
+              decoration: const InputDecoration(
+                labelText: 'Section',
+                prefixIcon: Icon(Icons.grid_view),
+              ),
               value: _selectedSection,
-              items: sections.where((s) => s.classId == _selectedClass).map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))).toList(),
+              items: sections
+                  .where((s) => s.classId == _selectedClass)
+                  .map(
+                    (s) => DropdownMenuItem(value: s.id, child: Text(s.name)),
+                  )
+                  .toList(),
               onChanged: (val) => setState(() => _selectedSection = val),
               validator: (val) => val == null ? 'Please select section' : null,
             ),
@@ -119,7 +146,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             ElevatedButton(
               onPressed: _save,
               style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-              child: const Text('Save Student', style: TextStyle(color: Colors.white, fontSize: 18)),
+              child: const Text(
+                'Save Student',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
             ),
           ],
         ),

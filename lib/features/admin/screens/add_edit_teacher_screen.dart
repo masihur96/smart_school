@@ -64,32 +64,64 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                 children: [
                   DropdownButtonFormField<String>(
                     decoration: const InputDecoration(labelText: 'Class'),
-                    items: classes.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
-                    onChanged: (val) => setDialogState(() => selectedClass = val),
+                    items: classes
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c.id,
+                            child: Text(c.name),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (val) =>
+                        setDialogState(() => selectedClass = val),
                   ),
                   DropdownButtonFormField<String>(
                     decoration: const InputDecoration(labelText: 'Section'),
-                    items: sections.where((s) => s.classId == selectedClass).map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))).toList(),
-                    onChanged: (val) => setDialogState(() => selectedSection = val),
+                    items: sections
+                        .where((s) => s.classId == selectedClass)
+                        .map(
+                          (s) => DropdownMenuItem(
+                            value: s.id,
+                            child: Text(s.name),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (val) =>
+                        setDialogState(() => selectedSection = val),
                   ),
                   DropdownButtonFormField<String>(
                     decoration: const InputDecoration(labelText: 'Subject'),
-                    items: subjects.map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))).toList(),
+                    items: subjects
+                        .map(
+                          (s) => DropdownMenuItem(
+                            value: s.id,
+                            child: Text(s.name),
+                          ),
+                        )
+                        .toList(),
                     onChanged: (val) => setDialogState(() => selectedSub = val),
                   ),
                 ],
               ),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
                 ElevatedButton(
-                  onPressed: (selectedClass != null && selectedSection != null && selectedSub != null)
+                  onPressed:
+                      (selectedClass != null &&
+                          selectedSection != null &&
+                          selectedSub != null)
                       ? () {
                           setState(() {
-                            _assignedSubjects.add(AssignedSubject(
-                              classId: selectedClass!,
-                              sectionId: selectedSection!,
-                              subjectId: selectedSub!,
-                            ));
+                            _assignedSubjects.add(
+                              AssignedSubject(
+                                classId: selectedClass!,
+                                sectionId: selectedSection!,
+                                subjectId: selectedSub!,
+                              ),
+                            );
                           });
                           Navigator.pop(context);
                         }
@@ -122,39 +154,63 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
           children: [
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Full Name', prefixIcon: Icon(Icons.person)),
+              decoration: const InputDecoration(
+                labelText: 'Full Name',
+                prefixIcon: Icon(Icons.person),
+              ),
               validator: (val) => val!.isEmpty ? 'Please enter name' : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email Address', prefixIcon: Icon(Icons.email)),
+              decoration: const InputDecoration(
+                labelText: 'Email Address',
+                prefixIcon: Icon(Icons.email),
+              ),
               validator: (val) => val!.isEmpty ? 'Please enter email' : null,
             ),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Assigned Subjects', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                TextButton.icon(onPressed: _addSubject, icon: const Icon(Icons.add), label: const Text('Add')),
+                Text(
+                  'Assigned Subjects',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: _addSubject,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add'),
+                ),
               ],
             ),
             const Divider(),
             if (_assignedSubjects.isEmpty)
               const Padding(
                 padding: EdgeInsets.all(16.0),
-                child: Text('No subjects assigned yet.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+                child: Text(
+                  'No subjects assigned yet.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey),
+                ),
               ),
             ..._assignedSubjects.asMap().entries.map((entry) {
               final idx = entry.key;
               final sub = entry.value;
-              final className = classes.firstWhere((c) => c.id == sub.classId).name;
-              final subName = subjects.firstWhere((s) => s.id == sub.subjectId).name;
+              final className = classes
+                  .firstWhere((c) => c.id == sub.classId)
+                  .name;
+              final subName = subjects
+                  .firstWhere((s) => s.id == sub.subjectId)
+                  .name;
               return ListTile(
                 title: Text('$className - $subName'),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete, color: Colors.grey),
-                  onPressed: () => setState(() => _assignedSubjects.removeAt(idx)),
+                  onPressed: () =>
+                      setState(() => _assignedSubjects.removeAt(idx)),
                 ),
               );
             }),
@@ -162,7 +218,10 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             ElevatedButton(
               onPressed: _save,
               style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-              child: const Text('Save Teacher', style: TextStyle(color: Colors.white, fontSize: 18)),
+              child: const Text(
+                'Save Teacher',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
             ),
           ],
         ),

@@ -30,10 +30,13 @@ class AttendanceNotifier extends ChangeNotifier {
   }
 
   List<AttendanceEntity> getRecordsForDate(DateTime date) {
-    return _state.where((r) => 
-      r.date.year == date.year && 
-      r.date.month == date.month && 
-      r.date.day == date.day
-    ).toList();
+    return _state
+        .where(
+          (r) =>
+              r.date.year == date.year &&
+              r.date.month == date.month &&
+              r.date.day == date.day,
+        )
+        .toList();
   }
 }

@@ -5,11 +5,7 @@ class Teacher {
   final List<AssignedSubject> assignedSubjects;
   final User? user;
 
-  Teacher({
-    required this.userId,
-    required this.assignedSubjects,
-    this.user,
-  });
+  Teacher({required this.userId, required this.assignedSubjects, this.user});
 
   factory Teacher.fromJson(Map<String, dynamic> json) {
     return Teacher(
@@ -50,10 +46,6 @@ class AssignedSubject {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'classId': classId,
-      'sectionId': sectionId,
-      'subjectId': subjectId,
-    };
+    return {'classId': classId, 'sectionId': sectionId, 'subjectId': subjectId};
   }
 }

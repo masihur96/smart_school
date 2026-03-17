@@ -33,16 +33,26 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthNotifier>().user;
-    final allExams = context.watch<ExamsNotifier>().state.where((e) => e.teacherId == user?.id).toList();
+    final allExams = context
+        .watch<ExamsNotifier>()
+        .state
+        .where((e) => e.teacherId == user?.id)
+        .toList();
     final allStudents = context.watch<StudentsNotifier>().students;
     final classes = context.watch<ClassSetupNotifier>().classes;
     final subjects = context.watch<SubjectSetupNotifier>().subjects;
 
     final uniqueExamNames = allExams.map((e) => e.name).toSet().toList();
-    
-    final classesForSelectedExam = _selectedExamName == null 
-        ? <ClassRoom>[] 
-        : classes.where((c) => allExams.any((e) => e.name == _selectedExamName && e.classId == c.id)).toList();
+
+    final classesForSelectedExam = _selectedExamName == null
+        ? <ClassRoom>[]
+        : classes
+              .where(
+                (c) => allExams.any(
+                  (e) => e.name == _selectedExamName && e.classId == c.id,
+                ),
+              )
+              .toList();
 
     final studentsForSelectedClass = _selectedClassId == null
         ? <Student>[]
@@ -50,27 +60,37 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
 
     final results = context.watch<ResultsNotifier>().state;
 
-    final examsToEnterMarks = (_selectedExamName != null && _selectedClassId != null && _selectedStudentId != null)
-        ? allExams.where((e) => e.name == _selectedExamName && e.classId == _selectedClassId).toList()
+    final examsToEnterMarks =
+        (_selectedExamName != null &&
+            _selectedClassId != null &&
+            _selectedStudentId != null)
+        ? allExams
+              .where(
+                (e) =>
+                    e.name == _selectedExamName &&
+                    e.classId == _selectedClassId,
+              )
+              .toList()
         : <Exam>[];
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: widget.hideAppBar ? null : AppBar(
-        title: const Text('Mark Entry System'),
-        backgroundColor: Colors.blue[700],
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            onPressed: () {}, // Help info
-          ),
-        ],
-      ),
+      appBar: widget.hideAppBar
+          ? null
+          : AppBar(
+              title: const Text('Mark Entry System'),
+              backgroundColor: Colors.blue[700],
+              foregroundColor: Colors.white,
+              elevation: 0,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.help_outline),
+                  onPressed: () {}, // Help info
+                ),
+              ],
+            ),
       body: Column(
         children: [
-
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20.0),
@@ -78,13 +98,17 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildSelectionCard(
-                    uniqueExamNames, 
-                    classesForSelectedExam, 
-                    studentsForSelectedClass
+                    uniqueExamNames,
+                    classesForSelectedExam,
+                    studentsForSelectedClass,
                   ),
                   const SizedBox(height: 28),
                   if (_selectedStudentId != null) ...[
-                    _buildMarkEntrySection(examsToEnterMarks, subjects, results),
+                    _buildMarkEntrySection(
+                      examsToEnterMarks,
+                      subjects,
+                      results,
+                    ),
                     const SizedBox(height: 32),
                     if (examsToEnterMarks.isNotEmpty)
                       _buildSaveButton(examsToEnterMarks),
@@ -99,8 +123,6 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       ),
     );
   }
-
-
 
   Widget _buildSelectionCard(
     List<String> uniqueExamNames,
@@ -119,7 +141,11 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
               label: 'Examination',
               icon: Icons.assignment,
               value: _selectedExamName,
-              items: uniqueExamNames.map((name) => DropdownMenuItem(value: name, child: Text(name))).toList(),
+              items: uniqueExamNames
+                  .map(
+                    (name) => DropdownMenuItem(value: name, child: Text(name)),
+                  )
+                  .toList(),
               onChanged: (val) {
                 setState(() {
                   _selectedExamName = val;
@@ -134,30 +160,47 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
               label: 'Classroom',
               icon: Icons.meeting_room,
               value: _selectedClassId,
-              items: classesForSelectedExam.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
-              onChanged: _selectedExamName == null ? null : (val) {
-                setState(() {
-                  _selectedClassId = val;
-                  _selectedStudentId = null;
-                  _markControllers.clear();
-                });
-              },
+              items: classesForSelectedExam
+                  .map(
+                    (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
+                  )
+                  .toList(),
+              onChanged: _selectedExamName == null
+                  ? null
+                  : (val) {
+                      setState(() {
+                        _selectedClassId = val;
+                        _selectedStudentId = null;
+                        _markControllers.clear();
+                      });
+                    },
             ),
             const SizedBox(height: 16),
             _buildDropdownField<String>(
               label: 'Student',
               icon: Icons.person_search,
               value: _selectedStudentId,
-              items: studentsForSelectedClass.map((s) => DropdownMenuItem(value: s.userId, child: Text(s.user?.name ?? 'Unknown'))).toList(),
-              onChanged: _selectedClassId == null ? null : (val) {
-                setState(() {
-                  _selectedStudentId = val;
-                  _markControllers.clear();
-                });
-                if (val != null) {
-                  context.read<ResultsNotifier>().loadResultsForStudent(val);
-                }
-              },
+              items: studentsForSelectedClass
+                  .map(
+                    (s) => DropdownMenuItem(
+                      value: s.userId,
+                      child: Text(s.user?.name ?? 'Unknown'),
+                    ),
+                  )
+                  .toList(),
+              onChanged: _selectedClassId == null
+                  ? null
+                  : (val) {
+                      setState(() {
+                        _selectedStudentId = val;
+                        _markControllers.clear();
+                      });
+                      if (val != null) {
+                        context.read<ResultsNotifier>().loadResultsForStudent(
+                          val,
+                        );
+                      }
+                    },
             ),
           ],
         ),
@@ -177,29 +220,49 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: Colors.blue[700]),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
         filled: true,
         fillColor: Colors.blue.withValues(alpha: 0.05),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
       ),
       items: items,
       onChanged: onChanged,
       icon: Icon(Icons.keyboard_arrow_down, color: Colors.blue[700]),
       style: const TextStyle(fontSize: 16, color: Colors.black87),
-      disabledHint: Text('Select previous step first', style: TextStyle(color: Colors.grey[400])),
+      disabledHint: Text(
+        'Select previous step first',
+        style: TextStyle(color: Colors.grey[400]),
+      ),
     );
   }
 
-  Widget _buildMarkEntrySection(List<Exam> exams, List<Subject> subjects, List<Result> results) {
+  Widget _buildMarkEntrySection(
+    List<Exam> exams,
+    List<Subject> subjects,
+    List<Result> results,
+  ) {
     if (exams.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(40.0),
           child: Column(
             children: [
-              Icon(Icons.warning_amber_rounded, size: 60, color: Colors.amber[300]),
+              Icon(
+                Icons.warning_amber_rounded,
+                size: 60,
+                color: Colors.amber[300],
+              ),
               const SizedBox(height: 16),
-              const Text('No exams found for this selection.', style: TextStyle(fontSize: 16, color: Colors.grey)),
+              const Text(
+                'No exams found for this selection.',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
             ],
           ),
         ),
@@ -221,12 +284,22 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
         ),
         const SizedBox(height: 16),
         ...exams.map((exam) {
-          final subject = subjects.firstWhere((s) => s.id == exam.subjectId, orElse: () => Subject(id: '', name: 'Unknown'));
-          
+          final subject = subjects.firstWhere(
+            (s) => s.id == exam.subjectId,
+            orElse: () => Subject(id: '', name: 'Unknown'),
+          );
+
           if (!_markControllers.containsKey(exam.id)) {
-            final existingResult = results.where((r) => r.examId == exam.id && r.studentId == _selectedStudentId).firstOrNull;
+            final existingResult = results
+                .where(
+                  (r) =>
+                      r.examId == exam.id && r.studentId == _selectedStudentId,
+                )
+                .firstOrNull;
             _markControllers[exam.id] = TextEditingController(
-              text: existingResult != null ? existingResult.marksObtained.toString() : '',
+              text: existingResult != null
+                  ? existingResult.marksObtained.toString()
+                  : '',
             );
           }
 
@@ -239,7 +312,10 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
             elevation: 1,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: BorderSide(color: Colors.grey.withValues(alpha: 0.2), width: 1),
+              side: BorderSide(
+                color: Colors.grey.withValues(alpha: 0.2),
+                width: 1,
+              ),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -258,8 +334,20 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(subject.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        Text('Total: 100 Marks', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                        Text(
+                          subject.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'Total: 100 Marks',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 13,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -270,7 +358,10 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
                       onChanged: (val) => setState(() {}),
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
                       decoration: InputDecoration(
                         hintText: '00',
                         suffixText: marks != null ? (isPass ? 'P' : 'F') : null,
@@ -278,8 +369,12 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                           color: isPass ? Colors.green : Colors.red,
                           fontWeight: FontWeight.bold,
                         ),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                        ),
                       ),
                     ),
                   ),
@@ -314,7 +409,9 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
           shadowColor: Colors.transparent,
           padding: const EdgeInsets.symmetric(vertical: 18),
           minimumSize: const Size(double.infinity, 50),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -323,7 +420,11 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
             SizedBox(width: 12),
             Text(
               'Confirm & Save Results',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ],
         ),
@@ -341,7 +442,11 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
             const SizedBox(height: 20),
             Text(
               'Ready to Record Marks?',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey[800]),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[800],
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -362,20 +467,24 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       final marksText = _markControllers[exam.id]?.text ?? '';
       if (marksText.isNotEmpty) {
         final marks = double.tryParse(marksText) ?? 0.0;
-        results.add(Result(
-          id: 'res_${exam.id}_$_selectedStudentId',
-          examId: exam.id,
-          studentId: _selectedStudentId!,
-          marksObtained: marks,
-          totalMarks: 100.0,
-          remarks: marks >= 40 ? 'Pass' : 'Fail',
-        ));
+        results.add(
+          Result(
+            id: 'res_${exam.id}_$_selectedStudentId',
+            examId: exam.id,
+            studentId: _selectedStudentId!,
+            marksObtained: marks,
+            totalMarks: 100.0,
+            remarks: marks >= 40 ? 'Pass' : 'Fail',
+          ),
+        );
       }
     }
 
     if (results.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter marks for at least one subject.')),
+        const SnackBar(
+          content: Text('Please enter marks for at least one subject.'),
+        ),
       );
       return;
     }

@@ -15,15 +15,26 @@ class StudentRoutineScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = context.watch<AuthNotifier>().user;
-    if (currentUser == null) return const Scaffold(body: Center(child: Text('Not logged in')));
+    if (currentUser == null)
+      return const Scaffold(body: Center(child: Text('Not logged in')));
 
-    final student = context.watch<StudentsNotifier>().students.firstWhere((s) => s.userId == currentUser.id);
+    final student = context.watch<StudentsNotifier>().students.firstWhere(
+      (s) => s.userId == currentUser.id,
+    );
     final routineMap = context.watch<RoutineNotifier>().state;
     final key = '${student.classId}_${student.sectionId}';
     final entries = routineMap[key] ?? [];
 
-    final days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    
+    final days = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Routine'),
@@ -40,15 +51,36 @@ class StudentRoutineScreen extends StatelessWidget {
                 if (dayEntries.isEmpty) return const SizedBox.shrink();
 
                 return ExpansionTile(
-                  initiallyExpanded: DateFormat('EEEE').format(DateTime.now()) == day,
-                  title: Text(day, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  initiallyExpanded:
+                      DateFormat('EEEE').format(DateTime.now()) == day,
+                  title: Text(
+                    day,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   children: dayEntries.map((e) {
-                    final subjectName = context.read<SubjectSetupNotifier>().subjects.firstWhere((s) => s.id == e.subjectId).name;
-                    final teacherName = context.read<TeachersNotifier>().teachers.firstWhere((t) => t.userId == e.teacherId, orElse: () => Teacher(userId: '', assignedSubjects: [])).user?.name ?? 'Unknown';
+                    final subjectName = context
+                        .read<SubjectSetupNotifier>()
+                        .subjects
+                        .firstWhere((s) => s.id == e.subjectId)
+                        .name;
+                    final teacherName =
+                        context
+                            .read<TeachersNotifier>()
+                            .teachers
+                            .firstWhere(
+                              (t) => t.userId == e.teacherId,
+                              orElse: () =>
+                                  Teacher(userId: '', assignedSubjects: []),
+                            )
+                            .user
+                            ?.name ??
+                        'Unknown';
                     return ListTile(
                       leading: const Icon(Icons.access_time),
                       title: Text(subjectName),
-                      subtitle: Text('$teacherName | ${e.startTime} - ${e.endTime}'),
+                      subtitle: Text(
+                        '$teacherName | ${e.startTime} - ${e.endTime}',
+                      ),
                     );
                   }).toList(),
                 );

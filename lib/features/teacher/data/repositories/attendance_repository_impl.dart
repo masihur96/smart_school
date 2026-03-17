@@ -11,30 +11,36 @@ class AttendanceRepositoryImpl implements IAttendanceRepository {
   @override
   Future<List<AttendanceEntity>> getAttendanceForDate(DateTime date) async {
     return _dbService.attendanceRecords
-        .where((r) =>
-            r.date.year == date.year &&
-            r.date.month == date.month &&
-            r.date.day == date.day)
-        .map((r) => AttendanceEntity(
-              id: r.id,
-              studentId: r.studentId,
-              date: r.date,
-              status: r.status,
-              takenBy: r.takenBy,
-            ))
+        .where(
+          (r) =>
+              r.date.year == date.year &&
+              r.date.month == date.month &&
+              r.date.day == date.day,
+        )
+        .map(
+          (r) => AttendanceEntity(
+            id: r.id,
+            studentId: r.studentId,
+            date: r.date,
+            status: r.status,
+            takenBy: r.takenBy,
+          ),
+        )
         .toList();
   }
 
   @override
   Future<List<AttendanceEntity>> getAllAttendance() async {
     return _dbService.attendanceRecords
-        .map((r) => AttendanceEntity(
-              id: r.id,
-              studentId: r.studentId,
-              date: r.date,
-              status: r.status,
-              takenBy: r.takenBy,
-            ))
+        .map(
+          (r) => AttendanceEntity(
+            id: r.id,
+            studentId: r.studentId,
+            date: r.date,
+            status: r.status,
+            takenBy: r.takenBy,
+          ),
+        )
         .toList();
   }
 
@@ -49,11 +55,13 @@ class AttendanceRepositoryImpl implements IAttendanceRepository {
         takenBy: entity.takenBy,
       );
 
-      final index = _dbService.attendanceRecords.indexWhere((r) =>
-          r.studentId == record.studentId &&
-          r.date.year == record.date.year &&
-          r.date.month == record.date.month &&
-          r.date.day == record.date.day);
+      final index = _dbService.attendanceRecords.indexWhere(
+        (r) =>
+            r.studentId == record.studentId &&
+            r.date.year == record.date.year &&
+            r.date.month == record.date.month &&
+            r.date.day == record.date.day,
+      );
 
       if (index != -1) {
         _dbService.attendanceRecords[index] = record;

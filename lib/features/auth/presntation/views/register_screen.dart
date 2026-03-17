@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 
-
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -39,18 +38,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final phone = _phoneController.text.trim();
 
       final success = await context.read<AuthNotifier>().register(
-            name: name,
-            email: email,
-            password: password,
-            role: role,
-            schoolId: schoolId,
-            phone: phone,
-          );
-      
+        name: name,
+        email: email,
+        password: password,
+        role: role,
+        schoolId: schoolId,
+        phone: phone,
+      );
+
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registration successful! Please login.')),
+            const SnackBar(
+              content: Text('Registration successful! Please login.'),
+            ),
           );
           Navigator.pop(context);
         }
@@ -66,7 +67,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (authNotifier.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authNotifier.error!), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(authNotifier.error!),
+            backgroundColor: Colors.red,
+          ),
         );
         authNotifier.clearError();
       }
@@ -90,16 +94,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Text(
                   'Join Smart School',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF6750A4),
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF6750A4),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Enter your details to register as Student.',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 32),
                 TextFormField(
@@ -108,8 +112,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: 'Full Name',
                     prefixIcon: Icon(Icons.person_outline),
                   ),
-                  validator: (value) =>
-                      value == null || value.isEmpty ? 'Please enter your name' : null,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please enter your name'
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -119,8 +124,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) =>
-                      value == null || !value.contains('@') ? 'Please enter a valid email' : null,
+                  validator: (value) => value == null || !value.contains('@')
+                      ? 'Please enter a valid email'
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -130,7 +136,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         color: Theme.of(context).primaryColor,
                       ),
                       onPressed: () {
@@ -141,8 +149,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   obscureText: !_isPasswordVisible,
-                  validator: (value) =>
-                      value == null || value.length < 6 ? 'Password must be at least 6 characters' : null,
+                  validator: (value) => value == null || value.length < 6
+                      ? 'Password must be at least 6 characters'
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -151,8 +160,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: 'School ID',
                     prefixIcon: Icon(Icons.school_outlined),
                   ),
-                  validator: (value) =>
-                      value == null || value.isEmpty ? 'Please enter your School ID' : null,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please enter your School ID'
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -162,28 +172,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     prefixIcon: Icon(Icons.phone_outlined),
                   ),
                   keyboardType: TextInputType.phone,
-                  validator: (value) =>
-                      value == null || value.isEmpty ? 'Please enter your phone number' : null,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please enter your phone number'
+                      : null,
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
                   onPressed: authNotifier.isLoading ? null : _register,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ).copyWith(
-                    backgroundColor: WidgetStateProperty.resolveWith((states) {
-                      if (states.contains(WidgetState.disabled)) return Colors.grey;
-                      return const Color(0xFF6750A4);
-                    }),
-                  ),
+                  style:
+                      ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ).copyWith(
+                        backgroundColor: WidgetStateProperty.resolveWith((
+                          states,
+                        ) {
+                          if (states.contains(WidgetState.disabled))
+                            return Colors.grey;
+                          return const Color(0xFF6750A4);
+                        }),
+                      ),
                   child: authNotifier.isLoading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
                         )
                       : const Text(
                           'Register',

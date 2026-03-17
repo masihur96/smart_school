@@ -36,7 +36,7 @@ class AuthNotifier extends ChangeNotifier {
       if (token != null) {
         // Fetch full profile by token
         final profile = await getProfileUseCase();
-        
+
         _user = User(
           id: profile.id,
           name: profile.name,
@@ -48,8 +48,6 @@ class AuthNotifier extends ChangeNotifier {
           schoolId: profile.schoolId,
           phone: profile.phone,
         );
-
-
       } else {
         _user = null;
       }
@@ -70,10 +68,10 @@ class AuthNotifier extends ChangeNotifier {
 
     try {
       await loginUseCase(email, password);
-      
+
       // Fetch full profile after login
       final profile = await getProfileUseCase();
-      
+
       _user = User(
         id: profile.id,
         name: profile.name,
@@ -90,8 +88,8 @@ class AuthNotifier extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _isLoading = false;
-      _error = e.toString().contains('Exception: ') 
-          ? e.toString().split('Exception: ')[1] 
+      _error = e.toString().contains('Exception: ')
+          ? e.toString().split('Exception: ')[1]
           : 'Login failed';
       notifyListeners();
     }
@@ -118,14 +116,14 @@ class AuthNotifier extends ChangeNotifier {
         schoolId: schoolId,
         phone: phone,
       );
-      
+
       _isLoading = false;
       notifyListeners();
       return success;
     } catch (e) {
       _isLoading = false;
-      _error = e.toString().contains('Exception: ') 
-          ? e.toString().split('Exception: ')[1] 
+      _error = e.toString().contains('Exception: ')
+          ? e.toString().split('Exception: ')[1]
           : 'Registration failed';
       notifyListeners();
       return false;

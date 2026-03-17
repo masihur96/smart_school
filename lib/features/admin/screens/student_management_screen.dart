@@ -19,17 +19,19 @@ class StudentManagementScreen extends StatelessWidget {
     final sections = dbService.sections;
 
     return Scaffold(
-      appBar: hideAppBar ? null : AppBar(
-        title: const Text('Student Management'),
-        backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => context.push('/admin/students/add'),
-          ),
-        ],
-      ),
+      appBar: hideAppBar
+          ? null
+          : AppBar(
+              title: const Text('Student Management'),
+              backgroundColor: Colors.purple,
+              foregroundColor: Colors.white,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () => context.push('/admin/students/add'),
+                ),
+              ],
+            ),
       body: Column(
         children: [
           Padding(
@@ -39,7 +41,14 @@ class StudentManagementScreen extends StatelessWidget {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     decoration: const InputDecoration(labelText: 'Class'),
-                    items: classes.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
+                    items: classes
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c.id,
+                            child: Text(c.name),
+                          ),
+                        )
+                        .toList(),
                     onChanged: (val) {},
                   ),
                 ),
@@ -47,7 +56,14 @@ class StudentManagementScreen extends StatelessWidget {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     decoration: const InputDecoration(labelText: 'Section'),
-                    items: sections.map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))).toList(),
+                    items: sections
+                        .map(
+                          (s) => DropdownMenuItem(
+                            value: s.id,
+                            child: Text(s.name),
+                          ),
+                        )
+                        .toList(),
                     onChanged: (val) {},
                   ),
                 ),
@@ -64,11 +80,18 @@ class StudentManagementScreen extends StatelessWidget {
                     child: Text(student.user?.name[0] ?? '?'),
                   ),
                   title: Text(student.user?.name ?? 'Unknown'),
-                  subtitle: Text('Roll: ${student.rollId} | ${classes.firstWhere((c) => c.id == student.classId, orElse: () => ClassRoom(id: '', name: 'Unknown')).name}'),
+                  subtitle: Text(
+                    'Roll: ${student.rollId} | ${classes.firstWhere(
+                      (c) => c.id == student.classId,
+                      orElse: () => ClassRoom(id: '', name: 'Unknown'),
+                    ).name}',
+                  ),
                   trailing: Switch(
                     value: student.isActive,
                     onChanged: (val) {
-                      context.read<StudentsNotifier>().toggleStudentStatus(student.userId);
+                      context.read<StudentsNotifier>().toggleStudentStatus(
+                        student.userId,
+                      );
                     },
                     activeColor: Colors.green,
                   ),
@@ -83,10 +106,10 @@ class StudentManagementScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-
-
-          Navigator.push(context, MaterialPageRoute(builder: (_)=>AddEditStudentScreen()));
-
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AddEditStudentScreen()),
+          );
         },
         backgroundColor: Colors.purple,
         child: const Icon(Icons.add, color: Colors.white),

@@ -33,7 +33,9 @@ class TeacherManagementScreen extends StatelessWidget {
           return ListTile(
             leading: const CircleAvatar(child: Icon(Icons.person)),
             title: Text(teacher.user?.name ?? 'Unknown Teacher'),
-            subtitle: Text('${teacher.user?.email} | ${teacher.assignedSubjects.length} subjects'),
+            subtitle: Text(
+              '${teacher.user?.email} | ${teacher.assignedSubjects.length} subjects',
+            ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               // Edit teacher
@@ -43,8 +45,10 @@ class TeacherManagementScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_)=>AddEditTeacherScreen(),),);
-
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AddEditTeacherScreen()),
+          );
         },
         backgroundColor: Colors.purple,
         child: const Icon(Icons.add, color: Colors.white),

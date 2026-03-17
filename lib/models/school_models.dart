@@ -1,13 +1,29 @@
 class ClassRoom {
   final String id;
   final String name; // e.g., "Class 10"
+  final String schoolId;
+  final String description;
 
-  ClassRoom({required this.id, required this.name});
+  ClassRoom({
+    required this.id,
+    required this.name,
+    this.schoolId = '',
+    this.description = '',
+  });
 
-  factory ClassRoom.fromJson(Map<String, dynamic> json) =>
-      ClassRoom(id: json['id'], name: json['name']);
+  factory ClassRoom.fromJson(Map<String, dynamic> json) => ClassRoom(
+    id: json['id'] ?? '',
+    name: json['name'] ?? '',
+    schoolId: json['schoolId'] ?? '',
+    description: json['description'] ?? '',
+  );
 
-  Map<String, dynamic> toJson() => {'id': id, 'name': name};
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'schoolId': schoolId,
+    'description': description,
+  };
 }
 
 class Section {
@@ -53,20 +69,23 @@ class Attendance {
   });
 
   factory Attendance.fromJson(Map<String, dynamic> json) => Attendance(
-        id: json['id'],
-        studentId: json['studentId'],
-        date: DateTime.parse(json['date']),
-        status: AttendanceStatus.values.firstWhere((e) => e.name == json['status'], orElse: () => AttendanceStatus.absent),
-        takenBy: json['takenBy'],
-      );
+    id: json['id'],
+    studentId: json['studentId'],
+    date: DateTime.parse(json['date']),
+    status: AttendanceStatus.values.firstWhere(
+      (e) => e.name == json['status'],
+      orElse: () => AttendanceStatus.absent,
+    ),
+    takenBy: json['takenBy'],
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'studentId': studentId,
-        'date': date.toIso8601String(),
-        'status': status.name,
-        'takenBy': takenBy,
-      };
+    'id': id,
+    'studentId': studentId,
+    'date': date.toIso8601String(),
+    'status': status.name,
+    'takenBy': takenBy,
+  };
 }
 
 class Homework {
@@ -93,28 +112,28 @@ class Homework {
   });
 
   factory Homework.fromJson(Map<String, dynamic> json) => Homework(
-        id: json['id'],
-        teacherId: json['teacherId'],
-        classId: json['classId'],
-        sectionId: json['sectionId'],
-        subjectId: json['subjectId'],
-        title: json['title'],
-        description: json['description'],
-        dueDate: DateTime.parse(json['dueDate']),
-        createdAt: DateTime.parse(json['createdAt']),
-      );
+    id: json['id'],
+    teacherId: json['teacherId'],
+    classId: json['classId'],
+    sectionId: json['sectionId'],
+    subjectId: json['subjectId'],
+    title: json['title'],
+    description: json['description'],
+    dueDate: DateTime.parse(json['dueDate']),
+    createdAt: DateTime.parse(json['createdAt']),
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'teacherId': teacherId,
-        'classId': classId,
-        'sectionId': sectionId,
-        'subjectId': subjectId,
-        'title': title,
-        'description': description,
-        'dueDate': dueDate.toIso8601String(),
-        'createdAt': createdAt.toIso8601String(),
-      };
+    'id': id,
+    'teacherId': teacherId,
+    'classId': classId,
+    'sectionId': sectionId,
+    'subjectId': subjectId,
+    'title': title,
+    'description': description,
+    'dueDate': dueDate.toIso8601String(),
+    'createdAt': createdAt.toIso8601String(),
+  };
 }
 
 class Notice {
@@ -135,22 +154,22 @@ class Notice {
   });
 
   factory Notice.fromJson(Map<String, dynamic> json) => Notice(
-        id: json['id'],
-        title: json['title'],
-        content: json['content'],
-        classId: json['classId'],
-        isImportant: json['isImportant'] ?? false,
-        date: DateTime.parse(json['date']),
-      );
+    id: json['id'],
+    title: json['title'],
+    content: json['content'],
+    classId: json['classId'],
+    isImportant: json['isImportant'] ?? false,
+    date: DateTime.parse(json['date']),
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'content': content,
-        'classId': classId,
-        'isImportant': isImportant,
-        'date': date.toIso8601String(),
-      };
+    'id': id,
+    'title': title,
+    'content': content,
+    'classId': classId,
+    'isImportant': isImportant,
+    'date': date.toIso8601String(),
+  };
 }
 
 class RoutineEntry {
@@ -169,20 +188,20 @@ class RoutineEntry {
   });
 
   factory RoutineEntry.fromJson(Map<String, dynamic> json) => RoutineEntry(
-        day: json['day'],
-        startTime: json['startTime'],
-        endTime: json['endTime'],
-        subjectId: json['subjectId'],
-        teacherId: json['teacherId'],
-      );
+    day: json['day'],
+    startTime: json['startTime'],
+    endTime: json['endTime'],
+    subjectId: json['subjectId'],
+    teacherId: json['teacherId'],
+  );
 
   Map<String, dynamic> toJson() => {
-        'day': day,
-        'startTime': startTime,
-        'endTime': endTime,
-        'subjectId': subjectId,
-        'teacherId': teacherId,
-      };
+    'day': day,
+    'startTime': startTime,
+    'endTime': endTime,
+    'subjectId': subjectId,
+    'teacherId': teacherId,
+  };
 }
 
 class Exam {
@@ -207,26 +226,26 @@ class Exam {
   });
 
   factory Exam.fromJson(Map<String, dynamic> json) => Exam(
-        id: json['id'],
-        name: json['name'],
-        subjectId: json['subjectId'],
-        teacherId: json['teacherId'],
-        classId: json['classId'],
-        sectionId: json['sectionId'],
-        dateTime: DateTime.parse(json['dateTime']),
-        isPublished: json['isPublished'] ?? false,
-      );
+    id: json['id'],
+    name: json['name'],
+    subjectId: json['subjectId'],
+    teacherId: json['teacherId'],
+    classId: json['classId'],
+    sectionId: json['sectionId'],
+    dateTime: DateTime.parse(json['dateTime']),
+    isPublished: json['isPublished'] ?? false,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'subjectId': subjectId,
-        'teacherId': teacherId,
-        'classId': classId,
-        'sectionId': sectionId,
-        'dateTime': dateTime.toIso8601String(),
-        'isPublished': isPublished,
-      };
+    'id': id,
+    'name': name,
+    'subjectId': subjectId,
+    'teacherId': teacherId,
+    'classId': classId,
+    'sectionId': sectionId,
+    'dateTime': dateTime.toIso8601String(),
+    'isPublished': isPublished,
+  };
 }
 
 class Result {
@@ -247,20 +266,20 @@ class Result {
   });
 
   factory Result.fromJson(Map<String, dynamic> json) => Result(
-        id: json['id'],
-        examId: json['examId'],
-        studentId: json['studentId'],
-        marksObtained: (json['marksObtained'] as num).toDouble(),
-        totalMarks: (json['totalMarks'] as num).toDouble(),
-        remarks: json['remarks'] ?? '',
-      );
+    id: json['id'],
+    examId: json['examId'],
+    studentId: json['studentId'],
+    marksObtained: (json['marksObtained'] as num).toDouble(),
+    totalMarks: (json['totalMarks'] as num).toDouble(),
+    remarks: json['remarks'] ?? '',
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'examId': examId,
-        'studentId': studentId,
-        'marksObtained': marksObtained,
-        'totalMarks': totalMarks,
-        'remarks': remarks,
-      };
+    'id': id,
+    'examId': examId,
+    'studentId': studentId,
+    'marksObtained': marksObtained,
+    'totalMarks': totalMarks,
+    'remarks': remarks,
+  };
 }

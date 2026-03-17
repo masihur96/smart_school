@@ -68,8 +68,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           IconButton(
             icon: const Icon(Icons.account_circle),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_)=>ProfileScreen(),),);
-
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => ProfileScreen()),
+              );
             },
           ),
           const SizedBox(width: 8),
@@ -94,8 +96,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Students'),
-          BottomNavigationBarItem(icon: Icon(Icons.assignment_turned_in), label: 'Exams'),
-          BottomNavigationBarItem(icon: Icon(Icons.announcement), label: 'Notices'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.assignment_turned_in),
+            label: 'Exams',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.announcement),
+            label: 'Notices',
+          ),
         ],
       ),
     );
@@ -109,7 +117,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         children: [
           Text(
             'School Overview',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           GridView.count(
@@ -120,39 +130,110 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             mainAxisSpacing: 16,
             childAspectRatio: 1,
             children: [
-              _buildStatCard(context, 'Total Students', '450', Icons.people, Colors.blue, onTap: () => setState(() => _selectedIndex = 1)),
-              _buildStatCard(context, 'Total Teachers', '25', Icons.person, Colors.orange, onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_)=>TeacherManagementScreen()));
-              }),
-              _buildStatCard(context, 'Total Classes', '12', Icons.class_, Colors.green, onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_)=>SetupScreen()));
-              }),
-              _buildStatCard(context, 'Active Notices', '5', Icons.announcement, Colors.red, onTap: () => setState(() => _selectedIndex = 3)),
+              _buildStatCard(
+                context,
+                'Total Students',
+                '450',
+                Icons.people,
+                Colors.blue,
+                onTap: () => setState(() => _selectedIndex = 1),
+              ),
+              _buildStatCard(
+                context,
+                'Total Teachers',
+                '25',
+                Icons.person,
+                Colors.orange,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TeacherManagementScreen(),
+                    ),
+                  );
+                },
+              ),
+              _buildStatCard(
+                context,
+                'Total Classes',
+                '12',
+                Icons.class_,
+                Colors.green,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => SetupScreen()),
+                  );
+                },
+              ),
+              _buildStatCard(
+                context,
+                'Active Notices',
+                '5',
+                Icons.announcement,
+                Colors.red,
+                onTap: () => setState(() => _selectedIndex = 3),
+              ),
             ],
           ),
           const SizedBox(height: 24),
           Text(
             'Attendance Overview',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           _buildAttendanceChart(attendanceRecords),
           const SizedBox(height: 24),
           Text(
             'Quick Actions',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          _buildActionTile(context, 'Add Student', Icons.person_add, Colors.blue, onTap: () => context.push('/admin/students/add')),
-          _buildActionTile(context, 'Add Teacher', Icons.group_add, Colors.orange, onTap: () => context.push('/admin/teachers/add')),
-          _buildActionTile(context, 'Post Notice', Icons.post_add, Colors.red, onTap: () => setState(() => _selectedIndex = 3)),
-          _buildActionTile(context, 'Manage Routine', Icons.calendar_month, Colors.purple, onTap: () => context.push('/admin/routine')),
+          _buildActionTile(
+            context,
+            'Add Student',
+            Icons.person_add,
+            Colors.blue,
+            onTap: () => context.push('/admin/students/add'),
+          ),
+          _buildActionTile(
+            context,
+            'Add Teacher',
+            Icons.group_add,
+            Colors.orange,
+            onTap: () => context.push('/admin/teachers/add'),
+          ),
+          _buildActionTile(
+            context,
+            'Post Notice',
+            Icons.post_add,
+            Colors.red,
+            onTap: () => setState(() => _selectedIndex = 3),
+          ),
+          _buildActionTile(
+            context,
+            'Manage Routine',
+            Icons.calendar_month,
+            Colors.purple,
+            onTap: () => context.push('/admin/routine'),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStatCard(BuildContext context, String title, String value, IconData icon, Color color, {VoidCallback? onTap}) {
+  Widget _buildStatCard(
+    BuildContext context,
+    String title,
+    String value,
+    IconData icon,
+    Color color, {
+    VoidCallback? onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -166,8 +247,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             children: [
               Icon(icon, color: color, size: 32),
               const SizedBox(height: 8),
-              Text(value, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-              Text(title, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+              Text(
+                value,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                title,
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              ),
             ],
           ),
         ),
@@ -175,7 +264,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildActionTile(BuildContext context, String title, IconData icon, Color color, {VoidCallback? onTap}) {
+  Widget _buildActionTile(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Color color, {
+    VoidCallback? onTap,
+  }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -210,7 +305,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
 
     final sortedDays = dailyData.keys.toList()..sort();
-    
+
     return Container(
       height: 250,
       padding: const EdgeInsets.only(top: 24, bottom: 12, left: 12, right: 12),
@@ -235,11 +330,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 return BarTooltipItem(
                   'Day ${sortedDays[group.x.toInt()]}\n',
-                  const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                   children: [
                     TextSpan(
                       text: '${rod.toY.toInt()}%',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 );
@@ -252,7 +353,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               sideTitles: SideTitles(
                 showTitles: true,
                 getTitlesWidget: (value, meta) {
-                  if (value < 0 || value >= sortedDays.length) return const SizedBox.shrink();
+                  if (value < 0 || value >= sortedDays.length)
+                    return const SizedBox.shrink();
                   final day = sortedDays[value.toInt()];
                   // Show only every 5th day to avoid crowding
                   if (day % 5 != 0 && day != 1 && day != daysInMonth) {
@@ -262,7 +364,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     meta: meta,
                     child: Text(
                       day.toString(),
-                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   );
                 },
@@ -281,8 +386,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 },
               ),
             ),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
           ),
           gridData: FlGridData(
             show: true,
@@ -297,7 +406,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           barGroups: sortedDays.asMap().entries.map((entry) {
             final dayRecords = dailyData[entry.value]!;
             final total = dayRecords.length;
-            final present = dayRecords.where((r) => r.status == AttendanceStatus.present).length;
+            final present = dayRecords
+                .where((r) => r.status == AttendanceStatus.present)
+                .length;
             final percentage = total == 0 ? 0.0 : (present / total) * 100;
 
             return BarChartGroupData(
@@ -307,7 +418,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   toY: percentage,
                   color: Colors.purple,
                   width: 6,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(2)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(2),
+                  ),
                   backDrawRodData: BackgroundBarChartRodData(
                     show: true,
                     toY: 100,

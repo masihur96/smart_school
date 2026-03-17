@@ -16,7 +16,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _opacityAnimation;
@@ -29,12 +30,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       duration: const Duration(milliseconds: 1500),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.5,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
 
     _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.5, curve: Curves.easeIn)),
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+      ),
     );
 
     _controller.forward();
@@ -44,9 +49,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Future<void> _checkAuth() async {
     // Ensuring animation plays for at least 2 seconds for branding
     await Future.delayed(const Duration(seconds: 2));
-    
+
     if (!mounted) return;
-    
+
     final authNotifier = context.read<AuthNotifier>();
     await authNotifier.checkAuthStatus();
 
@@ -59,21 +64,21 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => AdminDashboardScreen()),
-                (Route<dynamic> route) => false,
+            (Route<dynamic> route) => false,
           );
           break;
         case UserRole.teacher:
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => TeacherDashboardScreen()),
-                (Route<dynamic> route) => false,
+            (Route<dynamic> route) => false,
           );
           break;
         case UserRole.student:
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => StudentDashboardScreen()),
-                (Route<dynamic> route) => false,
+            (Route<dynamic> route) => false,
           );
           break;
       }
@@ -81,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => LoginScreen()),
-            (Route<dynamic> route) => false,
+        (Route<dynamic> route) => false,
       );
     }
   }
@@ -116,12 +121,18 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             Positioned(
               top: -100,
               right: -100,
-              child: _buildDecorativeCircle(200, Colors.white.withValues(alpha: 0.03)),
+              child: _buildDecorativeCircle(
+                200,
+                Colors.white.withValues(alpha: 0.03),
+              ),
             ),
             Positioned(
               bottom: -50,
               left: -50,
-              child: _buildDecorativeCircle(150, Colors.white.withValues(alpha: 0.02)),
+              child: _buildDecorativeCircle(
+                150,
+                Colors.white.withValues(alpha: 0.02),
+              ),
             ),
 
             Column(
@@ -198,7 +209,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       height: 40,
                       child: CircularProgressIndicator(
                         strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white70),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.white70,
+                        ),
                       ),
                     ),
                     SizedBox(height: 16),
@@ -224,10 +237,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }

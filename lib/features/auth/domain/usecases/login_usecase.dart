@@ -10,6 +10,6 @@ class LoginUseCase {
 
   Future<UserEntity> call(String email, String password) {
     log("Login usecase call email: $email pass: $password");
-    return repository.login(email,password);
+    return repository.login(email, password);
   }
 }

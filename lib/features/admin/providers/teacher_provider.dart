@@ -19,7 +19,9 @@ class TeachersNotifier extends ChangeNotifier {
   }
 
   void updateTeacher(Teacher teacher) {
-    final index = _dbService.teachers.indexWhere((t) => t.userId == teacher.userId);
+    final index = _dbService.teachers.indexWhere(
+      (t) => t.userId == teacher.userId,
+    );
     if (index != -1) {
       _dbService.teachers[index] = teacher;
       _state = [..._dbService.teachers];

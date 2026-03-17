@@ -25,19 +25,36 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   void _loadStudents() {
     if (_selectedClass != null && _selectedSection != null) {
-      final students = context.read<StudentsNotifier>().students.where((s) => 
-        s.classId == _selectedClass && s.sectionId == _selectedSection && s.isActive
-      ).toList();
-      
-      final existingRecords = context.read<AttendanceNotifier>().getRecordsForDate(_selectedDate);
-      
+      final students = context
+          .read<StudentsNotifier>()
+          .students
+          .where(
+            (s) =>
+                s.classId == _selectedClass &&
+                s.sectionId == _selectedSection &&
+                s.isActive,
+          )
+          .toList();
+
+      final existingRecords = context
+          .read<AttendanceNotifier>()
+          .getRecordsForDate(_selectedDate);
+
       setState(() {
         _attendanceMap = {
-          for (var s in students) 
-            s.userId: existingRecords.firstWhere(
-              (r) => r.studentId == s.userId, 
-              orElse: () => AttendanceEntity(id: '', studentId: '', date: DateTime.now(), status: AttendanceStatus.absent, takenBy: '')
-            ).status
+          for (var s in students)
+            s.userId: existingRecords
+                .firstWhere(
+                  (r) => r.studentId == s.userId,
+                  orElse: () => AttendanceEntity(
+                    id: '',
+                    studentId: '',
+                    date: DateTime.now(),
+                    status: AttendanceStatus.absent,
+                    takenBy: '',
+                  ),
+                )
+                .status,
         };
       });
     }
@@ -47,16 +64,22 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final currentUser = context.read<AuthNotifier>().user;
     if (currentUser == null) return;
 
-    final records = _attendanceMap.entries.map((e) => AttendanceEntity(
-      id: '${e.key}_${DateFormat('yyyyMMdd').format(_selectedDate)}',
-      studentId: e.key,
-      date: _selectedDate,
-      status: e.value,
-      takenBy: currentUser.id,
-    )).toList();
+    final records = _attendanceMap.entries
+        .map(
+          (e) => AttendanceEntity(
+            id: '${e.key}_${DateFormat('yyyyMMdd').format(_selectedDate)}',
+            studentId: e.key,
+            date: _selectedDate,
+            status: e.value,
+            takenBy: currentUser.id,
+          ),
+        )
+        .toList();
 
     context.read<AttendanceNotifier>().saveAttendance(records);
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Attendance saved successfully!')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Attendance saved successfully!')),
+    );
     if (!widget.hideAppBar) {
       context.pop();
     }
@@ -67,21 +90,28 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final classes = context.watch<ClassSetupNotifier>().classes;
     final sections = context.watch<SectionSetupNotifier>().sections;
     final studentsList = context.watch<StudentsNotifier>().students;
-    
+
     final students = (_selectedClass != null && _selectedSection != null)
-        ? studentsList.where((s) => 
-            s.classId == _selectedClass && s.sectionId == _selectedSection && s.isActive
-          ).toList()
+        ? studentsList
+              .where(
+                (s) =>
+                    s.classId == _selectedClass &&
+                    s.sectionId == _selectedSection &&
+                    s.isActive,
+              )
+              .toList()
         : [];
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: widget.hideAppBar ? null : AppBar(
-        title: const Text('Student Attendance'),
-        backgroundColor: Colors.blue[700],
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
+      appBar: widget.hideAppBar
+          ? null
+          : AppBar(
+              title: const Text('Student Attendance'),
+              backgroundColor: Colors.blue[700],
+              foregroundColor: Colors.white,
+              elevation: 0,
+            ),
       body: Column(
         children: [
           _buildFilterSection(classes, sections),
@@ -93,7 +123,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     itemCount: students.length,
                     itemBuilder: (context, index) {
                       final student = students[index];
-                      final status = _attendanceMap[student.userId] ?? AttendanceStatus.absent;
+                      final status =
+                          _attendanceMap[student.userId] ??
+                          AttendanceStatus.absent;
                       return _buildStudentCard(student, status);
                     },
                   ),
@@ -123,7 +155,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               Expanded(
                 child: Text(
                   DateFormat('EEEE, MMM d, yyyy').format(_selectedDate),
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               InkWell(
@@ -140,12 +176,18 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   }
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white24,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Text('Change Date', style: TextStyle(color: Colors.white, fontSize: 12)),
+                  child: const Text(
+                    'Change Date',
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
                 ),
               ),
             ],
@@ -157,9 +199,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 child: _buildHeaderDropdown<String>(
                   label: 'Class',
                   value: _selectedClass,
-                  items: classes.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
+                  items: classes
+                      .map(
+                        (c) =>
+                            DropdownMenuItem(value: c.id, child: Text(c.name)),
+                      )
+                      .toList(),
                   onChanged: (val) {
-                    setState(() { _selectedClass = val; _selectedSection = null; });
+                    setState(() {
+                      _selectedClass = val;
+                      _selectedSection = null;
+                    });
                     _loadStudents();
                   },
                 ),
@@ -169,7 +219,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 child: _buildHeaderDropdown<String>(
                   label: 'Section',
                   value: _selectedSection,
-                  items: sections.where((s) => s.classId == _selectedClass).map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))).toList(),
+                  items: sections
+                      .where((s) => s.classId == _selectedClass)
+                      .map(
+                        (s) =>
+                            DropdownMenuItem(value: s.id, child: Text(s.name)),
+                      )
+                      .toList(),
                   onChanged: (val) {
                     setState(() => _selectedSection = val);
                     _loadStudents();
@@ -198,7 +254,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<T>(
           value: value,
-          hint: Text(label, style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+          hint: Text(
+            label,
+            style: TextStyle(color: Colors.grey[400], fontSize: 14),
+          ),
           isExpanded: true,
           items: items,
           onChanged: onChanged,
@@ -223,15 +282,30 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               children: [
                 CircleAvatar(
                   backgroundColor: Colors.blue[50],
-                  child: Text(student.user?.name[0] ?? '?', style: TextStyle(color: Colors.blue[700], fontWeight: FontWeight.bold)),
+                  child: Text(
+                    student.user?.name[0] ?? '?',
+                    style: TextStyle(
+                      color: Colors.blue[700],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(student.user?.name ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                      Text('Roll No: ${student.rollId}', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                      Text(
+                        student.user?.name ?? 'Unknown',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                      Text(
+                        'Roll No: ${student.rollId}',
+                        style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                      ),
                     ],
                   ),
                 ),
@@ -289,7 +363,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? activeColor.withValues(alpha: 0.1) : Colors.transparent,
+          color: isActive
+              ? activeColor.withValues(alpha: 0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isActive ? activeColor : Colors.grey.withValues(alpha: 0.2),
@@ -358,10 +434,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           backgroundColor: Colors.blue[700],
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           elevation: 0,
         ),
-        child: const Text('Submit Attendance', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        child: const Text(
+          'Submit Attendance',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }

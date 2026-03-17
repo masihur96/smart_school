@@ -32,22 +32,24 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
     final allExams = context.watch<ExamsNotifier>().state;
     final results = context.watch<ResultsNotifier>().state;
     final students = context.watch<StudentsNotifier>().students;
-    
-    final student = students.where((s) => s.userId == user?.id).firstOrNull;
-    if (student == null) return const Center(child: Text('Student data not found.'));
 
-    final publishedExams = allExams.where((e) => 
-      e.classId == student.classId && 
-      e.isPublished
-    ).toList();
+    final student = students.where((s) => s.userId == user?.id).firstOrNull;
+    if (student == null)
+      return const Center(child: Text('Student data not found.'));
+
+    final publishedExams = allExams
+        .where((e) => e.classId == student.classId && e.isPublished)
+        .toList();
 
     return Scaffold(
-      appBar: widget.hideAppBar ? null : AppBar(
-        title: const Text('My Results'),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
+      appBar: widget.hideAppBar
+          ? null
+          : AppBar(
+              title: const Text('My Results'),
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              elevation: 0,
+            ),
       body: publishedExams.isEmpty
           ? _buildEmptyState()
           : SingleChildScrollView(
@@ -59,11 +61,15 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
                   const SizedBox(height: 24),
                   Text(
                     'Examination Details',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   ...publishedExams.map((exam) {
-                    final result = results.where((r) => r.examId == exam.id).firstOrNull;
+                    final result = results
+                        .where((r) => r.examId == exam.id)
+                        .firstOrNull;
                     return _buildResultCard(exam, result);
                   }),
                 ],
@@ -77,11 +83,19 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.assignment_late_outlined, size: 80, color: Colors.grey[300]),
+          Icon(
+            Icons.assignment_late_outlined,
+            size: 80,
+            color: Colors.grey[300],
+          ),
           const SizedBox(height: 16),
           Text(
             'No published results found.',
-            style: TextStyle(fontSize: 18, color: Colors.grey[600], fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
@@ -89,12 +103,22 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
   }
 
   Widget _buildSummaryCard(List exams, List results) {
-    final relevantResults = results.where((r) => exams.any((e) => e.id == r.examId)).toList();
+    final relevantResults = results
+        .where((r) => exams.any((e) => e.id == r.examId))
+        .toList();
     if (relevantResults.isEmpty) return const SizedBox.shrink();
 
-    final totalMarks = relevantResults.fold(0.0, (sum, r) => sum + r.totalMarks);
-    final obtainedMarks = relevantResults.fold(0.0, (sum, r) => sum + r.marksObtained);
-    final percentage = totalMarks == 0 ? 0.0 : (obtainedMarks / totalMarks) * 100;
+    final totalMarks = relevantResults.fold(
+      0.0,
+      (sum, r) => sum + r.totalMarks,
+    );
+    final obtainedMarks = relevantResults.fold(
+      0.0,
+      (sum, r) => sum + r.marksObtained,
+    );
+    final percentage = totalMarks == 0
+        ? 0.0
+        : (obtainedMarks / totalMarks) * 100;
     final passCount = relevantResults.where((r) => r.remarks == 'Pass').length;
 
     return Container(
@@ -122,11 +146,18 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Overall Performance', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                  const Text(
+                    'Overall Performance',
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     '${percentage.toStringAsFixed(1)}%',
-                    style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -136,7 +167,11 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
                   color: Colors.white.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.emoji_events, color: Colors.white, size: 32),
+                child: const Icon(
+                  Icons.emoji_events,
+                  color: Colors.white,
+                  size: 32,
+                ),
               ),
             ],
           ),
@@ -146,7 +181,10 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
             children: [
               _buildStatInfo('Exams', exams.length.toString()),
               _buildStatInfo('Passed', passCount.toString()),
-              _buildStatInfo('Total Marks', '${obtainedMarks.toInt()}/${totalMarks.toInt()}'),
+              _buildStatInfo(
+                'Total Marks',
+                '${obtainedMarks.toInt()}/${totalMarks.toInt()}',
+              ),
             ],
           ),
         ],
@@ -157,16 +195,26 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
   Widget _buildStatInfo(String label, String value) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
-        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white70, fontSize: 12),
+        ),
       ],
     );
   }
 
   Widget _buildResultCard(exam, result) {
     final bool isPassed = result?.remarks == 'Pass';
-    final percentage = (result != null && result.totalMarks > 0) 
-        ? (result.marksObtained / result.totalMarks) 
+    final percentage = (result != null && result.totalMarks > 0)
+        ? (result.marksObtained / result.totalMarks)
         : 0.0;
 
     return Card(
@@ -179,21 +227,33 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: (result == null) ? Colors.grey.shade100 : (isPassed ? Colors.green.shade50 : Colors.red.shade50),
+            color: (result == null)
+                ? Colors.grey.shade100
+                : (isPassed ? Colors.green.shade50 : Colors.red.shade50),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
-            result == null ? Icons.hourglass_empty : (isPassed ? Icons.check_circle : Icons.error),
-            color: result == null ? Colors.grey : (isPassed ? Colors.green : Colors.red),
+            result == null
+                ? Icons.hourglass_empty
+                : (isPassed ? Icons.check_circle : Icons.error),
+            color: result == null
+                ? Colors.grey
+                : (isPassed ? Colors.green : Colors.red),
           ),
         ),
         title: Text(
           exam.name,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
-        subtitle: result != null 
-            ? Text('${result.marksObtained}/${result.totalMarks} Marks', style: TextStyle(color: Colors.grey[600]))
-            : const Text('Awaiting results...', style: TextStyle(fontStyle: FontStyle.italic)),
+        subtitle: result != null
+            ? Text(
+                '${result.marksObtained}/${result.totalMarks} Marks',
+                style: TextStyle(color: Colors.grey[600]),
+              )
+            : const Text(
+                'Awaiting results...',
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
         trailing: result != null ? _buildStatusChip(isPassed) : null,
         children: [
           if (result != null)
@@ -207,8 +267,14 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Performance Score', style: TextStyle(fontWeight: FontWeight.w500)),
-                      Text('${(percentage * 100).toStringAsFixed(1)}%', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      const Text(
+                        'Performance Score',
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                      Text(
+                        '${(percentage * 100).toStringAsFixed(1)}%',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -218,14 +284,24 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
                       value: percentage,
                       minHeight: 8,
                       backgroundColor: Colors.grey.shade200,
-                      valueColor: AlwaysStoppedAnimation<Color>(isPassed ? Colors.green : Colors.red),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        isPassed ? Colors.green : Colors.red,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text('Remarks:', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                   Text(
-                    result.remarks.isEmpty ? 'Excellent performance.' : result.remarks,
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                    'Remarks:',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  ),
+                  Text(
+                    result.remarks.isEmpty
+                        ? 'Excellent performance.'
+                        : result.remarks,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                 ],
               ),
@@ -239,7 +315,9 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isPassed ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+        color: isPassed
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(

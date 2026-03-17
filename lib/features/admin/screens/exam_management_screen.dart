@@ -22,11 +22,13 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
     final subjects = context.watch<SubjectSetupNotifier>().subjects;
 
     return Scaffold(
-      appBar: widget.hideAppBar ? null : AppBar(
-        title: const Text('Exam Management'),
-        backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
-      ),
+      appBar: widget.hideAppBar
+          ? null
+          : AppBar(
+              title: const Text('Exam Management'),
+              backgroundColor: Colors.purple,
+              foregroundColor: Colors.white,
+            ),
       body: exams.isEmpty
           ? const Center(child: Text('No exams scheduled.'))
           : ListView.builder(
@@ -34,19 +36,32 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
               itemCount: exams.length,
               itemBuilder: (context, index) {
                 final exam = exams[index];
-                final className = classes.firstWhere((c) => c.id == exam.classId).name;
-                final subjectName = subjects.firstWhere((s) => s.id == exam.subjectId).name;
+                final className = classes
+                    .firstWhere((c) => c.id == exam.classId)
+                    .name;
+                final subjectName = subjects
+                    .firstWhere((s) => s.id == exam.subjectId)
+                    .name;
 
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: ListTile(
-                    title: Text(exam.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    title: Text(
+                      exam.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('$className - $subjectName'),
-                        Text(DateFormat('MMM dd, yyyy - hh:mm a').format(exam.dateTime)),
+                        Text(
+                          DateFormat(
+                            'MMM dd, yyyy - hh:mm a',
+                          ).format(exam.dateTime),
+                        ),
                       ],
                     ),
                     trailing: Row(
@@ -60,7 +75,8 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                           ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => context.read<ExamsNotifier>().deleteExam(exam.id),
+                          onPressed: () =>
+                              context.read<ExamsNotifier>().deleteExam(exam.id),
                         ),
                       ],
                     ),
@@ -81,18 +97,28 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Publish Result'),
-        content: Text('Are you sure you want to publish the results for ${exam.name}?'),
+        content: Text(
+          'Are you sure you want to publish the results for ${exam.name}?',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () {
               context.read<ExamsNotifier>().publishResult(exam.id);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Results published successfully!')),
+                const SnackBar(
+                  content: Text('Results published successfully!'),
+                ),
               );
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.purple,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Publish'),
           ),
         ],
@@ -104,7 +130,8 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
     final nameController = TextEditingController();
     String? selectedClassId;
     String? selectedSubjectId;
-    String? selectedTeacherId; // For simplicity, we'll just pick a teacher later or from a list
+    String?
+    selectedTeacherId; // For simplicity, we'll just pick a teacher later or from a list
     DateTime selectedDate = DateTime.now().add(const Duration(days: 1));
 
     showDialog(
@@ -132,33 +159,60 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                     DropdownButtonFormField<String>(
                       value: selectedClassId,
                       decoration: const InputDecoration(labelText: 'Class'),
-                      items: classes.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
+                      items: classes
+                          .map(
+                            (c) => DropdownMenuItem(
+                              value: c.id,
+                              child: Text(c.name),
+                            ),
+                          )
+                          .toList(),
                       onChanged: (val) => setState(() => selectedClassId = val),
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       value: selectedSubjectId,
                       decoration: const InputDecoration(labelText: 'Subject'),
-                      items: subjects.map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))).toList(),
-                      onChanged: (val) => setState(() => selectedSubjectId = val),
+                      items: subjects
+                          .map(
+                            (s) => DropdownMenuItem(
+                              value: s.id,
+                              child: Text(s.name),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (val) =>
+                          setState(() => selectedSubjectId = val),
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       value: selectedTeacherId,
                       decoration: const InputDecoration(labelText: 'Examiner'),
-                      items: teachersList.map((t) => DropdownMenuItem(value: t.userId, child: Text(t.user?.name ?? 'Unknown Teacher'))).toList(),
-                      onChanged: (val) => setState(() => selectedTeacherId = val),
+                      items: teachersList
+                          .map(
+                            (t) => DropdownMenuItem(
+                              value: t.userId,
+                              child: Text(t.user?.name ?? 'Unknown Teacher'),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (val) =>
+                          setState(() => selectedTeacherId = val),
                     ),
                     const SizedBox(height: 16),
                     ListTile(
-                      title: Text('Date: ${DateFormat('yyyy-MM-dd HH:mm').format(selectedDate)}'),
+                      title: Text(
+                        'Date: ${DateFormat('yyyy-MM-dd HH:mm').format(selectedDate)}',
+                      ),
                       trailing: const Icon(Icons.calendar_today),
                       onTap: () async {
                         final date = await showDatePicker(
                           context: context,
                           initialDate: selectedDate,
                           firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 365),
+                          ),
                         );
                         if (date != null) {
                           final time = await showTimePicker(
@@ -167,7 +221,13 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                           );
                           if (time != null) {
                             setState(() {
-                              selectedDate = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+                              selectedDate = DateTime(
+                                date.year,
+                                date.month,
+                                date.day,
+                                time.hour,
+                                time.minute,
+                              );
                             });
                           }
                         }
@@ -177,7 +237,10 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                 ),
               ),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
                 ElevatedButton(
                   onPressed: () {
                     if (nameController.text.isNotEmpty &&
@@ -197,7 +260,10 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                       if (context.mounted) Navigator.pop(context);
                     }
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.purple, foregroundColor: Colors.white),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.purple,
+                    foregroundColor: Colors.white,
+                  ),
                   child: const Text('Add'),
                 ),
               ],

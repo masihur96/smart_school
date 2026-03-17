@@ -12,13 +12,18 @@ class StudentNoticeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = context.watch<AuthNotifier>().user;
-    if (currentUser == null) return const Scaffold(body: Center(child: Text('Not logged in')));
+    if (currentUser == null)
+      return const Scaffold(body: Center(child: Text('Not logged in')));
 
-    final student = context.watch<StudentsNotifier>().students.firstWhere((s) => s.userId == currentUser.id);
-    final notices = context.watch<NoticesNotifier>().notices.where((n) => 
-      n.classId == null || n.classId == student.classId
-    ).toList();
-    
+    final student = context.watch<StudentsNotifier>().students.firstWhere(
+      (s) => s.userId == currentUser.id,
+    );
+    final notices = context
+        .watch<NoticesNotifier>()
+        .notices
+        .where((n) => n.classId == null || n.classId == student.classId)
+        .toList();
+
     notices.sort((a, b) {
       if (a.isImportant && !b.isImportant) return -1;
       if (!a.isImportant && b.isImportant) return 1;
@@ -43,16 +48,34 @@ class StudentNoticeScreen extends StatelessWidget {
                   elevation: notice.isImportant ? 4 : 1,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
-                    side: notice.isImportant ? const BorderSide(color: Colors.red, width: 1) : BorderSide.none,
+                    side: notice.isImportant
+                        ? const BorderSide(color: Colors.red, width: 1)
+                        : BorderSide.none,
                   ),
                   child: ExpansionTile(
                     leading: CircleAvatar(
-                      backgroundColor: notice.isImportant ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1),
-                      child: Icon(notice.isImportant ? Icons.priority_high : Icons.notifications, 
-                                 color: notice.isImportant ? Colors.red : Colors.green),
+                      backgroundColor: notice.isImportant
+                          ? Colors.red.withOpacity(0.1)
+                          : Colors.green.withOpacity(0.1),
+                      child: Icon(
+                        notice.isImportant
+                            ? Icons.priority_high
+                            : Icons.notifications,
+                        color: notice.isImportant ? Colors.red : Colors.green,
+                      ),
                     ),
-                    title: Text(notice.title, style: TextStyle(fontWeight: notice.isImportant ? FontWeight.bold : FontWeight.w600)),
-                    subtitle: Text(DateFormat('MMM d, yyyy').format(notice.date), style: const TextStyle(fontSize: 12)),
+                    title: Text(
+                      notice.title,
+                      style: TextStyle(
+                        fontWeight: notice.isImportant
+                            ? FontWeight.bold
+                            : FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: Text(
+                      DateFormat('MMM d, yyyy').format(notice.date),
+                      style: const TextStyle(fontSize: 12),
+                    ),
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(16.0),

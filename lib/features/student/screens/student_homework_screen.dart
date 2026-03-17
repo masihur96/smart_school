@@ -14,21 +14,28 @@ class StudentHomeworkScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = context.watch<AuthNotifier>().user;
-    if (currentUser == null) return const Scaffold(body: Center(child: Text('Not logged in')));
+    if (currentUser == null)
+      return const Scaffold(body: Center(child: Text('Not logged in')));
 
-    final student = context.watch<StudentsNotifier>().students.firstWhere((s) => s.userId == currentUser.id);
-    final homeworkList = context.watch<HomeworkNotifier>().getHomeworkForStudent(student.classId, student.sectionId);
-    
+    final student = context.watch<StudentsNotifier>().students.firstWhere(
+      (s) => s.userId == currentUser.id,
+    );
+    final homeworkList = context
+        .watch<HomeworkNotifier>()
+        .getHomeworkForStudent(student.classId, student.sectionId);
+
     homeworkList.sort((a, b) => a.dueDate.compareTo(b.dueDate));
 
     final subjects = context.watch<SubjectSetupNotifier>().subjects;
 
     return Scaffold(
-      appBar: hideAppBar ? null : AppBar(
-        title: const Text('My Homework'),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-      ),
+      appBar: hideAppBar
+          ? null
+          : AppBar(
+              title: const Text('My Homework'),
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
       body: homeworkList.isEmpty
           ? const Center(child: Text('No homework assigned.'))
           : ListView.builder(
@@ -36,12 +43,19 @@ class StudentHomeworkScreen extends StatelessWidget {
               itemCount: homeworkList.length,
               itemBuilder: (context, index) {
                 final hw = homeworkList[index];
-                final subName = subjects.firstWhere((s) => s.id == hw.subjectId, orElse: () => Subject(id: '', name: 'Unknown')).name;
+                final subName = subjects
+                    .firstWhere(
+                      (s) => s.id == hw.subjectId,
+                      orElse: () => Subject(id: '', name: 'Unknown'),
+                    )
+                    .name;
                 final isOverdue = hw.dueDate.isBefore(DateTime.now());
 
                 return Card(
                   margin: const EdgeInsets.only(bottom: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
@@ -51,28 +65,62 @@ class StudentHomeworkScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.green.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              child: Text(subName, style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),
+                              child: Text(
+                                subName,
+                                style: const TextStyle(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ),
-                            Text(DateFormat('MMM d').format(hw.dueDate), 
-                                 style: TextStyle(color: isOverdue ? Colors.red : Colors.grey, fontWeight: FontWeight.bold)),
+                            Text(
+                              DateFormat('MMM d').format(hw.dueDate),
+                              style: TextStyle(
+                                color: isOverdue ? Colors.red : Colors.grey,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Text(hw.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                        Text(
+                          hw.title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
                         const SizedBox(height: 8),
-                        Text(hw.description, style: TextStyle(color: Colors.grey[600])),
+                        Text(
+                          hw.description,
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
                         const Divider(height: 24),
                         Row(
                           children: [
-                             const Icon(Icons.timer_outlined, size: 16, color: Colors.grey),
-                             const SizedBox(width: 4),
-                             Text(isOverdue ? 'Overdue' : 'Pending', 
-                                  style: TextStyle(color: isOverdue ? Colors.red : Colors.orange, fontWeight: FontWeight.bold, fontSize: 12)),
+                            const Icon(
+                              Icons.timer_outlined,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              isOverdue ? 'Overdue' : 'Pending',
+                              style: TextStyle(
+                                color: isOverdue ? Colors.red : Colors.orange,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
                           ],
                         ),
                       ],

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
 import 'package:smart_school/features/splash_screen.dart';
 
-
 class RouteGenerator {
   static const String splashRoute = '/'; // ✅ Add this
   static const String login = '/login';
@@ -19,9 +18,10 @@ class RouteGenerator {
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(
-            builder: (_) => SplashScreen(
-                //shouldSkipUpdate: true,
-                ));
+          builder: (_) => SplashScreen(
+            //shouldSkipUpdate: true,
+          ),
+        );
       case loginRoute:
         return MaterialPageRoute(builder: (_) => LoginScreen());
 

@@ -70,7 +70,10 @@ class _LoginScreenState extends State<LoginScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (authNotifier.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authNotifier.error!), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(authNotifier.error!),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     });
@@ -89,17 +92,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 'Smart School',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF6750A4),
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF6750A4),
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Welcome back! Please login to continue.',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
               ),
               const SizedBox(height: 40),
               TextField(
@@ -118,7 +121,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      _isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                       color: Theme.of(context).primaryColor,
                     ),
                     onPressed: () {
@@ -141,15 +146,26 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Don't have an account?", style: TextStyle(color: Colors.grey[600])),
+                  Text(
+                    "Don't have an account?",
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
                   TextButton(
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const RegisterScreen(),
+                        ),
                       );
                     },
-                    child: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF6750A4))),
+                    child: const Text(
+                      'Register',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF6750A4),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -159,8 +175,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   Expanded(child: Divider(color: Colors.grey[300])),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('Quick Login',
-                        style: TextStyle(color: Colors.grey[500])),
+                    child: Text(
+                      'Quick Login',
+                      style: TextStyle(color: Colors.grey[500]),
+                    ),
                   ),
                   Expanded(child: Divider(color: Colors.grey[300])),
                 ],

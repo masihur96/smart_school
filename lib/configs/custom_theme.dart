@@ -41,9 +41,7 @@ class CustomTheme {
     cardTheme: CardThemeData(
       elevation: .5, // shadow intensity
       color: AppColors.backgroundLight,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
 
     /* ---------- Text ---------- */
@@ -78,9 +76,7 @@ class CustomTheme {
         backgroundColor: AppColors.buttonPrimary,
         foregroundColor: AppColors.white,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         textStyle: const TextStyle(fontWeight: FontWeight.w600),
       ),
     ),
@@ -89,16 +85,12 @@ class CustomTheme {
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.primary,
         side: const BorderSide(color: AppColors.primary),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     ),
 
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: AppColors.primary,
-      ),
+      style: TextButton.styleFrom(foregroundColor: AppColors.primary),
     ),
 
     /* ---------- Inputs ---------- */
@@ -122,9 +114,7 @@ class CustomTheme {
     ),
 
     /* ---------- Icons ---------- */
-    iconTheme: const IconThemeData(
-      color: AppColors.black,
-    ),
+    iconTheme: const IconThemeData(color: AppColors.black),
 
     /* ---------- Divider ---------- */
     dividerTheme: const DividerThemeData(
@@ -177,9 +167,7 @@ class CustomTheme {
     cardTheme: CardThemeData(
       color: AppColors.darkGrey,
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
 
     textTheme: const TextTheme(
@@ -212,9 +200,7 @@ class CustomTheme {
         backgroundColor: AppColors.buttonPrimary,
         foregroundColor: AppColors.black,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     ),
 
@@ -222,16 +208,12 @@ class CustomTheme {
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.textOnDark,
         side: const BorderSide(color: AppColors.textOnDark),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     ),
 
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: AppColors.textOnDark,
-      ),
+      style: TextButton.styleFrom(foregroundColor: AppColors.textOnDark),
     ),
 
     inputDecorationTheme: InputDecorationTheme(
@@ -249,9 +231,7 @@ class CustomTheme {
       labelStyle: const TextStyle(color: AppColors.textMuted),
     ),
 
-    iconTheme: const IconThemeData(
-      color: AppColors.textOnDark,
-    ),
+    iconTheme: const IconThemeData(color: AppColors.textOnDark),
 
     dividerTheme: const DividerThemeData(
       color: AppColors.darkGrey,

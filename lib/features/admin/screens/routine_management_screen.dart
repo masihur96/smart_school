@@ -9,7 +9,8 @@ class RoutineManagementScreen extends StatefulWidget {
   const RoutineManagementScreen({super.key});
 
   @override
-  State<RoutineManagementScreen> createState() => _RoutineManagementScreenState();
+  State<RoutineManagementScreen> createState() =>
+      _RoutineManagementScreenState();
 }
 
 class _RoutineManagementScreenState extends State<RoutineManagementScreen> {
@@ -21,7 +22,10 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen> {
     final classes = context.watch<ClassSetupNotifier>().classes;
     final sections = context.watch<SectionSetupNotifier>().sections;
     final routineEntries = (_selectedClass != null && _selectedSection != null)
-        ? context.watch<RoutineNotifier>().state['${_selectedClass}_$_selectedSection'] ?? []
+        ? context
+                  .watch<RoutineNotifier>()
+                  .state['${_selectedClass}_$_selectedSection'] ??
+              []
         : <RoutineEntry>[];
 
     return Scaffold(
@@ -40,8 +44,18 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen> {
                   child: DropdownButtonFormField<String>(
                     decoration: const InputDecoration(labelText: 'Class'),
                     value: _selectedClass,
-                    items: classes.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
-                    onChanged: (val) => setState(() { _selectedClass = val; _selectedSection = null; }),
+                    items: classes
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c.id,
+                            child: Text(c.name),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (val) => setState(() {
+                      _selectedClass = val;
+                      _selectedSection = null;
+                    }),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -49,7 +63,15 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen> {
                   child: DropdownButtonFormField<String>(
                     decoration: const InputDecoration(labelText: 'Section'),
                     value: _selectedSection,
-                    items: sections.where((s) => s.classId == _selectedClass).map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))).toList(),
+                    items: sections
+                        .where((s) => s.classId == _selectedClass)
+                        .map(
+                          (s) => DropdownMenuItem(
+                            value: s.id,
+                            child: Text(s.name),
+                          ),
+                        )
+                        .toList(),
                     onChanged: (val) => setState(() => _selectedSection = val),
                   ),
                 ),
@@ -58,20 +80,40 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen> {
           ),
           Expanded(
             child: (_selectedClass == null || _selectedSection == null)
-                ? const Center(child: Text('Select Class and Section to see routine'))
+                ? const Center(
+                    child: Text('Select Class and Section to see routine'),
+                  )
                 : ListView.builder(
                     itemCount: routineEntries.length,
                     itemBuilder: (context, index) {
                       final entry = routineEntries[index];
-                      final subjectName = context.read<SubjectSetupNotifier>().subjects.firstWhere((s) => s.id == entry.subjectId).name;
-                      final teacherName = context.read<TeachersNotifier>().teachers.firstWhere((t) => t.userId == entry.teacherId).user?.name ?? 'Unknown';
+                      final subjectName = context
+                          .read<SubjectSetupNotifier>()
+                          .subjects
+                          .firstWhere((s) => s.id == entry.subjectId)
+                          .name;
+                      final teacherName =
+                          context
+                              .read<TeachersNotifier>()
+                              .teachers
+                              .firstWhere((t) => t.userId == entry.teacherId)
+                              .user
+                              ?.name ??
+                          'Unknown';
                       return ListTile(
                         leading: CircleAvatar(child: Text(entry.day[0])),
                         title: Text('$subjectName (${entry.day})'),
-                        subtitle: Text('$teacherName | ${entry.startTime} - ${entry.endTime}'),
+                        subtitle: Text(
+                          '$teacherName | ${entry.startTime} - ${entry.endTime}',
+                        ),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete, color: Colors.grey),
-                          onPressed: () => context.read<RoutineNotifier>().removeEntry(_selectedClass!, _selectedSection!, index),
+                          onPressed: () =>
+                              context.read<RoutineNotifier>().removeEntry(
+                                _selectedClass!,
+                                _selectedSection!,
+                                index,
+                              ),
                         ),
                       );
                     },
@@ -91,7 +133,15 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen> {
   void _addEntryDialog(BuildContext context) {
     final subjects = context.read<SubjectSetupNotifier>().subjects;
     final teachers = context.read<TeachersNotifier>().teachers;
-    final days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    final days = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
     String? day = days[0];
     String? subjectId;
     String? teacherId;
@@ -109,40 +159,66 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen> {
               DropdownButtonFormField<String>(
                 value: day,
                 decoration: const InputDecoration(labelText: 'Day'),
-                items: days.map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
+                items: days
+                    .map((d) => DropdownMenuItem(value: d, child: Text(d)))
+                    .toList(),
                 onChanged: (val) => day = val,
               ),
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: 'Subject'),
-                items: subjects.map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))).toList(),
+                items: subjects
+                    .map(
+                      (s) => DropdownMenuItem(value: s.id, child: Text(s.name)),
+                    )
+                    .toList(),
                 onChanged: (val) => subjectId = val,
               ),
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: 'Teacher'),
-                items: teachers.map((t) => DropdownMenuItem(value: t.userId, child: Text(t.user?.name ?? 'Unknown'))).toList(),
+                items: teachers
+                    .map(
+                      (t) => DropdownMenuItem(
+                        value: t.userId,
+                        child: Text(t.user?.name ?? 'Unknown'),
+                      ),
+                    )
+                    .toList(),
                 onChanged: (val) => teacherId = val,
               ),
-              TextField(controller: startController, decoration: const InputDecoration(labelText: 'Start Time (e.g. 09:00 AM)')),
-              TextField(controller: endController, decoration: const InputDecoration(labelText: 'End Time (e.g. 10:00 AM)')),
+              TextField(
+                controller: startController,
+                decoration: const InputDecoration(
+                  labelText: 'Start Time (e.g. 09:00 AM)',
+                ),
+              ),
+              TextField(
+                controller: endController,
+                decoration: const InputDecoration(
+                  labelText: 'End Time (e.g. 10:00 AM)',
+                ),
+              ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () {
               if (day != null && subjectId != null && teacherId != null) {
                 context.read<RoutineNotifier>().addEntry(
-                      _selectedClass!,
-                      _selectedSection!,
-                      RoutineEntry(
-                        day: day!,
-                        startTime: startController.text,
-                        endTime: endController.text,
-                        subjectId: subjectId!,
-                        teacherId: teacherId!,
-                      ),
-                    );
+                  _selectedClass!,
+                  _selectedSection!,
+                  RoutineEntry(
+                    day: day!,
+                    startTime: startController.text,
+                    endTime: endController.text,
+                    subjectId: subjectId!,
+                    teacherId: teacherId!,
+                  ),
+                );
                 Navigator.pop(context);
               }
             },

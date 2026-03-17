@@ -23,10 +23,7 @@ class RoutineNotifier extends ChangeNotifier {
     if (index >= 0 && index < currentEntries.length) {
       final newList = [...currentEntries];
       newList.removeAt(index);
-      _state = {
-        ..._state,
-        key: newList,
-      };
+      _state = {..._state, key: newList};
       notifyListeners();
     }
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/setup_provider.dart';
 import '../../../models/school_models.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class SetupScreen extends StatelessWidget {
   const SetupScreen({super.key});
@@ -27,11 +28,7 @@ class SetupScreen extends StatelessWidget {
           ),
         ),
         body: TabBarView(
-          children: [
-            _ClassList(),
-            _SectionList(),
-            _SubjectList(),
-          ],
+          children: [_ClassList(), _SectionList(), _SubjectList()],
         ),
       ),
     );
@@ -51,7 +48,18 @@ class _ClassList extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addDialog(context, 'Class', (name) => context.read<ClassSetupNotifier>().addClass(name)),
+        onPressed: () {
+          final user = context.read<AuthNotifier>().user;
+          _addDialog(
+            context,
+            'Class',
+            (name, desc) => context.read<ClassSetupNotifier>().addClass(
+              name,
+              desc,
+              user?.schoolId ?? '',
+            ),
+          );
+        },
         child: const Icon(Icons.add),
       ),
     );
@@ -68,7 +76,12 @@ class _SectionList extends StatelessWidget {
         itemCount: sections.length,
         itemBuilder: (context, index) {
           final section = sections[index];
-          final className = classes.firstWhere((c) => c.id == section.classId, orElse: () => ClassRoom(id: '', name: 'Unknown')).name;
+          final className = classes
+              .firstWhere(
+                (c) => c.id == section.classId,
+                orElse: () => ClassRoom(id: '', name: 'Unknown'),
+              )
+              .name;
           return ListTile(
             title: Text('Section ${section.name}'),
             subtitle: Text('Class: $className'),
@@ -96,18 +109,33 @@ class _SectionList extends StatelessWidget {
           children: [
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: 'Select Class'),
-              items: classes.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
+              items: classes
+                  .map(
+                    (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
+                  )
+                  .toList(),
               onChanged: (val) => selectedClass = val,
             ),
-            TextField(controller: controller, decoration: const InputDecoration(labelText: 'Section Name (e.g. A)')),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Section Name (e.g. A)',
+              ),
+            ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () {
               if (selectedClass != null && controller.text.isNotEmpty) {
-                context.read<SectionSetupNotifier>().addSection(selectedClass!, controller.text);
+                context.read<SectionSetupNotifier>().addSection(
+                  selectedClass!,
+                  controller.text,
+                );
                 Navigator.pop(context);
               }
             },
@@ -126,29 +154,55 @@ class _SubjectList extends StatelessWidget {
     return Scaffold(
       body: ListView.builder(
         itemCount: subjects.length,
-        itemBuilder: (context, index) => ListTile(title: Text(subjects[index].name)),
+        itemBuilder: (context, index) =>
+            ListTile(title: Text(subjects[index].name)),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addDialog(context, 'Subject', (name) => context.read<SubjectSetupNotifier>().addSubject(name)),
+        onPressed: () => _addDialog(
+          context,
+          'Subject',
+          (name, desc) => context.read<SubjectSetupNotifier>().addSubject(name),
+        ),
         child: const Icon(Icons.add),
       ),
     );
   }
 }
 
-void _addDialog(BuildContext context, String type, Function(String) onAdd) {
-  final controller = TextEditingController();
+void _addDialog(
+  BuildContext context,
+  String type,
+  Function(String name, String description) onAdd,
+) {
+  final nameController = TextEditingController();
+  final descController = TextEditingController();
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
       title: Text('Add $type'),
-      content: TextField(controller: controller, decoration: InputDecoration(labelText: '$type Name')),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: nameController,
+            decoration: InputDecoration(labelText: '$type Name'),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: descController,
+            decoration: const InputDecoration(labelText: 'Description'),
+          ),
+        ],
+      ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
         ElevatedButton(
           onPressed: () {
-            if (controller.text.isNotEmpty) {
-              onAdd(controller.text);
+            if (nameController.text.isNotEmpty) {
+              onAdd(nameController.text, descController.text);
               Navigator.pop(context);
             }
           },

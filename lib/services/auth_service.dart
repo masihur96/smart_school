@@ -9,10 +9,7 @@ class AuthService {
     try {
       final response = await _dio.post(
         APIPath.login,
-        data: {
-          'email': email,
-          'password': password,
-        },
+        data: {'email': email, 'password': password},
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {

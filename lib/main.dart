@@ -28,7 +28,7 @@ import 'features/auth/domain/usecases/get_profile_usecase.dart';
 void main() {
   final databaseService = DatabaseService();
   final dataProvider = DataProvider();
-  
+
   // Auth dependencies
   final authRemoteDataSource = AuthRemoteDataSource(dataProvider);
   final authRepository = AuthRepositoryImpl(authRemoteDataSource);
@@ -42,8 +42,6 @@ void main() {
     getProfileUseCase: getProfileUseCase,
   );
 
-
-
   final attendanceRepository = AttendanceRepositoryImpl(databaseService);
   final resultRepository = ResultRepositoryImpl(databaseService);
   final examRepository = ExamRepositoryImpl(databaseService);
@@ -55,16 +53,32 @@ void main() {
         Provider.value(value: dataProvider),
         ChangeNotifierProvider.value(value: authNotifier),
         ChangeNotifierProvider(create: (_) => NoticesNotifier(databaseService)),
-        ChangeNotifierProvider(create: (_) => StudentsNotifier(databaseService)),
-        ChangeNotifierProvider(create: (_) => ClassSetupNotifier(databaseService)),
-        ChangeNotifierProvider(create: (_) => SectionSetupNotifier(databaseService)),
-        ChangeNotifierProvider(create: (_) => SubjectSetupNotifier(databaseService)),
-        ChangeNotifierProvider(create: (_) => TeachersNotifier(databaseService)),
+        ChangeNotifierProvider(
+          create: (_) => StudentsNotifier(databaseService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ClassSetupNotifier(databaseService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SectionSetupNotifier(databaseService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SubjectSetupNotifier(databaseService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => TeachersNotifier(databaseService),
+        ),
         ChangeNotifierProvider(create: (_) => RoutineNotifier()),
         ChangeNotifierProvider(create: (_) => ExamsNotifier(examRepository)),
-        ChangeNotifierProvider(create: (_) => HomeworkNotifier(databaseService)),
-        ChangeNotifierProvider(create: (_) => AttendanceNotifier(attendanceRepository)),
-        ChangeNotifierProvider(create: (_) => ResultsNotifier(resultRepository)),
+        ChangeNotifierProvider(
+          create: (_) => HomeworkNotifier(databaseService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AttendanceNotifier(attendanceRepository),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ResultsNotifier(resultRepository),
+        ),
       ],
       child: MyApp(),
     ),
@@ -72,12 +86,10 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       title: 'Smart School',
       debugShowCheckedModeBanner: false,

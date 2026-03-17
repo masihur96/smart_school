@@ -74,9 +74,18 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.check_circle), label: 'Attendance'),
-          BottomNavigationBarItem(icon: Icon(Icons.emoji_events), label: 'Results'),
-          BottomNavigationBarItem(icon: Icon(Icons.assignment), label: 'Homework'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.check_circle),
+            label: 'Attendance',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.emoji_events),
+            label: 'Results',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.assignment),
+            label: 'Homework',
+          ),
         ],
       ),
     );
@@ -93,18 +102,50 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Overview', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-              TextButton(onPressed: () => setState(() => _selectedIndex = 2), child: const Text('View Results')),
+              Text(
+                'Overview',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              TextButton(
+                onPressed: () => setState(() => _selectedIndex = 2),
+                child: const Text('View Results'),
+              ),
             ],
           ),
           const SizedBox(height: 16),
-          _buildActionTile(context, 'Weekly Routine', Icons.calendar_month, Colors.purple, onTap: () {
-            // Routine is not in bottom nav, push usually
-            // but we can decide to keep it as push
-          }),
-          _buildActionTile(context, 'My Homework', Icons.assignment, Colors.orange, onTap: () => setState(() => _selectedIndex = 3)),
-          _buildActionTile(context, 'Attendance History', Icons.history, Colors.blue, onTap: () => setState(() => _selectedIndex = 1)),
-          _buildActionTile(context, 'My Results', Icons.emoji_events, Colors.green, onTap: () => setState(() => _selectedIndex = 2)),
+          _buildActionTile(
+            context,
+            'Weekly Routine',
+            Icons.calendar_month,
+            Colors.purple,
+            onTap: () {
+              // Routine is not in bottom nav, push usually
+              // but we can decide to keep it as push
+            },
+          ),
+          _buildActionTile(
+            context,
+            'My Homework',
+            Icons.assignment,
+            Colors.orange,
+            onTap: () => setState(() => _selectedIndex = 3),
+          ),
+          _buildActionTile(
+            context,
+            'Attendance History',
+            Icons.history,
+            Colors.blue,
+            onTap: () => setState(() => _selectedIndex = 1),
+          ),
+          _buildActionTile(
+            context,
+            'My Results',
+            Icons.emoji_events,
+            Colors.green,
+            onTap: () => setState(() => _selectedIndex = 2),
+          ),
           const SizedBox(height: 24),
         ],
       ),
@@ -113,9 +154,15 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
 
   Widget _buildAttendanceCard(BuildContext context) {
     final currentUser = context.watch<AuthNotifier>().user;
-    final attendanceRecords = context.watch<AttendanceNotifier>().state.where((r) => r.studentId == currentUser?.id).toList();
+    final attendanceRecords = context
+        .watch<AttendanceNotifier>()
+        .state
+        .where((r) => r.studentId == currentUser?.id)
+        .toList();
     final totalDays = attendanceRecords.length;
-    final presentDays = attendanceRecords.where((r) => r.status == AttendanceStatus.present).length;
+    final presentDays = attendanceRecords
+        .where((r) => r.status == AttendanceStatus.present)
+        .length;
     final percentage = totalDays == 0 ? 0.0 : presentDays / totalDays;
 
     return InkWell(
@@ -132,7 +179,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 radius: 40.0,
                 lineWidth: 8.0,
                 percent: percentage,
-                center: Text("${(percentage * 100).toInt()}%", style: const TextStyle(fontWeight: FontWeight.bold)),
+                center: Text(
+                  "${(percentage * 100).toInt()}%",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 progressColor: Colors.green,
                 backgroundColor: Colors.white,
                 circularStrokeCap: CircularStrokeCap.round,
@@ -142,8 +192,17 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Attendance Overview', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                    Text('You were present $presentDays out of $totalDays days.', style: TextStyle(color: Colors.grey[700])),
+                    const Text(
+                      'Attendance Overview',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    Text(
+                      'You were present $presentDays out of $totalDays days.',
+                      style: TextStyle(color: Colors.grey[700]),
+                    ),
                   ],
                 ),
               ),
@@ -154,7 +213,13 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     );
   }
 
-  Widget _buildActionTile(BuildContext context, String title, IconData icon, Color color, {VoidCallback? onTap}) {
+  Widget _buildActionTile(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Color color, {
+    VoidCallback? onTap,
+  }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

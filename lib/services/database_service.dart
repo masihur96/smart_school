@@ -29,7 +29,12 @@ class DatabaseService {
       classId: 'c2',
       sectionId: 's3',
       guardianContact: '01700000000',
-      user: User(id: 'student1', name: 'Masihur Rahman', email: 'student@school.com', role: UserRole.student),
+      user: User(
+        id: 'student1',
+        name: 'Masihur Rahman',
+        email: 'student@school.com',
+        role: UserRole.student,
+      ),
     ),
   ];
 
@@ -39,7 +44,12 @@ class DatabaseService {
       assignedSubjects: [
         AssignedSubject(classId: 'c2', sectionId: 's3', subjectId: 'sub1'),
       ],
-      user: User(id: 'teacher1', name: 'Ms. Sarah', email: 'teacher@school.com', role: UserRole.teacher),
+      user: User(
+        id: 'teacher1',
+        name: 'Ms. Sarah',
+        email: 'teacher@school.com',
+        role: UserRole.teacher,
+      ),
     ),
   ];
 
@@ -48,7 +58,7 @@ class DatabaseService {
   static List<Attendance> _generateMockAttendance() {
     final List<Attendance> records = [];
     final now = DateTime.now();
-    
+
     // Generate data for the last 6 months
     for (int i = 0; i < 6; i++) {
       final monthDate = DateTime(now.year, now.month - i, 1);
@@ -57,18 +67,23 @@ class DatabaseService {
         final date = DateTime(monthDate.year, monthDate.month, day);
         // Simulate attendance for 'student1'
         // Random presence between 70% and 95%
-        final status = (day % 10 != 0) ? AttendanceStatus.present : AttendanceStatus.absent;
-        records.add(Attendance(
-          id: 'att_${monthDate.month}_$day',
-          studentId: 'student1',
-          date: date,
-          status: status,
-          takenBy: 'teacher1',
-        ));
+        final status = (day % 10 != 0)
+            ? AttendanceStatus.present
+            : AttendanceStatus.absent;
+        records.add(
+          Attendance(
+            id: 'att_${monthDate.month}_$day',
+            studentId: 'student1',
+            date: date,
+            status: status,
+            takenBy: 'teacher1',
+          ),
+        );
       }
     }
     return records;
   }
+
   final List<Homework> homeworkRecords = [
     Homework(
       id: 'hw1',
@@ -109,8 +124,13 @@ class DatabaseService {
   final List<Result> results = [];
 
   // Helper methods (Mock CRUD)
-  Future<List<Student>> getStudentsByClass(String classId, String sectionId) async {
-    return students.where((s) => s.classId == classId && s.sectionId == sectionId).toList();
+  Future<List<Student>> getStudentsByClass(
+    String classId,
+    String sectionId,
+  ) async {
+    return students
+        .where((s) => s.classId == classId && s.sectionId == sectionId)
+        .toList();
   }
 
   Future<void> addHomework(Homework homework) async {

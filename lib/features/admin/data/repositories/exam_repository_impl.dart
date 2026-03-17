@@ -19,7 +19,9 @@ class ExamRepositoryImpl implements IExamRepository {
 
   @override
   Future<List<Exam>> getExamsForClass(String classId, String sectionId) async {
-    return _dbService.exams.where((e) => e.classId == classId && e.sectionId == sectionId).toList();
+    return _dbService.exams
+        .where((e) => e.classId == classId && e.sectionId == sectionId)
+        .toList();
   }
 
   @override

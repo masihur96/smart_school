@@ -1,6 +1,5 @@
 import 'package:smart_school/models/school_models.dart';
 
-
 class AttendanceEntity {
   final String id;
   final String studentId;

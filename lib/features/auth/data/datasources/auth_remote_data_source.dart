@@ -14,10 +14,7 @@ class AuthRemoteDataSource {
     final response = await _dataProvider.performRequest(
       'POST',
       APIPath.login,
-      data: {
-        'email': email,
-        'password': password,
-      },
+      data: {'email': email, 'password': password},
     );
 
     log('Login response: ${response?.statusCode} - ${response?.data}');
@@ -106,10 +103,7 @@ class AuthRemoteDataSource {
     final response = await _dataProvider.performRequest(
       'POST',
       '${APIPath.baseUrl}/auth/reset-password',
-      data: {
-        'newPassword': newPassword,
-        'confirmPassword': confirmPassword,
-      },
+      data: {'newPassword': newPassword, 'confirmPassword': confirmPassword},
       header: {'Authorization': 'Bearer $tempToken'},
     );
 

@@ -30,7 +30,9 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 60,
-                    backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                    backgroundColor: Theme.of(
+                      context,
+                    ).primaryColor.withValues(alpha: 0.1),
                     child: Icon(
                       Icons.person,
                       size: 70,
@@ -66,9 +68,9 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               user?.name ?? 'User Name',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             Text(
               user?.role.name.toUpperCase() ?? 'NONE',
@@ -97,16 +99,16 @@ class ProfileScreen extends StatelessWidget {
               label: 'Phone',
               value: user?.phone ?? 'Not available',
             ),
-            const Padding(
-              padding: EdgeInsets.all(24.0),
-              child: Divider(),
-            ),
+            const Padding(padding: EdgeInsets.all(24.0), child: Divider()),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: ElevatedButton.icon(
                 onPressed: () => _showLogoutDialog(context),
                 icon: const Icon(Icons.logout, color: Colors.white),
-                label: const Text('Logout', style: TextStyle(color: Colors.white)),
+                label: const Text(
+                  'Logout',
+                  style: TextStyle(color: Colors.white),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   minimumSize: const Size(double.infinity, 50),
@@ -147,10 +149,7 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                   Text(
                     value,
