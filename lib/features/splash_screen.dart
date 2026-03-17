@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
+import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/student/screens/student_dashboard_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
@@ -77,7 +78,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           break;
       }
     } else {
-      context.go('/login');
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+            (Route<dynamic> route) => false,
+      );
     }
   }
 
