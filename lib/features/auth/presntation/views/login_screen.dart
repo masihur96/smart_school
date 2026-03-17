@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/models/user_model.dart';
+import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
+import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
+import 'package:smart_school/features/student/screens/student_dashboard_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -22,11 +26,34 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
-    context.read<AuthNotifier>().login(
-          _emailController.text.trim(),
-          _passwordController.text,
-        );
+  Future<void> _login() async {
+    final authNotifier = context.read<AuthNotifier>();
+    await authNotifier.login(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
+
+    if (!mounted) return;
+
+    if (authNotifier.user != null) {
+      Widget dashboard;
+      switch (authNotifier.user!.role) {
+        case UserRole.admin:
+          dashboard = const AdminDashboardScreen();
+          break;
+        case UserRole.teacher:
+          dashboard = const TeacherDashboardScreen();
+          break;
+        case UserRole.student:
+          dashboard = const StudentDashboardScreen();
+          break;
+      }
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => dashboard),
+      );
+    }
   }
 
   void _quickLogin(String email) {
