@@ -19,6 +19,7 @@ class StudentManagementScreen extends StatefulWidget {
 class _StudentManagementScreenState extends State<StudentManagementScreen> {
   String? _selectedClassId;
   String? _selectedSectionId;
+  bool? _selectedStatus;
   final ScrollController _scrollController = ScrollController();
   
   @override
@@ -44,6 +45,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
         notifier.fetchStudents(
           classId: _selectedClassId,
           sectionId: _selectedSectionId,
+          isActive: _selectedStatus,
           loadMore: true,
         );
       }
@@ -80,64 +82,109 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Column(
               children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(labelText: 'Class'),
-                    items: [
-                      const DropdownMenuItem<String>(
-                        value: null,
-                        child: Text('All Classes'),
-                      ),
-                      ...classes.map(
-                        (c) => DropdownMenuItem(
-                          value: c.id,
-                          child: Text(c.name),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText: 'Class',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         ),
-                      ),
-                    ],
-                    value: _selectedClassId,
-                    onChanged: (val) {
-                      setState(() {
-                         _selectedClassId = val;
-                         _selectedSectionId = null; // reset section
-                      });
-                      context.read<StudentsNotifier>().fetchStudents(
-                         classId: _selectedClassId, 
-                         sectionId: _selectedSectionId,
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(labelText: 'Section'),
-                    items: [
-                      const DropdownMenuItem<String>(
-                        value: null,
-                        child: Text('All Sections'),
-                      ),
-                      ...sections
-                          .where((s) => s.classId == _selectedClassId)
-                          .map(
-                            (s) => DropdownMenuItem(
-                              value: s.id,
-                              child: Text(s.name),
+                        items: [
+                          const DropdownMenuItem<String>(
+                            value: null,
+                            child: Text('All Classes'),
+                          ),
+                          ...classes.map(
+                            (c) => DropdownMenuItem(
+                              value: c.id,
+                              child: Text(c.name),
                             ),
                           ),
-                    ],
-                    value: _selectedSectionId,
-                    onChanged: (val) {
-                       setState(() => _selectedSectionId = val);
-                       context.read<StudentsNotifier>().fetchStudents(
-                         classId: _selectedClassId, 
-                         sectionId: _selectedSectionId,
-                      );
-                    },
+                        ],
+                        value: _selectedClassId,
+                        onChanged: (val) {
+                          setState(() {
+                             _selectedClassId = val;
+                             _selectedSectionId = null; // reset section
+                          });
+                          context.read<StudentsNotifier>().fetchStudents(
+                             classId: _selectedClassId, 
+                             sectionId: _selectedSectionId,
+                             isActive: _selectedStatus,
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText: 'Section',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ),
+                        items: [
+                          const DropdownMenuItem<String>(
+                            value: null,
+                            child: Text('All Sections'),
+                          ),
+                          ...sections
+                              .where((s) => s.classId == _selectedClassId)
+                              .map(
+                                (s) => DropdownMenuItem(
+                                  value: s.id,
+                                  child: Text(s.name),
+                                ),
+                              ),
+                        ],
+                        value: _selectedSectionId,
+                        onChanged: (val) {
+                           setState(() => _selectedSectionId = val);
+                           context.read<StudentsNotifier>().fetchStudents(
+                             classId: _selectedClassId, 
+                             sectionId: _selectedSectionId,
+                             isActive: _selectedStatus,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<bool?>(
+                  decoration: InputDecoration(
+                    labelText: 'Status',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
+                  items: const [
+                    DropdownMenuItem<bool?>(
+                      value: null,
+                      child: Text('All Status'),
+                    ),
+                    DropdownMenuItem<bool?>(
+                      value: true,
+                      child: Text('Active Only'),
+                    ),
+                    DropdownMenuItem<bool?>(
+                      value: false,
+                      child: Text('Inactive Only'),
+                    ),
+                  ],
+                  value: _selectedStatus,
+                  onChanged: (val) {
+                    setState(() => _selectedStatus = val);
+                    context.read<StudentsNotifier>().fetchStudents(
+                          classId: _selectedClassId,
+                          sectionId: _selectedSectionId,
+                          isActive: _selectedStatus,
+                        );
+                  },
                 ),
               ],
             ),
@@ -160,17 +207,65 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                   );
                 }
                 final student = students[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    child: Text(student.user?.name[0] ?? '?'),
-                  ),
-                  title: Text(student.user?.name ?? 'Unknown'),
-                  subtitle: Text(
-                    'Roll: ${student.rollId} | ${classes.firstWhere(
-                      (c) => c.id == student.classId,
-                      orElse: () => ClassRoom(id: '', name: 'Unknown'),
-                    ).name}',
-                  ),
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(8),
+                    leading: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.purple.shade300, Colors.purple.shade600],
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          student.user?.name[0] ?? '?',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+                        ),
+                      ),
+                    ),
+                    title: Row(
+                      children: [
+                        Text(
+                          student.user?.name ?? 'Unknown',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: student.isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            student.isActive ? 'Active' : 'Inactive',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: student.isActive ? Colors.green : Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 4),
+                        Text('Roll: ${student.rollId}'),
+                        Text(
+                          classes.firstWhere(
+                            (c) => c.id == student.classId,
+                            orElse: () => ClassRoom(id: '', name: 'Unknown'),
+                          ).name,
+                        ),
+                      ],
+                    ),
                   trailing: PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert),
                     onSelected: (value) {
@@ -184,6 +279,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                           context.read<StudentsNotifier>().fetchStudents(
                              classId: _selectedClassId, 
                              sectionId: _selectedSectionId,
+                             isActive: _selectedStatus,
                           );
                         });
                       } else if (value == 'status') {
@@ -247,6 +343,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                         ),
                       ),
                     ],
+                    ),
                   ),
                 );
               },
@@ -263,6 +360,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
             context.read<StudentsNotifier>().fetchStudents(
                   classId: _selectedClassId,
                   sectionId: _selectedSectionId,
+                  isActive: _selectedStatus,
                 );
           });
         },

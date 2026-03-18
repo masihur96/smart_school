@@ -23,7 +23,12 @@ class StudentsNotifier extends ChangeNotifier {
   bool get hasMore => _hasMore;
   bool get isLoadingMore => _isLoadingMore;
 
-  Future<void> fetchStudents({String? classId, String? sectionId, bool loadMore = false}) async {
+  Future<void> fetchStudents({
+    String? classId, 
+    String? sectionId, 
+    bool? isActive,
+    bool loadMore = false
+  }) async {
     if (loadMore) {
       if (_isLoadingMore || !_hasMore) return;
       _isLoadingMore = true;
@@ -46,6 +51,7 @@ class StudentsNotifier extends ChangeNotifier {
       };
       if (classId != null && classId.isNotEmpty) query['classId'] = classId;
       if (sectionId != null && sectionId.isNotEmpty) query['sectionId'] = sectionId;
+      if (isActive != null) query['isActive'] = isActive.toString();
 
       final response = await DataProvider().performRequest(
         'GET',
@@ -57,9 +63,13 @@ class StudentsNotifier extends ChangeNotifier {
       if (response != null && response.statusCode == 200) {
         final List<dynamic> data = response.data is List
             ? response.data
-            : (response.data['data'] ?? response.data['users'] ?? []);
+            : (response.data['data'] ?? []);
         
-        if (data.length < 10) {
+        final responseTotal = response.data['total'] != null 
+            ? int.tryParse(response.data['total'].toString()) ?? 0 
+            : data.length;
+        
+        if (data.length < 10 || (loadMore && _students.length + data.length >= responseTotal)) {
           _hasMore = false;
         }
 
@@ -174,7 +184,7 @@ class StudentsNotifier extends ChangeNotifier {
     }
 
     final response = await DataProvider().performRequest(
-      'PATCH',
+      'PUT',
       '${APIPath.register}/$userId',
       data: data,
       header: {'Authorization': 'Bearer $token'},
@@ -212,16 +222,16 @@ class StudentsNotifier extends ChangeNotifier {
         final token = await StorageService.getToken();
         if (token == null) throw Exception('No auth token found');
 
-        // We assume PATCH /users/:id to update status
+        // Based on the request, update endpoint is /users/:id (APIPath.fetchUsers + /id)
         final response = await DataProvider().performRequest(
-          'PATCH',
-          '${APIPath.register}/$userId',
+          'PUT',
+          '${APIPath.fetchUsers}/$userId',
           data: {'isActive': newStatus},
           header: {'Authorization': 'Bearer $token'},
         );
 
         if (response != null && response.statusCode == 200) {
-          _dbService.students[index] = Student(
+          final updatedStudent = Student(
             userId: student.userId,
             rollId: student.rollId,
             classId: student.classId,
@@ -230,7 +240,8 @@ class StudentsNotifier extends ChangeNotifier {
             isActive: newStatus,
             user: student.user,
           );
-          _students[index] = _dbService.students[index];
+          _dbService.students[index] = updatedStudent;
+          _students = [..._dbService.students];
         } else {
           log("Error toggling student status: ${response?.data}");
         }
