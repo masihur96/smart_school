@@ -2,6 +2,8 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart';
 import '../providers/student_provider.dart';
+import '../providers/setup_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../../services/database_service.dart';
 import '../../../models/school_models.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +26,13 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
     super.initState();
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = context.read<AuthNotifier>().user;
+      final schoolId = user?.schoolId ?? '';
+      
+      if (schoolId.isNotEmpty) {
+        context.read<ClassSetupNotifier>().fetchClasses(schoolId);
+      }
+      context.read<SectionSetupNotifier>().fetchSections();
       context.read<StudentsNotifier>().fetchStudents();
     });
   }
@@ -51,9 +60,8 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
   Widget build(BuildContext context) {
     final studentsNotifier = context.watch<StudentsNotifier>();
     final students = studentsNotifier.students;
-    final dbService = context.watch<DatabaseService>();
-    final classes = dbService.classes;
-    final sections = dbService.sections;
+    final classes = context.watch<ClassSetupNotifier>().classes;
+    final sections = context.watch<SectionSetupNotifier>().sections;
 
     return Scaffold(
       appBar: widget.hideAppBar
