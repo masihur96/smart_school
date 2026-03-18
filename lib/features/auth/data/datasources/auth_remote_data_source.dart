@@ -24,15 +24,28 @@ class AuthRemoteDataSource {
     }
 
     if (response.statusCode! >= 200 && response.statusCode! < 300) {
-      final data = response.data;
+      // The API wraps the payload inside a nested 'data' key:
+      // { message, statusCode, data: { accessToken, refreshToken, user } }
+      final outerData = response.data;
+      final innerData = outerData['data'] ?? outerData;
 
-      // Save token if returned
-      final token = data['accessToken'] ?? data['token'];
+      // Save token
+      final token = innerData['accessToken'] ?? innerData['token'];
       if (token != null) {
         await StorageService.saveToken(token);
+        log('Token saved successfully');
+      } else {
+        log('Warning: No token found in login response');
       }
 
-      return AuthResponseModel.fromJson(data['user'] ?? data);
+      // Also save refresh token if present
+      final refreshToken = innerData['refreshToken'];
+      if (refreshToken != null) {
+        await StorageService.saveSmallToken(refreshToken);
+      }
+
+      final userData = innerData['user'] ?? innerData;
+      return AuthResponseModel.fromJson(userData);
     } else {
       final message = response.data?['message'] ?? 'Login failed';
       throw Exception(message);
@@ -134,7 +147,10 @@ class AuthRemoteDataSource {
     }
 
     if (response.statusCode! >= 200 && response.statusCode! < 300) {
-      return AuthResponseModel.fromJson(response.data);
+      // API wraps payload: { message, statusCode, data: { id, role, ... } }
+      final outerData = response.data;
+      final userData = outerData['data'] ?? outerData;
+      return AuthResponseModel.fromJson(userData);
     } else {
       final message = response.data?['message'] ?? 'Failed to fetch profile';
       throw Exception(message);
