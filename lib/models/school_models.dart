@@ -34,7 +34,7 @@ class Section {
   Section({required this.id, required this.classId, required this.name});
 
   factory Section.fromJson(Map<String, dynamic> json) =>
-      Section(id: json['id'], classId: json['classId'], name: json['name']);
+      Section(id: json['id'] ?? json['_id'] ?? '', classId: json['classId'] ?? '', name: json['name'] ?? '');
 
   Map<String, dynamic> toJson() => {'id': id, 'classId': classId, 'name': name};
 }
@@ -42,13 +42,33 @@ class Section {
 class Subject {
   final String id;
   final String name;
+  final String code;
+  final String classId;
+  final String schoolId;
 
-  Subject({required this.id, required this.name});
+  Subject({
+    required this.id,
+    required this.name,
+    this.code = '',
+    this.classId = '',
+    this.schoolId = '',
+  });
 
-  factory Subject.fromJson(Map<String, dynamic> json) =>
-      Subject(id: json['id'], name: json['name']);
+  factory Subject.fromJson(Map<String, dynamic> json) => Subject(
+        id: json['id'] ?? json['_id'] ?? '',
+        name: json['name'] ?? '',
+        code: json['code'] ?? '',
+        classId: json['classId'] ?? '',
+        schoolId: json['schoolId'] ?? '',
+      );
 
-  Map<String, dynamic> toJson() => {'id': id, 'name': name};
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'code': code,
+        'classId': classId,
+        'schoolId': schoolId,
+      };
 }
 
 enum AttendanceStatus { present, absent, leave }

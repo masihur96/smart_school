@@ -1,11 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/setup_provider.dart';
+
 import '../../../models/school_models.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../providers/setup_provider.dart';
 
-class SetupScreen extends StatelessWidget {
+class SetupScreen extends StatefulWidget {
   const SetupScreen({super.key});
+
+  @override
+  State<SetupScreen> createState() => _SetupScreenState();
+}
+
+class _SetupScreenState extends State<SetupScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = context.read<AuthNotifier>().user;
+      if (user != null) {
+        context.read<ClassSetupNotifier>().fetchClasses(user.schoolId ?? "");
+        context.read<SectionSetupNotifier>().fetchSections();
+        context.read<SubjectSetupNotifier>().fetchSubjects(user.schoolId ?? "");
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,15 +57,18 @@ class SetupScreen extends StatelessWidget {
 class _ClassList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final classes = context.watch<ClassSetupNotifier>().classes;
+    final notifier = context.watch<ClassSetupNotifier>();
+    final classes = notifier.classes;
     return Scaffold(
-      body: ListView.builder(
-        itemCount: classes.length,
-        itemBuilder: (context, index) => ListTile(
-          title: Text(classes[index].name),
-          trailing: const Icon(Icons.chevron_right),
-        ),
-      ),
+      body: notifier.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: classes.length,
+              itemBuilder: (context, index) => ListTile(
+                title: Text(classes[index].name),
+                trailing: const Icon(Icons.chevron_right),
+              ),
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           final user = context.read<AuthNotifier>().user;
@@ -69,25 +91,29 @@ class _ClassList extends StatelessWidget {
 class _SectionList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final sections = context.watch<SectionSetupNotifier>().sections;
+    final notifier = context.watch<SectionSetupNotifier>();
+    final sections = notifier.sections;
     final classes = context.watch<ClassSetupNotifier>().classes;
+    
     return Scaffold(
-      body: ListView.builder(
-        itemCount: sections.length,
-        itemBuilder: (context, index) {
-          final section = sections[index];
-          final className = classes
-              .firstWhere(
-                (c) => c.id == section.classId,
-                orElse: () => ClassRoom(id: '', name: 'Unknown'),
-              )
-              .name;
-          return ListTile(
-            title: Text('Section ${section.name}'),
-            subtitle: Text('Class: $className'),
-          );
-        },
-      ),
+      body: notifier.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: sections.length,
+              itemBuilder: (context, index) {
+                final section = sections[index];
+                final className = classes
+                    .firstWhere(
+                      (c) => c.id == section.classId,
+                      orElse: () => ClassRoom(id: '', name: 'Unknown'),
+                    )
+                    .name;
+                return ListTile(
+                  title: Text('Section ${section.name}'),
+                  subtitle: Text('Class: $className'),
+                );
+              },
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _addSectionDialog(context),
         child: const Icon(Icons.add),
@@ -116,6 +142,7 @@ class _SectionList extends StatelessWidget {
                   .toList(),
               onChanged: (val) => selectedClass = val,
             ),
+            SizedBox(height: 10),
             TextField(
               controller: controller,
               decoration: const InputDecoration(
@@ -150,20 +177,99 @@ class _SectionList extends StatelessWidget {
 class _SubjectList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final subjects = context.watch<SubjectSetupNotifier>().subjects;
+    final notifier = context.watch<SubjectSetupNotifier>();
+    final subjects = notifier.subjects;
+    final classes = context.watch<ClassSetupNotifier>().classes;
+
     return Scaffold(
-      body: ListView.builder(
-        itemCount: subjects.length,
-        itemBuilder: (context, index) =>
-            ListTile(title: Text(subjects[index].name)),
-      ),
+      body: notifier.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: subjects.length,
+              itemBuilder: (context, index) {
+                final subject = subjects[index];
+                final className = classes
+                    .firstWhere(
+                      (c) => c.id == subject.classId,
+                      orElse: () => ClassRoom(id: '', name: 'Unknown'),
+                    )
+                    .name;
+                return ListTile(
+                  title: Text(
+                    '${subject.name} ${subject.code.isNotEmpty ? '(${subject.code})' : ''}',
+                  ),
+                  subtitle: Text('Class: $className'),
+                );
+              },
+            ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addDialog(
-          context,
-          'Subject',
-          (name, desc) => context.read<SubjectSetupNotifier>().addSubject(name),
-        ),
+        onPressed: () => _addSubjectDialog(context),
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _addSubjectDialog(BuildContext context) {
+    final classes = context.read<ClassSetupNotifier>().classes;
+    final user = context.read<AuthNotifier>().user;
+    String? selectedClass;
+    final nameController = TextEditingController();
+    final codeController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Subject'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(labelText: 'Select Class'),
+              items: classes
+                  .map(
+                    (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
+                  )
+                  .toList(),
+              onChanged: (val) => selectedClass = val,
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Subject Name (e.g. Mathematics)',
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: codeController,
+              decoration: const InputDecoration(
+                labelText: 'Subject Code (e.g. MATH101)',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (selectedClass != null &&
+                  nameController.text.isNotEmpty &&
+                  user?.schoolId != null) {
+                context.read<SubjectSetupNotifier>().addSubject(
+                      nameController.text,
+                      codeController.text,
+                      selectedClass!,
+                      user!.schoolId!,
+                    );
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
       ),
     );
   }
