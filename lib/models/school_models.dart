@@ -198,6 +198,7 @@ class RoutineEntry {
   final String endTime;
   final String subjectId;
   final String teacherId;
+  final String? roomNumber;
 
   RoutineEntry({
     required this.day,
@@ -205,6 +206,7 @@ class RoutineEntry {
     required this.endTime,
     required this.subjectId,
     required this.teacherId,
+    this.roomNumber,
   });
 
   factory RoutineEntry.fromJson(Map<String, dynamic> json) => RoutineEntry(
@@ -213,6 +215,7 @@ class RoutineEntry {
     endTime: json['endTime'],
     subjectId: json['subjectId'],
     teacherId: json['teacherId'],
+    roomNumber: json['roomNumber'],
   );
 
   Map<String, dynamic> toJson() => {
@@ -221,6 +224,7 @@ class RoutineEntry {
     'endTime': endTime,
     'subjectId': subjectId,
     'teacherId': teacherId,
+    if (roomNumber != null) 'roomNumber': roomNumber,
   };
 }
 
