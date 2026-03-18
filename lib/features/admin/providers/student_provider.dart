@@ -9,9 +9,57 @@ import '../../../core/constants/api_path.dart';
 class StudentsNotifier extends ChangeNotifier {
   final DatabaseService _dbService;
   List<Student> _students = [];
+  bool _isLoading = false;
 
   StudentsNotifier(this._dbService) {
     _students = [..._dbService.students];
+  }
+
+  List<Student> get students => _students;
+  bool get isLoading => _isLoading;
+
+  Future<void> fetchStudents({String? classId, String? sectionId}) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final Map<String, dynamic> query = {'role': 'student'};
+      if (classId != null && classId.isNotEmpty) query['classId'] = classId;
+      if (sectionId != null && sectionId.isNotEmpty) query['sectionId'] = sectionId;
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.register, // Using user endpoint for students
+        query: query,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final List<dynamic> data = response.data is List
+            ? response.data
+            : (response.data['data'] ?? response.data['users'] ?? []);
+        
+        _dbService.students.clear();
+        for (var item in data) {
+          try {
+             _dbService.students.add(Student.fromJson(item));
+          } catch(e) {
+             log("Error parsing student: $e");
+          }
+        }
+        _students = [..._dbService.students];
+      } else {
+        log("Error fetching students: ${response?.data}");
+      }
+    } catch (e) {
+      log("Error fetching students: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   List<Student> get students => _students;
@@ -79,20 +127,74 @@ class StudentsNotifier extends ChangeNotifier {
     }
   }
 
-  void toggleStudentStatus(String userId) {
+  Future<void> toggleStudentStatus(String userId) async {
     final index = _dbService.students.indexWhere((s) => s.userId == userId);
     if (index != -1) {
       final student = _students[index];
-      _dbService.students[index] = Student(
-        userId: student.userId,
-        rollId: student.rollId,
-        classId: student.classId,
-        sectionId: student.sectionId,
-        guardianContact: student.guardianContact,
-        isActive: !student.isActive,
-        user: student.user,
+      final newStatus = !student.isActive;
+
+      _isLoading = true;
+      notifyListeners();
+
+      try {
+        final token = await StorageService.getToken();
+        if (token == null) throw Exception('No auth token found');
+
+        // We assume PATCH /users/:id to update status
+        final response = await DataProvider().performRequest(
+          'PATCH',
+          '${APIPath.register}/$userId',
+          data: {'isActive': newStatus},
+          header: {'Authorization': 'Bearer $token'},
+        );
+
+        if (response != null && response.statusCode == 200) {
+          _dbService.students[index] = Student(
+            userId: student.userId,
+            rollId: student.rollId,
+            classId: student.classId,
+            sectionId: student.sectionId,
+            guardianContact: student.guardianContact,
+            isActive: newStatus,
+            user: student.user,
+          );
+          _students[index] = _dbService.students[index];
+        } else {
+          log("Error toggling student status: ${response?.data}");
+        }
+      } catch (e) {
+        log("Error toggling student status: $e");
+      } finally {
+        _isLoading = false;
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<void> deleteStudent(String userId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final response = await DataProvider().performRequest(
+        'DELETE',
+        '${APIPath.register}/$userId',
+        header: {'Authorization': 'Bearer $token'},
       );
-      _students[index] = _dbService.students[index];
+
+      if (response != null && (response.statusCode == 200 || response.statusCode == 204)) {
+        _dbService.students.removeWhere((s) => s.userId == userId);
+        _students = [..._dbService.students];
+      } else {
+        log("Error deleting student: ${response?.data}");
+      }
+    } catch (e) {
+      log("Error deleting student: $e");
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }

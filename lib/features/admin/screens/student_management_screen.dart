@@ -6,9 +6,25 @@ import '../../../services/database_service.dart';
 import '../../../models/school_models.dart';
 import 'package:flutter/material.dart';
 
-class StudentManagementScreen extends StatelessWidget {
+class StudentManagementScreen extends StatefulWidget {
   final bool hideAppBar;
   const StudentManagementScreen({super.key, this.hideAppBar = false});
+
+  @override
+  State<StudentManagementScreen> createState() => _StudentManagementScreenState();
+}
+
+class _StudentManagementScreenState extends State<StudentManagementScreen> {
+  String? _selectedClassId;
+  String? _selectedSectionId;
+  
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<StudentsNotifier>().fetchStudents();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +35,7 @@ class StudentManagementScreen extends StatelessWidget {
     final sections = dbService.sections;
 
     return Scaffold(
-      appBar: hideAppBar
+      appBar: widget.hideAppBar
           ? null
           : AppBar(
               title: const Text('Student Management'),
@@ -49,7 +65,16 @@ class StudentManagementScreen extends StatelessWidget {
                           ),
                         )
                         .toList(),
-                    onChanged: (val) {},
+                    onChanged: (val) {
+                      setState(() {
+                         _selectedClassId = val;
+                         _selectedSectionId = null; // reset section
+                      });
+                      context.read<StudentsNotifier>().fetchStudents(
+                         classId: _selectedClassId, 
+                         sectionId: _selectedSectionId,
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -57,6 +82,7 @@ class StudentManagementScreen extends StatelessWidget {
                   child: DropdownButtonFormField<String>(
                     decoration: const InputDecoration(labelText: 'Section'),
                     items: sections
+                        .where((s) => s.classId == _selectedClassId)
                         .map(
                           (s) => DropdownMenuItem(
                             value: s.id,
@@ -64,14 +90,23 @@ class StudentManagementScreen extends StatelessWidget {
                           ),
                         )
                         .toList(),
-                    onChanged: (val) {},
+                    value: _selectedSectionId,
+                    onChanged: (val) {
+                       setState(() => _selectedSectionId = val);
+                       context.read<StudentsNotifier>().fetchStudents(
+                         classId: _selectedClassId, 
+                         sectionId: _selectedSectionId,
+                      );
+                    },
                   ),
                 ),
               ],
             ),
           ),
           Expanded(
-            child: ListView.builder(
+            child: studentsNotifier.isLoading 
+              ? const Center(child: CircularProgressIndicator()) 
+              : ListView.builder(
               itemCount: students.length,
               itemBuilder: (context, index) {
                 final student = students[index];
@@ -86,14 +121,45 @@ class StudentManagementScreen extends StatelessWidget {
                       orElse: () => ClassRoom(id: '', name: 'Unknown'),
                     ).name}',
                   ),
-                  trailing: Switch(
-                    value: student.isActive,
-                    onChanged: (val) {
-                      context.read<StudentsNotifier>().toggleStudentStatus(
-                        student.userId,
-                      );
-                    },
-                    activeColor: Colors.green,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Switch(
+                        value: student.isActive,
+                        onChanged: (val) {
+                          context.read<StudentsNotifier>().toggleStudentStatus(
+                            student.userId,
+                          );
+                        },
+                        activeColor: Colors.green,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Delete Student'),
+                              content: const Text('Are you sure you want to delete this student?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx),
+                                  child: const Text('Cancel'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    context.read<StudentsNotifier>().deleteStudent(student.userId);
+                                    Navigator.pop(ctx);
+                                  },
+                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                  child: const Text('Delete', style: TextStyle(color: Colors.white)),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                   onTap: () {
                     // Navigate to edit
