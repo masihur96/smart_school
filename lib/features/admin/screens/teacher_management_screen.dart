@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_school/features/admin/screens/add_edit_teacher_screen.dart';
+import 'package:smart_school/models/school_models.dart';
+import 'package:smart_school/models/teacher_model.dart';
 import '../providers/teacher_provider.dart';
 import '../providers/setup_provider.dart';
 
@@ -254,7 +256,14 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                                   PopupMenuButton<String>(
                                     icon: const Icon(Icons.more_vert),
                                     onSelected: (value) async {
-                                      if (value == 'status') {
+                                      if (value == 'view') {
+                                        _showTeacherDetails(context, teacher);
+                                      } else if (value == 'edit') {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (_) => AddEditTeacherScreen(teacher: teacher)),
+                                        ).then((_) => _fetchTeachers());
+                                      } else if (value == 'status') {
                                         await context.read<TeachersNotifier>().toggleTeacherStatus(teacher.userId);
                                       } else if (value == 'delete') {
                                         final confirm = await showDialog<bool>(
@@ -277,6 +286,26 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                                       }
                                     },
                                     itemBuilder: (context) => [
+                                      const PopupMenuItem(
+                                        value: 'view',
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.visibility_outlined, color: Colors.green),
+                                            const SizedBox(width: 8),
+                                            const Text('View Profile'),
+                                          ],
+                                        ),
+                                      ),
+                                      const PopupMenuItem(
+                                        value: 'edit',
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.edit_outlined, color: Colors.orange),
+                                            const SizedBox(width: 8),
+                                            const Text('Edit Teacher'),
+                                          ],
+                                        ),
+                                      ),
                                       PopupMenuItem(
                                         value: 'status',
                                         child: Row(
@@ -317,6 +346,89 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
         },
         backgroundColor: Colors.purple,
         child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+
+  void _showTeacherDetails(BuildContext context, Teacher teacher) {
+    final user = teacher.user;
+    final classes = context.read<ClassSetupNotifier>().classes;
+    final sections = context.read<SectionSetupNotifier>().sections;
+    
+    final className = classes.firstWhere((c) => c.id == teacher.classId, orElse: () => ClassRoom(id: '', name: 'N/A', schoolId: '')).name;
+    final sectionName = sections.firstWhere((s) => s.id == teacher.sectionId, orElse: () => Section(id: '', name: 'N/A', classId: '')).name;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: const BoxDecoration(color: Colors.purple, shape: BoxShape.circle),
+                    child: const Icon(Icons.person, color: Colors.white, size: 35),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(user?.name ?? 'No Name', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        Text(teacher.designation, style: TextStyle(color: Colors.grey.shade600, fontSize: 14)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              const Text('Contact Information', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const SizedBox(height: 12),
+              _buildDetailItem(Icons.email_outlined, 'Email', user?.email ?? 'N/A'),
+              _buildDetailItem(Icons.phone_outlined, 'Phone', user?.phone ?? 'N/A'),
+              const SizedBox(height: 20),
+              const Text('Academic Assignment', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const SizedBox(height: 12),
+              _buildDetailItem(Icons.class_outlined, 'Assigned Class', className),
+              _buildDetailItem(Icons.groups_outlined, 'Assigned Section', sectionName),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.purple, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  child: const Text('Close', style: TextStyle(color: Colors.white)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailItem(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: Colors.purple.shade300),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+              Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+            ],
+          ),
+        ],
       ),
     );
   }

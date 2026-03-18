@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:smart_school/models/user_model.dart';
 import '../../../models/teacher_model.dart';
 import '../../../services/database_service.dart';
 import '../../../core/utils/storage_service.dart';
@@ -241,5 +242,73 @@ class TeachersNotifier extends ChangeNotifier {
     _dbService.teachers.removeWhere((t) => t.userId == userId);
     _teachers = [..._dbService.teachers];
     notifyListeners();
+  }
+  Future<void> updateTeacherOnAPI({
+    required String userId,
+    required String name,
+    required String email,
+    required String phone,
+    required String classId,
+    required String sectionId,
+    required String designation,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final data = {
+        "name": name,
+        "email": email,
+        "phone": phone,
+        "classId": classId,
+        "sectionId": sectionId,
+        "designation": designation,
+      };
+
+      final response = await DataProvider().performRequest(
+        'PUT',
+        '${APIPath.fetchUsers}/$userId',
+        data: data,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        log('Successfully updated teacher');
+        final index = _dbService.teachers.indexWhere((t) => t.userId == userId);
+        if (index != -1) {
+          final oldTeacher = _dbService.teachers[index];
+          final updatedTeacher = Teacher(
+            userId: userId,
+            designation: designation,
+            classId: classId,
+            sectionId: sectionId,
+            isActive: oldTeacher.isActive,
+            assignedSubjects: oldTeacher.assignedSubjects,
+            user: User(
+              id: userId,
+              name: name,
+              email: email,
+              role: UserRole.teacher,
+              phone: phone,
+              schoolId: oldTeacher.user?.schoolId,
+            ),
+          );
+          _dbService.teachers[index] = updatedTeacher;
+          _teachers = [..._dbService.teachers];
+        }
+      } else {
+        log('Error updating teacher: ${response?.data}');
+        throw Exception('Failed to update teacher: ${response?.data}');
+      }
+    } catch (e) {
+      log('Error updating teacher: $e');
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

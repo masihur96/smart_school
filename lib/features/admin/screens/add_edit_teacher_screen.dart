@@ -8,7 +8,8 @@ import '../../../models/teacher_model.dart';
 import '../../../models/user_model.dart';
 
 class AddEditTeacherScreen extends StatefulWidget {
-  const AddEditTeacherScreen({super.key});
+  final Teacher? teacher;
+  const AddEditTeacherScreen({super.key, this.teacher});
 
   @override
   State<AddEditTeacherScreen> createState() => _AddEditTeacherScreenState();
@@ -24,6 +25,22 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
   String? _selectedClassId;
   String? _selectedSectionId;
   final List<AssignedSubject> _assignedSubjects = [];
+
+  bool get isEditing => widget.teacher != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (isEditing) {
+      final teacher = widget.teacher!;
+      _nameController.text = teacher.user?.name ?? '';
+      _emailController.text = teacher.user?.email ?? '';
+      _phoneController.text = teacher.user?.phone ?? '';
+      _designationController.text = teacher.designation;
+      _selectedClassId = teacher.classId;
+      _selectedSectionId = teacher.sectionId;
+    }
+  }
 
   @override
   void dispose() {
@@ -45,46 +62,57 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
       }
 
       final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
+      final teacherNotifier = context.read<TeachersNotifier>();
       
       try {
-        await context.read<TeachersNotifier>().addTeacherToAPI(
-          name: _nameController.text,
-          email: _emailController.text,
-          password: _passwordController.text,
-          schoolId: schoolId,
-          phone: _phoneController.text,
-          classId: _selectedClassId!,
-          sectionId: _selectedSectionId!,
-          designation: _designationController.text,
-        );
+        if (isEditing) {
+          await teacherNotifier.updateTeacherOnAPI(
+            userId: widget.teacher!.userId,
+            name: _nameController.text,
+            email: _emailController.text,
+            phone: _phoneController.text,
+            classId: _selectedClassId!,
+            sectionId: _selectedSectionId!,
+            designation: _designationController.text,
+          );
+        } else {
+          await teacherNotifier.addTeacherToAPI(
+            name: _nameController.text,
+            email: _emailController.text,
+            password: _passwordController.text,
+            schoolId: schoolId,
+            phone: _phoneController.text,
+            classId: _selectedClassId!,
+            sectionId: _selectedSectionId!,
+            designation: _designationController.text,
+          );
+        }
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Teacher registered successfully')),
+            SnackBar(content: Text(isEditing ? 'Teacher updated successfully' : 'Teacher registered successfully')),
           );
           Navigator.pop(context);
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Registration failed: $e')),
+            SnackBar(content: Text('${isEditing ? 'Update' : 'Registration'} failed: $e')),
           );
         }
       }
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final classes = context.watch<ClassSetupNotifier>().classes;
     final sections = context.watch<SectionSetupNotifier>().sections;
-    final subjects = context.watch<SubjectSetupNotifier>().subjects;
     final teacherNotifier = context.watch<TeachersNotifier>();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Register Teacher'),
+        title: Text(isEditing ? 'Edit Teacher' : 'Register Teacher'),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
       ),
@@ -93,8 +121,6 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
-
-            
             // Personal Details Section
             _buildSectionHeader(context, 'Personal Details', Icons.person_outline),
             Card(
@@ -139,24 +165,26 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             const SizedBox(height: 24),
 
             // Account Security Section
-            _buildSectionHeader(context, 'Account Security', Icons.lock_outline),
-            Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: const Icon(Icons.security),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            if (!isEditing) ...[
+              _buildSectionHeader(context, 'Account Security', Icons.lock_outline),
+              Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: TextFormField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon: const Icon(Icons.security),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    validator: (val) => val!.length < 6 ? 'Password too short' : null,
                   ),
-                  validator: (val) => val!.length < 6 ? 'Password too short' : null,
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
+            ],
 
             // Professional Details Section
             _buildSectionHeader(context, 'Professional Details', Icons.work_outline),
@@ -214,7 +242,6 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
               ),
             ),
 
-
             const SizedBox(height: 32),
             SizedBox(
               height: 55,
@@ -227,9 +254,9 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                 ),
                 child: teacherNotifier.isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'Register Teacher',
-                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    : Text(
+                        isEditing ? 'Update Teacher' : 'Register Teacher',
+                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                       ),
               ),
             ),
@@ -259,25 +286,4 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
       ),
     );
   }
-
-  Widget _buildBadge(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.2)),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 11,
-          color: color,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-
 }
