@@ -86,14 +86,19 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     decoration: const InputDecoration(labelText: 'Class'),
-                    items: classes
-                        .map(
-                          (c) => DropdownMenuItem(
-                            value: c.id,
-                            child: Text(c.name),
-                          ),
-                        )
-                        .toList(),
+                    items: [
+                      const DropdownMenuItem<String>(
+                        value: null,
+                        child: Text('All Classes'),
+                      ),
+                      ...classes.map(
+                        (c) => DropdownMenuItem(
+                          value: c.id,
+                          child: Text(c.name),
+                        ),
+                      ),
+                    ],
+                    value: _selectedClassId,
                     onChanged: (val) {
                       setState(() {
                          _selectedClassId = val;
@@ -110,15 +115,20 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     decoration: const InputDecoration(labelText: 'Section'),
-                    items: sections
-                        .where((s) => s.classId == _selectedClassId)
-                        .map(
-                          (s) => DropdownMenuItem(
-                            value: s.id,
-                            child: Text(s.name),
+                    items: [
+                      const DropdownMenuItem<String>(
+                        value: null,
+                        child: Text('All Sections'),
+                      ),
+                      ...sections
+                          .where((s) => s.classId == _selectedClassId)
+                          .map(
+                            (s) => DropdownMenuItem(
+                              value: s.id,
+                              child: Text(s.name),
+                            ),
                           ),
-                        )
-                        .toList(),
+                    ],
                     value: _selectedSectionId,
                     onChanged: (val) {
                        setState(() => _selectedSectionId = val);
@@ -134,11 +144,13 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
           ),
           Expanded(
             child: studentsNotifier.isLoading && students.isEmpty
-              ? const Center(child: CircularProgressIndicator()) 
-              : ListView.builder(
-              controller: _scrollController,
-              itemCount: students.length + (studentsNotifier.hasMore ? 1 : 0),
-              itemBuilder: (context, index) {
+                ? const Center(child: CircularProgressIndicator())
+                : students.isEmpty
+                    ? const Center(child: Text('No students found.'))
+                    : ListView.builder(
+                        controller: _scrollController,
+                        itemCount: students.length + (studentsNotifier.hasMore ? 1 : 0),
+                        itemBuilder: (context, index) {
                 if (index == students.length) {
                   return const Center(
                     child: Padding(
@@ -159,59 +171,80 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                       orElse: () => ClassRoom(id: '', name: 'Unknown'),
                     ).name}',
                   ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Switch(
-                        value: student.isActive,
-                        onChanged: (val) {
-                          context.read<StudentsNotifier>().toggleStudentStatus(
-                            student.userId,
+                  trailing: PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert),
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AddEditStudentScreen(student: student),
+                          ),
+                        ).then((_) {
+                          context.read<StudentsNotifier>().fetchStudents(
+                             classId: _selectedClassId, 
+                             sectionId: _selectedSectionId,
                           );
-                        },
-                        activeColor: Colors.green,
+                        });
+                      } else if (value == 'status') {
+                        context.read<StudentsNotifier>().toggleStudentStatus(
+                          student.userId,
+                        );
+                      } else if (value == 'delete') {
+                        showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Delete Student'),
+                            content: const Text('Are you sure you want to delete this student?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx),
+                                child: const Text('Cancel'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  context.read<StudentsNotifier>().deleteStudent(student.userId);
+                                  Navigator.pop(ctx);
+                                },
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                child: const Text('Delete', style: TextStyle(color: Colors.white)),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    },
+                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit, color: Colors.blue),
+                            SizedBox(width: 8),
+                            Text('Edit'),
+                          ],
+                        ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => AddEditStudentScreen(student: student),
-                            ),
-                          ).then((_) {
-                            context.read<StudentsNotifier>().fetchStudents(
-                               classId: _selectedClassId, 
-                               sectionId: _selectedSectionId,
-                            );
-                          });
-                        },
+                      PopupMenuItem<String>(
+                        value: 'status',
+                        child: Row(
+                          children: [
+                            Icon(student.isActive ? Icons.block : Icons.check_circle, 
+                                 color: student.isActive ? Colors.orange : Colors.green),
+                            const SizedBox(width: 8),
+                            Text(student.isActive ? 'Deactivate' : 'Activate'),
+                          ],
+                        ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              title: const Text('Delete Student'),
-                              content: const Text('Are you sure you want to delete this student?'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(ctx),
-                                  child: const Text('Cancel'),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    context.read<StudentsNotifier>().deleteStudent(student.userId);
-                                    Navigator.pop(ctx);
-                                  },
-                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                  child: const Text('Delete', style: TextStyle(color: Colors.white)),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
+                      const PopupMenuItem<String>(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text('Delete', style: TextStyle(color: Colors.red)),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -225,8 +258,13 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => AddEditStudentScreen()),
-          );
+            MaterialPageRoute(builder: (_) => const AddEditStudentScreen()),
+          ).then((_) {
+            context.read<StudentsNotifier>().fetchStudents(
+                  classId: _selectedClassId,
+                  sectionId: _selectedSectionId,
+                );
+          });
         },
         backgroundColor: Colors.purple,
         child: const Icon(Icons.add, color: Colors.white),
