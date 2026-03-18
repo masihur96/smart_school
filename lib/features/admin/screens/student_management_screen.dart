@@ -17,13 +17,34 @@ class StudentManagementScreen extends StatefulWidget {
 class _StudentManagementScreenState extends State<StudentManagementScreen> {
   String? _selectedClassId;
   String? _selectedSectionId;
+  final ScrollController _scrollController = ScrollController();
   
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<StudentsNotifier>().fetchStudents();
     });
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      final notifier = context.read<StudentsNotifier>();
+      if (!notifier.isLoadingMore && notifier.hasMore) {
+        notifier.fetchStudents(
+          classId: _selectedClassId,
+          sectionId: _selectedSectionId,
+          loadMore: true,
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -104,11 +125,20 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
             ),
           ),
           Expanded(
-            child: studentsNotifier.isLoading 
+            child: studentsNotifier.isLoading && students.isEmpty
               ? const Center(child: CircularProgressIndicator()) 
               : ListView.builder(
-              itemCount: students.length,
+              controller: _scrollController,
+              itemCount: students.length + (studentsNotifier.hasMore ? 1 : 0),
               itemBuilder: (context, index) {
+                if (index == students.length) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
                 final student = students[index];
                 return ListTile(
                   leading: CircleAvatar(
@@ -132,6 +162,22 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                           );
                         },
                         activeColor: Colors.green,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.blue),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => AddEditStudentScreen(student: student),
+                            ),
+                          ).then((_) {
+                            context.read<StudentsNotifier>().fetchStudents(
+                               classId: _selectedClassId, 
+                               sectionId: _selectedSectionId,
+                            );
+                          });
+                        },
                       ),
                       IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
@@ -161,9 +207,6 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                       ),
                     ],
                   ),
-                  onTap: () {
-                    // Navigate to edit
-                  },
                 );
               },
             ),

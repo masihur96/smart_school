@@ -4,9 +4,11 @@ import 'package:provider/provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
+import '../../../models/student_model.dart';
 
 class AddEditStudentScreen extends StatefulWidget {
-  const AddEditStudentScreen({super.key});
+  final Student? student;
+  const AddEditStudentScreen({super.key, this.student});
 
   @override
   State<AddEditStudentScreen> createState() => _AddEditStudentScreenState();
@@ -22,6 +24,20 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   final _designationController = TextEditingController();
   String? _selectedClass;
   String? _selectedSection;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.student != null) {
+      final s = widget.student!;
+      _nameController.text = s.user?.name ?? '';
+      _emailController.text = s.user?.email ?? '';
+      _rollController.text = s.rollId;
+      _phoneController.text = s.user?.phone ?? s.guardianContact;
+      _selectedClass = s.classId;
+      _selectedSection = s.sectionId;
+    }
+  }
 
   @override
   void dispose() {
@@ -40,18 +56,32 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
       final schoolId = user?.schoolId ?? '';
 
       try {
-        await context.read<StudentsNotifier>().addStudentToAPI(
-          name: _nameController.text,
-          email: _emailController.text,
-          password: _passwordController.text,
-          role: 'student',
-          schoolId: schoolId,
-          phone: _phoneController.text,
-          classId: _selectedClass!,
-          sectionId: _selectedSection!,
-          rollNumber: _rollController.text,
-          designation: _designationController.text,
-        );
+        if (widget.student != null) {
+          await context.read<StudentsNotifier>().updateStudentToAPI(
+            userId: widget.student!.userId,
+            name: _nameController.text,
+            email: _emailController.text,
+            password: _passwordController.text,
+            phone: _phoneController.text,
+            classId: _selectedClass!,
+            sectionId: _selectedSection!,
+            rollNumber: _rollController.text,
+            designation: _designationController.text,
+          );
+        } else {
+          await context.read<StudentsNotifier>().addStudentToAPI(
+            name: _nameController.text,
+            email: _emailController.text,
+            password: _passwordController.text,
+            role: 'student',
+            schoolId: schoolId,
+            phone: _phoneController.text,
+            classId: _selectedClass!,
+            sectionId: _selectedSection!,
+            rollNumber: _rollController.text,
+            designation: _designationController.text,
+          );
+        }
 
         if (mounted) Navigator.pop(context);
       } catch (e) {
@@ -71,7 +101,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Student'),
+        title: Text(widget.student != null ? 'Edit Student' : 'Add Student'),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
       ),
@@ -101,11 +131,16 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             TextFormField(
               controller: _passwordController,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                prefixIcon: Icon(Icons.lock),
+              decoration: InputDecoration(
+                labelText: widget.student != null ? 'Password (leave blank to keep current)' : 'Password',
+                prefixIcon: const Icon(Icons.lock),
               ),
-              validator: (val) => val!.isEmpty ? 'Please enter password' : null,
+              validator: (val) {
+                 if (widget.student == null && (val == null || val.isEmpty)) {
+                   return 'Please enter password';
+                 }
+                 return null;
+              },
             ),
             const SizedBox(height: 16),
             Row(
@@ -176,9 +211,9 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             ElevatedButton(
               onPressed: _save,
               style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-              child: const Text(
-                'Save Student',
-                style: TextStyle(color: Colors.white, fontSize: 18),
+              child: Text(
+                widget.student != null ? 'Update Student' : 'Save Student',
+                style: const TextStyle(color: Colors.white, fontSize: 18),
               ),
             ),
           ],

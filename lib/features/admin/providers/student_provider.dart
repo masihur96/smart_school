@@ -10,6 +10,9 @@ class StudentsNotifier extends ChangeNotifier {
   final DatabaseService _dbService;
   List<Student> _students = [];
   bool _isLoading = false;
+  int _currentPage = 1;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
 
   StudentsNotifier(this._dbService) {
     _students = [..._dbService.students];
@@ -17,22 +20,36 @@ class StudentsNotifier extends ChangeNotifier {
 
   List<Student> get students => _students;
   bool get isLoading => _isLoading;
+  bool get hasMore => _hasMore;
+  bool get isLoadingMore => _isLoadingMore;
 
-  Future<void> fetchStudents({String? classId, String? sectionId}) async {
-    _isLoading = true;
+  Future<void> fetchStudents({String? classId, String? sectionId, bool loadMore = false}) async {
+    if (loadMore) {
+      if (_isLoadingMore || !_hasMore) return;
+      _isLoadingMore = true;
+      _currentPage++;
+    } else {
+      _isLoading = true;
+      _currentPage = 1;
+      _hasMore = true;
+    }
     notifyListeners();
 
     try {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
 
-      final Map<String, dynamic> query = {'role': 'student'};
+      final Map<String, dynamic> query = {
+        'role': 'student',
+        'page': _currentPage.toString(),
+        'limit': '10',
+      };
       if (classId != null && classId.isNotEmpty) query['classId'] = classId;
       if (sectionId != null && sectionId.isNotEmpty) query['sectionId'] = sectionId;
 
       final response = await DataProvider().performRequest(
         'GET',
-        APIPath.register, // Using user endpoint for students
+        APIPath.fetchUsers,
         query: query,
         header: {'Authorization': 'Bearer $token'},
       );
@@ -42,7 +59,14 @@ class StudentsNotifier extends ChangeNotifier {
             ? response.data
             : (response.data['data'] ?? response.data['users'] ?? []);
         
-        _dbService.students.clear();
+        if (data.length < 10) {
+          _hasMore = false;
+        }
+
+        if (!loadMore) {
+          _dbService.students.clear();
+        }
+
         for (var item in data) {
           try {
              _dbService.students.add(Student.fromJson(item));
@@ -53,11 +77,17 @@ class StudentsNotifier extends ChangeNotifier {
         _students = [..._dbService.students];
       } else {
         log("Error fetching students: ${response?.data}");
+        _hasMore = false;
       }
     } catch (e) {
       log("Error fetching students: $e");
+      _hasMore = false;
     } finally {
-      _isLoading = false;
+      if (loadMore) {
+        _isLoadingMore = false;
+      } else {
+        _isLoading = false;
+      }
       notifyListeners();
     }
   }
@@ -113,6 +143,48 @@ class StudentsNotifier extends ChangeNotifier {
     } else {
       log('Error creating student: ${response?.data}');
       throw Exception('Failed to create student: ${response?.data}');
+    }
+  }
+
+  Future<void> updateStudentToAPI({
+    required String userId,
+    required String name,
+    required String email,
+    String? password, // optional for update
+    required String phone,
+    required String classId,
+    required String sectionId,
+    required String rollNumber,
+    required String designation,
+  }) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No auth token found');
+
+    final data = {
+      "name": name,
+      "email": email,
+      "phone": phone,
+      "classId": classId,
+      "sectionId": sectionId,
+      "rollNumber": rollNumber,
+      "designation": designation,
+    };
+    if (password != null && password.isNotEmpty) {
+      data["password"] = password;
+    }
+
+    final response = await DataProvider().performRequest(
+      'PATCH',
+      '${APIPath.register}/$userId',
+      data: data,
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response != null && response.statusCode == 200) {
+      log('Successfully updated student');
+    } else {
+      log('Error updating student: ${response?.data}');
+      throw Exception('Failed to update student: ${response?.data}');
     }
   }
 
