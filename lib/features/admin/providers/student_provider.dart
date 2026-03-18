@@ -62,7 +62,7 @@ class StudentsNotifier extends ChangeNotifier {
     }
   }
 
-  List<Student> get students => _students;
+
 
   void addStudent(Student student) {
     _dbService.students.add(student);
