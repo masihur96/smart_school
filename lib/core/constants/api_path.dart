@@ -7,4 +7,5 @@ class APIPath {
   static String register = "$baseUrl/users";
   static String profile = "$baseUrl/auth/profile";
   static String createClass = "$baseUrl/admin/classes";
+  static String createSection = "$baseUrl/admin/sections";
 }
