@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
-import '../providers/student_provider.dart';
+
+import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
-import '../../../models/student_model.dart';
-import '../../../models/user_model.dart';
+import '../providers/student_provider.dart';
 
 class AddEditStudentScreen extends StatefulWidget {
   const AddEditStudentScreen({super.key});
@@ -17,8 +16,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _rollController = TextEditingController();
-  final _guardianController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _designationController = TextEditingController();
   String? _selectedClass;
   String? _selectedSection;
 
@@ -26,29 +27,40 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _passwordController.dispose();
     _rollController.dispose();
-    _guardianController.dispose();
+    _phoneController.dispose();
+    _designationController.dispose();
     super.dispose();
   }
 
-  void _save() {
+  void _save() async {
     if (_formKey.currentState!.validate()) {
-      final newStudent = Student(
-        userId: DateTime.now().millisecondsSinceEpoch.toString(),
-        rollId: _rollController.text,
-        classId: _selectedClass!,
-        sectionId: _selectedSection!,
-        guardianContact: _guardianController.text,
-        user: User(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
+      final user = context.read<AuthNotifier>().user;
+      final schoolId = user?.schoolId ?? '';
+
+      try {
+        await context.read<StudentsNotifier>().addStudentToAPI(
           name: _nameController.text,
           email: _emailController.text,
-          role: UserRole.student,
-        ),
-      );
+          password: _passwordController.text,
+          role: 'student',
+          schoolId: schoolId,
+          phone: _phoneController.text,
+          classId: _selectedClass!,
+          sectionId: _selectedSection!,
+          rollNumber: _rollController.text,
+          designation: _designationController.text,
+        );
 
-      context.read<StudentsNotifier>().addStudent(newStudent);
-      context.pop();
+        if (mounted) Navigator.pop(context);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        }
+      }
     }
   }
 
@@ -86,13 +98,23 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
               validator: (val) => val!.isEmpty ? 'Please enter email' : null,
             ),
             const SizedBox(height: 16),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                prefixIcon: Icon(Icons.lock),
+              ),
+              validator: (val) => val!.isEmpty ? 'Please enter password' : null,
+            ),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
                   child: TextFormField(
                     controller: _rollController,
                     decoration: const InputDecoration(
-                      labelText: 'Roll / ID',
+                      labelText: 'Roll Number',
                       prefixIcon: Icon(Icons.numbers),
                     ),
                     validator: (val) => val!.isEmpty ? 'Required' : null,
@@ -101,15 +123,23 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: TextFormField(
-                    controller: _guardianController,
+                    controller: _phoneController,
                     decoration: const InputDecoration(
-                      labelText: 'Guardian Contact',
+                      labelText: 'Phone',
                       prefixIcon: Icon(Icons.phone),
                     ),
                     validator: (val) => val!.isEmpty ? 'Required' : null,
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _designationController,
+              decoration: const InputDecoration(
+                labelText: 'Designation (e.g. Class Captain)',
+                prefixIcon: Icon(Icons.badge),
+              ),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
