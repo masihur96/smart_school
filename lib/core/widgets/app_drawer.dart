@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
+import 'package:smart_school/features/admin/screens/exam_management_screen.dart';
+import 'package:smart_school/features/admin/screens/notice_management_screen.dart';
+import 'package:smart_school/features/admin/screens/routine_management_screen.dart';
+import 'package:smart_school/features/admin/screens/setup_screen.dart';
+import 'package:smart_school/features/admin/screens/student_management_screen.dart';
+import 'package:smart_school/features/admin/screens/teacher_management_screen.dart';
+import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
+import 'package:smart_school/features/setting_management_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../models/user_model.dart';
 
@@ -36,13 +45,7 @@ class AppDrawer extends StatelessWidget {
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                _buildDrawerItem(
-                  Icons.person_outline,
-                  'My Profile',
-                  () => context.push('/profile'),
-                  context,
-                ),
-                const Divider(),
+
                 if (user.role == UserRole.admin) ..._buildAdminItems(context),
                 if (user.role == UserRole.teacher)
                   ..._buildTeacherItems(context),
@@ -57,7 +60,11 @@ class AppDrawer extends StatelessWidget {
             title: const Text('Logout', style: TextStyle(color: Colors.red)),
             onTap: () {
               context.read<AuthNotifier>().logout();
-              context.go('/login');
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => LoginScreen()),
+                    (route) => false,
+              );
             },
           ),
           const SizedBox(height: 16),
@@ -82,46 +89,65 @@ class AppDrawer extends StatelessWidget {
       _buildDrawerItem(
         Icons.dashboard,
         'Dashboard',
-        () => context.go('/admin'),
+        () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>AdminDashboardScreen(),),);
+
+        },
         context,
       ),
       _buildDrawerItem(
         Icons.people,
         'Students',
-        () => context.go('/admin/students'),
+        () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>StudentManagementScreen(),),);
+        },
         context,
       ),
       _buildDrawerItem(
         Icons.person,
         'Teachers',
-        () => context.go('/admin/teachers'),
+        () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>TeacherManagementScreen(),),);
+        },
         context,
       ),
       _buildDrawerItem(
         Icons.class_,
         'Class & Setup',
-        () => context.go('/admin/setup'),
+        () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>SetupScreen(),),);
+        },
         context,
       ),
       _buildDrawerItem(
         Icons.event_note,
         'Routine',
-        () => context.go('/admin/routine'),
+        () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>RoutineManagementScreen(),),);
+        },
         context,
       ),
       _buildDrawerItem(
         Icons.announcement,
         'Notices',
-        () => context.go('/admin/notices'),
+        () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>NoticeManagementScreen(),),);
+        },
         context,
       ),
       _buildDrawerItem(
         Icons.assignment_turned_in,
         'Exams',
-        () => context.go('/admin/exams'),
+        () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>ExamManagementScreen(),),);
+        },
         context,
       ),
-      _buildDrawerItem(Icons.settings, 'Settings', () {}, context),
+      _buildDrawerItem(Icons.settings, 'Settings', () {
+
+        Navigator.push(context, MaterialPageRoute(builder: (_)=>SettingManagementScreen(),),);
+
+      }, context),
     ];
   }
 

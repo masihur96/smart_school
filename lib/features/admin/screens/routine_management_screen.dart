@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/models/teacher_model.dart';
 import '../providers/routine_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
@@ -90,15 +91,21 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen> {
                       final subjectName = context
                           .read<SubjectSetupNotifier>()
                           .subjects
-                          .firstWhere((s) => s.id == entry.subjectId)
+                          .firstWhere((s) => s.id == entry.subjectId,
+                              orElse: () => Subject(id: '', name: 'Unknown'))
                           .name;
-                      final teacherName =
-                          context
-                              .read<TeachersNotifier>()
-                              .teachers
-                              .firstWhere((t) => t.userId == entry.teacherId)
-                              .user
-                              ?.name ??
+                      final teacherName = context
+                          .read<TeachersNotifier>()
+                          .teachers
+                          .firstWhere((t) => t.userId == entry.teacherId,
+                              orElse: () => Teacher(
+                                  userId: '',
+                                  designation: 'N/A',
+                                  classId: '',
+                                  sectionId: '',
+                                  ))
+                          .user
+                          ?.name ??
                           'Unknown';
                       return ListTile(
                         leading: CircleAvatar(child: Text(entry.day[0])),

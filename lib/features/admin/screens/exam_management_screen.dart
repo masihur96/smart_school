@@ -37,10 +37,12 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
               itemBuilder: (context, index) {
                 final exam = exams[index];
                 final className = classes
-                    .firstWhere((c) => c.id == exam.classId)
+                    .firstWhere((c) => c.id == exam.classId,
+                        orElse: () => ClassRoom(id: '', name: 'N/A'))
                     .name;
                 final subjectName = subjects
-                    .firstWhere((s) => s.id == exam.subjectId)
+                    .firstWhere((s) => s.id == exam.subjectId,
+                        orElse: () => Subject(id: '', name: 'N/A'))
                     .name;
 
                 return Card(
