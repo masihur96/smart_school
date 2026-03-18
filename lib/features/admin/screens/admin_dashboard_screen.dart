@@ -1,17 +1,19 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_school/features/admin/screens/routine_management_screen.dart';
 import 'package:smart_school/features/admin/screens/setup_screen.dart';
 import 'package:smart_school/features/admin/screens/teacher_management_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/models/school_models.dart';
+
 import '../../../core/widgets/app_drawer.dart';
-import '../../teacher/providers/attendance_provider.dart';
 import '../../teacher/domain/entities/attendance.dart';
-import 'student_management_screen.dart';
+import '../../teacher/providers/attendance_provider.dart';
 import 'exam_management_screen.dart';
 import 'notice_management_screen.dart';
+import 'student_management_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -219,7 +221,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             'Manage Routine',
             Icons.calendar_month,
             Colors.purple,
-            onTap: () => context.push('/admin/routine'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => RoutineManagementScreen()),
+              );
+            },
           ),
         ],
       ),
