@@ -21,10 +21,13 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      role: UserRole.values.firstWhere((e) => e.name == json['role']),
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      email: json['email'] ?? '',
+      role: UserRole.values.cast<UserRole?>().firstWhere(
+        (e) => e?.name == json['role'],
+        orElse: () => UserRole.student,
+      ) ?? UserRole.student,
       profileImageUrl: json['profileImageUrl'],
       schoolId: json['schoolId'],
       phone: json['phone'],
