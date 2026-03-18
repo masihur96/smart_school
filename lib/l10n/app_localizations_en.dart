@@ -36,6 +36,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get theme => 'Theme';
 
   @override
+  String get darkMode => 'Dark Mode';
+
+  @override
   String get logout => 'Logout';
 
   @override

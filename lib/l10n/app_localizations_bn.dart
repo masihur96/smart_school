@@ -33,7 +33,10 @@ class AppLocalizationsBn extends AppLocalizations {
   String get language => 'ভাষা';
 
   @override
-  String get theme => 'থিম';
+  String get theme => 'Theme';
+
+  @override
+  String get darkMode => 'ডার্ক মোড';
 
   @override
   String get logout => 'লগআউট';
