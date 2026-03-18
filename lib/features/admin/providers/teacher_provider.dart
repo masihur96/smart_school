@@ -8,15 +8,171 @@ import '../../../core/constants/api_path.dart';
 
 class TeachersNotifier extends ChangeNotifier {
   final DatabaseService _dbService;
-  List<Teacher> _state = [];
+  List<Teacher> _teachers = [];
   bool _isLoading = false;
+  int _currentPage = 1;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
 
   TeachersNotifier(this._dbService) {
-    _state = [..._dbService.teachers];
+    _teachers = [..._dbService.teachers];
   }
 
-  List<Teacher> get teachers => _state;
+  List<Teacher> get teachers => _teachers;
   bool get isLoading => _isLoading;
+  bool get hasMore => _hasMore;
+  bool get isLoadingMore => _isLoadingMore;
+
+  Future<void> fetchTeachers({
+    String? classId, 
+    String? sectionId, 
+    bool? isActive,
+    bool loadMore = false
+  }) async {
+    if (loadMore) {
+      if (_isLoadingMore || !_hasMore) return;
+      _isLoadingMore = true;
+      _currentPage++;
+    } else {
+      _isLoading = true;
+      _currentPage = 1;
+      _hasMore = true;
+    }
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final Map<String, dynamic> query = {
+        'role': 'teacher',
+        'page': _currentPage.toString(),
+        'limit': '10',
+      };
+      if (classId != null && classId.isNotEmpty) query['classId'] = classId;
+      if (sectionId != null && sectionId.isNotEmpty) query['sectionId'] = sectionId;
+      if (isActive != null) query['isActive'] = isActive.toString();
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.fetchUsers,
+        query: query,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final List<dynamic> data = response.data is List
+            ? response.data
+            : (response.data['data'] ?? []);
+        
+        final responseTotal = response.data['total'] != null 
+            ? int.tryParse(response.data['total'].toString()) ?? 0 
+            : data.length;
+        
+        if (data.length < 10 || (loadMore && _teachers.length + data.length >= responseTotal)) {
+          _hasMore = false;
+        }
+
+        if (!loadMore) {
+          _dbService.teachers.clear();
+        }
+
+        for (var item in data) {
+          try {
+             _dbService.teachers.add(Teacher.fromJson(item));
+          } catch(e) {
+             log("Error parsing teacher: $e");
+          }
+        }
+        _teachers = [..._dbService.teachers];
+      } else {
+        log("Error fetching teachers: ${response?.data}");
+        _hasMore = false;
+      }
+    } catch (e) {
+      log("Error fetching teachers: $e");
+      _hasMore = false;
+    } finally {
+      if (loadMore) {
+        _isLoadingMore = false;
+      } else {
+        _isLoading = false;
+      }
+      notifyListeners();
+    }
+  }
+
+  Future<void> toggleTeacherStatus(String userId) async {
+    final index = _dbService.teachers.indexWhere((t) => t.userId == userId);
+    if (index != -1) {
+      final teacher = _teachers[index];
+      final newStatus = !teacher.isActive;
+
+      _isLoading = true;
+      notifyListeners();
+
+      try {
+        final token = await StorageService.getToken();
+        if (token == null) throw Exception('No auth token found');
+
+        final response = await DataProvider().performRequest(
+          'PUT',
+          '${APIPath.fetchUsers}/$userId',
+          data: {'isActive': newStatus},
+          header: {'Authorization': 'Bearer $token'},
+        );
+
+        if (response != null && response.statusCode == 200) {
+          final updatedTeacher = Teacher(
+            userId: teacher.userId,
+            designation: teacher.designation,
+            classId: teacher.classId,
+            sectionId: teacher.sectionId,
+            isActive: newStatus,
+            assignedSubjects: teacher.assignedSubjects,
+            user: teacher.user,
+          );
+          _dbService.teachers[index] = updatedTeacher;
+          _teachers = [..._dbService.teachers];
+        } else {
+          log("Error toggling teacher status: ${response?.data}");
+        }
+      } catch (e) {
+        log("Error toggling teacher status: $e");
+      } finally {
+        _isLoading = false;
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<void> deleteTeacher(String userId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final response = await DataProvider().performRequest(
+        'DELETE',
+        '${APIPath.fetchUsers}/$userId',
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && (response.statusCode == 200 || response.statusCode == 204)) {
+        _dbService.teachers.removeWhere((t) => t.userId == userId);
+        _teachers = [..._dbService.teachers];
+      } else {
+        log("Error deleting teacher: ${response?.data}");
+      }
+    } catch (e) {
+      log("Error deleting teacher: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> addTeacherToAPI({
     required String name,
@@ -57,7 +213,6 @@ class TeachersNotifier extends ChangeNotifier {
 
       if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
         log('Successfully created teacher');
-        // Ideally we should add the teacher to the local state here or refresh the list
       } else {
         log('Error creating teacher: ${response?.data}');
         throw Exception('Failed to create teacher: ${response?.data}');
@@ -71,26 +226,20 @@ class TeachersNotifier extends ChangeNotifier {
     }
   }
 
-  void addTeacher(Teacher teacher) {
-    _dbService.teachers.add(teacher);
-    _state = [..._dbService.teachers];
-    notifyListeners();
-  }
-
   void updateTeacher(Teacher teacher) {
     final index = _dbService.teachers.indexWhere(
       (t) => t.userId == teacher.userId,
     );
     if (index != -1) {
       _dbService.teachers[index] = teacher;
-      _state = [..._dbService.teachers];
+      _teachers = [..._dbService.teachers];
       notifyListeners();
     }
   }
 
   void removeTeacher(String userId) {
     _dbService.teachers.removeWhere((t) => t.userId == userId);
-    _state = [..._dbService.teachers];
+    _teachers = [..._dbService.teachers];
     notifyListeners();
   }
 }
