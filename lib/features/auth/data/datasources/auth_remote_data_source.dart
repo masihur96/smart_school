@@ -140,4 +140,36 @@ class AuthRemoteDataSource {
       throw Exception(message);
     }
   }
+
+  /// Changes the current user's password.
+  Future<bool> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    final token = await StorageService.getToken();
+    if (token == null) {
+      throw Exception('No authentication token found');
+    }
+
+    final response = await _dataProvider.performRequest(
+      'POST',
+      APIPath.changePassword,
+      data: {
+        'oldPassword': oldPassword,
+        'newPassword': newPassword,
+      },
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response == null || response.statusCode == null) {
+      throw Exception('No response from server');
+    }
+
+    if (response.statusCode! >= 200 && response.statusCode! < 300) {
+      return true;
+    } else {
+      final message = response.data?['message'] ?? 'Failed to change password';
+      throw Exception(message);
+    }
+  }
 }

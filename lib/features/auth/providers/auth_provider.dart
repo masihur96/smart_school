@@ -5,16 +5,19 @@ import '../../../models/user_model.dart';
 import '../domain/usecases/login_usecase.dart';
 import '../domain/usecases/register_usecase.dart';
 import '../domain/usecases/get_profile_usecase.dart';
+import '../domain/usecases/change_password_usecase.dart';
 
 class AuthNotifier extends ChangeNotifier {
   final LoginUseCase loginUseCase;
   final RegisterUseCase registerUseCase;
   final GetProfileUseCase getProfileUseCase;
+  final ChangePasswordUseCase changePasswordUseCase;
 
   AuthNotifier({
     required this.loginUseCase,
     required this.registerUseCase,
     required this.getProfileUseCase,
+    required this.changePasswordUseCase,
   });
 
   User? _user;
@@ -139,5 +142,31 @@ class AuthNotifier extends ChangeNotifier {
   void clearError() {
     _error = null;
     notifyListeners();
+  }
+
+  Future<bool> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final success = await changePasswordUseCase(
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
+      _isLoading = false;
+      notifyListeners();
+      return success;
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString().contains('Exception: ')
+          ? e.toString().split('Exception: ')[1]
+          : 'Failed to change password';
+      notifyListeners();
+      return false;
+    }
   }
 }

@@ -7,6 +7,8 @@ class StorageService {
   static const String _forceResetKey = 'force_reset';
   static const String _userEmailKey = 'user_email';
   static const String _userPasswordKey = 'user_password';
+  static const String _themeKey = 'app_theme';
+  static const String _localeKey = 'app_locale';
 
   static const _storage = FlutterSecureStorage();
 
@@ -58,6 +60,26 @@ class StorageService {
   static Future<String?> getPassword() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_userPasswordKey);
+  }
+
+  static Future<void> saveTheme(String theme) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_themeKey, theme);
+  }
+
+  static Future<String?> getTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_themeKey);
+  }
+
+  static Future<void> saveLocale(String locale) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_localeKey, locale);
+  }
+
+  static Future<String?> getLocale() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_localeKey);
   }
 
   static Future<void> clearCredential() async {

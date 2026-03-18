@@ -13,4 +13,8 @@ abstract class AuthRepository {
     required String phone,
   });
   Future<UserEntity> getProfile();
+  Future<bool> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  });
 }

@@ -69,4 +69,15 @@ class AuthRepositoryImpl implements AuthRepository {
       phone: phone,
     );
   }
+
+  @override
+  Future<bool> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    return await remoteDataSource.changePassword(
+      oldPassword: oldPassword,
+      newPassword: newPassword,
+    );
+  }
 }

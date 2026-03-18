@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
+import 'package:smart_school/features/auth/presntation/views/change_password_screen.dart';
 import 'package:smart_school/features/splash_screen.dart';
 
 class RouteGenerator {
@@ -13,6 +14,7 @@ class RouteGenerator {
   static const String registerRoute = '/register';
   static const String homeRoute = '/home'; // ✅ Add this
   static const String notificationRoute = '/notification';
+  static const String changePasswordRoute = '/change-password';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -24,6 +26,9 @@ class RouteGenerator {
         );
       case loginRoute:
         return MaterialPageRoute(builder: (_) => LoginScreen());
+
+      case changePasswordRoute:
+        return MaterialPageRoute(builder: (_) => const ChangePasswordScreen());
 
       default:
         return MaterialPageRoute(builder: (_) => LoginScreen());
