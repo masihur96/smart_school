@@ -86,8 +86,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
         .where((s) => s.classId == _selectedClassId)
         .toList();
 
-    final bool isFiltered =
-        _selectedClassId != null && _selectedSectionId != null;
+    final bool isFiltered = _selectedClassId != null;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F3FF),
@@ -122,7 +121,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
     List<Section> filteredSections,
   ) {
     return SliverAppBar(
-      expandedHeight: 200,
+      expandedHeight: 220,
       floating: false,
       pinned: true,
       backgroundColor: const Color(0xFF7C3AED),
@@ -139,7 +138,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
           ),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 56, 20, 16),
+              padding: const EdgeInsets.fromLTRB(20, 50, 10, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -185,17 +184,22 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                       const SizedBox(width: 12),
                       Expanded(
                         child: _FilterDropdown(
-                          hint: 'Select Section',
+                          hint: filteredSections.isEmpty ? 'No Sections' : 'All Sections',
                           value: _selectedSectionId,
-                          items: filteredSections
-                              .map(
-                                (s) => DropdownMenuItem(
-                                  value: s.id,
-                                  child: Text(s.name),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (val) =>
+                          items: [
+                            if (filteredSections.isNotEmpty)
+                              const DropdownMenuItem(
+                                value: null,
+                                child: Text('All Sections'),
+                              ),
+                            ...filteredSections.map(
+                              (s) => DropdownMenuItem(
+                                value: s.id,
+                                child: Text(s.name),
+                              ),
+                            ),
+                          ],
+                          onChanged: filteredSections.isEmpty ? null : (val) =>
                               setState(() => _selectedSectionId = val),
                         ),
                       ),
@@ -207,7 +211,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
           ),
         ),
       ),
-      bottom: (_selectedClassId != null && _selectedSectionId != null)
+      bottom: (_selectedClassId != null)
           ? TabBar(
               controller: _tabController,
               isScrollable: true,
@@ -238,7 +242,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
           day: day,
           color: color,
           classId: _selectedClassId!,
-          sectionId: _selectedSectionId!,
+          sectionId: _selectedSectionId ?? '',
         );
       }),
     );
@@ -264,7 +268,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
           ),
           const SizedBox(height: 20),
           const Text(
-            'Select Class & Section',
+            'Select Class',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -273,7 +277,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'Choose a class and section above\nto view or manage the routine.',
+            'Choose a class above\nto view or manage the routine.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey[500], height: 1.5),
           ),
@@ -291,7 +295,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
       backgroundColor: Colors.transparent,
       builder: (_) => _AddRoutineEntrySheet(
         classId: _selectedClassId!,
-        sectionId: _selectedSectionId!,
+        sectionId: _selectedSectionId ?? '',
         initialDay: _days[_tabController.index],
       ),
     );
@@ -1247,13 +1251,13 @@ class _FilterDropdown extends StatelessWidget {
   final String hint;
   final String? value;
   final List<DropdownMenuItem<String>> items;
-  final ValueChanged<String?> onChanged;
+  final ValueChanged<String?>? onChanged;
 
   const _FilterDropdown({
     required this.hint,
     required this.value,
     required this.items,
-    required this.onChanged,
+    this.onChanged,
   });
 
   @override
