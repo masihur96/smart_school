@@ -10,6 +10,10 @@ import 'package:smart_school/features/admin/screens/student_management_screen.da
 import 'package:smart_school/features/admin/screens/teacher_management_screen.dart';
 import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
 import 'package:smart_school/features/setting_management_screen.dart';
+import 'package:smart_school/features/teacher/screens/attendance_screen.dart';
+import 'package:smart_school/features/teacher/screens/homework_management_screen.dart';
+import 'package:smart_school/features/teacher/screens/mark_entry_screen.dart';
+import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../models/user_model.dart';
 
@@ -156,28 +160,41 @@ class AppDrawer extends StatelessWidget {
       _buildDrawerItem(
         Icons.dashboard,
         'Dashboard',
-        () => context.go('/teacher'),
+        () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>TeacherDashboardScreen(),),);
+
+        },
         context,
       ),
       _buildDrawerItem(
         Icons.check_circle,
         'Attendance',
-        () => context.go('/teacher/attendance'),
+        () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>AttendanceScreen(),),);
+
+        },
         context,
       ),
       _buildDrawerItem(
         Icons.assignment,
         'Homework',
-        () => context.go('/teacher/homework'),
+        () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>HomeworkManagementScreen(),),);
+        },
         context,
       ),
       _buildDrawerItem(
         Icons.grade,
         'Mark Entry',
-        () => context.go('/teacher/marks'),
+        () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>MarkEntryScreen(),),);
+        },
         context,
       ),
-      _buildDrawerItem(Icons.calendar_today, 'Routine', () {}, context),
+      _buildDrawerItem(Icons.calendar_today, 'Routine', () {
+
+        Navigator.push(context, MaterialPageRoute(builder: (_)=>TeacherDashboardScreen(),),);
+      }, context),
     ];
   }
 
