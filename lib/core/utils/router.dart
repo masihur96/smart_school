@@ -1,30 +1,30 @@
 import 'package:go_router/go_router.dart';
 import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
-import 'package:smart_school/features/splash_screen.dart';
+import 'package:smart_school/features/auth/presntation/views/register_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
-import '../../features/auth/providers/auth_provider.dart';
+import 'package:smart_school/features/splash_screen.dart';
 
-import '../../features/admin/screens/admin_dashboard_screen.dart';
-import '../../features/admin/screens/student_management_screen.dart';
 import '../../features/admin/screens/add_edit_student_screen.dart';
-import '../../features/admin/screens/teacher_management_screen.dart';
 import '../../features/admin/screens/add_edit_teacher_screen.dart';
-import '../../features/admin/screens/setup_screen.dart';
-import '../../features/admin/screens/routine_management_screen.dart';
+import '../../features/admin/screens/admin_dashboard_screen.dart';
+import '../../features/admin/screens/exam_management_screen.dart';
 import '../../features/admin/screens/notice_management_screen.dart';
-import '../../features/teacher/screens/teacher_dashboard_screen.dart';
-import '../../features/teacher/screens/attendance_screen.dart';
-import '../../features/teacher/screens/homework_management_screen.dart';
-import '../../features/student/screens/student_dashboard_screen.dart';
+import '../../features/admin/screens/routine_management_screen.dart';
+import '../../features/admin/screens/setup_screen.dart';
+import '../../features/admin/screens/student_management_screen.dart';
+import '../../features/admin/screens/teacher_management_screen.dart';
+import '../../features/auth/providers/auth_provider.dart';
 import '../../features/student/screens/student_attendance_screen.dart';
-import '../../features/student/screens/student_routine_screen.dart';
+import '../../features/student/screens/student_dashboard_screen.dart';
 import '../../features/student/screens/student_homework_screen.dart';
 import '../../features/student/screens/student_notice_screen.dart';
-import '../../features/admin/screens/exam_management_screen.dart';
-import '../../features/teacher/screens/mark_entry_screen.dart';
 import '../../features/student/screens/student_result_screen.dart';
+import '../../features/student/screens/student_routine_screen.dart';
+import '../../features/teacher/screens/homework_management_screen.dart';
+import '../../features/teacher/screens/mark_entry_screen.dart';
+import '../../features/teacher/screens/teacher_attendance_screen.dart';
+import '../../features/teacher/screens/teacher_dashboard_screen.dart';
 import '../../models/user_model.dart';
-import 'package:smart_school/features/auth/presntation/views/register_screen.dart';
 
 GoRouter getRouter(AuthNotifier authNotifier) {
   return GoRouter(

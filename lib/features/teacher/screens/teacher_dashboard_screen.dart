@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
+
 import '../../../core/widgets/app_drawer.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/teacher_dashboard_provider.dart';
-import 'attendance_screen.dart';
-import 'mark_entry_screen.dart';
 import 'homework_management_screen.dart';
+import 'mark_entry_screen.dart';
+import 'teacher_attendance_screen.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
   const TeacherDashboardScreen({super.key});
@@ -24,7 +24,8 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final now = DateTime.now();
-      final dateString = "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
+      final dateString =
+          "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
       context.read<TeacherDashboardProvider>().fetchTodayClasses(dateString);
     });
   }
@@ -63,7 +64,10 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           IconButton(
             icon: const Icon(Icons.account_circle),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_)=>ProfileScreen(),),);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => ProfileScreen()),
+              );
             },
           ),
           const SizedBox(width: 8),
@@ -74,7 +78,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         index: _selectedIndex,
         children: [
           _buildDashboardOverview(context, user?.name ?? 'Teacher'),
-          const AttendanceScreen(hideAppBar: true),
+          const TeacherAttendanceScreen(hideAppBar: true),
           const MarkEntryScreen(hideAppBar: true),
           const HomeworkManagementScreen(hideAppBar: true),
         ],
@@ -125,16 +129,23 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           if (provider.isLoading)
             const Center(child: CircularProgressIndicator())
           else if (provider.error != null)
-            Center(child: Text('Error: ${provider.error}', style: TextStyle(color: Colors.red)))
+            Center(
+              child: Text(
+                'Error: ${provider.error}',
+                style: TextStyle(color: Colors.red),
+              ),
+            )
           else if (classes.isEmpty)
             const Center(child: Text('No classes today.'))
           else
-            ...classes.map((c) => _buildClassTile(
-                  context,
-                  c.classEntity?.name ?? 'Class ${c.classId}',
-                  c.subjectEntity?.name ?? 'Subject ${c.subjectId}',
-                  '${c.startTime} - ${c.endTime}',
-                )),
+            ...classes.map(
+              (c) => _buildClassTile(
+                context,
+                c.classEntity?.name ?? 'Class ${c.classId}',
+                c.subjectEntity?.name ?? 'Subject ${c.subjectId}',
+                '${c.startTime} - ${c.endTime}',
+              ),
+            ),
           const SizedBox(height: 24),
           Text(
             'Quick Actions',

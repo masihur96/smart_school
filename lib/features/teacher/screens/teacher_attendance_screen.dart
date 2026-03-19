@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/models/school_models.dart';
-import '../providers/attendance_provider.dart';
+
 import '../../admin/providers/student_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../domain/entities/attendance.dart';
-import 'package:intl/intl.dart';
+import '../providers/attendance_provider.dart';
 
-class AttendanceScreen extends StatefulWidget {
+class TeacherAttendanceScreen extends StatefulWidget {
   final bool hideAppBar;
-  const AttendanceScreen({super.key, this.hideAppBar = false});
+  const TeacherAttendanceScreen({super.key, this.hideAppBar = false});
 
   @override
-  State<AttendanceScreen> createState() => _AttendanceScreenState();
+  State<TeacherAttendanceScreen> createState() =>
+      _TeacherAttendanceScreenState();
 }
 
-class _AttendanceScreenState extends State<AttendanceScreen> {
+class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
   DateTime _selectedDate = DateTime.now();
   String? _selectedClass;
   String? _selectedSection;
