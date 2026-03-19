@@ -6,6 +6,8 @@ import '../../../models/school_models.dart';
 import '../providers/exam_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
+import '../../auth/providers/auth_provider.dart';
+
 
 class AddEditExamScreen extends StatefulWidget {
   final Exam? exam;
@@ -40,7 +42,12 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
     // Fetch dependencies if not already loaded
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TeachersNotifier>().fetchTeachers();
-      // Class and Subject should be available from setup_provider
+      
+      final schoolId = context.read<AuthNotifier>().user?.schoolId;
+      if (schoolId != null) {
+        context.read<ClassSetupNotifier>().fetchClasses(schoolId);
+        context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
+      }
     });
   }
 
