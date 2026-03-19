@@ -16,6 +16,7 @@ import 'features/admin/providers/settings_provider.dart';
 import 'features/teacher/providers/homework_provider.dart';
 import 'features/teacher/providers/attendance_provider.dart';
 import 'features/teacher/providers/result_provider.dart';
+import 'features/teacher/providers/teacher_dashboard_provider.dart';
 import 'features/teacher/data/repositories/attendance_repository_impl.dart';
 import 'features/teacher/data/repositories/result_repository_impl.dart';
 import 'services/database_service.dart';
@@ -83,6 +84,7 @@ void main() {
         ChangeNotifierProvider(
           create: (_) => ResultsNotifier(resultRepository),
         ),
+        ChangeNotifierProvider(create: (_) => TeacherDashboardProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
       ],
       child: const MyApp(),

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../providers/teacher_dashboard_provider.dart';
 import 'attendance_screen.dart';
 import 'mark_entry_screen.dart';
 import 'homework_management_screen.dart';
@@ -17,6 +18,16 @@ class TeacherDashboardScreen extends StatefulWidget {
 
 class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final now = DateTime.now();
+      final dateString = "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
+      context.read<TeacherDashboardProvider>().fetchTodayClasses(dateString);
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -94,12 +105,15 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   }
 
   Widget _buildDashboardOverview(BuildContext context, String name) {
+    final provider = context.watch<TeacherDashboardProvider>();
+    final classes = provider.todayClasses;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildWelcomeCard(context, name),
+          _buildWelcomeCard(context, name, classes.length),
           const SizedBox(height: 24),
           Text(
             'My Classes Today',
@@ -108,18 +122,19 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          _buildClassTile(
-            context,
-            'Class 10 - A',
-            'Mathematics',
-            '09:00 AM - 10:00 AM',
-          ),
-          _buildClassTile(
-            context,
-            'Class 9 - B',
-            'Physics',
-            '11:00 AM - 12:00 PM',
-          ),
+          if (provider.isLoading)
+            const Center(child: CircularProgressIndicator())
+          else if (provider.error != null)
+            Center(child: Text('Error: ${provider.error}', style: TextStyle(color: Colors.red)))
+          else if (classes.isEmpty)
+            const Center(child: Text('No classes today.'))
+          else
+            ...classes.map((c) => _buildClassTile(
+                  context,
+                  c.classEntity?.name ?? 'Class ${c.classId}',
+                  c.subjectEntity?.name ?? 'Subject ${c.subjectId}',
+                  '${c.startTime} - ${c.endTime}',
+                )),
           const SizedBox(height: 24),
           Text(
             'Quick Actions',
@@ -154,7 +169,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
-  Widget _buildWelcomeCard(BuildContext context, String name) {
+  Widget _buildWelcomeCard(BuildContext context, String name, int classCount) {
     return Card(
       color: Colors.blue.shade50,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -174,9 +189,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const Text(
-                    'You have 2 classes today.',
-                    style: TextStyle(color: Colors.grey),
+                  Text(
+                    'You have $classCount classes today.',
+                    style: const TextStyle(color: Colors.grey),
                   ),
                 ],
               ),
