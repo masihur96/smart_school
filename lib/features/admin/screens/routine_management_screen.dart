@@ -1,12 +1,14 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/models/teacher_model.dart';
+
+import '../../../models/school_models.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/routine_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
-import '../../../models/school_models.dart';
 
 // Day order constant
 const _days = [
@@ -61,7 +63,9 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
         context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
         context.read<TeachersNotifier>().fetchTeachers();
       } else {
-        log('Warning: No schoolId found in AuthNotifier during routine management init');
+        log(
+          'Warning: No schoolId found in AuthNotifier during routine management init',
+        );
       }
     });
   }
@@ -91,9 +95,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
         headerSliverBuilder: (context, _) => [
           _buildSliverHeader(context, classes, filteredSections),
         ],
-        body: isFiltered
-            ? _buildTimetableBody()
-            : _buildEmptyState(),
+        body: isFiltered ? _buildTimetableBody() : _buildEmptyState(),
       ),
       floatingActionButton: isFiltered
           ? FloatingActionButton.extended(
@@ -102,7 +104,10 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
               icon: const Icon(Icons.add, color: Colors.white),
               label: const Text(
                 'Add Entry',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             )
           : null,
@@ -150,7 +155,10 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                   const SizedBox(height: 4),
                   Text(
                     'Manage weekly timetable for each class',
-                    style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13),
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 13,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   // Filter row
@@ -161,7 +169,12 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                           hint: 'Select Class',
                           value: _selectedClassId,
                           items: classes
-                              .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
+                              .map(
+                                (c) => DropdownMenuItem(
+                                  value: c.id,
+                                  child: Text(c.name),
+                                ),
+                              )
                               .toList(),
                           onChanged: (val) => setState(() {
                             _selectedClassId = val;
@@ -175,9 +188,15 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                           hint: 'Select Section',
                           value: _selectedSectionId,
                           items: filteredSections
-                              .map((s) => DropdownMenuItem(value: s.id, child: Text(s.name)))
+                              .map(
+                                (s) => DropdownMenuItem(
+                                  value: s.id,
+                                  child: Text(s.name),
+                                ),
+                              )
                               .toList(),
-                          onChanged: (val) => setState(() => _selectedSectionId = val),
+                          onChanged: (val) =>
+                              setState(() => _selectedSectionId = val),
                         ),
                       ),
                     ],
@@ -197,7 +216,10 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
               indicatorWeight: 3,
               labelColor: Colors.white,
               unselectedLabelColor: Colors.white60,
-              labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              labelStyle: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
               tabs: _dayAbbr.map((d) => Tab(text: d)).toList(),
             )
           : null,
@@ -298,15 +320,18 @@ class _DayRoutineTab extends StatelessWidget {
     final key = '${classId}_$sectionId';
     final allEntries =
         context.watch<RoutineNotifier>().state[key] ?? <RoutineEntry>[];
-    final entries =
-        allEntries.where((e) => e.day == day).toList();
+    final entries = allEntries.where((e) => e.day == day).toList();
 
     if (entries.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.school_outlined, size: 48, color: color.withOpacity(0.4)),
+            Icon(
+              Icons.school_outlined,
+              size: 48,
+              color: color.withOpacity(0.4),
+            ),
             const SizedBox(height: 12),
             Text(
               'No classes on $day',
@@ -338,18 +363,15 @@ class _DayRoutineTab extends StatelessWidget {
             )
             .name;
 
-        final teacher = context
-            .read<TeachersNotifier>()
-            .teachers
-            .firstWhere(
-              (t) => t.userId == entry.teacherId,
-              orElse: () => Teacher(
-                userId: '',
-                designation: 'N/A',
-                classId: '',
-                sectionId: '',
-              ),
-            );
+        final teacher = context.read<TeachersNotifier>().teachers.firstWhere(
+          (t) => t.userId == entry.teacherId,
+          orElse: () => Teacher(
+            userId: '',
+            designation: 'N/A',
+            classId: '',
+            sectionId: '',
+          ),
+        );
         final teacherName = teacher.user?.name ?? 'Unknown Teacher';
 
         return _RoutineEntryCard(
@@ -357,15 +379,146 @@ class _DayRoutineTab extends StatelessWidget {
           subjectName: subjectName,
           teacherName: teacherName,
           accentColor: color,
-          onDelete: () {
-            context.read<RoutineNotifier>().removeEntry(
-              classId,
-              sectionId,
-              globalIndex,
-            );
-          },
+          onView: () =>
+              _viewEntry(context, entry, subjectName, teacherName, color),
+          onEdit: () => _editEntry(context, classId, sectionId, entry),
+          onDelete: () => _deleteEntry(context, classId, sectionId, entry),
         );
       },
+    );
+  }
+
+  void _viewEntry(
+    BuildContext context,
+    RoutineEntry entry,
+    String subjectName,
+    String teacherName,
+    Color color,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.info_outline_rounded, color: color),
+            const SizedBox(width: 10),
+            const Text('Routine Details'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _detailRow(Icons.book_outlined, 'Subject', subjectName),
+            const SizedBox(height: 12),
+            _detailRow(Icons.person_outline_rounded, 'Teacher', teacherName),
+            const SizedBox(height: 12),
+            _detailRow(Icons.calendar_today_outlined, 'Day', entry.day),
+            const SizedBox(height: 12),
+            _detailRow(
+              Icons.access_time_rounded,
+              'Duration',
+              '${entry.startTime} - ${entry.endTime}',
+            ),
+            if (entry.roomNumber != null) ...[
+              const SizedBox(height: 12),
+              _detailRow(
+                Icons.meeting_room_outlined,
+                'Room',
+                entry.roomNumber!,
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _detailRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: Colors.grey[600]),
+        const SizedBox(width: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(color: Colors.grey[500], fontSize: 11),
+            ),
+            Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _editEntry(
+    BuildContext context,
+    String classId,
+    String sectionId,
+    RoutineEntry entry,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _AddRoutineEntrySheet(
+        classId: classId,
+        sectionId: sectionId,
+        initialDay: entry.day,
+        existingEntry: entry,
+      ),
+    );
+  }
+
+  void _deleteEntry(
+    BuildContext context,
+    String classId,
+    String sectionId,
+    RoutineEntry entry,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Entry'),
+        content: const Text(
+          'Are you sure you want to delete this routine entry?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              if (entry.id != null) {
+                context.read<RoutineNotifier>().removeRoutineFromAPI(
+                  classId,
+                  sectionId,
+                  entry.id!,
+                );
+              } else {
+                // Fallback for entries not yet synced/without ID (if any)
+                // Need global index which we don't have easily here,
+                // but usually all will have IDs now.
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -380,6 +533,8 @@ class _RoutineEntryCard extends StatelessWidget {
   final String teacherName;
   final Color accentColor;
   final VoidCallback onDelete;
+  final VoidCallback onEdit;
+  final VoidCallback onView;
 
   const _RoutineEntryCard({
     required this.entry,
@@ -387,6 +542,8 @@ class _RoutineEntryCard extends StatelessWidget {
     required this.teacherName,
     required this.accentColor,
     required this.onDelete,
+    required this.onEdit,
+    required this.onView,
   });
 
   @override
@@ -395,188 +552,213 @@ class _RoutineEntryCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: accentColor.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: accentColor.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
+        border: Border.all(color: accentColor.withOpacity(0.1), width: 1),
       ),
-      child: IntrinsicHeight(
-        child: Row(
-          children: [
-            // Accent side bar
-            Container(
-              width: 5,
-              decoration: BoxDecoration(
-                color: accentColor,
-                borderRadius: const BorderRadius.horizontal(
-                  left: Radius.circular(16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              // Time Indicator side
+              Container(
+                width: 80,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  color: accentColor.withOpacity(0.05),
+                  border: Border(
+                    right: BorderSide(color: accentColor.withOpacity(0.1)),
+                  ),
                 ),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                child: Row(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Icon circle
-                    Container(
-                      width: 46,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        color: accentColor.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.menu_book_rounded,
+                    Text(
+                      entry.startTime.split(' ')[0],
+                      style: TextStyle(
                         color: accentColor,
-                        size: 22,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
                     ),
-                    const SizedBox(width: 14),
-                    // Content
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            subjectName,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                              color: Color(0xFF1E1B4B),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Icon(Icons.person_outline,
-                                  size: 13, color: Colors.grey[500]),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  teacherName,
-                                  style: TextStyle(
-                                    color: Colors.grey[500],
-                                    fontSize: 12,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (entry.roomNumber != null &&
-                              entry.roomNumber!.isNotEmpty) ...[
-                            const SizedBox(height: 2),
-                            Row(
-                              children: [
-                                Icon(Icons.room_outlined,
-                                    size: 13, color: Colors.grey[400]),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Room ${entry.roomNumber}',
-                                  style: TextStyle(
-                                    color: Colors.grey[400],
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ],
+                    Text(
+                      entry.startTime.split(' ').length > 1
+                          ? entry.startTime.split(' ')[1]
+                          : '',
+                      style: TextStyle(
+                        color: accentColor.withOpacity(0.6),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    // Time pill + delete
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: accentColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            '${entry.startTime}\n${entry.endTime}',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: accentColor,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              height: 1.4,
-                            ),
-                          ),
-                        ),
-                        InkWell(
-                          onTap: () => _confirmDelete(context),
-                          borderRadius: BorderRadius.circular(8),
-                          child: Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: Icon(
-                              Icons.delete_outline_rounded,
-                              size: 20,
-                              color: Colors.red[300],
-                            ),
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 8),
+                    Container(
+                      width: 1,
+                      height: 12,
+                      color: accentColor.withOpacity(0.2),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      entry.endTime.split(' ')[0],
+                      style: TextStyle(
+                        color: accentColor.withOpacity(0.8),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+              // Main Content
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              subjectName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 17,
+                                color: Color(0xFF1E1B4B),
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          ),
+                          _buildActionsMenu(),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.person_outline_rounded,
+                            size: 14,
+                            color: Colors.grey[500],
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            teacherName,
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (entry.roomNumber != null) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.meeting_room_outlined,
+                                size: 12,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Room: ${entry.roomNumber}',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  void _confirmDelete(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Remove Entry'),
-        content: Text('Remove "$subjectName" from the routine?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+  Widget _buildActionsMenu() {
+    return PopupMenuButton<String>(
+      icon: Icon(Icons.more_vert, color: Colors.grey[400], size: 20),
+      padding: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      onSelected: (val) {
+        if (val == 'view') onView();
+        if (val == 'edit') onEdit();
+        if (val == 'delete') onDelete();
+      },
+      itemBuilder: (ctx) => [
+        const PopupMenuItem(
+          value: 'view',
+          child: Row(
+            children: [
+              Icon(Icons.visibility_outlined, size: 18, color: Colors.blue),
+              SizedBox(width: 10),
+              Text('View Details'),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              onDelete();
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Remove', style: TextStyle(color: Colors.white)),
+        ),
+        const PopupMenuItem(
+          value: 'edit',
+          child: Row(
+            children: [
+              Icon(Icons.edit_outlined, size: 18, color: Colors.orange),
+              SizedBox(width: 10),
+              Text('Edit Entry'),
+            ],
           ),
-        ],
-      ),
+        ),
+        const PopupMenuItem(
+          value: 'delete',
+          child: Row(
+            children: [
+              Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+              SizedBox(width: 10),
+              Text('Delete', style: TextStyle(color: Colors.red)),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Add Routine Entry Bottom Sheet
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _AddRoutineEntrySheet extends StatefulWidget {
   final String classId;
   final String sectionId;
   final String initialDay;
+  final RoutineEntry? existingEntry;
 
   const _AddRoutineEntrySheet({
     required this.classId,
     required this.sectionId,
     required this.initialDay,
+    this.existingEntry,
   });
 
   @override
@@ -595,7 +777,36 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
   @override
   void initState() {
     super.initState();
-    _selectedDay = widget.initialDay;
+    if (widget.existingEntry != null) {
+      _selectedDay = widget.existingEntry!.day;
+      _subjectId = widget.existingEntry!.subjectId;
+      _teacherId = widget.existingEntry!.teacherId;
+      _startTime = _parseTime(widget.existingEntry!.startTime);
+      _endTime = _parseTime(widget.existingEntry!.endTime);
+      _roomController.text = widget.existingEntry!.roomNumber ?? '';
+    } else {
+      _selectedDay = widget.initialDay;
+    }
+  }
+
+  TimeOfDay _parseTime(String timeStr) {
+    try {
+      final parts = timeStr.trim().split(' ');
+      final timeParts = parts[0].split(':');
+      int hour = int.parse(timeParts[0]);
+      int minute = int.parse(timeParts[1]);
+      if (parts.length > 1 && parts[1].toUpperCase() == 'PM' && hour < 12) {
+        hour += 12;
+      } else if (parts.length > 1 &&
+          parts[1].toUpperCase() == 'AM' &&
+          hour == 12) {
+        hour = 0;
+      }
+      return TimeOfDay(hour: hour, minute: minute);
+    } catch (e) {
+      log('Error parsing time: $timeStr');
+      return const TimeOfDay(hour: 9, minute: 0);
+    }
   }
 
   @override
@@ -650,9 +861,11 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
     }
 
     final authNotifier = context.read<AuthNotifier>();
-    final schoolId = authNotifier.user?.schoolId ?? '3b1e7e8f-6e4c-4c0e-9c2a-6d8f4c1b7a91';
-    
+    final schoolId =
+        authNotifier.user?.schoolId ?? '3b1e7e8f-6e4c-4c0e-9c2a-6d8f4c1b7a91';
+
     final entry = RoutineEntry(
+      id: widget.existingEntry?.id,
       classId: widget.classId,
       schoolId: schoolId,
       day: _selectedDay,
@@ -665,15 +878,24 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
           : _roomController.text.trim(),
     );
 
-    log('Routine entry created: ${entry.toJson()}');
+    log('Routine entry prepared: ${entry.toJson()}');
 
     try {
-      log('Calling addRoutineToAPI from UI');
-      await context.read<RoutineNotifier>().addRoutineToAPI(
-        widget.classId,
-        widget.sectionId,
-        entry,
-      );
+      if (widget.existingEntry != null) {
+        log('Calling updateRoutineOnAPI from UI');
+        await context.read<RoutineNotifier>().updateRoutineOnAPI(
+          widget.classId,
+          widget.sectionId,
+          entry,
+        );
+      } else {
+        log('Calling addRoutineToAPI from UI');
+        await context.read<RoutineNotifier>().addRoutineToAPI(
+          widget.classId,
+          widget.sectionId,
+          entry,
+        );
+      }
       if (mounted) {
         log('Routine added successfully, closing sheet');
         Navigator.pop(context);
@@ -814,9 +1036,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                                 child: Text(
                                   _dayAbbr[i],
                                   style: TextStyle(
-                                    color: isSelected
-                                        ? Colors.white
-                                        : color,
+                                    color: isSelected ? Colors.white : color,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 13,
                                   ),
@@ -838,10 +1058,12 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                         hint: 'Choose a subject',
                         value: _subjectId,
                         items: subjects
-                            .map((s) => DropdownMenuItem(
-                                  value: s.id,
-                                  child: Text(s.name),
-                                ))
+                            .map(
+                              (s) => DropdownMenuItem(
+                                value: s.id,
+                                child: Text(s.name),
+                              ),
+                            )
                             .toList(),
                         onChanged: (val) => setState(() => _subjectId = val),
                       ),
@@ -857,10 +1079,12 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                         hint: 'Assign a teacher',
                         value: _teacherId,
                         items: teachers
-                            .map((t) => DropdownMenuItem(
-                                  value: t.userId,
-                                  child: Text(t.user?.name ?? 'Unknown'),
-                                ))
+                            .map(
+                              (t) => DropdownMenuItem(
+                                value: t.userId,
+                                child: Text(t.user?.name ?? 'Unknown'),
+                              ),
+                            )
                             .toList(),
                         onChanged: (val) => setState(() => _teacherId = val),
                       ),
@@ -953,14 +1177,17 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                             borderRadius: BorderRadius.circular(14),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF7C3AED).withOpacity(0.35),
+                                color: const Color(
+                                  0xFF7C3AED,
+                                ).withOpacity(0.35),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
                             ],
                           ),
                           child: ElevatedButton(
-                            onPressed: context.watch<RoutineNotifier>().isLoading
+                            onPressed:
+                                context.watch<RoutineNotifier>().isLoading
                                 ? null
                                 : _save,
                             style: ElevatedButton.styleFrom(
@@ -1045,8 +1272,18 @@ class _FilterDropdown extends StatelessWidget {
           isExpanded: true,
           dropdownColor: const Color(0xFF4F46E5),
           style: const TextStyle(color: Colors.white, fontSize: 13),
-          hint: Text(hint, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12)),
-          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 18),
+          hint: Text(
+            hint,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.7),
+              fontSize: 12,
+            ),
+          ),
+          icon: const Icon(
+            Icons.keyboard_arrow_down,
+            color: Colors.white,
+            size: 18,
+          ),
           items: items,
           onChanged: onChanged,
         ),
@@ -1110,7 +1347,10 @@ class _StyledDropdown<T> extends StatelessWidget {
         child: DropdownButton<T>(
           value: value,
           isExpanded: true,
-          hint: Text(hint, style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+          hint: Text(
+            hint,
+            style: TextStyle(color: Colors.grey[400], fontSize: 14),
+          ),
           icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF7C3AED)),
           items: items,
           onChanged: onChanged,

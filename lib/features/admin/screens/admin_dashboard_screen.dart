@@ -2,7 +2,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_school/features/admin/screens/routine_management_screen.dart';
+import 'package:smart_school/features/admin/screens/routine_management_screen.dart'
+    hide SizedBox;
 import 'package:smart_school/features/admin/screens/setup_screen.dart';
 import 'package:smart_school/features/admin/screens/teacher_management_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';

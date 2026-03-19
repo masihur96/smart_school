@@ -203,6 +203,7 @@ class Notice {
 }
 
 class RoutineEntry {
+  final String? id;
   final String? classId;
   final String? schoolId;
   final String day; // Monday, Tuesday, etc.
@@ -213,6 +214,7 @@ class RoutineEntry {
   final String? roomNumber;
 
   RoutineEntry({
+    this.id,
     this.classId,
     this.schoolId,
     required this.day,
@@ -226,6 +228,7 @@ class RoutineEntry {
   factory RoutineEntry.fromJson(Map<String, dynamic> json) {
     log('Parsing RoutineEntry from JSON: $json');
     return RoutineEntry(
+      id: json['id'] ?? json['_id'],
       classId: json['classId'],
       schoolId: json['schoolId'],
       day: json['day'] ?? '',
@@ -239,6 +242,7 @@ class RoutineEntry {
 
   Map<String, dynamic> toJson() {
     final data = {
+      if (id != null) 'id': id,
       'classId': classId,
       'schoolId': schoolId,
       'day': day,
