@@ -91,6 +91,54 @@ class ExamsNotifier extends ChangeNotifier {
     }
   }
 
+  Future<void> updateExamOnAPI({
+    required String examId,
+    required String examName,
+    required String classUid,
+    required String subjectUid,
+    required String examinerUid,
+    required DateTime date,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final data = {
+        'exam_name': examName,
+        'class_uid': classUid,
+        'subject_uid': subjectUid,
+        'examiner_uid': examinerUid,
+        'date': DateFormat('yyyy-MM-dd').format(date),
+      };
+
+      final response = await DataProvider().performRequest(
+        'PUT',
+        '${APIPath.createExam}/$examId',
+        data: data,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        log('Exam updated successfully');
+        await _load();
+      } else {
+        log('Error updating exam: ${response?.data}');
+        throw Exception(
+          response?.data?['message'] ?? 'Failed to update exam',
+        );
+      }
+    } catch (e) {
+      log('Error updating exam: $e');
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> deleteExam(String id) async {
     try {
       final token = await StorageService.getToken();
