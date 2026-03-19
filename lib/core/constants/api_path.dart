@@ -11,4 +11,5 @@ class APIPath {
   static String createSubject = "$baseUrl/admin/subjects";
   static String fetchUsers = "$baseUrl/admin/users";
   static String changePassword = "$baseUrl/auth/change-password";
+  static String createNotice = "$baseUrl/general/notices";
 }

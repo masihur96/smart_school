@@ -33,8 +33,11 @@ class Section {
 
   Section({required this.id, required this.classId, required this.name});
 
-  factory Section.fromJson(Map<String, dynamic> json) =>
-      Section(id: json['id'] ?? json['_id'] ?? '', classId: json['classId'] ?? '', name: json['name'] ?? '');
+  factory Section.fromJson(Map<String, dynamic> json) => Section(
+    id: json['id'] ?? json['_id'] ?? '',
+    classId: json['classId'] ?? '',
+    name: json['name'] ?? '',
+  );
 
   Map<String, dynamic> toJson() => {'id': id, 'classId': classId, 'name': name};
 }
@@ -55,20 +58,20 @@ class Subject {
   });
 
   factory Subject.fromJson(Map<String, dynamic> json) => Subject(
-        id: json['id'] ?? json['_id'] ?? '',
-        name: json['name'] ?? '',
-        code: json['code'] ?? '',
-        classId: json['classId'] ?? '',
-        schoolId: json['schoolId'] ?? '',
-      );
+    id: json['id'] ?? json['_id'] ?? '',
+    name: json['name'] ?? '',
+    code: json['code'] ?? '',
+    classId: json['classId'] ?? '',
+    schoolId: json['schoolId'] ?? '',
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'code': code,
-        'classId': classId,
-        'schoolId': schoolId,
-      };
+    'id': id,
+    'name': name,
+    'code': code,
+    'classId': classId,
+    'schoolId': schoolId,
+  };
 }
 
 enum AttendanceStatus { present, absent, leave }
@@ -157,38 +160,43 @@ class Homework {
 }
 
 class Notice {
-  final String id;
   final String title;
   final String content;
-  final String? classId; // Null means global
+  final String? classId; // For local UI logic
+  final String? schoolId;
+  final String? audience;
+  final String? postedBy;
   final bool isImportant;
-  final DateTime date;
 
   Notice({
-    required this.id,
     required this.title,
     required this.content,
     this.classId,
+    this.schoolId,
+    this.audience,
+    this.postedBy,
     this.isImportant = false,
-    required this.date,
   });
 
   factory Notice.fromJson(Map<String, dynamic> json) => Notice(
-    id: json['id'],
-    title: json['title'],
-    content: json['content'],
+    title: json['title'] ?? '',
+    content: json['content'] ?? '',
     classId: json['classId'],
-    isImportant: json['isImportant'] ?? false,
-    date: DateTime.parse(json['date']),
+    schoolId: json['schoolId'],
+    audience: json['audience'],
+    postedBy: json['postedBy'],
+    isImportant: json['isImportant'] ?? json['isImportent'] ?? false,
   );
 
   Map<String, dynamic> toJson() => {
-    'id': id,
     'title': title,
     'content': content,
     'classId': classId,
+    'schoolId': schoolId,
+    'audience': audience,
+    'postedBy': postedBy,
     'isImportant': isImportant,
-    'date': date.toIso8601String(),
+    'isImportent': isImportant, // API expects this spelling in the example
   };
 }
 

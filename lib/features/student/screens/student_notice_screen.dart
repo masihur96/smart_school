@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../admin/providers/notice_provider.dart';
 import '../../admin/providers/student_provider.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../../models/school_models.dart';
-import 'package:intl/intl.dart';
 
 class StudentNoticeScreen extends StatelessWidget {
   const StudentNoticeScreen({super.key});
@@ -23,12 +22,6 @@ class StudentNoticeScreen extends StatelessWidget {
         .notices
         .where((n) => n.classId == null || n.classId == student.classId)
         .toList();
-
-    notices.sort((a, b) {
-      if (a.isImportant && !b.isImportant) return -1;
-      if (!a.isImportant && b.isImportant) return 1;
-      return b.date.compareTo(a.date);
-    });
 
     return Scaffold(
       appBar: AppBar(
@@ -72,10 +65,7 @@ class StudentNoticeScreen extends StatelessWidget {
                             : FontWeight.w600,
                       ),
                     ),
-                    subtitle: Text(
-                      DateFormat('MMM d, yyyy').format(notice.date),
-                      style: const TextStyle(fontSize: 12),
-                    ),
+
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(16.0),

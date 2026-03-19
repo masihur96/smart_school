@@ -1,9 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/services/database_service.dart';
-import '../providers/notice_provider.dart';
+
 import '../../../models/school_models.dart';
-import 'package:intl/intl.dart';
-import 'package:flutter/material.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../providers/notice_provider.dart';
 
 class NoticeManagementScreen extends StatelessWidget {
   final bool hideAppBar;
@@ -58,15 +59,10 @@ class NoticeManagementScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Target: $target | ${DateFormat('MMM d, yyyy').format(notice.date)}',
+                    'Target: $target',
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ],
-              ),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete, color: Colors.grey),
-                onPressed: () =>
-                    context.read<NoticesNotifier>().removeNotice(notice.id),
               ),
               isThreeLine: true,
             ),
@@ -85,7 +81,10 @@ class NoticeManagementScreen extends StatelessWidget {
     final contentController = TextEditingController();
     String? selectedClass;
     bool isImportant = false;
-    final classes = context.read<DatabaseService>().classes;
+    final dbService = context.read<DatabaseService>();
+    final classes = dbService.classes;
+    final authNotifier = context.read<AuthNotifier>();
+    final currentUser = authNotifier.user;
 
     showDialog(
       context: context,
@@ -137,23 +136,61 @@ class NoticeManagementScreen extends StatelessWidget {
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (titleController.text.isNotEmpty &&
                     contentController.text.isNotEmpty) {
-                  context.read<NoticesNotifier>().addNotice(
-                    Notice(
-                      id: DateTime.now().millisecondsSinceEpoch.toString(),
-                      title: titleController.text,
-                      content: contentController.text,
-                      classId: selectedClass,
-                      isImportant: isImportant,
-                      date: DateTime.now(),
-                    ),
+                  final notice = Notice(
+                    title: titleController.text,
+                    content: contentController.text,
+                    classId: selectedClass,
+                    isImportant: isImportant,
+
+                    schoolId:
+                        currentUser?.schoolId ??
+                        '', // Fallback to user provided default for this session
+                    postedBy:
+                        currentUser?.id ??
+                        '', // Fallback to user provided default
+                    audience: selectedClass != null
+                        ? classes.firstWhere((c) => c.id == selectedClass).name
+                        : 'Global',
                   );
-                  Navigator.pop(context);
+
+                  try {
+                    await context.read<NoticesNotifier>().addNoticeToAPI(
+                      notice,
+                    );
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Notice posted successfully'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error: ${e.toString()}'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
                 }
               },
-              child: const Text('Post'),
+              child: context.watch<NoticesNotifier>().isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text('Post'),
             ),
           ],
         ),

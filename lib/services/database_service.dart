@@ -1,7 +1,7 @@
-import '../models/user_model.dart';
+import '../models/school_models.dart';
 import '../models/student_model.dart';
 import '../models/teacher_model.dart';
-import '../models/school_models.dart';
+import '../models/user_model.dart';
 
 class DatabaseService {
   // Mock Data
@@ -100,10 +100,8 @@ class DatabaseService {
 
   final List<Notice> notices = [
     Notice(
-      id: 'n1',
       title: 'School Reopening',
       content: 'The school will reopen on March 10th.',
-      date: DateTime.now(),
       isImportant: true,
     ),
   ];
