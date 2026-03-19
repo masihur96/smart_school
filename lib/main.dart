@@ -12,7 +12,7 @@ import 'features/admin/providers/exam_provider.dart';
 import 'features/admin/providers/teacher_provider.dart';
 import 'features/admin/providers/routine_provider.dart';
 import 'features/admin/providers/settings_provider.dart';
-import 'features/admin/data/repositories/exam_repository_impl.dart';
+
 import 'features/teacher/providers/homework_provider.dart';
 import 'features/teacher/providers/attendance_provider.dart';
 import 'features/teacher/providers/result_provider.dart';
@@ -48,7 +48,7 @@ void main() {
 
   final attendanceRepository = AttendanceRepositoryImpl(databaseService);
   final resultRepository = ResultRepositoryImpl(databaseService);
-  final examRepository = ExamRepositoryImpl(databaseService);
+
 
   runApp(
     MultiProvider(
@@ -73,7 +73,7 @@ void main() {
           create: (_) => TeachersNotifier(databaseService),
         ),
         ChangeNotifierProvider(create: (_) => RoutineNotifier()),
-        ChangeNotifierProvider(create: (_) => ExamsNotifier(examRepository)),
+        ChangeNotifierProvider(create: (_) => ExamsNotifier()),
         ChangeNotifierProvider(
           create: (_) => HomeworkNotifier(databaseService),
         ),

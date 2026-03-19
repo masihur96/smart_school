@@ -1,10 +1,11 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../../models/school_models.dart';
 import '../providers/exam_provider.dart';
 import '../providers/setup_provider.dart';
-import '../../../services/database_service.dart';
+import '../providers/teacher_provider.dart';
 
 class ExamManagementScreen extends StatefulWidget {
   final bool hideAppBar;
@@ -17,7 +18,8 @@ class ExamManagementScreen extends StatefulWidget {
 class _ExamManagementScreenState extends State<ExamManagementScreen> {
   @override
   Widget build(BuildContext context) {
-    final exams = context.watch<ExamsNotifier>().state;
+    final examsNotifier = context.watch<ExamsNotifier>();
+    final exams = examsNotifier.state;
     final classes = context.watch<ClassSetupNotifier>().classes;
     final subjects = context.watch<SubjectSetupNotifier>().subjects;
 
@@ -60,9 +62,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                       children: [
                         Text('$className - $subjectName'),
                         Text(
-                          DateFormat(
-                            'MMM dd, yyyy - hh:mm a',
-                          ).format(exam.dateTime),
+                          DateFormat('MMM dd, yyyy').format(exam.dateTime),
                         ),
                       ],
                     ),
@@ -132,20 +132,18 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
     final nameController = TextEditingController();
     String? selectedClassId;
     String? selectedSubjectId;
-    String?
-    selectedTeacherId; // For simplicity, we'll just pick a teacher later or from a list
+    String? selectedExaminerId;
     DateTime selectedDate = DateTime.now().add(const Duration(days: 1));
+    bool isSaving = false;
 
     showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
-          builder: (context, setState) {
+          builder: (context, setDialogState) {
             final classes = context.watch<ClassSetupNotifier>().classes;
             final subjects = context.watch<SubjectSetupNotifier>().subjects;
-            // We need a list of teachers, let's assume we can get it from databaseServiceProvider or similar
-            final db = context.read<DatabaseService>();
-            final teachersList = db.teachers;
+            final teachers = context.watch<TeachersNotifier>().teachers;
 
             return AlertDialog(
               title: const Text('Add New Exam'),
@@ -155,7 +153,8 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                   children: [
                     TextField(
                       controller: nameController,
-                      decoration: const InputDecoration(labelText: 'Exam Name'),
+                      decoration:
+                          const InputDecoration(labelText: 'Exam Name'),
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
@@ -169,7 +168,8 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                             ),
                           )
                           .toList(),
-                      onChanged: (val) => setState(() => selectedClassId = val),
+                      onChanged: (val) =>
+                          setDialogState(() => selectedClassId = val),
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
@@ -184,13 +184,13 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                           )
                           .toList(),
                       onChanged: (val) =>
-                          setState(() => selectedSubjectId = val),
+                          setDialogState(() => selectedSubjectId = val),
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: selectedTeacherId,
+                      value: selectedExaminerId,
                       decoration: const InputDecoration(labelText: 'Examiner'),
-                      items: teachersList
+                      items: teachers
                           .map(
                             (t) => DropdownMenuItem(
                               value: t.userId,
@@ -199,12 +199,13 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                           )
                           .toList(),
                       onChanged: (val) =>
-                          setState(() => selectedTeacherId = val),
+                          setDialogState(() => selectedExaminerId = val),
                     ),
                     const SizedBox(height: 16),
                     ListTile(
+                      contentPadding: EdgeInsets.zero,
                       title: Text(
-                        'Date: ${DateFormat('yyyy-MM-dd HH:mm').format(selectedDate)}',
+                        'Date: ${DateFormat('yyyy-MM-dd').format(selectedDate)}',
                       ),
                       trailing: const Icon(Icons.calendar_today),
                       onTap: () async {
@@ -217,21 +218,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                           ),
                         );
                         if (date != null) {
-                          final time = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay.fromDateTime(selectedDate),
-                          );
-                          if (time != null) {
-                            setState(() {
-                              selectedDate = DateTime(
-                                date.year,
-                                date.month,
-                                date.day,
-                                time.hour,
-                                time.minute,
-                              );
-                            });
-                          }
+                          setDialogState(() => selectedDate = date);
                         }
                       },
                     ),
@@ -240,33 +227,79 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed:
+                      isSaving ? null : () => Navigator.pop(context),
                   child: const Text('Cancel'),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    if (nameController.text.isNotEmpty &&
-                        selectedClassId != null &&
-                        selectedSubjectId != null &&
-                        selectedTeacherId != null) {
-                      final exam = Exam(
-                        id: 'exam_${DateTime.now().millisecondsSinceEpoch}',
-                        name: nameController.text,
-                        subjectId: selectedSubjectId!,
-                        teacherId: selectedTeacherId!,
-                        classId: selectedClassId!,
-                        sectionId: 's1', // Default section for now
-                        dateTime: selectedDate,
-                      );
-                      context.read<ExamsNotifier>().addExam(exam);
-                      if (context.mounted) Navigator.pop(context);
-                    }
-                  },
+                  onPressed: isSaving
+                      ? null
+                      : () async {
+                          if (nameController.text.trim().isEmpty ||
+                              selectedClassId == null ||
+                              selectedSubjectId == null ||
+                              selectedExaminerId == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Please fill in all fields.'),
+                                backgroundColor: Colors.orange,
+                              ),
+                            );
+                            return;
+                          }
+
+                          setDialogState(() => isSaving = true);
+                          try {
+                            await context
+                                .read<ExamsNotifier>()
+                                .createExamOnAPI(
+                                  examName: nameController.text.trim(),
+                                  classUid: selectedClassId!,
+                                  subjectUid: selectedSubjectId!,
+                                  examinerUid: selectedExaminerId!,
+                                  date: selectedDate,
+                                );
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Exam created successfully!'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            log('Error creating exam: $e');
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Failed to create exam: ${e.toString()}',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          } finally {
+                            if (context.mounted) {
+                              setDialogState(() => isSaving = false);
+                            }
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.purple,
                     foregroundColor: Colors.white,
                   ),
-                  child: const Text('Add'),
+                  child: isSaving
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Add'),
                 ),
               ],
             );

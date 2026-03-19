@@ -278,16 +278,40 @@ class Exam {
     this.isPublished = false,
   });
 
-  factory Exam.fromJson(Map<String, dynamic> json) => Exam(
-    id: json['id'],
-    name: json['name'],
-    subjectId: json['subjectId'],
-    teacherId: json['teacherId'],
-    classId: json['classId'],
-    sectionId: json['sectionId'],
-    dateTime: DateTime.parse(json['dateTime']),
-    isPublished: json['isPublished'] ?? false,
-  );
+  factory Exam.fromJson(Map<String, dynamic> json) {
+    // Support both API snake_case and legacy camelCase keys
+    final String id =
+        json['id'] ?? json['_id'] ?? json['uid'] ?? '';
+    final String name =
+        json['exam_name'] ?? json['name'] ?? '';
+    final String classId =
+        json['class_uid'] ?? json['classId'] ?? '';
+    final String subjectId =
+        json['subject_uid'] ?? json['subjectId'] ?? '';
+    final String teacherId =
+        json['examiner_uid'] ?? json['teacherId'] ?? '';
+    final String sectionId = json['sectionId'] ?? '';
+
+    // API may send just a date string "2025-06-15" or a full ISO dateTime
+    DateTime dateTime;
+    final raw = json['date'] ?? json['dateTime'];
+    if (raw != null) {
+      dateTime = DateTime.tryParse(raw.toString()) ?? DateTime.now();
+    } else {
+      dateTime = DateTime.now();
+    }
+
+    return Exam(
+      id: id,
+      name: name,
+      subjectId: subjectId,
+      teacherId: teacherId,
+      classId: classId,
+      sectionId: sectionId,
+      dateTime: dateTime,
+      isPublished: json['isPublished'] ?? false,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,
