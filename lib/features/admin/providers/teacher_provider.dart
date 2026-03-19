@@ -62,12 +62,13 @@ class TeachersNotifier extends ChangeNotifier {
       );
 
       if (response != null && response.statusCode == 200) {
-        final List<dynamic> data = response.data is List
-            ? response.data
-            : (response.data['data'] ?? []);
+        final dynamic rawData = response.data['data'];
+        final List<dynamic> data = rawData is List
+            ? rawData
+            : (rawData is Map ? (rawData['data'] ?? []) : []);
         
-        final responseTotal = response.data['total'] != null 
-            ? int.tryParse(response.data['total'].toString()) ?? 0 
+        final responseTotal = rawData is Map && rawData['total'] != null 
+            ? int.tryParse(rawData['total'].toString()) ?? 0 
             : data.length;
         
         if (data.length < 10 || (loadMore && _teachers.length + data.length >= responseTotal)) {

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:smart_school/features/admin/screens/add_edit_teacher_screen.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/teacher_model.dart';
+import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import '../providers/teacher_provider.dart';
 import '../providers/setup_provider.dart';
 
@@ -24,7 +25,14 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authNotifier = context.read<AuthNotifier>();
+      final schoolId = authNotifier.user?.schoolId;
+      
       _fetchTeachers();
+      if (schoolId != null) {
+        context.read<ClassSetupNotifier>().fetchClasses(schoolId);
+        context.read<SectionSetupNotifier>().fetchSections();
+      }
     });
     _scrollController.addListener(_onScroll);
   }
@@ -88,7 +96,52 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
             ),
             child: Column(
               children: [
-
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText: 'Class',
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        items: [
+                          const DropdownMenuItem(value: null, child: Text('All')),
+                          ...classes.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))),
+                        ],
+                        onChanged: (val) {
+                          setState(() {
+                            _selectedClass = val;
+                            _selectedSection = null; // Reset section when class changes
+                          });
+                          _fetchTeachers();
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText: 'Section',
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        value: _selectedSection,
+                        items: [
+                          const DropdownMenuItem(value: null, child: Text('All')),
+                          ...sections
+                              .where((s) => s.classId == _selectedClass)
+                              .map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))),
+                        ],
+                        onChanged: (val) {
+                          setState(() => _selectedSection = val);
+                          _fetchTeachers();
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   decoration: InputDecoration(
                     labelText: 'Status',
