@@ -1,6 +1,8 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/models/teacher_model.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/routine_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
@@ -49,6 +51,19 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: _days.length, vsync: this);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authNotifier = context.read<AuthNotifier>();
+      final schoolId = authNotifier.user?.schoolId;
+
+      if (schoolId != null) {
+        log('Initiating data fetch for routine management: schoolId=$schoolId');
+        context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
+        context.read<TeachersNotifier>().fetchTeachers();
+      } else {
+        log('Warning: No schoolId found in AuthNotifier during routine management init');
+      }
+    });
   }
 
   @override
@@ -621,8 +636,10 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
     }
   }
 
-  void _save() {
+  void _save() async {
+    log('Save button pressed in _AddRoutineEntrySheet');
     if (_subjectId == null || _teacherId == null) {
+      log('Validation failed: subject or teacher not selected');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select subject and teacher.'),
@@ -632,27 +649,58 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
       return;
     }
 
-    context.read<RoutineNotifier>().addEntry(
-      widget.classId,
-      widget.sectionId,
-      RoutineEntry(
-        day: _selectedDay,
-        startTime: _formatTime(_startTime),
-        endTime: _formatTime(_endTime),
-        subjectId: _subjectId!,
-        teacherId: _teacherId!,
-        roomNumber: _roomController.text.trim().isEmpty
-            ? null
-            : _roomController.text.trim(),
-      ),
+    final authNotifier = context.read<AuthNotifier>();
+    final schoolId = authNotifier.user?.schoolId ?? '3b1e7e8f-6e4c-4c0e-9c2a-6d8f4c1b7a91';
+    
+    final entry = RoutineEntry(
+      classId: widget.classId,
+      schoolId: schoolId,
+      day: _selectedDay,
+      startTime: _formatTime(_startTime),
+      endTime: _formatTime(_endTime),
+      subjectId: _subjectId!,
+      teacherId: _teacherId!,
+      roomNumber: _roomController.text.trim().isEmpty
+          ? null
+          : _roomController.text.trim(),
     );
-    Navigator.pop(context);
+
+    log('Routine entry created: ${entry.toJson()}');
+
+    try {
+      log('Calling addRoutineToAPI from UI');
+      await context.read<RoutineNotifier>().addRoutineToAPI(
+        widget.classId,
+        widget.sectionId,
+        entry,
+      );
+      if (mounted) {
+        log('Routine added successfully, closing sheet');
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Routine entry added successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      log('Error adding routine entry: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final subjects = context.read<SubjectSetupNotifier>().subjects;
-    final teachers = context.read<TeachersNotifier>().teachers;
+    final subjects = context.watch<SubjectSetupNotifier>().subjects;
+    final teachers = context.watch<TeachersNotifier>().teachers;
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
     return DraggableScrollableSheet(
@@ -911,8 +959,10 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                               ),
                             ],
                           ),
-                          child: ElevatedButton.icon(
-                            onPressed: _save,
+                          child: ElevatedButton(
+                            onPressed: context.watch<RoutineNotifier>().isLoading
+                                ? null
+                                : _save,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
@@ -920,18 +970,33 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                            icon: const Icon(
-                              Icons.check_circle_outline_rounded,
-                              color: Colors.white,
-                            ),
-                            label: const Text(
-                              'Save Entry',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                              ),
-                            ),
+                            child: context.watch<RoutineNotifier>().isLoading
+                                ? const SizedBox(
+                                    height: 24,
+                                    width: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.check_circle_outline_rounded,
+                                        color: Colors.white,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Save Entry',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                           ),
                         ),
                       ),

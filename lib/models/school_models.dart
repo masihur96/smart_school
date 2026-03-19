@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 class ClassRoom {
   final String id;
   final String name; // e.g., "Class 10"
@@ -201,6 +203,8 @@ class Notice {
 }
 
 class RoutineEntry {
+  final String? classId;
+  final String? schoolId;
   final String day; // Monday, Tuesday, etc.
   final String startTime;
   final String endTime;
@@ -209,6 +213,8 @@ class RoutineEntry {
   final String? roomNumber;
 
   RoutineEntry({
+    this.classId,
+    this.schoolId,
     required this.day,
     required this.startTime,
     required this.endTime,
@@ -217,23 +223,34 @@ class RoutineEntry {
     this.roomNumber,
   });
 
-  factory RoutineEntry.fromJson(Map<String, dynamic> json) => RoutineEntry(
-    day: json['day'],
-    startTime: json['startTime'],
-    endTime: json['endTime'],
-    subjectId: json['subjectId'],
-    teacherId: json['teacherId'],
-    roomNumber: json['roomNumber'],
-  );
+  factory RoutineEntry.fromJson(Map<String, dynamic> json) {
+    log('Parsing RoutineEntry from JSON: $json');
+    return RoutineEntry(
+      classId: json['classId'],
+      schoolId: json['schoolId'],
+      day: json['day'] ?? '',
+      startTime: json['startTime'] ?? '',
+      endTime: json['endTime'] ?? '',
+      subjectId: json['subjectId'] ?? '',
+      teacherId: json['teacherId'] ?? '',
+      roomNumber: json['roomNumber'],
+    );
+  }
 
-  Map<String, dynamic> toJson() => {
-    'day': day,
-    'startTime': startTime,
-    'endTime': endTime,
-    'subjectId': subjectId,
-    'teacherId': teacherId,
-    if (roomNumber != null) 'roomNumber': roomNumber,
-  };
+  Map<String, dynamic> toJson() {
+    final data = {
+      'classId': classId,
+      'schoolId': schoolId,
+      'day': day,
+      'startTime': startTime,
+      'endTime': endTime,
+      'subjectId': subjectId,
+      'teacherId': teacherId,
+      if (roomNumber != null) 'roomNumber': roomNumber,
+    };
+    log('Serializing RoutineEntry to JSON: $data');
+    return data;
+  }
 }
 
 class Exam {
