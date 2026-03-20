@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../models/school_models.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
+import 'class_detail_screen.dart';
 
 class SetupScreen extends StatefulWidget {
   const SetupScreen({super.key});
@@ -64,12 +65,47 @@ class _ClassList extends StatelessWidget {
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: classes.length,
-              itemBuilder: (context, index) => ListTile(
-                title: Text(classes[index].name),
-                trailing: const Icon(Icons.chevron_right),
-              ),
+              itemBuilder: (context, index) {
+                final classRoom = classes[index];
+                return ListTile(
+                  title: Text(classRoom.name),
+                  subtitle: classRoom.description.isNotEmpty
+                      ? Text(
+                          classRoom.description,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        )
+                      : null,
+                  trailing: SizedBox(
+                    width: 80,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                ClassDetailScreen(classRoom: classRoom),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(0, 36),
+                        padding: EdgeInsets.zero,
+                        backgroundColor: Colors.purple,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Enter'),
+                    ),
+                  ),
+                );
+              },
             ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.purple,
+        foregroundColor: Colors.white,
         onPressed: () {
           final user = context.read<AuthNotifier>().user;
           _addDialog(

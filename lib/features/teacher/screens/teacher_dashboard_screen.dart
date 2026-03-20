@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/features/admin/screens/class_detail_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
+import 'package:smart_school/models/school_models.dart';
 
 import '../../../core/widgets/app_drawer.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -140,10 +142,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           else
             ...classes.map(
               (c) => _buildClassTile(
-                context,
-                c.classEntity?.name ?? 'Class ${c.classId}',
-                c.subjectEntity?.name ?? 'Subject ${c.subjectId}',
-                '${c.startTime} - ${c.endTime}',
+               context:  context,
+               className:  c.classEntity?.name ?? 'Class ${c.classId}',
+              classRom:   c.classEntity!,
+              subject:   c.subjectEntity?.name ?? 'Subject ${c.subjectId}',
+              time:   '${c.startTime} - ${c.endTime}',
               ),
             ),
           const SizedBox(height: 24),
@@ -213,24 +216,33 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
-  Widget _buildClassTile(
-    BuildContext context,
-    String className,
-    String subject,
-    String time,
-  ) {
+  Widget _buildClassTile({
+    required BuildContext context,
+   required String className,
+   required ClassRoom classRom,
+   required String subject,
+   required String time,
+  }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         title: Text(
-          className,
+          classRom.name,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Text('$subject | $time'),
         trailing: SizedBox(
           width: 80,
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      ClassDetailScreen(classRoom: classRom),
+                ),
+              );
+            },
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(0, 36),
               padding: EdgeInsets.zero,
