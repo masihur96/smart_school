@@ -61,12 +61,14 @@ class StudentsNotifier extends ChangeNotifier {
       );
 
       if (response != null && response.statusCode == 200) {
-        final List<dynamic> data = response.data is List
-            ? response.data
-            : (response.data['data'] ?? []);
+        // API response structure: { data: { total, page, limit, data: [...] } }
+        final inner = response.data is Map ? response.data['data'] : response.data;
+        final List<dynamic> data = inner is List
+            ? inner
+            : (inner is Map ? (inner['data'] as List<dynamic>? ?? []) : []);
         
-        final responseTotal = response.data['total'] != null 
-            ? int.tryParse(response.data['total'].toString()) ?? 0 
+        final responseTotal = (inner is Map && inner['total'] != null)
+            ? int.tryParse(inner['total'].toString()) ?? 0
             : data.length;
         
         if (data.length < 10 || (loadMore && _students.length + data.length >= responseTotal)) {

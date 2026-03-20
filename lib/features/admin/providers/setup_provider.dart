@@ -149,6 +149,8 @@ class SectionSetupNotifier extends ChangeNotifier {
 
     final Map<String, dynamic> data = {"name": name, "classId": classId};
 
+    print("Section Data :: $data");
+
     final response = await DataProvider().performRequest(
       'POST',
       APIPath.createSection,
