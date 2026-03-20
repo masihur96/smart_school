@@ -67,7 +67,32 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
       if (schoolId.isNotEmpty) {
         context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
       }
+      
+      _loadAttendanceForDate();
     });
+  }
+
+  Future<void> _loadAttendanceForDate() async {
+    final records = await context.read<AttendanceNotifier>().fetchAttendanceFromAPI(
+      classId: widget.classRoom.id,
+      date: _selectedDate,
+    );
+
+    if (mounted) {
+      setState(() {
+        _attendanceMap.clear();
+        for (var record in records) {
+          final studentId = record['studentId'] as String?;
+          final statusStr = record['status'] as String?;
+          if (studentId != null && statusStr != null) {
+            _attendanceMap[studentId] = AttendanceStatus.values.firstWhere(
+              (e) => e.name == statusStr,
+              orElse: () => AttendanceStatus.present,
+            );
+          }
+        }
+      });
+    }
   }
 
   @override
@@ -93,6 +118,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
     );
     if (picked != null && picked != _selectedDate) {
       setState(() => _selectedDate = picked);
+      _loadAttendanceForDate();
     }
   }
 

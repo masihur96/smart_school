@@ -97,4 +97,50 @@ class AttendanceNotifier extends ChangeNotifier {
       notifyListeners();
     }
   }
+  Future<List<Map<String, dynamic>>> fetchAttendanceFromAPI({
+    required String classId,
+    required DateTime date,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final dateString =
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.submitAttendance,
+        query: {
+          'classId': classId,
+          'date': dateString,
+        },
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final data = response.data['data'];
+        
+        if (data is List && data.isNotEmpty) {
+          // If it's a list, take the first attendance document
+          final firstDoc = data.first;
+          if (firstDoc != null && firstDoc['records'] != null) {
+            return List<Map<String, dynamic>>.from(firstDoc['records']);
+          }
+        } else if (data is Map && data['records'] != null) {
+          // In case the backend returns a single object
+          return List<Map<String, dynamic>>.from(data['records']);
+        }
+      }
+      return [];
+    } catch (e) {
+      log('Error fetching attendance: $e');
+      return [];
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }
