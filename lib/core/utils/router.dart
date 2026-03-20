@@ -124,7 +124,7 @@ GoRouter getRouter(AuthNotifier authNotifier) {
         routes: [
           GoRoute(
             path: 'attendance',
-            builder: (context, state) => const AttendanceScreen(),
+            builder: (context, state) => const TeacherAttendanceScreen(),
           ),
           GoRoute(
             path: 'homework',

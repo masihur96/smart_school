@@ -12,6 +12,7 @@ import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
 import 'package:smart_school/features/setting_management_screen.dart';
 import 'package:smart_school/features/teacher/screens/homework_management_screen.dart';
 import 'package:smart_school/features/teacher/screens/mark_entry_screen.dart';
+import 'package:smart_school/features/teacher/screens/teacher_attendance_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
 
 import '../../features/auth/providers/auth_provider.dart';
@@ -151,7 +152,7 @@ class AppDrawer extends StatelessWidget {
       _buildDrawerItem(Icons.check_circle, 'Attendance', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => AttendanceScreen()),
+          MaterialPageRoute(builder: (_) => TeacherAttendanceScreen()),
         );
       }, context),
       _buildDrawerItem(Icons.assignment, 'Homework', () {
