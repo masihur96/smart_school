@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/features/teacher/providers/attendance_provider.dart';
 import '../../../models/school_models.dart';
 import '../../../models/student_model.dart';
 import '../providers/student_provider.dart';
@@ -97,17 +98,53 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
 
   // ── Save attendance ──────────────────────────────────────────────────────────
 
-  void _saveAttendance() {
-    // TODO: POST to API endpoint when backend is ready
-    log('Saving attendance for ${widget.classRoom.name} on $_selectedDate');
-    log('Records: $_attendanceMap');
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Attendance saved successfully!'),
-        backgroundColor: Color(0xFF7C3AED),
-        behavior: SnackBarBehavior.floating,
-      ),
+  Future<void> _saveAttendance() async {
+    final authNotifier = context.read<AuthNotifier>();
+    final teacherId = authNotifier.user?.id;
+    if (teacherId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error: No active user found.')),
+      );
+      return;
+    }
+
+    final students = context.read<StudentsNotifier>().students
+        .where((s) => s.classId == widget.classRoom.id)
+        .toList();
+
+    // Ensure all students have a status in the map (defaulting to present)
+    final fullMap = <String, AttendanceStatus>{};
+    for (var student in students) {
+      fullMap[student.userId] =
+          _attendanceMap[student.userId] ?? AttendanceStatus.present;
+    }
+
+    final success = await context.read<AttendanceNotifier>().submitAttendanceToAPI(
+      date: _selectedDate,
+      takenBy: teacherId,
+      classId: widget.classRoom.id,
+      attendanceMap: fullMap,
     );
+
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Attendance saved successfully!'),
+          backgroundColor: Color(0xFF7C3AED),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to save attendance.'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
