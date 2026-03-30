@@ -20,12 +20,55 @@ class NoticesNotifier extends ChangeNotifier {
   List<Notice> get notices => _notices;
   bool get isLoading => _isLoading;
 
-  void addNotice(Notice notice) {
-    _dbService.notices.add(notice);
-    _notices = [..._dbService.notices];
+  // ─── Fetch from API ───────────────────────────────────────────────────────
+  Future<void> fetchNoticesFromAPI(String schoolId) async {
+    _isLoading = true;
     notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        '${APIPath.createNotice}?schoolId=$schoolId',
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
+        final data = response.data;
+        List<dynamic> raw = [];
+
+        if (data is List) {
+          raw = data;
+        } else if (data is Map && data['data'] is List) {
+          raw = data['data'];
+        } else if (data is Map && data['notices'] is List) {
+          raw = data['notices'];
+        }
+
+        final fetched = raw
+            .map((e) => Notice.fromJson(e as Map<String, dynamic>))
+            .toList();
+
+        _dbService.notices
+          ..clear()
+          ..addAll(fetched);
+        _notices = [...fetched];
+        log('Fetched ${fetched.length} notices from API');
+      } else {
+        log('Failed to fetch notices: ${response?.data}');
+      }
+    } catch (e) {
+      log('Error fetching notices: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
+  // ─── Create ───────────────────────────────────────────────────────────────
   Future<void> addNoticeToAPI(Notice notice) async {
     _isLoading = true;
     notifyListeners();
@@ -44,21 +87,21 @@ class NoticesNotifier extends ChangeNotifier {
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
         log('Successfully created notice');
-        // Try to use server-returned id if available
+        // Capture server-returned id
         Notice saved = notice;
-        if (response.data is Map && response.data['id'] != null) {
-          saved = notice.copyWith(id: response.data['id'].toString());
-        } else if (response.data is Map && response.data['_id'] != null) {
-          saved = notice.copyWith(id: response.data['_id'].toString());
+        final body = response.data;
+        if (body is Map) {
+          final serverId =
+              (body['id'] ?? body['_id'])?.toString();
+          if (serverId != null) saved = notice.copyWith(id: serverId);
         }
         _dbService.notices.add(saved);
         _notices = [..._dbService.notices];
       } else {
-        log('Error creating notice: ${response?.data}');
         throw Exception('Failed to create notice: ${response?.data}');
       }
     } catch (e) {
-      log("Error creating notice: $e");
+      log('Error creating notice: $e');
       rethrow;
     } finally {
       _isLoading = false;
@@ -66,6 +109,7 @@ class NoticesNotifier extends ChangeNotifier {
     }
   }
 
+  // ─── Update ───────────────────────────────────────────────────────────────
   Future<void> updateNoticeOnAPI(Notice updated) async {
     if (updated.id == null) throw Exception('Notice id is required to update');
     _isLoading = true;
@@ -77,7 +121,7 @@ class NoticesNotifier extends ChangeNotifier {
 
       final response = await DataProvider().performRequest(
         'PUT',
-        "${APIPath.createNotice}/${updated.id}",
+        '${APIPath.createNotice}/${updated.id}',
         data: updated.toJson(),
         header: {'Authorization': 'Bearer $token'},
       );
@@ -85,14 +129,17 @@ class NoticesNotifier extends ChangeNotifier {
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
         log('Successfully updated notice ${updated.id}');
-        final idx = _dbService.notices.indexWhere((n) => n.id == updated.id);
-        if (idx != -1) _dbService.notices[idx] = updated;
+        final idx =
+            _dbService.notices.indexWhere((n) => n.id == updated.id);
+        if (idx != -1) {
+          _dbService.notices[idx] = updated;
+        }
         _notices = [..._dbService.notices];
       } else {
         throw Exception('Failed to update notice: ${response?.data}');
       }
     } catch (e) {
-      log("Error updating notice: $e");
+      log('Error updating notice: $e');
       rethrow;
     } finally {
       _isLoading = false;
@@ -100,6 +147,7 @@ class NoticesNotifier extends ChangeNotifier {
     }
   }
 
+  // ─── Delete ───────────────────────────────────────────────────────────────
   Future<void> deleteNoticeOnAPI(String id) async {
     _isLoading = true;
     notifyListeners();
@@ -108,11 +156,11 @@ class NoticesNotifier extends ChangeNotifier {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
 
-      print("${APIPath.createNotice}/$id");
+      log('Deleting notice: ${APIPath.createNotice}/$id');
 
       final response = await DataProvider().performRequest(
         'DELETE',
-        "${APIPath.createNotice}/$id",
+        '${APIPath.createNotice}/$id',
         header: {'Authorization': 'Bearer $token'},
       );
 
@@ -125,7 +173,7 @@ class NoticesNotifier extends ChangeNotifier {
         throw Exception('Failed to delete notice: ${response?.data}');
       }
     } catch (e) {
-      log("Error deleting notice: $e");
+      log('Error deleting notice: $e');
       rethrow;
     } finally {
       _isLoading = false;
