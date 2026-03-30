@@ -43,12 +43,12 @@ class ExamsNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> createExamOnAPI({
+  Future<void> createExamWithAssignments({
     required String examName,
-    required String classUid,
-    required String subjectUid,
-    required String examinerUid,
-    required DateTime date,
+    required String description,
+    required DateTime startDate,
+    required DateTime endDate,
+    required List<Map<String, dynamic>> assignments,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -57,24 +57,51 @@ class ExamsNotifier extends ChangeNotifier {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
 
-      final data = {
+      final examData = {
         'exam_name': examName,
-        'class_uid': classUid,
-        'subject_uid': subjectUid,
-        'examiner_uid': examinerUid,
-        'date': DateFormat('yyyy-MM-dd').format(date),
+        'description': description,
+        'start_date': DateFormat('yyyy-MM-dd').format(startDate),
+        'end_date': DateFormat('yyyy-MM-dd').format(endDate),
       };
 
       final response = await DataProvider().performRequest(
         'POST',
         APIPath.createExam,
-        data: data,
+        data: examData,
         header: {'Authorization': 'Bearer $token'},
       );
 
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
         log('Exam created successfully');
+
+        final dynamic respData = response.data;
+        String examId = '';
+        if (respData is Map) {
+          if (respData.containsKey('data') && respData['data'] is Map) {
+            examId = respData['data']['id'] ?? '';
+          } else {
+            examId = respData['id'] ?? '';
+          }
+        }
+        
+        if (examId.isNotEmpty) {
+          for (final assign in assignments) {
+            final assignData = {
+              'class_uid': assign['class_uid'],
+              'subject_uid': assign['subject_uid'],
+              'examiner_uid': assign['examiner_uid'],
+              'date': DateFormat('yyyy-MM-dd').format(assign['date']),
+            };
+            await DataProvider().performRequest(
+              'POST',
+              '${APIPath.createExam}/$examId/assignments',
+              data: assignData,
+              header: {'Authorization': 'Bearer $token'},
+            );
+          }
+        }
+
         await _load();
       } else {
         log('Error creating exam: ${response?.data}');
@@ -94,10 +121,9 @@ class ExamsNotifier extends ChangeNotifier {
   Future<void> updateExamOnAPI({
     required String examId,
     required String examName,
-    required String classUid,
-    required String subjectUid,
-    required String examinerUid,
-    required DateTime date,
+    required String description,
+    required DateTime startDate,
+    required DateTime endDate,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -106,18 +132,17 @@ class ExamsNotifier extends ChangeNotifier {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
 
-      final data = {
+      final examData = {
         'exam_name': examName,
-        'class_uid': classUid,
-        'subject_uid': subjectUid,
-        'examiner_uid': examinerUid,
-        'date': DateFormat('yyyy-MM-dd').format(date),
+        'description': description,
+        'start_date': DateFormat('yyyy-MM-dd').format(startDate),
+        'end_date': DateFormat('yyyy-MM-dd').format(endDate),
       };
 
       final response = await DataProvider().performRequest(
         'PUT',
         '${APIPath.createExam}/$examId',
-        data: data,
+        data: examData,
         header: {'Authorization': 'Bearer $token'},
       );
 

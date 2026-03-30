@@ -284,24 +284,60 @@ class RoutineEntry {
   }
 }
 
+class ExamAssignment {
+  final String id;
+  final String examId;
+  final String classId;
+  final String className;
+  final String subjectId;
+  final String subjectName;
+  final String examinerId;
+  final String examinerName;
+  final DateTime date;
+
+  ExamAssignment({
+    required this.id,
+    required this.examId,
+    required this.classId,
+    required this.className,
+    required this.subjectId,
+    required this.subjectName,
+    required this.examinerId,
+    required this.examinerName,
+    required this.date,
+  });
+
+  factory ExamAssignment.fromJson(Map<String, dynamic> json) {
+    return ExamAssignment(
+      id: json['id'] ?? '',
+      examId: json['examId'] ?? '',
+      classId: json['class']?['uuid'] ?? '',
+      className: json['class']?['name'] ?? '',
+      subjectId: json['subject']?['uuid'] ?? '',
+      subjectName: json['subject']?['name'] ?? '',
+      examinerId: json['examiner']?['uuid'] ?? '',
+      examinerName: json['examiner']?['name'] ?? '',
+      date: DateTime.tryParse(json['date']?.toString() ?? '') ?? DateTime.now(),
+    );
+  }
+}
+
 class Exam {
   final String id;
   final String name; // e.g., "Final Exam 2024"
-  final String subjectId;
-  final String teacherId; // Examiner
-  final String classId;
-  final String sectionId;
-  final DateTime dateTime;
+  final String? description;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final List<ExamAssignment> assignments;
   final bool isPublished;
 
   Exam({
     required this.id,
     required this.name,
-    required this.subjectId,
-    required this.teacherId,
-    required this.classId,
-    required this.sectionId,
-    required this.dateTime,
+    this.description,
+    this.startDate,
+    this.endDate,
+    this.assignments = const [],
     this.isPublished = false,
   });
 
@@ -311,43 +347,42 @@ class Exam {
         json['id'] ?? json['_id'] ?? json['uid'] ?? '';
     final String name =
         json['exam_name'] ?? json['name'] ?? '';
-    final String classId =
-        json['class_uid'] ?? json['classId'] ?? '';
-    final String subjectId =
-        json['subject_uid'] ?? json['subjectId'] ?? '';
-    final String teacherId =
-        json['examiner_uid'] ?? json['teacherId'] ?? '';
-    final String sectionId = json['sectionId'] ?? '';
+    final String? description = json['description'];
 
-    // API may send just a date string "2025-06-15" or a full ISO dateTime
-    DateTime dateTime;
-    final raw = json['date'] ?? json['dateTime'];
-    if (raw != null) {
-      dateTime = DateTime.tryParse(raw.toString()) ?? DateTime.now();
-    } else {
-      dateTime = DateTime.now();
+    DateTime? startDate;
+    if (json['start_date'] != null) {
+      startDate = DateTime.tryParse(json['start_date'].toString());
+    }
+
+    DateTime? endDate;
+    if (json['end_date'] != null) {
+      endDate = DateTime.tryParse(json['end_date'].toString());
+    }
+
+    List<ExamAssignment> assignments = [];
+    if (json['assignments'] != null && json['assignments'] is List) {
+      assignments = (json['assignments'] as List)
+          .map((a) => ExamAssignment.fromJson(a))
+          .toList();
     }
 
     return Exam(
       id: id,
       name: name,
-      subjectId: subjectId,
-      teacherId: teacherId,
-      classId: classId,
-      sectionId: sectionId,
-      dateTime: dateTime,
+      description: description,
+      startDate: startDate,
+      endDate: endDate,
+      assignments: assignments,
       isPublished: json['isPublished'] ?? false,
     );
   }
 
   Map<String, dynamic> toJson() => {
     'id': id,
-    'name': name,
-    'subjectId': subjectId,
-    'teacherId': teacherId,
-    'classId': classId,
-    'sectionId': sectionId,
-    'dateTime': dateTime.toIso8601String(),
+    'exam_name': name,
+    'description': description,
+    'start_date': startDate?.toIso8601String(),
+    'end_date': endDate?.toIso8601String(),
     'isPublished': isPublished,
   };
 }

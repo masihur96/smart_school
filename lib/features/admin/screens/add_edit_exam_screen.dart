@@ -48,15 +48,18 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
     super.initState();
     if (isEditing) {
       _nameController.text = widget.exam!.name;
-      _startDate = widget.exam!.dateTime;
-      _endDate = widget.exam!.dateTime;
-      // Pre-load single assignment from existing exam
-      _assignments.add(_AssignmentDraft(
-        classId: widget.exam!.classId,
-        subjectId: widget.exam!.subjectId,
-        examinerId: widget.exam!.teacherId,
-        date: widget.exam!.dateTime,
-      ));
+      _descController.text = widget.exam!.description ?? '';
+      _startDate = widget.exam!.startDate ?? DateTime.now();
+      _endDate = widget.exam!.endDate ?? DateTime.now();
+      
+      for(final a in widget.exam!.assignments) {
+        _assignments.add(_AssignmentDraft(
+          classId: a.classId,
+          subjectId: a.subjectId,
+          examinerId: a.examinerId,
+          date: a.date,
+        ));
+      }
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -435,20 +438,35 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
 
     final examsNotifier = context.read<ExamsNotifier>();
     try {
-      for (final a in _assignments) {
-        await examsNotifier.createExamOnAPI(
+      final List<Map<String, dynamic>> assignmentsList = _assignments.map((a) => {
+        'class_uid': a.classId!,
+        'subject_uid': a.subjectId!,
+        'examiner_uid': a.examinerId!,
+        'date': a.date,
+      }).toList();
+
+      if (isEditing) {
+        await examsNotifier.updateExamOnAPI(
+          examId: widget.exam!.id,
           examName: _nameController.text.trim(),
-          classUid: a.classId!,
-          subjectUid: a.subjectId!,
-          examinerUid: a.examinerId!,
-          date: a.date,
+          description: _descController.text.trim(),
+          startDate: _startDate,
+          endDate: _endDate,
+        );
+      } else {
+        await examsNotifier.createExamWithAssignments(
+          examName: _nameController.text.trim(),
+          description: _descController.text.trim(),
+          startDate: _startDate,
+          endDate: _endDate,
+          assignments: assignmentsList,
         );
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Exam "${_nameController.text.trim()}" created with ${_assignments.length} assignment(s).',
+              'Exam "${_nameController.text.trim()}" saved successfully.',
             ),
             backgroundColor: Colors.green,
           ),

@@ -14,13 +14,13 @@ class ExamRepositoryImpl implements IExamRepository {
 
   @override
   Future<List<Exam>> getExamsForTeacher(String teacherId) async {
-    return _dbService.exams.where((e) => e.teacherId == teacherId).toList();
+    return _dbService.exams.where((e) => e.assignments.any((a) => a.examinerId == teacherId)).toList();
   }
 
   @override
   Future<List<Exam>> getExamsForClass(String classId, String sectionId) async {
     return _dbService.exams
-        .where((e) => e.classId == classId && e.sectionId == sectionId)
+        .where((e) => e.assignments.any((a) => a.classId == classId))
         .toList();
   }
 
@@ -50,11 +50,10 @@ class ExamRepositoryImpl implements IExamRepository {
       _dbService.exams[index] = Exam(
         id: oldExam.id,
         name: oldExam.name,
-        subjectId: oldExam.subjectId,
-        teacherId: oldExam.teacherId,
-        classId: oldExam.classId,
-        sectionId: oldExam.sectionId,
-        dateTime: oldExam.dateTime,
+        description: oldExam.description,
+        startDate: oldExam.startDate,
+        endDate: oldExam.endDate,
+        assignments: oldExam.assignments,
         isPublished: true,
       );
     }

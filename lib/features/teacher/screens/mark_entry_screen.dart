@@ -36,7 +36,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     final allExams = context
         .watch<ExamsNotifier>()
         .state
-        .where((e) => e.teacherId == user?.id)
+        .where((e) => e.assignments.any((a) => a.examinerId == user?.id))
         .toList();
     final allStudents = context.watch<StudentsNotifier>().students;
     final classes = context.watch<ClassSetupNotifier>().classes;
@@ -49,7 +49,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
         : classes
               .where(
                 (c) => allExams.any(
-                  (e) => e.name == _selectedExamName && e.classId == c.id,
+                  (e) => e.name == _selectedExamName && e.assignments.any((a) => a.classId == c.id),
                 ),
               )
               .toList();
@@ -68,7 +68,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
               .where(
                 (e) =>
                     e.name == _selectedExamName &&
-                    e.classId == _selectedClassId,
+                    e.assignments.any((a) => a.classId == _selectedClassId),
               )
               .toList()
         : <Exam>[];
@@ -284,8 +284,12 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
         ),
         const SizedBox(height: 16),
         ...exams.map((exam) {
+          final matchingAssignment = exam.assignments.firstWhere(
+            (a) => a.classId == _selectedClassId,
+            orElse: () => exam.assignments.isNotEmpty ? exam.assignments.first : ExamAssignment(id: '', examId: '', classId: '', className: '', subjectId: '', subjectName: '', examinerId: '', examinerName: '', date: DateTime.now())
+          );
           final subject = subjects.firstWhere(
-            (s) => s.id == exam.subjectId,
+            (s) => s.id == matchingAssignment.subjectId,
             orElse: () => Subject(id: '', name: 'Unknown'),
           );
 

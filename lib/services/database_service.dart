@@ -110,12 +110,23 @@ class DatabaseService {
     Exam(
       id: 'exam1',
       name: 'First Term Exam 2024',
-      subjectId: 'sub1',
-      teacherId: 'teacher1',
-      classId: 'c2',
-      sectionId: 's3',
-      dateTime: DateTime.now().add(const Duration(days: 7)),
+      description: 'First term exam for all classes',
+      startDate: DateTime.now(),
+      endDate: DateTime.now().add(const Duration(days: 7)),
       isPublished: false,
+      assignments: [
+        ExamAssignment(
+          id: 'a1',
+          examId: 'exam1',
+          classId: 'c2',
+          className: 'Class 10',
+          subjectId: 'sub1',
+          subjectName: 'Mathematics',
+          examinerId: 'teacher1',
+          examinerName: 'Ms. Sarah',
+          date: DateTime.now().add(const Duration(days: 7)),
+        )
+      ]
     ),
   ];
 

@@ -31,8 +31,8 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
 
     // Apply filters
     final exams = allExams.where((exam) {
-      final matchesClass = _selectedClass == null || exam.classId == _selectedClass;
-      final matchesSubject = _selectedSubject == null || exam.subjectId == _selectedSubject;
+      final matchesClass = _selectedClass == null || exam.assignments.any((a) => a.classId == _selectedClass);
+      final matchesSubject = _selectedSubject == null || exam.assignments.any((a) => a.subjectId == _selectedSubject);
       final matchesStatus = _selectedStatus == 'All' ||
           (_selectedStatus == 'Published' && exam.isPublished) ||
           (_selectedStatus == 'Unpublished' && !exam.isPublished);
@@ -149,12 +149,15 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                         itemCount: exams.length,
                         itemBuilder: (context, index) {
                           final exam = exams[index];
-                          final className = classes
-                              .firstWhere((c) => c.id == exam.classId,
-                                  orElse: () => ClassRoom(id: '', name: 'N/A'))
-                              .name;
-                          final subject = subjects.firstWhere((s) => s.id == exam.subjectId,
-                              orElse: () => Subject(id: '', name: 'N/A'));
+                          final assignmentsCount = exam.assignments.length;
+                          String subtitleText = '$assignmentsCount Assignment${assignmentsCount == 1 ? '' : 's'}';
+                          if (assignmentsCount > 0) {
+                            final firstClass = classes.firstWhere((c) => c.id == exam.assignments.first.classId, orElse: () => ClassRoom(id: '', name: '')).name;
+                            final firstSubj = subjects.firstWhere((s) => s.id == exam.assignments.first.subjectId, orElse: () => Subject(id: '', name: '')).name;
+                            if (firstClass.isNotEmpty && firstSubj.isNotEmpty) {
+                              subtitleText += ' • e.g. $firstClass - $firstSubj';
+                            }
+                          }
 
                           return Card(
                             elevation: 0,
@@ -194,7 +197,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          '$className | ${subject.name}',
+                                          subtitleText,
                                           style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                                         ),
                                         const SizedBox(height: 4),
@@ -204,7 +207,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                                                 size: 14, color: Colors.grey.shade400),
                                             const SizedBox(width: 4),
                                             Text(
-                                              DateFormat('MMM dd, yyyy').format(exam.dateTime),
+                                              '${DateFormat('MMM dd, yyyy').format(exam.startDate ?? DateTime.now())} - ${DateFormat('MMM dd, yyyy').format(exam.endDate ?? DateTime.now())}',
                                               style: TextStyle(
                                                   color: Colors.grey.shade500, fontSize: 12),
                                             ),
@@ -323,16 +326,13 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
     final subjects = context.read<SubjectSetupNotifier>().subjects;
     final teachers = context.read<TeachersNotifier>().teachers;
 
-    final className = classes.firstWhere((c) => c.id == exam.classId, orElse: () => ClassRoom(id: '', name: 'N/A')).name;
-    final subjectName = subjects.firstWhere((s) => s.id == exam.subjectId, orElse: () => Subject(id: '', name: 'N/A')).name;
-    final examinerName = teachers.firstWhere((t) => t.userId == exam.teacherId, orElse: () => Teacher(userId: '', designation: 'N/A')).user?.name ?? 'N/A';
-
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Container(
           padding: const EdgeInsets.all(24),
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,18 +359,54 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-              const Text('Academic Details',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              const SizedBox(height: 12),
-              _buildDetailItem(Icons.class_outlined, 'Class', className),
-              _buildDetailItem(Icons.book_outlined, 'Subject', subjectName),
-              _buildDetailItem(Icons.person_outline, 'Examiner', examinerName),
-              const SizedBox(height: 20),
-              const Text('Schedule', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              const SizedBox(height: 12),
-              _buildDetailItem(Icons.calendar_today_outlined, 'Date',
-                  DateFormat('EEEE, MMM dd, yyyy').format(exam.dateTime)),
+              const SizedBox(height: 16),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (exam.description != null && exam.description!.isNotEmpty) ...[
+                        Text(exam.description!, style: TextStyle(color: Colors.grey.shade700, fontSize: 14)),
+                        const SizedBox(height: 16),
+                      ],
+                      const Text('Schedule', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      const SizedBox(height: 12),
+                      _buildDetailItem(Icons.calendar_today_outlined, 'Start Date',
+                          DateFormat('EEEE, MMM dd, yyyy').format(exam.startDate ?? DateTime.now())),
+                      _buildDetailItem(Icons.event_available_outlined, 'End Date',
+                          DateFormat('EEEE, MMM dd, yyyy').format(exam.endDate ?? DateTime.now())),
+                      const SizedBox(height: 20),
+                      Text('Assignments (${exam.assignments.length})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      const SizedBox(height: 12),
+                      ...exam.assignments.map((a) {
+                        final className = classes.firstWhere((c) => c.id == a.classId, orElse: () => ClassRoom(id: '', name: 'N/A')).name;
+                        final subjectName = subjects.firstWhere((s) => s.id == a.subjectId, orElse: () => Subject(id: '', name: 'N/A')).name;
+                        final examinerName = teachers.firstWhere((t) => t.userId == a.examinerId, orElse: () => Teacher(userId: '', designation: 'N/A')).user?.name ?? 'N/A';
+                        
+                        return Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey.shade200),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('$className • $subjectName', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                              const SizedBox(height: 4),
+                              Text('Examiner: $examinerName', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                              Text('Date: ${DateFormat('MMM dd, yyyy').format(a.date)}', style: TextStyle(color: Colors.purple.shade300, fontSize: 12)),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ],
+                  ),
+                ),
+              ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,

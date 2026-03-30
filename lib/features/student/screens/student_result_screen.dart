@@ -38,7 +38,7 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
       return const Center(child: Text('Student data not found.'));
 
     final publishedExams = allExams
-        .where((e) => e.classId == student.classId && e.isPublished)
+        .where((e) => e.assignments.any((a) => a.classId == student.classId) && e.isPublished)
         .toList();
 
     return Scaffold(
