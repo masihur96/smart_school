@@ -162,30 +162,33 @@ class Homework {
 }
 
 class Notice {
+  final String? id;
   final String title;
   final String content;
-  final String? classId; // For local UI logic
+  final String? classId; // For local UI logic only
   final String? schoolId;
-  final String? audience;
-  final String? postedBy;
+  final String? targetAudience; // API field: "Students", "Teachers", "Parents", "All"
+  final String? postedBy; // Name of poster, e.g. "Principal"
   final bool isImportant;
 
   Notice({
+    this.id,
     required this.title,
     required this.content,
     this.classId,
     this.schoolId,
-    this.audience,
+    this.targetAudience,
     this.postedBy,
     this.isImportant = false,
   });
 
   factory Notice.fromJson(Map<String, dynamic> json) => Notice(
+    id: json['id'] ?? json['_id'],
     title: json['title'] ?? '',
     content: json['content'] ?? '',
     classId: json['classId'],
     schoolId: json['schoolId'],
-    audience: json['audience'],
+    targetAudience: json['targetAudience'] ?? json['audience'],
     postedBy: json['postedBy'],
     isImportant: json['isImportant'] ?? json['isImportent'] ?? false,
   );
@@ -193,13 +196,31 @@ class Notice {
   Map<String, dynamic> toJson() => {
     'title': title,
     'content': content,
-    'classId': classId,
+    'targetAudience': targetAudience ?? 'All',
     'schoolId': schoolId,
-    'audience': audience,
     'postedBy': postedBy,
-    'isImportant': isImportant,
-    'isImportent': isImportant, // API expects this spelling in the example
+    'isImportent': isImportant, // API uses this spelling
   };
+
+  Notice copyWith({
+    String? id,
+    String? title,
+    String? content,
+    String? classId,
+    String? schoolId,
+    String? targetAudience,
+    String? postedBy,
+    bool? isImportant,
+  }) => Notice(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    content: content ?? this.content,
+    classId: classId ?? this.classId,
+    schoolId: schoolId ?? this.schoolId,
+    targetAudience: targetAudience ?? this.targetAudience,
+    postedBy: postedBy ?? this.postedBy,
+    isImportant: isImportant ?? this.isImportant,
+  );
 }
 
 class RoutineEntry {
