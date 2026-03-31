@@ -56,9 +56,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _quickLogin(String email) {
+  void _quickLogin(String email,String password) {
     _emailController.text = email;
-    _passwordController.text = 'password';
+    _passwordController.text = password;
     _login();
   }
 
@@ -190,17 +190,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   _QuickLoginButton(
                     label: 'Admin',
                     color: Colors.purple,
-                    onTap: () => _quickLogin('admin@school.com'),
+                    onTap: () => _quickLogin('admin@gmail.com',"Admin@"),
                   ),
                   _QuickLoginButton(
                     label: 'Teacher',
                     color: Colors.blue,
-                    onTap: () => _quickLogin('teacher@school.com'),
+                    onTap: () => _quickLogin('rofiqul@gmail.com',"Rofiqul@"),
                   ),
                   _QuickLoginButton(
                     label: 'Student',
                     color: Colors.green,
-                    onTap: () => _quickLogin('student@school.com'),
+                    onTap: () => _quickLogin('ahsan@gmail.com',"Ahsan@"),
                   ),
                 ],
               ),
