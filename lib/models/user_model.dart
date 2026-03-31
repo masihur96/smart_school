@@ -7,6 +7,7 @@ class User {
   final UserRole role;
   final String? profileImageUrl;
   final String? schoolId;
+  final String? classId;
   final String? phone;
 
   User({
@@ -16,6 +17,7 @@ class User {
     required this.role,
     this.profileImageUrl,
     this.schoolId,
+    this.classId,
     this.phone,
   });
 
@@ -30,6 +32,7 @@ class User {
       ) ?? UserRole.student,
       profileImageUrl: json['profileImageUrl'],
       schoolId: json['schoolId'],
+      classId: json['classId'],
       phone: json['phone'],
     );
   }
@@ -42,6 +45,7 @@ class User {
       'role': role.name,
       'profileImageUrl': profileImageUrl,
       'schoolId': schoolId,
+      'classId': classId,
       'phone': phone,
     };
   }

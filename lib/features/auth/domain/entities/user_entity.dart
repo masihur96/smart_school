@@ -4,6 +4,7 @@ class UserEntity {
   final String email;
   final String role;
   final String? schoolId;
+  final String? classId;
   final String? phone;
 
   UserEntity({
@@ -12,6 +13,7 @@ class UserEntity {
     required this.email,
     required this.role,
     this.schoolId,
+    this.classId,
     this.phone,
   });
 }

@@ -19,4 +19,6 @@ class APIPath {
   static String todayClass = "$baseUrl/teacher/todays-classes";
   static String submitAttendance = "$baseUrl/teacher/attendance";
   static String submitHomeWork = "$baseUrl/teacher/homework";
+  static String studentAttendance = "$baseUrl/student/attendance";
+  static String studentRoutine = "$baseUrl/student/routine";
 }

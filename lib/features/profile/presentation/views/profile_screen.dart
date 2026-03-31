@@ -9,6 +9,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = context.watch<AuthNotifier>().user;
 
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Profile'),

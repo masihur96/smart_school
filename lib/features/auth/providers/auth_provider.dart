@@ -84,6 +84,7 @@ class AuthNotifier extends ChangeNotifier {
           orElse: () => UserRole.student,
         ),
         schoolId: profile.schoolId,
+        classId: profile.classId,
         phone: profile.phone,
       );
 
