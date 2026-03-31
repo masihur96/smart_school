@@ -2,6 +2,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart';
+import 'package:smart_school/features/admin/screens/add_edit_teacher_screen.dart';
 import 'package:smart_school/features/admin/screens/routine_management_screen.dart'
     hide SizedBox;
 import 'package:smart_school/features/admin/screens/setup_screen.dart';
@@ -243,14 +245,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             'Add Student',
             Icons.person_add,
             Colors.blue,
-            onTap: () => context.push('/admin/students/add'),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_)=>AddEditStudentScreen()));
+
+            },
           ),
           _buildActionTile(
             context,
             'Add Teacher',
             Icons.group_add,
             Colors.orange,
-            onTap: () => context.push('/admin/teachers/add'),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_)=>AddEditTeacherScreen()));
+            },
           ),
           _buildActionTile(
             context,
