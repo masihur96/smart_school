@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/models/school_models.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -51,7 +52,9 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.account_circle),
-            onPressed: () => context.push('/profile'),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_)=>ProfileScreen(),));
+            },
           ),
           const SizedBox(width: 8),
         ],

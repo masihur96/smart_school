@@ -10,6 +10,11 @@ import 'package:smart_school/features/admin/screens/student_management_screen.da
 import 'package:smart_school/features/admin/screens/teacher_management_screen.dart';
 import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
 import 'package:smart_school/features/setting_management_screen.dart';
+import 'package:smart_school/features/student/screens/student_attendance_screen.dart';
+import 'package:smart_school/features/student/screens/student_dashboard_screen.dart';
+import 'package:smart_school/features/student/screens/student_homework_screen.dart';
+import 'package:smart_school/features/student/screens/student_notice_screen.dart';
+import 'package:smart_school/features/student/screens/student_result_screen.dart';
 import 'package:smart_school/features/student/screens/student_routine_screen.dart';
 import 'package:smart_school/features/teacher/screens/homework_management_screen.dart';
 import 'package:smart_school/features/teacher/screens/mark_entry_screen.dart';
@@ -183,37 +188,51 @@ class AppDrawer extends StatelessWidget {
       _buildDrawerItem(
         Icons.dashboard,
         'Dashboard',
-        () => context.go('/student'),
+        () {
+
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>StudentDashboardScreen(),));
+
+        },
         context,
       ),
       _buildDrawerItem(
         Icons.check_circle,
         'Attendance',
-        () => context.go('/student/attendance'),
+        () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>StudentAttendanceScreen(),));
+        },
         context,
       ),
       _buildDrawerItem(
         Icons.assignment,
         'Homework',
-        () => context.go('/student/homework'),
+        () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>StudentHomeworkScreen(),));
+        },
         context,
       ),
       _buildDrawerItem(
         Icons.calendar_month,
         'Routine',
-        () => context.go('/student/routine'),
+        () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>StudentRoutineScreen(),));
+        },
         context,
       ),
       _buildDrawerItem(
         Icons.notifications,
         'Notices',
-        () => context.go('/student/notices'),
+        () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>StudentNoticeScreen(),));
+        },
         context,
       ),
       _buildDrawerItem(
         Icons.assessment,
         'Results',
-        () => context.go('/student/results'),
+        () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>StudentResultScreen(),));
+        },
         context,
       ),
     ];
