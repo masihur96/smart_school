@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
+import 'package:smart_school/features/student/screens/student_routine_screen.dart';
 import 'package:smart_school/models/school_models.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -124,6 +125,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
             Icons.calendar_month,
             Colors.purple,
             onTap: () {
+
+              Navigator.push(context, MaterialPageRoute(builder: (_)=>StudentRoutineScreen(),));
               // Routine is not in bottom nav, push usually
               // but we can decide to keep it as push
             },
