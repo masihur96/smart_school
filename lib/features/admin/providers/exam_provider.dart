@@ -193,7 +193,8 @@ class ExamsNotifier extends ChangeNotifier {
 
       final response = await DataProvider().performRequest(
         'PUT',
-        '${APIPath.createExam}/$examId/publish',
+        '${APIPath.createExam}/$examId',
+        data: {'isPublished': true},
         header: {'Authorization': 'Bearer $token'},
       );
 
