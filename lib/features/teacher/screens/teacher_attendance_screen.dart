@@ -25,65 +25,100 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
   String? _selectedSection;
   Map<String, AttendanceStatus> _attendanceMap = {}; // studentId -> status
 
-  void _loadStudents() {
-    if (_selectedClass != null && _selectedSection != null) {
-      final students = context
-          .read<StudentsNotifier>()
-          .students
-          .where(
-            (s) =>
-                s.classId == _selectedClass &&
-                s.sectionId == _selectedSection &&
-                s.isActive,
-          )
-          .toList();
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchInitialData();
+    });
+  }
 
-      final existingRecords = context
-          .read<AttendanceNotifier>()
-          .getRecordsForDate(_selectedDate);
-
-      setState(() {
-        _attendanceMap = {
-          for (var s in students)
-            s.userId: existingRecords
-                .firstWhere(
-                  (r) => r.studentId == s.userId,
-                  orElse: () => AttendanceEntity(
-                    id: '',
-                    studentId: '',
-                    date: DateTime.now(),
-                    status: AttendanceStatus.absent,
-                    takenBy: '',
-                  ),
-                )
-                .status,
-        };
-      });
+  Future<void> _fetchInitialData() async {
+    final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
+    if (schoolId.isNotEmpty) {
+      await context.read<ClassSetupNotifier>().fetchClasses(schoolId);
+      await context.read<SectionSetupNotifier>().fetchSections();
     }
   }
 
-  void _save() {
-    final currentUser = context.read<AuthNotifier>().user;
-    if (currentUser == null) return;
+  Future<void> _onSelectionChanged() async {
+    if (_selectedClass != null && _selectedSection != null) {
+      // Fetch students for selected class/section
+      await context.read<StudentsNotifier>().fetchStudents(
+            classId: _selectedClass,
+            sectionId: _selectedSection,
+            isActive: true,
+          );
 
-    final records = _attendanceMap.entries
-        .map(
-          (e) => AttendanceEntity(
-            id: '${e.key}_${DateFormat('yyyyMMdd').format(_selectedDate)}',
-            studentId: e.key,
+      // Fetch existing attendance from API
+      await context.read<AttendanceNotifier>().fetchAttendanceFromAPI(
+            classId: _selectedClass!,
             date: _selectedDate,
-            status: e.value,
-            takenBy: currentUser.id,
-          ),
+          );
+
+      _loadStudentsFromState();
+    }
+  }
+
+  void _loadStudentsFromState() {
+    final students = context
+        .read<StudentsNotifier>()
+        .students
+        .where(
+          (s) =>
+              s.classId == _selectedClass &&
+              s.sectionId == _selectedSection &&
+              s.isActive,
         )
         .toList();
 
-    context.read<AttendanceNotifier>().saveAttendance(records);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Attendance saved successfully!')),
-    );
-    if (!widget.hideAppBar) {
-      context.pop();
+    final existingRecords = context
+        .read<AttendanceNotifier>()
+        .getRecordsForDate(_selectedDate);
+
+    setState(() {
+      _attendanceMap = {
+        for (var s in students)
+          s.userId: existingRecords
+              .firstWhere(
+                (r) => r.studentId == s.userId,
+                orElse: () => AttendanceEntity(
+                  id: '',
+                  studentId: '',
+                  date: _selectedDate,
+                  status: AttendanceStatus.absent,
+                  takenBy: '',
+                ),
+              )
+              .status,
+      };
+    });
+  }
+
+  Future<void> _save() async {
+    final currentUser = context.read<AuthNotifier>().user;
+    if (currentUser == null || _selectedClass == null) return;
+
+    final success = await context.read<AttendanceNotifier>().submitAttendanceToAPI(
+          date: _selectedDate,
+          takenBy: currentUser.id,
+          classId: _selectedClass!,
+          attendanceMap: _attendanceMap,
+        );
+
+    if (mounted) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Attendance saved successfully!')),
+        );
+        if (!widget.hideAppBar) {
+          context.pop();
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to save attendance')),
+        );
+      }
     }
   }
 
@@ -118,19 +153,21 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
         children: [
           _buildFilterSection(classes, sections),
           Expanded(
-            child: students.isEmpty
-                ? _buildEmptyState()
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: students.length,
-                    itemBuilder: (context, index) {
-                      final student = students[index];
-                      final status =
-                          _attendanceMap[student.userId] ??
-                          AttendanceStatus.absent;
-                      return _buildStudentCard(student, status);
-                    },
-                  ),
+            child: context.watch<AttendanceNotifier>().isLoading ||
+                    context.watch<StudentsNotifier>().isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : students.isEmpty
+                    ? _buildEmptyState()
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: students.length,
+                        itemBuilder: (context, index) {
+                          final student = students[index];
+                          final status = _attendanceMap[student.userId] ??
+                              AttendanceStatus.absent;
+                          return _buildStudentCard(student, status);
+                        },
+                      ),
           ),
         ],
       ),
@@ -174,7 +211,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                   );
                   if (picked != null) {
                     setState(() => _selectedDate = picked);
-                    _loadStudents();
+                    _onSelectionChanged();
                   }
                 },
                 child: Container(
@@ -212,7 +249,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                       _selectedClass = val;
                       _selectedSection = null;
                     });
-                    _loadStudents();
+                    _onSelectionChanged();
                   },
                 ),
               ),
@@ -230,7 +267,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                       .toList(),
                   onChanged: (val) {
                     setState(() => _selectedSection = val);
-                    _loadStudents();
+                    _onSelectionChanged();
                   },
                 ),
               ),

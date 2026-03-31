@@ -73,23 +73,19 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
   }
 
   Future<void> _loadAttendanceForDate() async {
-    final records = await context.read<AttendanceNotifier>().fetchAttendanceFromAPI(
-      classId: widget.classRoom.id,
-      date: _selectedDate,
-    );
+    await context.read<AttendanceNotifier>().fetchAttendanceFromAPI(
+          classId: widget.classRoom.id,
+          date: _selectedDate,
+        );
 
     if (mounted) {
+      final records = context
+          .read<AttendanceNotifier>()
+          .getRecordsForDate(_selectedDate);
       setState(() {
         _attendanceMap.clear();
         for (var record in records) {
-          final studentId = record['studentId'] as String?;
-          final statusStr = record['status'] as String?;
-          if (studentId != null && statusStr != null) {
-            _attendanceMap[studentId] = AttendanceStatus.values.firstWhere(
-              (e) => e.name == statusStr,
-              orElse: () => AttendanceStatus.present,
-            );
-          }
+          _attendanceMap[record.studentId] = record.status;
         }
       });
     }

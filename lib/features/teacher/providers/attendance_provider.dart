@@ -97,7 +97,7 @@ class AttendanceNotifier extends ChangeNotifier {
       notifyListeners();
     }
   }
-  Future<List<Map<String, dynamic>>> fetchAttendanceFromAPI({
+  Future<void> fetchAttendanceFromAPI({
     required String classId,
     required DateTime date,
   }) async {
@@ -122,22 +122,43 @@ class AttendanceNotifier extends ChangeNotifier {
 
       if (response != null && response.statusCode == 200) {
         final data = response.data['data'];
-        
+        List<Map<String, dynamic>> recordsRaw = [];
+        String takenBy = '';
+
         if (data is List && data.isNotEmpty) {
-          // If it's a list, take the first attendance document
           final firstDoc = data.first;
-          if (firstDoc != null && firstDoc['records'] != null) {
-            return List<Map<String, dynamic>>.from(firstDoc['records']);
+          if (firstDoc != null) {
+            recordsRaw = List<Map<String, dynamic>>.from(firstDoc['records'] ?? []);
+            takenBy = firstDoc['takenBy']?.toString() ?? '';
           }
-        } else if (data is Map && data['records'] != null) {
-          // In case the backend returns a single object
-          return List<Map<String, dynamic>>.from(data['records']);
+        } else if (data is Map) {
+          recordsRaw = List<Map<String, dynamic>>.from(data['records'] ?? []);
+          takenBy = data['takenBy']?.toString() ?? '';
         }
+
+        // Convert raw records to AttendanceEntity and update state
+        final List<AttendanceEntity> fetchedRecords = recordsRaw.map((r) {
+          return AttendanceEntity(
+            id: '', // Backend might not provide individual record IDs
+            studentId: r['studentId']?.toString() ?? '',
+            date: date,
+            status: AttendanceStatus.values.firstWhere(
+              (e) => e.name == r['status'],
+              orElse: () => AttendanceStatus.absent,
+            ),
+            takenBy: takenBy,
+          );
+        }).toList();
+
+        // Update state for this date
+        _state.removeWhere((r) =>
+            r.date.year == date.year &&
+            r.date.month == date.month &&
+            r.date.day == date.day);
+        _state.addAll(fetchedRecords);
       }
-      return [];
     } catch (e) {
       log('Error fetching attendance: $e');
-      return [];
     } finally {
       _isLoading = false;
       notifyListeners();
