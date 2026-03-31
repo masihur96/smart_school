@@ -101,4 +101,22 @@ class HomeworkNotifier extends ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<void> fetchHomework({
+    String? classId,
+    String? subjectId,
+  }) async {
+    if (_homeworkRepository == null) return;
+    try {
+      final results = await _homeworkRepository.fetchHomework(
+        classId: classId,
+        subjectId: subjectId,
+      );
+      _homeworkRecords = results;
+      notifyListeners();
+    } catch (e) {
+      log('Error fetching homework from API: $e');
+      rethrow;
+    }
+  }
 }

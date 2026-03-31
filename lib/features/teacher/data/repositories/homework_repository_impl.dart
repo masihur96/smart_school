@@ -23,4 +23,15 @@ class HomeworkRepositoryImpl implements IHomeworkRepository {
   Future<bool> deleteHomework(String id) async {
     return await _remoteDataSource.deleteHomework(id);
   }
+
+  @override
+  Future<List<Homework>> fetchHomework({
+    String? classId,
+    String? subjectId,
+  }) async {
+    return await _remoteDataSource.fetchHomework(
+      classId: classId,
+      subjectId: subjectId,
+    );
+  }
 }

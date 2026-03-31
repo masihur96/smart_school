@@ -96,4 +96,34 @@ class HomeworkRemoteDataSource {
     }
     return response.statusCode! >= 200 && response.statusCode! < 300;
   }
+
+  Future<List<Homework>> fetchHomework({
+    String? classId,
+    String? subjectId,
+  }) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    final query = <String, dynamic>{};
+    if (classId != null && classId.isNotEmpty) query['classId'] = classId;
+    if (subjectId != null && subjectId.isNotEmpty) query['subjectId'] = subjectId;
+
+    final response = await _dataProvider.performRequest(
+      'GET',
+      APIPath.submitHomeWork,
+      query: query,
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response == null || response.statusCode == null) {
+      throw Exception('No response from server');
+    }
+
+    if (response.statusCode! >= 200 && response.statusCode! < 300) {
+      final List data = response.data is List ? response.data : [];
+      return data.map((json) => Homework.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch homework');
+    }
+  }
 }

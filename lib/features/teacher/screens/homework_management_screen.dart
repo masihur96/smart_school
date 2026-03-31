@@ -17,6 +17,10 @@ class HomeworkManagementScreen extends StatefulWidget {
 }
 
 class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
+  String? _selectedClass;
+  String? _selectedSubject;
+  bool _isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -26,11 +30,26 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
   }
 
   Future<void> _fetchInitialData() async {
+    setState(() => _isLoading = true);
     final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
     if (schoolId.isNotEmpty) {
       await context.read<ClassSetupNotifier>().fetchClasses(schoolId);
       await context.read<SectionSetupNotifier>().fetchSections();
       await context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
+      await _onFetchHomework();
+    }
+    if (mounted) setState(() => _isLoading = false);
+  }
+
+  Future<void> _onFetchHomework() async {
+    setState(() => _isLoading = true);
+    try {
+      await context.read<HomeworkNotifier>().fetchHomework(
+            classId: _selectedClass,
+            subjectId: _selectedSubject,
+          );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -42,9 +61,13 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
     }
 
     final homeworkNotifier = context.watch<HomeworkNotifier>();
-    final homeworkList = homeworkNotifier.getHomeworkForTeacher(currentUser.id);
+    final homeworkList = homeworkNotifier.homeworkRecords; // Use all fetched records
     final classes = context.watch<ClassSetupNotifier>().classes;
     final subjects = context.watch<SubjectSetupNotifier>().subjects;
+
+    final filteredSubjects = _selectedClass == null
+        ? subjects
+        : subjects.where((s) => s.classId == _selectedClass).toList();
 
     return Scaffold(
       appBar: widget.hideAppBar
@@ -54,11 +77,70 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
               backgroundColor: Colors.blue,
               foregroundColor: Colors.white,
             ),
-      body: homeworkList.isEmpty
-          ? const Center(child: Text('No homeworks posted yet.'))
-          : ListView.builder(
-              itemCount: homeworkList.length,
-              itemBuilder: (context, index) {
+      body: Column(
+        children: [
+          // Filter Bar
+          Container(
+            padding: const EdgeInsets.all(16),
+            color: Colors.white,
+            child: Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String?>(
+                    decoration: const InputDecoration(
+                      labelText: 'Class',
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                    ),
+                    value: _selectedClass,
+                    items: [
+                      const DropdownMenuItem(value: null, child: Text('All Classes')),
+                      ...classes.map((c) =>
+                          DropdownMenuItem(value: c.id, child: Text(c.name))),
+                    ],
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedClass = val;
+                        _selectedSubject = null;
+                      });
+                      _onFetchHomework();
+                    },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: DropdownButtonFormField<String?>(
+                    decoration: const InputDecoration(
+                      labelText: 'Subject',
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                    ),
+                    value: _selectedSubject,
+                    items: [
+                      const DropdownMenuItem(value: null, child: Text('All Subjects')),
+                      ...filteredSubjects.map((s) =>
+                          DropdownMenuItem(value: s.id, child: Text(s.name))),
+                    ],
+                    onChanged: (val) {
+                      setState(() => _selectedSubject = val);
+                      _onFetchHomework();
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_isLoading)
+            const LinearProgressIndicator()
+          else
+            Expanded(
+              child: homeworkList.isEmpty
+                  ? const Center(child: Text('No homeworks found.'))
+                  : ListView.builder(
+                      itemCount: homeworkList.length,
+                      itemBuilder: (context, index) {
                 final hw = homeworkList[index];
                 final className = classes
                     .firstWhere(
@@ -136,11 +218,13 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
                         ),
                       ],
                     ),
-                    isThreeLine: true,
-                  ),
-                );
-              },
+                    ),
+                  );
+                },
+              ),
             ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _addHomeworkDialog(context),
         child: const Icon(Icons.add),
