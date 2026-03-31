@@ -121,6 +121,7 @@ class Homework {
   final String subjectId;
   final String title;
   final String description;
+  final String schoolId;
   final DateTime dueDate;
   final DateTime createdAt;
 
@@ -132,6 +133,7 @@ class Homework {
     required this.subjectId,
     required this.title,
     required this.description,
+    required this.schoolId,
     required this.dueDate,
     required this.createdAt,
   });
@@ -144,6 +146,7 @@ class Homework {
     subjectId: json['subjectId'],
     title: json['title'],
     description: json['description'],
+    schoolId: json['schoolId'] ?? '',
     dueDate: DateTime.parse(json['dueDate']),
     createdAt: DateTime.parse(json['createdAt']),
   );
@@ -156,6 +159,7 @@ class Homework {
     'subjectId': subjectId,
     'title': title,
     'description': description,
+    'schoolId': schoolId,
     'dueDate': dueDate.toIso8601String(),
     'createdAt': createdAt.toIso8601String(),
   };

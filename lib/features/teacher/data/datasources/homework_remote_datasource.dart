@@ -23,6 +23,7 @@ class HomeworkRemoteDataSource {
       'description': homework.description,
       'dueDate': homework.dueDate.toIso8601String().split('T')[0], // YYYY-MM-DD
       'sectionId': homework.sectionId,
+      'schoolId': homework.schoolId,
     };
 
     // Note: The user's curl also has schoolId. 

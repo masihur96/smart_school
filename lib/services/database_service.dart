@@ -112,7 +112,7 @@ class DatabaseService {
       title: 'Algebra Exercise 1.1',
       description: 'Solve problems 1 to 10.',
       dueDate: DateTime.now().add(const Duration(days: 2)),
-      createdAt: DateTime.now(),
+      createdAt: DateTime.now(), schoolId: '',
     ),
     Homework(
       id: 'hw_seed_1',
@@ -123,7 +123,7 @@ class DatabaseService {
       title: 'Mathematics Homework - Algebra',
       description: 'Solve exercises 1 to 10 from Chapter 3.',
       dueDate: DateTime.parse('2026-04-05'),
-      createdAt: DateTime.now(),
+      createdAt: DateTime.now(), schoolId: '',
     ),
   ];
 

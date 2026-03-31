@@ -8,24 +8,46 @@ import '../../auth/providers/auth_provider.dart';
 import '../../../models/school_models.dart';
 import 'package:intl/intl.dart';
 
-class HomeworkManagementScreen extends StatelessWidget {
+class HomeworkManagementScreen extends StatefulWidget {
   final bool hideAppBar;
   const HomeworkManagementScreen({super.key, this.hideAppBar = false});
 
   @override
+  State<HomeworkManagementScreen> createState() => _HomeworkManagementScreenState();
+}
+
+class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchInitialData();
+    });
+  }
+
+  Future<void> _fetchInitialData() async {
+    final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
+    if (schoolId.isNotEmpty) {
+      await context.read<ClassSetupNotifier>().fetchClasses(schoolId);
+      await context.read<SectionSetupNotifier>().fetchSections();
+      await context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final currentUser = context.watch<AuthNotifier>().user;
-    if (currentUser == null)
+    if (currentUser == null) {
       return const Scaffold(body: Center(child: Text('Please login')));
+    }
 
-    final homeworkList = context
-        .watch<HomeworkNotifier>()
-        .getHomeworkForTeacher(currentUser.id);
+    final homeworkNotifier = context.watch<HomeworkNotifier>();
+    final homeworkList = homeworkNotifier.getHomeworkForTeacher(currentUser.id);
     final classes = context.watch<ClassSetupNotifier>().classes;
     final subjects = context.watch<SubjectSetupNotifier>().subjects;
 
     return Scaffold(
-      appBar: hideAppBar
+      appBar: widget.hideAppBar
           ? null
           : AppBar(
               title: const Text('My Homeworks'),
@@ -77,9 +99,7 @@ class HomeworkManagementScreen extends StatelessWidget {
                     ),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete, color: Colors.grey),
-                      onPressed: () => context
-                          .read<HomeworkNotifier>()
-                          .removeHomework(hw.id),
+                      onPressed: () => homeworkNotifier.removeHomework(hw.id),
                     ),
                     isThreeLine: true,
                   ),
@@ -137,6 +157,7 @@ class HomeworkManagementScreen extends StatelessWidget {
                   onChanged: (val) => setState(() {
                     selectedClass = val;
                     selectedSection = null;
+                    selectedSubject = null; // Reset subject when class changes
                   }),
                 ),
                 DropdownButtonFormField<String>(
@@ -155,6 +176,7 @@ class HomeworkManagementScreen extends StatelessWidget {
                   decoration: const InputDecoration(labelText: 'Subject'),
                   value: selectedSubject,
                   items: subjects
+                      .where((s) => s.classId == selectedClass)
                       .map(
                         (s) =>
                             DropdownMenuItem(value: s.id, child: Text(s.name)),
@@ -212,6 +234,7 @@ class HomeworkManagementScreen extends StatelessWidget {
                               sectionId: selectedSection!,
                               subjectId: selectedSubject!,
                               teacherId: currentUser.id,
+                              schoolId: currentUser.schoolId ?? '',
                               dueDate: selectedDate,
                               createdAt: DateTime.now(),
                             ),
