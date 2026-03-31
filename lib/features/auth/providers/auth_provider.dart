@@ -75,6 +75,8 @@ class AuthNotifier extends ChangeNotifier {
       // Fetch full profile after login
       final profile = await getProfileUseCase();
 
+      print("profile.classId:: ${profile.classId}");
+
       _user = User(
         id: profile.id,
         name: profile.name,

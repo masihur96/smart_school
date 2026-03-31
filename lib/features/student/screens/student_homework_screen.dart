@@ -14,8 +14,10 @@ class StudentHomeworkScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = context.watch<AuthNotifier>().user;
-    if (currentUser == null)
+    if (currentUser == null) {
       return const Scaffold(body: Center(child: Text('Not logged in')));
+    }
+
 
     final student = context.watch<StudentsNotifier>().students.firstWhere(
       (s) => s.userId == currentUser.id,

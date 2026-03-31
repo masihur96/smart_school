@@ -33,6 +33,7 @@ class AuthRepositoryImpl implements AuthRepository {
       email: result.email,
       role: result.role,
       schoolId: result.schoolId,
+      classId: result.classId,
       phone: result.phone,
     );
   }

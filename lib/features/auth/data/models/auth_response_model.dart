@@ -4,6 +4,7 @@ class AuthResponseModel {
   final String email;
   final String role;
   final String? schoolId;
+  final String? classId;
   final String? phone;
 
   AuthResponseModel({
@@ -12,6 +13,7 @@ class AuthResponseModel {
     required this.email,
     required this.role,
     this.schoolId,
+    this.classId,
     this.phone,
   });
 
@@ -22,6 +24,7 @@ class AuthResponseModel {
       email: json['email'] ?? "",
       role: json['role'] ?? "",
       schoolId: json['schoolId'],
+      classId: json['classId'],
       phone: json['phone'],
     );
   }
@@ -33,6 +36,7 @@ class AuthResponseModel {
       'email': email,
       'role': role,
       'schoolId': schoolId,
+      'classId': classId,
       'phone': phone,
     };
   }
