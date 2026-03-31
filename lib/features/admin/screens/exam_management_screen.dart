@@ -166,154 +166,169 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                               borderRadius: BorderRadius.circular(16),
                               side: BorderSide(color: Colors.grey.shade200),
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 50,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [Colors.purple.shade300, Colors.purple.shade600],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(Icons.assignment, color: Colors.white, size: 28),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          exam.name,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
+                            child: Stack(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 50,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [Colors.purple.shade300, Colors.purple.shade600],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
                                           ),
+                                          shape: BoxShape.circle,
                                         ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          subtitleText,
-                                          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Row(
+                                        child: const Icon(Icons.assignment, color: Colors.white, size: 28),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Icon(Icons.calendar_today_outlined,
-                                                size: 14, color: Colors.grey.shade400),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              '${DateFormat('MMM dd, yyyy').format(exam.startDate ?? DateTime.now())} - ${DateFormat('MMM dd, yyyy').format(exam.endDate ?? DateTime.now())}',
-                                              style: TextStyle(
-                                                  color: Colors.grey.shade500, fontSize: 12),
-                                            ),
-                                            const SizedBox(width: 12),
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(
-                                                  horizontal: 8, vertical: 2),
-                                              decoration: BoxDecoration(
-                                                color: exam.isPublished
-                                                    ? Colors.green.shade50
-                                                    : Colors.orange.shade50,
-                                                borderRadius: BorderRadius.circular(12),
-                                              ),
-                                              child: Text(
-                                                exam.isPublished ? 'Published' : 'Draft',
-                                                style: TextStyle(
-                                                  color: exam.isPublished
-                                                      ? Colors.green
-                                                      : Colors.orange,
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.bold,
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text(
+                                                  exam.name,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16,
+                                                  ),
                                                 ),
-                                              ),
+                                                const SizedBox(width: 12),
+
+                                              ],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              subtitleText,
+                                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Row(
+                                              children: [
+                                                Icon(Icons.calendar_today_outlined,
+                                                    size: 14, color: Colors.grey.shade400),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  '${DateFormat('MMM dd, yyyy').format(exam.startDate ?? DateTime.now())} - ${DateFormat('MMM dd, yyyy').format(exam.endDate ?? DateTime.now())}',
+                                                  style: TextStyle(
+                                                      color: Colors.grey.shade500, fontSize: 12),
+                                                ),
+
+                                              ],
                                             ),
                                           ],
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                  PopupMenuButton<String>(
-                                    icon: const Icon(Icons.more_vert),
-                                    onSelected: (value) async {
-                                      if (value == 'view') {
-                                        _showExamDetails(context, exam);
-                                      } else if (value == 'edit') {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => AddEditExamScreen(exam: exam),
-                                          ),
-                                        );
-                                      } else if (value == 'publish') {
-                                        _updatePublishStatus(context, exam, true);
-                                      } else if (value == 'unpublish') {
-                                        _updatePublishStatus(context, exam, false);
-                                      } else if (value == 'delete') {
-                                        _confirmDelete(context, exam);
-                                      }
-                                    },
-                                    itemBuilder: (context) => [
-                                      const PopupMenuItem(
-                                        value: 'view',
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.visibility_outlined, color: Colors.green),
-                                            SizedBox(width: 8),
-                                            Text('View Details'),
-                                          ],
-                                        ),
                                       ),
-                                      const PopupMenuItem(
-                                        value: 'edit',
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.edit_outlined, color: Colors.orange),
-                                            SizedBox(width: 8),
-                                            Text('Edit Exam'),
-                                          ],
-                                        ),
-                                      ),
-                                      if (!exam.isPublished)
-                                        const PopupMenuItem(
-                                          value: 'publish',
-                                          child: Row(
-                                            children: [
-                                              Icon(Icons.publish, color: Colors.blue),
-                                              SizedBox(width: 8),
-                                              Text('Publish Result'),
-                                            ],
+                                      PopupMenuButton<String>(
+                                        icon: const Icon(Icons.more_vert),
+                                        onSelected: (value) async {
+                                          if (value == 'view') {
+                                            _showExamDetails(context, exam);
+                                          } else if (value == 'edit') {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => AddEditExamScreen(exam: exam),
+                                              ),
+                                            );
+                                          } else if (value == 'publish') {
+                                            _updatePublishStatus(context, exam, true);
+                                          } else if (value == 'unpublish') {
+                                            _updatePublishStatus(context, exam, false);
+                                          } else if (value == 'delete') {
+                                            _confirmDelete(context, exam);
+                                          }
+                                        },
+                                        itemBuilder: (context) => [
+                                          const PopupMenuItem(
+                                            value: 'view',
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.visibility_outlined, color: Colors.green),
+                                                SizedBox(width: 8),
+                                                Text('View Details'),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      if (exam.isPublished)
-                                        const PopupMenuItem(
-                                          value: 'unpublish',
-                                          child: Row(
-                                            children: [
-                                              Icon(Icons.unpublished_outlined, color: Colors.grey),
-                                              SizedBox(width: 8),
-                                              Text('Unpublish Result'),
-                                            ],
+                                          const PopupMenuItem(
+                                            value: 'edit',
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.edit_outlined, color: Colors.orange),
+                                                SizedBox(width: 8),
+                                                Text('Edit Exam'),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      const PopupMenuItem(
-                                        value: 'delete',
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.delete_outline, color: Colors.red),
-                                            SizedBox(width: 8),
-                                            Text('Delete Exam'),
-                                          ],
-                                        ),
+                                          if (!exam.isPublished)
+                                            const PopupMenuItem(
+                                              value: 'publish',
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.publish, color: Colors.blue),
+                                                  SizedBox(width: 8),
+                                                  Text('Publish Result'),
+                                                ],
+                                              ),
+                                            ),
+                                          if (exam.isPublished)
+                                            const PopupMenuItem(
+                                              value: 'unpublish',
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.unpublished_outlined, color: Colors.grey),
+                                                  SizedBox(width: 8),
+                                                  Text('Unpublish Result'),
+                                                ],
+                                              ),
+                                            ),
+                                          const PopupMenuItem(
+                                            value: 'delete',
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.delete_outline, color: Colors.red),
+                                                SizedBox(width: 8),
+                                                Text('Delete Exam'),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
+                                ),
+                                Positioned(
+                                  right: 5,
+                                  top: 5,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: exam.isPublished
+                                          ? Colors.green.shade50
+                                          : Colors.orange.shade50,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      exam.isPublished ? 'Published' : 'Draft',
+                                      style: TextStyle(
+                                        color: exam.isPublished
+                                            ? Colors.green
+                                            : Colors.orange,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           );
                         },
