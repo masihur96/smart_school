@@ -108,6 +108,9 @@ class HomeworkRemoteDataSource {
     if (classId != null && classId.isNotEmpty) query['classId'] = classId;
     if (subjectId != null && subjectId.isNotEmpty) query['subjectId'] = subjectId;
 
+
+    print("query:: $query");
+
     final response = await _dataProvider.performRequest(
       'GET',
       APIPath.submitHomeWork,
@@ -120,7 +123,10 @@ class HomeworkRemoteDataSource {
     }
 
     if (response.statusCode! >= 200 && response.statusCode! < 300) {
-      final List data = response.data is List ? response.data : [];
+      final dynamic rawData = response.data;
+      final List data = rawData is List
+          ? rawData
+          : (rawData is Map ? (rawData['data'] ?? []) : []);
       return data.map((json) => Homework.fromJson(json)).toList();
     } else {
       throw Exception('Failed to fetch homework');

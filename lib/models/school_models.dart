@@ -139,16 +139,16 @@ class Homework {
   });
 
   factory Homework.fromJson(Map<String, dynamic> json) => Homework(
-    id: json['id'],
-    teacherId: json['teacherId'],
-    classId: json['classId'],
-    sectionId: json['sectionId'],
-    subjectId: json['subjectId'],
-    title: json['title'],
-    description: json['description'],
+    id: json['id'] ?? '',
+    teacherId: json['teacherId'] ?? '',
+    classId: json['classId'] ?? '',
+    sectionId: json['sectionId'] ?? '',
+    subjectId: json['subjectId'] ?? '',
+    title: json['title'] ?? '',
+    description: json['description'] ?? '',
     schoolId: json['schoolId'] ?? '',
-    dueDate: DateTime.parse(json['dueDate']),
-    createdAt: DateTime.parse(json['createdAt']),
+    dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : DateTime.now(),
+    createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
   );
 
   Map<String, dynamic> toJson() => {
