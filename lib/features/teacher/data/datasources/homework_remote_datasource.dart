@@ -52,4 +52,48 @@ class HomeworkRemoteDataSource {
       throw Exception(message);
     }
   }
+
+  Future<bool> updateHomework(Homework homework) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    final payload = {
+      'classId': homework.classId,
+      'subjectId': homework.subjectId,
+      'teacherId': homework.teacherId,
+      'title': homework.title,
+      'description': homework.description,
+      'dueDate': homework.dueDate.toIso8601String().split('T')[0],
+      'sectionId': homework.sectionId,
+      'schoolId': homework.schoolId,
+    };
+
+    final response = await _dataProvider.performRequest(
+      'PUT',
+      '${APIPath.submitHomeWork}/${homework.id}',
+      data: payload,
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response == null || response.statusCode == null) {
+      throw Exception('No response from server');
+    }
+    return response.statusCode! >= 200 && response.statusCode! < 300;
+  }
+
+  Future<bool> deleteHomework(String id) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    final response = await _dataProvider.performRequest(
+      'DELETE',
+      '${APIPath.submitHomeWork}/$id',
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response == null || response.statusCode == null) {
+      throw Exception('No response from server');
+    }
+    return response.statusCode! >= 200 && response.statusCode! < 300;
+  }
 }

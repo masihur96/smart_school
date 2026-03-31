@@ -24,8 +24,19 @@ class HomeworkNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void removeHomework(String id) {
+  void _removeLocal(String id) {
     _dbService.homeworkRecords.removeWhere((h) => h.id == id);
+    _homeworkRecords = [..._dbService.homeworkRecords];
+    notifyListeners();
+  }
+
+  void _updateLocal(Homework homework) {
+    final index = _dbService.homeworkRecords.indexWhere((h) => h.id == homework.id);
+    if (index != -1) {
+      _dbService.homeworkRecords[index] = homework;
+    } else {
+      _dbService.homeworkRecords.add(homework);
+    }
     _homeworkRecords = [..._dbService.homeworkRecords];
     notifyListeners();
   }
@@ -42,11 +53,9 @@ class HomeworkNotifier extends ChangeNotifier {
 
   Future<bool> submitHomework(Homework homework) async {
     if (_homeworkRepository == null) {
-      // Fallback to mock if repository is not provided (e.g. in tests)
       addHomework(homework);
       return true;
     }
-
     try {
       final success = await _homeworkRepository.submitHomework(homework);
       if (success) {
@@ -55,6 +64,40 @@ class HomeworkNotifier extends ChangeNotifier {
       return success;
     } catch (e) {
       log('Error submitting homework: $e');
+      rethrow;
+    }
+  }
+
+  Future<bool> updateHomework(Homework homework) async {
+    if (_homeworkRepository == null) {
+      _updateLocal(homework);
+      return true;
+    }
+    try {
+      final success = await _homeworkRepository.updateHomework(homework);
+      if (success) {
+        _updateLocal(homework);
+      }
+      return success;
+    } catch (e) {
+      log('Error updating homework: $e');
+      rethrow;
+    }
+  }
+
+  Future<bool> removeHomework(String id) async {
+    if (_homeworkRepository == null) {
+      _removeLocal(id);
+      return true;
+    }
+    try {
+      final success = await _homeworkRepository.deleteHomework(id);
+      if (success) {
+        _removeLocal(id);
+      }
+      return success;
+    } catch (e) {
+      log('Error deleting homework: $e');
       rethrow;
     }
   }

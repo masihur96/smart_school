@@ -97,9 +97,44 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
                         ),
                       ],
                     ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.grey),
-                      onPressed: () => homeworkNotifier.removeHomework(hw.id),
+                    trailing: PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert, color: Colors.grey),
+                      onSelected: (value) {
+                        if (value == 'view') {
+                          _viewHomeworkDialog(context, hw);
+                        } else if (value == 'edit') {
+                          _updateHomeworkDialog(context, hw);
+                        } else if (value == 'delete') {
+                          _confirmDelete(context, hw.id);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'view',
+                          child: ListTile(
+                            leading: Icon(Icons.visibility),
+                            title: Text('View'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: ListTile(
+                            leading: Icon(Icons.edit),
+                            title: Text('Edit'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: ListTile(
+                            leading: Icon(Icons.delete, color: Colors.red),
+                            title:
+                                Text('Delete', style: TextStyle(color: Colors.red)),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ],
                     ),
                     isThreeLine: true,
                   ),
@@ -109,6 +144,208 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _addHomeworkDialog(context),
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _viewHomeworkDialog(BuildContext context, Homework hw) {
+    final classes = context.read<ClassSetupNotifier>().classes;
+    final subjects = context.read<SubjectSetupNotifier>().subjects;
+    final className = classes
+        .firstWhere((c) => c.id == hw.classId,
+            orElse: () => ClassRoom(id: '', name: 'Unknown'))
+        .name;
+    final subName = subjects
+        .firstWhere((s) => s.id == hw.subjectId,
+            orElse: () => Subject(id: '', name: 'Unknown'))
+        .name;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(hw.title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Class: $className'),
+            Text('Subject: $subName'),
+            const SizedBox(height: 10),
+            const Text('Description:', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(hw.description.isNotEmpty ? hw.description : 'No description'),
+            const SizedBox(height: 10),
+            Text('Due Date: ${DateFormat('yyyy-MM-dd').format(hw.dueDate)}'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _updateHomeworkDialog(BuildContext context, Homework hw) {
+    final titleController = TextEditingController(text: hw.title);
+    final descController = TextEditingController(text: hw.description);
+    String? selectedClass = hw.classId;
+    String? selectedSection = hw.sectionId;
+    String? selectedSubject = hw.subjectId;
+    DateTime selectedDate = hw.dueDate;
+
+    final classes = context.read<ClassSetupNotifier>().classes;
+    final sections = context.read<SectionSetupNotifier>().sections;
+    final subjects = context.read<SubjectSetupNotifier>().subjects;
+    final currentUser = context.read<AuthNotifier>().user!;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Edit Homework'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(labelText: 'Title'),
+                ),
+                TextField(
+                  controller: descController,
+                  decoration: const InputDecoration(labelText: 'Description'),
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(labelText: 'Class'),
+                  value: selectedClass,
+                  items: classes
+                      .map((c) =>
+                          DropdownMenuItem(value: c.id, child: Text(c.name)))
+                      .toList(),
+                  onChanged: (val) => setState(() {
+                    selectedClass = val;
+                    selectedSection = null;
+                    selectedSubject = null;
+                  }),
+                ),
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(labelText: 'Section'),
+                  value: selectedSection,
+                  items: sections
+                      .where((s) => s.classId == selectedClass)
+                      .map((s) =>
+                          DropdownMenuItem(value: s.id, child: Text(s.name)))
+                      .toList(),
+                  onChanged: (val) => setState(() => selectedSection = val),
+                ),
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(labelText: 'Subject'),
+                  value: selectedSubject,
+                  items: subjects
+                      .where((s) => s.classId == selectedClass)
+                      .map((s) =>
+                          DropdownMenuItem(value: s.id, child: Text(s.name)))
+                      .toList(),
+                  onChanged: (val) => setState(() => selectedSubject = val),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Due Date: ${DateFormat('yyyy-MM-dd').format(selectedDate)}',
+                      ),
+                    ),
+                    TextButton(
+                      child: const Text('Pick Date'),
+                      onPressed: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate,
+                          firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                        );
+                        if (picked != null) setState(() => selectedDate = picked);
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (titleController.text.isNotEmpty &&
+                    selectedClass != null &&
+                    selectedSubject != null) {
+                  final success = await context.read<HomeworkNotifier>().updateHomework(
+                        Homework(
+                          id: hw.id,
+                          title: titleController.text,
+                          description: descController.text,
+                          classId: selectedClass!,
+                          sectionId: selectedSection ?? '',
+                          subjectId: selectedSubject!,
+                          teacherId: currentUser.id,
+                          schoolId: currentUser.schoolId ?? '',
+                          dueDate: selectedDate,
+                          createdAt: hw.createdAt,
+                        ),
+                      );
+                  if (context.mounted) {
+                    if (success) {
+                      Navigator.pop(context);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Failed to update homework')),
+                      );
+                    }
+                  }
+                }
+              },
+              child: const Text('Save Changes'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, String id) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Homework'),
+        content: const Text('Are you sure you want to delete this homework?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final success = await context.read<HomeworkNotifier>().removeHomework(id);
+              if (context.mounted) {
+                Navigator.pop(context);
+                if (!success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to delete homework')),
+                  );
+                }
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }
