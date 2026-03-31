@@ -10,10 +10,12 @@ import 'package:smart_school/features/admin/screens/student_management_screen.da
 import 'package:smart_school/features/admin/screens/teacher_management_screen.dart';
 import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
 import 'package:smart_school/features/setting_management_screen.dart';
+import 'package:smart_school/features/student/screens/student_routine_screen.dart';
 import 'package:smart_school/features/teacher/screens/homework_management_screen.dart';
 import 'package:smart_school/features/teacher/screens/mark_entry_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_attendance_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
+import 'package:smart_school/features/teacher/screens/teacher_routine_screen.dart';
 
 import '../../features/auth/providers/auth_provider.dart';
 import '../../models/user_model.dart';
@@ -170,7 +172,7 @@ class AppDrawer extends StatelessWidget {
       _buildDrawerItem(Icons.calendar_today, 'Routine', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => TeacherDashboardScreen()),
+          MaterialPageRoute(builder: (_) => const TeacherRoutineScreen()),
         );
       }, context),
     ];

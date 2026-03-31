@@ -8,9 +8,11 @@ import '../../../models/school_models.dart';
 // Key format: classId_sectionId
 class RoutineNotifier extends ChangeNotifier {
   Map<String, List<RoutineEntry>> _state = {};
+  List<RoutineEntry> _teacherRoutine = [];
   bool _isLoading = false;
 
   Map<String, List<RoutineEntry>> get state => _state;
+  List<RoutineEntry> get teacherRoutine => _teacherRoutine;
   bool get isLoading => _isLoading;
 
   void addEntry(String classId, String sectionId, RoutineEntry entry) {
@@ -193,5 +195,39 @@ class RoutineNotifier extends ChangeNotifier {
 
   List<RoutineEntry> getRoutine(String classId, String sectionId) {
     return _state['${classId}_$sectionId'] ?? [];
+  }
+
+  Future<void> fetchTeacherRoutine(String teacherId) async {
+    log('Fetching routine for teacher: $teacherId');
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.createRoutine,
+        query: {'teacherId': teacherId},
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final List<dynamic> data = response.data is List
+            ? response.data
+            : (response.data['data'] ?? []);
+        
+        _teacherRoutine = data.map((e) => RoutineEntry.fromJson(e)).toList();
+        log('Fetched ${_teacherRoutine.length} routine entries for teacher');
+      } else {
+        log('Error fetching teacher routine: ${response?.statusCode}');
+      }
+    } catch (e) {
+      log('Error fetching teacher routine: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }
