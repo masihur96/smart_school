@@ -15,6 +15,11 @@ import '../../teacher/providers/attendance_provider.dart';
 import 'exam_management_screen.dart';
 import 'notice_management_screen.dart';
 import 'student_management_screen.dart';
+import '../providers/student_provider.dart';
+import '../providers/teacher_provider.dart';
+import '../providers/setup_provider.dart';
+import '../providers/notice_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -29,10 +34,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    // Load all attendance data for the chart
-    Future.microtask(() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
+        final schoolId = context.read<AuthNotifier>().user?.schoolId;
+        
         context.read<AttendanceNotifier>().loadAll();
+        
+        if (schoolId != null) {
+          context.read<StudentsNotifier>().fetchStudents();
+          context.read<TeachersNotifier>().fetchTeachers();
+          context.read<ClassSetupNotifier>().fetchClasses(schoolId);
+          context.read<NoticesNotifier>().fetchNoticesFromAPI(schoolId);
+        }
       }
     });
   }
@@ -61,6 +74,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final attendanceRecords = context.watch<AttendanceNotifier>().state;
+    final studentCount = context.watch<StudentsNotifier>().totalCount;
+    final teacherCount = context.watch<TeachersNotifier>().totalCount;
+    final classCount = context.watch<ClassSetupNotifier>().classes.length;
+    final noticeCount = context.watch<NoticesNotifier>().notices.length;
+
+    final isStudentsLoading = context.watch<StudentsNotifier>().isLoading;
+    final isTeachersLoading = context.watch<TeachersNotifier>().isLoading;
+    final isClassesLoading = context.watch<ClassSetupNotifier>().isLoading;
+    final isNoticesLoading = context.watch<NoticesNotifier>().isLoading;
 
     return Scaffold(
       appBar: AppBar(
@@ -84,7 +106,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          _buildDashboardOverview(attendanceRecords),
+          _buildDashboardOverview(
+            attendanceRecords,
+            studentCount: studentCount,
+            teacherCount: teacherCount,
+            classCount: classCount,
+            noticeCount: noticeCount,
+            isStudentsLoading: isStudentsLoading,
+            isTeachersLoading: isTeachersLoading,
+            isClassesLoading: isClassesLoading,
+            isNoticesLoading: isNoticesLoading,
+          ),
           const StudentManagementScreen(hideAppBar: true),
           const ExamManagementScreen(hideAppBar: true),
           const NoticeManagementScreen(hideAppBar: true),
@@ -112,7 +144,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildDashboardOverview(List<AttendanceEntity> attendanceRecords) {
+  Widget _buildDashboardOverview(
+    List<AttendanceEntity> attendanceRecords, {
+    required int studentCount,
+    required int teacherCount,
+    required int classCount,
+    required int noticeCount,
+    required bool isStudentsLoading,
+    required bool isTeachersLoading,
+    required bool isClassesLoading,
+    required bool isNoticesLoading,
+  }) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -136,7 +178,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               _buildStatCard(
                 context,
                 'Total Students',
-                '450',
+                isStudentsLoading ? '...' : studentCount.toString(),
                 Icons.people,
                 Colors.blue,
                 onTap: () => setState(() => _selectedIndex = 1),
@@ -144,7 +186,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               _buildStatCard(
                 context,
                 'Total Teachers',
-                '25',
+                isTeachersLoading ? '...' : teacherCount.toString(),
                 Icons.person,
                 Colors.orange,
                 onTap: () {
@@ -159,7 +201,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               _buildStatCard(
                 context,
                 'Total Classes',
-                '12',
+                isClassesLoading ? '...' : classCount.toString(),
                 Icons.class_,
                 Colors.green,
                 onTap: () {
@@ -172,7 +214,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               _buildStatCard(
                 context,
                 'Active Notices',
-                '5',
+                isNoticesLoading ? '...' : noticeCount.toString(),
                 Icons.announcement,
                 Colors.red,
                 onTap: () => setState(() => _selectedIndex = 3),

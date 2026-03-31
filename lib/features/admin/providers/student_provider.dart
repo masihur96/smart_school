@@ -13,6 +13,7 @@ class StudentsNotifier extends ChangeNotifier {
   int _currentPage = 1;
   bool _hasMore = true;
   bool _isLoadingMore = false;
+  int _totalCount = 0;
 
   StudentsNotifier(this._dbService) {
     _students = [..._dbService.students];
@@ -22,6 +23,7 @@ class StudentsNotifier extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get hasMore => _hasMore;
   bool get isLoadingMore => _isLoadingMore;
+  int get totalCount => _totalCount;
 
   Future<void> fetchStudents({
     String? classId, 
@@ -70,6 +72,8 @@ class StudentsNotifier extends ChangeNotifier {
         final responseTotal = (inner is Map && inner['total'] != null)
             ? int.tryParse(inner['total'].toString()) ?? 0
             : data.length;
+        
+        _totalCount = responseTotal;
         
         if (data.length < 10 || (loadMore && _students.length + data.length >= responseTotal)) {
           _hasMore = false;
