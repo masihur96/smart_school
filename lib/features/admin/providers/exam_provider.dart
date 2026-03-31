@@ -186,7 +186,7 @@ class ExamsNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> publishResult(String examId) async {
+  Future<void> updatePublishStatus(String examId, bool isPublished) async {
     try {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
@@ -194,17 +194,17 @@ class ExamsNotifier extends ChangeNotifier {
       final response = await DataProvider().performRequest(
         'PUT',
         '${APIPath.createExam}/$examId',
-        data: {'isPublished': true},
+        data: {'isPublished': isPublished},
         header: {'Authorization': 'Bearer $token'},
       );
 
       if (response != null && response.statusCode == 200) {
         await _load();
       } else {
-        log('Error publishing result: ${response?.data}');
+        log('Error updating publish status: ${response?.data}');
       }
     } catch (e) {
-      log('Error publishing result: $e');
+      log('Error updating publish status: $e');
     }
   }
 }

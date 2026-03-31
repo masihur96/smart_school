@@ -250,7 +250,9 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                                           ),
                                         );
                                       } else if (value == 'publish') {
-                                        _confirmPublish(context, exam);
+                                        _updatePublishStatus(context, exam, true);
+                                      } else if (value == 'unpublish') {
+                                        _updatePublishStatus(context, exam, false);
                                       } else if (value == 'delete') {
                                         _confirmDelete(context, exam);
                                       }
@@ -284,6 +286,17 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                                               Icon(Icons.publish, color: Colors.blue),
                                               SizedBox(width: 8),
                                               Text('Publish Result'),
+                                            ],
+                                          ),
+                                        ),
+                                      if (exam.isPublished)
+                                        const PopupMenuItem(
+                                          value: 'unpublish',
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.unpublished_outlined, color: Colors.grey),
+                                              SizedBox(width: 8),
+                                              Text('Unpublish Result'),
                                             ],
                                           ),
                                         ),
@@ -444,26 +457,32 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
     );
   }
 
-  void _confirmPublish(BuildContext context, Exam exam) {
+  void _updatePublishStatus(BuildContext context, Exam exam, bool newStatus) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Publish Result'),
-        content: Text('Are you sure you want to publish the results for ${exam.name}?'),
+        title: Text(newStatus ? 'Publish Result' : 'Unpublish Result'),
+        content: Text('Are you sure you want to ${newStatus ? 'publish' : 'unpublish'} the results for ${exam.name}?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
-              await context.read<ExamsNotifier>().publishResult(exam.id);
+              await context.read<ExamsNotifier>().updatePublishStatus(exam.id, newStatus);
               if (context.mounted) {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Results published successfully!'), backgroundColor: Colors.green),
+                  SnackBar(
+                    content: Text('Results ${newStatus ? 'published' : 'unpublished'} successfully!'),
+                    backgroundColor: newStatus ? Colors.green : Colors.grey,
+                  ),
                 );
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple, foregroundColor: Colors.white),
-            child: const Text('Publish'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: newStatus ? Colors.purple : Colors.grey.shade700,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(newStatus ? 'Publish' : 'Unpublish'),
           ),
         ],
       ),
