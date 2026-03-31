@@ -31,28 +31,10 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
 
     final currentUser = context.read<AuthNotifier>().user;
     if (currentUser == null) return;
-
-    // Check if student data is already loaded, if not fetch it
-    final studentsNotifier = context.read<StudentsNotifier>();
-    if (studentsNotifier.students.isEmpty) {
-      await studentsNotifier.fetchStudents();
-    }
-
-
     print("fetchRoutine");
     print("${currentUser.classId}");
-    print("${studentsNotifier.students.first.classId}");
-
-
-
-
-    final student = studentsNotifier.students.firstWhere(
-      (s) => s.userId == currentUser.id,
-      orElse: () => throw Exception('Student details not found'),
-    );
-    print("fetchRoutine");
     if (mounted) {
-      context.read<StudentRoutineNotifier>().fetchRoutine(student.classId);
+      context.read<StudentRoutineNotifier>().fetchRoutine(currentUser.classId??"");
     }
   }
 
