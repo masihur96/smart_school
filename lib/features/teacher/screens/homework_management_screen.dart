@@ -196,24 +196,36 @@ class HomeworkManagementScreen extends StatelessWidget {
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (titleController.text.isNotEmpty &&
                     selectedClass != null &&
                     selectedSubject != null) {
-                  context.read<HomeworkNotifier>().addHomework(
-                    Homework(
-                      id: DateTime.now().millisecondsSinceEpoch.toString(),
-                      title: titleController.text,
-                      description: descController.text,
-                      classId: selectedClass!,
-                      sectionId: selectedSection!,
-                      subjectId: selectedSubject!,
-                      teacherId: currentUser.id,
-                      dueDate: selectedDate,
-                      createdAt: DateTime.now(),
-                    ),
-                  );
-                  Navigator.pop(context);
+                  final success =
+                      await context.read<HomeworkNotifier>().submitHomework(
+                            Homework(
+                              id: DateTime.now()
+                                  .millisecondsSinceEpoch
+                                  .toString(),
+                              title: titleController.text,
+                              description: descController.text,
+                              classId: selectedClass!,
+                              sectionId: selectedSection!,
+                              subjectId: selectedSubject!,
+                              teacherId: currentUser.id,
+                              dueDate: selectedDate,
+                              createdAt: DateTime.now(),
+                            ),
+                          );
+                  if (context.mounted) {
+                    if (success) {
+                      Navigator.pop(context);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Failed to submit homework')),
+                      );
+                    }
+                  }
                 }
               },
               child: const Text('Post'),

@@ -8,18 +8,21 @@ class DatabaseService {
   final List<ClassRoom> classes = [
     ClassRoom(id: 'c1', name: 'Class 9'),
     ClassRoom(id: 'c2', name: 'Class 10'),
+    ClassRoom(id: 'uuid-class-001', name: 'Class 10 - Science'),
   ];
 
   final List<Section> sections = [
     Section(id: 's1', classId: 'c1', name: 'A'),
     Section(id: 's2', classId: 'c1', name: 'B'),
     Section(id: 's3', classId: 'c2', name: 'A'),
+    Section(id: 'uuid-section-001', classId: 'uuid-class-001', name: 'A'),
   ];
 
   final List<Subject> subjects = [
     Subject(id: 'sub1', name: 'Mathematics'),
     Subject(id: 'sub2', name: 'English'),
     Subject(id: 'sub3', name: 'Physics'),
+    Subject(id: 'uuid-subject-001', name: 'Mathematics'),
   ];
 
   final List<Student> students = [
@@ -48,6 +51,21 @@ class DatabaseService {
         id: 'teacher1',
         name: 'Ms. Sarah',
         email: 'teacher@school.com',
+        role: UserRole.teacher,
+      ),
+    ),
+    Teacher(
+      userId: 'uuid-teacher-001',
+      assignedSubjects: [
+        AssignedSubject(
+            classId: 'uuid-class-001',
+            sectionId: 'uuid-section-001',
+            subjectId: 'uuid-subject-001'),
+      ],
+      user: User(
+        id: 'uuid-teacher-001',
+        name: 'Mr. David',
+        email: 'david@school.com',
         role: UserRole.teacher,
       ),
     ),
@@ -94,6 +112,17 @@ class DatabaseService {
       title: 'Algebra Exercise 1.1',
       description: 'Solve problems 1 to 10.',
       dueDate: DateTime.now().add(const Duration(days: 2)),
+      createdAt: DateTime.now(),
+    ),
+    Homework(
+      id: 'hw_seed_1',
+      teacherId: 'uuid-teacher-001',
+      classId: 'uuid-class-001',
+      sectionId: 'uuid-section-001',
+      subjectId: 'uuid-subject-001',
+      title: 'Mathematics Homework - Algebra',
+      description: 'Solve exercises 1 to 10 from Chapter 3.',
+      dueDate: DateTime.parse('2026-04-05'),
       createdAt: DateTime.now(),
     ),
   ];

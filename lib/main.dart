@@ -19,6 +19,8 @@ import 'features/teacher/providers/result_provider.dart';
 import 'features/teacher/providers/teacher_dashboard_provider.dart';
 import 'features/teacher/data/repositories/attendance_repository_impl.dart';
 import 'features/teacher/data/repositories/result_repository_impl.dart';
+import 'features/teacher/data/datasources/homework_remote_datasource.dart';
+import 'features/teacher/data/repositories/homework_repository_impl.dart';
 import 'services/database_service.dart';
 import 'configs/network/data_provider.dart';
 import 'features/auth/data/datasources/auth_remote_data_source.dart';
@@ -50,6 +52,9 @@ void main() {
   final attendanceRepository = AttendanceRepositoryImpl(databaseService);
   final resultRepository = ResultRepositoryImpl(databaseService);
 
+  final homeworkRemoteDataSource = HomeworkRemoteDataSource(dataProvider);
+  final homeworkRepository = HomeworkRepositoryImpl(homeworkRemoteDataSource);
+
 
   runApp(
     MultiProvider(
@@ -76,7 +81,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => RoutineNotifier()),
         ChangeNotifierProvider(create: (_) => ExamsNotifier()),
         ChangeNotifierProvider(
-          create: (_) => HomeworkNotifier(databaseService),
+          create: (_) =>
+              HomeworkNotifier(databaseService, homeworkRepository: homeworkRepository),
         ),
         ChangeNotifierProvider(
           create: (_) => AttendanceNotifier(attendanceRepository),
