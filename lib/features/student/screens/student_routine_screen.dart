@@ -27,14 +27,11 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
   }
 
   Future<void> _fetchData() async {
-
-
     final currentUser = context.read<AuthNotifier>().user;
-    if (currentUser == null) return;
-    print("fetchRoutine");
-    print("${currentUser.classId}");
+    if (currentUser == null || currentUser.classId == null) return;
+
     if (mounted) {
-      context.read<StudentRoutineNotifier>().fetchRoutine(currentUser.classId??"");
+      context.read<StudentRoutineNotifier>().fetchRoutine(currentUser.classId!);
     }
   }
 
@@ -45,22 +42,15 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
       return const Scaffold(body: Center(child: Text('Not logged in')));
     }
 
-    final studentsNotifier = context.watch<StudentsNotifier>();
     final routineNotifier = context.watch<StudentRoutineNotifier>();
 
-    if (studentsNotifier.isLoading || (routineNotifier.isLoading && routineNotifier.routineEntries.isEmpty)) {
+    if (routineNotifier.isLoading && routineNotifier.routineEntries.isEmpty) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    Student? student;
-    try {
-      student = studentsNotifier.students.firstWhere(
-        (s) => s.userId == currentUser.id,
-      );
-    } catch (_) {}
-
-    if (student == null) {
-      return const Scaffold(body: Center(child: Text('Student details not found.')));
+    final classId = currentUser.classId;
+    if (classId == null) {
+      return const Scaffold(body: Center(child: Text('Class information not found for student.')));
     }
 
     final entries = routineNotifier.routineEntries;
@@ -83,7 +73,7 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
         foregroundColor: Colors.white,
       ),
       body: RefreshIndicator(
-        onRefresh: () => routineNotifier.fetchRoutine(student!.classId),
+        onRefresh: () => routineNotifier.fetchRoutine(classId),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
