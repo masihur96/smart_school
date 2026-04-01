@@ -8,6 +8,11 @@ import '../providers/student_provider.dart';
 import '../providers/setup_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 
+// ─── Colour palette (shared) ─────────────────────────────────────────────────
+const _kPrimary = Color(0xFF6C3CE1);
+const _kBg = Color(0xFFF4F2FB);
+const _kDivider = Color(0xFFEDE9F8);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Simple in-memory Homework storage for this session
 // ─────────────────────────────────────────────────────────────────────────────
@@ -191,7 +196,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Color(0xFF7C3AED), Color(0xFF4F46E5)],
+                    colors: [Color(0xFF6C3CE1), Color(0xFF9B6DFF)],
                   ),
                 ),
                 child: SafeArea(
@@ -451,8 +456,8 @@ class _StudentAttendanceCard extends StatelessWidget {
           ),
         ],
         border: Border.all(
-          color: _statusColor.withOpacity(0.25),
-          width: 1.2,
+          color: _kDivider.withOpacity(0.5),
+          width: 1,
         ),
       ),
       child: Padding(

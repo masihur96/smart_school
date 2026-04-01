@@ -1,7 +1,7 @@
 class APIPath {
   //Base Url for HR Service
-  static const String baseUrl = 'https://smart-school-backend-mmy3.onrender.com';
-  //  static const String baseUrl = 'http://192.168.68.120:3000';
+  // static const String baseUrl = 'https://smart-school-backend-mmy3.onrender.com';
+   static const String baseUrl = 'http://192.168.68.120:3000';
   // static const String baseUrl = 'http://10.0.2.2:3000';
   static String login = "$baseUrl/auth/login";
   static String register = "$baseUrl/users";
@@ -21,4 +21,11 @@ class APIPath {
   static String submitHomeWork = "$baseUrl/teacher/homework";
   static String studentAttendance = "$baseUrl/student/attendance";
   static String studentRoutine = "$baseUrl/student/routine";
+
+  static String updateClass(String id) => "$baseUrl/admin/classes/$id";
+  static String deleteClass(String id) => "$baseUrl/admin/classes/$id";
+  static String updateSection(String id) => "$baseUrl/admin/sections/$id";
+  static String deleteSection(String id) => "$baseUrl/admin/sections/$id";
+  static String updateSubject(String id) => "$baseUrl/admin/subjects/$id";
+  static String deleteSubject(String id) => "$baseUrl/admin/subjects/$id";
 }
