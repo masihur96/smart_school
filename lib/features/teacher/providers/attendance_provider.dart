@@ -120,7 +120,10 @@ class AttendanceNotifier extends ChangeNotifier {
         header: {'Authorization': 'Bearer $token'},
       );
 
+
+
       if (response != null && response.statusCode == 200) {
+        print("Attendance Response:: ${response.data}");
         final data = response.data['data'];
         List<Map<String, dynamic>> recordsRaw = [];
         String takenBy = '';
