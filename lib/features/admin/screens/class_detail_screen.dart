@@ -7,31 +7,12 @@ import '../../../models/student_model.dart';
 import '../providers/student_provider.dart';
 import '../providers/setup_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../teacher/providers/homework_provider.dart';
 
 // ─── Colour palette (shared) ─────────────────────────────────────────────────
 const _kPrimary = Color(0xFF6C3CE1);
 const _kBg = Color(0xFFF4F2FB);
 const _kDivider = Color(0xFFEDE9F8);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Simple in-memory Homework storage for this session
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _HomeworkEntry {
-  final String id;
-  final String subjectId;
-  final String title;
-  final String description;
-  final DateTime dueDate;
-
-  _HomeworkEntry({
-    required this.id,
-    required this.subjectId,
-    required this.title,
-    required this.description,
-    required this.dueDate,
-  });
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ClassDetailScreen
@@ -54,9 +35,6 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
   // Attendance state: studentId → status
   final Map<String, AttendanceStatus> _attendanceMap = {};
 
-  // In-session homework list
-  final List<_HomeworkEntry> _homeworkList = [];
-
   @override
   void initState() {
     super.initState();
@@ -72,6 +50,11 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
       if (schoolId.isNotEmpty) {
         context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
       }
+      
+      // Load homework for this class
+      context.read<HomeworkNotifier>().fetchHomework(
+            classId: widget.classRoom.id,
+          );
       
       _loadAttendanceForDate();
     });
@@ -261,12 +244,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
                 setState(() => _attendanceMap[studentId] = status);
               },
             ),
-            _HomeworkTab(
-              classRoom: widget.classRoom,
-              homeworkList: _homeworkList,
-              onAdded: (entry) => setState(() => _homeworkList.add(entry)),
-              onDeleted: (index) => setState(() => _homeworkList.removeAt(index)),
-            ),
+            _HomeworkTab(classRoom: widget.classRoom),
           ],
         ),
       ),
@@ -299,8 +277,10 @@ class _AttendanceTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final notifier = context.watch<StudentsNotifier>();
-    final students = notifier.students
+    final studentNotifier = context.watch<StudentsNotifier>();
+    final attendanceNotifier = context.watch<AttendanceNotifier>();
+    final isLoading = studentNotifier.isLoading || attendanceNotifier.isLoading;
+    final students = studentNotifier.students
         .where((s) => s.classId == classRoom.id)
         .toList();
 
@@ -360,7 +340,7 @@ class _AttendanceTab extends StatelessWidget {
 
         // Student list
         Expanded(
-          child: notifier.isLoading
+          child: isLoading
               ? const Center(child: CircularProgressIndicator())
               : students.isEmpty
                   ? _EmptyState(
@@ -386,7 +366,7 @@ class _AttendanceTab extends StatelessWidget {
         ),
 
         // Save button
-        if (!notifier.isLoading && students.isNotEmpty)
+        if (!isLoading && students.isNotEmpty)
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
@@ -605,19 +585,17 @@ class _ToggleChip extends StatelessWidget {
 
 class _HomeworkTab extends StatelessWidget {
   final ClassRoom classRoom;
-  final List<_HomeworkEntry> homeworkList;
-  final void Function(_HomeworkEntry) onAdded;
-  final void Function(int index) onDeleted;
 
   const _HomeworkTab({
     required this.classRoom,
-    required this.homeworkList,
-    required this.onAdded,
-    required this.onDeleted,
   });
 
   @override
   Widget build(BuildContext context) {
+    final homeworkList = context.watch<HomeworkNotifier>().homeworkRecords
+        .where((h) => h.classId == classRoom.id)
+        .toList();
+
     return Stack(
       children: [
         homeworkList.isEmpty
@@ -642,7 +620,7 @@ class _HomeworkTab extends StatelessWidget {
                   return _HomeworkCard(
                     homework: hw,
                     subjectName: subjectName,
-                    onDelete: () => onDeleted(index),
+                    onDelete: () => context.read<HomeworkNotifier>().removeHomework(hw.id),
                   );
                 },
               ),
@@ -673,7 +651,6 @@ class _HomeworkTab extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => _AddHomeworkSheet(
         classRoom: classRoom,
-        onSubmit: onAdded,
       ),
     );
   }
@@ -684,7 +661,7 @@ class _HomeworkTab extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _HomeworkCard extends StatelessWidget {
-  final _HomeworkEntry homework;
+  final Homework homework;
   final String subjectName;
   final VoidCallback onDelete;
 
@@ -822,11 +799,9 @@ class _HomeworkCard extends StatelessWidget {
 
 class _AddHomeworkSheet extends StatefulWidget {
   final ClassRoom classRoom;
-  final void Function(_HomeworkEntry) onSubmit;
 
   const _AddHomeworkSheet({
     required this.classRoom,
-    required this.onSubmit,
   });
 
   @override
@@ -864,7 +839,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     if (picked != null) setState(() => _dueDate = picked);
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedSubjectId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -873,15 +848,42 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
       return;
     }
 
-    final entry = _HomeworkEntry(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+    final authNotifier = context.read<AuthNotifier>();
+    final user = authNotifier.user;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error: No active user found.')),
+      );
+      return;
+    }
+
+    final homework = Homework(
+      id: '', // Backend will generate ID
+      teacherId: user.id,
+      classId: widget.classRoom.id,
+      sectionId: '', // Currently not handling sections in this screen
       subjectId: _selectedSubjectId!,
       title: _titleController.text.trim(),
       description: _descController.text.trim(),
+      schoolId: user.schoolId ?? '',
       dueDate: _dueDate,
+      createdAt: DateTime.now(),
     );
-    widget.onSubmit(entry);
-    Navigator.pop(context);
+
+    final success = await context.read<HomeworkNotifier>().submitHomework(homework);
+    
+    if (mounted) {
+      if (success) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Homework assigned successfully!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to assign homework.')),
+        );
+      }
+    }
   }
 
   @override
