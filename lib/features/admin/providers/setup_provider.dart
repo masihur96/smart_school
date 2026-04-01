@@ -93,6 +93,60 @@ class ClassSetupNotifier extends ChangeNotifier {
       log("Error creating class: ${response?.data}");
     }
   }
+
+  Future<void> updateClass(
+    String id,
+    String name,
+    String description,
+    String schoolId,
+  ) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    final response = await DataProvider().performRequest(
+      'PUT',
+      APIPath.updateClass(id),
+      data: {'name': name, 'description': description, 'schoolId': schoolId},
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response != null &&
+        (response.statusCode == 200 || response.statusCode == 201)) {
+      final idx = _dbService.classes.indexWhere((c) => c.id == id);
+      if (idx != -1) {
+        _dbService.classes[idx] = ClassRoom(
+          id: id,
+          name: name,
+          description: description,
+          schoolId: schoolId,
+        );
+        _classes = [..._dbService.classes];
+        notifyListeners();
+      }
+    } else {
+      log("Error updating class: ${response?.data}");
+    }
+  }
+
+  Future<void> deleteClass(String id) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    final response = await DataProvider().performRequest(
+      'DELETE',
+      APIPath.deleteClass(id),
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response != null &&
+        (response.statusCode == 200 || response.statusCode == 204)) {
+      _dbService.classes.removeWhere((c) => c.id == id);
+      _classes = [..._dbService.classes];
+      notifyListeners();
+    } else {
+      log("Error deleting class: ${response?.data}");
+    }
+  }
 }
 
 class SectionSetupNotifier extends ChangeNotifier {
@@ -171,6 +225,50 @@ class SectionSetupNotifier extends ChangeNotifier {
       notifyListeners();
     } else {
       log("Error creating section: ${response?.data}");
+    }
+  }
+
+  Future<void> updateSection(String id, String classId, String name) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    final response = await DataProvider().performRequest(
+      'PUT',
+      APIPath.updateSection(id),
+      data: {'classId': classId, 'name': name},
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response != null &&
+        (response.statusCode == 200 || response.statusCode == 201)) {
+      final idx = _dbService.sections.indexWhere((s) => s.id == id);
+      if (idx != -1) {
+        _dbService.sections[idx] = Section(id: id, classId: classId, name: name);
+        _sections = [..._dbService.sections];
+        notifyListeners();
+      }
+    } else {
+      log("Error updating section: ${response?.data}");
+    }
+  }
+
+  Future<void> deleteSection(String id) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    final response = await DataProvider().performRequest(
+      'DELETE',
+      APIPath.deleteSection(id),
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response != null &&
+        (response.statusCode == 200 || response.statusCode == 204)) {
+      _dbService.sections.removeWhere((s) => s.id == id);
+      _sections = [..._dbService.sections];
+      notifyListeners();
+    } else {
+      log("Error deleting section: ${response?.data}");
     }
   }
 }
@@ -262,6 +360,62 @@ class SubjectSetupNotifier extends ChangeNotifier {
       notifyListeners();
     } else {
       log("Error creating subject: ${response?.data}");
+    }
+  }
+
+  Future<void> updateSubject(
+    String id,
+    String name,
+    String code,
+    String classId,
+    String schoolId,
+  ) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    final response = await DataProvider().performRequest(
+      'PUT',
+      APIPath.updateSubject(id),
+      data: {'name': name, 'code': code, 'classId': classId, 'schoolId': schoolId},
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response != null &&
+        (response.statusCode == 200 || response.statusCode == 201)) {
+      final idx = _dbService.subjects.indexWhere((s) => s.id == id);
+      if (idx != -1) {
+        _dbService.subjects[idx] = Subject(
+          id: id,
+          name: name,
+          code: code,
+          classId: classId,
+          schoolId: schoolId,
+        );
+        _subjects = [..._dbService.subjects];
+        notifyListeners();
+      }
+    } else {
+      log("Error updating subject: ${response?.data}");
+    }
+  }
+
+  Future<void> deleteSubject(String id) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    final response = await DataProvider().performRequest(
+      'DELETE',
+      APIPath.deleteSubject(id),
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response != null &&
+        (response.statusCode == 200 || response.statusCode == 204)) {
+      _dbService.subjects.removeWhere((s) => s.id == id);
+      _subjects = [..._dbService.subjects];
+      notifyListeners();
+    } else {
+      log("Error deleting subject: ${response?.data}");
     }
   }
 }
