@@ -97,6 +97,15 @@ class AttendanceNotifier extends ChangeNotifier {
       notifyListeners();
     }
   }
+  AttendanceStatus _parseStatus(dynamic status) {
+    if (status == null) return AttendanceStatus.present;
+    final statusStr = status.toString().toLowerCase();
+    return AttendanceStatus.values.firstWhere(
+      (e) => e.name.toLowerCase() == statusStr,
+      orElse: () => AttendanceStatus.present,
+    );
+  }
+
   Future<void> fetchAttendanceFromAPI({
     required String classId,
     required DateTime date,
@@ -120,38 +129,61 @@ class AttendanceNotifier extends ChangeNotifier {
         header: {'Authorization': 'Bearer $token'},
       );
 
-
-
       if (response != null && response.statusCode == 200) {
-        print("Attendance Response:: ${response.data}");
-        final data = response.data['data'];
-        List<Map<String, dynamic>> recordsRaw = [];
-        String takenBy = '';
+        log("Attendance Response:: ${response.data}");
+        final rawData = response.data['data'];
+        final List<AttendanceEntity> fetchedRecords = [];
 
-        if (data is List && data.isNotEmpty) {
-          final firstDoc = data.first;
-          if (firstDoc != null) {
-            recordsRaw = List<Map<String, dynamic>>.from(firstDoc['records'] ?? []);
-            takenBy = firstDoc['takenBy']?.toString() ?? '';
+        if (rawData is List) {
+          for (var item in rawData) {
+            if (item is Map) {
+              if (item.containsKey('records') && item['records'] is List) {
+                // Nested records case (e.g. daily documentation)
+                final docDateStr = item['date']?.toString() ?? '';
+                final docDate = DateTime.tryParse(docDateStr) ?? date;
+                final docTakenBy = item['takenBy']?.toString() ?? '';
+                final recordsRaw = List<Map<String, dynamic>>.from(item['records']);
+                for (var r in recordsRaw) {
+                  fetchedRecords.add(AttendanceEntity(
+                    id: r['id']?.toString() ?? '',
+                    studentId: r['studentId']?.toString() ?? '',
+                    date: docDate,
+                    status: _parseStatus(r['status']),
+                    takenBy: docTakenBy,
+                  ));
+                }
+              } else {
+                // Flat record case (individual record)
+                final recDateStr = item['date']?.toString() ?? '';
+                final recDate = DateTime.tryParse(recDateStr) ?? date;
+                fetchedRecords.add(AttendanceEntity(
+                  id: item['id']?.toString() ?? '',
+                  studentId: item['studentId']?.toString() ?? '',
+                  date: recDate,
+                  status: _parseStatus(item['status']),
+                  takenBy: item['takenBy']?.toString() ?? '',
+                ));
+              }
+            }
           }
-        } else if (data is Map) {
-          recordsRaw = List<Map<String, dynamic>>.from(data['records'] ?? []);
-          takenBy = data['takenBy']?.toString() ?? '';
+        } else if (rawData is Map) {
+          // Single record object
+          if (rawData.containsKey('records') && rawData['records'] is List) {
+            final docDateStr = rawData['date']?.toString() ?? '';
+            final docDate = DateTime.tryParse(docDateStr) ?? date;
+            final docTakenBy = rawData['takenBy']?.toString() ?? '';
+            final recordsRaw = List<Map<String, dynamic>>.from(rawData['records']);
+            for (var r in recordsRaw) {
+              fetchedRecords.add(AttendanceEntity(
+                id: r['id']?.toString() ?? '',
+                studentId: r['studentId']?.toString() ?? '',
+                date: docDate,
+                status: _parseStatus(r['status']),
+                takenBy: docTakenBy,
+              ));
+            }
+          }
         }
-
-        // Convert raw records to AttendanceEntity and update state
-        final List<AttendanceEntity> fetchedRecords = recordsRaw.map((r) {
-          return AttendanceEntity(
-            id: '', // Backend might not provide individual record IDs
-            studentId: r['studentId']?.toString() ?? '',
-            date: date,
-            status: AttendanceStatus.values.firstWhere(
-              (e) => e.name == r['status'],
-              orElse: () => AttendanceStatus.absent,
-            ),
-            takenBy: takenBy,
-          );
-        }).toList();
 
         // Update state for this date
         _state.removeWhere((r) =>
@@ -159,6 +191,7 @@ class AttendanceNotifier extends ChangeNotifier {
             r.date.month == date.month &&
             r.date.day == date.day);
         _state.addAll(fetchedRecords);
+        log('Fetched ${fetchedRecords.length} attendance records for $dateString');
       }
     } catch (e) {
       log('Error fetching attendance: $e');
@@ -184,32 +217,38 @@ class AttendanceNotifier extends ChangeNotifier {
 
       if (response != null && response.statusCode == 200) {
         final data = response.data['data'];
-        List<dynamic> allRecords = [];
-        if (data is List) {
-          allRecords = data;
-        } else if (data is Map && data['data'] is List) {
-          allRecords = data['data'];
-        }
-
         final List<AttendanceEntity> fetchedRecords = [];
-        for (var doc in allRecords) {
-          if (doc is Map) {
-            final dateStr = doc['date']?.toString() ?? '';
-            final date = DateTime.tryParse(dateStr) ?? DateTime.now();
-            final takenBy = doc['takenBy']?.toString() ?? '';
-            final recordsRaw = List<Map<String, dynamic>>.from(doc['records'] ?? []);
 
-            for (var r in recordsRaw) {
-              fetchedRecords.add(AttendanceEntity(
-                id: '',
-                studentId: r['studentId']?.toString() ?? '',
-                date: date,
-                status: AttendanceStatus.values.firstWhere(
-                  (e) => e.name == r['status'],
-                  orElse: () => AttendanceStatus.absent,
-                ),
-                takenBy: takenBy,
-              ));
+        if (data is List) {
+          for (var item in data) {
+            if (item is Map) {
+              if (item.containsKey('records') && item['records'] is List) {
+                // Document with multiple records
+                final docDateStr = item['date']?.toString() ?? '';
+                final docDate = DateTime.tryParse(docDateStr) ?? DateTime.now();
+                final docTakenBy = item['takenBy']?.toString() ?? '';
+                final recordsRaw = List<Map<String, dynamic>>.from(item['records']);
+                for (var r in recordsRaw) {
+                  fetchedRecords.add(AttendanceEntity(
+                    id: r['id']?.toString() ?? '',
+                    studentId: r['studentId']?.toString() ?? '',
+                    date: docDate,
+                    status: _parseStatus(r['status']),
+                    takenBy: docTakenBy,
+                  ));
+                }
+              } else {
+                // Individual record
+                final recDateStr = item['date']?.toString() ?? '';
+                final recDate = DateTime.tryParse(recDateStr) ?? DateTime.now();
+                fetchedRecords.add(AttendanceEntity(
+                  id: item['id']?.toString() ?? '',
+                  studentId: item['studentId']?.toString() ?? '',
+                  date: recDate,
+                  status: _parseStatus(item['status']),
+                  takenBy: item['takenBy']?.toString() ?? '',
+                ));
+              }
             }
           }
         }
