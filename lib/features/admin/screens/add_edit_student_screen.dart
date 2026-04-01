@@ -34,8 +34,8 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
       _emailController.text = s.user?.email ?? '';
       _rollController.text = s.rollId;
       _phoneController.text = s.user?.phone ?? s.guardianContact;
-      _selectedClass = s.classId;
-      _selectedSection = s.sectionId;
+      _selectedClass = s.classId.isEmpty ? null : s.classId;
+      _selectedSection = s.sectionId.isEmpty ? null : s.sectionId;
     }
   }
 
@@ -182,13 +182,18 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 labelText: 'Class',
                 prefixIcon: Icon(Icons.class_),
               ),
-              value: _selectedClass,
+              value: classes.any((c) => c.id == _selectedClass) ? _selectedClass : null,
               items: classes
                   .map(
                     (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
                   )
                   .toList(),
-              onChanged: (val) => setState(() => _selectedClass = val),
+              onChanged: (val) {
+                setState(() {
+                  _selectedClass = val;
+                  _selectedSection = null;
+                });
+              },
               validator: (val) => val == null ? 'Please select class' : null,
             ),
             const SizedBox(height: 16),
@@ -197,7 +202,9 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 labelText: 'Section',
                 prefixIcon: Icon(Icons.grid_view),
               ),
-              value: _selectedSection,
+              value: sections.any((s) => s.id == _selectedSection && s.classId == _selectedClass)
+                  ? _selectedSection
+                  : null,
               items: sections
                   .where((s) => s.classId == _selectedClass)
                   .map(
