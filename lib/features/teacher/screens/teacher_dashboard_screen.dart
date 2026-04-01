@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/screens/class_detail_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
@@ -26,9 +27,8 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final now = DateTime.now();
-      final dateString =
-          "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
-      context.read<TeacherDashboardProvider>().fetchTodayClasses(dateString);
+      final dayName = DateFormat('EEEE').format(now);
+      context.read<TeacherDashboardProvider>().fetchTodayClasses(dayName);
     });
   }
 
