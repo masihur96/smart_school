@@ -164,4 +164,62 @@ class AttendanceNotifier extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> fetchSchoolWideAttendance(String schoolId) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.submitAttendance,
+        query: {'schoolId': schoolId},
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final data = response.data['data'];
+        List<dynamic> allRecords = [];
+        if (data is List) {
+          allRecords = data;
+        } else if (data is Map && data['data'] is List) {
+          allRecords = data['data'];
+        }
+
+        final List<AttendanceEntity> fetchedRecords = [];
+        for (var doc in allRecords) {
+          if (doc is Map) {
+            final dateStr = doc['date']?.toString() ?? '';
+            final date = DateTime.tryParse(dateStr) ?? DateTime.now();
+            final takenBy = doc['takenBy']?.toString() ?? '';
+            final recordsRaw = List<Map<String, dynamic>>.from(doc['records'] ?? []);
+
+            for (var r in recordsRaw) {
+              fetchedRecords.add(AttendanceEntity(
+                id: '',
+                studentId: r['studentId']?.toString() ?? '',
+                date: date,
+                status: AttendanceStatus.values.firstWhere(
+                  (e) => e.name == r['status'],
+                  orElse: () => AttendanceStatus.absent,
+                ),
+                takenBy: takenBy,
+              ));
+            }
+          }
+        }
+
+        // Replace state with latest school-wide records
+        _state = fetchedRecords;
+        log('Fetched ${fetchedRecords.length} school-wide attendance records');
+      }
+    } catch (e) {
+      log('Error fetching school-wide attendance: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

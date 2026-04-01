@@ -40,9 +40,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       if (mounted) {
         final schoolId = context.read<AuthNotifier>().user?.schoolId;
         
-        context.read<AttendanceNotifier>().loadAll();
-        
         if (schoolId != null) {
+          context.read<AttendanceNotifier>().fetchSchoolWideAttendance(schoolId);
           context.read<StudentsNotifier>().fetchStudents();
           context.read<TeachersNotifier>().fetchTeachers();
           context.read<ClassSetupNotifier>().fetchClasses(schoolId);
@@ -231,7 +230,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          _buildAttendanceChart(attendanceRecords),
+          _buildMultiMonthAttendanceOverview(attendanceRecords),
           const SizedBox(height: 24),
           Text(
             'Quick Actions',
@@ -343,152 +342,354 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildAttendanceChart(List<AttendanceEntity> records) {
-    // Process data: Group by day for the current month
-    final Map<int, List<AttendanceEntity>> dailyData = {};
-    final now = DateTime.now();
-    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+  Widget _buildMultiMonthAttendanceOverview(List<AttendanceEntity> records) {
+    if (records.isEmpty) {
+      return Container(
+        height: 300,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: _buildChartPlaceholder(),
+      );
+    }
 
-    // Initialize all days of the current month
+    // Group records by Month/Year
+    final Map<String, List<AttendanceEntity>> monthlyGroups = {};
+    for (var record in records) {
+      final key = '${record.date.month}-${record.date.year}';
+      monthlyGroups.putIfAbsent(key, () => []).add(record);
+    }
+
+    // Sort months (latest first)
+    final sortedMonthKeys = monthlyGroups.keys.toList()
+      ..sort((a, b) {
+        final partsA = a.split('-');
+        final partsB = b.split('-');
+        final dateA = DateTime(int.parse(partsA[1]), int.parse(partsA[0]));
+        final dateB = DateTime(int.parse(partsB[1]), int.parse(partsB[0]));
+        return dateB.compareTo(dateA);
+      });
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 420,
+          child: PageView.builder(
+            itemCount: sortedMonthKeys.length,
+            controller: PageController(initialPage: 0),
+            itemBuilder: (context, index) {
+              final monthKey = sortedMonthKeys[index];
+              final monthRecords = monthlyGroups[monthKey]!;
+              final monthDate = monthRecords.first.date;
+              final monthName = _getMonthName(monthDate.month);
+              
+              return _buildMonthlyAttendanceCard(
+                monthName: '$monthName ${monthDate.year}',
+                records: monthRecords,
+                totalMonths: sortedMonthKeys.length,
+                currentIndex: index,
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[month - 1];
+  }
+
+  Widget _buildMonthlyAttendanceCard({
+    required String monthName,
+    required List<AttendanceEntity> records,
+    required int totalMonths,
+    required int currentIndex,
+  }) {
+    // Summary calculations
+    final total = records.length;
+    final present = records.where((r) => r.status == AttendanceStatus.present).length;
+    final absent = records.where((r) => r.status == AttendanceStatus.absent).length;
+    final lateCount = records.where((r) => r.status == AttendanceStatus.leave).length;
+    final percentage = total == 0 ? 0.0 : (present / total) * 100;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.purple.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+        border: Border.all(color: Colors.purple.withOpacity(0.05)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    monthName,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E1B4B),
+                    ),
+                  ),
+                  Text(
+                    'Monthly Performance',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[500],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.purple.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '${percentage.toStringAsFixed(1)}%',
+                  style: const TextStyle(
+                    color: Colors.purple,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildMonthStatItem('Present', present.toString(), const Color(0xFF7C3AED)),
+              _buildMonthStatItem('Absent', absent.toString(), const Color(0xFFEF4444)),
+              _buildMonthStatItem('Late', lateCount.toString(), const Color(0xFFF59E0B)),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Expanded(child: _buildAttendanceChart(records)),
+          const SizedBox(height: 12),
+          Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(totalMonths, (index) {
+                return Container(
+                  width: 8,
+                  height: 8,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: index == currentIndex
+                        ? Colors.purple
+                        : Colors.purple.withOpacity(0.2),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMonthStatItem(String label, String value, Color color) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey[500],
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAttendanceChart(List<AttendanceEntity> records) {
+    // Process data: Group by day for the specific records
+    final Map<int, List<AttendanceEntity>> dailyData = {};
+    if (records.isEmpty) return const SizedBox.shrink();
+    
+    final monthDate = records.first.date;
+    final daysInMonth = DateTime(monthDate.year, monthDate.month + 1, 0).day;
+
     for (int i = 1; i <= daysInMonth; i++) {
       dailyData[i] = [];
     }
 
-    // Fill with data
     for (var record in records) {
-      if (record.date.year == now.year && record.date.month == now.month) {
-        dailyData[record.date.day]!.add(record);
-      }
+      dailyData[record.date.day]!.add(record);
     }
 
     final sortedDays = dailyData.keys.toList()..sort();
 
-    return Container(
-      height: 250,
-      padding: const EdgeInsets.only(top: 24, bottom: 12, left: 12, right: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: BarChart(
-        BarChartData(
-          alignment: BarChartAlignment.spaceEvenly,
-          maxY: 100,
-          barTouchData: BarTouchData(
-            touchTooltipData: BarTouchTooltipData(
-              getTooltipColor: (_) => Colors.purple.withValues(alpha: 0.8),
-              getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                return BarTooltipItem(
-                  'Day ${sortedDays[group.x.toInt()]}\n',
-                  const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+    return BarChart(
+      BarChartData(
+        alignment: BarChartAlignment.spaceAround,
+        maxY: 100,
+        barTouchData: BarTouchData(
+          touchTooltipData: BarTouchTooltipData(
+            getTooltipColor: (_) => const Color(0xFF1E1B4B).withOpacity(0.9),
+            getTooltipItem: (group, groupIndex, rod, rodIndex) {
+              final day = sortedDays[group.x.toInt()];
+              final dayRecords = dailyData[day]!;
+              final present = dayRecords.where((r) => r.status == AttendanceStatus.present).length;
+              return BarTooltipItem(
+                'Day $day\n',
+                const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                children: [
+                  TextSpan(
+                    text: '${rod.toY.toInt()}% Present\n',
+                    style: const TextStyle(color: Color(0xFFC084FC), fontWeight: FontWeight.w600, fontSize: 11),
                   ),
-                  children: [
-                    TextSpan(
-                      text: '${rod.toY.toInt()}%',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+                  TextSpan(
+                    text: '($present/${dayRecords.length} Students)',
+                    style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 9),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+        titlesData: FlTitlesData(
+          show: true,
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, meta) {
+                if (value < 0 || value >= sortedDays.length) return const SizedBox.shrink();
+                final day = sortedDays[value.toInt()];
+                if (day % 5 != 0 && day != 1 && day != daysInMonth) return const SizedBox.shrink();
+                return SideTitleWidget(
+                  meta: meta,
+                  space: 8,
+                  child: Text(
+                    day.toString(),
+                    style: TextStyle(color: Colors.grey[400], fontSize: 10, fontWeight: FontWeight.w600),
+                  ),
                 );
               },
             ),
           ),
-          titlesData: FlTitlesData(
-            show: true,
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  if (value < 0 || value >= sortedDays.length)
-                    return const SizedBox.shrink();
-                  final day = sortedDays[value.toInt()];
-                  // Show only every 5th day to avoid crowding
-                  if (day % 5 != 0 && day != 1 && day != daysInMonth) {
-                    return const SizedBox.shrink();
-                  }
-                  return SideTitleWidget(
-                    meta: meta,
-                    child: Text(
-                      day.toString(),
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 30,
-                getTitlesWidget: (value, meta) {
-                  if (value % 20 != 0) return const SizedBox.shrink();
-                  return Text(
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 30,
+              getTitlesWidget: (value, meta) {
+                if (value % 50 != 0) return const SizedBox.shrink();
+                return SideTitleWidget(
+                  meta: meta,
+                  child: Text(
                     '${value.toInt()}%',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 10),
-                  );
-                },
-              ),
-            ),
-            topTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            rightTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
+                    style: TextStyle(color: Colors.grey[400], fontSize: 9, fontWeight: FontWeight.w500),
+                  ),
+                );
+              },
             ),
           ),
-          gridData: FlGridData(
-            show: true,
-            drawVerticalLine: false,
-            horizontalInterval: 20,
-            getDrawingHorizontalLine: (value) => FlLine(
-              color: Colors.grey.withValues(alpha: 0.1),
-              strokeWidth: 1,
-            ),
-          ),
-          borderData: FlBorderData(show: false),
-          barGroups: sortedDays.asMap().entries.map((entry) {
-            final dayRecords = dailyData[entry.value]!;
-            final total = dayRecords.length;
-            final present = dayRecords
-                .where((r) => r.status == AttendanceStatus.present)
-                .length;
-            final percentage = total == 0 ? 0.0 : (present / total) * 100;
-
-            return BarChartGroupData(
-              x: entry.key,
-              barRods: [
-                BarChartRodData(
-                  toY: percentage,
-                  color: Colors.purple,
-                  width: 6,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(2),
-                  ),
-                  backDrawRodData: BackgroundBarChartRodData(
-                    show: true,
-                    toY: 100,
-                    color: Colors.purple.withValues(alpha: 0.05),
-                  ),
-                ),
-              ],
-            );
-          }).toList(),
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: false,
+          horizontalInterval: 50,
+          getDrawingHorizontalLine: (value) => FlLine(
+            color: Colors.purple.withOpacity(0.05),
+            strokeWidth: 1,
+          ),
+        ),
+        borderData: FlBorderData(show: false),
+        barGroups: sortedDays.asMap().entries.map((entry) {
+          final dayRecords = dailyData[entry.value]!;
+          final total = dayRecords.length;
+          final present = dayRecords.where((r) => r.status == AttendanceStatus.present).length;
+          final percentage = total == 0 ? 0.0 : (present / total) * 100;
+
+          return BarChartGroupData(
+            x: entry.key,
+            barRods: [
+              BarChartRodData(
+                toY: percentage == 0 ? 2 : percentage,
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF7C3AED), Color(0xFFC084FC)],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
+                width: 6,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(3)),
+                backDrawRodData: BackgroundBarChartRodData(
+                  show: true,
+                  toY: 100,
+                  color: const Color(0xFFF3F4F6),
+                ),
+              ),
+            ],
+          );
+        }).toList(),
       ),
+    );
+  }
+
+  Widget _buildLegendItem(String label, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: TextStyle(color: Colors.grey[600], fontSize: 11, fontWeight: FontWeight.w500),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChartPlaceholder() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.bar_chart_rounded, size: 48, color: Colors.purple.withOpacity(0.2)),
+        const SizedBox(height: 12),
+        Text(
+          'No attendance data found',
+          style: TextStyle(color: Colors.grey[400], fontSize: 13, fontWeight: FontWeight.w500),
+        ),
+      ],
     );
   }
 }
