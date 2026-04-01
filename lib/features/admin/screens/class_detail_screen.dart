@@ -20,8 +20,9 @@ const _kDivider = Color(0xFFEDE9F8);
 
 class ClassDetailScreen extends StatefulWidget {
   final ClassRoom classRoom;
+  final String? subjectID;
 
-  const ClassDetailScreen({super.key, required this.classRoom});
+  const ClassDetailScreen({super.key, this.subjectID, required this.classRoom});
 
   @override
   State<ClassDetailScreen> createState() => _ClassDetailScreenState();
@@ -50,10 +51,13 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
       if (schoolId.isNotEmpty) {
         context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
       }
+
+
       
       // Load homework for this class
       context.read<HomeworkNotifier>().fetchHomework(
             classId: widget.classRoom.id,
+        subjectId: widget.subjectID
           );
       
       _loadAttendanceForDate();

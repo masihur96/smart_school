@@ -107,11 +107,17 @@ class HomeworkNotifier extends ChangeNotifier {
     String? subjectId,
   }) async {
     if (_homeworkRepository == null) return;
+
+    print("________________________________--");
+    print(classId);
+    print(subjectId);
     try {
       final results = await _homeworkRepository.fetchHomework(
         classId: classId,
         subjectId: subjectId,
       );
+
+      print("Home work Resuls:: $results");
       _homeworkRecords = results;
       notifyListeners();
     } catch (e) {
