@@ -19,12 +19,15 @@ class StudentHomeworkScreen extends StatelessWidget {
     }
 
 
-    final student = context.watch<StudentsNotifier>().students.firstWhere(
-      (s) => s.userId == currentUser.id,
-    );
+    if (currentUser.classId == null || currentUser.sectionId == null) {
+      return const Scaffold(
+        body: Center(child: Text('Class/Section info not available')),
+      );
+    }
+
     final homeworkList = context
         .watch<HomeworkNotifier>()
-        .getHomeworkForStudent(student.classId, student.sectionId);
+        .getHomeworkForStudent(currentUser.classId!, currentUser.sectionId!);
 
     homeworkList.sort((a, b) => a.dueDate.compareTo(b.dueDate));
 

@@ -21,7 +21,12 @@ class AuthRepositoryImpl implements AuthRepository {
       role: result.role,
       schoolId: result.schoolId,
       classId: result.classId,
+      sectionId: result.sectionId,
       phone: result.phone,
+      rollNumber: result.rollNumber,
+      designation: result.designation,
+      isActive: result.isActive,
+      createdAt: result.createdAt,
     );
   }
 
@@ -35,7 +40,12 @@ class AuthRepositoryImpl implements AuthRepository {
       role: result.role,
       schoolId: result.schoolId,
       classId: result.classId,
+      sectionId: result.sectionId,
       phone: result.phone,
+      rollNumber: result.rollNumber,
+      designation: result.designation,
+      isActive: result.isActive,
+      createdAt: result.createdAt,
     );
   }
 

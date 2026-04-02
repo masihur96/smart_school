@@ -5,7 +5,12 @@ class UserEntity {
   final String role;
   final String? schoolId;
   final String? classId;
+  final String? sectionId;
   final String? phone;
+  final String? rollNumber;
+  final String? designation;
+  final bool? isActive;
+  final String? createdAt;
 
   UserEntity({
     required this.id,
@@ -14,6 +19,11 @@ class UserEntity {
     required this.role,
     this.schoolId,
     this.classId,
+    this.sectionId,
     this.phone,
+    this.rollNumber,
+    this.designation,
+    this.isActive,
+    this.createdAt,
   });
 }

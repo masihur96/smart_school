@@ -50,7 +50,14 @@ class AuthNotifier extends ChangeNotifier {
           ),
           schoolId: profile.schoolId,
           classId: profile.classId,
+          sectionId: profile.sectionId,
           phone: profile.phone,
+          rollNumber: profile.rollNumber,
+          designation: profile.designation,
+          isActive: profile.isActive,
+          createdAt: profile.createdAt != null
+              ? DateTime.tryParse(profile.createdAt!)
+              : null,
         );
       } else {
         _user = null;
@@ -88,7 +95,14 @@ class AuthNotifier extends ChangeNotifier {
         ),
         schoolId: profile.schoolId,
         classId: profile.classId,
+        sectionId: profile.sectionId,
         phone: profile.phone,
+        rollNumber: profile.rollNumber,
+        designation: profile.designation,
+        isActive: profile.isActive,
+        createdAt: profile.createdAt != null
+            ? DateTime.tryParse(profile.createdAt!)
+            : null,
       );
 
       _isLoading = false;

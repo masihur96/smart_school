@@ -8,11 +8,12 @@ class User {
   final String? profileImageUrl;
   final String? schoolId;
   final String? classId;
+  final String? sectionId;
   final String? phone;
   final String? rollNumber;
   final String? designation;
   final bool? isActive;
-
+  final DateTime? createdAt;
 
   User({
     required this.id,
@@ -22,10 +23,12 @@ class User {
     this.profileImageUrl,
     this.schoolId,
     this.classId,
+    this.sectionId,
     this.phone,
     this.rollNumber,
     this.designation,
     this.isActive,
+    this.createdAt,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -40,10 +43,14 @@ class User {
       profileImageUrl: json['profileImageUrl'],
       schoolId: json['schoolId'],
       classId: json['classId'],
+      sectionId: json['sectionId'],
       phone: json['phone'],
       rollNumber: json['rollNumber'],
       designation: json['designation'],
       isActive: json['isActive'],
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())
+          : null,
     );
   }
 
@@ -56,10 +63,12 @@ class User {
       'profileImageUrl': profileImageUrl,
       'schoolId': schoolId,
       'classId': classId,
+      'sectionId': sectionId,
       'phone': phone,
       'rollNumber': rollNumber,
       'designation': designation,
       'isActive': isActive,
+      'createdAt': createdAt?.toIso8601String(),
     };
   }
 }

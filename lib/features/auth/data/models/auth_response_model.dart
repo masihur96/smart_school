@@ -5,7 +5,12 @@ class AuthResponseModel {
   final String role;
   final String? schoolId;
   final String? classId;
+  final String? sectionId;
   final String? phone;
+  final String? rollNumber;
+  final String? designation;
+  final bool? isActive;
+  final String? createdAt;
 
   AuthResponseModel({
     required this.id,
@@ -14,7 +19,12 @@ class AuthResponseModel {
     required this.role,
     this.schoolId,
     this.classId,
+    this.sectionId,
     this.phone,
+    this.rollNumber,
+    this.designation,
+    this.isActive,
+    this.createdAt,
   });
 
   factory AuthResponseModel.fromJson(Map<String, dynamic> json) {
@@ -25,7 +35,12 @@ class AuthResponseModel {
       role: json['role'] ?? "",
       schoolId: json['schoolId'],
       classId: json['classId'],
+      sectionId: json['sectionId'],
       phone: json['phone'],
+      rollNumber: json['rollNumber'],
+      designation: json['designation'],
+      isActive: json['isActive'],
+      createdAt: json['createdAt']?.toString(),
     );
   }
 
@@ -37,7 +52,12 @@ class AuthResponseModel {
       'role': role,
       'schoolId': schoolId,
       'classId': classId,
+      'sectionId': sectionId,
       'phone': phone,
+      'rollNumber': rollNumber,
+      'designation': designation,
+      'isActive': isActive,
+      'createdAt': createdAt,
     };
   }
 }
