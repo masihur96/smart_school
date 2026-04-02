@@ -100,6 +100,27 @@ class ProfileScreen extends StatelessWidget {
               label: 'Phone',
               value: user?.phone ?? 'Not available',
             ),
+            if(user?.designation != null)
+            _buildProfileItem(
+              context,
+              icon: Icons.design_services,
+              label: 'Designation',
+              value: user?.designation ?? 'Not available',
+            ),
+            if(user?.rollNumber != null)
+             _buildProfileItem(
+              context,
+              icon: Icons.numbers,
+              label: 'Roll Number',
+              value: user?.rollNumber ?? 'Not available',
+            ),
+            if(user?.isActive != null)
+            _buildProfileItem(
+              context,
+              icon: Icons.local_activity,
+              label: 'Status',
+              value: user?.isActive.toString() ?? 'Not available',
+            ),
            // const Padding(padding: EdgeInsets.all(24.0), child: Divider()),
             // Padding(
             //   padding: const EdgeInsets.symmetric(horizontal: 24),

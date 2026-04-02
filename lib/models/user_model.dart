@@ -9,6 +9,10 @@ class User {
   final String? schoolId;
   final String? classId;
   final String? phone;
+  final String? rollNumber;
+  final String? designation;
+  final bool? isActive;
+
 
   User({
     required this.id,
@@ -19,6 +23,9 @@ class User {
     this.schoolId,
     this.classId,
     this.phone,
+    this.rollNumber,
+    this.designation,
+    this.isActive,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -34,6 +41,9 @@ class User {
       schoolId: json['schoolId'],
       classId: json['classId'],
       phone: json['phone'],
+      rollNumber: json['rollNumber'],
+      designation: json['designation'],
+      isActive: json['isActive'],
     );
   }
 
@@ -47,6 +57,9 @@ class User {
       'schoolId': schoolId,
       'classId': classId,
       'phone': phone,
+      'rollNumber': rollNumber,
+      'designation': designation,
+      'isActive': isActive,
     };
   }
 }
