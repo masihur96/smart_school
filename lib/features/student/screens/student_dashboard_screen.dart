@@ -8,9 +8,9 @@ import 'package:smart_school/features/student/screens/student_notice_screen.dart
 import 'package:smart_school/features/student/providers/student_attendance_provider.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
+import 'package:smart_school/features/student/providers/student_homework_provider.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../teacher/providers/homework_provider.dart';
 import '../../admin/providers/notice_provider.dart';
 import '../../admin/providers/setup_provider.dart';
 import 'student_attendance_screen.dart';
@@ -32,6 +32,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<StudentAttendanceNotifier>().fetchAttendance();
+      final user = context.read<AuthNotifier>().user;
+      if (user?.classId != null) {
+        context.read<StudentHomeworkNotifier>().fetchHomework(user!.classId!);
+      }
     });
   }
 
@@ -400,8 +404,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     }
 
     final homeworkList = context
-        .watch<HomeworkNotifier>()
-        .getHomeworkForStudent(user.classId!, user.sectionId!);
+        .watch<StudentHomeworkNotifier>()
+        .homeworkList;
 
     if (homeworkList.isEmpty) {
       return _buildEmptyCard('No pending homework');

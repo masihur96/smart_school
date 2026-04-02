@@ -22,6 +22,7 @@ class APIPath {
   static String submitHomeWork = "$baseUrl/teacher/homework";
   static String studentAttendance = "$baseUrl/student/attendance";
   static String studentRoutine = "$baseUrl/student/routine";
+  static String studentHomework = "$baseUrl/student/homework";
 
   static String updateClass(String id) => "$baseUrl/admin/classes/$id";
   static String deleteClass(String id) => "$baseUrl/admin/classes/$id";
