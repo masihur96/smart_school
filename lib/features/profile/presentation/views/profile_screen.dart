@@ -100,26 +100,26 @@ class ProfileScreen extends StatelessWidget {
               label: 'Phone',
               value: user?.phone ?? 'Not available',
             ),
-            const Padding(padding: EdgeInsets.all(24.0), child: Divider()),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: ElevatedButton.icon(
-                onPressed: () => _showLogoutDialog(context),
-                icon: const Icon(Icons.logout, color: Colors.white),
-                label: const Text(
-                  'Logout',
-                  style: TextStyle(color: Colors.white),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
+           // const Padding(padding: EdgeInsets.all(24.0), child: Divider()),
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 24),
+            //   child: ElevatedButton.icon(
+            //     onPressed: () => _showLogoutDialog(context),
+            //     icon: const Icon(Icons.logout, color: Colors.white),
+            //     label: const Text(
+            //       'Logout',
+            //       style: TextStyle(color: Colors.white),
+            //     ),
+            //     style: ElevatedButton.styleFrom(
+            //       backgroundColor: Colors.red,
+            //       minimumSize: const Size(double.infinity, 50),
+            //       shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(12),
+            //       ),
+            //     ),
+            //   ),
+            // ),
+            // const SizedBox(height: 24),
           ],
         ),
       ),
