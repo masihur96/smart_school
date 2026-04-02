@@ -11,6 +11,7 @@ class AttendanceNotifier extends ChangeNotifier {
   final IAttendanceRepository _repository;
   List<AttendanceEntity> _state = [];
   bool _isLoading = false;
+  AttendanceOverview? _overviewSummary;
 
   AttendanceNotifier(this._repository) {
     _load(DateTime.now());
@@ -18,6 +19,7 @@ class AttendanceNotifier extends ChangeNotifier {
 
   List<AttendanceEntity> get state => _state;
   bool get isLoading => _isLoading;
+  AttendanceOverview? get overviewSummary => _overviewSummary;
 
   Future<void> _load(DateTime date) async {
     _state = await _repository.getAttendanceForDate(date);
@@ -259,6 +261,42 @@ class AttendanceNotifier extends ChangeNotifier {
       }
     } catch (e) {
       log('Error fetching school-wide attendance: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchAttendanceOverview({int? year, int? month}) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final now = DateTime.now();
+      final qYear = year ?? now.year;
+      final qMonth = month ?? now.month;
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.attendanceOverview,
+        query: {
+          'year': qYear.toString(),
+          'month': qMonth.toString(),
+        },
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data != null) {
+          _overviewSummary = AttendanceOverview.fromJson(data);
+          log('Fetched attendance overview for $qMonth/$qYear');
+        }
+      }
+    } catch (e) {
+      log('Error fetching attendance overview: $e');
     } finally {
       _isLoading = false;
       notifyListeners();

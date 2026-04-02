@@ -113,6 +113,77 @@ class Attendance {
   };
 }
 
+class AttendanceOverviewData {
+  final String classId;
+  final String className;
+  final String sectionId;
+  final String sectionName;
+  final int totalPresent;
+  final int totalAbsent;
+  final int totalLeave;
+  final int totalRecords;
+  final double attendancePercentage;
+
+  AttendanceOverviewData({
+    required this.classId,
+    required this.className,
+    required this.sectionId,
+    required this.sectionName,
+    required this.totalPresent,
+    required this.totalAbsent,
+    required this.totalLeave,
+    required this.totalRecords,
+    required this.attendancePercentage,
+  });
+
+  factory AttendanceOverviewData.fromJson(Map<String, dynamic> json) =>
+      AttendanceOverviewData(
+        classId: json['classId'] ?? '',
+        className: json['className'] ?? '',
+        sectionId: json['sectionId'] ?? '',
+        sectionName: json['sectionName'] ?? '',
+        totalPresent: json['totalPresent'] ?? 0,
+        totalAbsent: json['totalAbsent'] ?? 0,
+        totalLeave: json['totalLeave'] ?? 0,
+        totalRecords: json['totalRecords'] ?? 0,
+        attendancePercentage: (json['attendancePercentage'] as num).toDouble(),
+      );
+}
+
+class AttendanceOverview {
+  final int year;
+  final int month;
+  final List<AttendanceOverviewData> data;
+  final int grandTotalPresent;
+  final int grandTotalAbsent;
+  final int grandTotalLeave;
+  final double overallAttendancePercentage;
+
+  AttendanceOverview({
+    required this.year,
+    required this.month,
+    required this.data,
+    required this.grandTotalPresent,
+    required this.grandTotalAbsent,
+    required this.grandTotalLeave,
+    required this.overallAttendancePercentage,
+  });
+
+  factory AttendanceOverview.fromJson(Map<String, dynamic> json) =>
+      AttendanceOverview(
+        year: json['year'] ?? 0,
+        month: json['month'] ?? 0,
+        data: (json['data'] as List? ?? [])
+            .map((e) => AttendanceOverviewData.fromJson(e))
+            .toList(),
+        grandTotalPresent: json['grandTotalPresent'] ?? 0,
+        grandTotalAbsent: json['grandTotalAbsent'] ?? 0,
+        grandTotalLeave: json['grandTotalLeave'] ?? 0,
+        overallAttendancePercentage:
+            (json['overallAttendancePercentage'] as num).toDouble(),
+      );
+}
+
 class Homework {
   final String id;
   final String teacherId;

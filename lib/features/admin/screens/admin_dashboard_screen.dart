@@ -32,6 +32,9 @@ class AdminDashboardScreen extends StatefulWidget {
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   int _selectedIndex = 0;
+  String? _selectedClassId;
+  final int _currentYear = DateTime.now().year;
+  final int _currentMonth = DateTime.now().month;
 
   @override
   void initState() {
@@ -41,7 +44,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         final schoolId = context.read<AuthNotifier>().user?.schoolId;
         
         if (schoolId != null) {
-          context.read<AttendanceNotifier>().fetchSchoolWideAttendance(schoolId);
+          context.read<AttendanceNotifier>().fetchAttendanceOverview(
+            year: _currentYear,
+            month: _currentMonth,
+          );
           context.read<StudentsNotifier>().fetchStudents();
           context.read<TeachersNotifier>().fetchTeachers();
           context.read<ClassSetupNotifier>().fetchClasses(schoolId);
@@ -223,14 +229,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ],
           ),
           const SizedBox(height: 24),
-          Text(
-            'Attendance Overview',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Attendance Overview',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              _buildClassFilter(),
+            ],
           ),
           const SizedBox(height: 16),
-          _buildMultiMonthAttendanceOverview(attendanceRecords),
+          _buildEnhancedAttendanceOverview(),
           const SizedBox(height: 24),
           Text(
             'Quick Actions',
@@ -342,10 +354,57 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildMultiMonthAttendanceOverview(List<AttendanceEntity> records) {
-    if (records.isEmpty) {
+  Widget _buildClassFilter() {
+    final overview = context.watch<AttendanceNotifier>().overviewSummary;
+    if (overview == null || overview.data.isEmpty) return const SizedBox.shrink();
+
+    final classes = overview.data;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.purple.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.purple.withOpacity(0.1)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String?>(
+          value: _selectedClassId,
+          hint: const Text('All Classes', style: TextStyle(fontSize: 13)),
+          style: const TextStyle(color: Colors.purple, fontWeight: FontWeight.w600, fontSize: 13),
+          items: [
+            const DropdownMenuItem(value: null, child: Text('All Classes')),
+            ...classes.map((c) => DropdownMenuItem(
+                  value: c.classId,
+                  child: Text(c.className),
+                )),
+          ],
+          onChanged: (val) {
+            setState(() {
+              _selectedClassId = val;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEnhancedAttendanceOverview() {
+    final attendanceNotifier = context.watch<AttendanceNotifier>();
+    final overview = attendanceNotifier.overviewSummary;
+    final isLoading = attendanceNotifier.isLoading;
+
+    if (isLoading && overview == null) {
       return Container(
-        height: 300,
+        height: 200,
+        alignment: Alignment.center,
+        child: const CircularProgressIndicator(),
+      );
+    }
+
+    if (overview == null) {
+      return Container(
+        height: 200,
         width: double.infinity,
         decoration: BoxDecoration(
           color: Colors.white,
@@ -355,72 +414,29 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       );
     }
 
-    // Group records by Month/Year
-    final Map<String, List<AttendanceEntity>> monthlyGroups = {};
-    for (var record in records) {
-      final key = '${record.date.month}-${record.date.year}';
-      monthlyGroups.putIfAbsent(key, () => []).add(record);
-    }
+    // Determine what to show based on filter
+    final bool isAllClasses = _selectedClassId == null;
+    final String currentTitle = isAllClasses
+        ? '${_getMonthName(overview.month)} ${overview.year}'
+        : overview.data.firstWhere((c) => c.classId == _selectedClassId).className;
 
-    // Sort months (latest first)
-    final sortedMonthKeys = monthlyGroups.keys.toList()
-      ..sort((a, b) {
-        final partsA = a.split('-');
-        final partsB = b.split('-');
-        final dateA = DateTime(int.parse(partsA[1]), int.parse(partsA[0]));
-        final dateB = DateTime(int.parse(partsB[1]), int.parse(partsB[0]));
-        return dateB.compareTo(dateA);
-      });
+    final int present = isAllClasses
+        ? overview.grandTotalPresent
+        : overview.data.firstWhere((c) => c.classId == _selectedClassId).totalPresent;
 
-    return Column(
-      children: [
-        SizedBox(
-          height: 420,
-          child: PageView.builder(
-            itemCount: sortedMonthKeys.length,
-            controller: PageController(initialPage: 0),
-            itemBuilder: (context, index) {
-              final monthKey = sortedMonthKeys[index];
-              final monthRecords = monthlyGroups[monthKey]!;
-              final monthDate = monthRecords.first.date;
-              final monthName = _getMonthName(monthDate.month);
-              
-              return _buildMonthlyAttendanceCard(
-                monthName: '$monthName ${monthDate.year}',
-                records: monthRecords,
-                totalMonths: sortedMonthKeys.length,
-                currentIndex: index,
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
+    final int absent = isAllClasses
+        ? overview.grandTotalAbsent
+        : overview.data.firstWhere((c) => c.classId == _selectedClassId).totalAbsent;
 
-  String _getMonthName(int month) {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    return months[month - 1];
-  }
+    final int leave = isAllClasses
+        ? overview.grandTotalLeave
+        : overview.data.firstWhere((c) => c.classId == _selectedClassId).totalLeave;
 
-  Widget _buildMonthlyAttendanceCard({
-    required String monthName,
-    required List<AttendanceEntity> records,
-    required int totalMonths,
-    required int currentIndex,
-  }) {
-    // Summary calculations
-    final total = records.length;
-    final present = records.where((r) => r.status == AttendanceStatus.present).length;
-    final absent = records.where((r) => r.status == AttendanceStatus.absent).length;
-    final lateCount = records.where((r) => r.status == AttendanceStatus.leave).length;
-    final percentage = total == 0 ? 0.0 : (present / total) * 100;
+    final double percentage = isAllClasses
+        ? overview.overallAttendancePercentage
+        : overview.data.firstWhere((c) => c.classId == _selectedClassId).attendancePercentage;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -444,7 +460,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    monthName,
+                    currentTitle,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -452,7 +468,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                   ),
                   Text(
-                    'Monthly Performance',
+                    isAllClasses ? 'School Performance' : 'Class Performance',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[500],
@@ -484,30 +500,44 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             children: [
               _buildMonthStatItem('Present', present.toString(), const Color(0xFF7C3AED)),
               _buildMonthStatItem('Absent', absent.toString(), const Color(0xFFEF4444)),
-              _buildMonthStatItem('Late', lateCount.toString(), const Color(0xFFF59E0B)),
+              _buildMonthStatItem('Leave', leave.toString(), const Color(0xFFF59E0B)),
             ],
           ),
-          const SizedBox(height: 24),
-          Expanded(child: _buildAttendanceChart(records)),
-          const SizedBox(height: 12),
-          Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(totalMonths, (index) {
-                return Container(
-                  width: 8,
-                  height: 8,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: index == currentIndex
-                        ? Colors.purple
-                        : Colors.purple.withOpacity(0.2),
-                  ),
-                );
-              }),
+          // We could still show class-wise progress bars if "All Classes" is selected
+          if (isAllClasses && overview.data.length > 1) ...[
+            const SizedBox(height: 24),
+            const Text(
+              'Class Breakdown',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
-          ),
+            const SizedBox(height: 12),
+            ...overview.data.take(5).map((c) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(c.className, style: const TextStyle(fontSize: 12)),
+                          Text('${c.attendancePercentage.toStringAsFixed(1)}%',
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: c.attendancePercentage / 100,
+                          backgroundColor: Colors.grey[200],
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              c.attendancePercentage > 80 ? Colors.green : Colors.orange),
+                          minHeight: 6,
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+          ],
         ],
       ),
     );
@@ -536,147 +566,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildAttendanceChart(List<AttendanceEntity> records) {
-    // Process data: Group by day for the specific records
-    final Map<int, List<AttendanceEntity>> dailyData = {};
-    if (records.isEmpty) return const SizedBox.shrink();
-    
-    final monthDate = records.first.date;
-    final daysInMonth = DateTime(monthDate.year, monthDate.month + 1, 0).day;
-
-    for (int i = 1; i <= daysInMonth; i++) {
-      dailyData[i] = [];
-    }
-
-    for (var record in records) {
-      dailyData[record.date.day]!.add(record);
-    }
-
-    final sortedDays = dailyData.keys.toList()..sort();
-
-    return BarChart(
-      BarChartData(
-        alignment: BarChartAlignment.spaceAround,
-        maxY: 100,
-        barTouchData: BarTouchData(
-          touchTooltipData: BarTouchTooltipData(
-            getTooltipColor: (_) => const Color(0xFF1E1B4B).withOpacity(0.9),
-            getTooltipItem: (group, groupIndex, rod, rodIndex) {
-              final day = sortedDays[group.x.toInt()];
-              final dayRecords = dailyData[day]!;
-              final present = dayRecords.where((r) => r.status == AttendanceStatus.present).length;
-              return BarTooltipItem(
-                'Day $day\n',
-                const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
-                children: [
-                  TextSpan(
-                    text: '${rod.toY.toInt()}% Present\n',
-                    style: const TextStyle(color: Color(0xFFC084FC), fontWeight: FontWeight.w600, fontSize: 11),
-                  ),
-                  TextSpan(
-                    text: '($present/${dayRecords.length} Students)',
-                    style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 9),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-        titlesData: FlTitlesData(
-          show: true,
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                if (value < 0 || value >= sortedDays.length) return const SizedBox.shrink();
-                final day = sortedDays[value.toInt()];
-                if (day % 5 != 0 && day != 1 && day != daysInMonth) return const SizedBox.shrink();
-                return SideTitleWidget(
-                  meta: meta,
-                  space: 8,
-                  child: Text(
-                    day.toString(),
-                    style: TextStyle(color: Colors.grey[400], fontSize: 10, fontWeight: FontWeight.w600),
-                  ),
-                );
-              },
-            ),
-          ),
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 30,
-              getTitlesWidget: (value, meta) {
-                if (value % 50 != 0) return const SizedBox.shrink();
-                return SideTitleWidget(
-                  meta: meta,
-                  child: Text(
-                    '${value.toInt()}%',
-                    style: TextStyle(color: Colors.grey[400], fontSize: 9, fontWeight: FontWeight.w500),
-                  ),
-                );
-              },
-            ),
-          ),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        ),
-        gridData: FlGridData(
-          show: true,
-          drawVerticalLine: false,
-          horizontalInterval: 50,
-          getDrawingHorizontalLine: (value) => FlLine(
-            color: Colors.purple.withOpacity(0.05),
-            strokeWidth: 1,
-          ),
-        ),
-        borderData: FlBorderData(show: false),
-        barGroups: sortedDays.asMap().entries.map((entry) {
-          final dayRecords = dailyData[entry.value]!;
-          final total = dayRecords.length;
-          final present = dayRecords.where((r) => r.status == AttendanceStatus.present).length;
-          final percentage = total == 0 ? 0.0 : (present / total) * 100;
-
-          return BarChartGroupData(
-            x: entry.key,
-            barRods: [
-              BarChartRodData(
-                toY: percentage == 0 ? 2 : percentage,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF7C3AED), Color(0xFFC084FC)],
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                ),
-                width: 6,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(3)),
-                backDrawRodData: BackgroundBarChartRodData(
-                  show: true,
-                  toY: 100,
-                  color: const Color(0xFFF3F4F6),
-                ),
-              ),
-            ],
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildLegendItem(String label, Color color) {
-    return Row(
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: TextStyle(color: Colors.grey[600], fontSize: 11, fontWeight: FontWeight.w500),
-        ),
-      ],
-    );
+  String _getMonthName(int month) {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[month - 1];
   }
 
   Widget _buildChartPlaceholder() {
