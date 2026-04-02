@@ -624,7 +624,9 @@ class _HomeworkTab extends StatelessWidget {
                   return _HomeworkCard(
                     homework: hw,
                     subjectName: subjectName,
-                    onDelete: () => context.read<HomeworkNotifier>().removeHomework(hw.id),
+                    onView: () => _showViewSheet(ctx, hw, subjectName),
+                    onEdit: () => _showEditSheet(ctx, hw),
+                    onDelete: () => _confirmDelete(ctx, hw.id),
                   );
                 },
               ),
@@ -658,6 +660,60 @@ class _HomeworkTab extends StatelessWidget {
       ),
     );
   }
+
+  void _showEditSheet(BuildContext context, Homework homework) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _AddHomeworkSheet(
+        classRoom: classRoom,
+        homework: homework,
+      ),
+    );
+  }
+
+  void _showViewSheet(BuildContext context, Homework homework, String subjectName) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _ViewHomeworkSheet(
+        homework: homework,
+        subjectName: subjectName,
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, String id) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Homework'),
+        content: const Text('Are you sure you want to delete this homework?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final success = await context.read<HomeworkNotifier>().removeHomework(id);
+              if (ctx.mounted) {
+                Navigator.pop(ctx);
+                if (!success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to delete homework')),
+                  );
+                }
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -667,11 +723,15 @@ class _HomeworkTab extends StatelessWidget {
 class _HomeworkCard extends StatelessWidget {
   final Homework homework;
   final String subjectName;
+  final VoidCallback onView;
+  final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _HomeworkCard({
     required this.homework,
     required this.subjectName,
+    required this.onView,
+    required this.onEdit,
     required this.onDelete,
   });
 
@@ -773,11 +833,35 @@ class _HomeworkCard extends StatelessWidget {
             PopupMenuButton<String>(
               icon: Icon(Icons.more_vert, color: Colors.grey[400], size: 20),
               onSelected: (val) {
-                if (val == 'delete') {
+                if (val == 'view') {
+                  onView();
+                } else if (val == 'edit') {
+                  onEdit();
+                } else if (val == 'delete') {
                   onDelete();
                 }
               },
               itemBuilder: (_) => const [
+                PopupMenuItem(
+                  value: 'view',
+                  child: Row(
+                    children: [
+                      Icon(Icons.visibility_outlined, size: 18),
+                      SizedBox(width: 8),
+                      Text('View'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit_outlined, size: 18),
+                      SizedBox(width: 8),
+                      Text('Edit'),
+                    ],
+                  ),
+                ),
                 PopupMenuItem(
                   value: 'delete',
                   child: Row(
@@ -803,9 +887,11 @@ class _HomeworkCard extends StatelessWidget {
 
 class _AddHomeworkSheet extends StatefulWidget {
   final ClassRoom classRoom;
+  final Homework? homework; // Add this
 
   const _AddHomeworkSheet({
     required this.classRoom,
+    this.homework, // Add this
   });
 
   @override
@@ -814,10 +900,19 @@ class _AddHomeworkSheet extends StatefulWidget {
 
 class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _descController = TextEditingController();
+  late final TextEditingController _titleController;
+  late final TextEditingController _descController;
   String? _selectedSubjectId;
-  DateTime _dueDate = DateTime.now().add(const Duration(days: 3));
+  late DateTime _dueDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.homework?.title ?? '');
+    _descController = TextEditingController(text: widget.homework?.description ?? '');
+    _selectedSubjectId = widget.homework?.subjectId;
+    _dueDate = widget.homework?.dueDate ?? DateTime.now().add(const Duration(days: 3));
+  }
 
   @override
   void dispose() {
@@ -862,29 +957,42 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     }
 
     final homework = Homework(
-      id: '', // Backend will generate ID
-      teacherId: user.id,
+      id: widget.homework?.id ?? '', // Use existing ID if editing
+      teacherId: widget.homework?.teacherId ?? user.id,
       classId: widget.classRoom.id,
-      sectionId: '', // Currently not handling sections in this screen
+      sectionId: widget.homework?.sectionId ?? '',
       subjectId: _selectedSubjectId!,
       title: _titleController.text.trim(),
       description: _descController.text.trim(),
       schoolId: user.schoolId ?? '',
       dueDate: _dueDate,
-      createdAt: DateTime.now(),
+      createdAt: widget.homework?.createdAt ?? DateTime.now(),
     );
 
-    final success = await context.read<HomeworkNotifier>().submitHomework(homework);
+    final bool success;
+    if (widget.homework == null) {
+      success = await context.read<HomeworkNotifier>().submitHomework(homework);
+    } else {
+      success = await context.read<HomeworkNotifier>().updateHomework(homework);
+    }
     
     if (mounted) {
       if (success) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Homework assigned successfully!')),
+          SnackBar(
+            content: Text(widget.homework == null
+                ? 'Homework assigned successfully!'
+                : 'Homework updated successfully!'),
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to assign homework.')),
+          SnackBar(
+            content: Text(widget.homework == null
+                ? 'Failed to assign homework.'
+                : 'Failed to update homework.'),
+          ),
         );
       }
     }
@@ -929,8 +1037,8 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                     ),
                   ),
                 ),
-                const Text(
-                  'Add Homework',
+                Text(
+                  widget.homework == null ? 'Add Homework' : 'Edit Homework',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -1007,8 +1115,10 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    child: const Text(
-                      'Assign Homework',
+                    child: Text(
+                      widget.homework == null
+                          ? 'Assign Homework'
+                          : 'Update Homework',
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                     ),
                   ),
@@ -1040,6 +1150,161 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// View Homework Bottom Sheet
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ViewHomeworkSheet extends StatelessWidget {
+  final Homework homework;
+  final String subjectName;
+
+  const _ViewHomeworkSheet({
+    required this.homework,
+    required this.subjectName,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final due =
+        '${homework.dueDate.day.toString().padLeft(2, '0')}/${homework.dueDate.month.toString().padLeft(2, '0')}/${homework.dueDate.year}';
+    final isPast = homework.dueDate.isBefore(DateTime.now());
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Handle
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+
+          // Subject Tag
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFF7C3AED).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              subjectName,
+              style: const TextStyle(
+                color: Color(0xFF7C3AED),
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Title
+          Text(
+            homework.title,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E1B4B),
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Info Row (Due Date)
+          Row(
+            children: [
+              Icon(Icons.calendar_today_rounded,
+                  size: 18, color: isPast ? Colors.red : Colors.grey[600]),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Due Date',
+                    style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                  ),
+                  Text(
+                    due,
+                    style: TextStyle(
+                      color: isPast ? Colors.red : const Color(0xFF1E1B4B),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // Description Section
+          const Text(
+            'Description',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E1B4B),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F3FF),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF7C3AED).withOpacity(0.1)),
+            ),
+            child: Text(
+              homework.description.isNotEmpty
+                  ? homework.description
+                  : 'No description provided.',
+              style: TextStyle(
+                color: Colors.grey[700],
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // Close Button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF7C3AED),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              child: const Text(
+                'Close',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
