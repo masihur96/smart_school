@@ -5,11 +5,11 @@ import 'package:intl/intl.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/features/student/screens/student_routine_screen.dart';
 import 'package:smart_school/features/student/screens/student_notice_screen.dart';
+import 'package:smart_school/features/student/providers/student_attendance_provider.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../teacher/providers/attendance_provider.dart';
 import '../../teacher/providers/homework_provider.dart';
 import '../../admin/providers/notice_provider.dart';
 import '../../admin/providers/setup_provider.dart';
@@ -26,6 +26,14 @@ class StudentDashboardScreen extends StatefulWidget {
 
 class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<StudentAttendanceNotifier>().fetchAttendance();
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -227,12 +235,22 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
   }
 
   Widget _buildAttendanceHighLight(BuildContext context) {
-    final currentUser = context.watch<AuthNotifier>().user;
-    final attendanceRecords = context
-        .watch<AttendanceNotifier>()
-        .state
-        .where((r) => r.studentId == currentUser?.id)
-        .toList();
+    final attendanceNotifier = context.watch<StudentAttendanceNotifier>();
+    final attendanceRecords = attendanceNotifier.attendanceRecords;
+    final isLoading = attendanceNotifier.isLoading;
+
+    if (isLoading) {
+      return Container(
+        height: 140,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final totalDays = attendanceRecords.length;
     final presentDays = attendanceRecords
         .where((r) => r.status == AttendanceStatus.present)
@@ -282,7 +300,9 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'You were present $presentDays out of $totalDays days this month.',
+                  totalDays == 0 
+                      ? 'No attendance records found.' 
+                      : 'You were present $presentDays out of $totalDays recorded days.',
                   style: TextStyle(
                     color: Colors.grey[600],
                     height: 1.4,
