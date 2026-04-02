@@ -124,6 +124,7 @@ class ExamsNotifier extends ChangeNotifier {
     required String description,
     required DateTime startDate,
     required DateTime endDate,
+    required List<Map<String, dynamic>> assignments,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -137,6 +138,13 @@ class ExamsNotifier extends ChangeNotifier {
         'description': description,
         'start_date': DateFormat('yyyy-MM-dd').format(startDate),
         'end_date': DateFormat('yyyy-MM-dd').format(endDate),
+        'assignments': assignments.map((a) => {
+          if (a.containsKey('id')) 'id': a['id'],
+          'class_uid': a['class_uid'],
+          'subject_uid': a['subject_uid'],
+          'examiner_uid': a['examiner_uid'],
+          'date': DateFormat('yyyy-MM-dd').format(a['date']),
+        }).toList(),
       };
 
       final response = await DataProvider().performRequest(

@@ -11,12 +11,13 @@ import '../../auth/providers/auth_provider.dart';
 
 // Local model for a single academic assignment draft
 class _AssignmentDraft {
+  String? id;
   String? classId;
   String? subjectId;
   String? examinerId;
   DateTime date;
 
-  _AssignmentDraft({this.classId, this.subjectId, this.examinerId, DateTime? date})
+  _AssignmentDraft({this.id, this.classId, this.subjectId, this.examinerId, DateTime? date})
       : date = date ?? DateTime.now().add(const Duration(days: 1));
 }
 
@@ -54,6 +55,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
       
       for(final a in widget.exam!.assignments) {
         _assignments.add(_AssignmentDraft(
+          id: a.id,
           classId: a.classId,
           subjectId: a.subjectId,
           examinerId: a.examinerId,
@@ -255,6 +257,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
     final editing = index != null;
     final draft = editing ? _assignments[index] : _AssignmentDraft();
 
+    String? id = draft.id;
     String? classId = draft.classId;
     String? subjectId = draft.subjectId;
     String? examinerId = draft.examinerId;
@@ -371,13 +374,15 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                               : () {
                                   setState(() {
                                     if (editing) {
-                                      _assignments[index!]
+                                      _assignments[index]
+                                        ..id = id
                                         ..classId = classId
                                         ..subjectId = subjectId
                                         ..examinerId = examinerId
                                         ..date = date;
                                     } else {
                                       _assignments.add(_AssignmentDraft(
+                                        id: id,
                                         classId: classId,
                                         subjectId: subjectId,
                                         examinerId: examinerId,
@@ -438,7 +443,14 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
 
     final examsNotifier = context.read<ExamsNotifier>();
     try {
-      final List<Map<String, dynamic>> assignmentsList = _assignments.map((a) => {
+      final List<Map<String, dynamic>> assignmentsList = _assignments
+          .where((a) => 
+            a.classId != null && a.classId!.trim().isNotEmpty &&
+            a.subjectId != null && a.subjectId!.trim().isNotEmpty &&
+            a.examinerId != null && a.examinerId!.trim().isNotEmpty
+          )
+          .map((a) => {
+        if (a.id != null && a.id!.isNotEmpty) 'id': a.id,
         'class_uid': a.classId!,
         'subject_uid': a.subjectId!,
         'examiner_uid': a.examinerId!,
@@ -452,6 +464,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
           description: _descController.text.trim(),
           startDate: _startDate,
           endDate: _endDate,
+          assignments: assignmentsList,
         );
       } else {
         await examsNotifier.createExamWithAssignments(
