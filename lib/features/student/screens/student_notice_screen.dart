@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../admin/providers/notice_provider.dart';
-import '../../admin/providers/student_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 
 class StudentNoticeScreen extends StatelessWidget {
@@ -14,13 +13,10 @@ class StudentNoticeScreen extends StatelessWidget {
     if (currentUser == null)
       return const Scaffold(body: Center(child: Text('Not logged in')));
 
-    final student = context.watch<StudentsNotifier>().students.firstWhere(
-      (s) => s.userId == currentUser.id,
-    );
     final notices = context
         .watch<NoticesNotifier>()
         .notices
-        .where((n) => n.classId == null || n.classId == student.classId)
+        .where((n) => n.classId == null || n.classId == currentUser.classId)
         .toList();
 
     return Scaffold(
