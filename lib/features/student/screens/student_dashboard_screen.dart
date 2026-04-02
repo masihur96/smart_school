@@ -200,18 +200,6 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              'Class: ${user?.classId ?? "N/A"} | Section: ${user?.sectionId ?? "N/A"}',
-              style: const TextStyle(color: Colors.white, fontSize: 13),
-            ),
-          ),
         ],
       ),
     );
