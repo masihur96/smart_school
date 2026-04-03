@@ -223,7 +223,7 @@ class AppDrawer extends StatelessWidget {
         Icons.notifications,
         'Notices',
         () {
-          Navigator.push(context, MaterialPageRoute(builder: (_)=>StudentNoticeScreen(),));
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>StudentNoticeScreen(isFromDrawer: true,),));
         },
         context,
       ),

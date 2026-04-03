@@ -5,7 +5,8 @@ import '../../admin/providers/notice_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 
 class StudentNoticeScreen extends StatelessWidget {
-  const StudentNoticeScreen({super.key});
+  final bool isFromDrawer;
+  const StudentNoticeScreen({super.key,required this.isFromDrawer});
 
   @override
   Widget build(BuildContext context) {
@@ -20,11 +21,11 @@ class StudentNoticeScreen extends StatelessWidget {
         .toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notices'),
+      appBar:isFromDrawer? AppBar(
+        title: const Text('Not ices'),
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
-      ),
+      ):null,
       body: notices.isEmpty
           ? const Center(child: Text('No notices found.'))
           : ListView.builder(

@@ -94,7 +94,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           const StudentAttendanceScreen(hideAppBar: true),
           const StudentResultScreen(hideAppBar: true),
           const StudentHomeworkScreen(hideAppBar: true),
-          const StudentNoticeScreen(),
+          const StudentNoticeScreen(isFromDrawer: false,),
         ],
       ),
       bottomNavigationBar: Container(

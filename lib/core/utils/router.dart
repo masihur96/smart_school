@@ -154,7 +154,7 @@ GoRouter getRouter(AuthNotifier authNotifier) {
           ),
           GoRoute(
             path: 'notices',
-            builder: (context, state) => const StudentNoticeScreen(),
+            builder: (context, state) => const StudentNoticeScreen(isFromDrawer: false,),
           ),
           GoRoute(
             path: 'results',
