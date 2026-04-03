@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/models/teacher_model.dart';
 
-import '../../../models/school_models.dart';
+import '../../../models/school_models.dart' hide Teacher;
 import '../../auth/providers/auth_provider.dart';
 import '../providers/routine_provider.dart';
 import '../providers/setup_provider.dart';

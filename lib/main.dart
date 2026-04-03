@@ -25,6 +25,7 @@ import 'features/teacher/data/repositories/homework_repository_impl.dart';
 import 'features/student/providers/student_attendance_provider.dart';
 import 'features/student/providers/student_routine_provider.dart';
 import 'features/student/providers/student_homework_provider.dart';
+import 'features/student/providers/student_result_provider.dart';
 import 'services/database_service.dart';
 import 'configs/network/data_provider.dart';
 import 'features/auth/data/datasources/auth_remote_data_source.dart';
@@ -99,6 +100,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => StudentAttendanceNotifier()),
         ChangeNotifierProvider(create: (_) => StudentRoutineNotifier()),
         ChangeNotifierProvider(create: (_) => StudentHomeworkNotifier()),
+        ChangeNotifierProvider(create: (_) => StudentResultNotifier()),
         ChangeNotifierProvider(create: (_) => TeacherDashboardProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
       ],

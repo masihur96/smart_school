@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_school/features/admin/screens/add_edit_teacher_screen.dart';
-import 'package:smart_school/models/school_models.dart';
+import 'package:smart_school/models/school_models.dart' hide Teacher;
 import 'package:smart_school/models/teacher_model.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import '../providers/teacher_provider.dart';

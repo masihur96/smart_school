@@ -469,6 +469,9 @@ class Result {
   final double marksObtained;
   final double totalMarks;
   final String remarks;
+  final Exam? exam;
+  final Subject? subject;
+  final Teacher? teacher;
 
   Result({
     required this.id,
@@ -477,16 +480,42 @@ class Result {
     required this.marksObtained,
     required this.totalMarks,
     required this.remarks,
+    this.exam,
+    this.subject,
+    this.teacher,
   });
 
-  factory Result.fromJson(Map<String, dynamic> json) => Result(
-    id: json['id'],
-    examId: json['examId'],
-    studentId: json['studentId'],
-    marksObtained: (json['marksObtained'] as num).toDouble(),
-    totalMarks: (json['totalMarks'] as num).toDouble(),
-    remarks: json['remarks'] ?? '',
-  );
+  factory Result.fromJson(Map<String, dynamic> json) {
+    double parsedMarksObtained = 0.0;
+    if (json['marksObtained'] != null) {
+      if (json['marksObtained'] is String) {
+        parsedMarksObtained = double.tryParse(json['marksObtained']) ?? 0.0;
+      } else if (json['marksObtained'] is num) {
+        parsedMarksObtained = (json['marksObtained'] as num).toDouble();
+      }
+    }
+
+    double parsedTotalMarks = 0.0;
+    if (json['totalMarks'] != null) {
+      if (json['totalMarks'] is String) {
+        parsedTotalMarks = double.tryParse(json['totalMarks']) ?? 0.0;
+      } else if (json['totalMarks'] is num) {
+        parsedTotalMarks = (json['totalMarks'] as num).toDouble();
+      }
+    }
+
+    return Result(
+      id: json['id'] ?? '',
+      examId: json['examId'] ?? '',
+      studentId: json['studentId'] ?? '',
+      marksObtained: parsedMarksObtained,
+      totalMarks: parsedTotalMarks,
+      remarks: json['remarks'] ?? '',
+      exam: json['exam'] != null ? Exam.fromJson(json['exam']) : null,
+      subject: json['subject'] != null ? Subject.fromJson(json['subject']) : null,
+      teacher: json['teacher'] != null ? Teacher.fromJson(json['teacher']) : null,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -566,3 +595,28 @@ class TeacherAssignmentSubject {
     );
   }
 }
+
+class Teacher {
+  final String id;
+  final String name;
+  final String? email;
+  final String? phone;
+  final String? designation;
+
+  Teacher({
+    required this.id,
+    required this.name,
+    this.email,
+    this.phone,
+    this.designation,
+  });
+
+  factory Teacher.fromJson(Map<String, dynamic> json) => Teacher(
+        id: json['id'] ?? '',
+        name: json['name'] ?? '',
+        email: json['email'],
+        phone: json['phone'],
+        designation: json['designation'],
+      );
+}
+

@@ -9,7 +9,7 @@ import '../../admin/providers/student_provider.dart';
 import '../../admin/providers/setup_provider.dart';
 import '../../admin/providers/teacher_provider.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../../models/school_models.dart';
+import '../../../models/school_models.dart' hide Teacher;
 
 class StudentRoutineScreen extends StatefulWidget {
   const StudentRoutineScreen({super.key});

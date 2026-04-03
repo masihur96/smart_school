@@ -2,7 +2,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../../../models/school_models.dart';
+import '../../../models/school_models.dart' hide Teacher;
 import '../../../models/teacher_model.dart';
 import '../providers/exam_provider.dart';
 import '../providers/setup_provider.dart';
