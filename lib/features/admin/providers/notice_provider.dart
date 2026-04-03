@@ -21,7 +21,7 @@ class NoticesNotifier extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   // ─── Fetch from API ───────────────────────────────────────────────────────
-  Future<void> fetchNoticesFromAPI(String schoolId) async {
+  Future<void> fetchNoticesFromAPI({String? schoolId}) async {
     _isLoading = true;
     notifyListeners();
 
@@ -29,9 +29,14 @@ class NoticesNotifier extends ChangeNotifier {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
 
+      String url = APIPath.createNotice;
+      if (schoolId != null) {
+        url += '?schoolId=$schoolId';
+      }
+
       final response = await DataProvider().performRequest(
         'GET',
-        '${APIPath.createNotice}?schoolId=$schoolId',
+        url,
         header: {'Authorization': 'Bearer $token'},
       );
 

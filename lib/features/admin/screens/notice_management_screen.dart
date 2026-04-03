@@ -23,7 +23,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
       if (user?.schoolId != null) {
         context
             .read<NoticesNotifier>()
-            .fetchNoticesFromAPI(user!.schoolId!);
+            .fetchNoticesFromAPI();
       }
     });
   }
@@ -63,7 +63,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                       if (user?.schoolId != null) {
                         context
                             .read<NoticesNotifier>()
-                            .fetchNoticesFromAPI(user!.schoolId!);
+                            .fetchNoticesFromAPI();
                       }
                     },
                   ),

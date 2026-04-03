@@ -51,7 +51,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           context.read<StudentsNotifier>().fetchStudents();
           context.read<TeachersNotifier>().fetchTeachers();
           context.read<ClassSetupNotifier>().fetchClasses(schoolId);
-          context.read<NoticesNotifier>().fetchNoticesFromAPI(schoolId);
+          context.read<NoticesNotifier>().fetchNoticesFromAPI();
         }
       }
     });

@@ -32,6 +32,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<StudentAttendanceNotifier>().fetchAttendance();
+      context.read<NoticesNotifier>().fetchNoticesFromAPI();
       final user = context.read<AuthNotifier>().user;
       if (user?.classId != null) {
         context.read<StudentHomeworkNotifier>().fetchHomework(user!.classId!);
@@ -348,49 +349,80 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
 
     return InkWell(
       onTap: () => setState(() => _selectedIndex = 4),
+      borderRadius: BorderRadius.circular(24),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: latest.isImportant ? Colors.red.withValues(alpha: 0.05) : Colors.blue.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: latest.isImportant ? Colors.red.withValues(alpha: 0.2) : Colors.blue.withValues(alpha: 0.2),
+          gradient: LinearGradient(
+            colors: latest.isImportant
+                ? [Colors.red.shade800, Colors.red.shade500]
+                : [Colors.indigo.shade800, Colors.indigo.shade500],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: (latest.isImportant ? Colors.red : Colors.indigo).withOpacity(0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: latest.isImportant ? Colors.red : Colors.blue,
+                color: Colors.white.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.notifications_active, color: Colors.white, size: 20),
+              child: const Icon(Icons.notifications_active_rounded, color: Colors.white, size: 24),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 20),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    latest.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          latest.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                      if (latest.isImportant)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            'URGENT',
+                            style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
                     latest.content,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                    style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14, height: 1.3),
                   ),
                 ],
               ),
             ),
+            const Icon(Icons.chevron_right_rounded, color: Colors.white54),
           ],
         ),
       ),
