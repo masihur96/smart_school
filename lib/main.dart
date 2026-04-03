@@ -20,6 +20,7 @@ import 'features/teacher/providers/teacher_dashboard_provider.dart';
 import 'features/teacher/data/repositories/attendance_repository_impl.dart';
 import 'features/teacher/data/repositories/result_repository_impl.dart';
 import 'features/teacher/data/datasources/homework_remote_datasource.dart';
+import 'features/teacher/data/datasources/mark_entry_remote_datasource.dart';
 import 'features/teacher/data/repositories/homework_repository_impl.dart';
 import 'features/student/providers/student_attendance_provider.dart';
 import 'features/student/providers/student_routine_provider.dart';
@@ -53,11 +54,13 @@ void main() {
   );
 
   final attendanceRepository = AttendanceRepositoryImpl(databaseService);
-  final resultRepository = ResultRepositoryImpl(databaseService);
 
   final homeworkRemoteDataSource = HomeworkRemoteDataSource(dataProvider);
   final homeworkRepository = HomeworkRepositoryImpl(homeworkRemoteDataSource);
 
+  final markEntryRemoteDataSource = MarkEntryRemoteDataSource(dataProvider);
+  final resultRepository =
+      ResultRepositoryImpl(databaseService, markEntryRemoteDataSource);
 
   runApp(
     MultiProvider(

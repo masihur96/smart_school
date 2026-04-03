@@ -448,7 +448,7 @@ class Exam {
       startDate: startDate,
       endDate: endDate,
       assignments: assignments,
-      isPublished: json['isPublished'] ?? false,
+      isPublished: (json['isPublished'] ?? json['is_published']) ?? false,
     );
   }
 
@@ -496,4 +496,73 @@ class Result {
     'totalMarks': totalMarks,
     'remarks': remarks,
   };
+}
+
+class TeacherAssignmentClass {
+  final String uuid;
+  final String name;
+
+  TeacherAssignmentClass({required this.uuid, required this.name});
+
+  factory TeacherAssignmentClass.fromJson(Map<String, dynamic> json) =>
+      TeacherAssignmentClass(
+        uuid: json['uuid'] ?? '',
+        name: json['name'] ?? '',
+      );
+}
+
+class TeacherAssignmentStudent {
+  final String id;
+  final String name;
+  final String rollNumber;
+
+  TeacherAssignmentStudent({
+    required this.id,
+    required this.name,
+    required this.rollNumber,
+  });
+
+  factory TeacherAssignmentStudent.fromJson(Map<String, dynamic> json) =>
+      TeacherAssignmentStudent(
+        id: json['id'] ?? '',
+        name: json['name'] ?? '',
+        rollNumber: json['rollNumber'] ?? '',
+      );
+}
+
+class TeacherAssignmentSubject {
+  final String uuid;
+  final String name;
+  final double? existingMark;
+
+  TeacherAssignmentSubject({
+    required this.uuid,
+    required this.name,
+    this.existingMark,
+  });
+
+  factory TeacherAssignmentSubject.fromJson(Map<String, dynamic> json) {
+    final subjectObj = json['subject'] as Map<String, dynamic>?;
+    
+    double? parsedMark;
+    if (json['existingMark'] != null) {
+      final existing = json['existingMark'];
+      if (existing is Map) {
+        final markStr = existing['marksObtained'];
+        if (markStr != null) {
+          parsedMark = double.tryParse(markStr.toString());
+        }
+      } else if (existing is num) {
+        parsedMark = existing.toDouble();
+      } else if (existing is String) {
+        parsedMark = double.tryParse(existing);
+      }
+    }
+
+    return TeacherAssignmentSubject(
+      uuid: subjectObj?['uuid'] ?? '',
+      name: subjectObj?['name'] ?? '',
+      existingMark: parsedMark,
+    );
+  }
 }
