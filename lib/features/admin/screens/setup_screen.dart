@@ -1253,8 +1253,8 @@ void _showViewSectionDialog(
           label: 'Class',
           value: className,
         ),
-        const SizedBox(height: 8),
-        _DetailRow(icon: Icons.key, label: 'ID', value: section.id),
+        // const SizedBox(height: 8),
+        // _DetailRow(icon: Icons.key, label: 'ID', value: section.id),
       ],
     ),
   );
