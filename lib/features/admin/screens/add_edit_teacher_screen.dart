@@ -25,6 +25,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
   String? _selectedClassId;
   String? _selectedSectionId;
   final List<AssignedSubject> _assignedSubjects = [];
+  bool _obscurePassword = true;
 
   bool get isEditing => widget.teacher != null;
 
@@ -173,10 +174,18 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: TextFormField(
                     controller: _passwordController,
-                    obscureText: true,
+                    obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       labelText: 'Password',
                       prefixIcon: const Icon(Icons.security),
+                      suffixIcon: IconButton(
+                        icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     validator: (val) => val!.length < 6 ? 'Password too short' : null,
@@ -213,7 +222,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                       items: classes
                           .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
                           .toList(),
-                      value: _selectedClassId,
+                      value: classes.any((c) => c.id == _selectedClassId) ? _selectedClassId : null,
                       onChanged: (val) {
                         setState(() {
                           _selectedClassId = val;
@@ -233,7 +242,9 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                           .where((s) => s.classId == _selectedClassId)
                           .map((s) => DropdownMenuItem(value: s.id, child: Text(s.name)))
                           .toList(),
-                      value: _selectedSectionId,
+                      value: sections.any((s) => s.id == _selectedSectionId && s.classId == _selectedClassId)
+                          ? _selectedSectionId
+                          : null,
                       onChanged: (val) => setState(() => _selectedSectionId = val),
                       validator: (val) => val == null ? 'Please select section' : null,
                     ),

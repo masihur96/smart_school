@@ -24,6 +24,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   final _designationController = TextEditingController();
   String? _selectedClass;
   String? _selectedSection;
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -130,10 +131,18 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _passwordController,
-              obscureText: true,
+              obscureText: _obscurePassword,
               decoration: InputDecoration(
                 labelText: widget.student != null ? 'Password (leave blank to keep current)' : 'Password',
                 prefixIcon: const Icon(Icons.lock),
+                suffixIcon: IconButton(
+                  icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                ),
               ),
               validator: (val) {
                  if (widget.student == null && (val == null || val.isEmpty)) {
