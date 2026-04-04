@@ -108,6 +108,9 @@ class ClassSetupNotifier extends ChangeNotifier {
       final token = await StorageService.getToken();
       if (token == null) return false;
 
+      print("DDDDD:: $id");
+      print("DDDDD:: ${APIPath.updateClass(id)}");
+
       final response = await DataProvider().performRequest(
         'PUT',
         APIPath.updateClass(id),
@@ -259,8 +262,11 @@ class SectionSetupNotifier extends ChangeNotifier {
           (response.statusCode == 200 || response.statusCode == 201)) {
         final idx = _dbService.sections.indexWhere((s) => s.id == id);
         if (idx != -1) {
-          _dbService.sections[idx] =
-              Section(id: id, classId: classId, name: name);
+          _dbService.sections[idx] = Section(
+            id: id,
+            classId: classId,
+            name: name,
+          );
           _sections = [..._dbService.sections];
           notifyListeners();
           return true;
@@ -410,7 +416,7 @@ class SubjectSetupNotifier extends ChangeNotifier {
           'name': name,
           'code': code,
           'classId': classId,
-          'schoolId': schoolId
+          'schoolId': schoolId,
         },
         header: {'Authorization': 'Bearer $token'},
       );

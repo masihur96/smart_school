@@ -86,13 +86,18 @@ class _SetupScreenState extends State<SetupScreen>
           child: Column(
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new,
-                          color: Colors.white, size: 20),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                       onPressed: () => Navigator.maybePop(context),
                     ),
                     const Expanded(
@@ -117,9 +122,13 @@ class _SetupScreenState extends State<SetupScreen>
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.white60,
                 labelStyle: const TextStyle(
-                    fontWeight: FontWeight.w700, fontSize: 14),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
                 unselectedLabelStyle: const TextStyle(
-                    fontWeight: FontWeight.w400, fontSize: 14),
+                  fontWeight: FontWeight.w400,
+                  fontSize: 14,
+                ),
                 tabs: const [
                   Tab(text: 'Classes'),
                   Tab(text: 'Sections'),
@@ -150,13 +159,12 @@ class _ClassTab extends StatelessWidget {
       body: notifier.isLoading
           ? const _LoadingView()
           : classes.isEmpty
-              ? const _EmptyView(label: 'No classes yet')
-              : ListView.builder(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  itemCount: classes.length,
-                  itemBuilder: (ctx, i) => _ClassCard(classRoom: classes[i]),
-                ),
+          ? const _EmptyView(label: 'No classes yet')
+          : ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              itemCount: classes.length,
+              itemBuilder: (ctx, i) => _ClassCard(classRoom: classes[i]),
+            ),
       floatingActionButton: _AddFab(
         gradientColors: _kClassGrad,
         onTap: () {
@@ -181,7 +189,10 @@ class _ClassCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(
-              color: Color(0x14000000), blurRadius: 12, offset: Offset(0, 4))
+            color: Color(0x14000000),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
@@ -195,7 +206,9 @@ class _ClassCard extends StatelessWidget {
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
+              ),
             ),
             child: Row(
               children: [
@@ -205,8 +218,11 @@ class _ClassCard extends StatelessWidget {
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.class_outlined,
-                      color: Colors.white, size: 20),
+                  child: const Icon(
+                    Icons.class_outlined,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -235,9 +251,10 @@ class _ClassCard extends StatelessWidget {
                     child: Text(
                       classRoom.description,
                       style: TextStyle(
-                          color: _kTextMid.withOpacity(0.85),
-                          fontSize: 13,
-                          height: 1.5),
+                        color: _kTextMid.withOpacity(0.85),
+                        fontSize: 13,
+                        height: 1.5,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -267,6 +284,8 @@ class _ClassCard extends StatelessWidget {
                       color: const Color(0xFF0EA5E9),
                       onTap: () {
                         final user = context.read<AuthNotifier>().user;
+
+                        print("classRoom.id::${classRoom.name}");
                         _showAddEditClassDialog(
                           context,
                           schoolId: user?.schoolId ?? '',
@@ -315,13 +334,12 @@ class _SectionTab extends StatelessWidget {
       body: notifier.isLoading
           ? const _LoadingView()
           : sections.isEmpty
-              ? const _EmptyView(label: 'No sections yet')
-              : ListView.builder(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  itemCount: sections.length,
-                  itemBuilder: (ctx, i) => _SectionCard(section: sections[i]),
-                ),
+          ? const _EmptyView(label: 'No sections yet')
+          : ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              itemCount: sections.length,
+              itemBuilder: (ctx, i) => _SectionCard(section: sections[i]),
+            ),
       floatingActionButton: _AddFab(
         gradientColors: _kSectionGrad,
         onTap: () => _showAddEditSectionDialog(context),
@@ -351,7 +369,10 @@ class _SectionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(
-              color: Color(0x14000000), blurRadius: 12, offset: Offset(0, 4))
+            color: Color(0x14000000),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
@@ -365,7 +386,9 @@ class _SectionCard extends StatelessWidget {
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
+              ),
             ),
             child: Row(
               children: [
@@ -375,8 +398,11 @@ class _SectionCard extends StatelessWidget {
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.tab_outlined,
-                      color: Colors.white, size: 20),
+                  child: const Icon(
+                    Icons.tab_outlined,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -396,8 +422,9 @@ class _SectionCard extends StatelessWidget {
                       Text(
                         className,
                         style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
-                            fontSize: 12),
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -422,18 +449,16 @@ class _SectionCard extends StatelessWidget {
                       icon: Icons.visibility_outlined,
                       label: 'View',
                       color: const Color(0xFF0EA5E9),
-                      onTap: () => _showViewSectionDialog(
-                          context, section, className),
+                      onTap: () =>
+                          _showViewSectionDialog(context, section, className),
                     ),
                     const SizedBox(width: 8),
                     _ActionChip(
                       icon: Icons.edit_outlined,
                       label: 'Edit',
                       color: const Color(0xFF8B5CF6),
-                      onTap: () => _showAddEditSectionDialog(
-                        context,
-                        existing: section,
-                      ),
+                      onTap: () =>
+                          _showAddEditSectionDialog(context, existing: section),
                     ),
                     const SizedBox(width: 8),
                     _ActionChip(
@@ -475,14 +500,12 @@ class _SubjectTab extends StatelessWidget {
       body: notifier.isLoading
           ? const _LoadingView()
           : subjects.isEmpty
-              ? const _EmptyView(label: 'No subjects yet')
-              : ListView.builder(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  itemCount: subjects.length,
-                  itemBuilder: (ctx, i) =>
-                      _SubjectCard(subject: subjects[i]),
-                ),
+          ? const _EmptyView(label: 'No subjects yet')
+          : ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              itemCount: subjects.length,
+              itemBuilder: (ctx, i) => _SubjectCard(subject: subjects[i]),
+            ),
       floatingActionButton: _AddFab(
         gradientColors: _kSubjectGrad,
         onTap: () => _showAddEditSubjectDialog(context),
@@ -512,7 +535,10 @@ class _SubjectCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(
-              color: Color(0x14000000), blurRadius: 12, offset: Offset(0, 4))
+            color: Color(0x14000000),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
@@ -526,7 +552,9 @@ class _SubjectCard extends StatelessWidget {
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
+              ),
             ),
             child: Row(
               children: [
@@ -536,8 +564,11 @@ class _SubjectCard extends StatelessWidget {
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.book_outlined,
-                      color: Colors.white, size: 20),
+                  child: const Icon(
+                    Icons.book_outlined,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -557,8 +588,9 @@ class _SubjectCard extends StatelessWidget {
                         Text(
                           subject.code,
                           style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
-                              fontSize: 12),
+                            color: Colors.white.withOpacity(0.7),
+                            fontSize: 12,
+                          ),
                         ),
                     ],
                   ),
@@ -566,8 +598,10 @@ class _SubjectCard extends StatelessWidget {
                 // Code badge
                 if (subject.code.isNotEmpty)
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
@@ -575,9 +609,10 @@ class _SubjectCard extends StatelessWidget {
                     child: Text(
                       subject.code,
                       style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600),
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
               ],
@@ -600,18 +635,16 @@ class _SubjectCard extends StatelessWidget {
                       icon: Icons.visibility_outlined,
                       label: 'View',
                       color: const Color(0xFF10B981),
-                      onTap: () => _showViewSubjectDialog(
-                          context, subject, className),
+                      onTap: () =>
+                          _showViewSubjectDialog(context, subject, className),
                     ),
                     const SizedBox(width: 8),
                     _ActionChip(
                       icon: Icons.edit_outlined,
                       label: 'Edit',
                       color: const Color(0xFF0EA5E9),
-                      onTap: () => _showAddEditSubjectDialog(
-                        context,
-                        existing: subject,
-                      ),
+                      onTap: () =>
+                          _showAddEditSubjectDialog(context, existing: subject),
                     ),
                     const SizedBox(width: 8),
                     _ActionChip(
@@ -674,9 +707,10 @@ class _ActionChip extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                    color: color,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600),
+                  color: color,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -691,8 +725,11 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _InfoRow(
-      {required this.icon, required this.label, required this.value});
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -700,16 +737,22 @@ class _InfoRow extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: _kTextMid),
         const SizedBox(width: 8),
-        Text('$label: ',
-            style: const TextStyle(
-                color: _kTextMid, fontSize: 13, fontWeight: FontWeight.w500)),
+        Text(
+          '$label: ',
+          style: const TextStyle(
+            color: _kTextMid,
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         Expanded(
           child: Text(
             value,
             style: const TextStyle(
-                color: _kTextDark,
-                fontSize: 13,
-                fontWeight: FontWeight.w600),
+              color: _kTextDark,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -736,9 +779,10 @@ class _AddFab extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-                color: gradientColors.last.withOpacity(0.4),
-                blurRadius: 12,
-                offset: const Offset(0, 4))
+              color: gradientColors.last.withOpacity(0.4),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: const Icon(Icons.add, color: Colors.white, size: 28),
@@ -770,17 +814,25 @@ class _EmptyView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.inbox_outlined, size: 64, color: _kPrimary.withOpacity(0.3)),
+          Icon(
+            Icons.inbox_outlined,
+            size: 64,
+            color: _kPrimary.withOpacity(0.3),
+          ),
           const SizedBox(height: 12),
-          Text(label,
-              style: TextStyle(
-                  color: _kTextMid,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500)),
+          Text(
+            label,
+            style: TextStyle(
+              color: _kTextMid,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           const SizedBox(height: 6),
-          Text('Tap + to add one',
-              style: TextStyle(
-                  color: _kTextMid.withOpacity(0.6), fontSize: 13)),
+          Text(
+            'Tap + to add one',
+            style: TextStyle(color: _kTextMid.withOpacity(0.6), fontSize: 13),
+          ),
         ],
       ),
     );
@@ -807,26 +859,24 @@ Future<void> _showStyledDialog({
           // Header
           Container(
             width: double.infinity,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
               gradient: LinearGradient(colors: gradientColors),
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
             ),
             child: Text(
               title,
               style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           // Body
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: body,
-          ),
+          Padding(padding: const EdgeInsets.all(20), child: body),
           // Actions
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -839,7 +889,8 @@ Future<void> _showStyledDialog({
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       side: BorderSide(color: gradientColors.first),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: const Text('Cancel'),
                   ),
@@ -853,9 +904,10 @@ Future<void> _showStyledDialog({
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                              color: gradientColors.last.withOpacity(0.35),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3))
+                            color: gradientColors.last.withOpacity(0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
                         ],
                       ),
                       child: ElevatedButton(
@@ -868,12 +920,16 @@ Future<void> _showStyledDialog({
                           shadowColor: Colors.transparent,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                        child: Text(confirmLabel,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold)),
+                        child: Text(
+                          confirmLabel,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -924,24 +980,24 @@ void _showErrorSnackBar(BuildContext context, String message) {
 }
 
 InputDecoration _inputDec(String label, {IconData? icon}) => InputDecoration(
-      labelText: label,
-      prefixIcon: icon != null ? Icon(icon, color: _kPrimary, size: 20) : null,
-      filled: true,
-      fillColor: _kBg,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _kDivider),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _kPrimary, width: 1.5),
-      ),
-      labelStyle: const TextStyle(color: _kTextMid, fontSize: 13),
-    );
+  labelText: label,
+  prefixIcon: icon != null ? Icon(icon, color: _kPrimary, size: 20) : null,
+  filled: true,
+  fillColor: _kBg,
+  border: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(12),
+    borderSide: BorderSide.none,
+  ),
+  enabledBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(12),
+    borderSide: const BorderSide(color: _kDivider),
+  ),
+  focusedBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(12),
+    borderSide: const BorderSide(color: _kPrimary, width: 1.5),
+  ),
+  labelStyle: const TextStyle(color: _kTextMid, fontSize: 13),
+);
 
 // ═══════════════════════════════════════════════════════════
 //  Dialog: Add / Edit Class
@@ -971,8 +1027,10 @@ void _showAddEditClassDialog(
         TextField(
           controller: descCtrl,
           maxLines: 2,
-          decoration:
-              _inputDec('Description (optional)', icon: Icons.notes_outlined),
+          decoration: _inputDec(
+            'Description (optional)',
+            icon: Icons.notes_outlined,
+          ),
         ),
       ],
     ),
@@ -980,27 +1038,32 @@ void _showAddEditClassDialog(
       if (nameCtrl.text.isNotEmpty) {
         bool success;
         if (isEdit) {
+          print("existing.id::${existing.id}");
           success = await context.read<ClassSetupNotifier>().updateClass(
-                existing!.id,
-                nameCtrl.text.trim(),
-                descCtrl.text.trim(),
-                schoolId,
-              );
+            existing.id,
+            nameCtrl.text.trim(),
+            descCtrl.text.trim(),
+            schoolId,
+          );
         } else {
           success = await context.read<ClassSetupNotifier>().addClass(
-                nameCtrl.text.trim(),
-                descCtrl.text.trim(),
-                schoolId,
-              );
+            nameCtrl.text.trim(),
+            descCtrl.text.trim(),
+            schoolId,
+          );
         }
 
         if (context.mounted) {
           if (success) {
             _showSuccessSnackBar(
-                context, 'Class ${isEdit ? 'updated' : 'added'} successfully');
+              context,
+              'Class ${isEdit ? 'updated' : 'added'} successfully',
+            );
           } else {
             _showErrorSnackBar(
-                context, 'Failed to ${isEdit ? 'update' : 'add'} class');
+              context,
+              'Failed to ${isEdit ? 'update' : 'add'} class',
+            );
           }
         }
       }
@@ -1030,16 +1093,17 @@ void _showAddEditSectionDialog(BuildContext context, {Section? existing}) {
             value: selectedClassId,
             decoration: _inputDec('Select Class', icon: Icons.class_outlined),
             items: classes
-                .map((c) =>
-                    DropdownMenuItem(value: c.id, child: Text(c.name)))
+                .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
                 .toList(),
             onChanged: (v) => setState(() => selectedClassId = v),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: nameCtrl,
-            decoration: _inputDec('Section Name (e.g. A)',
-                icon: Icons.tab_outlined),
+            decoration: _inputDec(
+              'Section Name (e.g. A)',
+              icon: Icons.tab_outlined,
+            ),
           ),
         ],
       ),
@@ -1049,24 +1113,28 @@ void _showAddEditSectionDialog(BuildContext context, {Section? existing}) {
         bool success;
         if (isEdit) {
           success = await context.read<SectionSetupNotifier>().updateSection(
-                existing!.id,
-                selectedClassId!,
-                nameCtrl.text.trim(),
-              );
+            existing!.id,
+            selectedClassId!,
+            nameCtrl.text.trim(),
+          );
         } else {
           success = await context.read<SectionSetupNotifier>().addSection(
-                selectedClassId!,
-                nameCtrl.text.trim(),
-              );
+            selectedClassId!,
+            nameCtrl.text.trim(),
+          );
         }
 
         if (context.mounted) {
           if (success) {
-            _showSuccessSnackBar(context,
-                'Section ${isEdit ? 'updated' : 'added'} successfully');
+            _showSuccessSnackBar(
+              context,
+              'Section ${isEdit ? 'updated' : 'added'} successfully',
+            );
           } else {
             _showErrorSnackBar(
-                context, 'Failed to ${isEdit ? 'update' : 'add'} section');
+              context,
+              'Failed to ${isEdit ? 'update' : 'add'} section',
+            );
           }
         }
       }
@@ -1098,22 +1166,25 @@ void _showAddEditSubjectDialog(BuildContext context, {Subject? existing}) {
             value: selectedClassId,
             decoration: _inputDec('Select Class', icon: Icons.class_outlined),
             items: classes
-                .map((c) =>
-                    DropdownMenuItem(value: c.id, child: Text(c.name)))
+                .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
                 .toList(),
             onChanged: (v) => setState(() => selectedClassId = v),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: nameCtrl,
-            decoration: _inputDec('Subject Name (e.g. Mathematics)',
-                icon: Icons.book_outlined),
+            decoration: _inputDec(
+              'Subject Name (e.g. Mathematics)',
+              icon: Icons.book_outlined,
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: codeCtrl,
-            decoration: _inputDec('Subject Code (e.g. MATH101)',
-                icon: Icons.qr_code_outlined),
+            decoration: _inputDec(
+              'Subject Code (e.g. MATH101)',
+              icon: Icons.qr_code_outlined,
+            ),
           ),
         ],
       ),
@@ -1125,28 +1196,32 @@ void _showAddEditSubjectDialog(BuildContext context, {Subject? existing}) {
         bool success;
         if (isEdit) {
           success = await context.read<SubjectSetupNotifier>().updateSubject(
-                existing!.id,
-                nameCtrl.text.trim(),
-                codeCtrl.text.trim(),
-                selectedClassId!,
-                user!.schoolId!,
-              );
+            existing!.id,
+            nameCtrl.text.trim(),
+            codeCtrl.text.trim(),
+            selectedClassId!,
+            user!.schoolId!,
+          );
         } else {
           success = await context.read<SubjectSetupNotifier>().addSubject(
-                nameCtrl.text.trim(),
-                codeCtrl.text.trim(),
-                selectedClassId!,
-                user!.schoolId!,
-              );
+            nameCtrl.text.trim(),
+            codeCtrl.text.trim(),
+            selectedClassId!,
+            user!.schoolId!,
+          );
         }
 
         if (context.mounted) {
           if (success) {
-            _showSuccessSnackBar(context,
-                'Subject ${isEdit ? 'updated' : 'added'} successfully');
+            _showSuccessSnackBar(
+              context,
+              'Subject ${isEdit ? 'updated' : 'added'} successfully',
+            );
           } else {
             _showErrorSnackBar(
-                context, 'Failed to ${isEdit ? 'update' : 'add'} subject');
+              context,
+              'Failed to ${isEdit ? 'update' : 'add'} subject',
+            );
           }
         }
       }
@@ -1158,7 +1233,10 @@ void _showAddEditSubjectDialog(BuildContext context, {Subject? existing}) {
 //  Dialog: View Section Details
 // ═══════════════════════════════════════════════════════════
 void _showViewSectionDialog(
-    BuildContext context, Section section, String className) {
+  BuildContext context,
+  Section section,
+  String className,
+) {
   _showStyledDialog(
     context: context,
     title: 'Section Details',
@@ -1171,9 +1249,10 @@ void _showViewSectionDialog(
         _DetailRow(icon: Icons.tag, label: 'Section', value: section.name),
         const SizedBox(height: 8),
         _DetailRow(
-            icon: Icons.class_outlined,
-            label: 'Class',
-            value: className),
+          icon: Icons.class_outlined,
+          label: 'Class',
+          value: className,
+        ),
         const SizedBox(height: 8),
         _DetailRow(icon: Icons.key, label: 'ID', value: section.id),
       ],
@@ -1185,7 +1264,10 @@ void _showViewSectionDialog(
 //  Dialog: View Subject Details
 // ═══════════════════════════════════════════════════════════
 void _showViewSubjectDialog(
-    BuildContext context, Subject subject, String className) {
+  BuildContext context,
+  Subject subject,
+  String className,
+) {
   _showStyledDialog(
     context: context,
     title: 'Subject Details',
@@ -1196,15 +1278,22 @@ void _showViewSubjectDialog(
       mainAxisSize: MainAxisSize.min,
       children: [
         _DetailRow(
-            icon: Icons.book_outlined, label: 'Subject', value: subject.name),
+          icon: Icons.book_outlined,
+          label: 'Subject',
+          value: subject.name,
+        ),
         const SizedBox(height: 8),
         _DetailRow(
-            icon: Icons.qr_code_outlined,
-            label: 'Code',
-            value: subject.code.isEmpty ? '-' : subject.code),
+          icon: Icons.qr_code_outlined,
+          label: 'Code',
+          value: subject.code.isEmpty ? '-' : subject.code,
+        ),
         const SizedBox(height: 8),
         _DetailRow(
-            icon: Icons.class_outlined, label: 'Class', value: className),
+          icon: Icons.class_outlined,
+          label: 'Class',
+          value: className,
+        ),
         const SizedBox(height: 8),
         _DetailRow(icon: Icons.key, label: 'ID', value: subject.id),
       ],
@@ -1217,8 +1306,11 @@ class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _DetailRow(
-      {required this.icon, required this.label, required this.value});
+  const _DetailRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1247,9 +1339,11 @@ class _DetailRow extends StatelessWidget {
                   : _kPrimary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon,
-                size: 20,
-                color: icon == Icons.key ? Colors.orange : _kPrimary),
+            child: Icon(
+              icon,
+              size: 20,
+              color: icon == Icons.key ? Colors.orange : _kPrimary,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -1307,11 +1401,14 @@ void _confirmDelete(
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.white, size: 22),
             SizedBox(width: 10),
-            Text('Delete',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
+            Text(
+              'Delete',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),
@@ -1342,8 +1439,9 @@ void _confirmDelete(
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFEF4444),
             foregroundColor: Colors.white,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
           child: const Text('Delete'),
         ),
