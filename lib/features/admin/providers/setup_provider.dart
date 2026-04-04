@@ -79,9 +79,12 @@ class ClassSetupNotifier extends ChangeNotifier {
 
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
+        final responseData = response.data['data'] ?? response.data;
+        final newId = responseData['_id']?.toString() ?? responseData['id']?.toString() ?? DateTime.now().toString();
+
         _dbService.classes.add(
           ClassRoom(
-            id: response.data['_id']?.toString() ?? DateTime.now().toString(),
+            id: newId,
             name: name,
             description: description,
             schoolId: schoolId,
@@ -228,9 +231,12 @@ class SectionSetupNotifier extends ChangeNotifier {
 
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
+        final responseData = response.data['data'] ?? response.data;
+        final newId = responseData['_id']?.toString() ?? responseData['id']?.toString() ?? DateTime.now().toString();
+
         _dbService.sections.add(
           Section(
-            id: response.data['_id']?.toString() ?? DateTime.now().toString(),
+            id: newId,
             classId: classId,
             name: name,
           ),
@@ -378,9 +384,12 @@ class SubjectSetupNotifier extends ChangeNotifier {
 
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
+        final responseData = response.data['data'] ?? response.data;
+        final newId = responseData['_id']?.toString() ?? responseData['id']?.toString() ?? DateTime.now().toString();
+
         _dbService.subjects.add(
           Subject(
-            id: response.data['_id']?.toString() ?? DateTime.now().toString(),
+            id: newId,
             name: name,
             code: code,
             classId: classId,

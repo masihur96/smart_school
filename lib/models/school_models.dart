@@ -14,7 +14,7 @@ class ClassRoom {
   });
 
   factory ClassRoom.fromJson(Map<String, dynamic> json) => ClassRoom(
-    id: json['id'] ?? '',
+    id: json['id'] ?? json['_id'] ?? '',
     name: json['name'] ?? '',
     schoolId: json['schoolId'] ?? '',
     description: json['description'] ?? '',
