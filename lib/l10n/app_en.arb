@@ -1,0 +1,21 @@
+{
+  "settingManagement": "Setting Management",
+  "accountInfo": "Account Information",
+  "name": "Name",
+  "email": "Email",
+  "role": "Role",
+  "security": "Security",
+  "changePassword": "Change Password",
+  "language": "Language",
+  "theme": "Theme",
+  "darkMode": "Dark Mode",
+  "logout": "Logout",
+  "oldPassword": "Old Password",
+  "newPassword": "New Password",
+  "confirmPassword": "Confirm Password",
+  "save": "Save",
+  "cancel": "Cancel",
+  "passwordChangedSuccess": "Password changed successfully",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "fieldRequired": "This field is required"
+}

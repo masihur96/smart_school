@@ -1,0 +1,21 @@
+{
+  "settingManagement": "সেটিং ম্যানেজমেন্ট",
+  "accountInfo": "অ্যাকাউন্ট তথ্য",
+  "name": "নাম",
+  "email": "ইমেল",
+  "role": "ভূমিকা",
+  "security": "নিরাপত্তা",
+  "changePassword": "পাসওয়ার্ড পরিবর্তন করুন",
+  "language": "ভাষা",
+  "theme": "Theme",
+  "darkMode": "ডার্ক মোড",
+  "logout": "লগআউট",
+  "oldPassword": "পুরানো পাসওয়ার্ড",
+  "newPassword": "নতুন পাসওয়ার্ড",
+  "confirmPassword": "পাসওয়ার্ড নিশ্চিত করুন",
+  "save": "সংরক্ষণ করুন",
+  "cancel": "বাতিল করুন",
+  "passwordChangedSuccess": "পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে",
+  "passwordsDoNotMatch": "পাসওয়ার্ড মেলে না",
+  "fieldRequired": "এই ক্ষেত্রটি প্রয়োজনীয়"
+}

@@ -1,0 +1,156 @@
+Resolving dependencies...
+Downloading packages...
+  async 2.13.0 (2.13.1 available)
+  characters 1.4.0 (1.4.1 available)
+  cupertino_icons 1.0.8 (1.0.9 available)
+  fl_chart 1.1.1 (1.2.0 available)
+  flutter_lints 5.0.0 (6.0.0 available)
+  flutter_svg 2.2.3 (2.2.4 available)
+  lints 5.1.1 (6.1.0 available)
+  matcher 0.12.17 (0.12.19 available)
+  material_color_utilities 0.11.1 (0.13.0 available)
+  meta 1.16.0 (1.18.2 available)
+  path_provider_android 2.2.22 (2.2.23 available)
+  path_provider_foundation 2.5.1 (2.6.0 available)
+  shared_preferences 2.5.4 (2.5.5 available)
+  shared_preferences_android 2.4.21 (2.4.23 available)
+  shared_preferences_platform_interface 2.4.1 (2.4.2 available)
+  test_api 0.7.6 (0.7.11 available)
+  vector_graphics 1.1.19 (1.1.20 available)
+  vector_math 2.2.0 (2.3.0 available)
+  win32 5.15.0 (6.0.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing smart_school...                                       
+
+   info • 'background' is deprecated and shouldn't be used. Use surface instead. This feature was deprecated after v3.18.0-0.1.pre • lib/configs/custom_theme.dart:149:7 • deprecated_member_use
+   info • Unnecessary braces in a string interpolation • lib/configs/network/data_provider.dart:63:23 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/configs/network/data_provider.dart:64:25 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/configs/network/data_provider.dart:65:24 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/configs/network/data_provider.dart:66:26 • unnecessary_brace_in_string_interps
+  error • The getter 'teacherId' isn't defined for the type 'Exam' • lib/features/admin/data/repositories/exam_repository_impl.dart:17:44 • undefined_getter
+  error • The getter 'classId' isn't defined for the type 'Exam' • lib/features/admin/data/repositories/exam_repository_impl.dart:23:25 • undefined_getter
+  error • The getter 'sectionId' isn't defined for the type 'Exam' • lib/features/admin/data/repositories/exam_repository_impl.dart:23:49 • undefined_getter
+  error • The named parameter 'subjectId' isn't defined • lib/features/admin/data/repositories/exam_repository_impl.dart:53:9 • undefined_named_parameter
+  error • The getter 'subjectId' isn't defined for the type 'Exam' • lib/features/admin/data/repositories/exam_repository_impl.dart:53:28 • undefined_getter
+  error • The named parameter 'teacherId' isn't defined • lib/features/admin/data/repositories/exam_repository_impl.dart:54:9 • undefined_named_parameter
+  error • The getter 'teacherId' isn't defined for the type 'Exam' • lib/features/admin/data/repositories/exam_repository_impl.dart:54:28 • undefined_getter
+  error • The named parameter 'classId' isn't defined • lib/features/admin/data/repositories/exam_repository_impl.dart:55:9 • undefined_named_parameter
+  error • The getter 'classId' isn't defined for the type 'Exam' • lib/features/admin/data/repositories/exam_repository_impl.dart:55:26 • undefined_getter
+  error • The named parameter 'sectionId' isn't defined • lib/features/admin/data/repositories/exam_repository_impl.dart:56:9 • undefined_named_parameter
+  error • The getter 'sectionId' isn't defined for the type 'Exam' • lib/features/admin/data/repositories/exam_repository_impl.dart:56:28 • undefined_getter
+  error • The named parameter 'dateTime' isn't defined • lib/features/admin/data/repositories/exam_repository_impl.dart:57:9 • undefined_named_parameter
+  error • The getter 'dateTime' isn't defined for the type 'Exam' • lib/features/admin/data/repositories/exam_repository_impl.dart:57:27 • undefined_getter
+   info • Don't invoke 'print' in production code • lib/features/admin/providers/setup_provider.dart:152:5 • avoid_print
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/add_edit_exam_screen.dart:181:60 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/add_edit_exam_screen.dart:186:62 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/add_edit_exam_screen.dart:316:25 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/add_edit_exam_screen.dart:329:25 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/add_edit_exam_screen.dart:340:25 • deprecated_member_use
+warning • The '!' will have no effect because the receiver can't be null • lib/features/admin/screens/add_edit_exam_screen.dart:374:57 • unnecessary_non_null_assertion
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/add_edit_exam_screen.dart:705:33 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/add_edit_student_screen.dart:185:15 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/add_edit_student_screen.dart:200:15 • deprecated_member_use
+warning • Unused import: 'package:go_router/go_router.dart' • lib/features/admin/screens/add_edit_teacher_screen.dart:3:8 • unused_import
+warning • Unused import: '../../../models/user_model.dart' • lib/features/admin/screens/add_edit_teacher_screen.dart:8:8 • unused_import
+warning • The value of the field '_assignedSubjects' isn't used • lib/features/admin/screens/add_edit_teacher_screen.dart:27:31 • unused_field
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/add_edit_teacher_screen.dart:216:23 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/add_edit_teacher_screen.dart:236:23 • deprecated_member_use
+warning • The library 'package:smart_school/features/admin/screens/routine_management_screen.dart' doesn't export a member with the hidden name 'SizedBox' • lib/features/admin/screens/admin_dashboard_screen.dart:6:10 • undefined_hidden_name
+   info • Statements in an if should be enclosed in a block • lib/features/admin/screens/admin_dashboard_screen.dart:365:21 • curly_braces_in_flow_control_structures
+warning • Unused import: 'dart:developer' • lib/features/admin/screens/class_detail_screen.dart:1:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/class_detail_screen.dart:222:49 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/class_detail_screen.dart:327:52 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/class_detail_screen.dart:330:56 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/class_detail_screen.dart:452:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/class_detail_screen.dart:458:31 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/class_detail_screen.dart:469:45 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/class_detail_screen.dart:708:44 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/class_detail_screen.dart:714:42 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/class_detail_screen.dart:938:19 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/class_detail_screen.dart:1058:46 • deprecated_member_use
+warning • Unused import: 'dart:developer' • lib/features/admin/screens/exam_management_screen.dart:1:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/exam_management_screen.dart:62:39 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/exam_management_screen.dart:79:25 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/exam_management_screen.dart:100:25 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/exam_management_screen.dart:119:19 • deprecated_member_use
+   info • Unnecessary use of 'toList' in a spread • lib/features/admin/screens/exam_management_screen.dart:405:26 • unnecessary_to_list_in_spreads
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/notice_management_screen.dart:240:40 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/notice_management_screen.dart:298:21 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/notice_management_screen.dart:515:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/notice_management_screen.dart:533:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/notice_management_screen.dart:534:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/notice_management_screen.dart:669:22 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:158:43 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:260:46 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:337:28 • deprecated_member_use
+warning • The value of the local variable 'globalIndex' isn't used • lib/features/admin/screens/routine_management_screen.dart:359:15 • unused_local_variable
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:562:32 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:567:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:579:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:581:58 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:600:44 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:609:42 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:615:44 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:964:54 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:1032:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:1037:49 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:1186:35 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:1269:29 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:1271:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:1282:35 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:1346:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:1394:30 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/routine_management_screen.dart:1396:49 • deprecated_member_use
+warning • Unused import: '../../../services/database_service.dart' • lib/features/admin/screens/student_management_screen.dart:7:8 • unused_import
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/student_management_screen.dart:109:25 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/student_management_screen.dart:145:25 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/student_management_screen.dart:179:19 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/student_management_screen.dart:242:68 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/student_management_screen.dart:242:98 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • lib/features/admin/screens/student_management_screen.dart:279:27 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/features/admin/screens/student_management_screen.dart:360:13 • use_build_context_synchronously
+warning • Unused import: 'package:go_router/go_router.dart' • lib/features/admin/screens/teacher_management_screen.dart:3:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/admin/screens/teacher_management_screen.dart:91:39 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/teacher_management_screen.dart:129:25 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/admin/screens/teacher_management_screen.dart:151:19 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • lib/features/admin/screens/teacher_management_screen.dart:291:49 • use_build_context_synchronously
+   info • Unnecessary 'const' keyword • lib/features/admin/screens/teacher_management_screen.dart:301:45 • unnecessary_const
+   info • Unnecessary 'const' keyword • lib/features/admin/screens/teacher_management_screen.dart:302:45 • unnecessary_const
+   info • Unnecessary 'const' keyword • lib/features/admin/screens/teacher_management_screen.dart:311:45 • unnecessary_const
+   info • Unnecessary 'const' keyword • lib/features/admin/screens/teacher_management_screen.dart:312:45 • unnecessary_const
+   info • Unnecessary 'const' keyword • lib/features/admin/screens/teacher_management_screen.dart:331:45 • unnecessary_const
+   info • Statements in an if should be enclosed in a block • lib/features/auth/presntation/views/register_screen.dart:193:29 • curly_braces_in_flow_control_structures
+warning • Unused import: 'package:go_router/go_router.dart' • lib/features/splash_screen.dart:4:8 • unused_import
+   info • Statements in an if should be enclosed in a block • lib/features/student/screens/student_attendance_screen.dart:17:7 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/student/screens/student_attendance_screen.dart:51:35 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/student/screens/student_attendance_screen.dart:67:51 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block • lib/features/student/screens/student_homework_screen.dart:18:7 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/student/screens/student_homework_screen.dart:73:53 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block • lib/features/student/screens/student_notice_screen.dart:15:7 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/student/screens/student_notice_screen.dart:51:40 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/student/screens/student_notice_screen.dart:52:42 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block • lib/features/student/screens/student_result_screen.dart:38:7 • curly_braces_in_flow_control_structures
+  error • The getter 'classId' isn't defined for the type 'Exam' • lib/features/student/screens/student_result_screen.dart:41:25 • undefined_getter
+warning • Unused import: '../../../models/school_models.dart' • lib/features/student/screens/student_routine_screen.dart:10:8 • unused_import
+   info • Statements in an if should be enclosed in a block • lib/features/student/screens/student_routine_screen.dart:19:7 • curly_braces_in_flow_control_structures
+warning • Unused import: 'package:go_router/go_router.dart' • lib/features/teacher/screens/homework_management_screen.dart:3:8 • unused_import
+warning • Unused import: '../../admin/providers/student_provider.dart' • lib/features/teacher/screens/homework_management_screen.dart:5:8 • unused_import
+   info • Statements in an if should be enclosed in a block • lib/features/teacher/screens/homework_management_screen.dart:19:7 • curly_braces_in_flow_control_structures
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/teacher/screens/homework_management_screen.dart:130:19 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/teacher/screens/homework_management_screen.dart:144:19 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/teacher/screens/homework_management_screen.dart:156:19 • deprecated_member_use
+   info • Statements in an if should be enclosed in a block • lib/features/teacher/screens/homework_management_screen.dart:185:27 • curly_braces_in_flow_control_structures
+  error • The getter 'teacherId' isn't defined for the type 'Exam' • lib/features/teacher/screens/mark_entry_screen.dart:39:25 • undefined_getter
+  error • The getter 'classId' isn't defined for the type 'Exam' • lib/features/teacher/screens/mark_entry_screen.dart:52:59 • undefined_getter
+  error • The getter 'classId' isn't defined for the type 'Exam' • lib/features/teacher/screens/mark_entry_screen.dart:71:23 • undefined_getter
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/teacher/screens/mark_entry_screen.dart:219:7 • deprecated_member_use
+  error • The getter 'subjectId' isn't defined for the type 'Exam' • lib/features/teacher/screens/mark_entry_screen.dart:288:33 • undefined_getter
+   info • Don't use 'BuildContext's across async gaps • lib/features/teacher/screens/mark_entry_screen.dart:494:30 • use_build_context_synchronously
+  error • The named parameter 'subjectId' isn't defined • lib/services/database_service.dart:113:7 • undefined_named_parameter
+  error • The named parameter 'teacherId' isn't defined • lib/services/database_service.dart:114:7 • undefined_named_parameter
+  error • The named parameter 'classId' isn't defined • lib/services/database_service.dart:115:7 • undefined_named_parameter
+  error • The named parameter 'sectionId' isn't defined • lib/services/database_service.dart:116:7 • undefined_named_parameter
+  error • The named parameter 'dateTime' isn't defined • lib/services/database_service.dart:117:7 • undefined_named_parameter
+

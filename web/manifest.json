@@ -1,6 +1,6 @@
 {
-    "name": "teacher_app",
-    "short_name": "teacher_app",
+    "name": "smart_school",
+    "short_name": "smart_school",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
