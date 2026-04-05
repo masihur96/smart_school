@@ -96,8 +96,9 @@ class NoticesNotifier extends ChangeNotifier {
         Notice saved = notice;
         final body = response.data;
         if (body is Map) {
+          final responseData = body['data'] ?? body;
           final serverId =
-              (body['id'] ?? body['_id'])?.toString();
+              (responseData['id'] ?? responseData['_id'])?.toString();
           if (serverId != null) saved = notice.copyWith(id: serverId);
         }
         _dbService.notices.add(saved);

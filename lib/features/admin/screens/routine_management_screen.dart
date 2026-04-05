@@ -62,6 +62,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
         log('Initiating data fetch for routine management: schoolId=$schoolId');
         context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
         context.read<TeachersNotifier>().fetchTeachers();
+        context.read<RoutineNotifier>().fetchAllRoutines(schoolId);
       } else {
         log(
           'Warning: No schoolId found in AuthNotifier during routine management init',

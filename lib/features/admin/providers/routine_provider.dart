@@ -15,6 +15,54 @@ class RoutineNotifier extends ChangeNotifier {
   List<RoutineEntry> get teacherRoutine => _teacherRoutine;
   bool get isLoading => _isLoading;
 
+  Future<void> fetchAllRoutines(String schoolId) async {
+    log('Fetching all routine entries for school: $schoolId');
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.createRoutine,
+        query: {'schoolId': schoolId},
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final List<dynamic> data = response.data is List
+            ? response.data
+            : (response.data['data'] ?? []);
+        
+        final List<RoutineEntry> fetched = data.map((e) => RoutineEntry.fromJson(e)).toList();
+        
+        // Clear and repopulate state
+        _state = {};
+        for (var entry in fetched) {
+          final classId = entry.classId ?? '';
+          final sectionId = entry.sectionId ?? '';
+          final key = '${classId}_$sectionId';
+          
+          if (!_state.containsKey(key)) {
+            _state[key] = [];
+          }
+          _state[key]!.add(entry);
+        }
+        
+        log('Fetched ${fetched.length} routine entries across ${_state.keys.length} class_section combinations');
+      } else {
+        log('Error fetching all routines: ${response?.statusCode}');
+      }
+    } catch (e) {
+      log('Error fetching all routines: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void addEntry(String classId, String sectionId, RoutineEntry entry) {
     log('Adding entry locally: classId=$classId, sectionId=$sectionId');
     final key = '${classId}_$sectionId';

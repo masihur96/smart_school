@@ -301,6 +301,7 @@ class Notice {
 class RoutineEntry {
   final String? id;
   final String? classId;
+  final String? sectionId;
   final String? schoolId;
   final String day; // Monday, Tuesday, etc.
   final String startTime;
@@ -314,6 +315,7 @@ class RoutineEntry {
   RoutineEntry({
     this.id,
     this.classId,
+    this.sectionId,
     this.schoolId,
     required this.day,
     required this.startTime,
@@ -330,6 +332,7 @@ class RoutineEntry {
     return RoutineEntry(
       id: json['id'] ?? json['_id'],
       classId: json['classId'],
+      sectionId: json['sectionId'],
       schoolId: json['schoolId'],
       day: json['day'] ?? '',
       startTime: json['startTime'] ?? '',
@@ -346,6 +349,7 @@ class RoutineEntry {
     final data = {
       if (id != null) 'id': id,
       'classId': classId,
+      'sectionId': sectionId,
       'schoolId': schoolId,
       'day': day,
       'startTime': startTime,
