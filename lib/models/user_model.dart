@@ -33,20 +33,20 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] ?? json['_id'] ?? '',
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
+      id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
       role: UserRole.values.cast<UserRole?>().firstWhere(
         (e) => e?.name == json['role'],
         orElse: () => UserRole.student,
       ) ?? UserRole.student,
-      profileImageUrl: json['profileImageUrl'],
-      schoolId: json['schoolId'],
-      classId: json['classId'],
-      sectionId: json['sectionId'],
-      phone: json['phone'],
-      rollNumber: json['rollNumber'],
-      designation: json['designation'],
+      profileImageUrl: json['profileImageUrl']?.toString(),
+      schoolId: json['schoolId']?.toString(),
+      classId: json['classId']?.toString(),
+      sectionId: json['sectionId']?.toString(),
+      phone: json['phone']?.toString(),
+      rollNumber: json['rollNumber']?.toString(),
+      designation: json['designation']?.toString(),
       isActive: json['isActive'],
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())

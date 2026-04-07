@@ -284,9 +284,19 @@ class _AttendanceTab extends StatelessWidget {
     final studentNotifier = context.watch<StudentsNotifier>();
     final attendanceNotifier = context.watch<AttendanceNotifier>();
     final isLoading = studentNotifier.isLoading || attendanceNotifier.isLoading;
+    
+    // Debug prints
+    print("UI DEBUG - ClassRoom ID: ${classRoom.id}");
+    print("UI DEBUG - Total Students in Notifier: ${studentNotifier.students.length}");
+    for (var s in studentNotifier.students) {
+       print("UI DEBUG - Student in Notifier: userId=${s.userId}, classId=${s.classId}, name=${s.user?.name}");
+    }
+
     final students = studentNotifier.students
         .where((s) => s.classId == classRoom.id)
         .toList();
+    
+    print("UI DEBUG - Students after filter: ${students.length}");
 
     return Column(
       children: [
