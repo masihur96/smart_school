@@ -185,7 +185,9 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                       const SizedBox(width: 12),
                       Expanded(
                         child: _FilterDropdown(
-                          hint: filteredSections.isEmpty ? 'No Sections' : 'All Sections',
+                          hint: filteredSections.isEmpty
+                              ? 'No Sections'
+                              : 'All Sections',
                           value: _selectedSectionId,
                           items: [
                             if (filteredSections.isNotEmpty)
@@ -200,8 +202,10 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                               ),
                             ),
                           ],
-                          onChanged: filteredSections.isEmpty ? null : (val) =>
-                              setState(() => _selectedSectionId = val),
+                          onChanged: filteredSections.isEmpty
+                              ? null
+                              : (val) =>
+                                    setState(() => _selectedSectionId = val),
                         ),
                       ),
                     ],
@@ -322,9 +326,18 @@ class _DayRoutineTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final key = '${classId}_$sectionId';
-    final allEntries =
-        context.watch<RoutineNotifier>().state[key] ?? <RoutineEntry>[];
+    final stateMap = context.watch<RoutineNotifier>().state;
+    // If sectionId is empty, show entries for ALL sections of this class
+    final List<RoutineEntry> allEntries;
+    if (sectionId.isEmpty) {
+      allEntries = stateMap.entries
+          .where((e) => e.key.startsWith('${classId}_'))
+          .expand((e) => e.value)
+          .toList();
+    } else {
+      final key = '${classId}_$sectionId';
+      allEntries = stateMap[key] ?? <RoutineEntry>[];
+    }
     final entries = allEntries.where((e) => e.day == day).toList();
 
     if (entries.isEmpty) {
@@ -878,6 +891,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
       endTime: _formatTime(_endTime),
       subjectId: _subjectId!,
       teacherId: _teacherId!,
+      sectionId: widget.sectionId,
       roomNumber: _roomController.text.trim().isEmpty
           ? null
           : _roomController.text.trim(),

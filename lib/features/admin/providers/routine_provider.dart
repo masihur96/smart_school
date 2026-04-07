@@ -1,6 +1,8 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
+
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
 import '../../../models/school_models.dart';
@@ -35,23 +37,27 @@ class RoutineNotifier extends ChangeNotifier {
         final List<dynamic> data = response.data is List
             ? response.data
             : (response.data['data'] ?? []);
-        
-        final List<RoutineEntry> fetched = data.map((e) => RoutineEntry.fromJson(e)).toList();
-        
+
+        final List<RoutineEntry> fetched = data
+            .map((e) => RoutineEntry.fromJson(e))
+            .toList();
+
         // Clear and repopulate state
         _state = {};
         for (var entry in fetched) {
           final classId = entry.classId ?? '';
           final sectionId = entry.sectionId ?? '';
           final key = '${classId}_$sectionId';
-          
+
           if (!_state.containsKey(key)) {
             _state[key] = [];
           }
           _state[key]!.add(entry);
         }
-        
-        log('Fetched ${fetched.length} routine entries across ${_state.keys.length} class_section combinations');
+
+        log(
+          'Fetched ${fetched.length} routine entries across ${_state.keys.length} class_section combinations',
+        );
       } else {
         log('Error fetching all routines: ${response?.statusCode}');
       }
@@ -79,7 +85,9 @@ class RoutineNotifier extends ChangeNotifier {
     String sectionId,
     RoutineEntry entry,
   ) async {
-    log('Attempting to add routine to API: classId=$classId, sectionId=$sectionId');
+    log(
+      'Attempting to add routine to API: classId=$classId, sectionId=$sectionId',
+    );
     _isLoading = true;
     notifyListeners();
 
@@ -91,7 +99,9 @@ class RoutineNotifier extends ChangeNotifier {
       }
 
       final payload = entry.toJson();
-      log('Performing POST request to ${APIPath.createRoutine} with payload: $payload');
+      log(
+        'Performing POST request to ${APIPath.createRoutine} with payload: $payload',
+      );
 
       final response = await DataProvider().performRequest(
         'POST',
@@ -102,10 +112,16 @@ class RoutineNotifier extends ChangeNotifier {
 
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
-        log('Successfully created routine on server. Status: ${response.statusCode}');
-        
-        final dynamic returnedData = response.data is Map ? (response.data['data'] ?? response.data) : response.data;
-        final routineId = returnedData is Map ? (returnedData['_id'] ?? returnedData['id'])?.toString() : null;
+        log(
+          'Successfully created routine on server. Status: ${response.statusCode}',
+        );
+
+        final dynamic returnedData = response.data is Map
+            ? (response.data['data'] ?? response.data)
+            : response.data;
+        final routineId = returnedData is Map
+            ? (returnedData['_id'] ?? returnedData['id'])?.toString()
+            : null;
 
         final newEntry = RoutineEntry(
           id: routineId,
@@ -117,12 +133,15 @@ class RoutineNotifier extends ChangeNotifier {
           subjectId: entry.subjectId,
           teacherId: entry.teacherId,
           roomNumber: entry.roomNumber,
+          sectionId: entry.sectionId,
         );
 
         // Add locally after successful API call
         addEntry(classId, sectionId, newEntry);
       } else {
-        log('Error creating routine: ${response?.statusCode} - ${response?.data}');
+        log(
+          'Error creating routine: ${response?.statusCode} - ${response?.data}',
+        );
         throw Exception('Failed to create routine: ${response?.data}');
       }
     } catch (e) {
@@ -150,7 +169,9 @@ class RoutineNotifier extends ChangeNotifier {
       if (token == null) throw Exception('No auth token found');
 
       final payload = entry.toJson();
-      log('Performing PUT request to ${APIPath.createRoutine}/${entry.id} with payload: $payload');
+      log(
+        'Performing PUT request to ${APIPath.createRoutine}/${entry.id} with payload: $payload',
+      );
 
       final response = await DataProvider().performRequest(
         'PUT',
@@ -159,7 +180,8 @@ class RoutineNotifier extends ChangeNotifier {
         header: {'Authorization': 'Bearer $token'},
       );
 
-      if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
         log('Successfully updated routine on server');
         // Update locally
         final key = '${classId}_$sectionId';
@@ -172,7 +194,9 @@ class RoutineNotifier extends ChangeNotifier {
         }
         notifyListeners();
       } else {
-        log('Error updating routine: ${response?.statusCode} - ${response?.data}');
+        log(
+          'Error updating routine: ${response?.statusCode} - ${response?.data}',
+        );
         throw Exception('Failed to update routine: ${response?.data}');
       }
     } catch (e) {
@@ -204,7 +228,8 @@ class RoutineNotifier extends ChangeNotifier {
         header: {'Authorization': 'Bearer $token'},
       );
 
-      if (response != null && (response.statusCode == 200 || response.statusCode == 204)) {
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 204)) {
         log('Successfully deleted routine on server');
         // Remove locally
         final key = '${classId}_$sectionId';
@@ -217,7 +242,9 @@ class RoutineNotifier extends ChangeNotifier {
         }
         notifyListeners();
       } else {
-        log('Error deleting routine: ${response?.statusCode} - ${response?.data}');
+        log(
+          'Error deleting routine: ${response?.statusCode} - ${response?.data}',
+        );
         throw Exception('Failed to delete routine: ${response?.data}');
       }
     } catch (e) {
@@ -230,7 +257,9 @@ class RoutineNotifier extends ChangeNotifier {
   }
 
   void removeEntry(String classId, String sectionId, int index) {
-    log('Removing entry locally: classId=$classId, sectionId=$sectionId, index=$index');
+    log(
+      'Removing entry locally: classId=$classId, sectionId=$sectionId, index=$index',
+    );
     final key = '${classId}_$sectionId';
     final currentEntries = _state[key] ?? [];
     if (index >= 0 && index < currentEntries.length) {
@@ -265,7 +294,7 @@ class RoutineNotifier extends ChangeNotifier {
         final List<dynamic> data = response.data is List
             ? response.data
             : (response.data['data'] ?? []);
-        
+
         _teacherRoutine = data.map((e) => RoutineEntry.fromJson(e)).toList();
         log('Fetched ${_teacherRoutine.length} routine entries for teacher');
       } else {
