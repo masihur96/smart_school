@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/features/admin/screens/class_detail_screen.dart';
 import 'package:smart_school/models/teacher_model.dart';
 
 import '../../../models/school_models.dart' hide Teacher;
@@ -392,15 +393,30 @@ class _DayRoutineTab extends StatelessWidget {
         );
         final teacherName = teacher.user?.name ?? 'Unknown Teacher';
 
-        return _RoutineEntryCard(
-          entry: entry,
-          subjectName: subjectName,
-          teacherName: teacherName,
-          accentColor: color,
-          onView: () =>
-              _viewEntry(context, entry, subjectName, teacherName, color),
-          onEdit: () => _editEntry(context, classId, sectionId, entry),
-          onDelete: () => _deleteEntry(context, classId, sectionId, entry),
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ClassDetailScreen(
+                  classRoom: ClassRoom(
+                    id: classId,
+                    name: entry.classEntity?.name ?? "",
+                  ),
+                ),
+              ),
+            );
+          },
+          child: _RoutineEntryCard(
+            entry: entry,
+            subjectName: subjectName,
+            teacherName: teacherName,
+            accentColor: color,
+            onView: () =>
+                _viewEntry(context, entry, subjectName, teacherName, color),
+            onEdit: () => _editEntry(context, classId, sectionId, entry),
+            onDelete: () => _deleteEntry(context, classId, sectionId, entry),
+          ),
         );
       },
     );
