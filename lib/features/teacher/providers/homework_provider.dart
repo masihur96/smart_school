@@ -10,6 +10,7 @@ class HomeworkNotifier extends ChangeNotifier {
   final DatabaseService _dbService;
   final IHomeworkRepository? _homeworkRepository;
   List<Homework> _homeworkRecords = [];
+  bool _isLoading = false;
 
   HomeworkNotifier(this._dbService, {IHomeworkRepository? homeworkRepository})
       : _homeworkRepository = homeworkRepository {
@@ -17,6 +18,7 @@ class HomeworkNotifier extends ChangeNotifier {
   }
 
   List<Homework> get homeworkRecords => _homeworkRecords;
+  bool get isLoading => _isLoading;
 
   void addHomework(Homework homework) {
     _dbService.homeworkRecords.add(homework);
@@ -109,6 +111,9 @@ class HomeworkNotifier extends ChangeNotifier {
   }) async {
     if (_homeworkRepository == null) return;
 
+    _isLoading = true;
+    notifyListeners();
+
     log('fetchHomework: classId=$classId, sectionId=$sectionId, subjectId=$subjectId');
     try {
       final results = await _homeworkRepository.fetchHomework(
@@ -119,10 +124,12 @@ class HomeworkNotifier extends ChangeNotifier {
 
       log('fetchHomework results count: ${results.length}');
       _homeworkRecords = results;
-      notifyListeners();
     } catch (e) {
       log('Error fetching homework from API: $e');
       rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 }
