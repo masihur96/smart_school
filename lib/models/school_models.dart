@@ -311,6 +311,7 @@ class RoutineEntry {
   final String? roomNumber;
   final ClassRoom? classEntity;
   final Subject? subjectEntity;
+  final Section? sectionEntity;
 
   RoutineEntry({
     this.id,
@@ -325,6 +326,7 @@ class RoutineEntry {
     this.roomNumber,
     this.classEntity,
     this.subjectEntity,
+    this.sectionEntity,
   });
 
   factory RoutineEntry.fromJson(Map<String, dynamic> json) {
@@ -342,6 +344,7 @@ class RoutineEntry {
       roomNumber: json['roomNumber'],
       classEntity: json['classEntity'] != null ? ClassRoom.fromJson(json['classEntity']) : null,
       subjectEntity: json['subjectEntity'] != null ? Subject.fromJson(json['subjectEntity']) : null,
+      sectionEntity: json['sectionEntity'] != null ? Section.fromJson(json['sectionEntity']) : null,
     );
   }
 

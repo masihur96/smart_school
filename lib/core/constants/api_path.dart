@@ -12,6 +12,7 @@ class APIPath {
   static String fetchUsers = "$baseUrl/admin/users";
   static String changePassword = "$baseUrl/auth/change-password";
   static String createNotice = "$baseUrl/general/notices";
+  static String fetchStudent = "$baseUrl/general/students";
   static String updateNotice(String id) => "$baseUrl/general/notices/$id";
   static String deleteNotice(String id) => "$baseUrl/general/notices/$id";
   static String createRoutine = "$baseUrl/general/routine";
