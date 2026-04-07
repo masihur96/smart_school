@@ -322,7 +322,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => ClassDetailScreen(subjectID: classInfo.subjectId??"",classRoom: classInfo.classEntity!),
+            builder: (_) => ClassDetailScreen(
+              subjectID: classInfo.subjectId??"",
+              classRoom: classInfo.classEntity!,
+              sectionId: classInfo.sectionId,
+            ),
           ),
         ),
         borderRadius: BorderRadius.circular(16),

@@ -104,20 +104,20 @@ class HomeworkNotifier extends ChangeNotifier {
 
   Future<void> fetchHomework({
     String? classId,
+    String? sectionId,
     String? subjectId,
   }) async {
     if (_homeworkRepository == null) return;
 
-    print("________________________________--");
-    print(classId);
-    print(subjectId);
+    log('fetchHomework: classId=$classId, sectionId=$sectionId, subjectId=$subjectId');
     try {
       final results = await _homeworkRepository.fetchHomework(
         classId: classId,
+        sectionId: sectionId,
         subjectId: subjectId,
       );
 
-      print("Home work Resuls:: $results");
+      log('fetchHomework results count: ${results.length}');
       _homeworkRecords = results;
       notifyListeners();
     } catch (e) {

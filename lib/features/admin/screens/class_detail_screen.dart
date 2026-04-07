@@ -21,8 +21,9 @@ const _kDivider = Color(0xFFEDE9F8);
 class ClassDetailScreen extends StatefulWidget {
   final ClassRoom classRoom;
   final String? subjectID;
+  final String? sectionId;
 
-  const ClassDetailScreen({super.key, this.subjectID, required this.classRoom});
+  const ClassDetailScreen({super.key, this.subjectID, required this.classRoom, this.sectionId});
 
   @override
   State<ClassDetailScreen> createState() => _ClassDetailScreenState();
@@ -42,9 +43,10 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
     _tabController = TabController(length: 2, vsync: this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Load students for this class
-      context.read<StudentsNotifier>().fetchStudents(
+      // Load students for this class + section
+      context.read<StudentsNotifier>().fetchStudentsBySection(
             classId: widget.classRoom.id,
+            sectionId: widget.sectionId,
           );
       // Ensure subjects are loaded for homework
       final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
@@ -52,12 +54,11 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
         context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
       }
 
-
-      
       // Load homework for this class
       context.read<HomeworkNotifier>().fetchHomework(
             classId: widget.classRoom.id,
-        subjectId: widget.subjectID
+            sectionId: widget.sectionId,
+            subjectId: widget.subjectID,
           );
       
       _loadAttendanceForDate();
@@ -67,6 +68,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
   Future<void> _loadAttendanceForDate() async {
     await context.read<AttendanceNotifier>().fetchAttendanceFromAPI(
           classId: widget.classRoom.id,
+          sectionId: widget.sectionId,
           date: _selectedDate,
         );
 
@@ -122,9 +124,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
       return;
     }
 
-    final students = context.read<StudentsNotifier>().students
-        .where((s) => s.classId == widget.classRoom.id)
-        .toList();
+    final students = context.read<StudentsNotifier>().students;
 
     // Ensure all students have a status in the map (defaulting to present)
     final fullMap = <String, AttendanceStatus>{};
@@ -137,6 +137,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
       date: _selectedDate,
       takenBy: teacherId,
       classId: widget.classRoom.id,
+      sectionId: widget.sectionId,
       attendanceMap: fullMap,
     );
 
@@ -239,6 +240,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
           children: [
             _AttendanceTab(
               classRoom: widget.classRoom,
+              sectionId: widget.sectionId,
               selectedDate: _selectedDate,
               dateLabel: dateLabel,
               attendanceMap: _attendanceMap,
@@ -248,7 +250,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
                 setState(() => _attendanceMap[studentId] = status);
               },
             ),
-            _HomeworkTab(classRoom: widget.classRoom),
+            _HomeworkTab(classRoom: widget.classRoom, sectionId: widget.sectionId),
           ],
         ),
       ),
@@ -262,6 +264,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
 
 class _AttendanceTab extends StatelessWidget {
   final ClassRoom classRoom;
+  final String? sectionId;
   final DateTime selectedDate;
   final String dateLabel;
   final Map<String, AttendanceStatus> attendanceMap;
@@ -271,6 +274,7 @@ class _AttendanceTab extends StatelessWidget {
 
   const _AttendanceTab({
     required this.classRoom,
+    this.sectionId,
     required this.selectedDate,
     required this.dateLabel,
     required this.attendanceMap,
@@ -285,18 +289,7 @@ class _AttendanceTab extends StatelessWidget {
     final attendanceNotifier = context.watch<AttendanceNotifier>();
     final isLoading = studentNotifier.isLoading || attendanceNotifier.isLoading;
     
-    // Debug prints
-    print("UI DEBUG - ClassRoom ID: ${classRoom.id}");
-    print("UI DEBUG - Total Students in Notifier: ${studentNotifier.students.length}");
-    for (var s in studentNotifier.students) {
-       print("UI DEBUG - Student in Notifier: userId=${s.userId}, classId=${s.classId}, name=${s.user?.name}");
-    }
-
-    final students = studentNotifier.students
-        .where((s) => s.classId == classRoom.id)
-        .toList();
-    
-    print("UI DEBUG - Students after filter: ${students.length}");
+    final students = studentNotifier.students;
 
     return Column(
       children: [
@@ -599,9 +592,11 @@ class _ToggleChip extends StatelessWidget {
 
 class _HomeworkTab extends StatelessWidget {
   final ClassRoom classRoom;
+  final String? sectionId;
 
   const _HomeworkTab({
     required this.classRoom,
+    this.sectionId,
   });
 
   @override
@@ -667,6 +662,7 @@ class _HomeworkTab extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => _AddHomeworkSheet(
         classRoom: classRoom,
+        sectionId: sectionId,
       ),
     );
   }
@@ -678,6 +674,7 @@ class _HomeworkTab extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => _AddHomeworkSheet(
         classRoom: classRoom,
+        sectionId: sectionId,
         homework: homework,
       ),
     );
@@ -897,11 +894,13 @@ class _HomeworkCard extends StatelessWidget {
 
 class _AddHomeworkSheet extends StatefulWidget {
   final ClassRoom classRoom;
-  final Homework? homework; // Add this
+  final String? sectionId;
+  final Homework? homework;
 
   const _AddHomeworkSheet({
     required this.classRoom,
-    this.homework, // Add this
+    this.sectionId,
+    this.homework,
   });
 
   @override
@@ -967,10 +966,10 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     }
 
     final homework = Homework(
-      id: widget.homework?.id ?? '', // Use existing ID if editing
+      id: widget.homework?.id ?? '',
       teacherId: widget.homework?.teacherId ?? user.id,
       classId: widget.classRoom.id,
-      sectionId: widget.homework?.sectionId ?? '',
+      sectionId: widget.homework?.sectionId ?? widget.sectionId ?? '',
       subjectId: _selectedSubjectId!,
       title: _titleController.text.trim(),
       description: _descController.text.trim(),

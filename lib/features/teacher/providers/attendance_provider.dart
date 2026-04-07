@@ -53,6 +53,7 @@ class AttendanceNotifier extends ChangeNotifier {
     required DateTime date,
     required String takenBy,
     required String classId,
+    String? sectionId,
     required Map<String, AttendanceStatus> attendanceMap,
   }) async {
     _isLoading = true;
@@ -73,6 +74,7 @@ class AttendanceNotifier extends ChangeNotifier {
         "date": dateString,
         "takenBy": takenBy,
         "classId": classId,
+        if (sectionId != null && sectionId.isNotEmpty) "sectionId": sectionId,
         "records": records,
       };
 
@@ -110,6 +112,7 @@ class AttendanceNotifier extends ChangeNotifier {
 
   Future<void> fetchAttendanceFromAPI({
     required String classId,
+    String? sectionId,
     required DateTime date,
   }) async {
     _isLoading = true;
@@ -121,13 +124,18 @@ class AttendanceNotifier extends ChangeNotifier {
       final dateString =
           '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
+      final query = <String, dynamic>{
+        'classId': classId,
+        'date': dateString,
+      };
+      if (sectionId != null && sectionId.isNotEmpty) {
+        query['sectionId'] = sectionId;
+      }
+
       final response = await DataProvider().performRequest(
         'GET',
         APIPath.submitAttendance,
-        query: {
-          'classId': classId,
-          'date': dateString,
-        },
+        query: query,
         header: {'Authorization': 'Bearer $token'},
       );
 

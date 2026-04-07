@@ -27,10 +27,12 @@ class HomeworkRepositoryImpl implements IHomeworkRepository {
   @override
   Future<List<Homework>> fetchHomework({
     String? classId,
+    String? sectionId,
     String? subjectId,
   }) async {
     return await _remoteDataSource.fetchHomework(
       classId: classId,
+      sectionId: sectionId,
       subjectId: subjectId,
     );
   }
