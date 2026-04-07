@@ -21,11 +21,11 @@ class Student {
 
   factory Student.fromJson(Map<String, dynamic> json) {
     return Student(
-      userId: json['userId'] ?? json['id'] ?? '',
-      rollId: json['rollId'] ?? json['rollNumber'] ?? '',
-      classId: json['classId'] ?? '',
-      sectionId: json['sectionId'] ?? '',
-      guardianContact: json['guardianContact'] ?? json['phone'] ?? '',
+      userId: json['userId']?.toString() ?? json['id']?.toString() ?? '',
+      rollId: json['rollId']?.toString() ?? json['rollNumber']?.toString() ?? '',
+      classId: json['classId']?.toString() ?? '',
+      sectionId: json['sectionId']?.toString() ?? '',
+      guardianContact: json['guardianContact']?.toString() ?? json['phone']?.toString() ?? '',
       isActive: json['isActive'] ?? true,
       user: json['user'] != null ? User.fromJson(json['user']) : User.fromJson(json),
     );

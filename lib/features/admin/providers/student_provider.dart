@@ -62,13 +62,18 @@ class StudentsNotifier extends ChangeNotifier {
         header: {'Authorization': 'Bearer $token'},
       );
 
+
+
       if (response != null && response.statusCode == 200) {
+        print("Student Query:: ${response.data}");
         // API response structure: { data: { total, page, limit, data: [...] } }
         final inner = response.data is Map ? response.data['data'] : response.data;
         final List<dynamic> data = inner is List
             ? inner
             : (inner is Map ? (inner['data'] as List<dynamic>? ?? []) : []);
         
+        print("Extracted Data Length: ${data.length}");
+
         final responseTotal = (inner is Map && inner['total'] != null)
             ? int.tryParse(inner['total'].toString()) ?? 0
             : data.length;
@@ -85,12 +90,17 @@ class StudentsNotifier extends ChangeNotifier {
 
         for (var item in data) {
           try {
-             _dbService.students.add(Student.fromJson(item));
-          } catch(e) {
-             log("Error parsing student: $e");
+             print("Parsing student item: $item");
+             final parsedStudent = Student.fromJson(item);
+             print("Parsed Student: classId=${parsedStudent.classId}");
+             _dbService.students.add(parsedStudent);
+          } catch(e, stacktrace) {
+             print("Error parsing student: $e");
+             print("Stacktrace: $stacktrace");
           }
         }
         _students = [..._dbService.students];
+        print("Total students in notifier: ${_students.length}. Provided classId: $classId");
       } else {
         log("Error fetching students: ${response?.data}");
         _hasMore = false;
