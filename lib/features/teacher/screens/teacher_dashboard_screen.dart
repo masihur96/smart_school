@@ -299,8 +299,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   }
 
   Widget _buildClassCard(BuildContext context, RoutineEntry classInfo) {
-    final className =
-        classInfo.classEntity?.name ?? 'Class ${classInfo.classId}';
+    final classNameText = classInfo.classEntity?.name ?? 'Class ${classInfo.classId}';
+    final sectionNameText = classInfo.sectionEntity?.name != null ? ' - ${classInfo.sectionEntity!.name}' : '';
+    final className = '$classNameText$sectionNameText';
     final subjectName =
         classInfo.subjectEntity?.name ?? 'Subject ${classInfo.subjectId}';
 
