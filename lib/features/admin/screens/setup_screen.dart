@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../../models/school_models.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
-import 'class_detail_screen.dart';
 
 // ─── Colour palette (shared) ─────────────────────────────────────────────────
 const _kPrimary = Color(0xFF6C3CE1);
@@ -268,13 +267,7 @@ class _ClassCard extends StatelessWidget {
                       icon: Icons.visibility_outlined,
                       label: 'View',
                       color: _kPrimary,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              ClassDetailScreen(classRoom: classRoom),
-                        ),
-                      ),
+                      onTap: () => _showViewClassDialog(context, classRoom),
                     ),
                     const SizedBox(width: 8),
                     // Edit
@@ -1226,6 +1219,37 @@ void _showAddEditSubjectDialog(BuildContext context, {Subject? existing}) {
         }
       }
     },
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Dialog: View Class Details
+// ═══════════════════════════════════════════════════════════
+void _showViewClassDialog(BuildContext context, ClassRoom classRoom) {
+  _showStyledDialog(
+    context: context,
+    title: 'Class Details',
+    gradientColors: _kClassGrad,
+    confirmLabel: '',
+    onConfirm: null,
+    body: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _DetailRow(
+          icon: Icons.class_outlined,
+          label: 'Class Name',
+          value: classRoom.name,
+        ),
+        if (classRoom.description.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          _DetailRow(
+            icon: Icons.notes_outlined,
+            label: 'Description',
+            value: classRoom.description,
+          ),
+        ],
+      ],
+    ),
   );
 }
 
