@@ -601,40 +601,49 @@ class _HomeworkTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final homeworkList = context.watch<HomeworkNotifier>().homeworkRecords
+    final homeworkNotifier = context.watch<HomeworkNotifier>();
+    final isLoading = homeworkNotifier.isLoading;
+    final homeworkList = homeworkNotifier.homeworkRecords
         .where((h) => h.classId == classRoom.id)
         .toList();
 
     return Stack(
       children: [
-        homeworkList.isEmpty
-            ? const _EmptyState(
-                icon: Icons.assignment_outlined,
-                message: 'No homework assigned yet.\nTap + to add one.',
-              )
-            : ListView.separated(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                itemCount: homeworkList.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 10),
-                itemBuilder: (ctx, index) {
-                  final hw = homeworkList[index];
-                  final subjects =
-                      context.read<SubjectSetupNotifier>().subjects;
-                  final subjectName = subjects
-                      .firstWhere(
-                        (s) => s.id == hw.subjectId,
-                        orElse: () => Subject(id: '', name: 'Unknown Subject'),
-                      )
-                      .name;
-                  return _HomeworkCard(
-                    homework: hw,
-                    subjectName: subjectName,
-                    onView: () => _showViewSheet(ctx, hw, subjectName),
-                    onEdit: () => _showEditSheet(ctx, hw),
-                    onDelete: () => _confirmDelete(ctx, hw.id),
-                  );
-                },
-              ),
+        if (isLoading)
+          const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(Color(0xFF7C3AED)),
+            ),
+          )
+        else if (homeworkList.isEmpty)
+          const _EmptyState(
+            icon: Icons.assignment_outlined,
+            message: 'No homework assigned yet.\nTap + to add one.',
+          )
+        else
+          ListView.separated(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+            itemCount: homeworkList.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 10),
+            itemBuilder: (ctx, index) {
+              final hw = homeworkList[index];
+              final subjects =
+                  context.read<SubjectSetupNotifier>().subjects;
+              final subjectName = subjects
+                  .firstWhere(
+                    (s) => s.id == hw.subjectId,
+                    orElse: () => Subject(id: '', name: 'Unknown Subject'),
+                  )
+                  .name;
+              return _HomeworkCard(
+                homework: hw,
+                subjectName: subjectName,
+                onView: () => _showViewSheet(ctx, hw, subjectName),
+                onEdit: () => _showEditSheet(ctx, hw),
+                onDelete: () => _confirmDelete(ctx, hw.id),
+              );
+            },
+          ),
 
         // FAB
         Positioned(
