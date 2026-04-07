@@ -67,49 +67,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
             ),
             child: Column(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          labelText: 'Class',
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                        value: _selectedClass,
-                        items: [
-                          const DropdownMenuItem(value: null, child: Text('All Classes')),
-                          ...classes.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))),
-                        ],
-                        onChanged: (val) {
-                          setState(() {
-                            _selectedClass = val;
-                            _selectedSubject = null;
-                          });
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          labelText: 'Subject',
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                        value: _selectedSubject,
-                        items: [
-                          const DropdownMenuItem(value: null, child: Text('All Subjects')),
-                          ...subjects
-                              .where((s) => _selectedClass == null || s.classId == _selectedClass)
-                              .map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))),
-                        ],
-                        onChanged: (val) => setState(() => _selectedSubject = val),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
+
                 DropdownButtonFormField<String>(
                   decoration: InputDecoration(
                     labelText: 'Publish Status',
