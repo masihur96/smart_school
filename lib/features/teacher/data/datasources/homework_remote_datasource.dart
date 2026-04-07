@@ -99,6 +99,7 @@ class HomeworkRemoteDataSource {
 
   Future<List<Homework>> fetchHomework({
     String? classId,
+    String? sectionId,
     String? subjectId,
   }) async {
     final token = await StorageService.getToken();
@@ -106,8 +107,8 @@ class HomeworkRemoteDataSource {
 
     final query = <String, dynamic>{};
     if (classId != null && classId.isNotEmpty) query['classId'] = classId;
+    if (sectionId != null && sectionId.isNotEmpty) query['sectionId'] = sectionId;
     if (subjectId != null && subjectId.isNotEmpty) query['subjectId'] = subjectId;
-
 
     print("query:: $query");
 

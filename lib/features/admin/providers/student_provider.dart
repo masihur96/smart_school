@@ -118,6 +118,71 @@ class StudentsNotifier extends ChangeNotifier {
     }
   }
 
+  /// Fetch students using the /general/students/{classId}?sectionId= endpoint.
+  /// This replaces the filtered list in [_students] without touching pagination.
+  Future<void> fetchStudentsBySection({
+    required String classId,
+    String? sectionId,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final Map<String, dynamic> query = {};
+      if (sectionId != null && sectionId.isNotEmpty) {
+        query['sectionId'] = sectionId;
+      }
+
+      // Endpoint: GET /general/students/{classId}?sectionId=...
+      final response = await DataProvider().performRequest(
+        'GET',
+        '${APIPath.fetchStudent}/$classId',
+        query: query.isEmpty ? null : query,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        log('fetchStudentsBySection response: ${response.data}');
+        final rawData = response.data;
+        List<dynamic> data = [];
+
+        if (rawData is Map) {
+          final inner = rawData['data'];
+          if (inner is List) {
+            data = inner;
+          } else if (inner is Map) {
+            data = inner['data'] as List<dynamic>? ?? [];
+          }
+        } else if (rawData is List) {
+          data = rawData;
+        }
+
+        _dbService.students.clear();
+        for (var item in data) {
+          try {
+            final parsedStudent = Student.fromJson(item);
+            _dbService.students.add(parsedStudent);
+          } catch (e) {
+            log('Error parsing student: $e');
+          }
+        }
+        _students = [..._dbService.students];
+        _totalCount = _students.length;
+        log('fetchStudentsBySection: loaded ${_students.length} students for classId=$classId, sectionId=$sectionId');
+      } else {
+        log('fetchStudentsBySection error: ${response?.data}');
+      }
+    } catch (e) {
+      log('fetchStudentsBySection exception: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
 
 
   void addStudent(Student student) {
