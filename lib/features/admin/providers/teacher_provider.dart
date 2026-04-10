@@ -189,6 +189,9 @@ class TeachersNotifier extends ChangeNotifier {
     required String classId,
     required String sectionId,
     required String designation,
+    double? lat,
+    double? lon,
+    double? radius,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -207,7 +210,10 @@ class TeachersNotifier extends ChangeNotifier {
         "classId": classId,
         "sectionId": sectionId,
         "designation": designation,
-        "isActive": true
+        "isActive": true,
+        if (lat != null) "lat": lat,
+        if (lon != null) "lon": lon,
+        if (radius != null) "radius": radius,
       };
 
       final response = await DataProvider().performRequest(
@@ -256,6 +262,9 @@ class TeachersNotifier extends ChangeNotifier {
     required String classId,
     required String sectionId,
     required String designation,
+    double? lat,
+    double? lon,
+    double? radius,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -271,6 +280,9 @@ class TeachersNotifier extends ChangeNotifier {
         "classId": classId,
         "sectionId": sectionId,
         "designation": designation,
+        if (lat != null) "lat": lat,
+        if (lon != null) "lon": lon,
+        if (radius != null) "radius": radius,
       };
 
       final response = await DataProvider().performRequest(
@@ -292,6 +304,9 @@ class TeachersNotifier extends ChangeNotifier {
             sectionId: sectionId,
             isActive: oldTeacher.isActive,
             assignedSubjects: oldTeacher.assignedSubjects,
+            lat: lat,
+            lon: lon,
+            radius: radius,
             user: User(
               id: userId,
               name: name,

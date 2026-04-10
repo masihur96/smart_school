@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
-import '../providers/teacher_provider.dart';
-import '../providers/setup_provider.dart';
+
 import '../../../models/teacher_model.dart';
-import '../../../models/user_model.dart';
+import '../providers/setup_provider.dart';
+import '../providers/teacher_provider.dart';
 
 class AddEditTeacherScreen extends StatefulWidget {
   final Teacher? teacher;
@@ -22,6 +21,9 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
   final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
   final _designationController = TextEditingController();
+  final _latController = TextEditingController();
+  final _lonController = TextEditingController();
+  final _radiusController = TextEditingController();
   String? _selectedClassId;
   String? _selectedSectionId;
   final List<AssignedSubject> _assignedSubjects = [];
@@ -40,6 +42,9 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
       _designationController.text = teacher.designation;
       _selectedClassId = teacher.classId;
       _selectedSectionId = teacher.sectionId;
+      _latController.text = teacher.lat?.toString() ?? '';
+      _lonController.text = teacher.lon?.toString() ?? '';
+      _radiusController.text = teacher.radius?.toString() ?? '';
     }
   }
 
@@ -50,6 +55,9 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
     _passwordController.dispose();
     _phoneController.dispose();
     _designationController.dispose();
+    _latController.dispose();
+    _lonController.dispose();
+    _radiusController.dispose();
     super.dispose();
   }
 
@@ -64,7 +72,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
 
       final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
       final teacherNotifier = context.read<TeachersNotifier>();
-      
+
       try {
         if (isEditing) {
           await teacherNotifier.updateTeacherOnAPI(
@@ -75,6 +83,9 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             classId: _selectedClassId!,
             sectionId: _selectedSectionId!,
             designation: _designationController.text,
+            lat: double.tryParse(_latController.text),
+            lon: double.tryParse(_lonController.text),
+            radius: double.tryParse(_radiusController.text),
           );
         } else {
           await teacherNotifier.addTeacherToAPI(
@@ -86,19 +97,32 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             classId: _selectedClassId!,
             sectionId: _selectedSectionId!,
             designation: _designationController.text,
+            lat: double.tryParse(_latController.text),
+            lon: double.tryParse(_lonController.text),
+            radius: double.tryParse(_radiusController.text),
           );
         }
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(isEditing ? 'Teacher updated successfully' : 'Teacher registered successfully')),
+            SnackBar(
+              content: Text(
+                isEditing
+                    ? 'Teacher updated successfully'
+                    : 'Teacher registered successfully',
+              ),
+            ),
           );
           Navigator.pop(context);
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${isEditing ? 'Update' : 'Registration'} failed: $e')),
+            SnackBar(
+              content: Text(
+                '${isEditing ? 'Update' : 'Registration'} failed: $e',
+              ),
+            ),
           );
         }
       }
@@ -123,9 +147,15 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
           padding: const EdgeInsets.all(16.0),
           children: [
             // Personal Details Section
-            _buildSectionHeader(context, 'Personal Details', Icons.person_outline),
+            _buildSectionHeader(
+              context,
+              'Personal Details',
+              Icons.person_outline,
+            ),
             Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -135,9 +165,12 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                       decoration: InputDecoration(
                         labelText: 'Full Name',
                         prefixIcon: const Icon(Icons.person),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      validator: (val) => val!.isEmpty ? 'Please enter name' : null,
+                      validator: (val) =>
+                          val!.isEmpty ? 'Please enter name' : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -145,9 +178,12 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                       decoration: InputDecoration(
                         labelText: 'Email Address',
                         prefixIcon: const Icon(Icons.email),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      validator: (val) => val!.isEmpty ? 'Please enter email' : null,
+                      validator: (val) =>
+                          val!.isEmpty ? 'Please enter email' : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -155,9 +191,12 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                       decoration: InputDecoration(
                         labelText: 'Phone Number',
                         prefixIcon: const Icon(Icons.phone),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      validator: (val) => val!.isEmpty ? 'Please enter phone' : null,
+                      validator: (val) =>
+                          val!.isEmpty ? 'Please enter phone' : null,
                     ),
                   ],
                 ),
@@ -167,9 +206,15 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
 
             // Account Security Section
             if (!isEditing) ...[
-              _buildSectionHeader(context, 'Account Security', Icons.lock_outline),
+              _buildSectionHeader(
+                context,
+                'Account Security',
+                Icons.lock_outline,
+              ),
               Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: TextFormField(
@@ -179,16 +224,23 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                       labelText: 'Password',
                       prefixIcon: const Icon(Icons.security),
                       suffixIcon: IconButton(
-                        icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
                         onPressed: () {
                           setState(() {
                             _obscurePassword = !_obscurePassword;
                           });
                         },
                       ),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    validator: (val) => val!.length < 6 ? 'Password too short' : null,
+                    validator: (val) =>
+                        val!.length < 6 ? 'Password too short' : null,
                   ),
                 ),
               ),
@@ -196,9 +248,15 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             ],
 
             // Professional Details Section
-            _buildSectionHeader(context, 'Professional Details', Icons.work_outline),
+            _buildSectionHeader(
+              context,
+              'Professional Details',
+              Icons.work_outline,
+            ),
             Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -208,45 +266,136 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                       decoration: InputDecoration(
                         labelText: 'Designation',
                         prefixIcon: const Icon(Icons.badge_outlined),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      validator: (val) => val!.isEmpty ? 'Please enter designation' : null,
+                      validator: (val) =>
+                          val!.isEmpty ? 'Please enter designation' : null,
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       decoration: InputDecoration(
                         labelText: 'Assigned Class',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         prefixIcon: const Icon(Icons.class_outlined),
                       ),
                       items: classes
-                          .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
+                          .map(
+                            (c) => DropdownMenuItem(
+                              value: c.id,
+                              child: Text(c.name),
+                            ),
+                          )
                           .toList(),
-                      value: classes.any((c) => c.id == _selectedClassId) ? _selectedClassId : null,
+                      value: classes.any((c) => c.id == _selectedClassId)
+                          ? _selectedClassId
+                          : null,
                       onChanged: (val) {
                         setState(() {
                           _selectedClassId = val;
                           _selectedSectionId = null;
                         });
                       },
-                      validator: (val) => val == null ? 'Please select class' : null,
+                      validator: (val) =>
+                          val == null ? 'Please select class' : null,
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       decoration: InputDecoration(
                         labelText: 'Assigned Section',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         prefixIcon: const Icon(Icons.groups_outlined),
                       ),
                       items: sections
                           .where((s) => s.classId == _selectedClassId)
-                          .map((s) => DropdownMenuItem(value: s.id, child: Text(s.name)))
+                          .map(
+                            (s) => DropdownMenuItem(
+                              value: s.id,
+                              child: Text(s.name),
+                            ),
+                          )
                           .toList(),
-                      value: sections.any((s) => s.id == _selectedSectionId && s.classId == _selectedClassId)
+                      value:
+                          sections.any(
+                            (s) =>
+                                s.id == _selectedSectionId &&
+                                s.classId == _selectedClassId,
+                          )
                           ? _selectedSectionId
                           : null,
-                      onChanged: (val) => setState(() => _selectedSectionId = val),
-                      validator: (val) => val == null ? 'Please select section' : null,
+                      onChanged: (val) =>
+                          setState(() => _selectedSectionId = val),
+                      validator: (val) =>
+                          val == null ? 'Please select section' : null,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Location Settings Section
+            _buildSectionHeader(
+              context,
+              'Arrival Settings',
+              Icons.location_on_outlined,
+            ),
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _latController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Latitude',
+                              prefixIcon: const Icon(Icons.map_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _lonController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Longitude',
+                              prefixIcon: const Icon(Icons.explore_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _radiusController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Allowed Radius (meters)',
+                        prefixIcon: const Icon(Icons.radar_outlined),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        helperText: 'Radius in meters for arrival check',
+                      ),
                     ),
                   ],
                 ),
@@ -260,14 +409,20 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                 onPressed: teacherNotifier.isLoading ? null : _save,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.purple,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   elevation: 2,
                 ),
                 child: teacherNotifier.isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
                         isEditing ? 'Update Teacher' : 'Register Teacher',
-                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
               ),
             ),
@@ -278,7 +433,11 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title,
+    IconData icon,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0, left: 4),
       child: Row(
