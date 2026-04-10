@@ -14,6 +14,9 @@ class User {
   final String? designation;
   final bool? isActive;
   final DateTime? createdAt;
+  final double? lat;
+  final double? lon;
+  final double? radius;
 
   User({
     required this.id,
@@ -29,6 +32,9 @@ class User {
     this.designation,
     this.isActive,
     this.createdAt,
+    this.lat,
+    this.lon,
+    this.radius,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -51,6 +57,9 @@ class User {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
+      lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
+      lon: json['lon'] != null ? double.tryParse(json['lon'].toString()) : null,
+      radius: json['radius'] != null ? double.tryParse(json['radius'].toString()) : null,
     );
   }
 
@@ -69,6 +78,9 @@ class User {
       'designation': designation,
       'isActive': isActive,
       'createdAt': createdAt?.toIso8601String(),
+      'lat': lat,
+      'lon': lon,
+      'radius': radius,
     };
   }
 }

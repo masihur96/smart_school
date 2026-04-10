@@ -58,6 +58,9 @@ class AuthNotifier extends ChangeNotifier {
           createdAt: profile.createdAt != null
               ? DateTime.tryParse(profile.createdAt!)
               : null,
+          lat: profile.lat,
+          lon: profile.lon,
+          radius: profile.radius,
         );
       } else {
         _user = null;
@@ -103,6 +106,9 @@ class AuthNotifier extends ChangeNotifier {
         createdAt: profile.createdAt != null
             ? DateTime.tryParse(profile.createdAt!)
             : null,
+        lat: profile.lat,
+        lon: profile.lon,
+        radius: profile.radius,
       );
 
       _isLoading = false;

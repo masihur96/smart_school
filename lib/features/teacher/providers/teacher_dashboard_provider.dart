@@ -47,4 +47,33 @@ class TeacherDashboardProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> submitSelfAttendance(double lat, double lon) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final response = await DataProvider().performRequest(
+        'POST',
+        APIPath.selfAttendance,
+        data: {'lat': lat, 'lon': lon},
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response == null || (response.statusCode != 200 && response.statusCode != 201)) {
+        throw Exception(response?.data?['message'] ?? 'Failed to submit attendance');
+      }
+    } catch (e) {
+      log('Error submitting self attendance: $e');
+      _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

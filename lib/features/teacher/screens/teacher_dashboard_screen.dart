@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/screens/class_detail_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/models/school_models.dart';
+import 'package:smart_school/models/user_model.dart';
 
 import '../../../core/widgets/app_drawer.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -90,7 +92,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          _buildDashboardOverview(context, user?.name ?? 'Teacher'),
+          _buildDashboardOverview(context, user?.name ?? 'Teacher', user!),
           const TeacherAttendanceScreen(hideAppBar: true),
           const MarkEntryScreen(hideAppBar: true),
           const HomeworkManagementScreen(hideAppBar: true),
@@ -146,7 +148,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
-  Widget _buildDashboardOverview(BuildContext context, String name) {
+  Widget _buildDashboardOverview(BuildContext context, String name, User user) {
     final provider = context.watch<TeacherDashboardProvider>();
     final classes = provider.todayClasses;
 
@@ -155,7 +157,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildWelcomeHeader(context, name, classes.length),
+          _buildWelcomeHeader(context, name, classes.length, user),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Column(
@@ -211,7 +213,12 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
-  Widget _buildWelcomeHeader(BuildContext context, String name, int count) {
+  Widget _buildWelcomeHeader(
+    BuildContext context,
+    String name,
+    int count,
+    User user,
+  ) {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
@@ -301,9 +308,159 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               ],
             ),
           ),
+          const SizedBox(width: 8),
+          _buildSelfAttendanceButton(context, user),
         ],
       ),
     );
+  }
+
+  Widget _buildSelfAttendanceButton(BuildContext context, User? user) {
+    if (user?.role != UserRole.teacher) return const SizedBox.shrink();
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ElevatedButton(
+          onPressed: () => _performSelfAttendance(context, user),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.green.shade700,
+            shape: const CircleBorder(),
+            padding: const EdgeInsets.all(16),
+            elevation: 4,
+          ),
+          child: const Icon(Icons.location_on, size: 28),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Check In',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _performSelfAttendance(BuildContext context, User? user) async {
+    if (user == null ||
+        user.lat == null ||
+        user.lon == null ||
+        user.radius == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Attendance location not configured by admin.'),
+        ),
+      );
+      return;
+    }
+
+    try {
+      // 1. Check/Request permissions
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location services are disabled.')),
+          );
+        }
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Location permissions are denied.')),
+            );
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Location permissions are permanently denied.'),
+            ),
+          );
+        }
+        return;
+      }
+
+      // 2. Get current position
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Fetching current location...')),
+        );
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      // 3. Calculate distance
+      double distanceInMeters = Geolocator.distanceBetween(
+        position.latitude,
+        position.longitude,
+        user.lat!,
+        user.lon!,
+      );
+      print(user.radius);
+      print(user.lat);
+      print(user.lon);
+      print(position.latitude);
+      print(position.longitude);
+
+      if (distanceInMeters != user.radius!) {
+        // 4. Submit attendance
+        if (mounted) {
+          context
+              .read<TeacherDashboardProvider>()
+              .submitSelfAttendance(position.latitude, position.longitude)
+              .then((_) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Attendance marked successfully!'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              })
+              .catchError((e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Submission failed: $e')),
+                  );
+                }
+              });
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'You are out of range (${distanceInMeters.toStringAsFixed(0)}m away). Allowed radius: ${user.radius}m',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('An error occurred: $e')));
+      }
+    }
   }
 
   Widget _buildClassCard(BuildContext context, RoutineEntry classInfo) {
