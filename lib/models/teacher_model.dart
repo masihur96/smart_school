@@ -9,6 +9,10 @@ class Teacher {
   final bool isActive;
   final User? user;
 
+  final double? lat;
+  final double? lon;
+  final double? radius;
+
   Teacher({
     required this.userId, 
     this.assignedSubjects = const [], 
@@ -16,7 +20,10 @@ class Teacher {
     this.classId,
     this.sectionId,
     this.isActive = true,
-    this.user
+    this.user,
+    this.lat,
+    this.lon,
+    this.radius,
   });
 
   factory Teacher.fromJson(Map<String, dynamic> json) {
@@ -30,6 +37,9 @@ class Teacher {
           ? (json['assignedSubjects'] as List).map((e) => AssignedSubject.fromJson(e)).toList()
           : [],
       user: json['user'] != null ? User.fromJson(json['user']) : User.fromJson(json),
+      lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
+      lon: json['lon'] != null ? double.tryParse(json['lon'].toString()) : null,
+      radius: json['radius'] != null ? double.tryParse(json['radius'].toString()) : null,
     );
   }
 
@@ -42,6 +52,9 @@ class Teacher {
       'isActive': isActive,
       'assignedSubjects': assignedSubjects.map((e) => e.toJson()).toList(),
       if (user != null) 'user': user!.toJson(),
+      if (lat != null) 'lat': lat,
+      if (lon != null) 'lon': lon,
+      if (radius != null) 'radius': radius,
     };
   }
 }
