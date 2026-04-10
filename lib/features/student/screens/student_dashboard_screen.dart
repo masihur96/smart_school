@@ -435,19 +435,25 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       return _buildEmptyCard('Class info missing');
     }
 
-    final homeworkList = context
-        .watch<StudentHomeworkNotifier>()
-        .homeworkList;
+    final homeworkList = context.watch<StudentHomeworkNotifier>().homeworkList;
 
     if (homeworkList.isEmpty) {
       return _buildEmptyCard('No pending homework');
     }
 
     final latest = homeworkList.last;
-    final subject = subjects.firstWhere(
-      (s) => s.id == latest.subjectId,
-      orElse: () => Subject(id: '', name: 'Subject'),
-    ).name;
+    final hwData = latest.homework;
+
+    if (hwData == null) {
+      return _buildEmptyCard('Homework data unavailable');
+    }
+
+    final subject = subjects
+        .firstWhere(
+          (s) => s.id == hwData.subjectId,
+          orElse: () => Subject(id: '', name: 'Subject'),
+        )
+        .name;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -471,22 +477,48 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 ),
               ),
               Text(
-                'Due: ${DateFormat('MMM d').format(latest.dueDate)}',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                'Due: ${DateFormat('MMM d').format(hwData.dueDate)}',
+                style:
+                    const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
               ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
-            latest.title,
+            hwData.title,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 4),
-          Text(
-            latest.description,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: Colors.grey[600], fontSize: 13),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  hwData.description,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: latest.status == 'done'
+                      ? Colors.green.withOpacity(0.1)
+                      : Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  latest.status.toUpperCase(),
+                  style: TextStyle(
+                    color: latest.status == 'done' ? Colors.green : Colors.orange,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

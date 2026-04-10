@@ -45,6 +45,7 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
     }
 
     final routineNotifier = context.watch<StudentRoutineNotifier>();
+    final homeworkNotifier = context.watch<StudentHomeworkNotifier>();
 
     if (routineNotifier.isLoading && routineNotifier.routineEntries.isEmpty) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -52,11 +53,12 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
 
     final classId = currentUser.classId;
     if (classId == null) {
-      return const Scaffold(body: Center(child: Text('Class information not found for student.')));
+      return const Scaffold(
+        body: Center(child: Text('Class information not found for student.')),
+      );
     }
 
     final entries = routineNotifier.routineEntries;
-    final error = routineNotifier.error;
 
     final days = [
       'Monday',
@@ -71,18 +73,37 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+        backgroundColor: const Color(0xFFF9FAFB),
         appBar: AppBar(
-          title: const Text('My Routine'),
+          title: const Text('Academic Schedule',
+              style: TextStyle(fontWeight: FontWeight.bold)),
           backgroundColor: Colors.green,
           foregroundColor: Colors.white,
-          bottom: const TabBar(
-            indicatorColor: Colors.white,
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
-            tabs: [
-              Tab(text: 'Schedule', icon: Icon(Icons.calendar_today)),
-              Tab(text: 'Homework', icon: Icon(Icons.assignment)),
-            ],
+          elevation: 0,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(60),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const TabBar(
+                indicatorSize: TabBarIndicatorSize.tab,
+                indicator: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                ),
+                labelColor: Colors.green,
+                unselectedLabelColor: Colors.white,
+                labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                tabs: [
+                  Tab(text: 'Routine'),
+                  Tab(text: 'Homework'),
+                ],
+              ),
+            ),
           ),
         ),
         body: TabBarView(
@@ -92,8 +113,8 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
               child: _buildRoutineList(entries, routineNotifier, days),
             ),
             RefreshIndicator(
-              onRefresh: () => context.read<StudentHomeworkNotifier>().fetchHomework(classId),
-              child: _buildHomeworkList(context),
+              onRefresh: () => homeworkNotifier.fetchHomework(classId),
+              child: _buildHomeworkList(context, homeworkNotifier),
             ),
           ],
         ),
@@ -101,118 +122,332 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
     );
   }
 
-  Widget _buildRoutineList(List<RoutineEntry> entries, StudentRoutineNotifier routineNotifier, List<String> days) {
-    if (routineNotifier.isLoading && entries.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    
+  Widget _buildRoutineList(List<RoutineEntry> entries,
+      StudentRoutineNotifier routineNotifier, List<String> days) {
     if (entries.isEmpty && !routineNotifier.isLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32),
-          child: Text('No entries in routine yet.'),
-        ),
+      return _buildEmptyState(
+        icon: Icons.calendar_month_outlined,
+        title: 'No Schedule Yet',
+        subtitle: 'Your weekly class routine will appear here.',
       );
     }
 
-    return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      child: Column(
-        children: [
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: days.length,
-            itemBuilder: (context, index) {
-              final day = days[index];
-              final dayEntries = entries.where((e) => e.day == day).toList();
-              if (dayEntries.isEmpty) return const SizedBox.shrink();
+    // Filter days that actually have entries
+    final activeDays = days.where((d) => entries.any((e) => e.day == d)).toList();
 
-              return ExpansionTile(
-                initiallyExpanded:
-                    DateFormat('EEEE').format(DateTime.now()) == day,
-                title: Text(
-                  day,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                children: dayEntries.map((e) {
-                  final subjectName = context
-                      .read<SubjectSetupNotifier>()
-                      .subjects
-                      .firstWhere(
-                        (s) => s.id == e.subjectId,
-                        orElse: () => Subject(id: '', name: 'Unknown', code: ''),
-                      )
-                      .name;
-                  final teacherName = context
-                          .read<TeachersNotifier>()
-                          .teachers
-                          .firstWhere(
-                            (t) => t.userId == e.teacherId,
-                            orElse: () =>
-                                Teacher(userId: '', assignedSubjects: []),
-                          )
-                          .user
-                          ?.name ??
-                      'Unknown';
-                  return ListTile(
-                    leading: const Icon(Icons.access_time),
-                    title: Text(subjectName),
-                    subtitle: Text(
-                      '$teacherName | ${e.startTime} - ${e.endTime} | Room: ${e.roomNumber ?? 'N/A'}',
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      itemCount: activeDays.length,
+      itemBuilder: (context, index) {
+        final day = activeDays[index];
+        final dayEntries = entries.where((e) => e.day == day).toList();
+        
+        // Sort day entries by start time
+        dayEntries.sort((a, b) => a.startTime.compareTo(b.startTime));
+
+        final bool isToday = DateFormat('EEEE').format(DateTime.now()) == day;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+              child: Row(
+                children: [
+                  Text(
+                    day.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                      color: isToday ? Colors.green : Colors.grey[500],
                     ),
-                  );
-                }).toList(),
-              );
-            },
-          ),
-          if (routineNotifier.isLoading && entries.isNotEmpty)
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(),
+                  ),
+                  if (isToday) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'TODAY',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
-        ],
-      ),
+            ...dayEntries.map((e) => _RoutineCard(entry: e)).toList(),
+            const SizedBox(height: 20),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildHomeworkList(BuildContext context) {
-    final homeworkNotifier = context.watch<StudentHomeworkNotifier>();
+  Widget _buildHomeworkList(
+      BuildContext context, StudentHomeworkNotifier homeworkNotifier) {
     final homeworkList = homeworkNotifier.homeworkList;
-    final subjects = context.watch<SubjectSetupNotifier>().subjects;
 
     if (homeworkNotifier.isLoading && homeworkList.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (homeworkList.isEmpty && !homeworkNotifier.isLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32),
-          child: Text('No homework assigned.'),
-        ),
+      return _buildEmptyState(
+        icon: Icons.assignment_outlined,
+        title: 'All Assignments Done',
+        subtitle: 'No pending homework for your class.',
       );
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       itemCount: homeworkList.length,
       itemBuilder: (context, index) {
-        final hw = homeworkList[index];
-        final subName = subjects
-            .firstWhere(
-              (s) => s.id == hw.subjectId,
-              orElse: () => Subject(id: '', name: 'Unknown'),
-            )
-            .name;
-        final isOverdue = hw.dueDate.isBefore(DateTime.now());
+        final sh = homeworkList[index];
+        final hw = sh.homework;
 
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+        if (hw == null) return const SizedBox();
+
+        return _HomeworkCard(sh: sh);
+      },
+    );
+  }
+
+  Widget _buildEmptyState(
+      {required IconData icon, required String title, required String subtitle}) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.05),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 64, color: Colors.green.withOpacity(0.3)),
           ),
-          child: Padding(
+          const SizedBox(height: 20),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1F2937),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey[500]),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RoutineCard extends StatelessWidget {
+  final RoutineEntry entry;
+
+  const _RoutineCard({required this.entry});
+
+  @override
+  Widget build(BuildContext context) {
+    final subjectName = entry.subjectEntity?.name ?? 'Unknown Subject';
+    final teacherName = entry.teacherEntity?.name ?? 'Teacher Not Assigned';
+    final room = entry.roomNumber ?? 'N/A';
+    
+    // Format times to look cleaner (e.g. 09:00:00 -> 09:00 AM)
+    String formatTime(String? timeStr) {
+      if (timeStr == null || timeStr.isEmpty) return 'N/A';
+      try {
+        final time = DateFormat('HH:mm:ss').parse(timeStr);
+        return DateFormat('hh:mm a').format(time);
+      } catch (e) {
+        return timeStr;
+      }
+    }
+
+    final startTime = formatTime(entry.startTime);
+    final endTime = formatTime(entry.endTime);
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Container(
+              width: 5,
+              decoration: const BoxDecoration(
+                color: Colors.green,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  bottomLeft: Radius.circular(16),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          startTime,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Color(0xFF1F2937),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          endTime,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[500],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 16),
+                    Container(
+                      height: 30,
+                      width: 1,
+                      color: Colors.grey[200],
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            subjectName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Color(0xFF1F2937),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(Icons.person_outline, size: 12, color: Colors.grey[600]),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  teacherName,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Room: $room',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeworkCard extends StatelessWidget {
+  final StudentHomework sh;
+
+  const _HomeworkCard({required this.sh});
+
+  @override
+  Widget build(BuildContext context) {
+    final hw = sh.homework!;
+    final isDone = sh.status == 'done';
+    final isSubmitted = sh.status == 'submitted';
+    final isOverdue = hw.dueDate.isBefore(DateTime.now()) && !isDone;
+
+    Color statusColor;
+    String statusText;
+
+    if (isDone) {
+      statusColor = const Color(0xFF10B981);
+      statusText = 'Completed';
+    } else if (isSubmitted) {
+      statusColor = const Color(0xFF3B82F6);
+      statusText = 'Submitted';
+    } else if (isOverdue) {
+      statusColor = const Color(0xFFEF4444);
+      statusText = 'Overdue';
+    } else {
+      statusColor = const Color(0xFFF59E0B);
+      statusText = 'Pending';
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Column(
+        children: [
+          Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,45 +455,68 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        subName,
-                        style: const TextStyle(
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
                     Text(
                       DateFormat('MMM d').format(hw.dueDate),
                       style: TextStyle(
-                        color: isOverdue ? Colors.red : Colors.grey,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
+                        color: isOverdue ? Colors.red : Colors.grey[500],
                       ),
                     ),
+                    _StatusChip(color: statusColor, text: statusText),
                   ],
                 ),
                 const SizedBox(height: 12),
                 Text(
                   hw.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Color(0xFF1F2937),
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(
                   hw.description,
-                  style: TextStyle(color: Colors.grey[600]),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
                 ),
               ],
             ),
           ),
-        );
-      },
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  final Color color;
+  final String text;
+
+  const _StatusChip({required this.color, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.bold,
+          fontSize: 10,
+        ),
+      ),
     );
   }
 }
