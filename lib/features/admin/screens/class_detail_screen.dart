@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/teacher/providers/attendance_provider.dart';
+import 'package:smart_school/features/teacher/screens/homework_details_screen.dart';
 
 import '../../../models/school_models.dart';
 import '../../../models/student_model.dart';
@@ -656,12 +657,22 @@ class _HomeworkTab extends StatelessWidget {
                     orElse: () => Subject(id: '', name: 'Unknown Subject'),
                   )
                   .name;
-              return _HomeworkCard(
-                homework: hw,
-                subjectName: subjectName,
-                onView: () => _showViewSheet(ctx, hw, subjectName),
-                onEdit: () => _showEditSheet(ctx, hw),
-                onDelete: () => _confirmDelete(ctx, hw.id),
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => HomeworkDetailsScreen(homeworkId: hw.id),
+                    ),
+                  );
+                },
+                child: _HomeworkCard(
+                  homework: hw,
+                  subjectName: subjectName,
+                  onView: () => _showViewSheet(ctx, hw, subjectName),
+                  onEdit: () => _showEditSheet(ctx, hw),
+                  onDelete: () => _confirmDelete(ctx, hw.id),
+                ),
               );
             },
           ),

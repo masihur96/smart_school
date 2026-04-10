@@ -132,4 +132,54 @@ class HomeworkNotifier extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Homework? _selectedHomework;
+  Homework? get selectedHomework => _selectedHomework;
+
+  Future<void> getHomeworkDetails(String id) async {
+    if (_homeworkRepository == null) return;
+
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      _selectedHomework = await _homeworkRepository.fetchHomeworkDetails(id);
+    } catch (e) {
+      log('Error fetching homework details: $e');
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> updateStudentHomeworkStatus({
+    required String studentHomeworkId,
+    required String status,
+    String? comment,
+  }) async {
+    if (_homeworkRepository == null) return false;
+
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final success = await _homeworkRepository.updateStudentHomeworkStatus(
+        studentHomeworkId: studentHomeworkId,
+        status: status,
+        comment: comment,
+      );
+      if (success && _selectedHomework != null) {
+        // Refresh details to show updated status/comment
+        await getHomeworkDetails(_selectedHomework!.id);
+      }
+      return success;
+    } catch (e) {
+      log('Error updating student homework status: $e');
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

@@ -36,4 +36,22 @@ class HomeworkRepositoryImpl implements IHomeworkRepository {
       subjectId: subjectId,
     );
   }
+
+  @override
+  Future<Homework> fetchHomeworkDetails(String id) async {
+    return await _remoteDataSource.fetchHomeworkDetails(id);
+  }
+
+  @override
+  Future<bool> updateStudentHomeworkStatus({
+    required String studentHomeworkId,
+    required String status,
+    String? comment,
+  }) async {
+    return await _remoteDataSource.updateStudentHomeworkStatus(
+      studentHomeworkId: studentHomeworkId,
+      status: status,
+      comment: comment,
+    );
+  }
 }
