@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/teacher/providers/homework_provider.dart';
 import 'package:smart_school/models/school_models.dart';
-import 'package:intl/intl.dart';
 
 class HomeworkDetailsScreen extends StatefulWidget {
   final String homeworkId;
@@ -27,6 +27,20 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
       appBar: AppBar(
         title: const Text('Homework Details'),
         elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: () {
+              final homework = context
+                  .read<HomeworkNotifier>()
+                  .selectedHomework;
+              if (homework != null) {
+                _showUpdateStatusDialog(homeworkId: homework.id);
+              }
+            },
+            icon: const Icon(Icons.group_add_outlined),
+            tooltip: 'Bulk Update Status',
+          ),
+        ],
       ),
       body: Consumer<HomeworkNotifier>(
         builder: (context, provider, child) {
@@ -46,11 +60,22 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
               children: [
                 _buildDetailsCard(homework),
                 const SizedBox(height: 24),
-                Text(
-                  'Students (${homework.studentHomeworks.length})',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Students (${homework.studentHomeworks.length})',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () =>
+                          _showUpdateStatusDialog(homeworkId: homework.id),
+                      icon: const Icon(Icons.edit_note, size: 18),
+                      label: const Text('Bulk Update'),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 if (homework.studentHomeworks.isEmpty)
@@ -69,7 +94,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                         const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final studentHomework = homework.studentHomeworks[index];
-                      return _buildStudentItem(studentHomework);
+                      return _buildStudentItem(homework.id, studentHomework);
                     },
                   ),
               ],
@@ -96,17 +121,20 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                   child: Text(
                     homework.title,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
                   ),
                 ),
                 _buildDueDateChip(homework.dueDate),
               ],
             ),
             const Divider(height: 32),
-            _buildDetailRow(Icons.description_outlined, 'Description',
-                homework.description),
+            _buildDetailRow(
+              Icons.description_outlined,
+              'Description',
+              homework.description,
+            ),
             const SizedBox(height: 16),
             _buildDetailRow(
               Icons.calendar_today_outlined,
@@ -185,7 +213,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
     );
   }
 
-  Widget _buildStudentItem(StudentHomework studentHomework) {
+  Widget _buildStudentItem(String homeworkId, StudentHomework studentHomework) {
     final student = studentHomework.student;
     return Card(
       elevation: 1,
@@ -200,7 +228,9 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                  backgroundColor: Theme.of(
+                    context,
+                  ).primaryColor.withOpacity(0.1),
                   child: Text(
                     student?.name.substring(0, 1).toUpperCase() ?? 'S',
                     style: TextStyle(
@@ -241,7 +271,11 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.comment_outlined, size: 16, color: Colors.grey),
+                  const Icon(
+                    Icons.comment_outlined,
+                    size: 16,
+                    color: Colors.grey,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -260,7 +294,17 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: () => _showUpdateStatusDialog(studentHomework),
+                onPressed: () {
+                  print(studentHomework.studentId);
+                  print(studentHomework.id);
+
+                  _showUpdateStatusDialog(
+                    homeworkId: studentHomework.studentId,
+                    studentId: studentHomework.id,
+                    currentStatus: studentHomework.status,
+                    currentComment: studentHomework.comment,
+                  );
+                },
                 icon: const Icon(Icons.edit_note, size: 18),
                 label: const Text('Update Status & Comment'),
                 style: OutlinedButton.styleFrom(
@@ -279,14 +323,11 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
   Widget _buildStatusChip(String status) {
     Color color;
     switch (status.toLowerCase()) {
-      case 'completed':
-        color = Colors.green;
-        break;
       case 'pending':
         color = Colors.orange;
         break;
-      case 'submitted':
-        color = Colors.blue;
+      case 'done':
+        color = Colors.purple;
         break;
       default:
         color = Colors.grey;
@@ -310,10 +351,15 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
     );
   }
 
-  void _showUpdateStatusDialog(StudentHomework studentHomework) {
-    String selectedStatus = studentHomework.status;
-    final commentController =
-        TextEditingController(text: studentHomework.comment);
+  void _showUpdateStatusDialog({
+    required String homeworkId,
+    String? studentId,
+    String currentStatus = 'pending',
+    String? currentComment,
+  }) {
+    String selectedStatus = currentStatus;
+    final commentController = TextEditingController(text: currentComment);
+    final isBulk = studentId == null;
 
     showDialog(
       context: context,
@@ -321,13 +367,26 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text('Update Homework Status'),
+              title: Text(
+                isBulk ? 'Bulk Update Status' : 'Update Student Status',
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (isBulk)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 16.0),
+                      child: Text(
+                        'This will update the status for ALL students in this homework.',
+                        style: TextStyle(color: Colors.orange, fontSize: 13),
+                      ),
+                    ),
                   DropdownButtonFormField<String>(
-                    value: ['pending', 'completed', 'submitted']
-                            .contains(selectedStatus.toLowerCase())
+                    value:
+                        [
+                          'pending',
+                          'done',
+                        ].contains(selectedStatus.toLowerCase())
                         ? selectedStatus.toLowerCase()
                         : 'pending',
                     decoration: const InputDecoration(
@@ -335,11 +394,11 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                       border: OutlineInputBorder(),
                     ),
                     items: const [
-                      DropdownMenuItem(value: 'pending', child: Text('Pending')),
                       DropdownMenuItem(
-                          value: 'submitted', child: Text('Submitted')),
-                      DropdownMenuItem(
-                          value: 'completed', child: Text('Completed')),
+                        value: 'pending',
+                        child: Text('Pending'),
+                      ),
+                      DropdownMenuItem(value: 'done', child: Text('Done')),
                     ],
                     onChanged: (value) {
                       if (value != null) {
@@ -353,7 +412,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Comment',
                       border: OutlineInputBorder(),
-                      hintText: 'Add feedback for the student...',
+                      hintText: 'Add feedback...',
                     ),
                     maxLines: 3,
                   ),
@@ -369,27 +428,43 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                     final navigator = Navigator.of(context);
                     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
-                    final success = await context
-                        .read<HomeworkNotifier>()
-                        .updateStudentHomeworkStatus(
-                          studentHomeworkId: studentHomework.id,
-                          status: selectedStatus,
-                          comment: commentController.text,
-                        );
+                    final success = isBulk
+                        ? await context
+                              .read<HomeworkNotifier>()
+                              .bulkUpdateStudentHomeworkStatus(
+                                homeworkId: homeworkId,
+                                status: selectedStatus,
+                                comment: commentController.text,
+                              )
+                        : await context
+                              .read<HomeworkNotifier>()
+                              .updateStudentHomeworkStatus(
+                                homeworkId: homeworkId,
+                                studentId: studentId!,
+                                status: selectedStatus,
+                                comment: commentController.text,
+                              );
 
                     if (success) {
                       navigator.pop();
                       scaffoldMessenger.showSnackBar(
-                        const SnackBar(
-                            content: Text('Status updated successfully')),
+                        SnackBar(
+                          content: Text(
+                            isBulk
+                                ? 'Bulk status updated successfully'
+                                : 'Student status updated successfully',
+                          ),
+                        ),
                       );
                     } else {
                       scaffoldMessenger.showSnackBar(
-                        const SnackBar(content: Text('Failed to update status')),
+                        const SnackBar(
+                          content: Text('Failed to update status'),
+                        ),
                       );
                     }
                   },
-                  child: const Text('Update'),
+                  child: Text(isBulk ? 'Bulk Update' : 'Update'),
                 ),
               ],
             );

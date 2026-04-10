@@ -191,4 +191,59 @@ class HomeworkRemoteDataSource {
 
     return response.statusCode! >= 200 && response.statusCode! < 300;
   }
+
+  Future<bool> bulkUpdateStudentHomeworkStatus({
+    required String homeworkId,
+    required String status,
+    String? comment,
+  }) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    final payload = {
+      'status': status,
+      if (comment != null) 'comment': comment,
+    };
+
+    final response = await _dataProvider.performRequest(
+      'PATCH',
+      APIPath.bulkUpdateHomework(homeworkId),
+      data: payload,
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response == null || response.statusCode == null) {
+      throw Exception('No response from server');
+    }
+
+    return response.statusCode! >= 200 && response.statusCode! < 300;
+  }
+
+  Future<bool> updateSpecificStudentHomeworkStatus({
+    required String homeworkId,
+    required String studentId,
+    required String status,
+    String? comment,
+  }) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    final payload = {
+      'status': status,
+      if (comment != null) 'comment': comment,
+    };
+
+    final response = await _dataProvider.performRequest(
+      'PATCH',
+      APIPath.updateStudentHomeworkDirect(homeworkId, studentId),
+      data: payload,
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response == null || response.statusCode == null) {
+      throw Exception('No response from server');
+    }
+
+    return response.statusCode! >= 200 && response.statusCode! < 300;
+  }
 }

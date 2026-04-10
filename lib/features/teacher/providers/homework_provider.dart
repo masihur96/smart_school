@@ -153,8 +153,8 @@ class HomeworkNotifier extends ChangeNotifier {
     }
   }
 
-  Future<bool> updateStudentHomeworkStatus({
-    required String studentHomeworkId,
+  Future<bool> bulkUpdateStudentHomeworkStatus({
+    required String homeworkId,
     required String status,
     String? comment,
   }) async {
@@ -164,13 +164,43 @@ class HomeworkNotifier extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final success = await _homeworkRepository.updateStudentHomeworkStatus(
-        studentHomeworkId: studentHomeworkId,
+      final success = await _homeworkRepository.bulkUpdateStudentHomeworkStatus(
+        homeworkId: homeworkId,
         status: status,
         comment: comment,
       );
       if (success && _selectedHomework != null) {
-        // Refresh details to show updated status/comment
+        await getHomeworkDetails(_selectedHomework!.id);
+      }
+      return success;
+    } catch (e) {
+      log('Error bulk updating student homework status: $e');
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> updateStudentHomeworkStatus({
+    required String homeworkId,
+    required String studentId,
+    required String status,
+    String? comment,
+  }) async {
+    if (_homeworkRepository == null) return false;
+
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final success = await _homeworkRepository.updateSpecificStudentHomeworkStatus(
+        homeworkId: homeworkId,
+        studentId: studentId,
+        status: status,
+        comment: comment,
+      );
+      if (success && _selectedHomework != null) {
         await getHomeworkDetails(_selectedHomework!.id);
       }
       return success;

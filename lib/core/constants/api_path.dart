@@ -38,4 +38,8 @@ class APIPath {
   static String homeworkDetails(String id) => "$baseUrl/teacher/homework/$id";
   static String updateStudentHomework(String id) =>
       "$baseUrl/teacher/homework/student-homework/$id";
+  static String bulkUpdateHomework(String homeworkId) =>
+      "$baseUrl/teacher/homework/$homeworkId/students/bulk";
+  static String updateStudentHomeworkDirect(String homeworkId, String studentId) =>
+      "$baseUrl/teacher/homework/$homeworkId/students/$studentId";
 }
