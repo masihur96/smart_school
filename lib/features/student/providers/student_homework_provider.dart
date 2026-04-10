@@ -6,11 +6,11 @@ import '../../../core/utils/storage_service.dart';
 import '../../../models/school_models.dart';
 
 class StudentHomeworkNotifier extends ChangeNotifier {
-  List<Homework> _homeworkList = [];
+  List<StudentHomework> _homeworkList = [];
   bool _isLoading = false;
   String? _error;
 
-  List<Homework> get homeworkList => _homeworkList;
+  List<StudentHomework> get homeworkList => _homeworkList;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -36,9 +36,13 @@ class StudentHomeworkNotifier extends ChangeNotifier {
             ? rawData
             : (rawData is Map ? (rawData['data'] ?? []) : []);
         
-        _homeworkList = data.map((json) => Homework.fromJson(json)).toList();
+        _homeworkList = data.map((json) => StudentHomework.fromJson(json)).toList();
         // Sort by due date (most recent/closest first)
-        _homeworkList.sort((a, b) => a.dueDate.compareTo(b.dueDate));
+        _homeworkList.sort((a, b) {
+          final dateA = a.homework?.dueDate ?? DateTime.now();
+          final dateB = b.homework?.dueDate ?? DateTime.now();
+          return dateA.compareTo(dateB);
+        });
         log('Fetched ${_homeworkList.length} student homework entries for class $classId');
       } else {
         _error = 'Failed to fetch homework: ${response?.statusCode}';

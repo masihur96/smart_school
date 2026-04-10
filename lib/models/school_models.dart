@@ -252,6 +252,7 @@ class StudentHomework {
   final DateTime createdAt;
   final DateTime updatedAt;
   final StudentSummary? student;
+  final Homework? homework;
 
   StudentHomework({
     required this.id,
@@ -263,6 +264,7 @@ class StudentHomework {
     required this.createdAt,
     required this.updatedAt,
     this.student,
+    this.homework,
   });
 
   factory StudentHomework.fromJson(Map<String, dynamic> json) => StudentHomework(
@@ -275,6 +277,7 @@ class StudentHomework {
     createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
     updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),
     student: json['student'] != null ? StudentSummary.fromJson(json['student']) : null,
+    homework: json['homework'] != null ? Homework.fromJson(json['homework']) : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -287,6 +290,7 @@ class StudentHomework {
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
     if (student != null) 'student': student!.toJson(),
+    if (homework != null) 'homework': homework!.toJson(),
   };
 }
 
@@ -398,6 +402,7 @@ class RoutineEntry {
   final ClassRoom? classEntity;
   final Subject? subjectEntity;
   final Section? sectionEntity;
+  final Teacher? teacherEntity;
 
   RoutineEntry({
     this.id,
@@ -413,6 +418,7 @@ class RoutineEntry {
     this.classEntity,
     this.subjectEntity,
     this.sectionEntity,
+    this.teacherEntity,
   });
 
   factory RoutineEntry.fromJson(Map<String, dynamic> json) {
@@ -431,6 +437,7 @@ class RoutineEntry {
       classEntity: json['classEntity'] != null ? ClassRoom.fromJson(json['classEntity']) : null,
       subjectEntity: json['subjectEntity'] != null ? Subject.fromJson(json['subjectEntity']) : null,
       sectionEntity: json['sectionEntity'] != null ? Section.fromJson(json['sectionEntity']) : null,
+      teacherEntity: json['teacherEntity'] != null ? Teacher.fromJson(json['teacherEntity']) : null,
     );
   }
 
