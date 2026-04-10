@@ -720,3 +720,66 @@ class Teacher {
       );
 }
 
+class TeacherSelfAttendance {
+  final String id;
+  final String teacherId;
+  final String date;
+  final String time;
+  final String lat;
+  final String lon;
+  final double distanceFromCenter;
+  final String status;
+  final String schoolId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  TeacherSelfAttendance({
+    required this.id,
+    required this.teacherId,
+    required this.date,
+    required this.time,
+    required this.lat,
+    required this.lon,
+    required this.distanceFromCenter,
+    required this.status,
+    required this.schoolId,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory TeacherSelfAttendance.fromJson(Map<String, dynamic> json) =>
+      TeacherSelfAttendance(
+        id: json['id'] ?? '',
+        teacherId: json['teacherId'] ?? '',
+        date: json['date'] ?? '',
+        time: json['time'] ?? '',
+        lat: json['lat']?.toString() ?? '',
+        lon: json['lon']?.toString() ?? '',
+        distanceFromCenter:
+            (json['distanceFromCenter'] as num?)?.toDouble() ?? 0.0,
+        status: json['status'] ?? '',
+        schoolId: json['schoolId'] ?? '',
+        createdAt: json['createdAt'] != null
+            ? DateTime.parse(json['createdAt'])
+            : DateTime.now(),
+        updatedAt: json['updatedAt'] != null
+            ? DateTime.parse(json['updatedAt'])
+            : DateTime.now(),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'teacherId': teacherId,
+        'date': date,
+        'time': time,
+        'lat': lat,
+        'lon': lon,
+        'distanceFromCenter': distanceFromCenter,
+        'status': status,
+        'schoolId': schoolId,
+        'createdAt': createdAt.toIso8601String(),
+        'updatedAt': updatedAt.toIso8601String(),
+      };
+}
+
+

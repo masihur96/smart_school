@@ -48,6 +48,48 @@ class TeacherDashboardProvider extends ChangeNotifier {
     }
   }
 
+  TeacherSelfAttendance? _todayAttendance;
+  TeacherSelfAttendance? get todayAttendance => _todayAttendance;
+
+  Future<void> fetchTodayAttendance(String date) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final url = '${APIPath.selfAttendance}?date=$date';
+      log('Fetching today attendance: $url');
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        url,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
+        final List<dynamic> data = response.data['data'] ?? [];
+        if (data.isNotEmpty) {
+          _todayAttendance = TeacherSelfAttendance.fromJson(data.first);
+        } else {
+          _todayAttendance = null;
+        }
+      } else {
+        throw Exception(
+            'Failed to load attendance: ${response?.statusCode} - ${response?.data}');
+      }
+    } catch (e) {
+      log('Error fetching today attendance: $e');
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> submitSelfAttendance(double lat, double lon) async {
     _isLoading = true;
     _error = null;
@@ -64,9 +106,17 @@ class TeacherDashboardProvider extends ChangeNotifier {
         header: {'Authorization': 'Bearer $token'},
       );
 
-      if (response == null || (response.statusCode != 200 && response.statusCode != 201)) {
-        throw Exception(response?.data?['message'] ?? 'Failed to submit attendance');
+      if (response == null ||
+          (response.statusCode != 200 && response.statusCode != 201)) {
+        throw Exception(
+            response?.data?['message'] ?? 'Failed to submit attendance');
       }
+
+      // Refresh attendance after successful submission
+      final now = DateTime.now();
+      final dateStr =
+          "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
+      await fetchTodayAttendance(dateStr);
     } catch (e) {
       log('Error submitting self attendance: $e');
       _error = e.toString();
