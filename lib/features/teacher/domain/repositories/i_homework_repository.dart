@@ -12,8 +12,14 @@ abstract class IHomeworkRepository {
     String? subjectId,
   });
   Future<Homework> fetchHomeworkDetails(String id);
-  Future<bool> updateStudentHomeworkStatus({
-    required String studentHomeworkId,
+  Future<bool> bulkUpdateStudentHomeworkStatus({
+    required String homeworkId,
+    required String status,
+    String? comment,
+  });
+  Future<bool> updateSpecificStudentHomeworkStatus({
+    required String homeworkId,
+    required String studentId,
     required String status,
     String? comment,
   });
