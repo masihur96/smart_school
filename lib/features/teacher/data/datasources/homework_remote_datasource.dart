@@ -140,4 +140,55 @@ class HomeworkRemoteDataSource {
       throw Exception('Failed to fetch homework');
     }
   }
+
+  Future<Homework> fetchHomeworkDetails(String id) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    final response = await _dataProvider.performRequest(
+      'GET',
+      APIPath.homeworkDetails(id),
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response == null || response.statusCode == null) {
+      throw Exception('No response from server');
+    }
+
+    if (response.statusCode! >= 200 && response.statusCode! < 300) {
+      final dynamic rawData = response.data;
+      final Map<String, dynamic> data =
+          rawData is Map ? (rawData['data'] ?? rawData) : {};
+      return Homework.fromJson(data);
+    } else {
+      throw Exception('Failed to fetch homework details');
+    }
+  }
+
+  Future<bool> updateStudentHomeworkStatus({
+    required String studentHomeworkId,
+    required String status,
+    String? comment,
+  }) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    final payload = {
+      'status': status,
+      if (comment != null) 'comment': comment,
+    };
+
+    final response = await _dataProvider.performRequest(
+      'PATCH',
+      APIPath.updateStudentHomework(studentHomeworkId),
+      data: payload,
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response == null || response.statusCode == null) {
+      throw Exception('No response from server');
+    }
+
+    return response.statusCode! >= 200 && response.statusCode! < 300;
+  }
 }

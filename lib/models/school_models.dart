@@ -195,6 +195,7 @@ class Homework {
   final String schoolId;
   final DateTime dueDate;
   final DateTime createdAt;
+  final List<StudentHomework> studentHomeworks;
 
   Homework({
     required this.id,
@@ -207,6 +208,7 @@ class Homework {
     required this.schoolId,
     required this.dueDate,
     required this.createdAt,
+    this.studentHomeworks = const [],
   });
 
   factory Homework.fromJson(Map<String, dynamic> json) => Homework(
@@ -220,6 +222,9 @@ class Homework {
     schoolId: json['schoolId'] ?? '',
     dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : DateTime.now(),
     createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+    studentHomeworks: (json['studentHomeworks'] as List? ?? [])
+        .map((e) => StudentHomework.fromJson(e))
+        .toList(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -233,6 +238,87 @@ class Homework {
     'schoolId': schoolId,
     'dueDate': dueDate.toIso8601String(),
     'createdAt': createdAt.toIso8601String(),
+    'studentHomeworks': studentHomeworks.map((e) => e.toJson()).toList(),
+  };
+}
+
+class StudentHomework {
+  final String id;
+  final String homeworkId;
+  final String studentId;
+  final String status;
+  final String? comment;
+  final String? updatedBy;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final StudentSummary? student;
+
+  StudentHomework({
+    required this.id,
+    required this.homeworkId,
+    required this.studentId,
+    required this.status,
+    this.comment,
+    this.updatedBy,
+    required this.createdAt,
+    required this.updatedAt,
+    this.student,
+  });
+
+  factory StudentHomework.fromJson(Map<String, dynamic> json) => StudentHomework(
+    id: json['id'] ?? '',
+    homeworkId: json['homeworkId'] ?? '',
+    studentId: json['studentId'] ?? '',
+    status: json['status'] ?? 'pending',
+    comment: json['comment'],
+    updatedBy: json['updatedBy'],
+    createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+    updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),
+    student: json['student'] != null ? StudentSummary.fromJson(json['student']) : null,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'homeworkId': homeworkId,
+    'studentId': studentId,
+    'status': status,
+    'comment': comment,
+    'updatedBy': updatedBy,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+    if (student != null) 'student': student!.toJson(),
+  };
+}
+
+class StudentSummary {
+  final String id;
+  final String name;
+  final String? rollNumber;
+  final String? email;
+  final String? phone;
+
+  StudentSummary({
+    required this.id,
+    required this.name,
+    this.rollNumber,
+    this.email,
+    this.phone,
+  });
+
+  factory StudentSummary.fromJson(Map<String, dynamic> json) => StudentSummary(
+    id: json['id'] ?? '',
+    name: json['name'] ?? '',
+    rollNumber: json['rollNumber'],
+    email: json['email'],
+    phone: json['phone'],
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'rollNumber': rollNumber,
+    'email': email,
+    'phone': phone,
   };
 }
 
