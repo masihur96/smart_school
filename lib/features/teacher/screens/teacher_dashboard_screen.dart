@@ -30,7 +30,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final now = DateTime.now();
       final dayName = DateFormat('EEEE').format(now);
+      final dateStr = DateFormat('dd/MM/yyyy').format(now);
       context.read<TeacherDashboardProvider>().fetchTodayClasses(dayName);
+      context.read<TeacherDashboardProvider>().fetchTodayAttendance(dateStr);
     });
   }
 
@@ -318,30 +320,101 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   Widget _buildSelfAttendanceButton(BuildContext context, User? user) {
     if (user?.role != UserRole.teacher) return const SizedBox.shrink();
 
+    final attendance = context
+        .watch<TeacherDashboardProvider>()
+        .todayAttendance;
+    final hasMarked = attendance != null;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         ElevatedButton(
-          onPressed: () => _performSelfAttendance(context, user),
+          onPressed: hasMarked
+              ? () => _showAttendanceDetails(context, attendance)
+              : () => _performSelfAttendance(context, user),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.green.shade700,
+            backgroundColor: hasMarked ? Colors.green.shade50 : Colors.white,
+            foregroundColor: hasMarked ? Colors.green : Colors.green.shade700,
             shape: const CircleBorder(),
             padding: const EdgeInsets.all(16),
             elevation: 4,
           ),
-          child: const Icon(Icons.location_on, size: 28),
+          child: Icon(
+            hasMarked ? Icons.check_circle : Icons.location_on,
+            size: 28,
+          ),
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Check In',
-          style: TextStyle(
+        Text(
+          hasMarked ? 'View Attendance' : 'Check In',
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 12,
             fontWeight: FontWeight.bold,
           ),
         ),
       ],
+    );
+  }
+
+  void _showAttendanceDetails(
+    BuildContext context,
+    TeacherSelfAttendance attendance,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.green),
+            SizedBox(width: 8),
+            Text('Today\'s Attendance'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildDetailRow(
+              'Status',
+              attendance.status.toUpperCase(),
+              isSuccess: true,
+            ),
+            _buildDetailRow('Date', attendance.date),
+            _buildDetailRow('Time', attendance.time),
+            _buildDetailRow(
+              'Distance',
+              '${attendance.distanceFromCenter.toStringAsFixed(1)} meters',
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value, {bool isSuccess = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+          Text(
+            value,
+            style: TextStyle(
+              color: isSuccess ? Colors.green : Colors.black87,
+              fontWeight: isSuccess ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -418,7 +491,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       print(position.latitude);
       print(position.longitude);
 
-      if (distanceInMeters != user.radius!) {
+      if (distanceInMeters <= user.radius!) {
         // 4. Submit attendance
         if (mounted) {
           context
