@@ -65,7 +65,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
-        backgroundColor: _selectedIndex == 0 ? Colors.green.shade600 : Colors.green,
+        backgroundColor: _selectedIndex == 0
+            ? Colors.green.shade600
+            : Colors.green,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -112,13 +114,17 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           unselectedItemColor: Colors.grey.shade500,
           backgroundColor: Colors.white,
           elevation: 0,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          selectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
           unselectedLabelStyle: const TextStyle(fontSize: 12),
           items: const [
             BottomNavigationBarItem(
-                icon: Icon(Icons.dashboard_outlined),
-                activeIcon: Icon(Icons.dashboard),
-                label: 'Home'),
+              icon: Icon(Icons.dashboard_outlined),
+              activeIcon: Icon(Icons.dashboard),
+              label: 'Home',
+            ),
             BottomNavigationBarItem(
               icon: Icon(Icons.check_circle_outline),
               activeIcon: Icon(Icons.check_circle),
@@ -162,9 +168,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     Text(
                       'Schedule Today',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blueGrey.shade900,
-                          ),
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blueGrey.shade900,
+                      ),
                     ),
                     TextButton(
                       onPressed: () {}, // Future: View full schedule
@@ -190,9 +196,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 Text(
                   'Quick Actions',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blueGrey.shade900,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueGrey.shade900,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 _buildQuickActionsGrid(context),
@@ -235,10 +241,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white, width: 2),
               boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                ),
+                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8),
               ],
             ),
             child: CircleAvatar(
@@ -267,8 +270,10 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 ),
                 const SizedBox(height: 8),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(20),
@@ -276,8 +281,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.calendar_today,
-                          color: Colors.white, size: 14),
+                      const Icon(
+                        Icons.calendar_today,
+                        color: Colors.white,
+                        size: 14,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         '$count Classes Today',
@@ -299,8 +307,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   }
 
   Widget _buildClassCard(BuildContext context, RoutineEntry classInfo) {
-    final classNameText = classInfo.classEntity?.name ?? 'Class ${classInfo.classId}';
-    final sectionNameText = classInfo.sectionEntity?.name != null ? ' - ${classInfo.sectionEntity!.name}' : '';
+    final classNameText =
+        classInfo.classEntity?.name ?? 'Class ${classInfo.classId}';
+    final sectionNameText = classInfo.sectionEntity?.name != null
+        ? ' - ${classInfo.sectionEntity!.name}'
+        : '';
     final className = '$classNameText$sectionNameText';
     final subjectName =
         classInfo.subjectEntity?.name ?? 'Subject ${classInfo.subjectId}';
@@ -319,16 +330,18 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         ],
       ),
       child: InkWell(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ClassDetailScreen(
-              subjectID: classInfo.subjectId??"",
-              classRoom: classInfo.classEntity!,
-              sectionId: classInfo.sectionId,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ClassDetailScreen(
+                subjectID: classInfo.subjectId ?? "",
+                classRoom: classInfo.classEntity!,
+                sectionId: classInfo.sectionId,
+              ),
             ),
-          ),
-        ),
+          );
+        },
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -369,8 +382,10 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.orange.shade50,
                       borderRadius: BorderRadius.circular(8),
@@ -385,8 +400,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Icon(Icons.arrow_forward_ios,
-                      size: 14, color: Colors.grey),
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 14,
+                    color: Colors.grey,
+                  ),
                 ],
               ),
             ],
@@ -496,9 +514,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         children: [
           const Icon(Icons.error_outline, color: Colors.red, size: 48),
           const SizedBox(height: 16),
-          Text('Failed to load classes: $error',
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.red)),
+          Text(
+            'Failed to load classes: $error',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.red),
+          ),
         ],
       ),
     );
