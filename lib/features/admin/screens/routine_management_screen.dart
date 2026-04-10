@@ -403,6 +403,8 @@ class _DayRoutineTab extends StatelessWidget {
                     id: classId,
                     name: entry.classEntity?.name ?? "",
                   ),
+                  sectionId: entry.sectionId,
+                  subjectID: entry.subjectId,
                 ),
               ),
             );

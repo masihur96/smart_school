@@ -1,13 +1,13 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/teacher/providers/attendance_provider.dart';
+
 import '../../../models/school_models.dart';
 import '../../../models/student_model.dart';
-import '../providers/student_provider.dart';
-import '../providers/setup_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../teacher/providers/homework_provider.dart';
+import '../providers/setup_provider.dart';
+import '../providers/student_provider.dart';
 
 // ─── Colour palette (shared) ─────────────────────────────────────────────────
 const _kPrimary = Color(0xFF6C3CE1);
@@ -20,10 +20,15 @@ const _kDivider = Color(0xFFEDE9F8);
 
 class ClassDetailScreen extends StatefulWidget {
   final ClassRoom classRoom;
-  final String? subjectID;
+  final String subjectID;
   final String? sectionId;
 
-  const ClassDetailScreen({super.key, this.subjectID, required this.classRoom, this.sectionId});
+  const ClassDetailScreen({
+    super.key,
+    required this.subjectID,
+    required this.classRoom,
+    this.sectionId,
+  });
 
   @override
   State<ClassDetailScreen> createState() => _ClassDetailScreenState();
@@ -45,9 +50,9 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Load students for this class + section
       context.read<StudentsNotifier>().fetchStudentsBySection(
-            classId: widget.classRoom.id,
-            sectionId: widget.sectionId,
-          );
+        classId: widget.classRoom.id,
+        sectionId: widget.sectionId,
+      );
       // Ensure subjects are loaded for homework
       final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
       if (schoolId.isNotEmpty) {
@@ -56,26 +61,26 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
 
       // Load homework for this class
       context.read<HomeworkNotifier>().fetchHomework(
-            classId: widget.classRoom.id,
-            sectionId: widget.sectionId,
-            subjectId: widget.subjectID,
-          );
-      
+        classId: widget.classRoom.id,
+        sectionId: widget.sectionId,
+        subjectId: widget.subjectID,
+      );
+
       _loadAttendanceForDate();
     });
   }
 
   Future<void> _loadAttendanceForDate() async {
     await context.read<AttendanceNotifier>().fetchAttendanceFromAPI(
-          classId: widget.classRoom.id,
-          sectionId: widget.sectionId,
-          date: _selectedDate,
-        );
+      classId: widget.classRoom.id,
+      sectionId: widget.sectionId,
+      date: _selectedDate,
+    );
 
     if (mounted) {
-      final records = context
-          .read<AttendanceNotifier>()
-          .getRecordsForDate(_selectedDate);
+      final records = context.read<AttendanceNotifier>().getRecordsForDate(
+        _selectedDate,
+      );
       setState(() {
         _attendanceMap.clear();
         for (var record in records) {
@@ -133,13 +138,15 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
           _attendanceMap[student.userId] ?? AttendanceStatus.present;
     }
 
-    final success = await context.read<AttendanceNotifier>().submitAttendanceToAPI(
-      date: _selectedDate,
-      takenBy: teacherId,
-      classId: widget.classRoom.id,
-      sectionId: widget.sectionId,
-      attendanceMap: fullMap,
-    );
+    final success = await context
+        .read<AttendanceNotifier>()
+        .submitAttendanceToAPI(
+          date: _selectedDate,
+          takenBy: teacherId,
+          classId: widget.classRoom.id,
+          sectionId: widget.sectionId,
+          attendanceMap: fullMap,
+        );
 
     if (!mounted) return;
 
@@ -250,7 +257,11 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
                 setState(() => _attendanceMap[studentId] = status);
               },
             ),
-            _HomeworkTab(classRoom: widget.classRoom, sectionId: widget.sectionId),
+            _HomeworkTab(
+              classRoom: widget.classRoom,
+              sectionId: widget.sectionId,
+              subjectId: widget.subjectID ?? "",
+            ),
           ],
         ),
       ),
@@ -270,7 +281,8 @@ class _AttendanceTab extends StatelessWidget {
   final Map<String, AttendanceStatus> attendanceMap;
   final VoidCallback onPickDate;
   final VoidCallback onSave;
-  final void Function(String studentId, AttendanceStatus status) onStatusChanged;
+  final void Function(String studentId, AttendanceStatus status)
+  onStatusChanged;
 
   const _AttendanceTab({
     required this.classRoom,
@@ -288,7 +300,7 @@ class _AttendanceTab extends StatelessWidget {
     final studentNotifier = context.watch<StudentsNotifier>();
     final attendanceNotifier = context.watch<AttendanceNotifier>();
     final isLoading = studentNotifier.isLoading || attendanceNotifier.isLoading;
-    
+
     final students = studentNotifier.students;
 
     return Column(
@@ -299,7 +311,11 @@ class _AttendanceTab extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             children: [
-              const Icon(Icons.calendar_today, size: 18, color: Color(0xFF7C3AED)),
+              const Icon(
+                Icons.calendar_today,
+                size: 18,
+                color: Color(0xFF7C3AED),
+              ),
               const SizedBox(width: 8),
               const Text(
                 'Date:',
@@ -309,13 +325,16 @@ class _AttendanceTab extends StatelessWidget {
               GestureDetector(
                 onTap: onPickDate,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF7C3AED).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: const Color(0xFF7C3AED).withOpacity(0.3)),
+                      color: const Color(0xFF7C3AED).withOpacity(0.3),
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -329,8 +348,11 @@ class _AttendanceTab extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      const Icon(Icons.arrow_drop_down,
-                          size: 18, color: Color(0xFF7C3AED)),
+                      const Icon(
+                        Icons.arrow_drop_down,
+                        size: 18,
+                        color: Color(0xFF7C3AED),
+                      ),
                     ],
                   ),
                 ),
@@ -350,26 +372,27 @@ class _AttendanceTab extends StatelessWidget {
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
               : students.isEmpty
-                  ? _EmptyState(
-                      icon: Icons.people_outline,
-                      message: 'No students found in\n${classRoom.name}',
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-                      itemCount: students.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder: (context, index) {
-                        final student = students[index];
-                        final status = attendanceMap[student.userId] ??
-                            AttendanceStatus.present;
-                        return _StudentAttendanceCard(
-                          student: student,
-                          status: status,
-                          onChanged: (newStatus) =>
-                              onStatusChanged(student.userId, newStatus),
-                        );
-                      },
-                    ),
+              ? _EmptyState(
+                  icon: Icons.people_outline,
+                  message: 'No students found in\n${classRoom.name}',
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+                  itemCount: students.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final student = students[index];
+                    final status =
+                        attendanceMap[student.userId] ??
+                        AttendanceStatus.present;
+                    return _StudentAttendanceCard(
+                      student: student,
+                      status: status,
+                      onChanged: (newStatus) =>
+                          onStatusChanged(student.userId, newStatus),
+                    );
+                  },
+                ),
         ),
 
         // Save button
@@ -442,10 +465,7 @@ class _StudentAttendanceCard extends StatelessWidget {
             offset: const Offset(0, 3),
           ),
         ],
-        border: Border.all(
-          color: _kDivider.withOpacity(0.5),
-          width: 1,
-        ),
+        border: Border.all(color: _kDivider.withOpacity(0.5), width: 1),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -593,10 +613,12 @@ class _ToggleChip extends StatelessWidget {
 class _HomeworkTab extends StatelessWidget {
   final ClassRoom classRoom;
   final String? sectionId;
+  final String subjectId;
 
   const _HomeworkTab({
     required this.classRoom,
     this.sectionId,
+    required this.subjectId,
   });
 
   @override
@@ -627,8 +649,7 @@ class _HomeworkTab extends StatelessWidget {
             separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (ctx, index) {
               final hw = homeworkList[index];
-              final subjects =
-                  context.read<SubjectSetupNotifier>().subjects;
+              final subjects = context.read<SubjectSetupNotifier>().subjects;
               final subjectName = subjects
                   .firstWhere(
                     (s) => s.id == hw.subjectId,
@@ -656,7 +677,10 @@ class _HomeworkTab extends StatelessWidget {
             icon: const Icon(Icons.add, color: Colors.white),
             label: const Text(
               'Add Homework',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
@@ -672,6 +696,7 @@ class _HomeworkTab extends StatelessWidget {
       builder: (_) => _AddHomeworkSheet(
         classRoom: classRoom,
         sectionId: sectionId,
+        subjectId: subjectId,
       ),
     );
   }
@@ -684,20 +709,23 @@ class _HomeworkTab extends StatelessWidget {
       builder: (_) => _AddHomeworkSheet(
         classRoom: classRoom,
         sectionId: sectionId,
+        subjectId: subjectId,
         homework: homework,
       ),
     );
   }
 
-  void _showViewSheet(BuildContext context, Homework homework, String subjectName) {
+  void _showViewSheet(
+    BuildContext context,
+    Homework homework,
+    String subjectName,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _ViewHomeworkSheet(
-        homework: homework,
-        subjectName: subjectName,
-      ),
+      builder: (_) =>
+          _ViewHomeworkSheet(homework: homework, subjectName: subjectName),
     );
   }
 
@@ -714,7 +742,9 @@ class _HomeworkTab extends StatelessWidget {
           ),
           TextButton(
             onPressed: () async {
-              final success = await context.read<HomeworkNotifier>().removeHomework(id);
+              final success = await context
+                  .read<HomeworkNotifier>()
+                  .removeHomework(id);
               if (ctx.mounted) {
                 Navigator.pop(ctx);
                 if (!success) {
@@ -768,9 +798,7 @@ class _HomeworkCard extends StatelessWidget {
             offset: const Offset(0, 5),
           ),
         ],
-        border: Border.all(
-          color: const Color(0xFF7C3AED).withOpacity(0.08),
-        ),
+        border: Border.all(color: const Color(0xFF7C3AED).withOpacity(0.08)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -787,8 +815,11 @@ class _HomeworkCard extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.assignment_rounded,
-                  color: Colors.white, size: 22),
+              child: const Icon(
+                Icons.assignment_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
             ),
             const SizedBox(width: 12),
             // Content
@@ -819,18 +850,17 @@ class _HomeworkCard extends StatelessWidget {
                       homework.description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
                   ],
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.event_rounded,
-                          size: 14,
-                          color: isPast ? Colors.red[400] : Colors.grey[500]),
+                      Icon(
+                        Icons.event_rounded,
+                        size: 14,
+                        color: isPast ? Colors.red[400] : Colors.grey[500],
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         'Due: $due',
@@ -904,10 +934,12 @@ class _HomeworkCard extends StatelessWidget {
 class _AddHomeworkSheet extends StatefulWidget {
   final ClassRoom classRoom;
   final String? sectionId;
+  final String subjectId;
   final Homework? homework;
 
   const _AddHomeworkSheet({
     required this.classRoom,
+    required this.subjectId,
     this.sectionId,
     this.homework,
   });
@@ -920,16 +952,20 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
   late final TextEditingController _descController;
-  String? _selectedSubjectId;
   late DateTime _dueDate;
 
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.homework?.title ?? '');
-    _descController = TextEditingController(text: widget.homework?.description ?? '');
-    _selectedSubjectId = widget.homework?.subjectId;
-    _dueDate = widget.homework?.dueDate ?? DateTime.now().add(const Duration(days: 3));
+    _titleController = TextEditingController(
+      text: widget.homework?.title ?? '',
+    );
+    _descController = TextEditingController(
+      text: widget.homework?.description ?? '',
+    );
+
+    _dueDate =
+        widget.homework?.dueDate ?? DateTime.now().add(const Duration(days: 3));
   }
 
   @override
@@ -947,8 +983,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme:
-              const ColorScheme.light(primary: Color(0xFF7C3AED)),
+          colorScheme: const ColorScheme.light(primary: Color(0xFF7C3AED)),
         ),
         child: child!,
       ),
@@ -958,12 +993,6 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_selectedSubjectId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a subject')),
-      );
-      return;
-    }
 
     final authNotifier = context.read<AuthNotifier>();
     final user = authNotifier.user;
@@ -974,18 +1003,21 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
       return;
     }
 
+    print("Add Homework Subject ID:: ${widget.subjectId}");
+
     final homework = Homework(
       id: widget.homework?.id ?? '',
       teacherId: widget.homework?.teacherId ?? user.id,
       classId: widget.classRoom.id,
       sectionId: widget.homework?.sectionId ?? widget.sectionId ?? '',
-      subjectId: _selectedSubjectId!,
+      subjectId: widget.subjectId ?? "",
       title: _titleController.text.trim(),
       description: _descController.text.trim(),
       schoolId: user.schoolId ?? '',
       dueDate: _dueDate,
       createdAt: widget.homework?.createdAt ?? DateTime.now(),
     );
+    {}
 
     final bool success;
     if (widget.homework == null) {
@@ -993,23 +1025,27 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     } else {
       success = await context.read<HomeworkNotifier>().updateHomework(homework);
     }
-    
+
     if (mounted) {
       if (success) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(widget.homework == null
-                ? 'Homework assigned successfully!'
-                : 'Homework updated successfully!'),
+            content: Text(
+              widget.homework == null
+                  ? 'Homework assigned successfully!'
+                  : 'Homework updated successfully!',
+            ),
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(widget.homework == null
-                ? 'Failed to assign homework.'
-                : 'Failed to update homework.'),
+            content: Text(
+              widget.homework == null
+                  ? 'Failed to assign homework.'
+                  : 'Failed to update homework.',
+            ),
           ),
         );
       }
@@ -1027,9 +1063,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
         '${_dueDate.day.toString().padLeft(2, '0')}/${_dueDate.month.toString().padLeft(2, '0')}/${_dueDate.year}';
 
     return Container(
-      margin: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
+      margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -1065,35 +1099,38 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                 ),
                 const SizedBox(height: 16),
 
-                // Subject dropdown
-                DropdownButtonFormField<String>(
-                  decoration: _inputDeco('Subject'),
-                  value: _selectedSubjectId,
-                  items: subjects.isEmpty
-                      ? [
-                          const DropdownMenuItem(
-                            value: '__none__',
-                            child: Text('No subjects for this class'),
-                          )
-                        ]
-                      : subjects
-                          .map((s) => DropdownMenuItem(
-                                value: s.id,
-                                child: Text(s.name),
-                              ))
-                          .toList(),
-                  onChanged: subjects.isEmpty
-                      ? null
-                      : (val) => setState(() => _selectedSubjectId = val),
-                ),
+                // // Subject dropdown
+                // DropdownButtonFormField<String>(
+                //   decoration: _inputDeco('Subject'),
+                //   value: _selectedSubjectId,
+                //   items: subjects.isEmpty
+                //       ? [
+                //           const DropdownMenuItem(
+                //             value: '__none__',
+                //             child: Text('No subjects for this class'),
+                //           ),
+                //         ]
+                //       : subjects
+                //             .map(
+                //               (s) => DropdownMenuItem(
+                //                 value: s.id,
+                //                 child: Text(s.name),
+                //               ),
+                //             )
+                //             .toList(),
+                //   onChanged: subjects.isEmpty
+                //       ? null
+                //       : (val) => setState(() => _selectedSubjectId = val),
+                // ),
                 const SizedBox(height: 12),
 
                 // Title
                 TextFormField(
                   controller: _titleController,
                   decoration: _inputDeco('Homework Title'),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Title is required' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'Title is required'
+                      : null,
                 ),
                 const SizedBox(height: 12),
 
@@ -1113,8 +1150,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                       decoration: _inputDeco('Due Date').copyWith(
                         suffixIcon: const Icon(Icons.calendar_today_rounded),
                       ),
-                      controller:
-                          TextEditingController(text: dueLabel),
+                      controller: TextEditingController(text: dueLabel),
                     ),
                   ),
                 ),
@@ -1137,7 +1173,10 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                       widget.homework == null
                           ? 'Assign Homework'
                           : 'Update Homework',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
                     ),
                   ),
                 ),
@@ -1150,24 +1189,23 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
   }
 
   InputDecoration _inputDeco(String label) => InputDecoration(
-        labelText: label,
-        filled: true,
-        fillColor: const Color(0xFFF5F3FF),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade200),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
-        ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      );
+    labelText: label,
+    filled: true,
+    fillColor: const Color(0xFFF5F3FF),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide.none,
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Colors.grey.shade200),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1178,10 +1216,7 @@ class _ViewHomeworkSheet extends StatelessWidget {
   final Homework homework;
   final String subjectName;
 
-  const _ViewHomeworkSheet({
-    required this.homework,
-    required this.subjectName,
-  });
+  const _ViewHomeworkSheet({required this.homework, required this.subjectName});
 
   @override
   Widget build(BuildContext context) {
@@ -1245,8 +1280,11 @@ class _ViewHomeworkSheet extends StatelessWidget {
           // Info Row (Due Date)
           Row(
             children: [
-              Icon(Icons.calendar_today_rounded,
-                  size: 18, color: isPast ? Colors.red : Colors.grey[600]),
+              Icon(
+                Icons.calendar_today_rounded,
+                size: 18,
+                color: isPast ? Colors.red : Colors.grey[600],
+              ),
               const SizedBox(width: 8),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1285,7 +1323,9 @@ class _ViewHomeworkSheet extends StatelessWidget {
             decoration: BoxDecoration(
               color: const Color(0xFFF5F3FF),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF7C3AED).withOpacity(0.1)),
+              border: Border.all(
+                color: const Color(0xFF7C3AED).withOpacity(0.1),
+              ),
             ),
             child: Text(
               homework.description.isNotEmpty

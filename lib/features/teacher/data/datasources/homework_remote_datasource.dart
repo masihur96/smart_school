@@ -1,4 +1,5 @@
 import 'dart:developer';
+
 import 'package:smart_school/configs/network/data_provider.dart';
 import 'package:smart_school/core/constants/api_path.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
@@ -26,10 +27,10 @@ class HomeworkRemoteDataSource {
       'schoolId': homework.schoolId,
     };
 
-    // Note: The user's curl also has schoolId. 
+    // Note: The user's curl also has schoolId.
     // If the Homework model doesn't have it, we might need a DTO or fetch it from user profile.
     // For now, I'll assume the backend can handle it or we'll add it if needed.
-    
+
     log('Submit homework payload: $payload');
 
     final response = await _dataProvider.performRequest(
@@ -39,7 +40,9 @@ class HomeworkRemoteDataSource {
       header: {'Authorization': 'Bearer $token'},
     );
 
-    log('Submit homework response: ${response?.statusCode} - ${response?.data}');
+    log(
+      'Submit homework response: ${response?.statusCode} - ${response?.data}',
+    );
 
     if (response == null || response.statusCode == null) {
       throw Exception('No response from server');
@@ -104,13 +107,17 @@ class HomeworkRemoteDataSource {
   }) async {
     final token = await StorageService.getToken();
     if (token == null) throw Exception('No authentication token found');
-
+    print("Fetch Homework query classId:: $classId");
+    print("Fetch Homework query sectionId:: $sectionId");
+    print("Fetch Homework query subjectId:: $subjectId");
     final query = <String, dynamic>{};
     if (classId != null && classId.isNotEmpty) query['classId'] = classId;
-    if (sectionId != null && sectionId.isNotEmpty) query['sectionId'] = sectionId;
-    if (subjectId != null && subjectId.isNotEmpty) query['subjectId'] = subjectId;
+    if (sectionId != null && sectionId.isNotEmpty)
+      query['sectionId'] = sectionId;
+    if (subjectId != null && subjectId.isNotEmpty)
+      query['subjectId'] = subjectId;
 
-    print("query:: $query");
+    print("Fetch Homework query:: $query");
 
     final response = await _dataProvider.performRequest(
       'GET',
