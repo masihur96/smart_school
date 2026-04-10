@@ -11,6 +11,9 @@ class AuthResponseModel {
   final String? designation;
   final bool? isActive;
   final String? createdAt;
+  final double? lat;
+  final double? lon;
+  final double? radius;
 
   AuthResponseModel({
     required this.id,
@@ -25,6 +28,9 @@ class AuthResponseModel {
     this.designation,
     this.isActive,
     this.createdAt,
+    this.lat,
+    this.lon,
+    this.radius,
   });
 
   factory AuthResponseModel.fromJson(Map<String, dynamic> json) {
@@ -41,6 +47,9 @@ class AuthResponseModel {
       designation: json['designation'],
       isActive: json['isActive'],
       createdAt: json['createdAt']?.toString(),
+      lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
+      lon: json['lon'] != null ? double.tryParse(json['lon'].toString()) : null,
+      radius: json['radius'] != null ? double.tryParse(json['radius'].toString()) : null,
     );
   }
 
@@ -58,6 +67,9 @@ class AuthResponseModel {
       'designation': designation,
       'isActive': isActive,
       'createdAt': createdAt,
+      'lat': lat,
+      'lon': lon,
+      'radius': radius,
     };
   }
 }

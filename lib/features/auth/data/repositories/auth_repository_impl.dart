@@ -27,6 +27,9 @@ class AuthRepositoryImpl implements AuthRepository {
       designation: result.designation,
       isActive: result.isActive,
       createdAt: result.createdAt,
+      lat: result.lat,
+      lon: result.lon,
+      radius: result.radius,
     );
   }
 
@@ -46,6 +49,9 @@ class AuthRepositoryImpl implements AuthRepository {
       designation: result.designation,
       isActive: result.isActive,
       createdAt: result.createdAt,
+      lat: result.lat,
+      lon: result.lon,
+      radius: result.radius,
     );
   }
 

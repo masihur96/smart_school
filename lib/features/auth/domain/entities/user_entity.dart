@@ -11,6 +11,9 @@ class UserEntity {
   final String? designation;
   final bool? isActive;
   final String? createdAt;
+  final double? lat;
+  final double? lon;
+  final double? radius;
 
   UserEntity({
     required this.id,
@@ -25,5 +28,8 @@ class UserEntity {
     this.designation,
     this.isActive,
     this.createdAt,
+    this.lat,
+    this.lon,
+    this.radius,
   });
 }

@@ -20,6 +20,7 @@ class APIPath {
   static String attendanceOverview = "$baseUrl/admin/attendance/overview";
   static String todayClass = "$baseUrl/teacher/todays-classes";
   static String submitAttendance = "$baseUrl/teacher/attendance";
+  static String selfAttendance = "$baseUrl/teacher/self-attendance";
   static String submitHomeWork = "$baseUrl/teacher/homework";
   static String studentAttendance = "$baseUrl/student/attendance";
   static String studentRoutine = "$baseUrl/student/routine";
