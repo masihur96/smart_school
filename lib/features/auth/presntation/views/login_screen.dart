@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_school/features/auth/providers/auth_provider.dart';
-import 'package:smart_school/models/user_model.dart';
 import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
-import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
+import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/student/screens/student_dashboard_screen.dart';
+import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
+import 'package:smart_school/models/user_model.dart';
+
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -56,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _quickLogin(String email,String password) {
+  void _quickLogin(String email, String password) {
     _emailController.text = email;
     _passwordController.text = password;
     _login();
@@ -190,17 +191,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   _QuickLoginButton(
                     label: 'Admin',
                     color: Colors.purple,
-                    onTap: () => _quickLogin('admin@gmail.com',"Admin@"),
+                    onTap: () => _quickLogin('admin@gmail.com', "Admin@"),
                   ),
                   _QuickLoginButton(
                     label: 'Teacher',
                     color: Colors.blue,
-                    onTap: () => _quickLogin('rofiqul@gmail.com',"Rofiqul@"),
+                    onTap: () => _quickLogin('rofiqul@gmail.com', "Rofiqul@"),
                   ),
                   _QuickLoginButton(
                     label: 'Student',
                     color: Colors.green,
-                    onTap: () => _quickLogin('ahsan@gmail.com',"Ahsan@"),
+                    onTap: () => _quickLogin('ariful@gmail.com', "Ariful@"),
                   ),
                 ],
               ),
