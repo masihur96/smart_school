@@ -92,6 +92,7 @@ class StudentsNotifier extends ChangeNotifier {
           try {
              print("Parsing student item: $item");
              final parsedStudent = Student.fromJson(item);
+             if (parsedStudent.isDeleted) continue; // Filter out soft-deleted students
              print("Parsed Student: classId=${parsedStudent.classId}");
              _dbService.students.add(parsedStudent);
           } catch(e, stacktrace) {
@@ -164,6 +165,7 @@ class StudentsNotifier extends ChangeNotifier {
         for (var item in data) {
           try {
             final parsedStudent = Student.fromJson(item);
+            if (parsedStudent.isDeleted) continue; // Filter out soft-deleted students
             _dbService.students.add(parsedStudent);
           } catch (e) {
             log('Error parsing student: $e');

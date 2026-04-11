@@ -17,6 +17,7 @@ class User {
   final double? lat;
   final double? lon;
   final double? radius;
+  final DateTime? deletedAt;
 
   User({
     required this.id,
@@ -35,6 +36,7 @@ class User {
     this.lat,
     this.lon,
     this.radius,
+    this.deletedAt,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -60,6 +62,9 @@ class User {
       lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
       lon: json['lon'] != null ? double.tryParse(json['lon'].toString()) : null,
       radius: json['radius'] != null ? double.tryParse(json['radius'].toString()) : null,
+      deletedAt: json['deletedAt'] != null
+          ? DateTime.tryParse(json['deletedAt'].toString())
+          : null,
     );
   }
 
@@ -81,6 +86,7 @@ class User {
       'lat': lat,
       'lon': lon,
       'radius': radius,
+      'deletedAt': deletedAt?.toIso8601String(),
     };
   }
 }
