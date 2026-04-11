@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
+import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/student/screens/student_dashboard_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
@@ -41,7 +42,9 @@ class _LoginScreenState extends State<LoginScreen> {
       Widget dashboard;
       switch (authNotifier.user!.role) {
         case UserRole.admin:
-          dashboard = const AdminDashboardScreen();
+          dashboard = authNotifier.isSubscriptionValid
+              ? const AdminDashboardScreen()
+              : const AdminPricingPlanScreen();
           break;
         case UserRole.teacher:
           dashboard = const TeacherDashboardScreen();

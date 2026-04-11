@@ -35,6 +35,18 @@ class AuthNotifier extends ChangeNotifier {
   Subscription? _adminSubscription;
   Subscription? get adminSubscription => _adminSubscription;
 
+  bool get isSubscriptionValid {
+    if (_adminSubscription == null) return false;
+    if (!_adminSubscription!.isActive) return false;
+
+    try {
+      final endDate = DateTime.parse(_adminSubscription!.endDate);
+      return endDate.isAfter(DateTime.now());
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<void> checkAuthStatus() async {
     _isLoading = true;
     _error = null;
