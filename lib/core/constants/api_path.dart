@@ -31,6 +31,8 @@ class APIPath {
   static String teacherMarks = "$baseUrl/teacher/marks";
   static String superAdminDashboard = "$baseUrl/superadmin/dashboard";
   static String superAdminSchools = "$baseUrl/superadmin/schools";
+  static String updateSchool(String id) => "$baseUrl/superadmin/schools/$id";
+  static String deleteSchool(String id) => "$baseUrl/superadmin/schools/$id";
 
   static String updateClass(String id) => "$baseUrl/admin/classes/$id";
   static String deleteClass(String id) => "$baseUrl/admin/classes/$id";

@@ -92,4 +92,76 @@ class SuperAdminSchoolNotifier extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> updateSchool(String id, SuperAdminSchool school) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await DataProvider().performRequest(
+        'PUT',
+        APIPath.updateSchool(id),
+        header: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        data: school.toJson(),
+      );
+
+      if (response != null && response.statusCode == 200) {
+        log('School updated successfully');
+        await fetchSchools(); // Refresh list
+        return true;
+      } else {
+        _error = 'Failed to update school: ${response?.statusCode}';
+        log('Error updating school: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error: $e';
+      log('Exception updating school: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> deleteSchool(String id) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await DataProvider().performRequest(
+        'DELETE',
+        APIPath.deleteSchool(id),
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && (response.statusCode == 200 || response.statusCode == 204)) {
+        log('School deleted successfully');
+        await fetchSchools(); // Refresh list
+        return true;
+      } else {
+        _error = 'Failed to delete school: ${response?.statusCode}';
+        log('Error deleting school: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error: $e';
+      log('Exception deleting school: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

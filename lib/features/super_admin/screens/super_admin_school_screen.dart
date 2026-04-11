@@ -20,12 +20,12 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
     });
   }
 
-  void _showAddSchoolSheet() {
+  void _showAddEditSchoolSheet({SuperAdminSchool? school}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const AddSchoolBottomSheet(),
+      builder: (context) => AddEditSchoolBottomSheet(school: school),
     );
   }
 
@@ -71,7 +71,7 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showAddSchoolSheet,
+        onPressed: () => _showAddEditSchoolSheet(),
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add_business_rounded, color: Colors.white),
         label: const Text(
@@ -318,16 +318,61 @@ class SchoolCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Spacer(),
-                TextButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.analytics_outlined, size: 18),
-                  label: const Text(
-                    'Analytics',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                if (!school.isActive)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      'INACTIVE',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
+                const Spacer(),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert_rounded, color: AppColors.textSecondary),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => AddEditSchoolBottomSheet(school: school),
+                      );
+                    } else if (value == 'delete') {
+                      _showDeleteConfirmation(context);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit_outlined, size: 20),
+                          SizedBox(width: 8),
+                          Text('Edit Details'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete_outline_rounded, size: 20, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text('Delete School', style: TextStyle(color: Colors.red)),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 4),
                 ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
@@ -346,6 +391,35 @@ class SchoolCard extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Institution?'),
+        content: Text('Are you sure you want to delete ${school.name}? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCEL'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await context.read<SuperAdminSchoolNotifier>().deleteSchool(school.id!);
+              if (success && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${school.name} deleted')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            child: const Text('DELETE'),
           ),
         ],
       ),
@@ -373,37 +447,61 @@ class SchoolCard extends StatelessWidget {
   }
 }
 
-class AddSchoolBottomSheet extends StatefulWidget {
-  const AddSchoolBottomSheet({super.key});
+class AddEditSchoolBottomSheet extends StatefulWidget {
+  final SuperAdminSchool? school;
+  const AddEditSchoolBottomSheet({super.key, this.school});
 
   @override
-  State<AddSchoolBottomSheet> createState() => _AddSchoolBottomSheetState();
+  State<AddEditSchoolBottomSheet> createState() => _AddEditSchoolBottomSheetState();
 }
 
-class _AddSchoolBottomSheetState extends State<AddSchoolBottomSheet> {
+class _AddEditSchoolBottomSheetState extends State<AddEditSchoolBottomSheet> {
   final _formKey = GlobalKey<FormState>();
-  final _idController = TextEditingController();
-  final _nameController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _emailController = TextEditingController();
+  late TextEditingController _idController;
+  late TextEditingController _nameController;
+  late TextEditingController _addressController;
+  late TextEditingController _phoneController;
+  late TextEditingController _emailController;
+  bool _isActive = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _idController = TextEditingController(text: widget.school?.schoolId);
+    _nameController = TextEditingController(text: widget.school?.name);
+    _addressController = TextEditingController(text: widget.school?.address);
+    _phoneController = TextEditingController(text: widget.school?.phone);
+    _emailController = TextEditingController(text: widget.school?.email);
+    _isActive = widget.school?.isActive ?? true;
+  }
 
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      final school = SuperAdminSchool(
+      final notifier = context.read<SuperAdminSchoolNotifier>();
+      final isEditing = widget.school != null;
+
+      final schoolData = SuperAdminSchool(
+        id: widget.school?.id,
         schoolId: _idController.text,
         name: _nameController.text,
         address: _addressController.text,
         phone: _phoneController.text,
         email: _emailController.text,
+        isActive: _isActive,
       );
 
-      final success = await context.read<SuperAdminSchoolNotifier>().createSchool(school);
+      bool success;
+      if (isEditing) {
+        success = await notifier.updateSchool(widget.school!.id!, schoolData);
+      } else {
+        success = await notifier.createSchool(schoolData);
+      }
+
       if (success && mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('School created successfully!'),
+          SnackBar(
+            content: Text(isEditing ? 'School updated!' : 'School created!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -414,6 +512,7 @@ class _AddSchoolBottomSheetState extends State<AddSchoolBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final padding = MediaQuery.of(context).viewInsets.bottom;
+    final isEditing = widget.school != null;
 
     return Container(
       decoration: const BoxDecoration(
@@ -439,9 +538,9 @@ class _AddSchoolBottomSheetState extends State<AddSchoolBottomSheet> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Register New School',
-                style: TextStyle(
+              Text(
+                isEditing ? 'Update Institution' : 'Register New School',
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -449,14 +548,51 @@ class _AddSchoolBottomSheetState extends State<AddSchoolBottomSheet> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Enter the institutional details below',
+                isEditing ? 'Modify institutional details below' : 'Enter the institutional details below',
                 style: TextStyle(
                   fontSize: 14,
                   color: AppColors.textSecondary.withOpacity(0.7),
                 ),
               ),
+              if (isEditing) ...[
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundLight,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Institution Status',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
+                          Text(
+                            'Set whether this school is currently active',
+                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                      Switch.adaptive(
+                        value: _isActive,
+                        activeColor: AppColors.primary,
+                        onChanged: (val) {
+                          setState(() {
+                            _isActive = val;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 24),
-              _buildTextField('School ID', _idController, Icons.vpn_key_outlined),
+              _buildTextField('School ID', _idController, Icons.vpn_key_outlined, enabled: !isEditing),
               const SizedBox(height: 16),
               _buildTextField('Institution Name', _nameController, Icons.school_outlined),
               const SizedBox(height: 16),
@@ -489,9 +625,9 @@ class _AddSchoolBottomSheetState extends State<AddSchoolBottomSheet> {
                     ),
                     child: notifier.isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            'REGISTER INSTITUTION',
-                            style: TextStyle(
+                        : Text(
+                            isEditing ? 'UPDATE INSTITUTION' : 'REGISTER INSTITUTION',
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1,
@@ -512,10 +648,12 @@ class _AddSchoolBottomSheetState extends State<AddSchoolBottomSheet> {
     TextEditingController controller,
     IconData icon, {
     TextInputType? keyboardType,
+    bool enabled = true,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
+      enabled: enabled,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: AppColors.primary),
@@ -527,12 +665,16 @@ class _AddSchoolBottomSheetState extends State<AddSchoolBottomSheet> {
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: Colors.grey.shade300),
         ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey.shade100),
+        ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         filled: true,
-        fillColor: Colors.grey.shade50,
+        fillColor: enabled ? Colors.grey.shade50 : Colors.grey.shade100,
       ),
       validator: (value) => value == null || value.isEmpty ? 'Required' : null,
     );
