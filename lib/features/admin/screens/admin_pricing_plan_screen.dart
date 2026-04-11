@@ -4,6 +4,7 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/super_admin/models/pricing_plan_model.dart';
 import 'package:smart_school/features/super_admin/providers/pricing_notifier.dart';
+import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
 import '../../auth/presntation/views/login_screen.dart';
 
 class AdminPricingPlanScreen extends StatefulWidget {
@@ -254,11 +255,36 @@ class _AdminPricingPlanCard extends StatelessWidget {
             ),
           ),
           InkWell(
-            onTap: () {
-               // Mock purchase/contact action
-               ScaffoldMessenger.of(context).showSnackBar(
-                 SnackBar(content: Text('Contact your Relationship Manager to activate "${plan.name}"')),
-               );
+            onTap: () async {
+              final auth = context.read<AuthNotifier>();
+              final success = await auth.assignPricingPlan(
+                plan.id!,
+                plan.pricePerMonth == '0' || plan.name.toLowerCase().contains('free'),
+              );
+
+              if (success && context.mounted) {
+                if (auth.isSubscriptionValid) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
+                    (route) => false,
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Plan assigned! Please complete payment to activate.'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
+              } else if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(auth.error ?? 'Failed to assign plan'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             },
             child: Container(
               width: double.infinity,
