@@ -19,6 +19,8 @@ class Student {
     this.user,
   });
 
+  bool get isDeleted => user?.deletedAt != null;
+
   factory Student.fromJson(Map<String, dynamic> json) {
     return Student(
       userId: json['userId']?.toString() ?? json['id']?.toString() ?? '',
