@@ -40,6 +40,7 @@ class APIPath {
   static String deletePricing(String id) => "$baseUrl/pricing/$id";
 
   static String allSubscriptions = "$baseUrl/subscriptions/all";
+  static String schoolSubscription(String schoolId) => "$baseUrl/subscriptions/school/$schoolId";
 
   static String updateClass(String id) => "$baseUrl/admin/classes/$id";
   static String deleteClass(String id) => "$baseUrl/admin/classes/$id";

@@ -6,6 +6,9 @@ import '../domain/usecases/login_usecase.dart';
 import '../domain/usecases/register_usecase.dart';
 import '../domain/usecases/get_profile_usecase.dart';
 import '../domain/usecases/change_password_usecase.dart';
+import '../../super_admin/models/subscription_model.dart';
+import '../../../configs/network/data_provider.dart';
+import '../../../core/constants/api_path.dart';
 
 class AuthNotifier extends ChangeNotifier {
   final LoginUseCase loginUseCase;
@@ -28,6 +31,9 @@ class AuthNotifier extends ChangeNotifier {
 
   String? _error;
   String? get error => _error;
+
+  Subscription? _adminSubscription;
+  Subscription? get adminSubscription => _adminSubscription;
 
   Future<void> checkAuthStatus() async {
     _isLoading = true;
@@ -62,6 +68,10 @@ class AuthNotifier extends ChangeNotifier {
           lon: profile.lon,
           radius: profile.radius,
         );
+
+        if (_user?.role == UserRole.admin && _user?.schoolId != null) {
+          await _fetchAdminSubscription(_user!.schoolId!);
+        }
       } else {
         _user = null;
       }
@@ -111,6 +121,10 @@ class AuthNotifier extends ChangeNotifier {
         radius: profile.radius,
       );
 
+      if (_user?.role == UserRole.admin && _user?.schoolId != null) {
+        await _fetchAdminSubscription(_user!.schoolId!);
+      }
+
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -159,8 +173,31 @@ class AuthNotifier extends ChangeNotifier {
 
   Future<void> logout() async {
     _user = null;
+    _adminSubscription = null;
     await StorageService.clear();
     notifyListeners();
+  }
+
+  Future<void> _fetchAdminSubscription(String schoolId) async {
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) return;
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.schoolSubscription(schoolId),
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final dynamic rawData = response.data;
+        final data = rawData is Map ? (rawData['data'] ?? rawData) : rawData;
+        _adminSubscription = Subscription.fromJson(data);
+        log('Fetched admin subscription for school: $schoolId (Active: ${_adminSubscription?.isActive})');
+      }
+    } catch (e) {
+      log('Error fetching admin subscription: $e');
+    }
   }
 
   void clearError() {
