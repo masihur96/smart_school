@@ -13,6 +13,7 @@ import '../providers/teacher_dashboard_provider.dart';
 import 'homework_management_screen.dart';
 import 'mark_entry_screen.dart';
 import 'teacher_attendance_screen.dart';
+import 'teacher_self_attendance_detail_screen.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
   const TeacherDashboardScreen({super.key});
@@ -330,7 +331,17 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       children: [
         ElevatedButton(
           onPressed: hasMarked
-              ? () => _showAttendanceDetails(context, attendance)
+              ? () {
+                  final now = DateTime.now();
+                  final dateStr = DateFormat('dd/MM/yyyy').format(now);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          TeacherSelfAttendanceDetailScreen(date: dateStr),
+                    ),
+                  );
+                }
               : () => _performSelfAttendance(context, user),
           style: ElevatedButton.styleFrom(
             backgroundColor: hasMarked ? Colors.green.shade50 : Colors.white,
@@ -357,66 +368,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
-  void _showAttendanceDetails(
-    BuildContext context,
-    TeacherSelfAttendance attendance,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green),
-            SizedBox(width: 8),
-            Text('Today\'s Attendance'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildDetailRow(
-              'Status',
-              attendance.status.toUpperCase(),
-              isSuccess: true,
-            ),
-            _buildDetailRow('Date', attendance.date),
-            _buildDetailRow('Time', attendance.time),
-            _buildDetailRow(
-              'Distance',
-              '${attendance.distanceFromCenter.toStringAsFixed(1)} meters',
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value, {bool isSuccess = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-          Text(
-            value,
-            style: TextStyle(
-              color: isSuccess ? Colors.green : Colors.black87,
-              fontWeight: isSuccess ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Future<void> _performSelfAttendance(BuildContext context, User? user) async {
     if (user == null ||
