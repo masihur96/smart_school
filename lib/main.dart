@@ -17,6 +17,7 @@ import 'features/teacher/providers/homework_provider.dart';
 import 'features/teacher/providers/attendance_provider.dart';
 import 'features/teacher/providers/result_provider.dart';
 import 'features/teacher/providers/teacher_dashboard_provider.dart';
+import 'features/teacher/providers/teacher_attendance_provider.dart';
 import 'features/teacher/data/repositories/attendance_repository_impl.dart';
 import 'features/teacher/data/repositories/result_repository_impl.dart';
 import 'features/teacher/data/datasources/homework_remote_datasource.dart';
@@ -102,6 +103,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => StudentHomeworkNotifier()),
         ChangeNotifierProvider(create: (_) => StudentResultNotifier()),
         ChangeNotifierProvider(create: (_) => TeacherDashboardProvider()),
+        ChangeNotifierProvider(create: (_) => TeacherAttendanceProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
       ],
       child: const MyApp(),

@@ -22,6 +22,7 @@ import '../providers/teacher_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/notice_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../teacher/screens/teacher_self_attendance_detail_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -286,6 +287,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => RoutineManagementScreen()),
+              );
+            },
+          ),
+          _buildActionTile(
+            context,
+            'Teacher Attendance',
+            Icons.how_to_reg,
+            Colors.green,
+            onTap: () {
+              final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TeacherSelfAttendanceDetailScreen(
+                    schoolId: schoolId,
+                  ),
+                ),
               );
             },
           ),
