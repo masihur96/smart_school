@@ -202,144 +202,230 @@ class SubscriptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isActive = subscription.isActive;
-    final statusColor = isActive ? Colors.green : Colors.red;
+    final statusColor = isActive ? const Color(0xFF10B981) : const Color(0xFFEF4444);
+    final statusBgColor = isActive ? const Color(0xFFD1FAE5) : const Color(0xFFFEE2E2);
     final plan = subscription.pricingPlan;
+    final school = subscription.school;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
         border: Border.all(
-          color: AppColors.primarySoft,
-          width: 1.5,
+          color: Colors.grey.withOpacity(0.1),
+          width: 1,
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
+          // Header Section (School & Status)
+          Container(
             padding: const EdgeInsets.all(20),
-            child: Column(
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.03),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+              border: Border(
+                bottom: BorderSide(color: Colors.grey.withOpacity(0.1)),
+              ),
+            ),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                Container(
+                  height: 48,
+                  width: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.school_rounded, color: AppColors.primary),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        school?.name ?? 'Unknown School',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
                         children: [
-                          Text(
-                            plan?.name ?? 'Unknown Plan',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'School ID: ${subscription.schoolId}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textSecondary.withOpacity(0.7),
-                              fontFamily: 'monospace',
+                          const Icon(Icons.email_outlined, size: 14, color: AppColors.textSecondary),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              school?.email ?? 'No email',
+                              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(12),
+                       const SizedBox(height: 4),
+                       Row(
+                        children: [
+                          const Icon(Icons.phone_outlined, size: 14, color: AppColors.textSecondary),
+                          const SizedBox(width: 4),
+                          Text(
+                            school?.phone ?? 'No phone',
+                            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                          ),
+                        ],
                       ),
-                      child: Text(
-                        isActive ? 'ACTIVE' : 'EXPIRED',
-                        style: TextStyle(
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: statusBgColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
                           color: statusColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    _buildInfoItem(
-                      context,
-                      Icons.event_available_rounded,
-                      'Start Date',
-                      _formatDate(subscription.startDate),
-                    ),
-                    const SizedBox(width: 16),
-                    _buildInfoItem(
-                      context,
-                      Icons.event_busy_rounded,
-                      'End Date',
-                      _formatDate(subscription.endDate),
-                      isCritical: !isActive,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const Divider(height: 1, thickness: 0.5),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildStatItem(
-                      'Students Usage',
-                      '${subscription.lastStudentCount} / ${plan?.maxStudents ?? '∞'}',
-                      Icons.group_outlined,
-                    ),
-                    _buildStatItem(
-                      'Plan Pricing',
-                      '\$${plan?.pricePerMonth ?? '0'}/mo',
-                      Icons.payments_outlined,
-                    ),
-                  ],
+                      const SizedBox(width: 6),
+                      Text(
+                        isActive ? 'Active' : 'Expired',
+                        style: TextStyle(
+                          color: statusColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
+          
+          // Body Section
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                // Plan info and student count
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildStatCard(
+                      'Plan',
+                      plan?.name ?? 'N/A',
+                      Icons.star_rounded,
+                      Colors.orange,
+                    ),
+                    const SizedBox(width: 16),
+                    _buildStatCard(
+                      'Students',
+                      '${subscription.lastStudentCount} / ${plan?.maxStudents ?? '∞'}',
+                      Icons.people_alt_rounded,
+                      Colors.blue,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                
+                // Dates
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.withOpacity(0.1)),
+                  ),
+                  child: Row(
+                    children: [
+                      _buildDateItem('Start Date', _formatDate(subscription.startDate), true),
+                      Container(
+                        width: 1,
+                        height: 30,
+                        color: Colors.grey.withOpacity(0.3),
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                      _buildDateItem('End Date', _formatDate(subscription.endDate), false),
+                    ],
+                  ),
+                ),
+                
+                if (school?.address != null && school!.address.isNotEmpty) ...[
+                 const SizedBox(height: 16),
+                 Row(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   children: [
+                     const Icon(Icons.location_on_outlined, size: 16, color: AppColors.textSecondary),
+                     const SizedBox(width: 8),
+                     Expanded(
+                       child: Text(
+                         school.address.replaceAll("\n", ", "),
+                         style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
+                       ),
+                     ),
+                   ],
+                 ),
+                ]
+              ],
+            ),
+          ),
+          
+          // Footer
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.backgroundLight.withOpacity(0.5),
+              color: Colors.grey.withOpacity(0.02),
               borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
+              ),
+              border: Border(
+                top: BorderSide(color: Colors.grey.withOpacity(0.08)),
               ),
             ),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Icon(Icons.update_rounded, size: 14, color: AppColors.textSecondary),
-                const SizedBox(width: 6),
-                Text(
-                  'Updated: ${_formatDate(subscription.updatedAt)}',
-                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                 Row(
+                  children: [
+                    const Icon(Icons.payments_outlined, size: 16, color: AppColors.textSecondary),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Monthly: \$${plan?.pricePerMonth ?? '0'}',
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                    ),
+                  ],
                 ),
-                const Spacer(),
-                TextButton(
-                  onPressed: () {},
-                  style: TextButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                  ),
-                  child: const Text('Manage Access'),
+                Text(
+                  'Created: ${_formatDate(subscription.createdAt)}',
+                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -349,71 +435,84 @@ class SubscriptionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoItem(
-    BuildContext context,
-    IconData icon,
-    String label,
-    String value, {
-    bool isCritical = false,
-  }) {
+  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.1)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 18, color: color),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateItem(String label, String date, bool isStart) {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 14, color: AppColors.primary),
+              Icon(
+                isStart ? Icons.calendar_today_rounded : Icons.event_busy_rounded,
+                size: 14,
+                color: AppColors.textSecondary,
+              ),
               const SizedBox(width: 6),
               Text(
                 label,
-                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
-            value,
-            style: TextStyle(
-              fontSize: 13,
+            date,
+            style: const TextStyle(
+              fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: isCritical && value != 'N/A' ? Colors.red : AppColors.textPrimary,
+              color: AppColors.textPrimary,
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildStatItem(String label, String value, IconData icon) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppColors.backgroundLight,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, size: 16, color: AppColors.primary),
-        ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
-            ),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }
