@@ -47,7 +47,9 @@ class _LoginScreenState extends State<LoginScreen> {
               : const AdminPricingPlanScreen();
           break;
         case UserRole.teacher:
-          dashboard = const TeacherDashboardScreen();
+          dashboard = authNotifier.isSubscriptionValid
+              ? const TeacherDashboardScreen()
+              : const AdminPricingPlanScreen();
           break;
         case UserRole.student:
           dashboard = const StudentDashboardScreen();
