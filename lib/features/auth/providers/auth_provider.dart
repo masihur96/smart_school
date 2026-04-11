@@ -83,7 +83,7 @@ class AuthNotifier extends ChangeNotifier {
           radius: profile.radius,
         );
 
-        if (_user?.role == UserRole.admin && _user?.schoolId != null) {
+        if ((_user?.role == UserRole.admin || _user?.role == UserRole.teacher) && _user?.schoolId != null) {
           await _fetchAdminSubscription(_user!.schoolId!);
         }
       } else {
@@ -135,7 +135,7 @@ class AuthNotifier extends ChangeNotifier {
         radius: profile.radius,
       );
 
-      if (_user?.role == UserRole.admin && _user?.schoolId != null) {
+      if ((_user?.role == UserRole.admin || _user?.role == UserRole.teacher) && _user?.schoolId != null) {
         await _fetchAdminSubscription(_user!.schoolId!);
       }
 

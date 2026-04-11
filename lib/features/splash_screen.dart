@@ -75,7 +75,11 @@ class _SplashScreenState extends State<SplashScreen>
         case UserRole.teacher:
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => TeacherDashboardScreen()),
+            MaterialPageRoute(
+              builder: (context) => authNotifier.isSubscriptionValid
+                  ? const TeacherDashboardScreen()
+                  : const AdminPricingPlanScreen(),
+            ),
             (Route<dynamic> route) => false,
           );
           break;
