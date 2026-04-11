@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
 import 'package:smart_school/features/admin/screens/exam_management_screen.dart';
@@ -92,6 +91,10 @@ class AppDrawer extends StatelessWidget {
         return Colors.blue;
       case UserRole.student:
         return Colors.green;
+      case UserRole.superadmin:
+        return Colors.amber;
+        // TODO: Handle this case.
+        throw UnimplementedError();
     }
   }
 
@@ -185,56 +188,44 @@ class AppDrawer extends StatelessWidget {
 
   List<Widget> _buildStudentItems(BuildContext context) {
     return [
-      _buildDrawerItem(
-        Icons.dashboard,
-        'Dashboard',
-        () {
-
-          Navigator.push(context, MaterialPageRoute(builder: (_)=>StudentDashboardScreen(),));
-
-        },
-        context,
-      ),
-      _buildDrawerItem(
-        Icons.check_circle,
-        'Attendance',
-        () {
-          Navigator.push(context, MaterialPageRoute(builder: (_)=>StudentAttendanceScreen(),));
-        },
-        context,
-      ),
-      _buildDrawerItem(
-        Icons.assignment,
-        'Homework',
-        () {
-          Navigator.push(context, MaterialPageRoute(builder: (_)=>StudentHomeworkScreen(),));
-        },
-        context,
-      ),
-      _buildDrawerItem(
-        Icons.calendar_month,
-        'Routine',
-        () {
-          Navigator.push(context, MaterialPageRoute(builder: (_)=>StudentRoutineScreen(),));
-        },
-        context,
-      ),
-      _buildDrawerItem(
-        Icons.notifications,
-        'Notices',
-        () {
-          Navigator.push(context, MaterialPageRoute(builder: (_)=>StudentNoticeScreen(isFromDrawer: true,),));
-        },
-        context,
-      ),
-      _buildDrawerItem(
-        Icons.assessment,
-        'Results',
-        () {
-          Navigator.push(context, MaterialPageRoute(builder: (_)=>StudentResultScreen(),));
-        },
-        context,
-      ),
+      _buildDrawerItem(Icons.dashboard, 'Dashboard', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => StudentDashboardScreen()),
+        );
+      }, context),
+      _buildDrawerItem(Icons.check_circle, 'Attendance', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => StudentAttendanceScreen()),
+        );
+      }, context),
+      _buildDrawerItem(Icons.assignment, 'Homework', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => StudentHomeworkScreen()),
+        );
+      }, context),
+      _buildDrawerItem(Icons.calendar_month, 'Routine', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => StudentRoutineScreen()),
+        );
+      }, context),
+      _buildDrawerItem(Icons.notifications, 'Notices', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => StudentNoticeScreen(isFromDrawer: true),
+          ),
+        );
+      }, context),
+      _buildDrawerItem(Icons.assessment, 'Results', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => StudentResultScreen()),
+        );
+      }, context),
     ];
   }
 

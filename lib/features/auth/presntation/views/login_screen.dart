@@ -4,6 +4,7 @@ import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart'
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/student/screens/student_dashboard_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
+import 'package:smart_school/features/super_admin/screens/super_admin_dashboard_screen.dart';
 import 'package:smart_school/models/user_model.dart';
 
 import 'register_screen.dart';
@@ -47,6 +48,9 @@ class _LoginScreenState extends State<LoginScreen> {
           break;
         case UserRole.student:
           dashboard = const StudentDashboardScreen();
+          break;
+        case UserRole.superadmin:
+          dashboard = const SuperAdminDashboardScreen();
           break;
       }
 
