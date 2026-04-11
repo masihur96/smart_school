@@ -30,6 +30,7 @@ import 'features/student/providers/student_result_provider.dart';
 import 'features/super_admin/providers/super_admin_dashboard_provider.dart';
 import 'features/super_admin/providers/super_admin_school_provider.dart';
 import 'features/super_admin/providers/pricing_notifier.dart';
+import 'features/super_admin/providers/subscription_provider.dart';
 import 'services/database_service.dart';
 import 'configs/network/data_provider.dart';
 import 'features/auth/data/datasources/auth_remote_data_source.dart';
@@ -111,6 +112,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => SuperAdminDashboardNotifier()),
         ChangeNotifierProvider(create: (_) => SuperAdminSchoolNotifier()),
         ChangeNotifierProvider(create: (_) => PricingNotifier()),
+        ChangeNotifierProvider(create: (_) => SubscriptionNotifier()),
       ],
       child: const MyApp(),
     ),
