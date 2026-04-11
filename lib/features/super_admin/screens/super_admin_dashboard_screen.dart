@@ -402,29 +402,24 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         childAspectRatio: 1.6,
         children: [
           _buildActionItem(
-            'Add School',
+            'Schools',
             Icons.add_business_rounded,
             Colors.indigo,
             () {},
           ),
           _buildActionItem(
-            'System Logs',
+            'Pricing',
             Icons.terminal_rounded,
             Colors.blueGrey,
             () {},
           ),
           _buildActionItem(
-            'Broadcast',
+            'Subscription',
             Icons.podcasts_rounded,
             Colors.deepOrange,
             () {},
           ),
-          _buildActionItem(
-            'DB Health',
-            Icons.storage_rounded,
-            Colors.teal,
-            () {},
-          ),
+          _buildActionItem('Backup', Icons.storage_rounded, Colors.teal, () {}),
         ],
       ),
     );
