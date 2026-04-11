@@ -61,6 +61,8 @@ class AppDrawer extends StatelessWidget {
                   ..._buildTeacherItems(context),
                 if (user.role == UserRole.student)
                   ..._buildStudentItems(context),
+                if (user.role == UserRole.superadmin)
+                  ..._buildSuperAdminItems(context),
               ],
             ),
           ),
@@ -92,9 +94,7 @@ class AppDrawer extends StatelessWidget {
       case UserRole.student:
         return Colors.green;
       case UserRole.superadmin:
-        return Colors.amber;
-        // TODO: Handle this case.
-        throw UnimplementedError();
+        return Colors.deepPurple;
     }
   }
 
@@ -226,6 +226,18 @@ class AppDrawer extends StatelessWidget {
           MaterialPageRoute(builder: (_) => StudentResultScreen()),
         );
       }, context),
+    ];
+  }
+
+  List<Widget> _buildSuperAdminItems(BuildContext context) {
+    return [
+      _buildDrawerItem(Icons.admin_panel_settings, 'Global Dashboard', () {
+        // Since we are likely already here or navigating back
+        Navigator.of(context).pop();
+      }, context),
+      _buildDrawerItem(Icons.business_center, 'School Management', () {}, context),
+      _buildDrawerItem(Icons.settings_suggest, 'System Config', () {}, context),
+      _buildDrawerItem(Icons.history_edu, 'Global Audit Logs', () {}, context),
     ];
   }
 
