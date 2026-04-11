@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+
 import '../models/subscription_model.dart';
 import '../providers/subscription_provider.dart';
 
@@ -26,7 +28,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       body: RefreshIndicator(
-        onRefresh: () => context.read<SubscriptionNotifier>().fetchSubscriptions(),
+        onRefresh: () =>
+            context.read<SubscriptionNotifier>().fetchSubscriptions(),
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
@@ -170,13 +173,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         return SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final subscription = notifier.subscriptions[index];
-                return SubscriptionCard(subscription: subscription);
-              },
-              childCount: notifier.subscriptions.length,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final subscription = notifier.subscriptions[index];
+              return SubscriptionCard(subscription: subscription);
+            }, childCount: notifier.subscriptions.length),
           ),
         );
       },
@@ -202,8 +202,12 @@ class SubscriptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isActive = subscription.isActive;
-    final statusColor = isActive ? const Color(0xFF10B981) : const Color(0xFFEF4444);
-    final statusBgColor = isActive ? const Color(0xFFD1FAE5) : const Color(0xFFFEE2E2);
+    final statusColor = isActive
+        ? const Color(0xFF10B981)
+        : const Color(0xFFEF4444);
+    final statusBgColor = isActive
+        ? const Color(0xFFD1FAE5)
+        : const Color(0xFFFEE2E2);
     final plan = subscription.pricingPlan;
     final school = subscription.school;
 
@@ -219,10 +223,7 @@ class SubscriptionCard extends StatelessWidget {
             offset: const Offset(0, 10),
           ),
         ],
-        border: Border.all(
-          color: Colors.grey.withOpacity(0.1),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.grey.withOpacity(0.1), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,28 +269,84 @@ class SubscriptionCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
+                      InkWell(
+                        onTap: () {
+                          Clipboard.setData(
+                            ClipboardData(text: subscription.schoolId),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('School UUID copied to clipboard'),
+                              behavior: SnackBarBehavior.floating,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(4),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  subscription.schoolId,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.primary,
+                                    fontFamily: 'monospace',
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              const Icon(
+                                Icons.copy_rounded,
+                                size: 12,
+                                color: AppColors.primary,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
                       Row(
                         children: [
-                          const Icon(Icons.email_outlined, size: 14, color: AppColors.textSecondary),
+                          const Icon(
+                            Icons.email_outlined,
+                            size: 14,
+                            color: AppColors.textSecondary,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               school?.email ?? 'No email',
-                              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
-                       const SizedBox(height: 4),
-                       Row(
+                      const SizedBox(height: 4),
+                      Row(
                         children: [
-                          const Icon(Icons.phone_outlined, size: 14, color: AppColors.textSecondary),
+                          const Icon(
+                            Icons.phone_outlined,
+                            size: 14,
+                            color: AppColors.textSecondary,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             school?.phone ?? 'No phone',
-                            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ],
                       ),
@@ -297,7 +354,10 @@ class SubscriptionCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: statusBgColor,
                     borderRadius: BorderRadius.circular(20),
@@ -328,7 +388,7 @@ class SubscriptionCard extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Body Section
           Padding(
             padding: const EdgeInsets.all(20),
@@ -354,7 +414,7 @@ class SubscriptionCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 20),
-                
+
                 // Dates
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -365,38 +425,54 @@ class SubscriptionCard extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      _buildDateItem('Start Date', _formatDate(subscription.startDate), true),
+                      _buildDateItem(
+                        'Start Date',
+                        _formatDate(subscription.startDate),
+                        true,
+                      ),
                       Container(
                         width: 1,
                         height: 30,
                         color: Colors.grey.withOpacity(0.3),
                         margin: const EdgeInsets.symmetric(horizontal: 16),
                       ),
-                      _buildDateItem('End Date', _formatDate(subscription.endDate), false),
+                      _buildDateItem(
+                        'End Date',
+                        _formatDate(subscription.endDate),
+                        false,
+                      ),
                     ],
                   ),
                 ),
-                
+
                 if (school?.address != null && school!.address.isNotEmpty) ...[
-                 const SizedBox(height: 16),
-                 Row(
-                   crossAxisAlignment: CrossAxisAlignment.start,
-                   children: [
-                     const Icon(Icons.location_on_outlined, size: 16, color: AppColors.textSecondary),
-                     const SizedBox(width: 8),
-                     Expanded(
-                       child: Text(
-                         school.address.replaceAll("\n", ", "),
-                         style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
-                       ),
-                     ),
-                   ],
-                 ),
-                ]
+                  const SizedBox(height: 16),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.location_on_outlined,
+                        size: 16,
+                        color: AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          school.address.replaceAll("\n", ", "),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
-          
+
           // Footer
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -413,19 +489,30 @@ class SubscriptionCard extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                 Row(
+                Row(
                   children: [
-                    const Icon(Icons.payments_outlined, size: 16, color: AppColors.textSecondary),
+                    const Icon(
+                      Icons.payments_outlined,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Monthly: \$${plan?.pricePerMonth ?? '0'}',
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ],
                 ),
                 Text(
                   'Created: ${_formatDate(subscription.createdAt)}',
-                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -435,7 +522,12 @@ class SubscriptionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -461,7 +553,11 @@ class SubscriptionCard extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -491,14 +587,20 @@ class SubscriptionCard extends StatelessWidget {
           Row(
             children: [
               Icon(
-                isStart ? Icons.calendar_today_rounded : Icons.event_busy_rounded,
+                isStart
+                    ? Icons.calendar_today_rounded
+                    : Icons.event_busy_rounded,
                 size: 14,
                 color: AppColors.textSecondary,
               ),
               const SizedBox(width: 6),
               Text(
                 label,
-                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
