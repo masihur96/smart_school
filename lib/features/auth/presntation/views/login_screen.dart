@@ -205,6 +205,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ],
               ),
+              SizedBox(height: 20),
+              _QuickLoginButton(
+                label: 'Super Admin',
+                color: Colors.purple,
+                onTap: () => _quickLogin('superadmin@gmail.com', "SuperAdmin@"),
+              ),
             ],
           ),
         ),
@@ -236,9 +242,11 @@ class _QuickLoginButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           color: color.withValues(alpha: 0.05),
         ),
-        child: Text(
-          label,
-          style: TextStyle(color: color, fontWeight: FontWeight.bold),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(color: color, fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );
