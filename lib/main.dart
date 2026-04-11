@@ -28,6 +28,7 @@ import 'features/student/providers/student_routine_provider.dart';
 import 'features/student/providers/student_homework_provider.dart';
 import 'features/student/providers/student_result_provider.dart';
 import 'features/super_admin/providers/super_admin_dashboard_provider.dart';
+import 'features/super_admin/providers/super_admin_school_provider.dart';
 import 'services/database_service.dart';
 import 'configs/network/data_provider.dart';
 import 'features/auth/data/datasources/auth_remote_data_source.dart';
@@ -107,6 +108,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => TeacherAttendanceProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => SuperAdminDashboardNotifier()),
+        ChangeNotifierProvider(create: (_) => SuperAdminSchoolNotifier()),
       ],
       child: const MyApp(),
     ),

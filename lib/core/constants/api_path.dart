@@ -30,6 +30,7 @@ class APIPath {
   static String teacherAssignment = "$baseUrl/teacher/assignments";
   static String teacherMarks = "$baseUrl/teacher/marks";
   static String superAdminDashboard = "$baseUrl/superadmin/dashboard";
+  static String superAdminSchools = "$baseUrl/superadmin/schools";
 
   static String updateClass(String id) => "$baseUrl/admin/classes/$id";
   static String deleteClass(String id) => "$baseUrl/admin/classes/$id";
