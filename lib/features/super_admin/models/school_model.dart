@@ -5,6 +5,7 @@ class SuperAdminSchool {
   final String address;
   final String phone;
   final String email;
+  final bool isActive;
 
   SuperAdminSchool({
     this.id,
@@ -13,6 +14,7 @@ class SuperAdminSchool {
     required this.address,
     required this.phone,
     required this.email,
+    this.isActive = true,
   });
 
   factory SuperAdminSchool.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class SuperAdminSchool {
       address: json['address'] ?? '',
       phone: json['phone'] ?? '',
       email: json['email'] ?? '',
+      isActive: json['isActive'] ?? true,
     );
   }
 
@@ -33,6 +36,27 @@ class SuperAdminSchool {
       'address': address,
       'phone': phone,
       'email': email,
+      'isActive': isActive,
     };
+  }
+
+  SuperAdminSchool copyWith({
+    String? id,
+    String? schoolId,
+    String? name,
+    String? address,
+    String? phone,
+    String? email,
+    bool? isActive,
+  }) {
+    return SuperAdminSchool(
+      id: id ?? this.id,
+      schoolId: schoolId ?? this.schoolId,
+      name: name ?? this.name,
+      address: address ?? this.address,
+      phone: phone ?? this.phone,
+      email: email ?? this.email,
+      isActive: isActive ?? this.isActive,
+    );
   }
 }
