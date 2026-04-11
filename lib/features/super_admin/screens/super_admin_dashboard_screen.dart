@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/widgets/app_drawer.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/features/super_admin/providers/super_admin_dashboard_provider.dart';
 import 'package:smart_school/models/user_model.dart';
 
 class SuperAdminDashboardScreen extends StatefulWidget {
@@ -15,6 +16,13 @@ class SuperAdminDashboardScreen extends StatefulWidget {
 
 class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
   int _selectedIndex = 0;
+
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SuperAdminDashboardNotifier>().fetchDashboardData();
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -269,6 +277,19 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
   }
 
   Widget _buildStatGrid() {
+    final dashboardNotifier = context.watch<SuperAdminDashboardNotifier>();
+    final data = dashboardNotifier.dashboardData;
+    final isLoading = dashboardNotifier.isLoading;
+
+    if (isLoading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
@@ -280,12 +301,27 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         mainAxisSpacing: 16,
         childAspectRatio: 1.4,
         children: [
-          _buildStatCard('Total Schools', '42', Icons.business, Colors.blue),
-          _buildStatCard('Total Student', '8.4k', Icons.people, Colors.green),
-          _buildStatCard('Total Teacher', '1.4k', Icons.dns, Colors.teal),
+          _buildStatCard(
+            'Total Schools',
+            '${data.totalSchools}',
+            Icons.business,
+            Colors.blue,
+          ),
+          _buildStatCard(
+            'Total Student',
+            '${data.totalStudents}',
+            Icons.people,
+            Colors.green,
+          ),
+          _buildStatCard(
+            'Total Teacher',
+            '${data.totalTeachers}',
+            Icons.dns,
+            Colors.teal,
+          ),
           _buildStatCard(
             'Active Subscription',
-            '5k',
+            '${data.activeSubscriptions}',
             Icons.monetization_on,
             Colors.deepPurple,
           ),
