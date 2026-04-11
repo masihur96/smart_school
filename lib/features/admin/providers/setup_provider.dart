@@ -41,7 +41,10 @@ class ClassSetupNotifier extends ChangeNotifier {
             : (response.data['data'] ?? response.data['classes'] ?? []);
         _dbService.classes.clear();
         for (var item in data) {
-          _dbService.classes.add(ClassRoom.fromJson(item));
+          final cls = ClassRoom.fromJson(item);
+          if (!cls.isDeleted) {
+            _dbService.classes.add(cls);
+          }
         }
         _classes = [..._dbService.classes];
       } else {
@@ -201,7 +204,10 @@ class SectionSetupNotifier extends ChangeNotifier {
             : (response.data['data'] ?? response.data['sections'] ?? []);
         _dbService.sections.clear();
         for (var item in data) {
-          _dbService.sections.add(Section.fromJson(item));
+          final section = Section.fromJson(item);
+          if (!section.isDeleted) {
+            _dbService.sections.add(section);
+          }
         }
         _sections = [..._dbService.sections];
       } else {
@@ -344,7 +350,10 @@ class SubjectSetupNotifier extends ChangeNotifier {
             : (response.data['data'] ?? response.data['subjects'] ?? []);
         _dbService.subjects.clear();
         for (var item in data) {
-          _dbService.subjects.add(Subject.fromJson(item));
+          final subject = Subject.fromJson(item);
+          if (!subject.isDeleted) {
+            _dbService.subjects.add(subject);
+          }
         }
         _subjects = [..._dbService.subjects];
       } else {

@@ -12,6 +12,7 @@ class Teacher {
   final double? lat;
   final double? lon;
   final double? radius;
+  final DateTime? deletedAt;
 
   Teacher({
     required this.userId, 
@@ -24,7 +25,10 @@ class Teacher {
     this.lat,
     this.lon,
     this.radius,
+    this.deletedAt,
   });
+
+  bool get isDeleted => deletedAt != null;
 
   factory Teacher.fromJson(Map<String, dynamic> json) {
     return Teacher(
@@ -40,6 +44,7 @@ class Teacher {
       lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
       lon: json['lon'] != null ? double.tryParse(json['lon'].toString()) : null,
       radius: json['radius'] != null ? double.tryParse(json['radius'].toString()) : null,
+      deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
     );
   }
 
@@ -55,6 +60,7 @@ class Teacher {
       if (lat != null) 'lat': lat,
       if (lon != null) 'lon': lon,
       if (radius != null) 'radius': radius,
+      if (deletedAt != null) 'deletedAt': deletedAt!.toIso8601String(),
     };
   }
 }

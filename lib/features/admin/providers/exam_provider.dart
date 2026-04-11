@@ -33,7 +33,7 @@ class ExamsNotifier extends ChangeNotifier {
         final List<dynamic> data = raw is List
             ? raw
             : (raw is Map ? (raw['data'] ?? raw['exams'] ?? []) : []);
-        _state = data.map((e) => Exam.fromJson(e)).toList();
+        _state = data.map((e) => Exam.fromJson(e)).where((e) => !e.isDeleted).toList();
       } else {
         log('Error fetching exams: ${response?.data}');
       }

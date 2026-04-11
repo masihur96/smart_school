@@ -85,7 +85,10 @@ class TeachersNotifier extends ChangeNotifier {
 
         for (var item in data) {
           try {
-             _dbService.teachers.add(Teacher.fromJson(item));
+             final teacher = Teacher.fromJson(item);
+             if (!teacher.isDeleted) {
+               _dbService.teachers.add(teacher);
+             }
           } catch(e) {
              log("Error parsing teacher: $e");
           }

@@ -123,7 +123,7 @@ class HomeworkNotifier extends ChangeNotifier {
       );
 
       log('fetchHomework results count: ${results.length}');
-      _homeworkRecords = results;
+      _homeworkRecords = results.where((h) => !h.isDeleted).toList();
     } catch (e) {
       log('Error fetching homework from API: $e');
       rethrow;
