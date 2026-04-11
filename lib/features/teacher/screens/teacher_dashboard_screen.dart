@@ -337,8 +337,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) =>
-                          TeacherSelfAttendanceDetailScreen(date: dateStr),
+                      builder: (_) => TeacherSelfAttendanceDetailScreen(
+                        initialDate: dateStr,
+                        teacherId: user?.id ?? "",
+                        schoolId: user?.schoolId ?? '',
+                      ),
                     ),
                   );
                 }
@@ -367,7 +370,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       ],
     );
   }
-
 
   Future<void> _performSelfAttendance(BuildContext context, User? user) async {
     if (user == null ||

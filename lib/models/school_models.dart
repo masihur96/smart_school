@@ -718,6 +718,14 @@ class Teacher {
         phone: json['phone'],
         designation: json['designation'],
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'designation': designation,
+      };
 }
 
 class TeacherSelfAttendance {
@@ -732,6 +740,7 @@ class TeacherSelfAttendance {
   final String schoolId;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final Teacher? teacher;
 
   TeacherSelfAttendance({
     required this.id,
@@ -745,6 +754,7 @@ class TeacherSelfAttendance {
     required this.schoolId,
     required this.createdAt,
     required this.updatedAt,
+    this.teacher,
   });
 
   factory TeacherSelfAttendance.fromJson(Map<String, dynamic> json) =>
@@ -765,6 +775,7 @@ class TeacherSelfAttendance {
         updatedAt: json['updatedAt'] != null
             ? DateTime.parse(json['updatedAt'])
             : DateTime.now(),
+        teacher: json['teacher'] != null ? Teacher.fromJson(json['teacher']) : null,
       );
 
   Map<String, dynamic> toJson() => {
@@ -779,6 +790,7 @@ class TeacherSelfAttendance {
         'schoolId': schoolId,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
+        if (teacher != null) 'teacher': teacher!.toJson(),
       };
 }
 

@@ -1,122 +1,221 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_school/features/teacher/providers/teacher_dashboard_provider.dart';
+import 'package:smart_school/features/admin/providers/teacher_provider.dart';
+import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/features/teacher/providers/teacher_attendance_provider.dart';
 import 'package:smart_school/models/school_models.dart';
+import 'package:smart_school/models/user_model.dart';
 
 class TeacherSelfAttendanceDetailScreen extends StatefulWidget {
-  final String date; // Format: DD/MM/YYYY
+  final String? teacherId;
+  final String schoolId;
+  final String? initialDate; // Format: DD/MM/YYYY
 
-  const TeacherSelfAttendanceDetailScreen({super.key, required this.date});
+  const TeacherSelfAttendanceDetailScreen({
+    super.key,
+    this.teacherId,
+    required this.schoolId,
+    this.initialDate,
+  });
 
   @override
-  State<TeacherSelfAttendanceDetailScreen> createState() => _TeacherSelfAttendanceDetailScreenState();
+  State<TeacherSelfAttendanceDetailScreen> createState() =>
+      _TeacherSelfAttendanceDetailScreenState();
 }
 
-class _TeacherSelfAttendanceDetailScreenState extends State<TeacherSelfAttendanceDetailScreen> {
+class _TeacherSelfAttendanceDetailScreenState
+    extends State<TeacherSelfAttendanceDetailScreen> {
+  String? _selectedTeacherId;
+  DateTime? _selectedDate;
+
   @override
   void initState() {
     super.initState();
+    _selectedTeacherId = widget.teacherId;
+    if (widget.initialDate != null) {
+      try {
+        _selectedDate = DateFormat('dd/MM/yyyy').parse(widget.initialDate!);
+      } catch (e) {
+        _selectedDate = DateTime.now();
+      }
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<TeacherDashboardProvider>().fetchTodayAttendance(widget.date);
+      _fetchData();
+      final auth = context.read<AuthNotifier>();
+      if (auth.user?.role == UserRole.admin) {
+        context.read<TeachersNotifier>().fetchTeachers();
+      }
     });
+  }
+
+  void _fetchData() {
+    final dateStr = _selectedDate != null
+        ? DateFormat('dd/MM/yyyy').format(_selectedDate!)
+        : null;
+    context.read<TeacherAttendanceProvider>().fetchTeacherAttendance(
+      schoolId: widget.schoolId,
+      teacherId: _selectedTeacherId,
+      date: dateStr,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<TeacherDashboardProvider>();
-    final attendance = provider.todayAttendance;
-    final isLoading = provider.isLoading;
+    final auth = context.watch<AuthNotifier>();
+    final isAdmin = auth.user?.role == UserRole.admin;
+    final provider = context.watch<TeacherAttendanceProvider>();
+    final teachers = context.watch<TeachersNotifier>().teachers;
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Attendance Details', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Teacher Attendance',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.green.shade600,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : provider.error != null
-              ? _buildErrorWidget(provider.error!)
-              : attendance == null
-                  ? _buildEmptyWidget()
-                  : _buildAttendanceDetails(attendance),
-    );
-  }
-
-  Widget _buildAttendanceDetails(TeacherSelfAttendance attendance) {
-    final isPresent = attendance.status.toLowerCase() == 'present';
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Column(
         children: [
-          _buildStatusHeader(isPresent, attendance.status),
-          const SizedBox(height: 24),
-          _buildInfoSection(attendance),
-          const SizedBox(height: 24),
-          _buildLocationCard(attendance),
-          const SizedBox(height: 32),
-          _buildTimelineCard(attendance),
+          _buildFilterSection(isAdmin, teachers),
+          Expanded(
+            child: provider.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : provider.error != null
+                    ? _buildErrorWidget(provider.error!)
+                    : provider.attendanceList.isEmpty
+                        ? _buildEmptyWidget()
+                        : _buildAttendanceList(provider.attendanceList),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStatusHeader(bool isPresent, String status) {
+  Widget _buildFilterSection(bool isAdmin, List<dynamic> teachers) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isPresent ? Colors.green.shade50 : Colors.red.shade50,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isPresent ? Colors.green.shade200 : Colors.red.shade200,
-          width: 2,
-        ),
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          Icon(
-            isPresent ? Icons.check_circle : Icons.cancel,
-            color: isPresent ? Colors.green : Colors.red,
-            size: 64,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            status.toUpperCase(),
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: isPresent ? Colors.green.shade800 : Colors.red.shade800,
-              letterSpacing: 1.2,
+          if (isAdmin) ...[
+            DropdownButtonFormField<String>(
+              decoration: InputDecoration(
+                labelText: 'Select Teacher',
+                prefixIcon: const Icon(Icons.person_search),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              value: _selectedTeacherId,
+              items: [
+                const DropdownMenuItem(value: null, child: Text('All Teachers')),
+                ...teachers.map((t) => DropdownMenuItem(
+                      value: t.userId,
+                      child: Text(t.user?.name ?? 'Unknown'),
+                    )),
+              ],
+              onChanged: (val) {
+                setState(() => _selectedTeacherId = val);
+                _fetchData();
+              },
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            isPresent ? 'You are marked as present' : 'You are marked as absent',
-            style: TextStyle(
-              color: isPresent ? Colors.green.shade600 : Colors.red.shade600,
-              fontWeight: FontWeight.w500,
-            ),
+            const SizedBox(height: 12),
+          ],
+          Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedDate ?? DateTime.now(),
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2030),
+                    );
+                    if (picked != null) {
+                      setState(() => _selectedDate = picked);
+                      _fetchData();
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade400),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
+                        const SizedBox(width: 8),
+                        Text(
+                          _selectedDate == null
+                              ? 'Filter by Date'
+                              : DateFormat('dd/MM/yyyy').format(_selectedDate!),
+                          style: TextStyle(
+                            color: _selectedDate == null ? Colors.grey.shade600 : Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              if (_selectedDate != null || (isAdmin && _selectedTeacherId != null))
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedDate = null;
+                      if (isAdmin) _selectedTeacherId = null;
+                    });
+                    _fetchData();
+                  },
+                  icon: const Icon(Icons.clear, color: Colors.red),
+                  tooltip: 'Clear Filters',
+                ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildInfoSection(TeacherSelfAttendance attendance) {
+  Widget _buildAttendanceList(List<TeacherSelfAttendance> list) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        final attendance = list[index];
+        return _buildAttendanceCard(attendance);
+      },
+    );
+  }
+
+  Widget _buildAttendanceCard(TeacherSelfAttendance attendance) {
+    final isPresent = attendance.status.toLowerCase() == 'present';
+    final teacherName = attendance.teacher?.name ?? 'Teacher';
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -124,184 +223,70 @@ class _TeacherSelfAttendanceDetailScreenState extends State<TeacherSelfAttendanc
       ),
       child: Column(
         children: [
-          _buildInfoRow(Icons.calendar_today, 'Date', attendance.date),
-          const Divider(height: 32),
-          _buildInfoRow(Icons.access_time, 'Check-in Time', attendance.time),
-          const Divider(height: 32),
-          _buildInfoRow(
-            Icons.straighten,
-            'Distance from School',
-            '${attendance.distanceFromCenter.toStringAsFixed(2)} meters',
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(IconData icon, String label, String value) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.green.shade50,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: Colors.green.shade700, size: 20),
-        ),
-        const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              value,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.black87,
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            leading: CircleAvatar(
+              backgroundColor: isPresent ? Colors.green.shade50 : Colors.red.shade50,
+              child: Icon(
+                isPresent ? Icons.check_circle : Icons.cancel,
+                color: isPresent ? Colors.green : Colors.red,
               ),
             ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLocationCard(TeacherSelfAttendance attendance) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.blue.shade100),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.location_on, color: Colors.blue.shade700),
-              const SizedBox(width: 8),
-              Text(
-                'Location Captured',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Colors.blue.shade900,
+            title: Text(
+              teacherName,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text('${attendance.date} at ${attendance.time}'),
+            trailing: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: isPresent ? Colors.green.shade50 : Colors.red.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isPresent ? Colors.green.shade200 : Colors.red.shade200,
                 ),
               ),
-            ],
+              child: Text(
+                attendance.status.toUpperCase(),
+                style: TextStyle(
+                  color: isPresent ? Colors.green.shade700 : Colors.red.shade700,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              _buildCoordItem('Latitude', attendance.lat),
-              const SizedBox(width: 24),
-              _buildCoordItem('Longitude', attendance.lon),
-            ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildMiniInfo(Icons.location_on, 'Dist: ${attendance.distanceFromCenter.toStringAsFixed(1)}m'),
+                _buildMiniInfo(Icons.my_location, '${attendance.lat}, ${attendance.lon}', flex: 2),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCoordItem(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(color: Colors.blue.shade700, fontSize: 12),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-            color: Colors.blue.shade900,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTimelineCard(TeacherSelfAttendance attendance) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Attendance Metadata',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            children: [
-              _buildTimelineItem(
-                'Registered At',
-                DateFormat('MMM d, yyyy - hh:mm a').format(attendance.createdAt),
-                isLast: false,
-              ),
-              _buildTimelineItem(
-                'Last Updated',
-                DateFormat('MMM d, yyyy - hh:mm a').format(attendance.updatedAt),
-                isLast: true,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTimelineItem(String title, String subtitle, {required bool isLast}) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Column(
-          children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: Colors.green.shade400,
-                shape: BoxShape.circle,
-              ),
+  Widget _buildMiniInfo(IconData icon, String text, {int flex = 1}) {
+    return Expanded(
+      flex: flex,
+      child: Row(
+        children: [
+          Icon(icon, size: 14, color: Colors.grey),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              text,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
+              overflow: TextOverflow.ellipsis,
             ),
-            if (!isLast)
-              Container(
-                width: 2,
-                height: 40,
-                color: Colors.green.shade100,
-              ),
-          ],
-        ),
-        const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-            ),
-            Text(
-              subtitle,
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-            ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -313,8 +298,13 @@ class _TeacherSelfAttendanceDetailScreenState extends State<TeacherSelfAttendanc
           Icon(Icons.event_busy, size: 80, color: Colors.grey.shade300),
           const SizedBox(height: 16),
           const Text(
-            'No attendance record found for this date',
+            'No attendance records found',
             style: TextStyle(color: Colors.grey, fontSize: 16),
+          ),
+          const SizedBox(height: 8),
+          ElevatedButton(
+            onPressed: _fetchData,
+            child: const Text('Refresh'),
           ),
         ],
       ),
@@ -337,7 +327,7 @@ class _TeacherSelfAttendanceDetailScreenState extends State<TeacherSelfAttendanc
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => context.read<TeacherDashboardProvider>().fetchTodayAttendance(widget.date),
+              onPressed: _fetchData,
               child: const Text('Try Again'),
             ),
           ],
