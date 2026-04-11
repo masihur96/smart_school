@@ -202,7 +202,8 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const SizedBox(height: 40),
                   Text(
@@ -279,12 +280,12 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         mainAxisSpacing: 16,
         childAspectRatio: 1.4,
         children: [
-          _buildStatCard('Schools', '42', Icons.business, Colors.blue),
-          _buildStatCard('Active Users', '8.4k', Icons.people, Colors.green),
-          _buildStatCard('Server Status', 'Healthy', Icons.dns, Colors.teal),
+          _buildStatCard('Total Schools', '42', Icons.business, Colors.blue),
+          _buildStatCard('Total Student', '8.4k', Icons.people, Colors.green),
+          _buildStatCard('Total Teacher', '1.4k', Icons.dns, Colors.teal),
           _buildStatCard(
-            'Daily Rev',
-            '\$1.2k',
+            'Active Subscription',
+            '5k',
             Icons.monetization_on,
             Colors.deepPurple,
           ),
