@@ -57,6 +57,9 @@ GoRouter getRouter(AuthNotifier authNotifier) {
             return '/teacher';
           case UserRole.student:
             return '/student';
+          case UserRole.superadmin:
+            // TODO: Handle this case.
+            throw UnimplementedError();
         }
       }
 
@@ -154,7 +157,8 @@ GoRouter getRouter(AuthNotifier authNotifier) {
           ),
           GoRoute(
             path: 'notices',
-            builder: (context, state) => const StudentNoticeScreen(isFromDrawer: false,),
+            builder: (context, state) =>
+                const StudentNoticeScreen(isFromDrawer: false),
           ),
           GoRoute(
             path: 'results',
