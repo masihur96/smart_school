@@ -40,6 +40,7 @@ class RoutineNotifier extends ChangeNotifier {
 
         final List<RoutineEntry> fetched = data
             .map((e) => RoutineEntry.fromJson(e))
+            .where((e) => !e.isDeleted)
             .toList();
 
         // Clear and repopulate state
@@ -295,7 +296,10 @@ class RoutineNotifier extends ChangeNotifier {
             ? response.data
             : (response.data['data'] ?? []);
 
-        _teacherRoutine = data.map((e) => RoutineEntry.fromJson(e)).toList();
+        _teacherRoutine = data
+            .map((e) => RoutineEntry.fromJson(e))
+            .where((e) => !e.isDeleted)
+            .toList();
         log('Fetched ${_teacherRoutine.length} routine entries for teacher');
       } else {
         log('Error fetching teacher routine: ${response?.statusCode}');

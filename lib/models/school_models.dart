@@ -11,13 +11,18 @@ class ClassRoom {
     required this.name,
     this.schoolId = '',
     this.description = '',
+    this.deletedAt,
   });
+
+  bool get isDeleted => deletedAt != null;
+  final DateTime? deletedAt;
 
   factory ClassRoom.fromJson(Map<String, dynamic> json) => ClassRoom(
     id: json['id'] ?? json['_id'] ?? '',
     name: json['name'] ?? '',
     schoolId: json['schoolId'] ?? '',
     description: json['description'] ?? '',
+    deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -25,6 +30,7 @@ class ClassRoom {
     'name': name,
     'schoolId': schoolId,
     'description': description,
+    'deletedAt': deletedAt?.toIso8601String(),
   };
 }
 
@@ -32,16 +38,20 @@ class Section {
   final String id;
   final String classId;
   final String name; // e.g., "A"
+  final DateTime? deletedAt;
 
-  Section({required this.id, required this.classId, required this.name});
+  Section({required this.id, required this.classId, required this.name, this.deletedAt});
+
+  bool get isDeleted => deletedAt != null;
 
   factory Section.fromJson(Map<String, dynamic> json) => Section(
     id: json['id'] ?? json['_id'] ?? '',
     classId: json['classId'] ?? '',
     name: json['name'] ?? '',
+    deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
   );
 
-  Map<String, dynamic> toJson() => {'id': id, 'classId': classId, 'name': name};
+  Map<String, dynamic> toJson() => {'id': id, 'classId': classId, 'name': name, 'deletedAt': deletedAt?.toIso8601String()};
 }
 
 class Subject {
@@ -57,7 +67,11 @@ class Subject {
     this.code = '',
     this.classId = '',
     this.schoolId = '',
+    this.deletedAt,
   });
+
+  bool get isDeleted => deletedAt != null;
+  final DateTime? deletedAt;
 
   factory Subject.fromJson(Map<String, dynamic> json) => Subject(
     id: json['id'] ?? json['_id'] ?? '',
@@ -65,6 +79,7 @@ class Subject {
     code: json['code'] ?? '',
     classId: json['classId'] ?? '',
     schoolId: json['schoolId'] ?? '',
+    deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -73,6 +88,7 @@ class Subject {
     'code': code,
     'classId': classId,
     'schoolId': schoolId,
+    'deletedAt': deletedAt?.toIso8601String(),
   };
 }
 
@@ -209,7 +225,11 @@ class Homework {
     required this.dueDate,
     required this.createdAt,
     this.studentHomeworks = const [],
+    this.deletedAt,
   });
+
+  bool get isDeleted => deletedAt != null;
+  final DateTime? deletedAt;
 
   factory Homework.fromJson(Map<String, dynamic> json) => Homework(
     id: json['id'] ?? '',
@@ -225,6 +245,7 @@ class Homework {
     studentHomeworks: (json['studentHomeworks'] as List? ?? [])
         .map((e) => StudentHomework.fromJson(e))
         .toList(),
+    deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -239,6 +260,7 @@ class Homework {
     'dueDate': dueDate.toIso8601String(),
     'createdAt': createdAt.toIso8601String(),
     'studentHomeworks': studentHomeworks.map((e) => e.toJson()).toList(),
+    'deletedAt': deletedAt?.toIso8601String(),
   };
 }
 
@@ -345,7 +367,11 @@ class Notice {
     this.targetAudience,
     this.postedBy,
     this.isImportant = false,
+    this.deletedAt,
   });
+
+  bool get isDeleted => deletedAt != null;
+  final DateTime? deletedAt;
 
   factory Notice.fromJson(Map<String, dynamic> json) => Notice(
     id: json['id'] ?? json['_id'],
@@ -356,6 +382,7 @@ class Notice {
     targetAudience: json['targetAudience'] ?? json['audience'],
     postedBy: json['postedBy'],
     isImportant: json['isImportant'] ?? json['isImportent'] ?? false,
+    deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -365,6 +392,7 @@ class Notice {
     'schoolId': schoolId,
     'postedBy': postedBy,
     'isImportent': isImportant, // API uses this spelling
+    'deletedAt': deletedAt?.toIso8601String(),
   };
 
   Notice copyWith({
@@ -419,7 +447,11 @@ class RoutineEntry {
     this.subjectEntity,
     this.sectionEntity,
     this.teacherEntity,
+    this.deletedAt,
   });
+
+  bool get isDeleted => deletedAt != null;
+  final DateTime? deletedAt;
 
   factory RoutineEntry.fromJson(Map<String, dynamic> json) {
     log('Parsing RoutineEntry from JSON: $json');
@@ -438,6 +470,7 @@ class RoutineEntry {
       subjectEntity: json['subjectEntity'] != null ? Subject.fromJson(json['subjectEntity']) : null,
       sectionEntity: json['sectionEntity'] != null ? Section.fromJson(json['sectionEntity']) : null,
       teacherEntity: json['teacherEntity'] != null ? Teacher.fromJson(json['teacherEntity']) : null,
+      deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
     );
   }
 
@@ -453,6 +486,7 @@ class RoutineEntry {
       'subjectId': subjectId,
       'teacherId': teacherId,
       if (roomNumber != null) 'roomNumber': roomNumber,
+      'deletedAt': deletedAt?.toIso8601String(),
     };
     log('Serializing RoutineEntry to JSON: $data');
     return data;
@@ -514,7 +548,11 @@ class Exam {
     this.endDate,
     this.assignments = const [],
     this.isPublished = false,
+    this.deletedAt,
   });
+
+  bool get isDeleted => deletedAt != null;
+  final DateTime? deletedAt;
 
   factory Exam.fromJson(Map<String, dynamic> json) {
     // Support both API snake_case and legacy camelCase keys
@@ -549,6 +587,7 @@ class Exam {
       endDate: endDate,
       assignments: assignments,
       isPublished: (json['isPublished'] ?? json['is_published']) ?? false,
+      deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
     );
   }
 
@@ -559,6 +598,7 @@ class Exam {
     'start_date': startDate?.toIso8601String(),
     'end_date': endDate?.toIso8601String(),
     'isPublished': isPublished,
+    'deletedAt': deletedAt?.toIso8601String(),
   };
 }
 
@@ -709,7 +749,11 @@ class Teacher {
     this.email,
     this.phone,
     this.designation,
+    this.deletedAt,
   });
+
+  bool get isDeleted => deletedAt != null;
+  final DateTime? deletedAt;
 
   factory Teacher.fromJson(Map<String, dynamic> json) => Teacher(
         id: json['id'] ?? '',
@@ -717,6 +761,7 @@ class Teacher {
         email: json['email'],
         phone: json['phone'],
         designation: json['designation'],
+        deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
       );
 
   Map<String, dynamic> toJson() => {
@@ -725,6 +770,7 @@ class Teacher {
         'email': email,
         'phone': phone,
         'designation': designation,
+        'deletedAt': deletedAt?.toIso8601String(),
       };
 }
 

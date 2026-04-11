@@ -55,6 +55,7 @@ class NoticesNotifier extends ChangeNotifier {
 
         final fetched = raw
             .map((e) => Notice.fromJson(e as Map<String, dynamic>))
+            .where((n) => !n.isDeleted)
             .toList();
 
         _dbService.notices

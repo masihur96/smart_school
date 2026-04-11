@@ -97,9 +97,6 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             classId: _selectedClassId!,
             sectionId: _selectedSectionId!,
             designation: _designationController.text,
-            lat: double.tryParse(_latController.text),
-            lon: double.tryParse(_lonController.text),
-            radius: double.tryParse(_radiusController.text),
           );
         }
 
@@ -340,67 +337,73 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             const SizedBox(height: 24),
 
             // Location Settings Section
-            _buildSectionHeader(
-              context,
-              'Arrival Settings',
-              Icons.location_on_outlined,
-            ),
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _latController,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: 'Latitude',
-                              prefixIcon: const Icon(Icons.map_outlined),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _lonController,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: 'Longitude',
-                              prefixIcon: const Icon(Icons.explore_outlined),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+            isEditing
+                ? _buildSectionHeader(
+                    context,
+                    'Arrival Settings',
+                    Icons.location_on_outlined,
+                  )
+                : SizedBox(),
+            isEditing
+                ? Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _radiusController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Allowed Radius (meters)',
-                        prefixIcon: const Icon(Icons.radar_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        helperText: 'Radius in meters for arrival check',
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _latController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    labelText: 'Latitude',
+                                    prefixIcon: const Icon(Icons.map_outlined),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _lonController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    labelText: 'Longitude',
+                                    prefixIcon: const Icon(
+                                      Icons.explore_outlined,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _radiusController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Allowed Radius (meters)',
+                              prefixIcon: const Icon(Icons.radar_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              helperText: 'Radius in meters for arrival check',
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
+                  )
+                : SizedBox(),
 
             const SizedBox(height: 32),
             SizedBox(
