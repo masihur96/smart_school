@@ -90,4 +90,76 @@ class PricingNotifier extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> updatePricingPlan(String id, PricingPlan plan) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await DataProvider().performRequest(
+        'PATCH',
+        APIPath.updatePricing(id),
+        header: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        data: plan.toJson(),
+      );
+
+      if (response != null && response.statusCode == 200) {
+        log('Pricing plan updated successfully');
+        await fetchPricingPlans(); // Refresh list
+        return true;
+      } else {
+        _error = 'Failed to update plan: ${response?.statusCode}';
+        log('Error updating pricing plan: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error: $e';
+      log('Exception updating pricing plan: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> deletePricingPlan(String id) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await DataProvider().performRequest(
+        'DELETE',
+        APIPath.deletePricing(id),
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && (response.statusCode == 200 || response.statusCode == 204)) {
+        log('Pricing plan deleted successfully');
+        await fetchPricingPlans(); // Refresh list
+        return true;
+      } else {
+        _error = 'Failed to delete plan: ${response?.statusCode}';
+        log('Error deleting pricing plan: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error: $e';
+      log('Exception deleting pricing plan: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

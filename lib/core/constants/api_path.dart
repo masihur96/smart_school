@@ -36,6 +36,8 @@ class APIPath {
 
   static String pricingPlans = "$baseUrl/pricing/plans";
   static String createPricing = "$baseUrl/pricing";
+  static String updatePricing(String id) => "$baseUrl/pricing/$id";
+  static String deletePricing(String id) => "$baseUrl/pricing/$id";
 
   static String updateClass(String id) => "$baseUrl/admin/classes/$id";
   static String deleteClass(String id) => "$baseUrl/admin/classes/$id";

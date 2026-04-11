@@ -278,7 +278,50 @@ class PricingPlanCard extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_horiz_rounded, color: AppColors.textSecondary),
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => AddPricingPlanBottomSheet(plan: plan),
+                          );
+                        } else if (value == 'delete') {
+                          _showDeleteConfirmation(context);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit_outlined, size: 20),
+                              SizedBox(width: 8),
+                              Text('Edit Plan'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline_rounded, size: 20, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('Delete Plan', style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     _buildPricingDetail(
@@ -364,10 +407,40 @@ class PricingPlanCard extends StatelessWidget {
       ),
     );
   }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Pricing Plan?'),
+        content: Text('Are you sure you want to delete "${plan.name}"? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCEL'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await context.read<PricingNotifier>().deletePricingPlan(plan.id!);
+              if (success && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('"${plan.name}" deleted')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            child: const Text('DELETE'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class AddPricingPlanBottomSheet extends StatefulWidget {
-  const AddPricingPlanBottomSheet({super.key});
+  final PricingPlan? plan;
+  const AddPricingPlanBottomSheet({super.key, this.plan});
 
   @override
   State<AddPricingPlanBottomSheet> createState() => _AddPricingPlanBottomSheetState();
@@ -375,13 +448,25 @@ class AddPricingPlanBottomSheet extends StatefulWidget {
 
 class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _descController = TextEditingController();
-  final _minStudentsController = TextEditingController(text: '0');
-  final _maxStudentsController = TextEditingController();
-  final _priceMonthController = TextEditingController();
-  final _priceStudentController = TextEditingController();
+  late TextEditingController _nameController;
+  late TextEditingController _descController;
+  late TextEditingController _minStudentsController;
+  late TextEditingController _maxStudentsController;
+  late TextEditingController _priceMonthController;
+  late TextEditingController _priceStudentController;
   bool _isCustom = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.plan?.name);
+    _descController = TextEditingController(text: widget.plan?.description);
+    _minStudentsController = TextEditingController(text: widget.plan?.minStudents.toString() ?? '0');
+    _maxStudentsController = TextEditingController(text: widget.plan?.maxStudents.toString() ?? '');
+    _priceMonthController = TextEditingController(text: widget.plan?.pricePerMonth ?? '');
+    _priceStudentController = TextEditingController(text: widget.plan?.pricePerStudent ?? '');
+    _isCustom = widget.plan?.isCustom ?? false;
+  }
 
   @override
   void dispose() {
@@ -397,7 +482,10 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
       final notifier = context.read<PricingNotifier>();
-      final plan = PricingPlan(
+      final isEditing = widget.plan != null;
+
+      final planData = PricingPlan(
+        id: widget.plan?.id,
         name: _nameController.text,
         description: _descController.text,
         minStudents: int.parse(_minStudentsController.text),
@@ -407,12 +495,18 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
         isCustom: _isCustom,
       );
 
-      final success = await notifier.createPricingPlan(plan);
+      bool success;
+      if (isEditing) {
+        success = await notifier.updatePricingPlan(widget.plan!.id!, planData);
+      } else {
+        success = await notifier.createPricingPlan(planData);
+      }
+
       if (success && mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Pricing plan created successfully!'),
+          SnackBar(
+            content: Text(isEditing ? 'Pricing plan updated successfully!' : 'Pricing plan created successfully!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -423,6 +517,7 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final padding = MediaQuery.of(context).viewInsets.bottom;
+    final isEditing = widget.plan != null;
 
     return Container(
       decoration: const BoxDecoration(
@@ -448,9 +543,9 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Create New Plan',
-                style: TextStyle(
+              Text(
+                isEditing ? 'Update Pricing Plan' : 'Create New Plan',
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -458,7 +553,7 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Define a new pricing structure for institutions',
+                isEditing ? 'Modify the pricing structure below' : 'Define a new pricing structure for institutions',
                 style: TextStyle(
                   fontSize: 14,
                   color: AppColors.textSecondary.withOpacity(0.7),
@@ -550,9 +645,9 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
                     ),
                     child: notifier.isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            'CREATE PRICING PLAN',
-                            style: TextStyle(
+                        : Text(
+                            isEditing ? 'UPDATE PRICING PLAN' : 'CREATE PRICING PLAN',
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1,
