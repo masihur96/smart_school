@@ -4,6 +4,9 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/widgets/app_drawer.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/super_admin/providers/super_admin_dashboard_provider.dart';
+import 'package:smart_school/features/super_admin/screens/backup_screen.dart';
+import 'package:smart_school/features/super_admin/screens/pricing_school_screen.dart';
+import 'package:smart_school/features/super_admin/screens/subscription_screen.dart';
 import 'package:smart_school/features/super_admin/screens/super_admin_school_screen.dart';
 import 'package:smart_school/models/user_model.dart';
 
@@ -417,15 +420,30 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
             'Pricing',
             Icons.terminal_rounded,
             Colors.blueGrey,
-            () {},
+            () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => PricingSchoolScreen()),
+              );
+            },
           ),
           _buildActionItem(
             'Subscription',
             Icons.podcasts_rounded,
             Colors.deepOrange,
-            () {},
+            () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => SubscriptionScreen()),
+              );
+            },
           ),
-          _buildActionItem('Backup', Icons.storage_rounded, Colors.teal, () {}),
+          _buildActionItem('Backup', Icons.storage_rounded, Colors.teal, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => BackupScreen()),
+            );
+          }),
         ],
       ),
     );
