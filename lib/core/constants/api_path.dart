@@ -42,6 +42,8 @@ class APIPath {
   static String allSubscriptions = "$baseUrl/subscriptions/all";
   static String schoolSubscription(String schoolId) => "$baseUrl/subscriptions/school/$schoolId";
   static String assignSubscription = "$baseUrl/subscriptions/assign";
+  static String updateSubscription(String id) => "$baseUrl/subscriptions/$id";
+  static String deleteSubscription(String id) => "$baseUrl/subscriptions/$id";
 
   static String updateClass(String id) => "$baseUrl/admin/classes/$id";
   static String deleteClass(String id) => "$baseUrl/admin/classes/$id";
