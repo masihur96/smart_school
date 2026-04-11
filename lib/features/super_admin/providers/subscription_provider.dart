@@ -1,5 +1,7 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
+
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
 import '../../../core/utils/storage_service.dart';
@@ -46,6 +48,75 @@ class SubscriptionNotifier extends ChangeNotifier {
     } catch (e) {
       _error = 'Error: $e';
       log('Exception fetching subscriptions: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> updateSubscriptionStatus(String id, bool isActive) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await DataProvider().performRequest(
+        'PATCH',
+        APIPath.updateSubscription(id),
+        header: {'Authorization': 'Bearer $token'},
+        data: {'isActive': isActive},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        await fetchSubscriptions(); // Refresh the list from the server
+        return true;
+      } else {
+        _error = 'Failed to update subscription: ${response?.statusCode}';
+        log('Error updating subscription: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error updating subscription: $e';
+      log('Exception updating subscription: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> deleteSubscription(String id) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await DataProvider().performRequest(
+        'DELETE',
+        APIPath.deleteSubscription(id),
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        _subscriptions.removeWhere((s) => s.id == id);
+        return true;
+      } else if (response != null && response.statusCode == 204) {
+        // Also handle 204 No Content
+        _subscriptions.removeWhere((s) => s.id == id);
+        return true;
+      } else {
+        _error = 'Failed to delete subscription: ${response?.statusCode}';
+        log('Error deleting subscription: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error deleting subscription: $e';
+      log('Exception deleting subscription: $e');
+      return false;
     } finally {
       _isLoading = false;
       notifyListeners();
