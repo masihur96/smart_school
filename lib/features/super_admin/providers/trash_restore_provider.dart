@@ -232,13 +232,12 @@ class TrashRestoreNotifier extends ChangeNotifier {
       if (token == null) throw Exception('No authentication token found');
 
       final response = await DataProvider().performRequest(
-        'POST',
-        APIPath.restoreRecord,
+        'PATCH',
+        APIPath.restore(record.entity, record.id),
         header: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
-        data: {'entity': record.entity, 'id': record.id},
       );
 
       if (response != null &&
