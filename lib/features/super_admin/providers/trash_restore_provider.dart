@@ -49,11 +49,11 @@ class DeletedRecord {
         break;
       case 'pricing':
         name = json['name'] ?? json['planName'] ?? 'Unknown Plan';
-        subtitle = json['price'] != null ? '\$${json['price']}' : null;
+        subtitle = json['pricePerMonth'] != null ? '\$${json['pricePerMonth']}/mo' : (json['price'] != null ? '\$${json['price']}' : null);
         break;
       case 'subscription':
-        name = json['schoolId'] ?? json['school']?['name'] ?? 'Unknown Subscription';
-        subtitle = json['planId'] ?? json['pricingPlan']?['name'];
+        name = json['school']?['name'] ?? json['schoolId'] ?? 'Unknown Subscription';
+        subtitle = json['pricingPlan']?['name'] ?? json['planId'];
         break;
       case 'homework':
         name = json['title'] ?? json['description'] ?? 'Unknown Homework';
@@ -128,23 +128,44 @@ class TrashRestoreNotifier extends ChangeNotifier {
       );
 
       if (response != null && response.statusCode == 200) {
-        final dynamic rawData = response.data;
+        final dynamic body = response.data;
+        final dynamic nestedData = (body is Map) ? body['data'] : null;
         
         // Clear old data
         _deletedData.clear();
         
-        if (rawData is Map<String, dynamic>) {
-          rawData.forEach((key, value) {
+        if (nestedData is Map<String, dynamic>) {
+          nestedData.forEach((key, value) {
+            if (key == 'summary') return; // Skip summary object
+
             String entityKey = key;
-            // Handle plural keys from backend (e.g., users -> user)
-            if (key.endsWith('s') && !supportedEntities.contains(key)) {
+            
+            // Map backend keys to internal supported entities
+            if (key == 'pricingPlans') {
+              entityKey = 'pricing';
+            } else if (key == 'subscriptions') {
+              entityKey = 'subscription';
+            } else if (key == 'users') {
+              entityKey = 'user';
+            } else if (key == 'schools') {
+              entityKey = 'school';
+            } else if (key == 'classes') {
+              entityKey = 'class';
+            } else if (key == 'sections') {
+              entityKey = 'section';
+            } else if (key == 'subjects') {
+              entityKey = 'subject';
+            }
+
+            // Fallback plural check (e.g. homeworks -> homework)
+            if (!supportedEntities.contains(entityKey) && key.endsWith('s')) {
               final singular = key.substring(0, key.length - 1);
               if (supportedEntities.contains(singular)) {
                 entityKey = singular;
               }
             }
             
-            if (value is List) {
+            if (value is List && supportedEntities.contains(entityKey)) {
               _deletedData[entityKey] = value
                   .map((j) => DeletedRecord.fromJson(j as Map<String, dynamic>, entityKey))
                   .toList();
