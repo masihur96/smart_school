@@ -61,6 +61,7 @@ class APIPath {
       "$baseUrl/teacher/homework/$homeworkId/students/$studentId";
       
   // Backup & Restore
+  static String trash = "$baseUrl/superadmin/trash";
   static String deletedRecords(String entity) => "$baseUrl/superadmin/backup/deleted?entity=$entity";
   static String restoreRecord = "$baseUrl/superadmin/backup/restore";
 }

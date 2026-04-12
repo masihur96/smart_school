@@ -144,70 +144,104 @@ class _BackupScreenState extends State<BackupScreen>
 
   Widget _buildSliverAppBar(TrashRestoreNotifier notifier) {
     return SliverAppBar(
-      expandedHeight: 180,
+      expandedHeight: 200,
       pinned: true,
-      backgroundColor: const Color(0xFF1B2559),
+      stretch: true,
+      backgroundColor: const Color(0xFF0F172A),
       iconTheme: const IconThemeData(color: Colors.white),
       flexibleSpace: FlexibleSpaceBar(
+        stretchModes: const [StretchMode.blurBackground, StretchMode.zoomBackground],
         background: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF1B2559), Color(0xFF2D3A8C)],
+              colors: [Color(0xFF0F172A), Color(0xFF1E293B), Color(0xFF334155)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Row(
+          child: Stack(
+            children: [
+              // Decorative circles
+              Positioned(
+                top: -50,
+                right: -50,
+                child: Container(
+                  width: 200,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.03),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: const Icon(
-                          Icons.restore_from_trash_rounded,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Column(
+                      Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Trash & Restore',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blueAccent.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(
+                                            color: Colors.blueAccent.withOpacity(0.3)),
+                                      ),
+                                      child: const Text(
+                                        'SUPER ADMIN',
+                                        style: TextStyle(
+                                          color: Colors.blueAccent,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 1.2,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'System Trash',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Manage and restore soft-deleted records',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.6),
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          Text(
-                            '${notifier.totalDeleted} deleted records found',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
-                              fontSize: 13,
-                            ),
-                          ),
+                          _RefreshButton(onTap: () => notifier.fetchAllFromTrash()),
                         ],
                       ),
-                      const Spacer(),
-                      _RefreshButton(onTap: () => notifier.fetchAll()),
+                      const SizedBox(height: 24),
+                      _buildSearchBar(),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  _buildSearchBar(),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -216,22 +250,25 @@ class _BackupScreenState extends State<BackupScreen>
 
   Widget _buildSearchBar() {
     return Container(
-      height: 44,
+      height: 48,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.15)),
       ),
       child: TextField(
         controller: _searchController,
         style: const TextStyle(color: Colors.white, fontSize: 14),
+        cursorColor: Colors.blueAccent,
         decoration: InputDecoration(
-          hintText: 'Search deleted records…',
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14),
-          prefixIcon: const Icon(Icons.search_rounded, color: Colors.white54, size: 20),
+          hintText: 'Search records...',
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 14),
+          prefixIcon: Icon(Icons.search_rounded,
+              color: Colors.white.withOpacity(0.5), size: 20),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.close_rounded, color: Colors.white54, size: 18),
+                  icon: const Icon(Icons.cancel_rounded,
+                      color: Colors.white54, size: 20),
                   onPressed: () {
                     _searchController.clear();
                     setState(() => _searchQuery = '');
@@ -239,7 +276,7 @@ class _BackupScreenState extends State<BackupScreen>
                 )
               : null,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
         ),
         onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
       ),
@@ -248,39 +285,63 @@ class _BackupScreenState extends State<BackupScreen>
 
   Widget _buildTabBar(TrashRestoreNotifier notifier) {
     return Container(
-      color: const Color(0xFF1B2559),
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      decoration: const BoxDecoration(
+        color: Color(0xFF0F172A),
+        border: Border(bottom: BorderSide(color: Color(0xFF1E293B), width: 1)),
+      ),
       child: TabBar(
         controller: _tabController,
         isScrollable: true,
-        indicatorColor: Colors.white,
-        indicatorWeight: 3,
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.white54,
-        labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-        unselectedLabelStyle: const TextStyle(fontSize: 12),
+        indicatorSize: TabBarIndicatorSize.label,
+        indicator: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.blueAccent.withOpacity(0.15),
+          border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+        ),
+        labelColor: Colors.blueAccent,
+        unselectedLabelColor: const Color(0xFF94A3B8),
+        labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+        unselectedLabelStyle:
+            const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+        dividerColor: Colors.transparent,
         tabAlignment: TabAlignment.start,
         tabs: [
-          Tab(
-            child: Row(
-              children: [
-                const Icon(Icons.all_inclusive_rounded, size: 16),
-                const SizedBox(width: 6),
-                Text('All (${notifier.totalDeleted})'),
-              ],
-            ),
-          ),
+          _buildTabItem('All', Icons.auto_awesome_rounded,
+              notifier.totalDeleted),
           ..._entities.map((e) {
             final count = notifier.recordsFor(e['key'] as String).length;
-            return Tab(
-              child: Row(
-                children: [
-                  Icon(e['icon'] as IconData, size: 14),
-                  const SizedBox(width: 5),
-                  Text('${e['label']}${count > 0 ? ' ($count)' : ''}'),
-                ],
-              ),
-            );
+            return _buildTabItem(
+                e['label'] as String, e['icon'] as IconData, count);
           }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabItem(String label, IconData icon, int count) {
+    return Tab(
+      height: 40,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16),
+          const SizedBox(width: 8),
+          Text(label),
+          if (count > 0) ...[
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                '$count',
+                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -288,6 +349,8 @@ class _BackupScreenState extends State<BackupScreen>
 
   // ─── ALL TAB ──────────────────────────────────────────────────────────────
   Widget _buildAllTab(TrashRestoreNotifier notifier) {
+    if (notifier.isLoadingAll) return const _LoadingView();
+
     final all = _entities
         .expand((e) => notifier.recordsFor(e['key'] as String))
         .where((r) =>
@@ -295,10 +358,6 @@ class _BackupScreenState extends State<BackupScreen>
             r.displayName.toLowerCase().contains(_searchQuery) ||
             r.entity.contains(_searchQuery))
         .toList();
-
-    if (_entities.every((e) => notifier.isLoadingEntity(e['key'] as String))) {
-      return const _LoadingView();
-    }
 
     if (all.isEmpty) {
       return const _EmptyView(message: 'No deleted records found');
@@ -391,7 +450,9 @@ class _BackupScreenState extends State<BackupScreen>
     String entity,
     Color color,
   ) {
-    if (notifier.isLoadingEntity(entity)) return const _LoadingView();
+    if (notifier.isLoadingAll || notifier.isLoadingEntity(entity)) {
+      return const _LoadingView();
+    }
 
     final records = notifier
         .recordsFor(entity)
@@ -411,10 +472,10 @@ class _BackupScreenState extends State<BackupScreen>
 
     final icon = _entityIcon(entity);
     return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       physics: const BouncingScrollPhysics(),
       itemCount: records.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (ctx, i) => _RecordCard(
         record: records[i],
         color: color,
@@ -580,7 +641,7 @@ class _RecordCard extends StatelessWidget {
       final dt = DateTime.parse(raw).toLocal();
       final now = DateTime.now();
       final diff = now.difference(dt);
-      if (diff.inDays == 0) return 'Today';
+      if (diff.inDays == 0) return 'Today at ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
       if (diff.inDays == 1) return 'Yesterday';
       if (diff.inDays < 7) return '${diff.inDays} days ago';
       return '${dt.day}/${dt.month}/${dt.year}';
@@ -594,107 +655,134 @@ class _RecordCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
+            color: const Color(0xFF0F172A).withOpacity(0.04),
+            blurRadius: 20,
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: const Color(0xFFF1F5F9)),
       ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: () {},
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(13),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(icon, color: color, size: 24),
                 ),
-                child: Icon(icon, color: color, size: 22),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      record.displayName,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (record.subtitle != null) ...[
-                      const SizedBox(height: 2),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        record.subtitle!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[500],
+                        record.displayName,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1E293B),
+                          letterSpacing: -0.2,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                    if (record.deletedAt != null) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
+                      if (record.subtitle != null)
+                        Text(
+                          record.subtitle!,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF64748B),
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      const SizedBox(height: 6),
                       Row(
                         children: [
-                          Icon(
-                            Icons.schedule_rounded,
-                            size: 11,
-                            color: Colors.red[300],
-                          ),
-                          const SizedBox(width: 3),
-                          Text(
-                            'Deleted ${_formatDate(record.deletedAt)}',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.red[300],
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFEF2F2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.delete_outline_rounded,
+                                    size: 10, color: Color(0xFFF87171)),
+                                const SizedBox(width: 4),
+                                Text(
+                                  _formatDate(record.deletedAt),
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFFF87171),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: onRestore,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: color.withOpacity(0.25)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.restore_rounded, color: color, size: 14),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Restore',
-                        style: TextStyle(
-                          color: color,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
+                const SizedBox(width: 12),
+                _RestoreButton(onTap: onRestore, color: color),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RestoreButton extends StatelessWidget {
+  final VoidCallback onTap;
+  final Color color;
+
+  const _RestoreButton({required this.onTap, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withOpacity(0.12)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.unarchive_rounded, color: color, size: 16),
+              const SizedBox(width: 6),
+              Text(
+                'Restore',
+                style: TextStyle(
+                  color: color,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
@@ -710,17 +798,26 @@ class _LoadingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+          const SizedBox(
+            width: 40,
+            height: 40,
+            child: CircularProgressIndicator(
+              strokeWidth: 3,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+            ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 24),
           Text(
-            'Loading deleted records…',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+            'Synchronizing trash data...',
+            style: TextStyle(
+              color: const Color(0xFF64748B),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
