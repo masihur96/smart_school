@@ -103,15 +103,70 @@ class TrashRestoreNotifier extends ChangeNotifier {
   bool get restoring => _restoring;
   String? get error => _error;
 
+  bool _isLoadingAll = false;
+  bool get isLoadingAll => _isLoadingAll;
+
   int get totalDeleted => _deletedData.values.fold(0, (s, l) => s + l.length);
 
   Future<void> fetchAll() async {
-    for (final entity in supportedEntities) {
-      await fetchEntity(entity);
+    await fetchAllFromTrash();
+  }
+
+  Future<void> fetchAllFromTrash() async {
+    _isLoadingAll = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.trash,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final dynamic rawData = response.data;
+        
+        // Clear old data
+        _deletedData.clear();
+        
+        if (rawData is Map<String, dynamic>) {
+          rawData.forEach((key, value) {
+            String entityKey = key;
+            // Handle plural keys from backend (e.g., users -> user)
+            if (key.endsWith('s') && !supportedEntities.contains(key)) {
+              final singular = key.substring(0, key.length - 1);
+              if (supportedEntities.contains(singular)) {
+                entityKey = singular;
+              }
+            }
+            
+            if (value is List) {
+              _deletedData[entityKey] = value
+                  .map((j) => DeletedRecord.fromJson(j as Map<String, dynamic>, entityKey))
+                  .toList();
+            }
+          });
+          log('[Trash] Fetched consolidated data: $totalDeleted records across ${_deletedData.length} categories');
+        }
+      } else {
+        _error = 'Failed to fetch trash: ${response?.statusCode}';
+        log('[Trash] consolidated fetch failed: ${response?.statusCode}');
+      }
+    } catch (e) {
+      _error = 'Error fetching trash: $e';
+      log('[Trash] Exception in fetchAllFromTrash: $e');
+    } finally {
+      _isLoadingAll = false;
+      notifyListeners();
     }
   }
 
   Future<void> fetchEntity(String entity) async {
+    // Keep this for individual refreshes if needed, but usually redundant now
     _loadingMap[entity] = true;
     _error = null;
     notifyListeners();
@@ -136,13 +191,10 @@ class TrashRestoreNotifier extends ChangeNotifier {
             dataList.map((j) => DeletedRecord.fromJson(j as Map<String, dynamic>, entity)).toList();
         log('[Trash] Fetched ${_deletedData[entity]!.length} deleted $entity records');
       } else {
-        // Gracefully handle 404 / entity not supported — just show empty
         _deletedData[entity] = [];
-        log('[Trash] Non-200 for $entity: ${response?.statusCode}');
       }
     } catch (e) {
       _deletedData[entity] = [];
-      log('[Trash] Exception fetching deleted $entity: $e');
     } finally {
       _loadingMap[entity] = false;
       notifyListeners();
