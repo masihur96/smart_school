@@ -59,4 +59,8 @@ class APIPath {
       "$baseUrl/teacher/homework/$homeworkId/students/bulk";
   static String updateStudentHomeworkDirect(String homeworkId, String studentId) =>
       "$baseUrl/teacher/homework/$homeworkId/students/$studentId";
+      
+  // Backup & Restore
+  static String deletedRecords(String entity) => "$baseUrl/superadmin/backup/deleted?entity=$entity";
+  static String restoreRecord = "$baseUrl/superadmin/backup/restore";
 }
