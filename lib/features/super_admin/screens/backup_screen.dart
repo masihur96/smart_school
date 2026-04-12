@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../providers/trash_restore_provider.dart';
 
@@ -98,14 +99,16 @@ class _BackupScreenState extends State<BackupScreen>
     return (_entities.firstWhere(
           (e) => e['key'] == key,
           orElse: () => {'color': AppColors.primary},
-        )['color'] as Color);
+        )['color']
+        as Color);
   }
 
   IconData _entityIcon(String key) {
     return (_entities.firstWhere(
           (e) => e['key'] == key,
           orElse: () => {'icon': Icons.delete_forever_rounded},
-        )['icon'] as IconData);
+        )['icon']
+        as IconData);
   }
 
   @override
@@ -141,7 +144,6 @@ class _BackupScreenState extends State<BackupScreen>
     );
   }
 
-
   Widget _buildSliverAppBar(TrashRestoreNotifier notifier) {
     return SliverAppBar(
       expandedHeight: 200,
@@ -150,7 +152,10 @@ class _BackupScreenState extends State<BackupScreen>
       backgroundColor: const Color(0xFF0F172A),
       iconTheme: const IconThemeData(color: Colors.white),
       flexibleSpace: FlexibleSpaceBar(
-        stretchModes: const [StretchMode.blurBackground, StretchMode.zoomBackground],
+        stretchModes: const [
+          StretchMode.blurBackground,
+          StretchMode.zoomBackground,
+        ],
         background: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -192,12 +197,19 @@ class _BackupScreenState extends State<BackupScreen>
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: Colors.blueAccent.withOpacity(0.2),
+                                        color: Colors.blueAccent.withOpacity(
+                                          0.2,
+                                        ),
                                         borderRadius: BorderRadius.circular(6),
                                         border: Border.all(
-                                            color: Colors.blueAccent.withOpacity(0.3)),
+                                          color: Colors.blueAccent.withOpacity(
+                                            0.3,
+                                          ),
+                                        ),
                                       ),
                                       child: const Text(
                                         'SUPER ADMIN',
@@ -232,7 +244,9 @@ class _BackupScreenState extends State<BackupScreen>
                               ],
                             ),
                           ),
-                          _RefreshButton(onTap: () => notifier.fetchAllFromTrash()),
+                          _RefreshButton(
+                            onTap: () => notifier.fetchAllFromTrash(),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -258,17 +272,26 @@ class _BackupScreenState extends State<BackupScreen>
       ),
       child: TextField(
         controller: _searchController,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        style: const TextStyle(fontSize: 14),
         cursorColor: Colors.blueAccent,
         decoration: InputDecoration(
           hintText: 'Search records...',
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 14),
-          prefixIcon: Icon(Icons.search_rounded,
-              color: Colors.white.withOpacity(0.5), size: 20),
+          hintStyle: TextStyle(
+            color: Colors.white.withOpacity(0.4),
+            fontSize: 14,
+          ),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            color: Colors.white.withOpacity(0.5),
+            size: 20,
+          ),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.cancel_rounded,
-                      color: Colors.white54, size: 20),
+                  icon: const Icon(
+                    Icons.cancel_rounded,
+                    color: Colors.white54,
+                    size: 20,
+                  ),
                   onPressed: () {
                     _searchController.clear();
                     setState(() => _searchQuery = '');
@@ -302,17 +325,25 @@ class _BackupScreenState extends State<BackupScreen>
         labelColor: Colors.blueAccent,
         unselectedLabelColor: const Color(0xFF94A3B8),
         labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-        unselectedLabelStyle:
-            const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
         dividerColor: Colors.transparent,
         tabAlignment: TabAlignment.start,
         tabs: [
-          _buildTabItem('All', Icons.auto_awesome_rounded,
-              notifier.totalDeleted),
+          _buildTabItem(
+            'All',
+            Icons.auto_awesome_rounded,
+            notifier.totalDeleted,
+          ),
           ..._entities.map((e) {
             final count = notifier.recordsFor(e['key'] as String).length;
             return _buildTabItem(
-                e['label'] as String, e['icon'] as IconData, count);
+              e['label'] as String,
+              e['icon'] as IconData,
+              count,
+            );
           }),
         ],
       ),
@@ -338,7 +369,10 @@ class _BackupScreenState extends State<BackupScreen>
               ),
               child: Text(
                 '$count',
-                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -353,10 +387,12 @@ class _BackupScreenState extends State<BackupScreen>
 
     final all = _entities
         .expand((e) => notifier.recordsFor(e['key'] as String))
-        .where((r) =>
-            _searchQuery.isEmpty ||
-            r.displayName.toLowerCase().contains(_searchQuery) ||
-            r.entity.contains(_searchQuery))
+        .where(
+          (r) =>
+              _searchQuery.isEmpty ||
+              r.displayName.toLowerCase().contains(_searchQuery) ||
+              r.entity.contains(_searchQuery),
+        )
         .toList();
 
     if (all.isEmpty) {
@@ -385,8 +421,13 @@ class _BackupScreenState extends State<BackupScreen>
   ) {
     final color = _entityColor(entity);
     final icon = _entityIcon(entity);
-    final label = _entities.firstWhere((e) => e['key'] == entity,
-        orElse: () => {'label': entity})['label'] as String? ?? entity;
+    final label =
+        _entities.firstWhere(
+              (e) => e['key'] == entity,
+              orElse: () => {'label': entity},
+            )['label']
+            as String? ??
+        entity;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -456,10 +497,12 @@ class _BackupScreenState extends State<BackupScreen>
 
     final records = notifier
         .recordsFor(entity)
-        .where((r) =>
-            _searchQuery.isEmpty ||
-            r.displayName.toLowerCase().contains(_searchQuery) ||
-            (r.subtitle?.toLowerCase().contains(_searchQuery) ?? false))
+        .where(
+          (r) =>
+              _searchQuery.isEmpty ||
+              r.displayName.toLowerCase().contains(_searchQuery) ||
+              (r.subtitle?.toLowerCase().contains(_searchQuery) ?? false),
+        )
         .toList();
 
     if (records.isEmpty) {
@@ -609,9 +652,13 @@ class _BackupScreenState extends State<BackupScreen>
                 ),
               ],
             ),
-            backgroundColor: success ? const Color(0xFF2E7D32) : Colors.red[700],
+            backgroundColor: success
+                ? const Color(0xFF2E7D32)
+                : Colors.red[700],
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             duration: const Duration(seconds: 3),
           ),
         );
@@ -641,7 +688,8 @@ class _RecordCard extends StatelessWidget {
       final dt = DateTime.parse(raw).toLocal();
       final now = DateTime.now();
       final diff = now.difference(dt);
-      if (diff.inDays == 0) return 'Today at ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+      if (diff.inDays == 0)
+        return 'Today at ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
       if (diff.inDays == 1) return 'Yesterday';
       if (diff.inDays < 7) return '${diff.inDays} days ago';
       return '${dt.day}/${dt.month}/${dt.year}';
@@ -715,15 +763,20 @@ class _RecordCard extends StatelessWidget {
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFEF2F2),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.delete_outline_rounded,
-                                    size: 10, color: Color(0xFFF87171)),
+                                const Icon(
+                                  Icons.delete_outline_rounded,
+                                  size: 10,
+                                  color: Color(0xFFF87171),
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   _formatDate(record.deletedAt),
@@ -922,7 +975,11 @@ class _RefreshButtonState extends State<_RefreshButton>
         ),
         child: RotationTransition(
           turns: _ctrl,
-          child: const Icon(Icons.refresh_rounded, color: Colors.white, size: 20),
+          child: const Icon(
+            Icons.refresh_rounded,
+            color: Colors.white,
+            size: 20,
+          ),
         ),
       ),
     );
