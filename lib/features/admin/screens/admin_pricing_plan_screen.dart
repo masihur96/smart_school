@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
@@ -5,6 +7,7 @@ import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart'
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/super_admin/models/pricing_plan_model.dart';
 import 'package:smart_school/features/super_admin/providers/pricing_notifier.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../auth/presntation/views/login_screen.dart';
 
@@ -270,36 +273,37 @@ class _AdminPricingPlanCard extends StatelessWidget {
           InkWell(
             onTap: () async {
               final auth = context.read<AuthNotifier>();
-              final success = await auth.assignPricingPlan(
-                plan.id!,
-                plan.pricePerMonth == '0' ||
-                    plan.name.toLowerCase().contains('free'),
-              );
+              final isFree =
+                  plan.pricePerMonth == '0' ||
+                  plan.name.toLowerCase().contains('free');
+
+              final success = await auth.assignPricingPlan(plan.id!, isFree);
 
               if (success && context.mounted) {
-                if (auth.isSubscriptionValid) {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AdminDashboardScreen(),
-                    ),
-                    (route) => false,
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Plan assigned! Please complete payment to activate.',
+                if (isFree) {
+                  // Direct navigation for Free plans as they are auto-activated
+                  if (auth.isSubscriptionValid) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdminDashboardScreen(),
                       ),
-                      backgroundColor: Colors.orange,
-                    ),
-                  );
+                      (route) => false,
+                    );
+                  }
+                } else {
+                  // Show professional success dialog for paid plans
+                  _showSuccessDialog(context, auth, plan);
                 }
               } else if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(auth.error ?? 'Failed to assign plan'),
                     backgroundColor: Colors.red,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 );
               }
@@ -329,6 +333,124 @@ class _AdminPricingPlanCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _showSuccessDialog(
+    BuildContext context,
+    AuthNotifier auth,
+    PricingPlan plan,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        contentPadding: const EdgeInsets.all(0),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.check_circle_outline,
+                  color: Colors.white,
+                  size: 64,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  const Text(
+                    'Perfect Choice!',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'You have successfully registered for the ${plan.name} plan. To activate your account, a request needs to be sent to our administration team.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary.withOpacity(0.8),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () {
+                      _sendRequestEmail(auth, plan);
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Activation request sent via email!'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('SEND ACTIVATION REQUEST'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      'Decide Later',
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _sendRequestEmail(AuthNotifier auth, PricingPlan plan) async {
+    final user = auth.user;
+    final String subject = Uri.encodeComponent(
+      'Plan Activation Request: ${plan.name}',
+    );
+    final String body = Uri.encodeComponent(
+      'Hello Admin,\n\n'
+      'I have selected the ${plan.name} plan for my school.\n'
+      'Please accept my registration and activate the plan.\n\n'
+      'User Details:\n'
+      'Name: ${user?.name}\n'
+      'Email: ${user?.email}\n'
+      'School ID: ${user?.schoolId}\n\n'
+      'Regards,\n'
+      '${user?.name}',
+    );
+
+    final Uri emailUri = Uri.parse(
+      'mailto:masihur.work@gmail.com?subject=$subject&body=$body',
+    );
+
+    if (await canLaunchUrl(emailUri)) {
+      await launchUrl(emailUri);
+    } else {
+      log('Could not launch $emailUri');
+    }
   }
 
   Widget _buildFeature(IconData icon, String text) {
