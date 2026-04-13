@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/super_admin/models/pricing_plan_model.dart';
 import 'package:smart_school/features/super_admin/providers/pricing_notifier.dart';
-import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
+
 import '../../auth/presntation/views/login_screen.dart';
 
 class AdminPricingPlanScreen extends StatefulWidget {
@@ -34,9 +35,7 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
       body: CustomScrollView(
         slivers: [
           _buildAppBar(),
-          SliverToBoxAdapter(
-            child: _buildStatusBanner(authNotifier),
-          ),
+          SliverToBoxAdapter(child: _buildStatusBanner(authNotifier)),
           if (pricingNotifier.isLoading)
             const SliverFillRemaining(
               child: Center(child: CircularProgressIndicator()),
@@ -47,7 +46,11 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.info_outline, size: 48, color: Colors.grey),
+                    const Icon(
+                      Icons.info_outline,
+                      size: 48,
+                      color: Colors.grey,
+                    ),
                     const SizedBox(height: 16),
                     const Text('No pricing plans available'),
                     TextButton(
@@ -62,13 +65,10 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final plan = pricingNotifier.plans[index];
-                    return _AdminPricingPlanCard(plan: plan);
-                  },
-                  childCount: pricingNotifier.plans.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final plan = pricingNotifier.plans[index];
+                  return _AdminPricingPlanCard(plan: plan);
+                }, childCount: pricingNotifier.plans.length),
               ),
             ),
         ],
@@ -112,13 +112,15 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
     final isValid = auth.isSubscriptionValid;
 
     String title = 'No Active Subscription';
-    String message = 'Your institution needs an active plan to access the dashboard.';
+    String message =
+        'Your institution needs an active plan to access the dashboard.';
     Color color = Colors.red;
     IconData icon = Icons.warning_amber_rounded;
 
     if (sub != null && !isValid) {
       title = 'Subscription Expired';
-      message = 'Your plan expired on ${sub.endDate.split('T')[0]}. Please renew to continue.';
+      message =
+          'Your plan expired on ${sub.endDate.split('T')[0]}. Please renew to continue.';
     }
 
     return Container(
@@ -200,7 +202,10 @@ class _AdminPricingPlanCard extends StatelessWidget {
                     ),
                     if (plan.isCustom)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.orange.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
@@ -228,8 +233,16 @@ class _AdminPricingPlanCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildFeature(Icons.people_outline, '${plan.maxStudents} Students'),
-                    _buildFeature(Icons.calendar_today_outlined, 'Monthly Billing'),
+                    _buildFeature(
+                      Icons.people_outline,
+                      '${plan.maxStudents} Students',
+                    ),
+                    _buildFeature(
+                      Icons.calendar_today_outlined,
+                      plan.pricePerMonth == "0"
+                          ? "Weekly Billing"
+                          : 'Monthly Billing',
+                    ),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -245,8 +258,8 @@ class _AdminPricingPlanCard extends StatelessWidget {
                         color: AppColors.primary,
                       ),
                     ),
-                    const Text(
-                      ' / month',
+                    Text(
+                      plan.pricePerMonth == "0" ? ' / week' : ' / month',
                       style: TextStyle(color: AppColors.textSecondary),
                     ),
                   ],
@@ -259,20 +272,25 @@ class _AdminPricingPlanCard extends StatelessWidget {
               final auth = context.read<AuthNotifier>();
               final success = await auth.assignPricingPlan(
                 plan.id!,
-                plan.pricePerMonth == '0' || plan.name.toLowerCase().contains('free'),
+                plan.pricePerMonth == '0' ||
+                    plan.name.toLowerCase().contains('free'),
               );
 
               if (success && context.mounted) {
                 if (auth.isSubscriptionValid) {
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const AdminDashboardScreen(),
+                    ),
                     (route) => false,
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Plan assigned! Please complete payment to activate.'),
+                      content: Text(
+                        'Plan assigned! Please complete payment to activate.',
+                      ),
                       backgroundColor: Colors.orange,
                     ),
                   );

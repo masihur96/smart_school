@@ -83,7 +83,9 @@ class AuthNotifier extends ChangeNotifier {
           radius: profile.radius,
         );
 
-        if ((_user?.role == UserRole.admin || _user?.role == UserRole.teacher) && _user?.schoolId != null) {
+        if ((_user?.role == UserRole.admin ||
+                _user?.role == UserRole.teacher) &&
+            _user?.schoolId != null) {
           await _fetchAdminSubscription(_user!.schoolId!);
         }
       } else {
@@ -135,7 +137,8 @@ class AuthNotifier extends ChangeNotifier {
         radius: profile.radius,
       );
 
-      if ((_user?.role == UserRole.admin || _user?.role == UserRole.teacher) && _user?.schoolId != null) {
+      if ((_user?.role == UserRole.admin || _user?.role == UserRole.teacher) &&
+          _user?.schoolId != null) {
         await _fetchAdminSubscription(_user!.schoolId!);
       }
 
@@ -228,7 +231,9 @@ class AuthNotifier extends ChangeNotifier {
         throw Exception('No school ID found for user');
 
       final now = DateTime.now().toUtc();
-      final end = DateTime(now.year + 1, now.month, now.day).toUtc();
+      final end = isFree
+          ? DateTime(now.year, now.month, now.day + 7).toUtc()
+          : DateTime(now.year, now.month + 1, now.day).toUtc();
 
       final response = await DataProvider().performRequest(
         'POST',
