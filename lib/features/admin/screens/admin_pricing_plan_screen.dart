@@ -394,7 +394,9 @@ class _AdminPricingPlanCard extends StatelessWidget {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Activation request sent via email!'),
+                          content: Text(
+                            'Activation request sent successfully. You will receive a confirmation email within 12 hours.',
+                          ),
                           backgroundColor: Colors.green,
                         ),
                       );
