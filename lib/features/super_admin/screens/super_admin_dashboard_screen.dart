@@ -150,33 +150,6 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                 const SizedBox(height: 16),
                 _buildQuickActionsGrid(),
                 const SizedBox(height: 16),
-                const Text(
-                  'Critical System Alerts',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _buildAlertTile(
-                  'New School Signed Up: Bright Future Academy',
-                  '2 mins ago',
-                  Icons.add_business,
-                  Colors.green,
-                ),
-                _buildAlertTile(
-                  'System Maintenance scheduled for midnight',
-                  '1 hour ago',
-                  Icons.warning_amber,
-                  Colors.orange,
-                ),
-                _buildAlertTile(
-                  'High server load detected on US-East-1',
-                  '3 hours ago',
-                  Icons.speed,
-                  Colors.red,
-                ),
               ],
             ),
           ),
