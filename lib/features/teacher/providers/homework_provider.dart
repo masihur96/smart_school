@@ -1,11 +1,11 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+
 import '../../../models/school_models.dart';
 import '../../../services/database_service.dart';
-
-import '../domain/repositories/i_homework_repository.dart';
 import '../../../services/notification_service.dart';
+import '../domain/repositories/i_homework_repository.dart';
 
 class HomeworkNotifier extends ChangeNotifier {
   final DatabaseService _dbService;
@@ -14,7 +14,7 @@ class HomeworkNotifier extends ChangeNotifier {
   bool _isLoading = false;
 
   HomeworkNotifier(this._dbService, {IHomeworkRepository? homeworkRepository})
-      : _homeworkRepository = homeworkRepository {
+    : _homeworkRepository = homeworkRepository {
     _homeworkRecords = [..._dbService.homeworkRecords];
   }
 
@@ -34,7 +34,9 @@ class HomeworkNotifier extends ChangeNotifier {
   }
 
   void _updateLocal(Homework homework) {
-    final index = _dbService.homeworkRecords.indexWhere((h) => h.id == homework.id);
+    final index = _dbService.homeworkRecords.indexWhere(
+      (h) => h.id == homework.id,
+    );
     if (index != -1) {
       _dbService.homeworkRecords[index] = homework;
     } else {
@@ -66,12 +68,9 @@ class HomeworkNotifier extends ChangeNotifier {
         // Trigger notification
         NotificationService().triggerNotification(
           title: 'New Homework Assigned',
-          body: 'New homework for ${homework.subjectName}: ${homework.title}',
+          body: 'New homework for ${homework.description}: ${homework.title}',
           topic: 'homework',
-          data: {
-            'type': 'homework',
-            'id': homework.id,
-          },
+          data: {'type': 'homework', 'id': homework.id},
         );
       }
       return success;
@@ -125,7 +124,9 @@ class HomeworkNotifier extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    log('fetchHomework: classId=$classId, sectionId=$sectionId, subjectId=$subjectId');
+    log(
+      'fetchHomework: classId=$classId, sectionId=$sectionId, subjectId=$subjectId',
+    );
     try {
       final results = await _homeworkRepository.fetchHomework(
         classId: classId,
@@ -205,12 +206,13 @@ class HomeworkNotifier extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final success = await _homeworkRepository.updateSpecificStudentHomeworkStatus(
-        homeworkId: homeworkId,
-        studentId: studentId,
-        status: status,
-        comment: comment,
-      );
+      final success = await _homeworkRepository
+          .updateSpecificStudentHomeworkStatus(
+            homeworkId: homeworkId,
+            studentId: studentId,
+            status: status,
+            comment: comment,
+          );
       if (success && _selectedHomework != null) {
         await getHomeworkDetails(_selectedHomework!.id);
       }

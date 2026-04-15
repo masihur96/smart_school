@@ -64,4 +64,13 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get fieldRequired => 'এই ক্ষেত্রটি প্রয়োজনীয়';
+
+  @override
+  String get notifications => 'বিজ্ঞপ্তি';
+
+  @override
+  String get homework => 'বাড়ির কাজ';
+
+  @override
+  String get attendance => 'উপস্থিতি';
 }
