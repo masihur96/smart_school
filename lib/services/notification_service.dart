@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -23,7 +23,8 @@ class NotificationService {
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
       log('User granted permission');
-    } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+    } else if (settings.authorizationStatus ==
+        AuthorizationStatus.provisional) {
       log('User granted provisional permission');
     } else {
       log('User declined or has not accepted permission');
@@ -44,7 +45,7 @@ class NotificationService {
       if (message.notification != null) {
         log('Message also contained a notification: ${message.notification}');
       }
-      
+
       // Handle the JSON body here if needed
       _handleMessage(message);
     });
@@ -80,26 +81,38 @@ class NotificationService {
 
   // Helper to trigger a notification (pseudo-implementation)
   // In a real app, this should be a call to your backend.
+
   Future<void> triggerNotification({
     required String title,
     required String body,
     required String topic,
     Map<String, dynamic>? data,
   }) async {
-    log('Triggering notification: $title, Topic: $topic');
-    // Here you would call your backend API which then sends the FCM message.
-    // Example:
-    /*
-    await http.post(
-      Uri.parse('https://your-backend.com/send-notification'),
-      body: jsonEncode({
-        'title': title,
-        'body': body,
-        'topic': topic,
-        'data': data,
-      }),
-    );
-    */
+    try {
+      log('Triggering notification: $title, Topic: $topic');
+
+      final response = await Dio().post(
+        'https://fcm.googleapis.com/fcm/send',
+        data: {
+          'title': title,
+          'body': body,
+          'topic': topic,
+          'data': data ?? {},
+        },
+        options: Options(
+          headers: {
+            "Authorization": "key=YOUR_SERVER_KEY",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      log('Notification sent: ${response.data}');
+    } on DioException catch (e) {
+      log('Dio Error: ${e.response?.data ?? e.message}');
+    } catch (e) {
+      log('Unexpected Error: $e');
+    }
   }
 }
 
