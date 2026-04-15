@@ -9,6 +9,8 @@ class StorageService {
   static const String _userPasswordKey = 'user_password';
   static const String _themeKey = 'app_theme';
   static const String _localeKey = 'app_locale';
+  static const String _homeworkNotifyKey = 'homework_notify';
+  static const String _attendanceNotifyKey = 'attendance_notify';
 
   static const _storage = FlutterSecureStorage();
 
@@ -80,6 +82,26 @@ class StorageService {
   static Future<String?> getLocale() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_localeKey);
+  }
+
+  static Future<void> saveHomeworkNotify(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_homeworkNotifyKey, value);
+  }
+
+  static Future<bool> getHomeworkNotify() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_homeworkNotifyKey) ?? true;
+  }
+
+  static Future<void> saveAttendanceNotify(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_attendanceNotifyKey, value);
+  }
+
+  static Future<bool> getAttendanceNotify() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_attendanceNotifyKey) ?? true;
   }
 
   static Future<void> clearCredential() async {

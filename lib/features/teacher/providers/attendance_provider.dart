@@ -6,6 +6,7 @@ import '../../../core/utils/storage_service.dart';
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
 import '../../../models/school_models.dart';
+import '../../../services/notification_service.dart';
 
 class AttendanceNotifier extends ChangeNotifier {
   final IAttendanceRepository _repository;
@@ -88,6 +89,17 @@ class AttendanceNotifier extends ChangeNotifier {
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
         log('Successfully submitted attendance');
+        // Trigger notification
+        NotificationService().triggerNotification(
+          title: 'Attendance Submitted',
+          body: 'Attendance for class ${classId} has been submitted.',
+          topic: 'attendance',
+          data: {
+            'type': 'attendance',
+            'classId': classId,
+            'date': dateString,
+          },
+        );
         return true;
       } else {
         log('Error submitting attendance: ${response?.data}');

@@ -60,6 +60,32 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
           ),
           const SizedBox(height: 24),
 
+          // Notifications Section
+          _buildSectionHeader(l10n.notifications, theme),
+          _buildSettingTile(
+            icon: Icons.assignment_outlined,
+            title: l10n.homework,
+            theme: theme,
+            trailing: Switch(
+              value: settings.isHomeworkNotifyEnabled,
+              onChanged: (value) {
+                settings.setHomeworkNotify(value);
+              },
+            ),
+          ),
+          _buildSettingTile(
+            icon: Icons.how_to_reg_outlined,
+            title: l10n.attendance,
+            theme: theme,
+            trailing: Switch(
+              value: settings.isAttendanceNotifyEnabled,
+              onChanged: (value) {
+                settings.setAttendanceNotify(value);
+              },
+            ),
+          ),
+          const SizedBox(height: 24),
+
           // Security Section
           _buildSectionHeader(l10n.security, theme),
           _buildSettingTile(
