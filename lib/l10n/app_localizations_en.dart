@@ -64,4 +64,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fieldRequired => 'This field is required';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get homework => 'Homework';
+
+  @override
+  String get attendance => 'Attendance';
 }
