@@ -42,9 +42,16 @@ import 'features/teacher/providers/teacher_attendance_provider.dart';
 import 'features/teacher/providers/teacher_dashboard_provider.dart';
 import 'firebase_options.dart';
 import 'services/database_service.dart';
+import 'services/notification_service.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  // Initialize Push Notifications
+  final notificationService = NotificationService();
+  await notificationService.initialize();
+
   final databaseService = DatabaseService();
   final dataProvider = DataProvider();
 

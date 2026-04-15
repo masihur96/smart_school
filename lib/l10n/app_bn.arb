@@ -17,5 +17,8 @@
   "cancel": "বাতিল করুন",
   "passwordChangedSuccess": "পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে",
   "passwordsDoNotMatch": "পাসওয়ার্ড মেলে না",
-  "fieldRequired": "এই ক্ষেত্রটি প্রয়োজনীয়"
+  "fieldRequired": "এই ক্ষেত্রটি প্রয়োজনীয়",
+  "notifications": "বিজ্ঞপ্তি",
+  "homework": "বাড়ির কাজ",
+  "attendance": "উপস্থিতি"
 }

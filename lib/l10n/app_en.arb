@@ -17,5 +17,8 @@
   "cancel": "Cancel",
   "passwordChangedSuccess": "Password changed successfully",
   "passwordsDoNotMatch": "Passwords do not match",
-  "fieldRequired": "This field is required"
+  "fieldRequired": "This field is required",
+  "notifications": "Notifications",
+  "homework": "Homework",
+  "attendance": "Attendance"
 }

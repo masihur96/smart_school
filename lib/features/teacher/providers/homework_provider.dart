@@ -5,6 +5,7 @@ import '../../../models/school_models.dart';
 import '../../../services/database_service.dart';
 
 import '../domain/repositories/i_homework_repository.dart';
+import '../../../services/notification_service.dart';
 
 class HomeworkNotifier extends ChangeNotifier {
   final DatabaseService _dbService;
@@ -62,6 +63,16 @@ class HomeworkNotifier extends ChangeNotifier {
       final success = await _homeworkRepository.submitHomework(homework);
       if (success) {
         addHomework(homework);
+        // Trigger notification
+        NotificationService().triggerNotification(
+          title: 'New Homework Assigned',
+          body: 'New homework for ${homework.subjectName}: ${homework.title}',
+          topic: 'homework',
+          data: {
+            'type': 'homework',
+            'id': homework.id,
+          },
+        );
       }
       return success;
     } catch (e) {
