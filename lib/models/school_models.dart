@@ -843,4 +843,22 @@ class TeacherSelfAttendance {
       };
 }
 
+class Marquee {
+  final String text;
+  final String type;
+  final String schoolId;
 
+  Marquee({required this.text, required this.type, required this.schoolId});
+
+  factory Marquee.fromJson(Map<String, dynamic> json) => Marquee(
+    text: json['text'] ?? '',
+    type: json['type'] ?? '',
+    schoolId: json['schoolId'] ?? '',
+  );
+
+  Map<String, dynamic> toJson() => {
+    'text': text,
+    'type': type,
+    'schoolId': schoolId,
+  };
+}

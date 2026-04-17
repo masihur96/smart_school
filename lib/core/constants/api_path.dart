@@ -15,6 +15,7 @@ class APIPath {
   static String fetchStudent = "$baseUrl/general/students";
   static String updateNotice(String id) => "$baseUrl/general/notices/$id";
   static String deleteNotice(String id) => "$baseUrl/general/notices/$id";
+  static String marquee = "$baseUrl/general/marquee";
   static String createRoutine = "$baseUrl/general/routine";
   static String createExam = "$baseUrl/admin/exams";
   static String attendanceOverview = "$baseUrl/admin/attendance/overview";

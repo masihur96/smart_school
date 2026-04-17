@@ -12,6 +12,7 @@ import 'package:smart_school/features/student/providers/student_homework_provide
 import '../../../core/widgets/app_drawer.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../admin/providers/notice_provider.dart';
+import '../../admin/providers/marquee_provider.dart';
 import '../../admin/providers/setup_provider.dart';
 import '../../../core/widgets/notification_icon_button.dart';
 import '../../../core/widgets/marquee_notice.dart';
@@ -39,6 +40,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       if (user?.classId != null) {
         context.read<StudentHomeworkNotifier>().fetchHomework(user!.classId!);
       }
+      context.read<MarqueeProvider>().fetchMarquee('STUDENT');
     });
   }
 
@@ -155,12 +157,15 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(user),
-          Consumer<NoticesNotifier>(
-            builder: (context, noticeNotifier, child) {
+          Consumer2<NoticesNotifier, MarqueeProvider>(
+            builder: (context, noticeNotifier, marqueeNotifier, child) {
               final notices = noticeNotifier.notices
                   .where((n) => n.classId == null || n.classId == user?.classId)
                   .toList();
-              return MarqueeNotice(notices: notices);
+              return MarqueeNotice(
+                notices: notices,
+                customText: marqueeNotifier.studentMarquee?.text,
+              );
             },
           ),
           Padding(
