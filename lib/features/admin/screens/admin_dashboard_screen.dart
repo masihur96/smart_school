@@ -23,6 +23,7 @@ import '../providers/setup_provider.dart';
 import '../providers/notice_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../teacher/screens/teacher_self_attendance_detail_screen.dart';
+import '../../../core/widgets/notification_icon_button.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -98,6 +99,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
         actions: [
+          const NotificationIconButton(),
           IconButton(
             icon: const Icon(Icons.account_circle),
             onPressed: () {

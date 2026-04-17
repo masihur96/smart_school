@@ -9,6 +9,7 @@ import 'package:smart_school/features/super_admin/screens/pricing_school_screen.
 import 'package:smart_school/features/super_admin/screens/subscription_screen.dart';
 import 'package:smart_school/features/super_admin/screens/super_admin_school_screen.dart';
 import 'package:smart_school/models/user_model.dart';
+import 'package:smart_school/core/widgets/notification_icon_button.dart';
 
 class SuperAdminDashboardScreen extends StatefulWidget {
   const SuperAdminDashboardScreen({super.key});
@@ -64,7 +65,9 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          const NotificationIconButton(color: Colors.white),
+        ],
       ),
       drawer: const AppDrawer(),
       body: IndexedStack(

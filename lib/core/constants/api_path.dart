@@ -65,4 +65,9 @@ class APIPath {
   static String restore(String entity, String id) => "$baseUrl/superadmin/trash/$entity/$id/restore";
   static String deletedRecords(String entity) => "$baseUrl/superadmin/backup/deleted?entity=$entity";
   static String restoreRecord = "$baseUrl/superadmin/backup/restore";
+
+  // Notifications
+  static String registerFcmToken = "$baseUrl/notifications/fcm-token";
+  static String notifications = "$baseUrl/notifications";
+  static String sendTestNotification = "$baseUrl/notifications/send-test";
 }

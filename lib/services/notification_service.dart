@@ -1,9 +1,14 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:smart_school/core/constants/api_path.dart';
+import 'package:smart_school/core/utils/storage_service.dart';
+import 'package:smart_school/configs/network/data_provider.dart';
+import 'package:smart_school/models/notification_model.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -34,6 +39,10 @@ class NotificationService {
     String? token = await _fcm.getToken();
     log("FCM Token: $token");
 
+    if (token != null) {
+      await registerToken(token);
+    }
+
     // Handle background messages
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
@@ -55,6 +64,96 @@ class NotificationService {
       log('A new onMessageOpenedApp event was published!');
       _handleMessage(message);
     });
+  }
+
+  Future<void> registerToken(String fcmToken) async {
+    try {
+      final authToken = await StorageService.getToken();
+      if (authToken == null) {
+        log('No auth token found, skipping token registration');
+        return;
+      }
+
+      final deviceType = Platform.isAndroid ? 'android' : 'ios';
+
+      final response = await DataProvider().performRequest(
+        'POST',
+        APIPath.registerFcmToken,
+        data: {
+          'token': fcmToken,
+          'deviceType': deviceType,
+        },
+        header: {'Authorization': 'Bearer $authToken'},
+      );
+
+      if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
+        log('FCM Token registered successfully');
+      } else {
+        log('Failed to register FCM Token: ${response?.data}');
+      }
+    } catch (e) {
+      log('Error registering FCM token: $e');
+    }
+  }
+
+  Future<List<NotificationModel>> getNotifications() async {
+    try {
+      final authToken = await StorageService.getToken();
+      if (authToken == null) throw Exception('No auth token found');
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.notifications,
+        header: {'Authorization': 'Bearer $authToken'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map && data['data'] is List) {
+          return NotificationModel.fromList(data['data']);
+        } else if (data is List) {
+          return NotificationModel.fromList(data);
+        }
+      }
+      return [];
+    } catch (e) {
+      log('Error fetching notifications: $e');
+      return [];
+    }
+  }
+
+  Future<void> sendTestNotification({
+    required String userId,
+    required String title,
+    required String body,
+    String topic = "all_users",
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      final authToken = await StorageService.getToken();
+      if (authToken == null) throw Exception('No auth token found');
+
+      final response = await DataProvider().performRequest(
+        'POST',
+        APIPath.sendTestNotification,
+        data: {
+          "title": title,
+          "body": body,
+          "topic": topic,
+          "userId": userId,
+          "data": data ?? {}
+        },
+        header: {'Authorization': 'Bearer $authToken'},
+      );
+
+      if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
+        log('Test notification sent successfully');
+      } else {
+        log('Failed to send test notification: ${response?.data}');
+      }
+    } catch (e) {
+      log('Error sending test notification: $e');
+    }
   }
 
   void _handleMessage(RemoteMessage message) {
@@ -79,40 +178,24 @@ class NotificationService {
     log('Unsubscribed from topic: $topic');
   }
 
-  // Helper to trigger a notification (pseudo-implementation)
-  // In a real app, this should be a call to your backend.
-
+  // Legacy method to fix breaking change.
+  // Ideally, this should be updated to a specific backend endpoint for different notification types.
   Future<void> triggerNotification({
     required String title,
     required String body,
     required String topic,
     Map<String, dynamic>? data,
   }) async {
-    try {
-      log('Triggering notification: $title, Topic: $topic');
-
-      final response = await Dio().post(
-        'https://fcm.googleapis.com/fcm/send',
-        data: {
-          'title': title,
-          'body': body,
-          'topic': topic,
-          'data': data ?? {},
-        },
-        options: Options(
-          headers: {
-            "Authorization": "key=YOUR_SERVER_KEY",
-            "Content-Type": "application/json",
-          },
-        ),
-      );
-
-      log('Notification sent: ${response.data}');
-    } on DioException catch (e) {
-      log('Dio Error: ${e.response?.data ?? e.message}');
-    } catch (e) {
-      log('Unexpected Error: $e');
-    }
+    // For now, we'll use the sendTestNotification logic.
+    // We'll use a placeholder userId if not provided in data, or try to get it from data.
+    final userId = data?['userId'] ?? "all_users_placeholder";
+    await sendTestNotification(
+      userId: userId,
+      title: title,
+      body: body,
+      topic: topic,
+      data: data,
+    );
   }
 }
 

@@ -11,6 +11,8 @@ import '../domain/usecases/change_password_usecase.dart';
 import '../domain/usecases/get_profile_usecase.dart';
 import '../domain/usecases/login_usecase.dart';
 import '../domain/usecases/register_usecase.dart';
+import '../../../services/notification_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AuthNotifier extends ChangeNotifier {
   final LoginUseCase loginUseCase;
@@ -88,6 +90,12 @@ class AuthNotifier extends ChangeNotifier {
             _user?.schoolId != null) {
           await _fetchAdminSubscription(_user!.schoolId!);
         }
+
+        // Register FCM Token
+        final fcmToken = await FirebaseMessaging.instance.getToken();
+        if (fcmToken != null) {
+          await NotificationService().registerToken(fcmToken);
+        }
       } else {
         _user = null;
       }
@@ -140,6 +148,12 @@ class AuthNotifier extends ChangeNotifier {
       if ((_user?.role == UserRole.admin || _user?.role == UserRole.teacher) &&
           _user?.schoolId != null) {
         await _fetchAdminSubscription(_user!.schoolId!);
+      }
+
+      // Register FCM Token
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) {
+        await NotificationService().registerToken(fcmToken);
       }
 
       _isLoading = false;
