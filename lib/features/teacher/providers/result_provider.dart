@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import '../../../models/school_models.dart';
 import '../domain/repositories/i_result_repository.dart';
+import '../../../services/notification_service.dart';
 
 class ResultsNotifier extends ChangeNotifier {
   final IResultRepository _repository;
@@ -138,6 +139,17 @@ class ResultsNotifier extends ChangeNotifier {
         marks: marks,
       );
       log('Marks submitted successfully');
+
+      // Trigger notification
+      NotificationService().triggerNotification(
+        title: 'Exam Results Published',
+        body: 'Results for your recent exam have been published.',
+        topic: 'class_${marks.first['classId'] ?? ''}', 
+        data: {
+          'type': 'result',
+          'examId': examId,
+        },
+      );
     } finally {
       _submitting = false;
       notifyListeners();

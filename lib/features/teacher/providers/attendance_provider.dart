@@ -92,11 +92,12 @@ class AttendanceNotifier extends ChangeNotifier {
         // Trigger notification
         NotificationService().triggerNotification(
           title: 'Attendance Submitted',
-          body: 'Attendance for class ${classId} has been submitted.',
-          topic: 'attendance',
+          body: 'Attendance for class ${classId} has been submitted on ${dateString}.',
+          topic: 'class_${classId}',
           data: {
             'type': 'attendance',
             'classId': classId,
+            'sectionId': sectionId,
             'date': dateString,
           },
         );
