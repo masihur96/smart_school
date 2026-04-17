@@ -1,6 +1,4 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart';
 import 'package:smart_school/features/admin/screens/add_edit_teacher_screen.dart';
@@ -9,21 +7,20 @@ import 'package:smart_school/features/admin/screens/routine_management_screen.da
 import 'package:smart_school/features/admin/screens/setup_screen.dart';
 import 'package:smart_school/features/admin/screens/teacher_management_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
-import 'package:smart_school/models/school_models.dart';
 
 import '../../../core/widgets/app_drawer.dart';
+import '../../../core/widgets/notification_icon_button.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../teacher/domain/entities/attendance.dart';
 import '../../teacher/providers/attendance_provider.dart';
+import '../../teacher/screens/teacher_self_attendance_detail_screen.dart';
+import '../providers/notice_provider.dart';
+import '../providers/setup_provider.dart';
+import '../providers/student_provider.dart';
+import '../providers/teacher_provider.dart';
 import 'exam_management_screen.dart';
 import 'notice_management_screen.dart';
 import 'student_management_screen.dart';
-import '../providers/student_provider.dart';
-import '../providers/teacher_provider.dart';
-import '../providers/setup_provider.dart';
-import '../providers/notice_provider.dart';
-import '../../auth/providers/auth_provider.dart';
-import '../../teacher/screens/teacher_self_attendance_detail_screen.dart';
-import '../../../core/widgets/notification_icon_button.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -44,7 +41,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final schoolId = context.read<AuthNotifier>().user?.schoolId;
-        
+
         if (schoolId != null) {
           context.read<AttendanceNotifier>().fetchAttendanceOverview(
             year: _currentYear,
@@ -260,8 +257,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             Icons.person_add,
             Colors.blue,
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_)=>AddEditStudentScreen()));
-
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => AddEditStudentScreen()),
+              );
             },
           ),
           _buildActionTile(
@@ -270,7 +269,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             Icons.group_add,
             Colors.orange,
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_)=>AddEditTeacherScreen()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => AddEditTeacherScreen()),
+              );
             },
           ),
           _buildActionTile(
@@ -298,13 +300,31 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             Icons.how_to_reg,
             Colors.green,
             onTap: () {
-              final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
+              final schoolId =
+                  context.read<AuthNotifier>().user?.schoolId ?? '';
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => TeacherSelfAttendanceDetailScreen(
-                    schoolId: schoolId,
-                  ),
+                  builder: (_) =>
+                      TeacherSelfAttendanceDetailScreen(schoolId: schoolId),
+                ),
+              );
+            },
+          ),
+
+          _buildActionTile(
+            context,
+            'Marquee Message',
+            Icons.campaign_outlined,
+            Colors.redAccent,
+            onTap: () {
+              final schoolId =
+                  context.read<AuthNotifier>().user?.schoolId ?? '';
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      TeacherSelfAttendanceDetailScreen(schoolId: schoolId),
                 ),
               );
             },
@@ -376,7 +396,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Widget _buildClassFilter() {
     final overview = context.watch<AttendanceNotifier>().overviewSummary;
-    if (overview == null || overview.data.isEmpty) return const SizedBox.shrink();
+    if (overview == null || overview.data.isEmpty)
+      return const SizedBox.shrink();
 
     final classes = overview.data;
 
@@ -391,13 +412,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         child: DropdownButton<String?>(
           value: _selectedClassId,
           hint: const Text('All Classes', style: TextStyle(fontSize: 13)),
-          style: const TextStyle(color: Colors.purple, fontWeight: FontWeight.w600, fontSize: 13),
+          style: const TextStyle(
+            color: Colors.purple,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
           items: [
             const DropdownMenuItem(value: null, child: Text('All Classes')),
-            ...classes.map((c) => DropdownMenuItem(
-                  value: c.classId,
-                  child: Text(c.className),
-                )),
+            ...classes.map(
+              (c) =>
+                  DropdownMenuItem(value: c.classId, child: Text(c.className)),
+            ),
           ],
           onChanged: (val) {
             setState(() {
@@ -438,23 +463,33 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final bool isAllClasses = _selectedClassId == null;
     final String currentTitle = isAllClasses
         ? '${_getMonthName(overview.month)} ${overview.year}'
-        : overview.data.firstWhere((c) => c.classId == _selectedClassId).className;
+        : overview.data
+              .firstWhere((c) => c.classId == _selectedClassId)
+              .className;
 
     final int present = isAllClasses
         ? overview.grandTotalPresent
-        : overview.data.firstWhere((c) => c.classId == _selectedClassId).totalPresent;
+        : overview.data
+              .firstWhere((c) => c.classId == _selectedClassId)
+              .totalPresent;
 
     final int absent = isAllClasses
         ? overview.grandTotalAbsent
-        : overview.data.firstWhere((c) => c.classId == _selectedClassId).totalAbsent;
+        : overview.data
+              .firstWhere((c) => c.classId == _selectedClassId)
+              .totalAbsent;
 
     final int leave = isAllClasses
         ? overview.grandTotalLeave
-        : overview.data.firstWhere((c) => c.classId == _selectedClassId).totalLeave;
+        : overview.data
+              .firstWhere((c) => c.classId == _selectedClassId)
+              .totalLeave;
 
     final double percentage = isAllClasses
         ? overview.overallAttendancePercentage
-        : overview.data.firstWhere((c) => c.classId == _selectedClassId).attendancePercentage;
+        : overview.data
+              .firstWhere((c) => c.classId == _selectedClassId)
+              .attendancePercentage;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -498,7 +533,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.purple.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -518,9 +556,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildMonthStatItem('Present', present.toString(), const Color(0xFF7C3AED)),
-              _buildMonthStatItem('Absent', absent.toString(), const Color(0xFFEF4444)),
-              _buildMonthStatItem('Leave', leave.toString(), const Color(0xFFF59E0B)),
+              _buildMonthStatItem(
+                'Present',
+                present.toString(),
+                const Color(0xFF7C3AED),
+              ),
+              _buildMonthStatItem(
+                'Absent',
+                absent.toString(),
+                const Color(0xFFEF4444),
+              ),
+              _buildMonthStatItem(
+                'Leave',
+                leave.toString(),
+                const Color(0xFFF59E0B),
+              ),
             ],
           ),
           // We could still show class-wise progress bars if "All Classes" is selected
@@ -531,32 +581,47 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
             const SizedBox(height: 12),
-            ...overview.data.take(5).map((c) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(c.className, style: const TextStyle(fontSize: 12)),
-                          Text('${c.attendancePercentage.toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: c.attendancePercentage / 100,
-                          backgroundColor: Colors.grey[200],
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                              c.attendancePercentage > 80 ? Colors.green : Colors.orange),
-                          minHeight: 6,
+            ...overview.data
+                .take(5)
+                .map(
+                  (c) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              c.className,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            Text(
+                              '${c.attendancePercentage.toStringAsFixed(1)}%',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: c.attendancePercentage / 100,
+                            backgroundColor: Colors.grey[200],
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              c.attendancePercentage > 80
+                                  ? Colors.green
+                                  : Colors.orange,
+                            ),
+                            minHeight: 6,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                )),
+                ),
           ],
         ],
       ),
@@ -588,8 +653,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   String _getMonthName(int month) {
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return months[month - 1];
   }
@@ -598,11 +673,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.bar_chart_rounded, size: 48, color: Colors.purple.withOpacity(0.2)),
+        Icon(
+          Icons.bar_chart_rounded,
+          size: 48,
+          color: Colors.purple.withOpacity(0.2),
+        ),
         const SizedBox(height: 12),
         Text(
           'No attendance data found',
-          style: TextStyle(color: Colors.grey[400], fontSize: 13, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            color: Colors.grey[400],
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
