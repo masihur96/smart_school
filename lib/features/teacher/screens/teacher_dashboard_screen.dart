@@ -13,6 +13,7 @@ import '../providers/teacher_dashboard_provider.dart';
 import 'homework_management_screen.dart';
 import 'mark_entry_screen.dart';
 import 'teacher_attendance_screen.dart';
+import '../../../core/widgets/notification_icon_button.dart';
 import 'teacher_self_attendance_detail_screen.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
@@ -75,10 +76,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             : Colors.green,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
-          ),
+          const NotificationIconButton(),
           IconButton(
             icon: const Icon(Icons.account_circle_outlined),
             onPressed: () {

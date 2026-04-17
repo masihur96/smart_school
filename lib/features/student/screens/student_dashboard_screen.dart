@@ -13,6 +13,7 @@ import '../../../core/widgets/app_drawer.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../admin/providers/notice_provider.dart';
 import '../../admin/providers/setup_provider.dart';
+import '../../../core/widgets/notification_icon_button.dart';
 import 'student_attendance_screen.dart';
 import 'student_result_screen.dart';
 import 'student_homework_screen.dart';
@@ -75,6 +76,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
+          const NotificationIconButton(),
           IconButton(
             icon: const Icon(Icons.account_circle_outlined),
             onPressed: () {
