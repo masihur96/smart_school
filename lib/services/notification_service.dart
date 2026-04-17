@@ -9,6 +9,7 @@ import 'package:smart_school/core/constants/api_path.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
 import 'package:smart_school/configs/network/data_provider.dart';
 import 'package:smart_school/models/notification_model.dart';
+import 'package:smart_school/models/user_model.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -196,6 +197,49 @@ class NotificationService {
       topic: topic,
       data: data,
     );
+  }
+
+  Future<void> subscribeToUserTopics(User user) async {
+    try {
+      // General topic
+      await subscribeToTopic('all');
+
+      // User specific topic
+      await subscribeToTopic('user_${user.id}');
+
+      // Class specific topic
+      if (user.classId != null && user.classId!.isNotEmpty) {
+        await subscribeToTopic('class_${user.classId}');
+      }
+
+      // Section specific topic
+      if (user.sectionId != null && user.sectionId!.isNotEmpty) {
+        await subscribeToTopic('section_${user.sectionId}');
+      }
+
+      log('Successfully subscribed to all user topics for ${user.name}');
+    } catch (e) {
+      log('Error subscribing to user topics: $e');
+    }
+  }
+
+  Future<void> unsubscribeFromUserTopics(User user) async {
+    try {
+      await unsubscribeFromTopic('all');
+      await unsubscribeFromTopic('user_${user.id}');
+
+      if (user.classId != null && user.classId!.isNotEmpty) {
+        await unsubscribeFromTopic('class_${user.classId}');
+      }
+
+      if (user.sectionId != null && user.sectionId!.isNotEmpty) {
+        await unsubscribeFromTopic('section_${user.sectionId}');
+      }
+
+      log('Successfully unsubscribed from all user topics for ${user.name}');
+    } catch (e) {
+      log('Error unsubscribing from user topics: $e');
+    }
   }
 }
 

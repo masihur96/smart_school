@@ -7,6 +7,7 @@ import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
 import '../../../models/school_models.dart';
 import '../../../services/database_service.dart';
+import '../../../services/notification_service.dart';
 
 class NoticesNotifier extends ChangeNotifier {
   final DatabaseService _dbService;
@@ -104,6 +105,17 @@ class NoticesNotifier extends ChangeNotifier {
         }
         _dbService.notices.add(saved);
         _notices = [..._dbService.notices];
+
+        // Trigger notification
+        NotificationService().triggerNotification(
+          title: 'New School Notice',
+          body: notice.title,
+          topic: 'all',
+          data: {
+            'type': 'notice',
+            'id': saved.id,
+          },
+        );
       } else {
         throw Exception('Failed to create notice: ${response?.data}');
       }

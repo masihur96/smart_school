@@ -95,6 +95,7 @@ class AuthNotifier extends ChangeNotifier {
         final fcmToken = await FirebaseMessaging.instance.getToken();
         if (fcmToken != null) {
           await NotificationService().registerToken(fcmToken);
+          await NotificationService().subscribeToUserTopics(_user!);
         }
       } else {
         _user = null;
@@ -154,6 +155,7 @@ class AuthNotifier extends ChangeNotifier {
       final fcmToken = await FirebaseMessaging.instance.getToken();
       if (fcmToken != null) {
         await NotificationService().registerToken(fcmToken);
+        await NotificationService().subscribeToUserTopics(_user!);
       }
 
       _isLoading = false;
@@ -203,6 +205,9 @@ class AuthNotifier extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    if (_user != null) {
+      await NotificationService().unsubscribeFromUserTopics(_user!);
+    }
     _user = null;
     _adminSubscription = null;
     await StorageService.clear();
