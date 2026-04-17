@@ -25,6 +25,7 @@ import 'features/student/providers/student_attendance_provider.dart';
 import 'features/student/providers/student_homework_provider.dart';
 import 'features/student/providers/student_result_provider.dart';
 import 'features/student/providers/student_routine_provider.dart';
+import 'features/student/providers/student_exam_provider.dart';
 import 'features/super_admin/providers/pricing_notifier.dart';
 import 'features/super_admin/providers/subscription_provider.dart';
 import 'features/super_admin/providers/super_admin_dashboard_provider.dart';
@@ -122,6 +123,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => StudentRoutineNotifier()),
         ChangeNotifierProvider(create: (_) => StudentHomeworkNotifier()),
         ChangeNotifierProvider(create: (_) => StudentResultNotifier()),
+        ChangeNotifierProvider(create: (_) => StudentExamNotifier()),
         ChangeNotifierProvider(create: (_) => TeacherDashboardProvider()),
         ChangeNotifierProvider(create: (_) => TeacherAttendanceProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
