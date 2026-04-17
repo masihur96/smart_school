@@ -4,8 +4,8 @@ import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart'
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/student/screens/student_dashboard_screen.dart';
-import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
 import 'package:smart_school/features/super_admin/screens/super_admin_dashboard_screen.dart';
+import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
 import 'package:smart_school/models/user_model.dart';
 
 import 'register_screen.dart';
@@ -205,7 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   _QuickLoginButton(
                     label: 'Teacher',
                     color: Colors.blue,
-                    onTap: () => _quickLogin('rofiqul@gmail.com', "Rofiqul@"),
+                    onTap: () => _quickLogin('emdadul@gmail.com', "Emdadul@"),
                   ),
                   _QuickLoginButton(
                     label: 'Student',
