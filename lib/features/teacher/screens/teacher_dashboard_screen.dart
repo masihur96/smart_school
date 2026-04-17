@@ -15,6 +15,8 @@ import 'mark_entry_screen.dart';
 import 'teacher_attendance_screen.dart';
 import '../../../core/widgets/notification_icon_button.dart';
 import 'teacher_self_attendance_detail_screen.dart';
+import '../../admin/providers/notice_provider.dart';
+import '../../../core/widgets/marquee_notice.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
   const TeacherDashboardScreen({super.key});
@@ -35,6 +37,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       final dateStr = DateFormat('dd/MM/yyyy').format(now);
       context.read<TeacherDashboardProvider>().fetchTodayClasses(dayName);
       context.read<TeacherDashboardProvider>().fetchTodayAttendance(dateStr);
+      context.read<NoticesNotifier>().fetchNoticesFromAPI();
     });
   }
 
@@ -159,6 +162,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildWelcomeHeader(context, name, classes.length, user),
+          Consumer<NoticesNotifier>(
+            builder: (context, noticeNotifier, child) {
+              return MarqueeNotice(notices: noticeNotifier.notices);
+            },
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Column(
