@@ -9,6 +9,7 @@ import 'configs/network/data_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'features/admin/providers/exam_provider.dart';
 import 'features/admin/providers/notice_provider.dart';
+import 'features/admin/providers/marquee_provider.dart';
 import 'features/admin/providers/routine_provider.dart';
 import 'features/admin/providers/settings_provider.dart';
 import 'features/admin/providers/setup_provider.dart';
@@ -133,6 +134,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => SubscriptionNotifier()),
         ChangeNotifierProvider(create: (_) => TrashRestoreNotifier()),
         ChangeNotifierProvider(create: (_) => NotificationNotifier()),
+        ChangeNotifierProvider(create: (_) => MarqueeProvider()),
       ],
       child: const MyApp(),
     ),

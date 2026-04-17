@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/features/admin/screens/add_edit_marquee_screen.dart';
 import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart';
 import 'package:smart_school/features/admin/screens/add_edit_teacher_screen.dart';
 import 'package:smart_school/features/admin/screens/routine_management_screen.dart'
@@ -323,8 +324,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) =>
-                      TeacherSelfAttendanceDetailScreen(schoolId: schoolId),
+                  builder: (_) => AddEditMarqueeScreen(schoolId: schoolId),
                 ),
               );
             },

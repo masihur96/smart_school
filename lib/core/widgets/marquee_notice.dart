@@ -1,25 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
-import '../../models/school_models.dart';
+
+import '../../models/school_models.dart' hide Marquee;
 
 class MarqueeNotice extends StatelessWidget {
-  final List<Notice> notices;
+  final List<Notice>? notices;
+  final String? customText;
 
-  const MarqueeNotice({
-    super.key,
-    required this.notices,
-  });
+  const MarqueeNotice({super.key, this.notices, this.customText});
 
   @override
   Widget build(BuildContext context) {
-    if (notices.isEmpty) {
+    if (customText != null && customText!.isNotEmpty) {
+      return _buildMarqueeContainer(customText!);
+    }
+
+    if (notices == null || notices!.isEmpty) {
       return _buildMarqueeContainer(
         'Welcome to Smart School! Stay tuned for the latest updates and announcements.',
       );
     }
 
     // Combine all notice titles into one scrolling string
-    final marqueeText = notices.map((n) => '• ${n.title}: ${n.content}').join('   ');
+    final marqueeText = notices!
+        .map((n) => '• ${n.title}: ${n.content}')
+        .join('   ');
 
     return _buildMarqueeContainer(marqueeText);
   }
@@ -56,13 +61,9 @@ class MarqueeNotice extends StatelessWidget {
               ),
               child: const Row(
                 children: [
-                   Icon(
-                    Icons.campaign_rounded,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                   SizedBox(width: 4),
-                   Text(
+                  Icon(Icons.campaign_rounded, color: Colors.white, size: 18),
+                  SizedBox(width: 4),
+                  Text(
                     'UPDATES',
                     style: TextStyle(
                       color: Colors.white,
