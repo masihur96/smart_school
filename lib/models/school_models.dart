@@ -503,6 +503,7 @@ class ExamAssignment {
   final String examinerId;
   final String examinerName;
   final DateTime date;
+  final String? syllabus;
 
   ExamAssignment({
     required this.id,
@@ -514,6 +515,7 @@ class ExamAssignment {
     required this.examinerId,
     required this.examinerName,
     required this.date,
+    this.syllabus,
   });
 
   factory ExamAssignment.fromJson(Map<String, dynamic> json) {
@@ -527,6 +529,7 @@ class ExamAssignment {
       examinerId: json['examiner']?['uuid'] ?? '',
       examinerName: json['examiner']?['name'] ?? '',
       date: DateTime.tryParse(json['date']?.toString() ?? '') ?? DateTime.now(),
+      syllabus: json['syllabus'],
     );
   }
 }

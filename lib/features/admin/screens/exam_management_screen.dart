@@ -385,6 +385,10 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                               const SizedBox(height: 4),
                               Text('Examiner: $examinerName', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
                               Text('Date: ${DateFormat('MMM dd, yyyy').format(a.date)}', style: TextStyle(color: Colors.purple.shade300, fontSize: 12)),
+                              if (a.syllabus != null && a.syllabus!.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text('Syllabus: ${a.syllabus}', style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontStyle: FontStyle.italic)),
+                              ],
                             ],
                           ),
                         );

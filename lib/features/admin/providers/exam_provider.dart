@@ -92,6 +92,7 @@ class ExamsNotifier extends ChangeNotifier {
               'subject_uid': assign['subject_uid'],
               'examiner_uid': assign['examiner_uid'],
               'date': DateFormat('yyyy-MM-dd').format(assign['date']),
+              'syllabus': assign['syllabus'],
             };
             await DataProvider().performRequest(
               'POST',
@@ -144,6 +145,7 @@ class ExamsNotifier extends ChangeNotifier {
           'subject_uid': a['subject_uid'],
           'examiner_uid': a['examiner_uid'],
           'date': DateFormat('yyyy-MM-dd').format(a['date']),
+          'syllabus': a['syllabus'],
         }).toList(),
       };
 

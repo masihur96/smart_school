@@ -1,13 +1,15 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
 import '../../../models/school_models.dart' hide Teacher;
 import '../../../models/teacher_model.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/exam_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
-import '../../auth/providers/auth_provider.dart';
 
 // Local model for a single academic assignment draft
 class _AssignmentDraft {
@@ -16,9 +18,16 @@ class _AssignmentDraft {
   String? subjectId;
   String? examinerId;
   DateTime date;
+  String? syllabus;
 
-  _AssignmentDraft({this.id, this.classId, this.subjectId, this.examinerId, DateTime? date})
-      : date = date ?? DateTime.now().add(const Duration(days: 1));
+  _AssignmentDraft({
+    this.id,
+    this.classId,
+    this.subjectId,
+    this.examinerId,
+    DateTime? date,
+    this.syllabus,
+  }) : date = date ?? DateTime.now().add(const Duration(days: 1));
 }
 
 class AddEditExamScreen extends StatefulWidget {
@@ -52,15 +61,18 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
       _descController.text = widget.exam!.description ?? '';
       _startDate = widget.exam!.startDate ?? DateTime.now();
       _endDate = widget.exam!.endDate ?? DateTime.now();
-      
-      for(final a in widget.exam!.assignments) {
-        _assignments.add(_AssignmentDraft(
-          id: a.id,
-          classId: a.classId,
-          subjectId: a.subjectId,
-          examinerId: a.examinerId,
-          date: a.date,
-        ));
+
+      for (final a in widget.exam!.assignments) {
+        _assignments.add(
+          _AssignmentDraft(
+            id: a.id,
+            classId: a.classId,
+            subjectId: a.subjectId,
+            examinerId: a.examinerId,
+            date: a.date,
+            syllabus: a.syllabus,
+          ),
+        );
       }
     }
 
@@ -83,21 +95,21 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
 
   // ── Date picker helper ─────────────────────────────────────────────────────
   Future<DateTime?> _pickDate(DateTime initial) => showDatePicker(
-        context: context,
-        initialDate: initial,
-        firstDate: DateTime.now().subtract(const Duration(days: 365)),
-        lastDate: DateTime.now().add(const Duration(days: 730)),
-        builder: (ctx, child) => Theme(
-          data: Theme.of(ctx).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Colors.purple,
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
+    context: context,
+    initialDate: initial,
+    firstDate: DateTime.now().subtract(const Duration(days: 365)),
+    lastDate: DateTime.now().add(const Duration(days: 730)),
+    builder: (ctx, child) => Theme(
+      data: Theme.of(ctx).copyWith(
+        colorScheme: const ColorScheme.light(
+          primary: Colors.purple,
+          onPrimary: Colors.white,
+          onSurface: Colors.black,
         ),
-      );
+      ),
+      child: child!,
+    ),
+  );
 
   // ── STEP 1: Exam details ───────────────────────────────────────────────────
   Widget _buildStep1() {
@@ -180,12 +192,18 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                     ),
                     Text(
                       '${DateFormat('MMM dd').format(_startDate)} – ${DateFormat('MMM dd, yyyy').format(_endDate)}',
-                      style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 12),
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.85),
+                        fontSize: 12,
+                      ),
                     ),
                     if (_descController.text.isNotEmpty)
                       Text(
                         _descController.text,
-                        style: TextStyle(color: Colors.white.withOpacity(0.75), fontSize: 11),
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.75),
+                          fontSize: 11,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -223,7 +241,11 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
             ),
             child: Column(
               children: [
-                Icon(Icons.school_outlined, size: 40, color: Colors.grey.shade300),
+                Icon(
+                  Icons.school_outlined,
+                  size: 40,
+                  color: Colors.grey.shade300,
+                ),
                 const SizedBox(height: 8),
                 Text(
                   'No assignments yet.\nTap "Add" to assign a class, subject & examiner.',
@@ -262,6 +284,9 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
     String? subjectId = draft.subjectId;
     String? examinerId = draft.examinerId;
     DateTime date = draft.date;
+    String? syllabus = draft.syllabus;
+
+    final syllabusController = TextEditingController(text: syllabus);
 
     showModalBottomSheet(
       context: context,
@@ -318,7 +343,12 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                         decoration: _dropDeco('Class', Icons.class_outlined),
                         value: classId,
                         items: classes
-                            .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
+                            .map(
+                              (c) => DropdownMenuItem(
+                                value: c.id,
+                                child: Text(c.name),
+                              ),
+                            )
                             .toList(),
                         onChanged: (v) => setBS(() {
                           classId = v;
@@ -331,21 +361,33 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                         decoration: _dropDeco('Subject', Icons.book_outlined),
                         value: subjectId,
                         items: allSubjects
-                            .where((s) => classId == null || s.classId == classId)
-                            .map((s) => DropdownMenuItem(value: s.id, child: Text(s.name)))
+                            .where(
+                              (s) => classId == null || s.classId == classId,
+                            )
+                            .map(
+                              (s) => DropdownMenuItem(
+                                value: s.id,
+                                child: Text(s.name),
+                              ),
+                            )
                             .toList(),
                         onChanged: (v) => setBS(() => subjectId = v),
                       ),
                       const SizedBox(height: 14),
                       // Examiner dropdown
                       DropdownButtonFormField<String>(
-                        decoration: _dropDeco('Examiner / Teacher', Icons.person_outline),
+                        decoration: _dropDeco(
+                          'Examiner / Teacher',
+                          Icons.person_outline,
+                        ),
                         value: examinerId,
                         items: teachers
-                            .map((t) => DropdownMenuItem(
-                                  value: t.userId,
-                                  child: Text(t.user?.name ?? 'Unknown'),
-                                ))
+                            .map(
+                              (t) => DropdownMenuItem(
+                                value: t.userId,
+                                child: Text(t.user?.name ?? 'Unknown'),
+                              ),
+                            )
                             .toList(),
                         onChanged: (v) => setBS(() => examinerId = v),
                       ),
@@ -358,18 +400,34 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                           if (d != null) setBS(() => date = d);
                         },
                         child: InputDecorator(
-                          decoration: _dropDeco('Exam Date', Icons.calendar_today),
+                          decoration: _dropDeco(
+                            'Exam Date',
+                            Icons.calendar_today,
+                          ),
                           child: Text(
                             DateFormat('EEEE, MMM dd, yyyy').format(date),
                             style: const TextStyle(fontSize: 15),
                           ),
                         ),
                       ),
+                      const SizedBox(height: 14),
+                      // Syllabus
+                      TextFormField(
+                        controller: syllabusController,
+                        decoration: _dropDeco(
+                          'Syllabus (e.g. Chapter 1-5)',
+                          Icons.book_outlined,
+                        ),
+                        onChanged: (v) => syllabus = v,
+                      ),
                       const SizedBox(height: 24),
                       SizedBox(
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: (classId == null || subjectId == null || examinerId == null)
+                          onPressed:
+                              (classId == null ||
+                                  subjectId == null ||
+                                  examinerId == null)
                               ? null
                               : () {
                                   setState(() {
@@ -379,15 +437,19 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                                         ..classId = classId
                                         ..subjectId = subjectId
                                         ..examinerId = examinerId
-                                        ..date = date;
+                                        ..date = date
+                                        ..syllabus = syllabus;
                                     } else {
-                                      _assignments.add(_AssignmentDraft(
-                                        id: id,
-                                        classId: classId,
-                                        subjectId: subjectId,
-                                        examinerId: examinerId,
-                                        date: date,
-                                      ));
+                                      _assignments.add(
+                                        _AssignmentDraft(
+                                          id: id,
+                                          classId: classId,
+                                          subjectId: subjectId,
+                                          examinerId: examinerId,
+                                          date: date,
+                                          syllabus: syllabus,
+                                        ),
+                                      );
                                     }
                                   });
                                   Navigator.pop(ctx);
@@ -396,12 +458,15 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                             backgroundColor: Colors.purple,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           child: Text(
                             editing ? 'Save Changes' : 'Add Assignment',
                             style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -418,16 +483,15 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
   }
 
   InputDecoration _dropDeco(String label, IconData icon) => InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, color: Colors.purple),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      );
+    labelText: label,
+    prefixIcon: Icon(icon, color: Colors.purple),
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Colors.grey.shade300),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+  );
 
   // ── Save / Submit ──────────────────────────────────────────────────────────
   Future<void> _submit() async {
@@ -444,18 +508,26 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
     final examsNotifier = context.read<ExamsNotifier>();
     try {
       final List<Map<String, dynamic>> assignmentsList = _assignments
-          .where((a) => 
-            a.classId != null && a.classId!.trim().isNotEmpty &&
-            a.subjectId != null && a.subjectId!.trim().isNotEmpty &&
-            a.examinerId != null && a.examinerId!.trim().isNotEmpty
+          .where(
+            (a) =>
+                a.classId != null &&
+                a.classId!.trim().isNotEmpty &&
+                a.subjectId != null &&
+                a.subjectId!.trim().isNotEmpty &&
+                a.examinerId != null &&
+                a.examinerId!.trim().isNotEmpty,
           )
-          .map((a) => {
-        if (a.id != null && a.id!.isNotEmpty) 'id': a.id,
-        'class_uid': a.classId!,
-        'subject_uid': a.subjectId!,
-        'examiner_uid': a.examinerId!,
-        'date': a.date,
-      }).toList();
+          .map(
+            (a) => {
+              if (a.id != null && a.id!.isNotEmpty) 'id': a.id,
+              'class_uid': a.classId!,
+              'subject_uid': a.subjectId!,
+              'examiner_uid': a.examinerId!,
+              'date': a.date,
+              'syllabus': a.syllabus,
+            },
+          )
+          .toList();
 
       if (isEditing) {
         await examsNotifier.updateExamOnAPI(
@@ -517,7 +589,8 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
           type: StepperType.horizontal,
           elevation: 0,
           onStepTapped: (i) {
-            if (i == 1 && !(_step1Key.currentState?.validate() ?? false)) return;
+            if (i == 1 && !(_step1Key.currentState?.validate() ?? false))
+              return;
             setState(() => _currentStep = i);
           },
           controlsBuilder: (context, details) {
@@ -533,7 +606,9 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                             if (_endDate.isBefore(_startDate)) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('End date must be after start date.'),
+                                  content: Text(
+                                    'End date must be after start date.',
+                                  ),
                                   backgroundColor: Colors.orange,
                                 ),
                               );
@@ -547,11 +622,16 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                           foregroundColor: Colors.white,
                           minimumSize: const Size.fromHeight(50),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                        child: const Text('Next: Add Assignments',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold)),
+                        child: const Text(
+                          'Next: Add Assignments',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   if (_currentStep == 1) ...[
@@ -561,7 +641,8 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size.fromHeight(50),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           side: const BorderSide(color: Colors.purple),
                           foregroundColor: Colors.purple,
                         ),
@@ -578,18 +659,24 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                           foregroundColor: Colors.white,
                           minimumSize: const Size.fromHeight(50),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         child: examsNotifier.isLoading
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 2))
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
                             : Text(
                                 'Create Exam (${_assignments.length})',
                                 style: const TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.bold),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                       ),
                     ),
@@ -694,18 +781,26 @@ class _AssignmentCard extends StatelessWidget {
     final teachers = context.watch<TeachersNotifier>().teachers;
 
     final className = classes
-        .firstWhere((c) => c.id == draft.classId,
-            orElse: () => ClassRoom(id: '', name: 'Unknown'))
+        .firstWhere(
+          (c) => c.id == draft.classId,
+          orElse: () => ClassRoom(id: '', name: 'Unknown'),
+        )
         .name;
     final subjectName = subjects
-        .firstWhere((s) => s.id == draft.subjectId,
-            orElse: () => Subject(id: '', name: 'Unknown'))
+        .firstWhere(
+          (s) => s.id == draft.subjectId,
+          orElse: () => Subject(id: '', name: 'Unknown'),
+        )
         .name;
-    final teacherName = teachers
-        .firstWhere((t) => t.userId == draft.examinerId,
-            orElse: () => Teacher(userId: ''))
-        .user
-        ?.name ?? 'Unknown';
+    final teacherName =
+        teachers
+            .firstWhere(
+              (t) => t.userId == draft.examinerId,
+              orElse: () => Teacher(userId: ''),
+            )
+            .user
+            ?.name ??
+        'Unknown';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -727,7 +822,9 @@ class _AssignmentCard extends StatelessWidget {
           child: Text(
             '${index + 1}',
             style: const TextStyle(
-                color: Colors.purple, fontWeight: FontWeight.bold),
+              color: Colors.purple,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         title: Text(
@@ -737,20 +834,38 @@ class _AssignmentCard extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Examiner: $teacherName',
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
-            Text(DateFormat('MMM dd, yyyy').format(draft.date),
-                style: TextStyle(
-                    color: Colors.purple.shade300,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500)),
+            Text(
+              'Examiner: $teacherName',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+            ),
+            Text(
+              DateFormat('MMM dd, yyyy').format(draft.date),
+              style: TextStyle(
+                color: Colors.purple.shade300,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            if (draft.syllabus != null && draft.syllabus!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: Text(
+                  'Syllabus: ${draft.syllabus}',
+                  style: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: 11,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
           ],
         ),
         isThreeLine: true,
         trailing: PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert, size: 20),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           onSelected: (v) {
             if (v == 'edit') onEdit();
             if (v == 'delete') onDelete();
@@ -758,19 +873,23 @@ class _AssignmentCard extends StatelessWidget {
           itemBuilder: (_) => const [
             PopupMenuItem(
               value: 'edit',
-              child: Row(children: [
-                Icon(Icons.edit_outlined, size: 18, color: Colors.orange),
-                SizedBox(width: 8),
-                Text('Edit'),
-              ]),
+              child: Row(
+                children: [
+                  Icon(Icons.edit_outlined, size: 18, color: Colors.orange),
+                  SizedBox(width: 8),
+                  Text('Edit'),
+                ],
+              ),
             ),
             PopupMenuItem(
               value: 'delete',
-              child: Row(children: [
-                Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                SizedBox(width: 8),
-                Text('Remove', style: TextStyle(color: Colors.red)),
-              ]),
+              child: Row(
+                children: [
+                  Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                  SizedBox(width: 8),
+                  Text('Remove', style: TextStyle(color: Colors.red)),
+                ],
+              ),
             ),
           ],
         ),
