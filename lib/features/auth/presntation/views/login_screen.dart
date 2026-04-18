@@ -185,46 +185,46 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
               const SizedBox(height: 40),
-              Row(
-                children: [
-                  Expanded(child: Divider(color: Colors.grey[300])),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'Quick Login',
-                      style: TextStyle(color: Colors.grey[500]),
-                    ),
-                  ),
-                  Expanded(child: Divider(color: Colors.grey[300])),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _QuickLoginButton(
-                    label: 'Admin',
-                    color: Colors.purple,
-                    onTap: () => _quickLogin('admin@gmail.com', "Admin@"),
-                  ),
-                  _QuickLoginButton(
-                    label: 'Teacher',
-                    color: Colors.blue,
-                    onTap: () => _quickLogin('emdadul@gmail.com', "Emdadul@"),
-                  ),
-                  _QuickLoginButton(
-                    label: 'Student',
-                    color: Colors.green,
-                    onTap: () => _quickLogin('ariful@gmail.com', "Ariful@"),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              _QuickLoginButton(
-                label: 'Super Admin',
-                color: Colors.purple,
-                onTap: () => _quickLogin('superadmin@gmail.com', "SuperAdmin@"),
-              ),
+              // Row(
+              //   children: [
+              //     Expanded(child: Divider(color: Colors.grey[300])),
+              //     Padding(
+              //       padding: const EdgeInsets.symmetric(horizontal: 16),
+              //       child: Text(
+              //         'Quick Login',
+              //         style: TextStyle(color: Colors.grey[500]),
+              //       ),
+              //     ),
+              //     Expanded(child: Divider(color: Colors.grey[300])),
+              //   ],
+              // ),
+              // const SizedBox(height: 16),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              //   children: [
+              //     _QuickLoginButton(
+              //       label: 'Admin',
+              //       color: Colors.purple,
+              //       onTap: () => _quickLogin('admin@gmail.com', "Admin@"),
+              //     ),
+              //     _QuickLoginButton(
+              //       label: 'Teacher',
+              //       color: Colors.blue,
+              //       onTap: () => _quickLogin('emdadul@gmail.com', "Emdadul@"),
+              //     ),
+              //     _QuickLoginButton(
+              //       label: 'Student',
+              //       color: Colors.green,
+              //       onTap: () => _quickLogin('ariful@gmail.com', "Ariful@"),
+              //     ),
+              //   ],
+              // ),
+              // SizedBox(height: 20),
+              // _QuickLoginButton(
+              //   label: 'Super Admin',
+              //   color: Colors.purple,
+              //   onTap: () => _quickLogin('superadmin@gmail.com', "SuperAdmin@"),
+              // ),
             ],
           ),
         ),
