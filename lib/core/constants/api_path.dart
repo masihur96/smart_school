@@ -1,8 +1,9 @@
 class APIPath {
   //Base Url for HR Service
-  // static const String baseUrl = 'https://smart-school-backend-mmy3.onrender.com';
+  static const String baseUrl =
+      'https://smart-school-backend-production.up.railway.app'; // For Railway
   //static const String baseUrl = 'http://192.168.68.120:3000';
-  static const String baseUrl = 'http://10.0.2.2:3000';
+  // static const String baseUrl = 'http://10.0.2.2:3000';
   static String login = "$baseUrl/auth/login";
   static String register = "$baseUrl/users";
   static String profile = "$baseUrl/auth/profile";
@@ -42,7 +43,8 @@ class APIPath {
   static String deletePricing(String id) => "$baseUrl/pricing/$id";
 
   static String allSubscriptions = "$baseUrl/subscriptions/all";
-  static String schoolSubscription(String schoolId) => "$baseUrl/subscriptions/school/$schoolId";
+  static String schoolSubscription(String schoolId) =>
+      "$baseUrl/subscriptions/school/$schoolId";
   static String assignSubscription = "$baseUrl/subscriptions/assign";
   static String updateSubscription(String id) => "$baseUrl/subscriptions/$id";
   static String deleteSubscription(String id) => "$baseUrl/subscriptions/$id";
@@ -59,13 +61,17 @@ class APIPath {
       "$baseUrl/teacher/homework/student-homework/$id";
   static String bulkUpdateHomework(String homeworkId) =>
       "$baseUrl/teacher/homework/$homeworkId/students/bulk";
-  static String updateStudentHomeworkDirect(String homeworkId, String studentId) =>
-      "$baseUrl/teacher/homework/$homeworkId/students/$studentId";
-      
+  static String updateStudentHomeworkDirect(
+    String homeworkId,
+    String studentId,
+  ) => "$baseUrl/teacher/homework/$homeworkId/students/$studentId";
+
   // Backup & Restore
   static String trash = "$baseUrl/superadmin/trash";
-  static String restore(String entity, String id) => "$baseUrl/superadmin/trash/$entity/$id/restore";
-  static String deletedRecords(String entity) => "$baseUrl/superadmin/backup/deleted?entity=$entity";
+  static String restore(String entity, String id) =>
+      "$baseUrl/superadmin/trash/$entity/$id/restore";
+  static String deletedRecords(String entity) =>
+      "$baseUrl/superadmin/backup/deleted?entity=$entity";
   static String restoreRecord = "$baseUrl/superadmin/backup/restore";
 
   // Notifications
@@ -75,7 +81,10 @@ class APIPath {
 
   // Student Exam Endpoints
   static String studentExams = "$baseUrl/student/exams";
-  static String studentExamRoutine(String id) => "$baseUrl/student/exam-routine/$id";
-  static String studentExamSyllabus(String id) => "$baseUrl/student/exam-syllabus/$id";
-  static String studentExamResults(String id) => "$baseUrl/student/exam-results/$id";
+  static String studentExamRoutine(String id) =>
+      "$baseUrl/student/exam-routine/$id";
+  static String studentExamSyllabus(String id) =>
+      "$baseUrl/student/exam-syllabus/$id";
+  static String studentExamResults(String id) =>
+      "$baseUrl/student/exam-results/$id";
 }

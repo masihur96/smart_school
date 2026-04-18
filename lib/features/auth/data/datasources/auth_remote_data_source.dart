@@ -1,7 +1,9 @@
 import 'dart:developer';
+
 import 'package:smart_school/configs/network/data_provider.dart';
 import 'package:smart_school/core/constants/api_path.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
+
 import '../models/auth_response_model.dart';
 
 class AuthRemoteDataSource {
@@ -68,6 +70,9 @@ class AuthRemoteDataSource {
       'role': role,
       'schoolId': schoolId,
       'phone': phone,
+      "lat": 0,
+      "lon": 0,
+      "radius": 0,
     };
 
     log('Register payload: $payload');
@@ -170,10 +175,7 @@ class AuthRemoteDataSource {
     final response = await _dataProvider.performRequest(
       'POST',
       APIPath.changePassword,
-      data: {
-        'oldPassword': oldPassword,
-        'newPassword': newPassword,
-      },
+      data: {'oldPassword': oldPassword, 'newPassword': newPassword},
       header: {'Authorization': 'Bearer $token'},
     );
 
