@@ -1,3 +1,5 @@
+import 'package:smart_school/models/school_models.dart';
+
 class AuthResponseModel {
   final String id;
   final String name;
@@ -14,6 +16,7 @@ class AuthResponseModel {
   final double? lat;
   final double? lon;
   final double? radius;
+  final School? school;
 
   AuthResponseModel({
     required this.id,
@@ -31,6 +34,7 @@ class AuthResponseModel {
     this.lat,
     this.lon,
     this.radius,
+    this.school,
   });
 
   factory AuthResponseModel.fromJson(Map<String, dynamic> json) {
@@ -50,6 +54,7 @@ class AuthResponseModel {
       lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
       lon: json['lon'] != null ? double.tryParse(json['lon'].toString()) : null,
       radius: json['radius'] != null ? double.tryParse(json['radius'].toString()) : null,
+      school: json['school'] != null ? School.fromJson(json['school']) : null,
     );
   }
 
@@ -70,6 +75,7 @@ class AuthResponseModel {
       'lat': lat,
       'lon': lon,
       'radius': radius,
+      'school': school?.toJson(),
     };
   }
 }

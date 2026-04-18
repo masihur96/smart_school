@@ -1,5 +1,63 @@
 import 'dart:developer';
 
+class School {
+  final String id;
+  final String schoolId;
+  final String name;
+  final String address;
+  final String phone;
+  final String email;
+  final bool isActive;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final DateTime? deletedAt;
+
+  School({
+    required this.id,
+    required this.schoolId,
+    required this.name,
+    required this.address,
+    required this.phone,
+    required this.email,
+    required this.isActive,
+    this.createdAt,
+    this.updatedAt,
+    this.deletedAt,
+  });
+
+  factory School.fromJson(Map<String, dynamic> json) => School(
+        id: json['id'] ?? '',
+        schoolId: json['schoolId'] ?? '',
+        name: json['name'] ?? '',
+        address: json['address'] ?? '',
+        phone: json['phone'] ?? '',
+        email: json['email'] ?? '',
+        isActive: json['isActive'] ?? false,
+        createdAt: json['createdAt'] != null
+            ? DateTime.tryParse(json['createdAt'].toString())
+            : null,
+        updatedAt: json['updatedAt'] != null
+            ? DateTime.tryParse(json['updatedAt'].toString())
+            : null,
+        deletedAt: json['deletedAt'] != null
+            ? DateTime.tryParse(json['deletedAt'].toString())
+            : null,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'schoolId': schoolId,
+        'name': name,
+        'address': address,
+        'phone': phone,
+        'email': email,
+        'isActive': isActive,
+        'createdAt': createdAt?.toIso8601String(),
+        'updatedAt': updatedAt?.toIso8601String(),
+        'deletedAt': deletedAt?.toIso8601String(),
+      };
+}
+
 class ClassRoom {
   final String id;
   final String name; // e.g., "Class 10"

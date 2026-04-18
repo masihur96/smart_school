@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
+import 'package:smart_school/features/admin/screens/register_school_screen.dart';
 import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/student/screens/student_dashboard_screen.dart';
@@ -62,15 +63,23 @@ class _SplashScreenState extends State<SplashScreen>
     if (user != null) {
       switch (user.role) {
         case UserRole.admin:
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => authNotifier.isSubscriptionValid
-                  ? const AdminDashboardScreen()
-                  : const AdminPricingPlanScreen(),
-            ),
-            (Route<dynamic> route) => false,
-          );
+          if (user.school == null) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const AdminRegisterSchoolScreen()),
+              (Route<dynamic> route) => false,
+            );
+          } else {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => authNotifier.isSubscriptionValid
+                    ? const AdminDashboardScreen()
+                    : const AdminPricingPlanScreen(),
+              ),
+              (Route<dynamic> route) => false,
+            );
+          }
           break;
         case UserRole.teacher:
           Navigator.pushAndRemoveUntil(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
+import 'package:smart_school/features/admin/screens/register_school_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/student/screens/student_dashboard_screen.dart';
 import 'package:smart_school/features/super_admin/screens/super_admin_dashboard_screen.dart';
@@ -42,9 +43,13 @@ class _LoginScreenState extends State<LoginScreen> {
       Widget dashboard;
       switch (authNotifier.user!.role) {
         case UserRole.admin:
-          dashboard = authNotifier.isSubscriptionValid
-              ? const AdminDashboardScreen()
-              : const AdminPricingPlanScreen();
+          if (authNotifier.user!.school == null) {
+            dashboard = const AdminRegisterSchoolScreen();
+          } else {
+            dashboard = authNotifier.isSubscriptionValid
+                ? const AdminDashboardScreen()
+                : const AdminPricingPlanScreen();
+          }
           break;
         case UserRole.teacher:
           dashboard = authNotifier.isSubscriptionValid
