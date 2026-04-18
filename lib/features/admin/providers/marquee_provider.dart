@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
+
 import '../../../../configs/network/data_provider.dart';
 import '../../../../core/constants/api_path.dart';
 import '../../../../models/school_models.dart';
@@ -9,7 +10,7 @@ import '../../../../models/school_models.dart';
 class MarqueeProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
-  
+
   Marquee? _teacherMarquee;
   Marquee? _studentMarquee;
 
@@ -18,7 +19,7 @@ class MarqueeProvider extends ChangeNotifier {
   Marquee? get teacherMarquee => _teacherMarquee;
   Marquee? get studentMarquee => _studentMarquee;
 
-  Future<void> fetchMarquee(String type) async {
+  Future<void> fetchMarquee(String type, String schoolId) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -27,18 +28,17 @@ class MarqueeProvider extends ChangeNotifier {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
 
-      final url = '${APIPath.marquee}?type=$type';
+      final url = '${APIPath.marquee}/$schoolId/$type';
       log('Fetching $type marquee: $url');
 
-      final response = await DataProvider().performRequest(
-        'GET',
-        url,
-        header: {'Authorization': 'Bearer $token'},
-      );
+      final response = await DataProvider().performRequest('GET', url);
 
-      if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
+      print("Marque Response : $response");
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
         final dynamic data = response.data['data'];
-        
+
         if (data != null) {
           final marquee = Marquee.fromJson(data);
           if (type == 'TEACHER') {
@@ -54,7 +54,9 @@ class MarqueeProvider extends ChangeNotifier {
           }
         }
       } else {
-        throw Exception('Failed to load marquee: ${response?.statusCode} - ${response?.data}');
+        throw Exception(
+          'Failed to load marquee: ${response?.statusCode} - ${response?.data}',
+        );
       }
     } catch (e) {
       log('Error fetching marquee: $e');
@@ -65,7 +67,11 @@ class MarqueeProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> addOrUpdateMarquee(String text, String type, String schoolId) async {
+  Future<bool> addOrUpdateMarquee(
+    String text,
+    String type,
+    String schoolId,
+  ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -74,11 +80,7 @@ class MarqueeProvider extends ChangeNotifier {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
 
-      final data = {
-        'text': text,
-        'type': type,
-        'schoolId': schoolId,
-      };
+      final data = {'text': text, 'type': type, 'schoolId': schoolId};
 
       final response = await DataProvider().performRequest(
         'POST',
@@ -87,7 +89,8 @@ class MarqueeProvider extends ChangeNotifier {
         header: {'Authorization': 'Bearer $token'},
       );
 
-      if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
         log('Successfully saved $type marquee');
         // Refresh local state if adding for the current school
         return true;

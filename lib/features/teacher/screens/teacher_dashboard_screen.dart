@@ -8,16 +8,16 @@ import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
 
 import '../../../core/widgets/app_drawer.dart';
+import '../../../core/widgets/marquee_notice.dart';
+import '../../../core/widgets/notification_icon_button.dart';
+import '../../admin/providers/marquee_provider.dart';
+import '../../admin/providers/notice_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/teacher_dashboard_provider.dart';
 import 'homework_management_screen.dart';
 import 'mark_entry_screen.dart';
 import 'teacher_attendance_screen.dart';
-import '../../../core/widgets/notification_icon_button.dart';
 import 'teacher_self_attendance_detail_screen.dart';
-import '../../admin/providers/notice_provider.dart';
-import '../../admin/providers/marquee_provider.dart';
-import '../../../core/widgets/marquee_notice.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
   const TeacherDashboardScreen({super.key});
@@ -33,13 +33,17 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = context.read<AuthNotifier>().user;
       final now = DateTime.now();
       final dayName = DateFormat('EEEE').format(now);
       final dateStr = DateFormat('dd/MM/yyyy').format(now);
       context.read<TeacherDashboardProvider>().fetchTodayClasses(dayName);
       context.read<TeacherDashboardProvider>().fetchTodayAttendance(dateStr);
       context.read<NoticesNotifier>().fetchNoticesFromAPI();
-      context.read<MarqueeProvider>().fetchMarquee('TEACHER');
+      context.read<MarqueeProvider>().fetchMarquee(
+        'TEACHER',
+        user?.schoolId ?? "",
+      );
     });
   }
 
@@ -167,7 +171,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           Consumer2<NoticesNotifier, MarqueeProvider>(
             builder: (context, noticeNotifier, marqueeProvider, child) {
               return MarqueeNotice(
-                notices: noticeNotifier.notices,
                 customText: marqueeProvider.teacherMarquee?.text,
               );
             },

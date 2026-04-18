@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:percent_indicator/percent_indicator.dart';
 import 'package:intl/intl.dart';
+import 'package:percent_indicator/percent_indicator.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
-import 'package:smart_school/features/student/screens/student_routine_screen.dart';
-import 'package:smart_school/features/student/screens/student_notice_screen.dart';
 import 'package:smart_school/features/student/providers/student_attendance_provider.dart';
+import 'package:smart_school/features/student/providers/student_homework_provider.dart';
+import 'package:smart_school/features/student/screens/student_notice_screen.dart';
+import 'package:smart_school/features/student/screens/student_routine_screen.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
-import 'package:smart_school/features/student/providers/student_homework_provider.dart';
+
 import '../../../core/widgets/app_drawer.dart';
-import '../../auth/providers/auth_provider.dart';
-import '../../admin/providers/notice_provider.dart';
-import '../../admin/providers/marquee_provider.dart';
-import '../../admin/providers/setup_provider.dart';
-import '../../../core/widgets/notification_icon_button.dart';
 import '../../../core/widgets/marquee_notice.dart';
+import '../../../core/widgets/notification_icon_button.dart';
+import '../../admin/providers/marquee_provider.dart';
+import '../../admin/providers/notice_provider.dart';
+import '../../admin/providers/setup_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 import 'student_attendance_screen.dart';
-import 'student_result_screen.dart';
 import 'student_homework_screen.dart';
+import 'student_result_screen.dart';
 
 class StudentDashboardScreen extends StatefulWidget {
   const StudentDashboardScreen({super.key});
@@ -38,9 +39,14 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       context.read<NoticesNotifier>().fetchNoticesFromAPI();
       final user = context.read<AuthNotifier>().user;
       if (user?.classId != null) {
-        context.read<StudentHomeworkNotifier>().fetchHomework(user!.classId!);
+        context.read<StudentHomeworkNotifier>().fetchHomework(
+          user?.classId ?? "",
+        );
       }
-      context.read<MarqueeProvider>().fetchMarquee('STUDENT');
+      context.read<MarqueeProvider>().fetchMarquee(
+        'STUDENT',
+        user?.schoolId ?? "",
+      );
     });
   }
 
@@ -100,7 +106,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           const StudentAttendanceScreen(hideAppBar: true),
           const StudentResultScreen(hideAppBar: true),
           const StudentHomeworkScreen(hideAppBar: true),
-          const StudentNoticeScreen(isFromDrawer: false,),
+          const StudentNoticeScreen(isFromDrawer: false),
         ],
       ),
       bottomNavigationBar: Container(
@@ -159,11 +165,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           _buildHeader(user),
           Consumer2<NoticesNotifier, MarqueeProvider>(
             builder: (context, noticeNotifier, marqueeNotifier, child) {
-              final notices = noticeNotifier.notices
-                  .where((n) => n.classId == null || n.classId == user?.classId)
-                  .toList();
               return MarqueeNotice(
-                notices: notices,
                 customText: marqueeNotifier.studentMarquee?.text,
               );
             },
@@ -249,7 +251,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         if (onMore != null)
           TextButton(
             onPressed: onMore,
-            child: const Text('View All', style: TextStyle(color: Colors.green)),
+            child: const Text(
+              'View All',
+              style: TextStyle(color: Colors.green),
+            ),
           ),
       ],
     );
@@ -321,13 +326,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  totalDays == 0 
-                      ? 'No attendance records found.' 
+                  totalDays == 0
+                      ? 'No attendance records found.'
                       : 'You were present $presentDays out of $totalDays recorded days.',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    height: 1.4,
-                  ),
+                  style: TextStyle(color: Colors.grey[600], height: 1.4),
                 ),
                 const SizedBox(height: 12),
                 InkWell(
@@ -379,7 +381,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: (latest.isImportant ? Colors.red : Colors.indigo).withOpacity(0.3),
+              color: (latest.isImportant ? Colors.red : Colors.indigo)
+                  .withOpacity(0.3),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -393,7 +396,11 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 color: Colors.white.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.notifications_active_rounded, color: Colors.white, size: 24),
+              child: const Icon(
+                Icons.notifications_active_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 20),
             Expanded(
@@ -416,14 +423,21 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                       ),
                       if (latest.isImportant)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Text(
                             'URGENT',
-                            style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                     ],
@@ -433,7 +447,11 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                     latest.content,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14, height: 1.3),
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 14,
+                      height: 1.3,
+                    ),
                   ),
                 ],
               ),
@@ -494,8 +512,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
               ),
               Text(
                 'Due: ${DateFormat('MMM d').format(hwData.dueDate)}',
-                style:
-                    const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -528,7 +548,9 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 child: Text(
                   latest.status.toUpperCase(),
                   style: TextStyle(
-                    color: latest.status == 'done' ? Colors.green : Colors.orange,
+                    color: latest.status == 'done'
+                        ? Colors.green
+                        : Colors.orange,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
@@ -554,7 +576,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           Icons.calendar_month_rounded,
           'My Routine',
           Colors.purple,
-          () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StudentRoutineScreen())),
+          () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const StudentRoutineScreen()),
+          ),
         ),
         _buildQuickActionItem(
           Icons.emoji_events_rounded,
@@ -578,7 +603,12 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     );
   }
 
-  Widget _buildQuickActionItem(IconData icon, String label, Color color, VoidCallback onTap) {
+  Widget _buildQuickActionItem(
+    IconData icon,
+    String label,
+    Color color,
+    VoidCallback onTap,
+  ) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
@@ -632,7 +662,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       child: Center(
         child: Text(
           message,
-          style: TextStyle(color: Colors.grey[500], fontStyle: FontStyle.italic),
+          style: TextStyle(
+            color: Colors.grey[500],
+            fontStyle: FontStyle.italic,
+          ),
         ),
       ),
     );
