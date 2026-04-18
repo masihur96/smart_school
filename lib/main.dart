@@ -12,6 +12,7 @@ import 'features/admin/providers/notice_provider.dart';
 import 'features/admin/providers/marquee_provider.dart';
 import 'features/admin/providers/routine_provider.dart';
 import 'features/admin/providers/settings_provider.dart';
+import 'features/admin/providers/school_provider.dart';
 import 'features/admin/providers/setup_provider.dart';
 import 'features/admin/providers/student_provider.dart';
 import 'features/admin/providers/teacher_provider.dart';
@@ -129,6 +130,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => TeacherAttendanceProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => SuperAdminDashboardNotifier()),
+        ChangeNotifierProvider(create: (_) => AdminSchoolNotifier()),
         ChangeNotifierProvider(create: (_) => SuperAdminSchoolNotifier()),
         ChangeNotifierProvider(create: (_) => PricingNotifier()),
         ChangeNotifierProvider(create: (_) => SubscriptionNotifier()),

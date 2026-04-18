@@ -30,6 +30,7 @@ class AuthRepositoryImpl implements AuthRepository {
       lat: result.lat,
       lon: result.lon,
       radius: result.radius,
+      school: result.school,
     );
   }
 
@@ -52,6 +53,7 @@ class AuthRepositoryImpl implements AuthRepository {
       lat: result.lat,
       lon: result.lon,
       radius: result.radius,
+      school: result.school,
     );
   }
 

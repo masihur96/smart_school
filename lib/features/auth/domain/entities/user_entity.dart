@@ -1,3 +1,5 @@
+import 'package:smart_school/models/school_models.dart';
+
 class UserEntity {
   final String id;
   final String name;
@@ -14,6 +16,7 @@ class UserEntity {
   final double? lat;
   final double? lon;
   final double? radius;
+  final School? school;
 
   UserEntity({
     required this.id,
@@ -31,5 +34,6 @@ class UserEntity {
     this.lat,
     this.lon,
     this.radius,
+    this.school,
   });
 }

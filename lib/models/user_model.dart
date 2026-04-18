@@ -1,3 +1,5 @@
+import 'package:smart_school/models/school_models.dart';
+
 enum UserRole { admin, teacher, student, superadmin }
 
 class User {
@@ -18,6 +20,7 @@ class User {
   final double? lon;
   final double? radius;
   final DateTime? deletedAt;
+  final School? school;
 
   User({
     required this.id,
@@ -37,6 +40,7 @@ class User {
     this.lon,
     this.radius,
     this.deletedAt,
+    this.school,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -65,6 +69,7 @@ class User {
       deletedAt: json['deletedAt'] != null
           ? DateTime.tryParse(json['deletedAt'].toString())
           : null,
+      school: json['school'] != null ? School.fromJson(json['school']) : null,
     );
   }
 
@@ -87,6 +92,7 @@ class User {
       'lon': lon,
       'radius': radius,
       'deletedAt': deletedAt?.toIso8601String(),
+      'school': school?.toJson(),
     };
   }
 }

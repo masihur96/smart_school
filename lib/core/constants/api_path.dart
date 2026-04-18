@@ -6,6 +6,7 @@ class APIPath {
   static String login = "$baseUrl/auth/login";
   static String register = "$baseUrl/users";
   static String profile = "$baseUrl/auth/profile";
+  static String createSchool = "$baseUrl/admin/schools";
   static String createClass = "$baseUrl/admin/classes";
   static String createSection = "$baseUrl/admin/sections";
   static String createSubject = "$baseUrl/admin/subjects";
