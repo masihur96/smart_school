@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:uuid/uuid.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -14,7 +15,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _schoolIdController = TextEditingController();
+
   final _phoneController = TextEditingController();
   bool _isPasswordVisible = false;
 
@@ -23,7 +24,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _schoolIdController.dispose();
+
     _phoneController.dispose();
     super.dispose();
   }
@@ -34,7 +35,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final email = _emailController.text.trim();
       final password = _passwordController.text;
       const role = 'admin'; // Payload says "role": "student"
-      final schoolId = _schoolIdController.text.trim();
       final phone = _phoneController.text.trim();
 
       final success = await context.read<AuthNotifier>().register(
@@ -42,7 +42,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         email: email,
         password: password,
         role: role,
-        schoolId: schoolId,
+        schoolId: const Uuid().v4(),
         phone: phone,
       );
 
@@ -151,17 +151,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   obscureText: !_isPasswordVisible,
                   validator: (value) => value == null || value.length < 6
                       ? 'Password must be at least 6 characters'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _schoolIdController,
-                  decoration: const InputDecoration(
-                    labelText: 'School ID',
-                    prefixIcon: Icon(Icons.school_outlined),
-                  ),
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Please enter your School ID'
                       : null,
                 ),
                 const SizedBox(height: 16),
