@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart';
+import 'package:smart_school/features/admin/screens/student_detail_screen.dart';
 
 import '../../../models/school_models.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -297,12 +298,15 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                               shape: BoxShape.circle,
                             ),
                             child: Center(
-                              child: Text(
-                                student.user?.name[0] ?? '?',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
+                              child: Hero(
+                                tag: 'student-avatar-${student.userId}',
+                                child: Text(
+                                  student.user?.name[0] ?? '?',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                  ),
                                 ),
                               ),
                             ),
@@ -359,7 +363,15 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                           trailing: PopupMenuButton<String>(
                             icon: const Icon(Icons.more_vert),
                             onSelected: (value) {
-                              if (value == 'edit') {
+                              if (value == 'view') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        StudentDetailScreen(student: student),
+                                  ),
+                                ).then((_) => _applyFilters());
+                              } else if (value == 'edit') {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -408,6 +420,17 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                             },
                             itemBuilder: (BuildContext context) =>
                                 <PopupMenuEntry<String>>[
+                                  const PopupMenuItem<String>(
+                                    value: 'view',
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.visibility,
+                                            color: Colors.purple),
+                                        SizedBox(width: 8),
+                                        Text('View Details'),
+                                      ],
+                                    ),
+                                  ),
                                   const PopupMenuItem<String>(
                                     value: 'edit',
                                     child: Row(

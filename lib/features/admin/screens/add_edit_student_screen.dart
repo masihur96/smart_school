@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../models/student_model.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
-import '../../../models/student_model.dart';
 
 class AddEditStudentScreen extends StatefulWidget {
   final Student? student;
@@ -21,7 +21,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   final _passwordController = TextEditingController();
   final _rollController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _designationController = TextEditingController();
+  final _aboutController = TextEditingController();
   String? _selectedClass;
   String? _selectedSection;
   bool _obscurePassword = true;
@@ -47,7 +47,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     _passwordController.dispose();
     _rollController.dispose();
     _phoneController.dispose();
-    _designationController.dispose();
+    _aboutController.dispose();
     super.dispose();
   }
 
@@ -67,7 +67,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             classId: _selectedClass!,
             sectionId: _selectedSection!,
             rollNumber: _rollController.text,
-            designation: _designationController.text,
+            designation: _aboutController.text,
           );
         } else {
           await context.read<StudentsNotifier>().addStudentToAPI(
@@ -80,7 +80,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             classId: _selectedClass!,
             sectionId: _selectedSection!,
             rollNumber: _rollController.text,
-            designation: _designationController.text,
+            designation: _aboutController.text,
           );
         }
 
@@ -121,6 +121,14 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             ),
             const SizedBox(height: 16),
             TextFormField(
+              controller: _aboutController,
+              decoration: const InputDecoration(
+                labelText: 'About (e.g. About Student)',
+                prefixIcon: Icon(Icons.badge),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
               controller: _emailController,
               decoration: const InputDecoration(
                 labelText: 'Email Address',
@@ -133,10 +141,14 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
               controller: _passwordController,
               obscureText: _obscurePassword,
               decoration: InputDecoration(
-                labelText: widget.student != null ? 'Password (leave blank to keep current)' : 'Password',
+                labelText: widget.student != null
+                    ? 'Password (leave blank to keep current)'
+                    : 'Password',
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
-                  icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                  ),
                   onPressed: () {
                     setState(() {
                       _obscurePassword = !_obscurePassword;
@@ -145,10 +157,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 ),
               ),
               validator: (val) {
-                 if (widget.student == null && (val == null || val.isEmpty)) {
-                   return 'Please enter password';
-                 }
-                 return null;
+                if (widget.student == null && (val == null || val.isEmpty)) {
+                  return 'Please enter password';
+                }
+                return null;
               },
             ),
             const SizedBox(height: 16),
@@ -177,21 +189,16 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _designationController,
-              decoration: const InputDecoration(
-                labelText: 'Designation (e.g. Class Captain)',
-                prefixIcon: Icon(Icons.badge),
-              ),
-            ),
+
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(
                 labelText: 'Class',
                 prefixIcon: Icon(Icons.class_),
               ),
-              value: classes.any((c) => c.id == _selectedClass) ? _selectedClass : null,
+              value: classes.any((c) => c.id == _selectedClass)
+                  ? _selectedClass
+                  : null,
               items: classes
                   .map(
                     (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
@@ -211,7 +218,11 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 labelText: 'Section',
                 prefixIcon: Icon(Icons.grid_view),
               ),
-              value: sections.any((s) => s.id == _selectedSection && s.classId == _selectedClass)
+              value:
+                  sections.any(
+                    (s) =>
+                        s.id == _selectedSection && s.classId == _selectedClass,
+                  )
                   ? _selectedSection
                   : null,
               items: sections
