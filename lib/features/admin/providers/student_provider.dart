@@ -29,6 +29,7 @@ class StudentsNotifier extends ChangeNotifier {
     String? classId, 
     String? sectionId, 
     bool? isActive,
+    String? search,
     bool loadMore = false
   }) async {
     if (loadMore) {
@@ -54,6 +55,7 @@ class StudentsNotifier extends ChangeNotifier {
       if (classId != null && classId.isNotEmpty) query['classId'] = classId;
       if (sectionId != null && sectionId.isNotEmpty) query['sectionId'] = sectionId;
       if (isActive != null) query['isActive'] = isActive.toString();
+      if (search != null && search.isNotEmpty) query['search'] = search;
 
       final response = await DataProvider().performRequest(
         'GET',

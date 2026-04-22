@@ -7,6 +7,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../../services/database_service.dart';
 import '../../../models/school_models.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 class StudentManagementScreen extends StatefulWidget {
   final bool hideAppBar;
@@ -20,6 +21,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
   String? _selectedClassId;
   String? _selectedSectionId;
   bool? _selectedStatus;
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
   final ScrollController _scrollController = ScrollController();
   
   @override
@@ -46,6 +50,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
           classId: _selectedClassId,
           sectionId: _selectedSectionId,
           isActive: _selectedStatus,
+          search: _searchQuery.isEmpty ? null : _searchQuery,
           loadMore: true,
         );
       }
@@ -54,8 +59,19 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
 
   @override
   void dispose() {
+    _searchController.dispose();
+    _debounce?.cancel();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _applyFilters() {
+    context.read<StudentsNotifier>().fetchStudents(
+      classId: _selectedClassId,
+      sectionId: _selectedSectionId,
+      isActive: _selectedStatus,
+      search: _searchQuery.isEmpty ? null : _searchQuery,
+    );
   }
 
   @override
@@ -85,6 +101,32 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Column(
               children: [
+                // Search bar
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    labelText: 'Search by name',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                              _applyFilters();
+                            },
+                          )
+                        : null,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  onChanged: (val) {
+                    setState(() => _searchQuery = val.trim());
+                    if (_debounce?.isActive ?? false) _debounce!.cancel();
+                    _debounce = Timer(const Duration(milliseconds: 500), _applyFilters);
+                  },
+                ),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
@@ -112,11 +154,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                              _selectedClassId = val;
                              _selectedSectionId = null; // reset section
                           });
-                          context.read<StudentsNotifier>().fetchStudents(
-                             classId: _selectedClassId, 
-                             sectionId: _selectedSectionId,
-                             isActive: _selectedStatus,
-                          );
+                          _applyFilters();
                         },
                       ),
                     ),
@@ -145,11 +183,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                         value: _selectedSectionId,
                         onChanged: (val) {
                            setState(() => _selectedSectionId = val);
-                           context.read<StudentsNotifier>().fetchStudents(
-                             classId: _selectedClassId, 
-                             sectionId: _selectedSectionId,
-                             isActive: _selectedStatus,
-                          );
+                           _applyFilters();
                         },
                       ),
                     ),
@@ -179,11 +213,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                   value: _selectedStatus,
                   onChanged: (val) {
                     setState(() => _selectedStatus = val);
-                    context.read<StudentsNotifier>().fetchStudents(
-                          classId: _selectedClassId,
-                          sectionId: _selectedSectionId,
-                          isActive: _selectedStatus,
-                        );
+                    _applyFilters();
                   },
                 ),
               ],
@@ -276,11 +306,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                             builder: (_) => AddEditStudentScreen(student: student),
                           ),
                         ).then((_) {
-                          context.read<StudentsNotifier>().fetchStudents(
-                             classId: _selectedClassId, 
-                             sectionId: _selectedSectionId,
-                             isActive: _selectedStatus,
-                          );
+                          _applyFilters();
                         });
                       } else if (value == 'status') {
                         context.read<StudentsNotifier>().toggleStudentStatus(
@@ -357,11 +383,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
             context,
             MaterialPageRoute(builder: (_) => const AddEditStudentScreen()),
           ).then((_) {
-            context.read<StudentsNotifier>().fetchStudents(
-                  classId: _selectedClassId,
-                  sectionId: _selectedSectionId,
-                  isActive: _selectedStatus,
-                );
+            _applyFilters();
           });
         },
         backgroundColor: Colors.purple,
