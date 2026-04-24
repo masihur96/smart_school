@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/features/admin/providers/student_provider.dart';
 import 'package:smart_school/features/admin/screens/add_edit_teacher_screen.dart';
+import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/school_models.dart' hide Teacher;
 import 'package:smart_school/models/teacher_model.dart';
@@ -442,11 +444,49 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          final studentCount = context.watch<StudentsNotifier>().totalCount;
+          final authState = context.watch<AuthNotifier>();
+
+          final maxStudents =
+              authState.adminSubscription?.pricingPlan?.maxStudents;
+
+          if (maxStudents != null && studentCount >= maxStudents) {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text("Limit Reached"),
+                content: Text(
+                  "You have reached your student limit ($studentCount / $maxStudents).\n\nUpgrade your plan to add more students.",
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Cancel"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AdminPricingPlanScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text("Upgrade Plan"),
+                  ),
+                ],
+              ),
+            );
+            return;
+          }
+
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddEditTeacherScreen()),
           ).then((_) => _fetchTeachers());
         },
+
         backgroundColor: Colors.purple,
         child: const Icon(Icons.add, color: Colors.white),
       ),

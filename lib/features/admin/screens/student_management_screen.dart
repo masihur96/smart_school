@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart';
+import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
 import 'package:smart_school/features/admin/screens/student_detail_screen.dart';
 
 import '../../../models/school_models.dart';
@@ -424,8 +425,10 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                     value: 'view',
                                     child: Row(
                                       children: [
-                                        Icon(Icons.visibility,
-                                            color: Colors.purple),
+                                        Icon(
+                                          Icons.visibility,
+                                          color: Colors.purple,
+                                        ),
                                         SizedBox(width: 8),
                                         Text('View Details'),
                                       ],
@@ -486,6 +489,43 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          final studentCount = context.watch<StudentsNotifier>().totalCount;
+          final authState = context.watch<AuthNotifier>();
+
+          final maxStudents =
+              authState.adminSubscription?.pricingPlan?.maxStudents;
+
+          if (maxStudents != null && studentCount >= maxStudents) {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text("Limit Reached"),
+                content: Text(
+                  "You have reached your student limit ($studentCount / $maxStudents).\n\nUpgrade your plan to add more students.",
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Cancel"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AdminPricingPlanScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text("Upgrade Plan"),
+                  ),
+                ],
+              ),
+            );
+            return;
+          }
+
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddEditStudentScreen()),

@@ -1,18 +1,18 @@
 import 'dart:developer';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
 
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
 import '../../../models/user_model.dart';
+import '../../../services/notification_service.dart';
 import '../../super_admin/models/subscription_model.dart';
 import '../domain/usecases/change_password_usecase.dart';
 import '../domain/usecases/get_profile_usecase.dart';
 import '../domain/usecases/login_usecase.dart';
 import '../domain/usecases/register_usecase.dart';
-import '../../../services/notification_service.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AuthNotifier extends ChangeNotifier {
   final LoginUseCase loginUseCase;
@@ -43,8 +43,14 @@ class AuthNotifier extends ChangeNotifier {
     if (_adminSubscription == null) return false;
     if (!_adminSubscription!.isActive) return false;
 
+    print("_adminSubscription:: ${_adminSubscription!.endDate}");
+    print("_adminSubscription:: ${_adminSubscription!.lastStudentCount}");
+    print(
+      "_adminSubscription:: ${_adminSubscription!.pricingPlan?.maxStudents ?? 0}",
+    );
     try {
       final endDate = DateTime.parse(_adminSubscription!.endDate);
+      print("_adminSubscription:: ${endDate.isAfter(DateTime.now())}");
       return endDate.isAfter(DateTime.now());
     } catch (e) {
       return false;
