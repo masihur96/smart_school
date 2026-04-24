@@ -37,6 +37,7 @@ class StudentDetailScreen extends StatelessWidget {
             floating: false,
             pinned: true,
             backgroundColor: Colors.purple,
+            foregroundColor: Colors.white,
             flexibleSpace: FlexibleSpaceBar(
               title: Column(
                 children: [
@@ -50,7 +51,7 @@ class StudentDetailScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              centerTitle: T,
+
               background: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
