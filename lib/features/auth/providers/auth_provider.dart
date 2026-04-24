@@ -258,9 +258,13 @@ class AuthNotifier extends ChangeNotifier {
         throw Exception('No school ID found for user');
 
       final now = DateTime.now().toUtc();
-      final end = isFree
-          ? DateTime(now.year, now.month, now.day + 7).toUtc()
-          : DateTime(now.year, now.month + 1, now.day).toUtc();
+
+      final startDate = formatIso(now);
+      final endDate = formatIso(
+        isFree
+            ? now.add(const Duration(days: 7))
+            : now.add(const Duration(days: 30)),
+      );
 
       final response = await DataProvider().performRequest(
         'POST',
@@ -272,8 +276,8 @@ class AuthNotifier extends ChangeNotifier {
         data: {
           'schoolId': _user!.schoolId,
           'pricingPlanId': planId,
-          'startDate': now.toIso8601String(),
-          'endDate': end.toIso8601String(),
+          'startDate': startDate,
+          'endDate': endDate,
           'isActive': isFree ? true : false,
         },
       );
@@ -297,6 +301,11 @@ class AuthNotifier extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  String formatIso(DateTime date) {
+    final iso = date.toUtc().toIso8601String();
+    return iso.contains('.') ? iso.split('.').first + '.000Z' : iso + '.000Z';
   }
 
   void clearError() {
