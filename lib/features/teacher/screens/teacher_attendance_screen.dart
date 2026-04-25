@@ -7,6 +7,7 @@ import 'package:smart_school/models/school_models.dart';
 
 import '../../admin/providers/student_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../models/student_model.dart';
 import '../domain/entities/attendance.dart';
 import '../providers/attendance_provider.dart';
 
@@ -44,17 +45,16 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
   Future<void> _onSelectionChanged() async {
     if (_selectedClass != null && _selectedSection != null) {
       // Fetch students for selected class/section
-      await context.read<StudentsNotifier>().fetchStudents(
-            classId: _selectedClass,
-            sectionId: _selectedSection,
-            isActive: true,
-          );
+      await context.read<StudentsNotifier>().fetchStudentsBySection(
+        classId: _selectedClass!,
+        sectionId: _selectedSection,
+      );
 
       // Fetch existing attendance from API
       await context.read<AttendanceNotifier>().fetchAttendanceFromAPI(
-            classId: _selectedClass!,
-            date: _selectedDate,
-          );
+        classId: _selectedClass!,
+        date: _selectedDate,
+      );
 
       _loadStudentsFromState();
     }
@@ -99,7 +99,9 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     final currentUser = context.read<AuthNotifier>().user;
     if (currentUser == null || _selectedClass == null) return;
 
-    final success = await context.read<AttendanceNotifier>().submitAttendanceToAPI(
+    final success = await context
+        .read<AttendanceNotifier>()
+        .submitAttendanceToAPI(
           date: _selectedDate,
           takenBy: currentUser.id,
           classId: _selectedClass!,
@@ -153,21 +155,23 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
         children: [
           _buildFilterSection(classes, sections),
           Expanded(
-            child: context.watch<AttendanceNotifier>().isLoading ||
+            child:
+                context.watch<AttendanceNotifier>().isLoading ||
                     context.watch<StudentsNotifier>().isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : students.isEmpty
-                    ? _buildEmptyState()
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: students.length,
-                        itemBuilder: (context, index) {
-                          final student = students[index];
-                          final status = _attendanceMap[student.userId] ??
-                              AttendanceStatus.absent;
-                          return _buildStudentCard(student, status);
-                        },
-                      ),
+                ? _buildEmptyState()
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: students.length,
+                    itemBuilder: (context, index) {
+                      final student = students[index];
+                      final status =
+                          _attendanceMap[student.userId] ??
+                          AttendanceStatus.absent;
+                      return _buildStudentCard(student, status);
+                    },
+                  ),
           ),
         ],
       ),
@@ -305,7 +309,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     );
   }
 
-  Widget _buildStudentCard(dynamic student, AttendanceStatus status) {
+  Widget _buildStudentCard(Student student, AttendanceStatus status) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 0,
