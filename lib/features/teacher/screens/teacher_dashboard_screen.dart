@@ -39,6 +39,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       final dateStr = DateFormat('dd/MM/yyyy').format(now);
       context.read<TeacherDashboardProvider>().fetchTodayClasses(dayName);
       context.read<TeacherDashboardProvider>().fetchTodayAttendance(dateStr);
+      context.read<TeacherDashboardProvider>().fetchExams();
       context.read<NoticesNotifier>().fetchNoticesFromAPI();
       context.read<MarqueeProvider>().fetchMarquee(
         'TEACHER',
@@ -181,6 +182,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                _buildExamsSection(context),
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -608,6 +610,197 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildExamsSection(BuildContext context) {
+    final provider = context.watch<TeacherDashboardProvider>();
+    final exams = provider.exams;
+
+    if (provider.isLoading && exams.isEmpty) {
+      return const SizedBox(); // don't show while loading
+    }
+    if (exams.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Upcoming Exams',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.blueGrey.shade900,
+              ),
+            ),
+            if (exams.length > 2)
+              TextButton(
+                onPressed: () {},
+                child: const Text('View All'),
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 160,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            itemCount: exams.length,
+            itemBuilder: (context, index) {
+              final exam = exams[index];
+              return _buildExamCard(context, exam);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExamCard(BuildContext context, Exam exam) {
+    final assignmentsCount = exam.assignments.length;
+    final startDateStr = exam.startDate != null
+        ? DateFormat('MMM dd, yyyy').format(exam.startDate!)
+        : 'N/A';
+
+    return Container(
+      width: 300,
+      margin: const EdgeInsets.only(right: 16, bottom: 8),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.purple.shade600, Colors.deepPurple.shade900],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.purple.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -20,
+            top: -20,
+            child: Icon(
+              Icons.assignment_rounded,
+              size: 100,
+              color: Colors.white.withOpacity(0.1),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        exam.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        exam.isPublished ? 'Published' : 'Upcoming',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  exam.description ?? '',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 12,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Starts On',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 10,
+                          ),
+                        ),
+                        Text(
+                          startDateStr,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.menu_book,
+                            size: 14,
+                            color: Colors.deepPurple.shade900,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$assignmentsCount Routines',
+                            style: TextStyle(
+                              color: Colors.deepPurple.shade900,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
