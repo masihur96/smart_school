@@ -769,7 +769,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       ],
                     ),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        _showExamRoutinesDialog(context, exam);
+                      },
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -806,6 +808,15 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showExamRoutinesDialog(BuildContext context, Exam exam) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return ExamRoutinesDialog(exam: exam);
+      },
     );
   }
 
@@ -939,6 +950,267 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class ExamRoutinesDialog extends StatelessWidget {
+  final Exam exam;
+
+  const ExamRoutinesDialog({super.key, required this.exam});
+
+  @override
+  Widget build(BuildContext context) {
+    if (exam.assignments.isEmpty) {
+      return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: const Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Text('No routines assigned yet.'),
+        ),
+      );
+    }
+
+    final Map<String, List<ExamAssignment>> grouped = {};
+    for (var a in exam.assignments) {
+      grouped.putIfAbsent(a.className, () => []).add(a);
+    }
+
+    final classNames = grouped.keys.toList();
+    classNames.sort((a, b) {
+      final order = [
+        'Play',
+        'Nursery',
+        'One',
+        'Two',
+        'Three',
+        'Four',
+        'Five',
+        'Six',
+        'Seven',
+        'Eight',
+        'Nine',
+        'Ten'
+      ];
+      final indexA = order.indexOf(a);
+      final indexB = order.indexOf(b);
+      if (indexA != -1 && indexB != -1) return indexA.compareTo(indexB);
+      if (indexA != -1) return -1;
+      if (indexB != -1) return 1;
+      return a.compareTo(b);
+    });
+
+    return DefaultTabController(
+      length: classNames.length,
+      child: Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: Colors.white,
+        clipBehavior: Clip.antiAlias,
+        child: Container(
+          constraints: const BoxConstraints(maxHeight: 650, maxWidth: 600),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.purple.shade600, Colors.deepPurple.shade900],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.event_note, color: Colors.white),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Exam Routines',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.8),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  exam.name,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    TabBar(
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.start,
+                      indicatorColor: Colors.white,
+                      indicatorWeight: 3,
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.white.withOpacity(0.6),
+                      labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                      tabs: classNames.map((c) => Tab(text: 'Class $c')).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: TabBarView(
+                  children: classNames.map((className) {
+                    final assignments = grouped[className]!;
+                    assignments.sort((a, b) => a.date.compareTo(b.date));
+
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: assignments.length,
+                      itemBuilder: (context, index) {
+                        final assignment = assignments[index];
+                        final dateStr = DateFormat('EEEE, MMM dd').format(assignment.date);
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.purple.shade50, width: 2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.purple.withOpacity(0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.purple.shade50,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Icon(Icons.book, size: 24, color: Colors.purple.shade700),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            assignment.subjectName,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            dateStr,
+                                            style: TextStyle(color: Colors.purple.shade700, fontSize: 13, fontWeight: FontWeight.w600),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 12),
+                                  child: Divider(height: 1),
+                                ),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.person_outline, size: 18, color: Colors.black54),
+                                    const SizedBox(width: 8),
+                                    Text('Examiner: ', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                                    Expanded(
+                                      child: Text(
+                                        assignment.examinerName,
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                if (assignment.syllabus != null && assignment.syllabus!.isNotEmpty && assignment.syllabus != "N/A") ...[
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(Icons.menu_book, size: 18, color: Colors.black54),
+                                      const SizedBox(width: 8),
+                                      Text('Syllabus: ', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                                      Expanded(
+                                        child: Text(
+                                          assignment.syllabus!,
+                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ]
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border(top: BorderSide(color: Colors.grey.shade200)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.purple.shade700,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Close', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
