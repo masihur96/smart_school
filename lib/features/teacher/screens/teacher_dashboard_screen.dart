@@ -195,10 +195,10 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         color: Colors.blueGrey.shade900,
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {}, // Future: View full schedule
-                      child: const Text('View All'),
-                    ),
+                    // TextButton(
+                    //   onPressed: () {}, // Future: View full schedule
+                    //   child: const Text('View All'),
+                    // ),
                   ],
                 ),
                 const SizedBox(height: 12),
