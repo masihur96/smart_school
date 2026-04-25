@@ -592,7 +592,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      classInfo.startTime,
+                      "${classInfo.startTime.split(':').take(2).join(':')} - ${classInfo.endTime.split(':').take(2).join(':')}",
                       style: TextStyle(
                         color: Colors.orange.shade800,
                         fontWeight: FontWeight.bold,
@@ -618,17 +618,25 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   Widget _buildExamsSection(BuildContext context) {
     final provider = context.watch<TeacherDashboardProvider>();
     final allExams = provider.exams;
-    
+
     // Filter exams to show only running or upcoming
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    
+
     final exams = allExams.where((exam) {
       if (exam.endDate != null) {
-        final end = DateTime(exam.endDate!.year, exam.endDate!.month, exam.endDate!.day);
+        final end = DateTime(
+          exam.endDate!.year,
+          exam.endDate!.month,
+          exam.endDate!.day,
+        );
         return end.isAfter(today) || end.isAtSameMomentAs(today);
       } else if (exam.startDate != null) {
-        final start = DateTime(exam.startDate!.year, exam.startDate!.month, exam.startDate!.day);
+        final start = DateTime(
+          exam.startDate!.year,
+          exam.startDate!.month,
+          exam.startDate!.day,
+        );
         return start.isAfter(today) || start.isAtSameMomentAs(today);
       }
       return true; // if no dates specified, keep it
@@ -1006,7 +1014,7 @@ class ExamRoutinesDialog extends StatelessWidget {
         'Seven',
         'Eight',
         'Nine',
-        'Ten'
+        'Ten',
       ];
       final indexA = order.indexOf(a);
       final indexB = order.indexOf(b);
@@ -1031,7 +1039,10 @@ class ExamRoutinesDialog extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.purple.shade600, Colors.deepPurple.shade900],
+                    colors: [
+                      Colors.purple.shade600,
+                      Colors.deepPurple.shade900,
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -1049,7 +1060,10 @@ class ExamRoutinesDialog extends StatelessWidget {
                               color: Colors.white.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.event_note, color: Colors.white),
+                            child: const Icon(
+                              Icons.event_note,
+                              color: Colors.white,
+                            ),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -1089,7 +1103,9 @@ class ExamRoutinesDialog extends StatelessWidget {
                       labelColor: Colors.white,
                       unselectedLabelColor: Colors.white.withOpacity(0.6),
                       labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                      tabs: classNames.map((c) => Tab(text: 'Class $c')).toList(),
+                      tabs: classNames
+                          .map((c) => Tab(text: 'Class $c'))
+                          .toList(),
                     ),
                   ],
                 ),
@@ -1105,13 +1121,18 @@ class ExamRoutinesDialog extends StatelessWidget {
                       itemCount: assignments.length,
                       itemBuilder: (context, index) {
                         final assignment = assignments[index];
-                        final dateStr = DateFormat('EEEE, MMM dd').format(assignment.date);
+                        final dateStr = DateFormat(
+                          'EEEE, MMM dd',
+                        ).format(assignment.date);
                         return Container(
                           margin: const EdgeInsets.only(bottom: 12),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.purple.shade50, width: 2),
+                            border: Border.all(
+                              color: Colors.purple.shade50,
+                              width: 2,
+                            ),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.purple.withOpacity(0.05),
@@ -1133,12 +1154,17 @@ class ExamRoutinesDialog extends StatelessWidget {
                                         color: Colors.purple.shade50,
                                         borderRadius: BorderRadius.circular(12),
                                       ),
-                                      child: Icon(Icons.book, size: 24, color: Colors.purple.shade700),
+                                      child: Icon(
+                                        Icons.book,
+                                        size: 24,
+                                        color: Colors.purple.shade700,
+                                      ),
                                     ),
                                     const SizedBox(width: 16),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             assignment.subjectName,
@@ -1151,7 +1177,11 @@ class ExamRoutinesDialog extends StatelessWidget {
                                           const SizedBox(height: 4),
                                           Text(
                                             dateStr,
-                                            style: TextStyle(color: Colors.purple.shade700, fontSize: 13, fontWeight: FontWeight.w600),
+                                            style: TextStyle(
+                                              color: Colors.purple.shade700,
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -1164,36 +1194,67 @@ class ExamRoutinesDialog extends StatelessWidget {
                                 ),
                                 Row(
                                   children: [
-                                    const Icon(Icons.person_outline, size: 18, color: Colors.black54),
+                                    const Icon(
+                                      Icons.person_outline,
+                                      size: 18,
+                                      color: Colors.black54,
+                                    ),
                                     const SizedBox(width: 8),
-                                    Text('Examiner: ', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                                    Text(
+                                      'Examiner: ',
+                                      style: TextStyle(
+                                        color: Colors.grey.shade600,
+                                        fontSize: 13,
+                                      ),
+                                    ),
                                     Expanded(
                                       child: Text(
                                         assignment.examinerName,
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          color: Colors.black87,
+                                        ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                   ],
                                 ),
-                                if (assignment.syllabus != null && assignment.syllabus!.isNotEmpty && assignment.syllabus != "N/A") ...[
+                                if (assignment.syllabus != null &&
+                                    assignment.syllabus!.isNotEmpty &&
+                                    assignment.syllabus != "N/A") ...[
                                   const SizedBox(height: 8),
                                   Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      const Icon(Icons.menu_book, size: 18, color: Colors.black54),
+                                      const Icon(
+                                        Icons.menu_book,
+                                        size: 18,
+                                        color: Colors.black54,
+                                      ),
                                       const SizedBox(width: 8),
-                                      Text('Syllabus: ', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                                      Text(
+                                        'Syllabus: ',
+                                        style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                          fontSize: 13,
+                                        ),
+                                      ),
                                       Expanded(
                                         child: Text(
                                           assignment.syllabus!,
-                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13,
+                                            color: Colors.black87,
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                ]
+                                ],
                               ],
                             ),
                           ),
@@ -1204,7 +1265,10 @@ class ExamRoutinesDialog extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   border: Border(top: BorderSide(color: Colors.grey.shade200)),
@@ -1215,10 +1279,15 @@ class ExamRoutinesDialog extends StatelessWidget {
                     TextButton(
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.purple.shade700,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Close', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        'Close',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ],
                 ),
