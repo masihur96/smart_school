@@ -53,6 +53,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
       // Fetch existing attendance from API
       await context.read<AttendanceNotifier>().fetchAttendanceFromAPI(
         classId: _selectedClass!,
+        sectionId: _selectedSection,
         date: _selectedDate,
       );
 
@@ -64,12 +65,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     final students = context
         .read<StudentsNotifier>()
         .students
-        .where(
-          (s) =>
-              s.classId == _selectedClass &&
-              s.sectionId == _selectedSection &&
-              s.isActive,
-        )
+        .where((s) => s.isActive)
         .toList();
 
     final existingRecords = context
@@ -105,6 +101,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
           date: _selectedDate,
           takenBy: currentUser.id,
           classId: _selectedClass!,
+          sectionId: _selectedSection,
           attendanceMap: _attendanceMap,
         );
 
@@ -131,15 +128,8 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     final studentsList = context.watch<StudentsNotifier>().students;
 
     final students = (_selectedClass != null && _selectedSection != null)
-        ? studentsList
-              .where(
-                (s) =>
-                    s.classId == _selectedClass &&
-                    s.sectionId == _selectedSection &&
-                    s.isActive,
-              )
-              .toList()
-        : [];
+        ? studentsList.where((s) => s.isActive).toList()
+        : <Student>[];
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
