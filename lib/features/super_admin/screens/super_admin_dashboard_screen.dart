@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/widgets/app_drawer.dart';
+import 'package:smart_school/core/widgets/notification_icon_button.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/super_admin/providers/super_admin_dashboard_provider.dart';
 import 'package:smart_school/features/super_admin/screens/backup_screen.dart';
@@ -9,7 +10,6 @@ import 'package:smart_school/features/super_admin/screens/pricing_school_screen.
 import 'package:smart_school/features/super_admin/screens/subscription_screen.dart';
 import 'package:smart_school/features/super_admin/screens/super_admin_school_screen.dart';
 import 'package:smart_school/models/user_model.dart';
-import 'package:smart_school/core/widgets/notification_icon_button.dart';
 
 class SuperAdminDashboardScreen extends StatefulWidget {
   const SuperAdminDashboardScreen({super.key});
@@ -63,11 +63,10 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
             color: Colors.white,
           ),
         ),
+        foregroundColor: AppColors.white,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          const NotificationIconButton(color: Colors.white),
-        ],
+        actions: [const NotificationIconButton(color: Colors.white)],
       ),
       drawer: const AppDrawer(),
       body: IndexedStack(
