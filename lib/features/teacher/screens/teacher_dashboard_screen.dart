@@ -160,7 +160,8 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
 
   Widget _buildDashboardOverview(BuildContext context, String name, User user) {
     final provider = context.watch<TeacherDashboardProvider>();
-    final classes = provider.todayClasses;
+    final classes = List.of(provider.todayClasses);
+    classes.sort((a, b) => a.startTime.compareTo(b.startTime));
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
