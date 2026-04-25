@@ -617,7 +617,22 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
 
   Widget _buildExamsSection(BuildContext context) {
     final provider = context.watch<TeacherDashboardProvider>();
-    final exams = provider.exams;
+    final allExams = provider.exams;
+    
+    // Filter exams to show only running or upcoming
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    
+    final exams = allExams.where((exam) {
+      if (exam.endDate != null) {
+        final end = DateTime(exam.endDate!.year, exam.endDate!.month, exam.endDate!.day);
+        return end.isAfter(today) || end.isAtSameMomentAs(today);
+      } else if (exam.startDate != null) {
+        final start = DateTime(exam.startDate!.year, exam.startDate!.month, exam.startDate!.day);
+        return start.isAfter(today) || start.isAtSameMomentAs(today);
+      }
+      return true; // if no dates specified, keep it
+    }).toList();
 
     if (provider.isLoading && exams.isEmpty) {
       return const SizedBox(); // don't show while loading
