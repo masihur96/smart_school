@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/screens/add_edit_marquee_screen.dart';
 import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart';
@@ -91,7 +92,36 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final isClassesLoading = context.watch<ClassSetupNotifier>().isLoading;
     final isNoticesLoading = context.watch<NoticesNotifier>().isLoading;
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, dynamic result) async {
+        if (didPop) return;
+        final shouldExit = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Exit App'),
+            content: const Text('Are you sure you want to exit the app?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('No'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Yes'),
+              ),
+            ],
+          ),
+        );
+        if (shouldExit == true) {
+          SystemNavigator.pop();
+        }
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: Text(_getTitle()),
         backgroundColor: Colors.purple,
@@ -149,7 +179,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildDashboardOverview(
