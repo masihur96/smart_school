@@ -35,7 +35,7 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
             icon: settings.themeMode == ThemeMode.dark
                 ? Icons.dark_mode
                 : Icons.light_mode,
-            title: "l10n.",
+            title: l10n.darkMode,
             theme: theme,
             trailing: Switch(
               value: settings.themeMode == ThemeMode.dark,
@@ -106,11 +106,11 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
 
           // Admin Subscription Section
           if (authNotifier.user?.role == UserRole.admin) ...[
-            _buildSectionHeader('System Subscription', theme),
+            _buildSectionHeader(l10n.systemSubscription, theme),
             _buildSettingTile(
               icon: Icons.card_membership,
-              title: 'Subscription Details',
-              subtitle: 'Manage and upgrade your system plan',
+              title: l10n.subscriptionDetails,
+              subtitle: l10n.systemPlanManagement,
               theme: theme,
               isAction: true,
               onTap: () {

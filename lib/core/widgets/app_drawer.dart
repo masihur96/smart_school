@@ -20,6 +20,7 @@ import 'package:smart_school/features/teacher/screens/mark_entry_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_attendance_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_routine_screen.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../features/auth/providers/auth_provider.dart';
 import '../../models/user_model.dart';
@@ -69,7 +70,10 @@ class AppDrawer extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Logout', style: TextStyle(color: Colors.red)),
+            title: Text(
+              AppLocalizations.of(context)?.logout ?? 'Logout',
+              style: const TextStyle(color: Colors.red),
+            ),
             onTap: () {
               context.read<AuthNotifier>().logout();
               Navigator.pushAndRemoveUntil(
@@ -99,50 +103,51 @@ class AppDrawer extends StatelessWidget {
   }
 
   List<Widget> _buildAdminItems(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return [
-      _buildDrawerItem(Icons.dashboard, 'Dashboard', () {
+      _buildDrawerItem(Icons.dashboard, l10n.dashboard, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => AdminDashboardScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.people, 'Students', () {
+      _buildDrawerItem(Icons.people, l10n.students, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => StudentManagementScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.person, 'Teachers', () {
+      _buildDrawerItem(Icons.person, l10n.teachers, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => TeacherManagementScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.class_, 'Class & Setup', () {
+      _buildDrawerItem(Icons.class_, l10n.classSetup, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => SetupScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.event_note, 'Routine', () {
+      _buildDrawerItem(Icons.event_note, l10n.routine, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => RoutineManagementScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.announcement, 'Notices', () {
+      _buildDrawerItem(Icons.announcement, l10n.notices, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => NoticeManagementScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.assignment_turned_in, 'Exams', () {
+      _buildDrawerItem(Icons.assignment_turned_in, l10n.exams, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => ExamManagementScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.settings, 'Settings', () {
+      _buildDrawerItem(Icons.settings, l10n.settings, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => SettingManagementScreen()),
@@ -152,67 +157,75 @@ class AppDrawer extends StatelessWidget {
   }
 
   List<Widget> _buildTeacherItems(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return [
-      _buildDrawerItem(Icons.dashboard, 'Dashboard', () {
+      _buildDrawerItem(Icons.dashboard, l10n.dashboard, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => TeacherDashboardScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.check_circle, 'Attendance', () {
+      _buildDrawerItem(Icons.check_circle, l10n.attendance, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => TeacherAttendanceScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.assignment, 'Homework', () {
+      _buildDrawerItem(Icons.assignment, l10n.homework, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => HomeworkManagementScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.grade, 'Mark Entry', () {
+      _buildDrawerItem(Icons.grade, l10n.markEntry, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => MarkEntryScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.calendar_today, 'Routine', () {
+      _buildDrawerItem(Icons.calendar_today, l10n.routine, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const TeacherRoutineScreen()),
+        );
+      }, context),
+      _buildDrawerItem(Icons.settings, l10n.settings, () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => SettingManagementScreen()),
         );
       }, context),
     ];
   }
 
   List<Widget> _buildStudentItems(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return [
-      _buildDrawerItem(Icons.dashboard, 'Dashboard', () {
+      _buildDrawerItem(Icons.dashboard, l10n.dashboard, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => StudentDashboardScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.check_circle, 'Attendance', () {
+      _buildDrawerItem(Icons.check_circle, l10n.attendance, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => StudentAttendanceScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.assignment, 'Homework', () {
+      _buildDrawerItem(Icons.assignment, l10n.homework, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => StudentHomeworkScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.calendar_month, 'Routine', () {
+      _buildDrawerItem(Icons.calendar_month, l10n.routine, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => StudentRoutineScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.notifications, 'Notices', () {
+      _buildDrawerItem(Icons.notifications, l10n.notices, () {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -220,24 +233,47 @@ class AppDrawer extends StatelessWidget {
           ),
         );
       }, context),
-      _buildDrawerItem(Icons.assessment, 'Results', () {
+      _buildDrawerItem(Icons.assessment, l10n.results, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => StudentResultScreen()),
+        );
+      }, context),
+      _buildDrawerItem(Icons.settings, l10n.settings, () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => SettingManagementScreen()),
         );
       }, context),
     ];
   }
 
   List<Widget> _buildSuperAdminItems(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return [
       _buildDrawerItem(Icons.admin_panel_settings, 'Global Dashboard', () {
         // Since we are likely already here or navigating back
         Navigator.of(context).pop();
       }, context),
-      _buildDrawerItem(Icons.business_center, 'School Management', () {}, context),
-      _buildDrawerItem(Icons.settings_suggest, 'System Config', () {}, context),
-      _buildDrawerItem(Icons.history_edu, 'Global Audit Logs', () {}, context),
+      _buildDrawerItem(
+        Icons.business_center,
+        l10n.schoolManagement,
+        () {},
+        context,
+      ),
+      _buildDrawerItem(
+        Icons.settings_suggest,
+        l10n.systemConfig,
+        () {},
+        context,
+      ),
+      _buildDrawerItem(Icons.history_edu, l10n.globalAuditLogs, () {}, context),
+      _buildDrawerItem(Icons.settings, l10n.settings, () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => SettingManagementScreen()),
+        );
+      }, context),
     ];
   }
 

@@ -10,6 +10,7 @@ import 'package:smart_school/features/admin/screens/setup_screen.dart';
 import 'package:smart_school/features/admin/screens/teacher_management_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/notification_icon_button.dart';
@@ -65,18 +66,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     });
   }
 
-  String _getTitle() {
+  String _getTitle(AppLocalizations l10n) {
     switch (_selectedIndex) {
       case 0:
-        return 'Admin Dashboard';
+        return l10n.adminDashboard;
       case 1:
-        return 'Student Management';
+        return l10n.studentManagement;
       case 2:
-        return 'Exam Management';
+        return l10n.examManagement;
       case 3:
-        return 'School Notices';
+        return l10n.schoolNotices;
       default:
-        return 'Admin Dashboard';
+        return l10n.adminDashboard;
     }
   }
 
@@ -92,8 +93,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final isTeachersLoading = context.watch<TeachersNotifier>().isLoading;
     final isClassesLoading = context.watch<ClassSetupNotifier>().isLoading;
     final isNoticesLoading = context.watch<NoticesNotifier>().isLoading;
-    final authNotifier = context.watch<AuthNotifier>();
-
+    final l10n = AppLocalizations.of(context)!;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, dynamic result) async {
@@ -101,12 +101,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         final shouldExit = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Exit App'),
-            content: const Text('Are you sure you want to exit the app?'),
+            title: Text(l10n.exitApp),
+            content: Text(l10n.exitAppConfirmation),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('No'),
+                child: Text(l10n.no),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(true),
@@ -114,7 +114,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('Yes'),
+                child: Text(l10n.yes),
               ),
             ],
           ),
@@ -125,7 +125,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       },
       child: Scaffold(
       appBar: AppBar(
-        title: Text(_getTitle()),
+        title: Text(_getTitle(l10n)),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
         actions: [
@@ -157,6 +157,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             isTeachersLoading: isTeachersLoading,
             isClassesLoading: isClassesLoading,
             isNoticesLoading: isNoticesLoading,
+            l10n: l10n,
           ),
           const StudentManagementScreen(hideAppBar: true),
           const ExamManagementScreen(hideAppBar: true),
@@ -169,16 +170,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.purple,
         unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Students'),
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.dashboard), label: l10n.home),
+          BottomNavigationBarItem(icon: const Icon(Icons.people), label: l10n.students),
           BottomNavigationBarItem(
-            icon: Icon(Icons.assignment_turned_in),
-            label: 'Exams',
+            icon: const Icon(Icons.assignment_turned_in),
+            label: l10n.exams,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.announcement),
-            label: 'Notices',
+            icon: const Icon(Icons.announcement),
+            label: l10n.notices,
           ),
         ],
       ),
@@ -196,15 +197,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     required bool isTeachersLoading,
     required bool isClassesLoading,
     required bool isNoticesLoading,
+    required AppLocalizations l10n,
   }) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSubscriptionCard(authNotifier),
+          _buildSubscriptionCard(authNotifier, l10n),
           Text(
-            'School Overview',
+            l10n.schoolOverview,
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -220,7 +222,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             children: [
               _buildStatCard(
                 context,
-                'Total Students',
+                l10n.totalStudents,
                 isStudentsLoading ? '...' : studentCount.toString(),
                 Icons.people,
                 Colors.blue,
@@ -228,7 +230,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
               _buildStatCard(
                 context,
-                'Total Teachers',
+                l10n.totalTeachers,
                 isTeachersLoading ? '...' : teacherCount.toString(),
                 Icons.person,
                 Colors.orange,
@@ -243,7 +245,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
               _buildStatCard(
                 context,
-                'Total Classes',
+                l10n.totalClasses,
                 isClassesLoading ? '...' : classCount.toString(),
                 Icons.class_,
                 Colors.green,
@@ -256,7 +258,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
               _buildStatCard(
                 context,
-                'Active Notices',
+                l10n.activeNotices,
                 isNoticesLoading ? '...' : noticeCount.toString(),
                 Icons.announcement,
                 Colors.red,
@@ -269,19 +271,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Attendance Overview',
+                l10n.attendanceOverview,
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
-              _buildClassFilter(),
+              _buildClassFilter(l10n),
             ],
           ),
           const SizedBox(height: 16),
-          _buildEnhancedAttendanceOverview(),
+          _buildEnhancedAttendanceOverview(l10n),
           const SizedBox(height: 24),
           Text(
-            'Quick Actions',
+            l10n.quickActions,
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -289,7 +291,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           const SizedBox(height: 16),
           _buildActionTile(
             context,
-            'Add Student',
+            l10n.addStudent,
             Icons.person_add,
             Colors.blue,
             onTap: () {
@@ -301,7 +303,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
           _buildActionTile(
             context,
-            'Add Teacher',
+            l10n.addTeacher,
             Icons.group_add,
             Colors.orange,
             onTap: () {
@@ -313,14 +315,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
           _buildActionTile(
             context,
-            'Post Notice',
+            l10n.postNotice,
             Icons.post_add,
             Colors.red,
             onTap: () => setState(() => _selectedIndex = 3),
           ),
           _buildActionTile(
             context,
-            'Manage Routine',
+            l10n.manageRoutine,
             Icons.calendar_month,
             Colors.purple,
             onTap: () {
@@ -332,7 +334,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
           _buildActionTile(
             context,
-            'Teacher Attendance',
+            l10n.teacherAttendance,
             Icons.how_to_reg,
             Colors.green,
             onTap: () {
@@ -347,10 +349,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               );
             },
           ),
-
           _buildActionTile(
             context,
-            'Marquee Message',
+            l10n.marqueeMessage,
             Icons.campaign_outlined,
             Colors.redAccent,
             onTap: () {
@@ -429,7 +430,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildClassFilter() {
+  Widget _buildClassFilter(AppLocalizations l10n) {
     final overview = context.watch<AttendanceNotifier>().overviewSummary;
     if (overview == null || overview.data.isEmpty)
       return const SizedBox.shrink();
@@ -446,14 +447,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String?>(
           value: _selectedClassId,
-          hint: const Text('All Classes', style: TextStyle(fontSize: 13)),
+          hint: Text(l10n.allClasses, style: const TextStyle(fontSize: 13)),
           style: const TextStyle(
             color: Colors.purple,
             fontWeight: FontWeight.w600,
             fontSize: 13,
           ),
           items: [
-            const DropdownMenuItem(value: null, child: Text('All Classes')),
+            DropdownMenuItem(value: null, child: Text(l10n.allClasses)),
             ...classes.map(
               (c) =>
                   DropdownMenuItem(value: c.classId, child: Text(c.className)),
@@ -558,7 +559,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                   ),
                   Text(
-                    isAllClasses ? 'School Performance' : 'Class Performance',
+                    isAllClasses ? l10n.schoolPerformance : l10n.classPerformance,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[500],
@@ -592,17 +593,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildMonthStatItem(
-                'Present',
+                l10n.present,
                 present.toString(),
                 const Color(0xFF7C3AED),
               ),
               _buildMonthStatItem(
-                'Absent',
+                l10n.absent,
                 absent.toString(),
                 const Color(0xFFEF4444),
               ),
               _buildMonthStatItem(
-                'Leave',
+                l10n.leave,
                 leave.toString(),
                 const Color(0xFFF59E0B),
               ),
@@ -611,9 +612,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           // We could still show class-wise progress bars if "All Classes" is selected
           if (isAllClasses && overview.data.length > 1) ...[
             const SizedBox(height: 24),
-            const Text(
-              'Class Breakdown',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            Text(
+              l10n.classBreakdown,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
             const SizedBox(height: 12),
             ...overview.data
@@ -704,17 +705,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return months[month - 1];
   }
 
-  Widget _buildSubscriptionCard(AuthNotifier auth) {
+  Widget _buildSubscriptionCard(AuthNotifier auth, AppLocalizations l10n) {
     final sub = auth.adminSubscription;
     if (sub == null) return const SizedBox.shrink();
-
+ 
     final isValid = auth.isSubscriptionValid;
     final planName = sub.pricingPlan?.name ?? 'No Plan';
     final expiryDate = DateTime.tryParse(sub.endDate);
     final formattedDate = expiryDate != null
         ? DateFormat('MMM dd, yyyy').format(expiryDate)
         : 'Unknown';
-
+ 
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(20),
@@ -764,7 +765,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${sub.lastStudentCount} / ${sub.pricingPlan?.maxStudents ?? '∞'} Students',
+                  '${sub.lastStudentCount} / ${sub.pricingPlan?.maxStudents ?? '∞'} ${l10n.studentsLabel}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -792,7 +793,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                'ACTIVE',
+                l10n.active,
                 style: TextStyle(
                   color: Colors.purple.shade700,
                   fontWeight: FontWeight.bold,
@@ -803,7 +804,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ],
       ),
     );
-  }
+  } }
 
   Widget _buildChartPlaceholder() {
     return Column(

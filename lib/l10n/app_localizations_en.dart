@@ -104,4 +104,291 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirmSignOut => 'Confirm Sign Out';
+
+  @override
+  String get dashboard => 'Dashboard';
+
+  @override
+  String get students => 'Students';
+
+  @override
+  String get teachers => 'Teachers';
+
+  @override
+  String get classSetup => 'Class & Setup';
+
+  @override
+  String get routine => 'Routine';
+
+  @override
+  String get notices => 'Notices';
+
+  @override
+  String get exams => 'Exams';
+
+  @override
+  String get results => 'Results';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get markEntry => 'Mark Entry';
+
+  @override
+  String get schoolManagement => 'School Management';
+
+  @override
+  String get systemConfig => 'System Config';
+
+  @override
+  String get globalAuditLogs => 'Global Audit Logs';
+
+  @override
+  String get adminDashboard => 'Admin Dashboard';
+
+  @override
+  String get studentManagement => 'Student Management';
+
+  @override
+  String get examManagement => 'Exam Management';
+
+  @override
+  String get schoolNotices => 'School Notices';
+
+  @override
+  String get exitApp => 'Exit App';
+
+  @override
+  String get exitAppConfirmation => 'Are you sure you want to exit the app?';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get yes => 'Yes';
+
+  @override
+  String get home => 'Home';
+
+  @override
+  String get schoolOverview => 'School Overview';
+
+  @override
+  String get totalStudents => 'Total Students';
+
+  @override
+  String get totalTeachers => 'Total Teachers';
+
+  @override
+  String get totalClasses => 'Total Classes';
+
+  @override
+  String get activeNotices => 'Active Notices';
+
+  @override
+  String get attendanceOverview => 'Attendance Overview';
+
+  @override
+  String get quickActions => 'Quick Actions';
+
+  @override
+  String get addStudent => 'Add Student';
+
+  @override
+  String get addTeacher => 'Add Teacher';
+
+  @override
+  String get postNotice => 'Post Notice';
+
+  @override
+  String get manageRoutine => 'Manage Routine';
+
+  @override
+  String get teacherAttendance => 'Teacher Attendance';
+
+  @override
+  String get marqueeMessage => 'Marquee Message';
+
+  @override
+  String get allClasses => 'All Classes';
+
+  @override
+  String get schoolPerformance => 'School Performance';
+
+  @override
+  String get classPerformance => 'Class Performance';
+
+  @override
+  String get present => 'Present';
+
+  @override
+  String get absent => 'Absent';
+
+  @override
+  String get leave => 'Leave';
+
+  @override
+  String get classBreakdown => 'Class Breakdown';
+
+  @override
+  String get studentsLabel => 'Students';
+
+  @override
+  String get active => 'ACTIVE';
+
+  @override
+  String get invalid => 'INVALID';
+
+  @override
+  String get expired => 'EXPIRED';
+
+  @override
+  String get teacherDashboard => 'Teacher Dashboard';
+
+  @override
+  String get marks => 'Marks';
+
+  @override
+  String get scheduleToday => 'Schedule Today';
+
+  @override
+  String get hello => 'Hello';
+
+  @override
+  String get classesToday => 'Classes Today';
+
+  @override
+  String get clockIn => 'Clock In';
+
+  @override
+  String get clockOut => 'Clock Out';
+
+  @override
+  String get clockedOut => 'Clocked Out';
+
+  @override
+  String get locationNotConfigured =>
+      'Attendance location not configured by admin.';
+
+  @override
+  String get locationServicesDisabled => 'Location services are disabled.';
+
+  @override
+  String get locationPermissionsDenied => 'Location permissions are denied.';
+
+  @override
+  String get locationPermissionsPermanentlyDenied =>
+      'Location permissions are permanently denied.';
+
+  @override
+  String get fetchingCurrentLocation => 'Fetching current location...';
+
+  @override
+  String get attendanceMarkedSuccessfully => 'Attendance marked successfully!';
+
+  @override
+  String get submissionFailed => 'Submission failed';
+
+  @override
+  String get outOfRange => 'You are out of range';
+
+  @override
+  String get upcomingExams => 'Upcoming Exams';
+
+  @override
+  String get viewAll => 'View All';
+
+  @override
+  String get welcomeBack => 'Welcome Back';
+
+  @override
+  String get recentHomework => 'Recent Homework';
+
+  @override
+  String get urgent => 'URGENT';
+
+  @override
+  String get myRoutine => 'My Routine';
+
+  @override
+  String get examResults => 'Exam Results';
+
+  @override
+  String get material => 'Material';
+
+  @override
+  String get queries => 'Queries';
+
+  @override
+  String get classInfoMissing => 'Class info missing';
+
+  @override
+  String get noPendingHomework => 'No pending homework';
+
+  @override
+  String get homeworkDataUnavailable => 'Homework data unavailable';
+
+  @override
+  String get due => 'Due';
+
+  @override
+  String get fullReport => 'Full Report';
+
+  @override
+  String get noAttendanceRecordsFound => 'No attendance records found.';
+
+  @override
+  String get systemOverview => 'System Overview';
+
+  @override
+  String get systemPerformance => 'System Performance';
+
+  @override
+  String get systemStatusHealthy => 'SYSTEM STATUS: HEALTHY';
+
+  @override
+  String get totalSchools => 'Total Schools';
+
+  @override
+  String get activeSubscription => 'Active Subscription';
+
+  @override
+  String get schools => 'Schools';
+
+  @override
+  String get pricing => 'Pricing';
+
+  @override
+  String get subscription => 'Subscription';
+
+  @override
+  String get backup => 'Backup';
+
+  @override
+  String get managedSchools => 'Managed Schools';
+
+  @override
+  String get addNew => 'Add New';
+
+  @override
+  String get analytics => 'Analytics';
+
+  @override
+  String get manage => 'Manage';
+
+  @override
+  String get systemConfiguration => 'System Configuration';
+
+  @override
+  String get maintenanceMode => 'Maintenance Mode';
+
+  @override
+  String get systemSubscription => 'System Subscription';
+
+  @override
+  String get subscriptionDetails => 'Subscription Details';
+
+  @override
+  String get systemPlanManagement => 'Manage and upgrade your system plan';
 }

@@ -56,18 +56,18 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     });
   }
 
-  String _getTitle() {
+  String _getTitle(AppLocalizations l10n) {
     switch (_selectedIndex) {
       case 0:
-        return 'Teacher Dashboard';
+        return l10n.teacherDashboard;
       case 1:
-        return 'Attendance';
+        return l10n.attendance;
       case 2:
-        return 'Mark Entry';
+        return l10n.markEntry;
       case 3:
-        return 'Homework';
+        return l10n.homework;
       default:
-        return 'Teacher Dashboard';
+        return l10n.teacherDashboard;
     }
   }
 
@@ -75,6 +75,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   Widget build(BuildContext context) {
     final user = context.watch<AuthNotifier>().user;
 
+    final l10n = AppLocalizations.of(context)!;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, dynamic result) async {
@@ -82,12 +83,12 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         final shouldExit = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Exit App'),
-            content: const Text('Are you sure you want to exit the app?'),
+            title: Text(l10n.exitApp),
+            content: Text(l10n.exitAppConfirmation),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('No'),
+                child: Text(l10n.no),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(true),
@@ -95,7 +96,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('Yes'),
+                child: Text(l10n.yes),
               ),
             ],
           ),
@@ -108,7 +109,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         backgroundColor: Colors.grey.shade50,
         appBar: AppBar(
           title: Text(
-            _getTitle(),
+            _getTitle(l10n),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           elevation: 0,
@@ -134,7 +135,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         body: IndexedStack(
           index: _selectedIndex,
           children: [
-            _buildDashboardOverview(context, user?.name ?? 'Teacher', user!),
+            _buildDashboardOverview(context, user?.name ?? 'Teacher', user!, l10n),
             const TeacherAttendanceScreen(hideAppBar: true),
             const MarkEntryScreen(hideAppBar: true),
             const HomeworkManagementScreen(hideAppBar: true),
@@ -163,26 +164,26 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               fontSize: 12,
             ),
             unselectedLabelStyle: const TextStyle(fontSize: 12),
-            items: const [
+            items: [
               BottomNavigationBarItem(
-                icon: Icon(Icons.dashboard_outlined),
-                activeIcon: Icon(Icons.dashboard),
-                label: 'Home',
+                icon: const Icon(Icons.dashboard_outlined),
+                activeIcon: const Icon(Icons.dashboard),
+                label: l10n.home,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.check_circle_outline),
-                activeIcon: Icon(Icons.check_circle),
-                label: 'Attendance',
+                icon: const Icon(Icons.check_circle_outline),
+                activeIcon: const Icon(Icons.check_circle),
+                label: l10n.attendance,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.assignment_turned_in_outlined),
-                activeIcon: Icon(Icons.assignment_turned_in),
-                label: 'Marks',
+                icon: const Icon(Icons.assignment_turned_in_outlined),
+                activeIcon: const Icon(Icons.assignment_turned_in),
+                label: l10n.marks,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.assignment_outlined),
-                activeIcon: Icon(Icons.assignment),
-                label: 'Homework',
+                icon: const Icon(Icons.assignment_outlined),
+                activeIcon: const Icon(Icons.assignment),
+                label: l10n.homework,
               ),
             ],
           ),
@@ -191,19 +192,19 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
-  Widget _buildDashboardOverview(BuildContext context, String name, User user) {
+  Widget _buildDashboardOverview(BuildContext context, String name, User user, AppLocalizations l10n) {
     final provider = context.watch<TeacherDashboardProvider>();
     final classes = provider.todayClasses
         .where((c) => c.teacherId == user.id)
         .toList();
     classes.sort((a, b) => a.startTime.compareTo(b.startTime));
-
+ 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildWelcomeHeader(context, name, classes.length, user),
+          _buildWelcomeHeader(context, name, classes.length, user, l10n),
           Consumer2<NoticesNotifier, MarqueeProvider>(
             builder: (context, noticeNotifier, marqueeProvider, child) {
               return MarqueeNotice(
@@ -216,22 +217,18 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildExamsSection(context),
+                _buildExamsSection(context, l10n),
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Schedule Today',
+                      l10n.scheduleToday,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Colors.blueGrey.shade900,
                       ),
                     ),
-                    // TextButton(
-                    //   onPressed: () {}, // Future: View full schedule
-                    //   child: const Text('View All'),
-                    // ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -250,14 +247,14 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                   ...classes.map((c) => _buildClassCard(context, c)),
                 const SizedBox(height: 32),
                 Text(
-                  'Quick Actions',
+                  l10n.quickActions,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.blueGrey.shade900,
                   ),
                 ),
                 const SizedBox(height: 16),
-                _buildQuickActionsGrid(context),
+                _buildQuickActionsGrid(context, l10n),
                 const SizedBox(height: 32),
               ],
             ),
@@ -272,6 +269,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     String name,
     int count,
     User user,
+    AppLocalizations l10n,
   ) {
     final theme = Theme.of(context);
     return Container(
@@ -317,7 +315,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Hello,',
+                  l10n.hello + ',',
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: Colors.white.withOpacity(0.9),
                   ),
@@ -349,7 +347,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        '$count Classes Today',
+                        '$count ${l10n.classesToday}',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -363,47 +361,47 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          _buildSelfAttendanceButton(context, user),
+          _buildSelfAttendanceButton(context, user, l10n),
         ],
       ),
     );
   }
 
-  Widget _buildSelfAttendanceButton(BuildContext context, User? user) {
+  Widget _buildSelfAttendanceButton(BuildContext context, User? user, AppLocalizations l10n) {
     if (user?.role != UserRole.teacher) return const SizedBox.shrink();
-
+ 
     final attendance = context.watch<TeacherDashboardProvider>().todayAttendance;
     final status = attendance?.status; // 'clock-in' or 'clock-out'
-
+ 
     IconData icon;
     String label;
     Color buttonColor;
     Color iconColor;
-
+ 
     if (attendance == null) {
       icon = Icons.location_on;
-      label = 'Clock In';
+      label = l10n.clockIn;
       buttonColor = Colors.white;
       iconColor = Colors.green.shade700;
     } else if (status == 'clock-in') {
       icon = Icons.logout;
-      label = 'Clock Out';
+      label = l10n.clockOut;
       buttonColor = Colors.orange.shade50;
       iconColor = Colors.orange.shade700;
     } else {
       // status == 'clock-out'
       icon = Icons.check_circle;
-      label = 'Clocked Out';
+      label = l10n.clockedOut;
       buttonColor = Colors.green.shade50;
       iconColor = Colors.green;
     }
-
+ 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         ElevatedButton(
           onPressed: () {
-            _performSelfAttendance(context, user);
+            _performSelfAttendance(context, user, l10n);
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: buttonColor,
@@ -446,14 +444,14 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
-  Future<void> _performSelfAttendance(BuildContext context, User? user) async {
+  Future<void> _performSelfAttendance(BuildContext context, User? user, AppLocalizations l10n) async {
     if (user == null ||
         user.lat == null ||
         user.lon == null ||
         user.radius == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Attendance location not configured by admin.'),
+        SnackBar(
+          content: Text(l10n.locationNotConfigured),
         ),
       );
       return;
@@ -528,8 +526,8 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               .then((_) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Attendance marked successfully!'),
+                    SnackBar(
+                      content: Text(l10n.attendanceMarkedSuccessfully),
                       backgroundColor: Colors.green,
                     ),
                   );
@@ -538,7 +536,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               .catchError((e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Submission failed: $e')),
+                    SnackBar(content: Text('${l10n.submissionFailed}: $e')),
                   );
                 }
               });
@@ -548,7 +546,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'You are out of range (${distanceInMeters.toStringAsFixed(0)}m away). Allowed radius: ${user.radius}m',
+                '${l10n.outOfRange} (${distanceInMeters.toStringAsFixed(0)}m away). Allowed radius: ${user.radius}m',
               ),
               backgroundColor: Colors.red,
             ),
@@ -732,14 +730,14 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Upcoming Exams',
+              l10n.upcomingExams,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: Colors.blueGrey.shade900,
               ),
             ),
             if (exams.length > 2)
-              TextButton(onPressed: () {}, child: const Text('View All')),
+              TextButton(onPressed: () {}, child: Text(l10n.viewAll)),
           ],
         ),
         const SizedBox(height: 12),
@@ -920,7 +918,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
-  Widget _buildQuickActionsGrid(BuildContext context) {
+  Widget _buildQuickActionsGrid(BuildContext context, AppLocalizations l10n) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -931,28 +929,28 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       children: [
         _buildActionGridItem(
           context,
-          'Attendance',
+          l10n.attendance,
           Icons.how_to_reg,
           Colors.blue,
           onTap: () => setState(() => _selectedIndex = 1),
         ),
         _buildActionGridItem(
           context,
-          'Mark Entry',
+          l10n.markEntry,
           Icons.grade,
           Colors.indigo,
           onTap: () => setState(() => _selectedIndex = 2),
         ),
         _buildActionGridItem(
           context,
-          'Homework',
+          l10n.homework,
           Icons.menu_book,
           Colors.orange,
           onTap: () => setState(() => _selectedIndex = 3),
         ),
         _buildActionGridItem(
           context,
-          'Reports',
+          l10n.results, // Using results as report
           Icons.bar_chart,
           Colors.purple,
           onTap: () {}, // Future: Add reports screen
