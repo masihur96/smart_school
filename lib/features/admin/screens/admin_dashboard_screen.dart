@@ -764,12 +764,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
+                  '${sub.lastStudentCount} / ${sub.pricingPlan?.maxStudents ?? '∞'} Students',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
                   isValid
                       ? 'Valid until $formattedDate'
                       : 'Expired on $formattedDate',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
-                    fontSize: 14,
+                    fontSize: 12,
                   ),
                 ),
               ],
