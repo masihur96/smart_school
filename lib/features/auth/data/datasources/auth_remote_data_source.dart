@@ -176,7 +176,11 @@ class AuthRemoteDataSource {
       'POST',
       APIPath.changePassword,
       data: {'oldPassword': oldPassword, 'newPassword': newPassword},
-      header: {'Authorization': 'Bearer $token'},
+      header: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'accept': '*/*',
+      },
     );
 
     if (response == null || response.statusCode == null) {

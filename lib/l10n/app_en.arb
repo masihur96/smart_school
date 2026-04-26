@@ -20,5 +20,15 @@
   "fieldRequired": "This field is required",
   "notifications": "Notifications",
   "homework": "Homework",
-  "attendance": "Attendance"
+  "attendance": "Attendance",
+  "securityDescription": "Update your account security",
+  "personalInformation": "Personal Information",
+  "organizationalDetails": "Organizational Details",
+  "accountMetadata": "Account Metadata",
+  "memberSince": "Member Since",
+  "verifiedUser": "Verified User",
+  "signOut": "Sign Out",
+  "signOutConfirmation": "Are you sure you want to exit your account?",
+  "keepSignedIn": "Keep Signed In",
+  "confirmSignOut": "Confirm Sign Out"
 }
