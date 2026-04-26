@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
-
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
 
@@ -40,9 +39,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
       if (mounted) {
         if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.passwordChangedSuccess)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.passwordChangedSuccess)));
           Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -59,9 +58,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.changePassword),
-      ),
+      appBar: AppBar(title: Text(l10n.changePassword)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -69,11 +66,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                l10n.changePassword,
-                style: theme.textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
               const SizedBox(height: 32),
               TextFormField(
                 controller: _oldPasswordController,
@@ -82,11 +74,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   labelText: l10n.oldPassword,
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
-                    icon: Icon(_isObscureOld ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () => setState(() => _isObscureOld = !_isObscureOld),
+                    icon: Icon(
+                      _isObscureOld ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () =>
+                        setState(() => _isObscureOld = !_isObscureOld),
                   ),
                 ),
-                validator: (value) => value == null || value.isEmpty ? l10n.fieldRequired : null,
+                validator: (value) =>
+                    value == null || value.isEmpty ? l10n.fieldRequired : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -96,11 +92,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   labelText: l10n.newPassword,
                   prefixIcon: const Icon(Icons.lock_reset),
                   suffixIcon: IconButton(
-                    icon: Icon(_isObscureNew ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () => setState(() => _isObscureNew = !_isObscureNew),
+                    icon: Icon(
+                      _isObscureNew ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () =>
+                        setState(() => _isObscureNew = !_isObscureNew),
                   ),
                 ),
-                validator: (value) => value == null || value.isEmpty ? l10n.fieldRequired : null,
+                validator: (value) =>
+                    value == null || value.isEmpty ? l10n.fieldRequired : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -110,13 +110,19 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   labelText: l10n.confirmPassword,
                   prefixIcon: const Icon(Icons.lock_clock),
                   suffixIcon: IconButton(
-                    icon: Icon(_isObscureConfirm ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () => setState(() => _isObscureConfirm = !_isObscureConfirm),
+                    icon: Icon(
+                      _isObscureConfirm
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () =>
+                        setState(() => _isObscureConfirm = !_isObscureConfirm),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) return l10n.fieldRequired;
-                  if (value != _newPasswordController.text) return l10n.passwordsDoNotMatch;
+                  if (value != _newPasswordController.text)
+                    return l10n.passwordsDoNotMatch;
                   return null;
                 },
               ),
