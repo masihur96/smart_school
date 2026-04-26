@@ -229,6 +229,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Attendance'**
   String get attendance;
+
+  /// No description provided for @securityDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Update your account security'**
+  String get securityDescription;
+
+  /// No description provided for @personalInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Information'**
+  String get personalInformation;
+
+  /// No description provided for @organizationalDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Organizational Details'**
+  String get organizationalDetails;
+
+  /// No description provided for @accountMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Metadata'**
+  String get accountMetadata;
+
+  /// No description provided for @memberSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Member Since'**
+  String get memberSince;
+
+  /// No description provided for @verifiedUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified User'**
+  String get verifiedUser;
+
+  /// No description provided for @signOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Out'**
+  String get signOut;
+
+  /// No description provided for @signOutConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to exit your account?'**
+  String get signOutConfirmation;
+
+  /// No description provided for @keepSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Signed In'**
+  String get keepSignedIn;
+
+  /// No description provided for @confirmSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Sign Out'**
+  String get confirmSignOut;
 }
 
 class _AppLocalizationsDelegate

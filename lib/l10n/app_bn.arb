@@ -20,5 +20,15 @@
   "fieldRequired": "এই ক্ষেত্রটি প্রয়োজনীয়",
   "notifications": "বিজ্ঞপ্তি",
   "homework": "বাড়ির কাজ",
-  "attendance": "উপস্থিতি"
+  "attendance": "উপস্থিতি",
+  "securityDescription": "আপনার অ্যাকাউন্টের নিরাপত্তা আপডেট করুন",
+  "personalInformation": "ব্যক্তিগত তথ্য",
+  "organizationalDetails": "প্রাতিষ্ঠানিক বিবরণ",
+  "accountMetadata": "অ্যাকাউন্ট মেটাডেটা",
+  "memberSince": "সদস্যতা শুরু",
+  "verifiedUser": "যাচাইকৃত ব্যবহারকারী",
+  "signOut": "সাইন আউট",
+  "signOutConfirmation": "আপনি কি নিশ্চিত যে আপনি আপনার অ্যাকাউন্ট থেকে প্রস্থান করতে চান?",
+  "keepSignedIn": "সাইন ইন থাকুন",
+  "confirmSignOut": "সাইন আউট নিশ্চিত করুন"
 }

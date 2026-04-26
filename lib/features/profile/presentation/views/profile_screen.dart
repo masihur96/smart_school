@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/models/user_model.dart';
+import 'package:smart_school/configs/route_generator.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import '../../../auth/providers/auth_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -62,6 +64,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthNotifier>();
     final user = authProvider.user;
+    final l10n = AppLocalizations.of(context)!;
 
     if (user == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -94,7 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildSectionHeader('Personal Information'),
+                      _buildSectionHeader(l10n.personalInformation),
                       TextButton.icon(
                         onPressed: () {
                           if (_isEditing) {
@@ -141,7 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ]),
 
                   const SizedBox(height: 24),
-                  _buildSectionHeader('Organizational Details'),
+                  _buildSectionHeader(l10n.organizationalDetails),
                   _buildInfoCard(context, [
                     _buildInfoTile(
                       context,
@@ -192,12 +195,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ]),
 
                   const SizedBox(height: 24),
-                  _buildSectionHeader('Account Metadata'),
+                  _buildSectionHeader(l10n.security),
+                  _buildInfoCard(context, [
+                    _buildInteractiveTile(
+                      context,
+                      icon: Icons.lock_reset_rounded,
+                      label: l10n.changePassword,
+                      subtitle: l10n.securityDescription,
+                      onTap: () => Navigator.pushNamed(
+                        context,
+                        RouteGenerator.changePasswordRoute,
+                      ),
+                    ),
+                  ]),
+
+                  const SizedBox(height: 24),
+                  _buildSectionHeader(l10n.accountMetadata),
                   _buildInfoCard(context, [
                     _buildInfoTile(
                       context,
                       icon: Icons.calendar_today_rounded,
-                      label: 'Member Since',
+                      label: l10n.memberSince,
                       value: memberSince,
                     ),
                   ]),
@@ -407,8 +425,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget _buildInteractiveTile(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, size: 20, color: Theme.of(context).primaryColor),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 20,
+              color: Colors.grey[400],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildStatusSection(BuildContext context, User user) {
     final bool isActive = user.isActive ?? false;
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -439,7 +511,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const Spacer(),
           Text(
-            'Verified User',
+            l10n.verifiedUser,
             style: TextStyle(
               color: Colors.grey[500],
               fontSize: 12,
@@ -452,6 +524,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildLogoutButton(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -466,14 +539,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             side: const BorderSide(color: Color(0xFFFEE2E2), width: 1.5),
           ),
         ),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.logout_rounded, size: 20),
             SizedBox(width: 8),
             Text(
-              'Sign Out from Account',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              l10n.signOut,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ],
         ),
@@ -482,17 +555,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showLogoutDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Sign Out'),
-        content: const Text('Are you sure you want to exit your account?'),
+        title: Text(l10n.signOut),
+        content: Text(l10n.signOutConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Keep Signed In',
+              l10n.keepSignedIn,
               style: TextStyle(color: Colors.grey[600]),
             ),
           ),
@@ -501,9 +575,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Navigator.pop(context);
               context.read<AuthNotifier>().logout();
             },
-            child: const Text(
-              'Confirm Sign Out',
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            child: Text(
+              l10n.confirmSignOut,
+              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
             ),
           ),
         ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
@@ -39,13 +40,23 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
       if (mounted) {
         if (success) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(l10n.passwordChangedSuccess)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.passwordChangedSuccess),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          );
           Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(authNotifier.error ?? "Error")),
+            SnackBar(
+              content: Text(authNotifier.error ?? "Error"),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
           );
         }
       }
@@ -55,10 +66,18 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.changePassword)),
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        title: Text(
+          l10n.changePassword,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.black,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -66,81 +85,182 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const SizedBox(height: 12),
+              _buildInstructionText(l10n),
               const SizedBox(height: 32),
-              TextFormField(
+              _buildPasswordField(
                 controller: _oldPasswordController,
-                obscureText: _isObscureOld,
-                decoration: InputDecoration(
-                  labelText: l10n.oldPassword,
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isObscureOld ? Icons.visibility_off : Icons.visibility,
-                    ),
-                    onPressed: () =>
-                        setState(() => _isObscureOld = !_isObscureOld),
-                  ),
-                ),
-                validator: (value) =>
-                    value == null || value.isEmpty ? l10n.fieldRequired : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _newPasswordController,
-                obscureText: _isObscureNew,
-                decoration: InputDecoration(
-                  labelText: l10n.newPassword,
-                  prefixIcon: const Icon(Icons.lock_reset),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isObscureNew ? Icons.visibility_off : Icons.visibility,
-                    ),
-                    onPressed: () =>
-                        setState(() => _isObscureNew = !_isObscureNew),
-                  ),
-                ),
-                validator: (value) =>
-                    value == null || value.isEmpty ? l10n.fieldRequired : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _confirmPasswordController,
-                obscureText: _isObscureConfirm,
-                decoration: InputDecoration(
-                  labelText: l10n.confirmPassword,
-                  prefixIcon: const Icon(Icons.lock_clock),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isObscureConfirm
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                    ),
-                    onPressed: () =>
-                        setState(() => _isObscureConfirm = !_isObscureConfirm),
-                  ),
-                ),
+                label: l10n.oldPassword,
+                isObscure: _isObscureOld,
+                onToggle: () => setState(() => _isObscureOld = !_isObscureOld),
+                prefixIcon: Icons.lock_outline_rounded,
                 validator: (value) {
                   if (value == null || value.isEmpty) return l10n.fieldRequired;
-                  if (value != _newPasswordController.text)
-                    return l10n.passwordsDoNotMatch;
                   return null;
                 },
               ),
-              const SizedBox(height: 32),
-              Consumer<AuthNotifier>(
-                builder: (context, auth, _) {
-                  return ElevatedButton(
-                    onPressed: auth.isLoading ? null : _submit,
-                    child: auth.isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : Text(l10n.save),
-                  );
+              const SizedBox(height: 20),
+              _buildPasswordField(
+                controller: _newPasswordController,
+                label: l10n.newPassword,
+                isObscure: _isObscureNew,
+                onToggle: () => setState(() => _isObscureNew = !_isObscureNew),
+                prefixIcon: Icons.lock_reset_rounded,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return l10n.fieldRequired;
+                  if (value.length < 6) return 'Password must be at least 6 characters';
+                  if (value == _oldPasswordController.text) {
+                    return 'New password cannot be same as old password';
+                  }
+                  return null;
                 },
               ),
+              const SizedBox(height: 20),
+              _buildPasswordField(
+                controller: _confirmPasswordController,
+                label: l10n.confirmPassword,
+                isObscure: _isObscureConfirm,
+                onToggle: () => setState(() => _isObscureConfirm = !_isObscureConfirm),
+                prefixIcon: Icons.lock_clock_rounded,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return l10n.fieldRequired;
+                  if (value != _newPasswordController.text) return l10n.passwordsDoNotMatch;
+                  return null;
+                },
+              ),
+              const SizedBox(height: 48),
+              _buildSubmitButton(l10n),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildInstructionText(AppLocalizations l10n) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Your new password should be different from your current password.',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey[700],
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPasswordField({
+    required TextEditingController controller,
+    required String label,
+    required bool isObscure,
+    required VoidCallback onToggle,
+    required IconData prefixIcon,
+    required String? Function(String?) validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF475569),
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          obscureText: isObscure,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            prefixIcon: Icon(prefixIcon, color: AppColors.primary, size: 20),
+            suffixIcon: IconButton(
+              icon: Icon(
+                isObscure ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                color: Colors.grey[400],
+                size: 20,
+              ),
+              onPressed: onToggle,
+              splashRadius: 20,
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[200]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[200]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+            ),
+          ),
+          validator: validator,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubmitButton(AppLocalizations l10n) {
+    return Consumer<AuthNotifier>(
+      builder: (context, auth, _) {
+        return ElevatedButton(
+          onPressed: auth.isLoading ? null : _submit,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 18),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            elevation: 2,
+            shadowColor: AppColors.primary.withOpacity(0.3),
+          ),
+          child: auth.isLoading
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : Text(
+                  l10n.save,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+        );
+      },
     );
   }
 }

@@ -73,4 +73,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attendance => 'Attendance';
+
+  @override
+  String get securityDescription => 'Update your account security';
+
+  @override
+  String get personalInformation => 'Personal Information';
+
+  @override
+  String get organizationalDetails => 'Organizational Details';
+
+  @override
+  String get accountMetadata => 'Account Metadata';
+
+  @override
+  String get memberSince => 'Member Since';
+
+  @override
+  String get verifiedUser => 'Verified User';
+
+  @override
+  String get signOut => 'Sign Out';
+
+  @override
+  String get signOutConfirmation =>
+      'Are you sure you want to exit your account?';
+
+  @override
+  String get keepSignedIn => 'Keep Signed In';
+
+  @override
+  String get confirmSignOut => 'Confirm Sign Out';
 }

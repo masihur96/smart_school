@@ -73,4 +73,35 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get attendance => 'উপস্থিতি';
+
+  @override
+  String get securityDescription => 'আপনার অ্যাকাউন্টের নিরাপত্তা আপডেট করুন';
+
+  @override
+  String get personalInformation => 'ব্যক্তিগত তথ্য';
+
+  @override
+  String get organizationalDetails => 'প্রাতিষ্ঠানিক বিবরণ';
+
+  @override
+  String get accountMetadata => 'অ্যাকাউন্ট মেটাডেটা';
+
+  @override
+  String get memberSince => 'সদস্যতা শুরু';
+
+  @override
+  String get verifiedUser => 'যাচাইকৃত ব্যবহারকারী';
+
+  @override
+  String get signOut => 'সাইন আউট';
+
+  @override
+  String get signOutConfirmation =>
+      'আপনি কি নিশ্চিত যে আপনি আপনার অ্যাকাউন্ট থেকে প্রস্থান করতে চান?';
+
+  @override
+  String get keepSignedIn => 'সাইন ইন থাকুন';
+
+  @override
+  String get confirmSignOut => 'সাইন আউট নিশ্চিত করুন';
 }
