@@ -16,7 +16,7 @@ class AuthRemoteDataSource {
     final response = await _dataProvider.performRequest(
       'POST',
       APIPath.login,
-      data: {'email': email, 'password': password},
+      data: {'identifier': email, 'password': password},
     );
 
     log('Login response: ${response?.statusCode} - ${response?.data}');
