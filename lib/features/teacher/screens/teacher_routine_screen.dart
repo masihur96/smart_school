@@ -75,8 +75,11 @@ class _TeacherRoutineScreenState extends State<TeacherRoutineScreen>
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthNotifier>().user;
     final routineNotifier = context.watch<RoutineNotifier>();
-    final teacherRoutine = routineNotifier.teacherRoutine;
+    final teacherRoutine = routineNotifier.teacherRoutine
+        .where((r) => r.teacherId == user?.id)
+        .toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
