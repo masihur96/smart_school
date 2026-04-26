@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../../models/school_models.dart';
 import '../../admin/providers/routine_provider.dart';
 import '../../admin/providers/setup_provider.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../../models/school_models.dart';
 
 class TeacherRoutineScreen extends StatefulWidget {
   const TeacherRoutineScreen({super.key});
@@ -22,14 +23,14 @@ class _TeacherRoutineScreenState extends State<TeacherRoutineScreen>
     'Thursday',
     'Friday',
     'Saturday',
-    'Sunday'
+    'Sunday',
   ];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: _days.length, vsync: this);
-    
+
     // Set initial tab to current day
     final currentDay = _getCurrentDay();
     final dayIndex = _days.indexOf(currentDay);
@@ -50,14 +51,22 @@ class _TeacherRoutineScreenState extends State<TeacherRoutineScreen>
   String _getCurrentDay() {
     final now = DateTime.now();
     switch (now.weekday) {
-      case DateTime.monday: return 'Monday';
-      case DateTime.tuesday: return 'Tuesday';
-      case DateTime.wednesday: return 'Wednesday';
-      case DateTime.thursday: return 'Thursday';
-      case DateTime.friday: return 'Friday';
-      case DateTime.saturday: return 'Saturday';
-      case DateTime.sunday: return 'Sunday';
-      default: return 'Monday';
+      case DateTime.monday:
+        return 'Monday';
+      case DateTime.tuesday:
+        return 'Tuesday';
+      case DateTime.wednesday:
+        return 'Wednesday';
+      case DateTime.thursday:
+        return 'Thursday';
+      case DateTime.friday:
+        return 'Friday';
+      case DateTime.saturday:
+        return 'Saturday';
+      case DateTime.sunday:
+        return 'Sunday';
+      default:
+        return 'Monday';
     }
   }
 
@@ -82,6 +91,7 @@ class _TeacherRoutineScreenState extends State<TeacherRoutineScreen>
           controller: _tabController,
           isScrollable: true,
           indicatorColor: Colors.white,
+          labelColor: Colors.white,
           tabs: _days.map((day) => Tab(text: day)).toList(),
         ),
       ),
@@ -90,18 +100,27 @@ class _TeacherRoutineScreenState extends State<TeacherRoutineScreen>
           : TabBarView(
               controller: _tabController,
               children: _days.map((day) {
-                final dayEntries = teacherRoutine.where((e) => e.day == day).toList();
-                
+                final dayEntries = teacherRoutine
+                    .where((e) => e.day == day)
+                    .toList();
+
                 if (dayEntries.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.calendar_today, size: 64, color: Colors.grey[300]),
+                        Icon(
+                          Icons.calendar_today,
+                          size: 64,
+                          color: Colors.grey[300],
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           'No classes scheduled for $day',
-                          style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 16,
+                          ),
                         ),
                       ],
                     ),
@@ -168,7 +187,10 @@ class _RoutineCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.blue[50],
                     borderRadius: BorderRadius.circular(8),
