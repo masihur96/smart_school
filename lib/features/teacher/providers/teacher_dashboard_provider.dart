@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
 import '../../../../configs/network/data_provider.dart';
 import '../../../../core/constants/api_path.dart';
@@ -151,8 +152,7 @@ class TeacherDashboardProvider extends ChangeNotifier {
 
       // Refresh attendance after successful submission
       final now = DateTime.now();
-      final dateStr =
-          "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
+      final dateStr = DateFormat('yyyy-MM-dd').format(now);
       await fetchTodayAttendance(dateStr);
     } catch (e) {
       log('Error submitting self attendance: $e');
