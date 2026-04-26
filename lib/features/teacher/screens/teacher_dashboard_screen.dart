@@ -105,94 +105,97 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         }
       },
       child: Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: Text(
-          _getTitle(),
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        elevation: 0,
-        backgroundColor: _selectedIndex == 0
-            ? Colors.green.shade600
-            : Colors.green,
-        foregroundColor: Colors.white,
-        actions: [
-          const NotificationIconButton(),
-          IconButton(
-            icon: const Icon(Icons.account_circle_outlined),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ProfileScreen()),
-              );
-            },
+        backgroundColor: Colors.grey.shade50,
+        appBar: AppBar(
+          title: Text(
+            _getTitle(),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      drawer: const AppDrawer(),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: [
-          _buildDashboardOverview(context, user?.name ?? 'Teacher', user!),
-          const TeacherAttendanceScreen(hideAppBar: true),
-          const MarkEntryScreen(hideAppBar: true),
-          const HomeworkManagementScreen(hideAppBar: true),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 10,
-              offset: const Offset(0, -4),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.green.shade700,
-          unselectedItemColor: Colors.grey.shade500,
-          backgroundColor: Colors.white,
           elevation: 0,
-          selectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-          ),
-          unselectedLabelStyle: const TextStyle(fontSize: 12),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard_outlined),
-              activeIcon: Icon(Icons.dashboard),
-              label: 'Home',
+          backgroundColor: _selectedIndex == 0
+              ? Colors.green.shade600
+              : Colors.green,
+          foregroundColor: Colors.white,
+          actions: [
+            const NotificationIconButton(),
+            IconButton(
+              icon: const Icon(Icons.account_circle_outlined),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                );
+              },
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.check_circle_outline),
-              activeIcon: Icon(Icons.check_circle),
-              label: 'Attendance',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.assignment_turned_in_outlined),
-              activeIcon: Icon(Icons.assignment_turned_in),
-              label: 'Marks',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.assignment_outlined),
-              activeIcon: Icon(Icons.assignment),
-              label: 'Homework',
-            ),
+            const SizedBox(width: 8),
           ],
         ),
+        drawer: const AppDrawer(),
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: [
+            _buildDashboardOverview(context, user?.name ?? 'Teacher', user!),
+            const TeacherAttendanceScreen(hideAppBar: true),
+            const MarkEntryScreen(hideAppBar: true),
+            const HomeworkManagementScreen(hideAppBar: true),
+          ],
+        ),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 10,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: Colors.green.shade700,
+            unselectedItemColor: Colors.grey.shade500,
+            backgroundColor: Colors.white,
+            elevation: 0,
+            selectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+            unselectedLabelStyle: const TextStyle(fontSize: 12),
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.dashboard_outlined),
+                activeIcon: Icon(Icons.dashboard),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.check_circle_outline),
+                activeIcon: Icon(Icons.check_circle),
+                label: 'Attendance',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.assignment_turned_in_outlined),
+                activeIcon: Icon(Icons.assignment_turned_in),
+                label: 'Marks',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.assignment_outlined),
+                activeIcon: Icon(Icons.assignment),
+                label: 'Homework',
+              ),
+            ],
+          ),
+        ),
       ),
-    ));
+    );
   }
 
   Widget _buildDashboardOverview(BuildContext context, String name, User user) {
     final provider = context.watch<TeacherDashboardProvider>();
-    final classes = provider.todayClasses.where((c) => c.teacherId == user.id).toList();
+    final classes = provider.todayClasses
+        .where((c) => c.teacherId == user.id)
+        .toList();
     classes.sort((a, b) => a.startTime.compareTo(b.startTime));
 
     return SingleChildScrollView(
@@ -378,22 +381,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         ElevatedButton(
-          onPressed: hasMarked
-              ? () {
-                  final now = DateTime.now();
-                  final dateStr = DateFormat('dd/MM/yyyy').format(now);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => TeacherSelfAttendanceDetailScreen(
-                        initialDate: dateStr,
-                        teacherId: user?.id ?? "",
-                        schoolId: user?.schoolId ?? '',
-                      ),
-                    ),
-                  );
-                }
-              : () => _performSelfAttendance(context, user),
+          onPressed: () {
+            _performSelfAttendance(context, user);
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: hasMarked ? Colors.green.shade50 : Colors.white,
             foregroundColor: hasMarked ? Colors.green : Colors.green.shade700,
@@ -406,13 +396,29 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             size: 28,
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          hasMarked ? 'View Attendance' : 'Check In',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
+        const SizedBox(height: 18),
+        GestureDetector(
+          onTap: () {
+            final now = DateTime.now();
+            final dateStr = DateFormat('dd/MM/yyyy').format(now);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => TeacherSelfAttendanceDetailScreen(
+                  initialDate: dateStr,
+                  teacherId: user?.id ?? "",
+                  schoolId: user?.schoolId ?? '',
+                ),
+              ),
+            );
+          },
+          child: Text(
+            hasMarked ? 'View Attendance' : 'Check In',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
@@ -610,11 +616,18 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.person, size: 14, color: Colors.grey),
+                          const Icon(
+                            Icons.person,
+                            size: 14,
+                            color: Colors.grey,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             classInfo.teacherEntity!.name,
-                            style: const TextStyle(color: Colors.black54, fontSize: 12),
+                            style: const TextStyle(
+                              color: Colors.black54,
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                       ),
