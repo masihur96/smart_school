@@ -70,7 +70,11 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
                   final plan = pricingNotifier.plans[index];
-                  return _AdminPricingPlanCard(plan: plan);
+                  return _AdminPricingPlanCard(
+                    plan: plan,
+                    currentCount: subscription?.lastStudentCount ?? 0,
+                    isActive: subscription?.pricingPlan?.id == plan.id,
+                  );
                 }, childCount: pricingNotifier.plans.length),
               ),
             ),
@@ -173,8 +177,14 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
 
 class _AdminPricingPlanCard extends StatelessWidget {
   final PricingPlan plan;
+  final int currentCount;
+  final bool isActive;
 
-  const _AdminPricingPlanCard({required this.plan});
+  const _AdminPricingPlanCard({
+    required this.plan,
+    required this.currentCount,
+    required this.isActive,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -232,6 +242,32 @@ class _AdminPricingPlanCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
+                if (isActive)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.green.withOpacity(0.3)),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green, size: 14),
+                        SizedBox(width: 6),
+                        Text(
+                          'YOUR CURRENT PLAN',
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 Text(
                   plan.description,
                   style: TextStyle(
@@ -245,7 +281,7 @@ class _AdminPricingPlanCard extends StatelessWidget {
                   children: [
                     _buildFeature(
                       Icons.people_outline,
-                      '${plan.maxStudents} Students',
+                      '${currentCount} / ${plan.maxStudents} Students',
                     ),
                     _buildFeature(
                       Icons.calendar_today_outlined,
