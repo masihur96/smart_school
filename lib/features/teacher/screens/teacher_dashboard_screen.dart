@@ -606,6 +606,19 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       subjectName,
                       style: TextStyle(color: Colors.grey.shade600),
                     ),
+                    if (classInfo.teacherEntity != null) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(Icons.person, size: 14, color: Colors.grey),
+                          const SizedBox(width: 4),
+                          Text(
+                            classInfo.teacherEntity!.name,
+                            style: const TextStyle(color: Colors.black54, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
