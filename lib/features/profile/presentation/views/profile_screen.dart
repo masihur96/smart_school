@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/models/user_model.dart';
+
 import '../../../auth/providers/auth_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -13,9 +15,7 @@ class ProfileScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     if (user == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     // Format the creation date
@@ -26,6 +26,7 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
+
       body: CustomScrollView(
         slivers: [
           _buildSliverAppBar(context, user),
@@ -63,17 +64,40 @@ class ProfileScreen extends StatelessWidget {
                       value: user.phone ?? 'N/A',
                     ),
                   ]),
-                  
+
                   const SizedBox(height: 24),
                   _buildSectionHeader('Organizational Details'),
                   _buildInfoCard(context, [
                     _buildInfoTile(
                       context,
                       icon: Icons.school_outlined,
-                      label: 'School ID',
-                      value: user.schoolId ?? 'N/A',
+                      label: 'School Name',
+                      value: user.school?.name ?? 'N/A',
+                      isCopyable: false,
+                    ),
+
+                    _buildInfoTile(
+                      context,
+                      icon: Icons.school_outlined,
+                      label: 'School Email',
+                      value: user.school?.email ?? 'N/A',
                       isCopyable: true,
                     ),
+                    _buildInfoTile(
+                      context,
+                      icon: Icons.school_outlined,
+                      label: 'School Phone',
+                      value: user.school?.phone ?? 'N/A',
+                      isCopyable: true,
+                    ),
+                    _buildInfoTile(
+                      context,
+                      icon: Icons.school_outlined,
+                      label: 'School Address',
+                      value: user.school?.address ?? 'N/A',
+                      isCopyable: false,
+                    ),
+
                     _buildInfoTile(
                       context,
                       icon: Icons.admin_panel_settings_outlined,
@@ -87,7 +111,8 @@ class ProfileScreen extends StatelessWidget {
                         label: 'Roll Number',
                         value: user.rollNumber!,
                       ),
-                    if (user.designation != null && user.designation!.isNotEmpty)
+                    if (user.designation != null &&
+                        user.designation!.isNotEmpty)
                       _buildInfoTile(
                         context,
                         icon: Icons.badge_outlined,
@@ -108,8 +133,6 @@ class ProfileScreen extends StatelessWidget {
                   ]),
 
                   const SizedBox(height: 40),
-                  
-
                 ],
               ),
             ),
@@ -126,6 +149,7 @@ class ProfileScreen extends StatelessWidget {
       pinned: true,
       stretch: true,
       backgroundColor: theme.primaryColor,
+      foregroundColor: AppColors.white,
       flexibleSpace: FlexibleSpaceBar(
         stretchModes: const [StretchMode.zoomBackground],
         background: Stack(
@@ -231,12 +255,7 @@ class ProfileScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.grey[100]!,
-            width: 1,
-          ),
-        ),
+        border: Border(bottom: BorderSide(color: Colors.grey[100]!, width: 1)),
       ),
       child: Row(
         children: [
@@ -246,11 +265,7 @@ class ProfileScreen extends StatelessWidget {
               color: Theme.of(context).primaryColor.withOpacity(0.08),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: Theme.of(context).primaryColor,
-            ),
+            child: Icon(icon, size: 20, color: Theme.of(context).primaryColor),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -354,10 +369,7 @@ class ProfileScreen extends StatelessWidget {
             SizedBox(width: 8),
             Text(
               'Sign Out from Account',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ],
         ),
@@ -375,14 +387,20 @@ class ProfileScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Keep Signed In', style: TextStyle(color: Colors.grey[600])),
+            child: Text(
+              'Keep Signed In',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               context.read<AuthNotifier>().logout();
             },
-            child: const Text('Confirm Sign Out', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Confirm Sign Out',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
