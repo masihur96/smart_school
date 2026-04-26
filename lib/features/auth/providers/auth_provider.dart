@@ -338,4 +338,50 @@ class AuthNotifier extends ChangeNotifier {
       return false;
     }
   }
+
+  Future<bool> updateProfile({
+    required String name,
+    required String phone,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+      if (_user == null) throw Exception('No user found');
+
+      final response = await DataProvider().performRequest(
+        'PUT',
+        '${APIPath.register}/${_user!.id}',
+        header: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        data: {
+          'name': name,
+          'phone': phone,
+        },
+      );
+
+      if (response != null && response.statusCode == 200) {
+        log('Profile updated successfully');
+        // Refresh profile data
+        await checkAuthStatus();
+        return true;
+      } else {
+        _error = 'Failed to update profile: ${response?.statusCode}';
+        log('Error updating profile: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error: $e';
+      log('Exception updating profile: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }
