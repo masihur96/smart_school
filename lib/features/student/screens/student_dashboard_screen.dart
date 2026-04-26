@@ -108,87 +108,88 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         }
       },
       child: Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _getTitle(l10n),
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          const NotificationIconButton(),
-          IconButton(
-            icon: const Icon(Icons.account_circle_outlined),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ProfileScreen()),
-              );
-            },
+        appBar: AppBar(
+          title: Text(
+            _getTitle(l10n),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      drawer: const AppDrawer(),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: [
-          _buildDashboardOverview(context, l10n),
-          const StudentAttendanceScreen(hideAppBar: true),
-          const StudentResultScreen(hideAppBar: true),
-          const StudentHomeworkScreen(hideAppBar: true),
-          const StudentNoticeScreen(isFromDrawer: false),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          actions: [
+            const NotificationIconButton(),
+            IconButton(
+              icon: const Icon(Icons.account_circle_outlined),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                );
+              },
             ),
+            const SizedBox(width: 8),
           ],
         ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex > 3 ? 0 : _selectedIndex,
-          onTap: _onItemTapped,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.green,
-          unselectedItemColor: Colors.grey,
-          showUnselectedLabels: true,
-          items: [
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.dashboard_rounded),
-              activeIcon: const Icon(Icons.dashboard),
-              label: l10n.home,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.calendar_today_outlined),
-              activeIcon: const Icon(Icons.calendar_today),
-              label: l10n.attendance,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.analytics_outlined),
-              activeIcon: const Icon(Icons.analytics),
-              label: l10n.results,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.assignment_outlined),
-              activeIcon: const Icon(Icons.assignment),
-              label: l10n.homework,
-            ),
+        drawer: const AppDrawer(),
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: [
+            _buildDashboardOverview(context, l10n),
+            const StudentAttendanceScreen(hideAppBar: true),
+            const StudentResultScreen(hideAppBar: true),
+            const StudentHomeworkScreen(hideAppBar: true),
+            const StudentNoticeScreen(isFromDrawer: false),
           ],
         ),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: BottomNavigationBar(
+            currentIndex: _selectedIndex > 3 ? 0 : _selectedIndex,
+            onTap: _onItemTapped,
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: Colors.green,
+            unselectedItemColor: Colors.grey,
+            showUnselectedLabels: true,
+            items: [
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.dashboard_rounded),
+                activeIcon: const Icon(Icons.dashboard),
+                label: l10n.home,
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.calendar_today_outlined),
+                activeIcon: const Icon(Icons.calendar_today),
+                label: l10n.attendance,
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.analytics_outlined),
+                activeIcon: const Icon(Icons.analytics),
+                label: l10n.results,
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.assignment_outlined),
+                activeIcon: const Icon(Icons.assignment),
+                label: l10n.homework,
+              ),
+            ],
+          ),
+        ),
       ),
-    ));
+    );
   }
 
   Widget _buildDashboardOverview(BuildContext context, AppLocalizations l10n) {
     final user = context.watch<AuthNotifier>().user;
     final subjects = context.watch<SubjectSetupNotifier>().subjects;
- 
+
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Column(
@@ -268,7 +269,11 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title, VoidCallback? onMore, AppLocalizations l10n) {
+  Widget _buildSectionHeader(
+    String title,
+    VoidCallback? onMore,
+    AppLocalizations l10n,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -292,11 +297,14 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     );
   }
 
-  Widget _buildAttendanceHighLight(BuildContext context, AppLocalizations l10n) {
+  Widget _buildAttendanceHighLight(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
     final attendanceNotifier = context.watch<StudentAttendanceNotifier>();
     final attendanceRecords = attendanceNotifier.attendanceRecords;
     final isLoading = attendanceNotifier.isLoading;
- 
+
     if (isLoading) {
       return Container(
         height: 140,
@@ -308,13 +316,13 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         child: const Center(child: CircularProgressIndicator()),
       );
     }
- 
+
     final totalDays = attendanceRecords.length;
     final presentDays = attendanceRecords
         .where((r) => r.status == AttendanceStatus.present)
         .length;
     final percentage = totalDays == 0 ? 0.0 : presentDays / totalDays;
- 
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -381,9 +389,9 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         ],
       ),
     );
-  } }
+  }
 
-  Widget _buildNoticeHighlight(BuildContext context) {
+  Widget _buildNoticeHighlight(BuildContext context, AppLocalizations l10n) {
     final user = context.watch<AuthNotifier>().user;
     final notices = context
         .watch<NoticesNotifier>()
@@ -495,14 +503,18 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     );
   }
 
-  Widget _buildHomeworkHighlight(BuildContext context, List<Subject> subjects, AppLocalizations l10n) {
+  Widget _buildHomeworkHighlight(
+    BuildContext context,
+    List<Subject> subjects,
+    AppLocalizations l10n,
+  ) {
     final user = context.watch<AuthNotifier>().user;
     if (user == null || user.classId == null || user.sectionId == null) {
       return _buildEmptyCard(l10n.classInfoMissing);
     }
- 
+
     final homeworkList = context.watch<StudentHomeworkNotifier>().homeworkList;
- 
+
     if (homeworkList.isEmpty) {
       return _buildEmptyCard(l10n.noPendingHomework);
     }

@@ -391,4 +391,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get systemPlanManagement => 'Manage and upgrade your system plan';
+
+  @override
+  String get superAdmin => 'Super Admin';
+
+  @override
+  String get noNewNotices => 'No new notices at this time';
+
+  @override
+  String get overview => 'Overview';
+
+  @override
+  String get config => 'Config';
 }

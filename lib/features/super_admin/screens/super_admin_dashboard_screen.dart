@@ -10,6 +10,7 @@ import 'package:smart_school/features/super_admin/screens/backup_screen.dart';
 import 'package:smart_school/features/super_admin/screens/pricing_school_screen.dart';
 import 'package:smart_school/features/super_admin/screens/subscription_screen.dart';
 import 'package:smart_school/features/super_admin/screens/super_admin_school_screen.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/user_model.dart';
 
 class SuperAdminDashboardScreen extends StatefulWidget {
@@ -84,68 +85,69 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         }
       },
       child: Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: Text(
-          _getTitle(l10n),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+        backgroundColor: AppColors.backgroundLight,
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          title: Text(
+            _getTitle(l10n),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          foregroundColor: AppColors.white,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          actions: [const NotificationIconButton(color: Colors.white)],
+        ),
+        drawer: const AppDrawer(),
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: [
+            _buildOverviewTab(user, l10n),
+            _buildSchoolsTab(l10n),
+            _buildSettingsTab(l10n),
+          ],
+        ),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            selectedItemColor: AppColors.primary,
+            unselectedItemColor: Colors.grey,
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.white,
+            elevation: 0,
+            items: [
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.dashboard_rounded),
+                activeIcon: const Icon(Icons.dashboard),
+                label: l10n.overview,
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.business_rounded),
+                activeIcon: const Icon(Icons.business),
+                label: l10n.schools,
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.settings_suggest_rounded),
+                activeIcon: const Icon(Icons.settings_suggest),
+                label: l10n.config,
+              ),
+            ],
           ),
         ),
-        foregroundColor: AppColors.white,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [const NotificationIconButton(color: Colors.white)],
       ),
-      drawer: const AppDrawer(),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: [
-          _buildOverviewTab(user, l10n),
-          _buildSchoolsTab(l10n),
-          _buildSettingsTab(l10n),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          selectedItemColor: AppColors.primary,
-          unselectedItemColor: Colors.grey,
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          elevation: 0,
-          items: [
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.dashboard_rounded),
-              activeIcon: const Icon(Icons.dashboard),
-              label: l10n.overview,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.business_rounded),
-              activeIcon: const Icon(Icons.business),
-              label: l10n.schools,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.settings_suggest_rounded),
-              activeIcon: const Icon(Icons.settings_suggest),
-              label: l10n.config,
-            ),
-          ],
-        ),
-      ),
-    ));
+    );
   }
 
   // --- OVERVIEW TAB ---
@@ -318,13 +320,13 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
             Colors.blue,
           ),
           _buildStatCard(
-            l10n.totalStudent,
+            l10n.totalStudents,
             '${data.totalStudents}',
             Icons.people,
             Colors.green,
           ),
           _buildStatCard(
-            l10n.totalTeacher,
+            l10n.totalTeachers,
             '${data.totalTeachers}',
             Icons.dns,
             Colors.teal,
@@ -642,7 +644,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
     final statusColor = status == 'Active'
         ? Colors.green
         : (status == 'Suspended' ? Colors.red : Colors.orange);
- 
+
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(

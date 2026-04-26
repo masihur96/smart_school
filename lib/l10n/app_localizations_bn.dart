@@ -394,4 +394,16 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get systemPlanManagement =>
       'আপনার সিস্টেম প্ল্যান পরিচালনা এবং আপগ্রেড করুন';
+
+  @override
+  String get superAdmin => 'সুপার অ্যাডমিন';
+
+  @override
+  String get noNewNotices => 'এই মুহূর্তে কোনো নতুন নোটিশ নেই';
+
+  @override
+  String get overview => 'ওভারভিউ';
+
+  @override
+  String get config => 'কনফিগারেশন';
 }

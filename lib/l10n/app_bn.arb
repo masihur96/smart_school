@@ -127,5 +127,9 @@
   "maintenanceMode": "ম্যানটেন্যান্স মোড",
   "systemSubscription": "সিস্টেম সাবস্ক্রিপশন",
   "subscriptionDetails": "সাবস্ক্রিপশন বিস্তারিত",
-  "systemPlanManagement": "আপনার সিস্টেম প্ল্যান পরিচালনা এবং আপগ্রেড করুন"
+  "systemPlanManagement": "আপনার সিস্টেম প্ল্যান পরিচালনা এবং আপগ্রেড করুন",
+  "superAdmin": "সুপার অ্যাডমিন",
+  "noNewNotices": "এই মুহূর্তে কোনো নতুন নোটিশ নেই",
+  "overview": "ওভারভিউ",
+  "config": "কনফিগারেশন"
 }

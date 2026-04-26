@@ -8,6 +8,7 @@ import 'package:smart_school/features/admin/screens/class_detail_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/marquee_notice.dart';
@@ -690,7 +691,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
-  Widget _buildExamsSection(BuildContext context) {
+  Widget _buildExamsSection(BuildContext context, AppLocalizations l10n) {
     final provider = context.watch<TeacherDashboardProvider>();
     final allExams = provider.exams;
 
