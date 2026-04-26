@@ -1,18 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/models/user_model.dart';
-
 import '../../../auth/providers/auth_provider.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  bool _isEditing = false;
+  late TextEditingController _nameController;
+  late TextEditingController _phoneController;
+
+  @override
+  void initState() {
+    super.initState();
+    final user = context.read<AuthNotifier>().user;
+    _nameController = TextEditingController(text: user?.name);
+    _phoneController = TextEditingController(text: user?.phone);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  void _handleUpdate() async {
+    final auth = context.read<AuthNotifier>();
+    final success = await auth.updateProfile(
+      name: _nameController.text.trim(),
+      phone: _phoneController.text.trim(),
+    );
+
+    if (success && mounted) {
+      setState(() => _isEditing = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Profile updated successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(auth.error ?? 'Failed to update profile'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final user = context.watch<AuthNotifier>().user;
-    final theme = Theme.of(context);
+    final authProvider = context.watch<AuthNotifier>();
+    final user = authProvider.user;
 
     if (user == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -26,10 +75,9 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-
       body: CustomScrollView(
         slivers: [
-          _buildSliverAppBar(context, user),
+          _buildSliverAppBar(context, user, authProvider.isLoading),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -43,25 +91,52 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 32),
 
                   // Information Sections
-                  _buildSectionHeader('Personal Information'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildSectionHeader('Personal Information'),
+                      TextButton.icon(
+                        onPressed: () {
+                          if (_isEditing) {
+                            _handleUpdate();
+                          } else {
+                            setState(() => _isEditing = true);
+                          }
+                        },
+                        icon: Icon(
+                          _isEditing ? Icons.check_circle_rounded : Icons.edit_rounded,
+                          size: 18,
+                        ),
+                        label: Text(_isEditing ? 'Save' : 'Edit'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: _isEditing ? Colors.green : AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
                   _buildInfoCard(context, [
                     _buildInfoTile(
                       context,
                       icon: Icons.person_outline_rounded,
                       label: 'Full Name',
-                      value: user.name ?? 'N/A',
+                      value: user.name,
+                      isEditable: true,
+                      controller: _nameController,
                     ),
                     _buildInfoTile(
                       context,
                       icon: Icons.email_outlined,
                       label: 'Email Address',
-                      value: user.email ?? 'N/A',
+                      value: user.email,
+                      isCopyable: true,
                     ),
                     _buildInfoTile(
                       context,
                       icon: Icons.phone_android_rounded,
                       label: 'Phone Number',
                       value: user.phone ?? 'N/A',
+                      isEditable: true,
+                      controller: _phoneController,
                     ),
                   ]),
 
@@ -73,9 +148,7 @@ class ProfileScreen extends StatelessWidget {
                       icon: Icons.school_outlined,
                       label: 'School Name',
                       value: user.school?.name ?? 'N/A',
-                      isCopyable: false,
                     ),
-
                     _buildInfoTile(
                       context,
                       icon: Icons.school_outlined,
@@ -95,14 +168,12 @@ class ProfileScreen extends StatelessWidget {
                       icon: Icons.school_outlined,
                       label: 'School Address',
                       value: user.school?.address ?? 'N/A',
-                      isCopyable: false,
                     ),
-
                     _buildInfoTile(
                       context,
                       icon: Icons.admin_panel_settings_outlined,
                       label: 'Account Role',
-                      value: user.role.name.toUpperCase() ?? 'N/A',
+                      value: user.role.name.toUpperCase(),
                     ),
                     if (user.rollNumber != null && user.rollNumber!.isNotEmpty)
                       _buildInfoTile(
@@ -111,8 +182,7 @@ class ProfileScreen extends StatelessWidget {
                         label: 'Roll Number',
                         value: user.rollNumber!,
                       ),
-                    if (user.designation != null &&
-                        user.designation!.isNotEmpty)
+                    if (user.designation != null && user.designation!.isNotEmpty)
                       _buildInfoTile(
                         context,
                         icon: Icons.badge_outlined,
@@ -132,7 +202,9 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ]),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 32),
+                  _buildLogoutButton(context),
+                  const SizedBox(height: 48),
                 ],
               ),
             ),
@@ -142,7 +214,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context, User user) {
+  Widget _buildSliverAppBar(BuildContext context, User user, bool isLoading) {
     final theme = Theme.of(context);
     return SliverAppBar(
       expandedHeight: 240,
@@ -155,7 +227,6 @@ class ProfileScreen extends StatelessWidget {
         background: Stack(
           alignment: Alignment.center,
           children: [
-            // Gradient Background
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -168,30 +239,40 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
-            // Profile Info in Header
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 40),
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundColor: theme.primaryColor.withOpacity(0.1),
-                    child: Icon(
-                      Icons.person,
-                      size: 60,
-                      color: theme.primaryColor,
+                Stack(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundColor: theme.primaryColor.withOpacity(0.1),
+                        child: Icon(
+                          Icons.person,
+                          size: 60,
+                          color: theme.primaryColor,
+                        ),
+                      ),
                     ),
-                  ),
+                    if (isLoading)
+                      const Positioned.fill(
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  user.name ?? 'User Name',
+                  user.name,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -199,7 +280,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  user.email ?? '',
+                  user.email,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 14,
@@ -251,6 +332,8 @@ class ProfileScreen extends StatelessWidget {
     required String label,
     required String value,
     bool isCopyable = false,
+    bool isEditable = false,
+    TextEditingController? controller,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -280,14 +363,29 @@ class ProfileScreen extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1E293B),
+                if (_isEditing && isEditable && controller != null)
+                  TextField(
+                    controller: controller,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1E293B),
+                    ),
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(vertical: 4),
+                      border: InputBorder.none,
+                    ),
+                  )
+                else
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1E293B),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
@@ -295,7 +393,13 @@ class ProfileScreen extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.copy_rounded, size: 18, color: Colors.grey[400]),
               onPressed: () {
-                // TODO: Implement copy to clipboard
+                Clipboard.setData(ClipboardData(text: value));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('$label copied to clipboard'),
+                    duration: const Duration(seconds: 1),
+                  ),
+                );
               },
             ),
         ],
@@ -348,7 +452,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildLogoutButton(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () => _showLogoutDialog(context),
