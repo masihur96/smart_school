@@ -85,6 +85,7 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
       pinned: true,
       elevation: 0,
       backgroundColor: AppColors.primary,
+      foregroundColor: AppColors.white,
       flexibleSpace: const FlexibleSpaceBar(
         centerTitle: true,
         title: Text(
