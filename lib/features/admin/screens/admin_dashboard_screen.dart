@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/screens/add_edit_marquee_screen.dart';
 import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart';
@@ -9,7 +10,6 @@ import 'package:smart_school/features/admin/screens/routine_management_screen.da
 import 'package:smart_school/features/admin/screens/setup_screen.dart';
 import 'package:smart_school/features/admin/screens/teacher_management_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
-import 'package:intl/intl.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../core/widgets/app_drawer.dart';
@@ -93,6 +93,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final isTeachersLoading = context.watch<TeachersNotifier>().isLoading;
     final isClassesLoading = context.watch<ClassSetupNotifier>().isLoading;
     final isNoticesLoading = context.watch<NoticesNotifier>().isLoading;
+    final authNotifier = context.watch<AuthNotifier>();
     final l10n = AppLocalizations.of(context)!;
     return PopScope(
       canPop: false,
@@ -124,66 +125,73 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         }
       },
       child: Scaffold(
-      appBar: AppBar(
-        title: Text(_getTitle(l10n)),
-        backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
-        actions: [
-          const NotificationIconButton(),
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => ProfileScreen()),
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-        ],
+        appBar: AppBar(
+          title: Text(_getTitle(l10n)),
+          backgroundColor: Colors.purple,
+          foregroundColor: Colors.white,
+          actions: [
+            const NotificationIconButton(),
+            IconButton(
+              icon: const Icon(Icons.account_circle),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ProfileScreen()),
+                );
+              },
+            ),
+            const SizedBox(width: 8),
+          ],
+        ),
+        drawer: const AppDrawer(),
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: [
+            _buildDashboardOverview(
+              attendanceRecords,
+              authNotifier: authNotifier,
+              studentCount: studentCount,
+              teacherCount: teacherCount,
+              classCount: classCount,
+              noticeCount: noticeCount,
+              isStudentsLoading: isStudentsLoading,
+              isTeachersLoading: isTeachersLoading,
+              isClassesLoading: isClassesLoading,
+              isNoticesLoading: isNoticesLoading,
+              l10n: l10n,
+            ),
+            const StudentManagementScreen(hideAppBar: true),
+            const ExamManagementScreen(hideAppBar: true),
+            const NoticeManagementScreen(hideAppBar: true),
+          ],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: Colors.purple,
+          unselectedItemColor: Colors.grey,
+          items: [
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.dashboard),
+              label: l10n.home,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.people),
+              label: l10n.students,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.assignment_turned_in),
+              label: l10n.exams,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.announcement),
+              label: l10n.notices,
+            ),
+          ],
+        ),
       ),
-      drawer: const AppDrawer(),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: [
-          _buildDashboardOverview(
-            attendanceRecords,
-            authNotifier: authNotifier,
-            studentCount: studentCount,
-            teacherCount: teacherCount,
-            classCount: classCount,
-            noticeCount: noticeCount,
-            isStudentsLoading: isStudentsLoading,
-            isTeachersLoading: isTeachersLoading,
-            isClassesLoading: isClassesLoading,
-            isNoticesLoading: isNoticesLoading,
-            l10n: l10n,
-          ),
-          const StudentManagementScreen(hideAppBar: true),
-          const ExamManagementScreen(hideAppBar: true),
-          const NoticeManagementScreen(hideAppBar: true),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.purple,
-        unselectedItemColor: Colors.grey,
-        items: [
-          BottomNavigationBarItem(icon: const Icon(Icons.dashboard), label: l10n.home),
-          BottomNavigationBarItem(icon: const Icon(Icons.people), label: l10n.students),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.assignment_turned_in),
-            label: l10n.exams,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.announcement),
-            label: l10n.notices,
-          ),
-        ],
-      ),
-    ));
+    );
   }
 
   Widget _buildDashboardOverview(
@@ -470,7 +478,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildEnhancedAttendanceOverview() {
+  Widget _buildEnhancedAttendanceOverview(AppLocalizations l10n) {
     final attendanceNotifier = context.watch<AttendanceNotifier>();
     final overview = attendanceNotifier.overviewSummary;
     final isLoading = attendanceNotifier.isLoading;
@@ -559,7 +567,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                   ),
                   Text(
-                    isAllClasses ? l10n.schoolPerformance : l10n.classPerformance,
+                    isAllClasses
+                        ? l10n.schoolPerformance
+                        : l10n.classPerformance,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[500],
@@ -708,14 +718,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildSubscriptionCard(AuthNotifier auth, AppLocalizations l10n) {
     final sub = auth.adminSubscription;
     if (sub == null) return const SizedBox.shrink();
- 
+
     final isValid = auth.isSubscriptionValid;
     final planName = sub.pricingPlan?.name ?? 'No Plan';
     final expiryDate = DateTime.tryParse(sub.endDate);
     final formattedDate = expiryDate != null
         ? DateFormat('MMM dd, yyyy').format(expiryDate)
         : 'Unknown';
- 
+
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(20),
@@ -804,27 +814,27 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ],
       ),
     );
-  } }
-
-  Widget _buildChartPlaceholder() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          Icons.bar_chart_rounded,
-          size: 48,
-          color: Colors.purple.withOpacity(0.2),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'No attendance data found',
-          style: TextStyle(
-            color: Colors.grey[400],
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
   }
+}
+
+Widget _buildChartPlaceholder() {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Icon(
+        Icons.bar_chart_rounded,
+        size: 48,
+        color: Colors.purple.withOpacity(0.2),
+      ),
+      const SizedBox(height: 12),
+      Text(
+        'No attendance data found',
+        style: TextStyle(
+          color: Colors.grey[400],
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    ],
+  );
 }

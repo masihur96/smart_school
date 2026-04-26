@@ -127,5 +127,9 @@
   "maintenanceMode": "Maintenance Mode",
   "systemSubscription": "System Subscription",
   "subscriptionDetails": "Subscription Details",
-  "systemPlanManagement": "Manage and upgrade your system plan"
+  "systemPlanManagement": "Manage and upgrade your system plan",
+  "superAdmin": "Super Admin",
+  "noNewNotices": "No new notices at this time",
+  "overview": "Overview",
+  "config": "Config"
 }

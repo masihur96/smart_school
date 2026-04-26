@@ -859,6 +859,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage and upgrade your system plan'**
   String get systemPlanManagement;
+
+  /// No description provided for @superAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Super Admin'**
+  String get superAdmin;
+
+  /// No description provided for @noNewNotices.
+  ///
+  /// In en, this message translates to:
+  /// **'No new notices at this time'**
+  String get noNewNotices;
+
+  /// No description provided for @overview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get overview;
+
+  /// No description provided for @config.
+  ///
+  /// In en, this message translates to:
+  /// **'Config'**
+  String get config;
 }
 
 class _AppLocalizationsDelegate
