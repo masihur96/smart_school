@@ -37,8 +37,9 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
   Future<void> _fetchInitialData() async {
     final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
     if (schoolId.isNotEmpty) {
-      await context.read<ClassSetupNotifier>().fetchClasses(schoolId);
-      await context.read<SectionSetupNotifier>().fetchSections();
+      // Fetch consolidated school data (classes, sections, subjects)
+      await context.read<ClassSetupNotifier>().fetchSchoolData();
+      await context.read<SectionSetupNotifier>().fetchSchoolData();
     }
   }
 

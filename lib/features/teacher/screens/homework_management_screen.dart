@@ -34,9 +34,9 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
     setState(() => _isLoading = true);
     final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
     if (schoolId.isNotEmpty) {
-      await context.read<ClassSetupNotifier>().fetchClasses(schoolId);
-      await context.read<SectionSetupNotifier>().fetchSections();
-      await context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
+      await context.read<ClassSetupNotifier>().fetchSchoolData();
+      await context.read<SectionSetupNotifier>().fetchSchoolData();
+      await context.read<SubjectSetupNotifier>().fetchSchoolData();
       await _onFetchHomework();
     }
     if (mounted) setState(() => _isLoading = false);

@@ -50,8 +50,40 @@ class ClassSetupNotifier extends ChangeNotifier {
       } else {
         log("Error fetching classes: ${response?.data}");
       }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchSchoolData() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.schoolData,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data != null) {
+          final List<dynamic> classData = data['classes'] ?? [];
+          _dbService.classes.clear();
+          for (var item in classData) {
+            final cls = ClassRoom.fromJson(item);
+            if (!cls.isDeleted) _dbService.classes.add(cls);
+          }
+          _classes = [..._dbService.classes];
+        }
+      }
     } catch (e) {
-      log("Error fetching classes: $e");
+      log("Error fetching school data in ClassSetupNotifier: $e");
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -213,8 +245,40 @@ class SectionSetupNotifier extends ChangeNotifier {
       } else {
         log("Error fetching sections: ${response?.data}");
       }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchSchoolData() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.schoolData,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data != null) {
+          final List<dynamic> sectionData = data['sections'] ?? [];
+          _dbService.sections.clear();
+          for (var item in sectionData) {
+            final section = Section.fromJson(item);
+            if (!section.isDeleted) _dbService.sections.add(section);
+          }
+          _sections = [..._dbService.sections];
+        }
+      }
     } catch (e) {
-      log("Error fetching sections: $e");
+      log("Error fetching school data in SectionSetupNotifier: $e");
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -359,8 +423,40 @@ class SubjectSetupNotifier extends ChangeNotifier {
       } else {
         log("Error fetching subjects: ${response?.data}");
       }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchSchoolData() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.schoolData,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data != null) {
+          final List<dynamic> subjectData = data['subjects'] ?? [];
+          _dbService.subjects.clear();
+          for (var item in subjectData) {
+            final subject = Subject.fromJson(item);
+            if (!subject.isDeleted) _dbService.subjects.add(subject);
+          }
+          _subjects = [..._dbService.subjects];
+        }
+      }
     } catch (e) {
-      log("Error fetching subjects: $e");
+      log("Error fetching school data in SubjectSetupNotifier: $e");
     } finally {
       _isLoading = false;
       notifyListeners();
