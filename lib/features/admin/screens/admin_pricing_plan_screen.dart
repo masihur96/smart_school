@@ -121,7 +121,13 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
     Color color = Colors.red;
     IconData icon = Icons.warning_amber_rounded;
 
-    if (sub != null && !isValid) {
+    if (isValid && sub != null) {
+      title = 'Active Subscription';
+      message =
+          'Your institution is on the ${sub.pricingPlan?.name ?? 'Standard'} plan, valid until ${sub.endDate.split('T')[0]}.';
+      color = Colors.green;
+      icon = Icons.check_circle_rounded;
+    } else if (sub != null && !isValid) {
       title = 'Subscription Expired';
       message =
           'Your plan expired on ${sub.endDate.split('T')[0]}. Please renew to continue.';
