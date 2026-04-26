@@ -9,6 +9,7 @@ import 'package:smart_school/features/admin/screens/routine_management_screen.da
 import 'package:smart_school/features/admin/screens/setup_screen.dart';
 import 'package:smart_school/features/admin/screens/teacher_management_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/notification_icon_button.dart';
@@ -91,6 +92,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final isTeachersLoading = context.watch<TeachersNotifier>().isLoading;
     final isClassesLoading = context.watch<ClassSetupNotifier>().isLoading;
     final isNoticesLoading = context.watch<NoticesNotifier>().isLoading;
+    final authNotifier = context.watch<AuthNotifier>();
 
     return PopScope(
       canPop: false,
@@ -146,6 +148,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         children: [
           _buildDashboardOverview(
             attendanceRecords,
+            authNotifier: authNotifier,
             studentCount: studentCount,
             teacherCount: teacherCount,
             classCount: classCount,
@@ -184,6 +187,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Widget _buildDashboardOverview(
     List<AttendanceEntity> attendanceRecords, {
+    required AuthNotifier authNotifier,
     required int studentCount,
     required int teacherCount,
     required int classCount,
@@ -198,6 +202,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildSubscriptionCard(authNotifier),
           Text(
             'School Overview',
             style: Theme.of(
@@ -697,6 +702,98 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       'December',
     ];
     return months[month - 1];
+  }
+
+  Widget _buildSubscriptionCard(AuthNotifier auth) {
+    final sub = auth.adminSubscription;
+    if (sub == null) return const SizedBox.shrink();
+
+    final isValid = auth.isSubscriptionValid;
+    final planName = sub.pricingPlan?.name ?? 'No Plan';
+    final expiryDate = DateTime.tryParse(sub.endDate);
+    final formattedDate = expiryDate != null
+        ? DateFormat('MMM dd, yyyy').format(expiryDate)
+        : 'Unknown';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isValid
+              ? [Colors.purple.shade700, Colors.purple.shade400]
+              : [Colors.red.shade700, Colors.red.shade400],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: (isValid ? Colors.purple : Colors.red).withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isValid ? Icons.star : Icons.error_outline,
+              color: Colors.white,
+              size: 32,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  planName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isValid
+                      ? 'Valid until $formattedDate'
+                      : 'Expired on $formattedDate',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (isValid)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'ACTIVE',
+                style: TextStyle(
+                  color: Colors.purple.shade700,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   Widget _buildChartPlaceholder() {

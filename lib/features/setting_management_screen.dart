@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/route_generator.dart';
 import 'package:smart_school/features/admin/providers/settings_provider.dart';
+import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
+import 'package:smart_school/models/user_model.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
 class SettingManagementScreen extends StatefulWidget {
@@ -19,6 +22,7 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
     final theme = Theme.of(context);
 
     final settings = context.watch<SettingsProvider>();
+    final authNotifier = context.watch<AuthNotifier>();
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingManagement)),
@@ -98,7 +102,28 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
             theme: theme,
             isAction: true,
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
+
+          // Admin Subscription Section
+          if (authNotifier.user?.role == UserRole.admin) ...[
+            _buildSectionHeader('System Subscription', theme),
+            _buildSettingTile(
+              icon: Icons.card_membership,
+              title: 'Subscription Details',
+              subtitle: 'Manage and upgrade your system plan',
+              theme: theme,
+              isAction: true,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AdminPricingPlanScreen(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 32),
+          ],
 
           // Logout Button
           // ElevatedButton.icon(
