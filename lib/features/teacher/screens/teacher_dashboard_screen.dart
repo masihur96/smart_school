@@ -38,9 +38,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       final user = context.read<AuthNotifier>().user;
       final now = DateTime.now();
       final dayName = DateFormat('EEEE').format(now);
-      final dateStr = DateFormat('dd/MM/yyyy').format(now);
+      final apiDateStr = DateFormat('yyyy-MM-dd').format(now);
       context.read<TeacherDashboardProvider>().fetchTodayClasses(dayName);
-      context.read<TeacherDashboardProvider>().fetchTodayAttendance(dateStr);
+      context.read<TeacherDashboardProvider>().fetchTodayAttendance(apiDateStr);
       context.read<TeacherDashboardProvider>().fetchExams();
       context.read<NoticesNotifier>().fetchNoticesFromAPI();
       context.read<MarqueeProvider>().fetchMarquee(
@@ -372,10 +372,31 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   Widget _buildSelfAttendanceButton(BuildContext context, User? user) {
     if (user?.role != UserRole.teacher) return const SizedBox.shrink();
 
-    final attendance = context
-        .watch<TeacherDashboardProvider>()
-        .todayAttendance;
-    final hasMarked = attendance != null;
+    final attendance = context.watch<TeacherDashboardProvider>().todayAttendance;
+    final status = attendance?.status; // 'clock-in' or 'clock-out'
+
+    IconData icon;
+    String label;
+    Color buttonColor;
+    Color iconColor;
+
+    if (attendance == null) {
+      icon = Icons.location_on;
+      label = 'Clock In';
+      buttonColor = Colors.white;
+      iconColor = Colors.green.shade700;
+    } else if (status == 'clock-in') {
+      icon = Icons.logout;
+      label = 'Clock Out';
+      buttonColor = Colors.orange.shade50;
+      iconColor = Colors.orange.shade700;
+    } else {
+      // status == 'clock-out'
+      icon = Icons.check_circle;
+      label = 'Clocked Out';
+      buttonColor = Colors.green.shade50;
+      iconColor = Colors.green;
+    }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -385,18 +406,18 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             _performSelfAttendance(context, user);
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: hasMarked ? Colors.green.shade50 : Colors.white,
-            foregroundColor: hasMarked ? Colors.green : Colors.green.shade700,
+            backgroundColor: buttonColor,
+            foregroundColor: iconColor,
             shape: const CircleBorder(),
             padding: const EdgeInsets.all(16),
             elevation: 4,
           ),
           child: Icon(
-            hasMarked ? Icons.check_circle : Icons.location_on,
+            icon,
             size: 28,
           ),
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 12),
         GestureDetector(
           onTap: () {
             final now = DateTime.now();
@@ -413,7 +434,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             );
           },
           child: Text(
-            hasMarked ? 'View Attendance' : 'Check In',
+            label,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 12,
