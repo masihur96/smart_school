@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../../../models/school_models.dart';
 import '../../admin/providers/routine_provider.dart';
-import '../../admin/providers/setup_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 
 class TeacherRoutineScreen extends StatefulWidget {
@@ -42,8 +41,6 @@ class _TeacherRoutineScreenState extends State<TeacherRoutineScreen>
       final user = context.read<AuthNotifier>().user;
       if (user != null) {
         context.read<RoutineNotifier>().fetchTeacherRoutine(user.id);
-        context.read<ClassSetupNotifier>().fetchClasses(user.schoolId ?? '');
-        context.read<SubjectSetupNotifier>().fetchSubjects(user.schoolId ?? '');
       }
     });
   }
@@ -151,18 +148,13 @@ class _RoutineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subjects = context.watch<SubjectSetupNotifier>().subjects;
-    final classes = context.watch<ClassSetupNotifier>().classes;
-
-    final subject = subjects.firstWhere(
-      (s) => s.id == entry.subjectId,
-      orElse: () => Subject(id: '', name: 'Unknown Subject'),
-    );
-
-    final classRoom = classes.firstWhere(
-      (c) => c.id == entry.classId,
-      orElse: () => ClassRoom(id: '', name: 'Unknown Class'),
-    );
+    final subjectName = entry.subjectEntity?.name ?? 'Unknown Subject';
+    final className = entry.classEntity?.name ?? 'Unknown Class';
+    final sectionName = entry.sectionEntity?.name ?? '';
+    
+    final classDisplay = sectionName.isNotEmpty 
+        ? '$className ($sectionName)' 
+        : className;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -178,7 +170,7 @@ class _RoutineCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    subject.name,
+                    subjectName,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -212,11 +204,24 @@ class _RoutineCard extends StatelessWidget {
                 const Icon(Icons.class_, size: 16, color: Colors.grey),
                 const SizedBox(width: 8),
                 Text(
-                  'Class: ${classRoom.name}',
+                  'Class: $classDisplay',
                   style: const TextStyle(fontSize: 14, color: Colors.black87),
                 ),
               ],
             ),
+            if (entry.teacherEntity != null) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.person, size: 16, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Teacher: ${entry.teacherEntity!.name}',
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                  ),
+                ],
+              ),
+            ],
             if (entry.roomNumber != null && entry.roomNumber!.isNotEmpty) ...[
               const SizedBox(height: 8),
               Row(
