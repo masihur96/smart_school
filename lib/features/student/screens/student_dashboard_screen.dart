@@ -8,6 +8,7 @@ import 'package:smart_school/features/student/providers/student_attendance_provi
 import 'package:smart_school/features/student/providers/student_homework_provider.dart';
 import 'package:smart_school/features/student/screens/student_notice_screen.dart';
 import 'package:smart_school/features/student/screens/student_routine_screen.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
 
@@ -57,25 +58,26 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     });
   }
 
-  String _getTitle() {
+  String _getTitle(AppLocalizations l10n) {
     switch (_selectedIndex) {
       case 0:
-        return 'Dashboard';
+        return l10n.dashboard;
       case 1:
-        return 'Attendance';
+        return l10n.attendance;
       case 2:
-        return 'Results';
+        return l10n.results;
       case 3:
-        return 'Homework';
+        return l10n.homework;
       case 4:
-        return 'Notices';
+        return l10n.notices;
       default:
-        return 'Dashboard';
+        return l10n.dashboard;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, dynamic result) async {
@@ -83,12 +85,12 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         final shouldExit = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Exit App'),
-            content: const Text('Are you sure you want to exit the app?'),
+            title: Text(l10n.exitApp),
+            content: Text(l10n.exitAppConfirmation),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('No'),
+                child: Text(l10n.no),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(true),
@@ -96,7 +98,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('Yes'),
+                child: Text(l10n.yes),
               ),
             ],
           ),
@@ -108,7 +110,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       child: Scaffold(
       appBar: AppBar(
         title: Text(
-          _getTitle(),
+          _getTitle(l10n),
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.green,
@@ -132,7 +134,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          _buildDashboardOverview(context),
+          _buildDashboardOverview(context, l10n),
           const StudentAttendanceScreen(hideAppBar: true),
           const StudentResultScreen(hideAppBar: true),
           const StudentHomeworkScreen(hideAppBar: true),
@@ -156,26 +158,26 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           selectedItemColor: Colors.green,
           unselectedItemColor: Colors.grey,
           showUnselectedLabels: true,
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard_rounded),
-              activeIcon: Icon(Icons.dashboard),
-              label: 'Home',
+              icon: const Icon(Icons.dashboard_rounded),
+              activeIcon: const Icon(Icons.dashboard),
+              label: l10n.home,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today_outlined),
-              activeIcon: Icon(Icons.calendar_today),
-              label: 'Attendance',
+              icon: const Icon(Icons.calendar_today_outlined),
+              activeIcon: const Icon(Icons.calendar_today),
+              label: l10n.attendance,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.analytics_outlined),
-              activeIcon: Icon(Icons.analytics),
-              label: 'Results',
+              icon: const Icon(Icons.analytics_outlined),
+              activeIcon: const Icon(Icons.analytics),
+              label: l10n.results,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.assignment_outlined),
-              activeIcon: Icon(Icons.assignment),
-              label: 'Homework',
+              icon: const Icon(Icons.assignment_outlined),
+              activeIcon: const Icon(Icons.assignment),
+              label: l10n.homework,
             ),
           ],
         ),
@@ -183,16 +185,16 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     ));
   }
 
-  Widget _buildDashboardOverview(BuildContext context) {
+  Widget _buildDashboardOverview(BuildContext context, AppLocalizations l10n) {
     final user = context.watch<AuthNotifier>().user;
     final subjects = context.watch<SubjectSetupNotifier>().subjects;
-
+ 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(user),
+          _buildHeader(user, l10n),
           Consumer2<NoticesNotifier, MarqueeProvider>(
             builder: (context, noticeNotifier, marqueeNotifier, child) {
               return MarqueeNotice(
@@ -205,23 +207,23 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildAttendanceHighLight(context),
+                _buildAttendanceHighLight(context, l10n),
                 const SizedBox(height: 24),
-                _buildSectionHeader('School Notices', () {
+                _buildSectionHeader(l10n.schoolNotices, () {
                   setState(() => _selectedIndex = 4);
-                }),
+                }, l10n),
                 const SizedBox(height: 12),
-                _buildNoticeHighlight(context),
+                _buildNoticeHighlight(context, l10n),
                 const SizedBox(height: 24),
-                _buildSectionHeader('Recent Homework', () {
+                _buildSectionHeader(l10n.recentHomework, () {
                   setState(() => _selectedIndex = 3);
-                }),
+                }, l10n),
                 const SizedBox(height: 12),
-                _buildHomeworkHighlight(context, subjects),
+                _buildHomeworkHighlight(context, subjects, l10n),
                 const SizedBox(height: 24),
-                _buildSectionHeader('Quick Actions', null),
+                _buildSectionHeader(l10n.quickActions, null, l10n),
                 const SizedBox(height: 12),
-                _buildQuickActionsGrid(context),
+                _buildQuickActionsGrid(context, l10n),
                 const SizedBox(height: 32),
               ],
             ),
@@ -231,7 +233,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     );
   }
 
-  Widget _buildHeader(User? user) {
+  Widget _buildHeader(User? user, AppLocalizations l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
@@ -246,7 +248,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Welcome Back,',
+            l10n.welcomeBack + ',',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.8),
               fontSize: 16,
@@ -266,7 +268,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title, VoidCallback? onMore) {
+  Widget _buildSectionHeader(String title, VoidCallback? onMore, AppLocalizations l10n) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -281,20 +283,20 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         if (onMore != null)
           TextButton(
             onPressed: onMore,
-            child: const Text(
-              'View All',
-              style: TextStyle(color: Colors.green),
+            child: Text(
+              l10n.viewAll,
+              style: const TextStyle(color: Colors.green),
             ),
           ),
       ],
     );
   }
 
-  Widget _buildAttendanceHighLight(BuildContext context) {
+  Widget _buildAttendanceHighLight(BuildContext context, AppLocalizations l10n) {
     final attendanceNotifier = context.watch<StudentAttendanceNotifier>();
     final attendanceRecords = attendanceNotifier.attendanceRecords;
     final isLoading = attendanceNotifier.isLoading;
-
+ 
     if (isLoading) {
       return Container(
         height: 140,
@@ -306,13 +308,13 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         child: const Center(child: CircularProgressIndicator()),
       );
     }
-
+ 
     final totalDays = attendanceRecords.length;
     final presentDays = attendanceRecords
         .where((r) => r.status == AttendanceStatus.present)
         .length;
     final percentage = totalDays == 0 ? 0.0 : presentDays / totalDays;
-
+ 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -346,9 +348,9 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Attendance Overview',
-                  style: TextStyle(
+                Text(
+                  l10n.attendanceOverview,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF2D3142),
@@ -357,16 +359,16 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 const SizedBox(height: 6),
                 Text(
                   totalDays == 0
-                      ? 'No attendance records found.'
+                      ? l10n.noAttendanceRecordsFound
                       : 'You were present $presentDays out of $totalDays recorded days.',
                   style: TextStyle(color: Colors.grey[600], height: 1.4),
                 ),
                 const SizedBox(height: 12),
                 InkWell(
                   onTap: () => setState(() => _selectedIndex = 1),
-                  child: const Text(
-                    'Full Report →',
-                    style: TextStyle(
+                  child: Text(
+                    '${l10n.fullReport} →',
+                    style: const TextStyle(
                       color: Colors.green,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
@@ -379,7 +381,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         ],
       ),
     );
-  }
+  } }
 
   Widget _buildNoticeHighlight(BuildContext context) {
     final user = context.watch<AuthNotifier>().user;
@@ -390,7 +392,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         .toList();
 
     if (notices.isEmpty) {
-      return _buildEmptyCard('No new notices');
+      return _buildEmptyCard(l10n.noNewNotices);
     }
 
     final latest = notices.last;
@@ -461,9 +463,9 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
-                            'URGENT',
-                            style: TextStyle(
+                          child: Text(
+                            l10n.urgent,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
@@ -493,23 +495,23 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     );
   }
 
-  Widget _buildHomeworkHighlight(BuildContext context, List<Subject> subjects) {
+  Widget _buildHomeworkHighlight(BuildContext context, List<Subject> subjects, AppLocalizations l10n) {
     final user = context.watch<AuthNotifier>().user;
     if (user == null || user.classId == null || user.sectionId == null) {
-      return _buildEmptyCard('Class info missing');
+      return _buildEmptyCard(l10n.classInfoMissing);
     }
-
+ 
     final homeworkList = context.watch<StudentHomeworkNotifier>().homeworkList;
-
+ 
     if (homeworkList.isEmpty) {
-      return _buildEmptyCard('No pending homework');
+      return _buildEmptyCard(l10n.noPendingHomework);
     }
 
     final latest = homeworkList.last;
     final hwData = latest.homework;
 
     if (hwData == null) {
-      return _buildEmptyCard('Homework data unavailable');
+      return _buildEmptyCard(l10n.homeworkDataUnavailable);
     }
 
     final subject = subjects
@@ -541,7 +543,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 ),
               ),
               Text(
-                'Due: ${DateFormat('MMM d').format(hwData.dueDate)}',
+                '${l10n.due}: ${DateFormat('MMM d').format(hwData.dueDate)}',
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -593,7 +595,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     );
   }
 
-  Widget _buildQuickActionsGrid(BuildContext context) {
+  Widget _buildQuickActionsGrid(BuildContext context, AppLocalizations l10n) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -604,7 +606,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       children: [
         _buildQuickActionItem(
           Icons.calendar_month_rounded,
-          'My Routine',
+          l10n.myRoutine,
           Colors.purple,
           () => Navigator.push(
             context,
@@ -613,19 +615,19 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         ),
         _buildQuickActionItem(
           Icons.emoji_events_rounded,
-          'Exam Results',
+          l10n.examResults,
           Colors.green,
           () => setState(() => _selectedIndex = 2),
         ),
         _buildQuickActionItem(
           Icons.library_books_rounded,
-          'Material',
+          l10n.material,
           Colors.blue,
           () {}, // Placeholder for future feature
         ),
         _buildQuickActionItem(
           Icons.contact_support_rounded,
-          'Queries',
+          l10n.queries,
           Colors.teal,
           () {}, // Placeholder for future feature
         ),

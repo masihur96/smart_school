@@ -36,16 +36,16 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
     });
   }
 
-  String _getTitle() {
+  String _getTitle(AppLocalizations l10n) {
     switch (_selectedIndex) {
       case 0:
-        return 'System Overview';
+        return l10n.systemOverview;
       case 1:
-        return 'School Management';
+        return l10n.schoolManagement;
       case 2:
-        return 'System Config';
+        return l10n.systemConfig;
       default:
-        return 'Super Admin';
+        return l10n.superAdmin;
     }
   }
 
@@ -53,6 +53,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
   Widget build(BuildContext context) {
     final user = context.watch<AuthNotifier>().user;
 
+    final l10n = AppLocalizations.of(context)!;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, dynamic result) async {
@@ -60,12 +61,12 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         final shouldExit = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Exit App'),
-            content: const Text('Are you sure you want to exit the app?'),
+            title: Text(l10n.exitApp),
+            content: Text(l10n.exitAppConfirmation),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('No'),
+                child: Text(l10n.no),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(true),
@@ -73,7 +74,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('Yes'),
+                child: Text(l10n.yes),
               ),
             ],
           ),
@@ -87,7 +88,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
-          _getTitle(),
+          _getTitle(l10n),
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -102,9 +103,9 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          _buildOverviewTab(user),
-          _buildSchoolsTab(),
-          _buildSettingsTab(),
+          _buildOverviewTab(user, l10n),
+          _buildSchoolsTab(l10n),
+          _buildSettingsTab(l10n),
         ],
       ),
       bottomNavigationBar: Container(
@@ -125,21 +126,21 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
           elevation: 0,
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard_rounded),
-              activeIcon: Icon(Icons.dashboard),
-              label: 'Overview',
+              icon: const Icon(Icons.dashboard_rounded),
+              activeIcon: const Icon(Icons.dashboard),
+              label: l10n.overview,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.business_rounded),
-              activeIcon: Icon(Icons.business),
-              label: 'Schools',
+              icon: const Icon(Icons.business_rounded),
+              activeIcon: const Icon(Icons.business),
+              label: l10n.schools,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.settings_suggest_rounded),
-              activeIcon: Icon(Icons.settings_suggest),
-              label: 'Config',
+              icon: const Icon(Icons.settings_suggest_rounded),
+              activeIcon: const Icon(Icons.settings_suggest),
+              label: l10n.config,
             ),
           ],
         ),
@@ -148,39 +149,39 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
   }
 
   // --- OVERVIEW TAB ---
-  Widget _buildOverviewTab(user) {
+  Widget _buildOverviewTab(user, AppLocalizations l10n) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(user),
+          _buildHeader(user, l10n),
           Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'System Performance',
-                  style: TextStyle(
+                Text(
+                  l10n.systemPerformance,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 16),
-                _buildStatGrid(),
+                _buildStatGrid(l10n),
                 const SizedBox(height: 16),
-                const Text(
-                  'Quick Management',
-                  style: TextStyle(
+                Text(
+                  l10n.quickActions,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 16),
-                _buildQuickActionsGrid(),
+                _buildQuickActionsGrid(l10n),
                 const SizedBox(height: 16),
               ],
             ),
@@ -190,7 +191,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
     );
   }
 
-  Widget _buildHeader(User? user) {
+  Widget _buildHeader(User? user, AppLocalizations l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 80, 24, 40),
@@ -224,7 +225,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                 children: [
                   const SizedBox(height: 40),
                   Text(
-                    'Welcome, ${user?.name ?? 'Admin'}',
+                    '${l10n.welcomeBack}, ${user?.name ?? 'Admin'}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 26,
@@ -267,7 +268,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                 const Icon(Icons.lens, color: Colors.greenAccent, size: 12),
                 const SizedBox(width: 8),
                 Text(
-                  'SYSTEM STATUS: HEALTHY',
+                  l10n.systemStatusHealthy,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 12,
@@ -285,7 +286,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
     );
   }
 
-  Widget _buildStatGrid() {
+  Widget _buildStatGrid(AppLocalizations l10n) {
     final dashboardNotifier = context.watch<SuperAdminDashboardNotifier>();
     final data = dashboardNotifier.dashboardData;
     final isLoading = dashboardNotifier.isLoading;
@@ -311,25 +312,25 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         childAspectRatio: 1.4,
         children: [
           _buildStatCard(
-            'Total Schools',
+            l10n.totalSchools,
             '${data.totalSchools}',
             Icons.business,
             Colors.blue,
           ),
           _buildStatCard(
-            'Total Student',
+            l10n.totalStudent,
             '${data.totalStudents}',
             Icons.people,
             Colors.green,
           ),
           _buildStatCard(
-            'Total Teacher',
+            l10n.totalTeacher,
             '${data.totalTeachers}',
             Icons.dns,
             Colors.teal,
           ),
           _buildStatCard(
-            'Active Subscription',
+            l10n.activeSubscription,
             '${data.activeSubscriptions}',
             Icons.monetization_on,
             Colors.deepPurple,
@@ -398,7 +399,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
     );
   }
 
-  Widget _buildQuickActionsGrid() {
+  Widget _buildQuickActionsGrid(AppLocalizations l10n) {
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
@@ -411,7 +412,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         childAspectRatio: 1.6,
         children: [
           _buildActionItem(
-            'Schools',
+            l10n.schools,
             Icons.add_business_rounded,
             Colors.indigo,
             () {
@@ -422,7 +423,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
             },
           ),
           _buildActionItem(
-            'Pricing',
+            l10n.pricing,
             Icons.terminal_rounded,
             Colors.blueGrey,
             () {
@@ -433,7 +434,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
             },
           ),
           _buildActionItem(
-            'Subscription',
+            l10n.subscription,
             Icons.podcasts_rounded,
             Colors.deepOrange,
             () {
@@ -443,7 +444,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
               );
             },
           ),
-          _buildActionItem('Backup', Icons.storage_rounded, Colors.teal, () {
+          _buildActionItem(l10n.backup, Icons.storage_rounded, Colors.teal, () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => BackupScreen()),
@@ -544,7 +545,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
   }
 
   // --- SCHOOLS TAB ---
-  Widget _buildSchoolsTab() {
+  Widget _buildSchoolsTab(AppLocalizations l10n) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
       physics: const BouncingScrollPhysics(),
@@ -552,9 +553,9 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Managed Schools',
-              style: TextStyle(
+            Text(
+              l10n.managedSchools,
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
@@ -573,7 +574,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
               child: ElevatedButton.icon(
                 onPressed: () {},
                 icon: const Icon(Icons.add_rounded, size: 20),
-                label: const Text('Add New'),
+                label: Text(l10n.addNew),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -604,24 +605,28 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
           'Active',
           '1240 Students',
           'Premium Plan',
+          l10n,
         ),
         _buildSchoolCard(
           'St. Mary High School',
           'Active',
           '850 Students',
           'Basic Plan',
+          l10n,
         ),
         _buildSchoolCard(
           'Lakeside Academy',
           'Suspended',
           '0 Students',
           'Trial Expired',
+          l10n,
         ),
         _buildSchoolCard(
           'Oakwood Montessori',
           'Trial',
           '120 Students',
           'Free Trial',
+          l10n,
         ),
       ],
     );
@@ -632,11 +637,12 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
     String status,
     String students,
     String plan,
+    AppLocalizations l10n,
   ) {
     final statusColor = status == 'Active'
         ? Colors.green
         : (status == 'Suspended' ? Colors.red : Colors.orange);
-
+ 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
@@ -719,9 +725,9 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                 TextButton.icon(
                   onPressed: () {},
                   icon: const Icon(Icons.bar_chart_rounded, size: 18),
-                  label: const Text(
-                    'Analytics',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  label: Text(
+                    l10n.analytics,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -741,9 +747,9 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    'Manage',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  child: Text(
+                    l10n.manage,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -765,14 +771,14 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
   }
 
   // --- SETTINGS TAB ---
-  Widget _buildSettingsTab() {
+  Widget _buildSettingsTab(AppLocalizations l10n) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
       physics: const BouncingScrollPhysics(),
       children: [
-        const Text(
-          'System Configuration',
-          style: TextStyle(
+        Text(
+          l10n.systemConfiguration,
+          style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -789,7 +795,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         const SizedBox(height: 24),
         _buildSettingsGroup('Access Control', [
           _buildSettingToggle(
-            'Maintenance Mode',
+            l10n.maintenanceMode,
             'Block access for all non-admins',
             false,
           ),
