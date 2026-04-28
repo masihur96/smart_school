@@ -79,7 +79,6 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
     final isLoadingMore = context.watch<TeachersNotifier>().isLoadingMore;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         title: const Text('Teacher Management'),
         backgroundColor: Colors.purple,
@@ -92,7 +91,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              // color: Colors.white,
               borderRadius: const BorderRadius.vertical(
                 bottom: Radius.circular(24),
               ),

@@ -390,8 +390,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -425,7 +423,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: color.withValues(alpha: 0.1),
@@ -495,10 +492,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       return Container(
         height: 200,
         width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(24)),
         child: _buildChartPlaceholder(),
       );
     }
@@ -535,141 +529,134 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               .firstWhere((c) => c.classId == _selectedClassId)
               .attendancePercentage;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.purple.withOpacity(0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-        border: Border.all(color: Colors.purple.withOpacity(0.05)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    currentTitle,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      currentTitle,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E1B4B),
+                      ),
+                    ),
+                    Text(
+                      isAllClasses
+                          ? l10n.schoolPerformance
+                          : l10n.classPerformance,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${percentage.toStringAsFixed(1)}%',
                     style: const TextStyle(
-                      fontSize: 18,
+                      color: Colors.purple,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E1B4B),
+                      fontSize: 14,
                     ),
                   ),
-                  Text(
-                    isAllClasses
-                        ? l10n.schoolPerformance
-                        : l10n.classPerformance,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[500],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
                 ),
-                decoration: BoxDecoration(
-                  color: Colors.purple.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '${percentage.toStringAsFixed(1)}%',
-                  style: const TextStyle(
-                    color: Colors.purple,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildMonthStatItem(
-                l10n.present,
-                present.toString(),
-                const Color(0xFF7C3AED),
-              ),
-              _buildMonthStatItem(
-                l10n.absent,
-                absent.toString(),
-                const Color(0xFFEF4444),
-              ),
-              _buildMonthStatItem(
-                l10n.leave,
-                leave.toString(),
-                const Color(0xFFF59E0B),
-              ),
-            ],
-          ),
-          // We could still show class-wise progress bars if "All Classes" is selected
-          if (isAllClasses && overview.data.length > 1) ...[
-            const SizedBox(height: 24),
-            Text(
-              l10n.classBreakdown,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ],
             ),
-            const SizedBox(height: 12),
-            ...overview.data
-                .take(5)
-                .map(
-                  (c) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              c.className,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            Text(
-                              '${c.attendancePercentage.toStringAsFixed(1)}%',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildMonthStatItem(
+                  l10n.present,
+                  present.toString(),
+                  const Color(0xFF7C3AED),
+                ),
+                _buildMonthStatItem(
+                  l10n.absent,
+                  absent.toString(),
+                  const Color(0xFFEF4444),
+                ),
+                _buildMonthStatItem(
+                  l10n.leave,
+                  leave.toString(),
+                  const Color(0xFFF59E0B),
+                ),
+              ],
+            ),
+            // We could still show class-wise progress bars if "All Classes" is selected
+            if (isAllClasses && overview.data.length > 1) ...[
+              const SizedBox(height: 24),
+              Text(
+                l10n.classBreakdown,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...overview.data
+                  .take(5)
+                  .map(
+                    (c) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                c.className,
+                                style: const TextStyle(fontSize: 12),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: LinearProgressIndicator(
-                            value: c.attendancePercentage / 100,
-                            backgroundColor: Colors.grey[200],
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              c.attendancePercentage > 80
-                                  ? Colors.green
-                                  : Colors.orange,
-                            ),
-                            minHeight: 6,
+                              Text(
+                                '${c.attendancePercentage.toStringAsFixed(1)}%',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: c.attendancePercentage / 100,
+                              backgroundColor: Colors.grey[200],
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                c.attendancePercentage > 80
+                                    ? Colors.green
+                                    : Colors.orange,
+                              ),
+                              minHeight: 6,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

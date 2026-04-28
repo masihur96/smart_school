@@ -21,9 +21,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final user = context.read<AuthNotifier>().user;
       if (user?.schoolId != null) {
-        context
-            .read<NoticesNotifier>()
-            .fetchNoticesFromAPI();
+        context.read<NoticesNotifier>().fetchNoticesFromAPI();
       }
     });
   }
@@ -34,7 +32,6 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
     final notices = noticesNotifier.notices;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
       appBar: widget.hideAppBar
           ? null
           : AppBar(
@@ -50,7 +47,9 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                         height: 18,
                         width: 18,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white),
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   )
@@ -61,9 +60,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                     onPressed: () {
                       final user = context.read<AuthNotifier>().user;
                       if (user?.schoolId != null) {
-                        context
-                            .read<NoticesNotifier>()
-                            .fetchNoticesFromAPI();
+                        context.read<NoticesNotifier>().fetchNoticesFromAPI();
                       }
                     },
                   ),
@@ -72,39 +69,37 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
       body: noticesNotifier.isLoading
           ? const Center(child: CircularProgressIndicator())
           : notices.isEmpty
-              ? const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.notifications_none,
-                          size: 64, color: Colors.grey),
-                      SizedBox(height: 12),
-                      Text(
-                        'No notices posted yet.',
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
-                      ),
-                    ],
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.notifications_none, size: 64, color: Colors.grey),
+                  SizedBox(height: 12),
+                  Text(
+                    'No notices posted yet.',
+                    style: TextStyle(color: Colors.grey, fontSize: 16),
                   ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  itemCount: notices.length,
-                  itemBuilder: (context, index) {
-                    final notice = notices[index];
-                    return _NoticeCard(
-                      notice: notice,
-                      onView: () => _viewNoticeDialog(context, notice),
-                      onEdit: () => _editNoticeDialog(context, notice),
-                      onDelete: () => _confirmDelete(context, notice),
-                    );
-                  },
-                ),
+                ],
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              itemCount: notices.length,
+              itemBuilder: (context, index) {
+                final notice = notices[index];
+                return _NoticeCard(
+                  notice: notice,
+                  onView: () => _viewNoticeDialog(context, notice),
+                  onEdit: () => _editNoticeDialog(context, notice),
+                  onDelete: () => _confirmDelete(context, notice),
+                );
+              },
+            ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _addNoticeDialog(context),
         backgroundColor: Colors.purple,
         icon: const Icon(Icons.add, color: Colors.white),
-        label:
-            const Text('New Notice', style: TextStyle(color: Colors.white)),
+        label: const Text('New Notice', style: TextStyle(color: Colors.white)),
       ),
     );
   }
@@ -114,8 +109,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
             Icon(
@@ -124,8 +118,10 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(notice.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(
+                notice.title,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
@@ -133,21 +129,28 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(notice.content,
-                style: const TextStyle(fontSize: 14, height: 1.5)),
+            Text(
+              notice.content,
+              style: const TextStyle(fontSize: 14, height: 1.5),
+            ),
             const SizedBox(height: 16),
             const Divider(),
             const SizedBox(height: 8),
-            _infoRow(Icons.group_outlined, 'Audience',
-                notice.targetAudience ?? 'All'),
+            _infoRow(
+              Icons.group_outlined,
+              'Audience',
+              notice.targetAudience ?? 'All',
+            ),
             const SizedBox(height: 6),
-            _infoRow(Icons.person_outline, 'Posted by',
-                notice.postedBy ?? '—'),
+            _infoRow(Icons.person_outline, 'Posted by', notice.postedBy ?? '—'),
             if (notice.isImportant) ...[
               const SizedBox(height: 6),
-              _infoRow(Icons.warning_amber_rounded, 'Priority',
-                  'Important',
-                  color: Colors.red),
+              _infoRow(
+                Icons.warning_amber_rounded,
+                'Priority',
+                'Important',
+                color: Colors.red,
+              ),
             ],
           ],
         ),
@@ -161,18 +164,25 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
     );
   }
 
-  Widget _infoRow(IconData icon, String label, String value,
-      {Color color = Colors.purple}) {
+  Widget _infoRow(
+    IconData icon,
+    String label,
+    String value, {
+    Color color = Colors.purple,
+  }) {
     return Row(
       children: [
         Icon(icon, size: 16, color: color),
         const SizedBox(width: 6),
-        Text('$label: ',
-            style: TextStyle(
-                fontSize: 12, fontWeight: FontWeight.w600, color: color)),
-        Expanded(
-          child: Text(value, style: const TextStyle(fontSize: 12)),
+        Text(
+          '$label: ',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
         ),
+        Expanded(child: Text(value, style: const TextStyle(fontSize: 12))),
       ],
     );
   }
@@ -200,9 +210,9 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
       initialPostedBy: notice.postedBy ?? user?.name ?? '',
       schoolId: notice.schoolId ?? user?.schoolId ?? '',
       onSubmit: (updated) async {
-        await context
-            .read<NoticesNotifier>()
-            .updateNoticeOnAPI(updated.copyWith(id: notice.id));
+        await context.read<NoticesNotifier>().updateNoticeOnAPI(
+          updated.copyWith(id: notice.id),
+        );
       },
       submitLabel: 'Update',
     );
@@ -217,12 +227,11 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
     required Future<void> Function(Notice) onSubmit,
     required String submitLabel,
   }) {
-    final titleController =
-        TextEditingController(text: existing?.title ?? '');
-    final contentController =
-        TextEditingController(text: existing?.content ?? '');
-    final postedByController =
-        TextEditingController(text: initialPostedBy);
+    final titleController = TextEditingController(text: existing?.title ?? '');
+    final contentController = TextEditingController(
+      text: existing?.content ?? '',
+    );
+    final postedByController = TextEditingController(text: initialPostedBy);
     String selectedAudience = existing?.targetAudience ?? 'Students';
     bool isImportant = existing?.isImportant ?? false;
 
@@ -231,7 +240,8 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16)),
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Row(
             children: [
               Container(
@@ -241,19 +251,17 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  submitLabel == 'Update'
-                      ? Icons.edit
-                      : Icons.campaign,
+                  submitLabel == 'Update' ? Icons.edit : Icons.campaign,
                   color: Colors.purple,
                 ),
               ),
               const SizedBox(width: 12),
               Text(
-                submitLabel == 'Update'
-                    ? 'Edit Notice'
-                    : 'Post New Notice',
+                submitLabel == 'Update' ? 'Edit Notice' : 'Post New Notice',
                 style: const TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.bold),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -288,23 +296,30 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                   DropdownButtonFormField<String>(
                     decoration: InputDecoration(
                       labelText: 'Target Audience',
-                      prefixIcon: const Icon(Icons.group,
-                          color: Colors.purple),
+                      prefixIcon: const Icon(Icons.group, color: Colors.purple),
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10)),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 14),
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
                     ),
                     value: selectedAudience,
                     items: const [
+                      DropdownMenuItem(value: 'All', child: Text('All')),
                       DropdownMenuItem(
-                          value: 'All', child: Text('All')),
+                        value: 'Students',
+                        child: Text('Students'),
+                      ),
                       DropdownMenuItem(
-                          value: 'Students', child: Text('Students')),
+                        value: 'Teachers',
+                        child: Text('Teachers'),
+                      ),
                       DropdownMenuItem(
-                          value: 'Teachers', child: Text('Teachers')),
-                      DropdownMenuItem(
-                          value: 'Parents', child: Text('Parents')),
+                        value: 'Parents',
+                        child: Text('Parents'),
+                      ),
                     ],
                     onChanged: (val) =>
                         setState(() => selectedAudience = val ?? 'All'),
@@ -336,19 +351,22 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                 backgroundColor: Colors.purple,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               icon: context.watch<NoticesNotifier>().isLoading
                   ? const SizedBox(
                       height: 16,
                       width: 16,
                       child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white))
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
                   : Icon(
-                      submitLabel == 'Update'
-                          ? Icons.save
-                          : Icons.send,
-                      size: 18),
+                      submitLabel == 'Update' ? Icons.save : Icons.send,
+                      size: 18,
+                    ),
               label: Text(submitLabel),
               onPressed: () async {
                 if (titleController.text.isEmpty ||
@@ -373,19 +391,25 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                   await onSubmit(notice);
                   if (context.mounted) {
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(submitLabel == 'Update'
-                          ? 'Notice updated successfully'
-                          : 'Notice posted successfully'),
-                      backgroundColor: Colors.green,
-                    ));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          submitLabel == 'Update'
+                              ? 'Notice updated successfully'
+                              : 'Notice posted successfully',
+                        ),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
                   }
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('Error: $e'),
-                      backgroundColor: Colors.red,
-                    ));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
                   }
                 }
               },
@@ -401,8 +425,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Row(
           children: [
             Icon(Icons.delete_forever, color: Colors.red),
@@ -423,7 +446,8 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
             icon: const Icon(Icons.delete, size: 18),
             label: const Text('Delete'),
@@ -431,13 +455,11 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
               Navigator.pop(context);
               try {
                 if (notice.id != null) {
-                  await context
-                      .read<NoticesNotifier>()
-                      .deleteNoticeOnAPI(notice.id!);
+                  await context.read<NoticesNotifier>().deleteNoticeOnAPI(
+                    notice.id!,
+                  );
                 } else {
-                  context
-                      .read<NoticesNotifier>()
-                      .removeNotice('');
+                  context.read<NoticesNotifier>().removeNotice('');
                 }
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -449,10 +471,12 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('Error: $e'),
-                    backgroundColor: Colors.red,
-                  ));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
                 }
               }
             },
@@ -476,10 +500,11 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
         labelText: label,
         hintText: hint,
         prefixIcon: Icon(icon, color: Colors.purple),
-        border:
-            OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 14,
+        ),
       ),
     );
   }
@@ -502,22 +527,7 @@ class _NoticeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isImportant = notice.isImportant;
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: isImportant
-            ? Border.all(color: Colors.red.shade300, width: 1.5)
-            : null,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return Card(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(14, 14, 4, 10),
         child: Column(
@@ -551,19 +561,21 @@ class _NoticeCard extends StatelessWidget {
                             child: Text(
                               notice.title,
                               style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
                             ),
                           ),
                           if (isImportant)
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.red.shade50,
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                    color: Colors.red.shade300),
+                                border: Border.all(color: Colors.red.shade300),
                               ),
                               child: const Text(
                                 'Important',
@@ -580,9 +592,10 @@ class _NoticeCard extends StatelessWidget {
                       Text(
                         notice.content,
                         style: TextStyle(
-                            color: Colors.grey[700],
-                            fontSize: 13,
-                            height: 1.4),
+                          color: Colors.grey[700],
+                          fontSize: 13,
+                          height: 1.4,
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -593,7 +606,8 @@ class _NoticeCard extends StatelessWidget {
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.more_vert, color: Colors.grey),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   onSelected: (value) {
                     if (value == 'view') onView();
                     if (value == 'edit') onEdit();
@@ -602,31 +616,45 @@ class _NoticeCard extends StatelessWidget {
                   itemBuilder: (_) => [
                     const PopupMenuItem(
                       value: 'view',
-                      child: Row(children: [
-                        Icon(Icons.remove_red_eye_outlined,
-                            size: 18, color: Colors.blue),
-                        SizedBox(width: 10),
-                        Text('View'),
-                      ]),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.remove_red_eye_outlined,
+                            size: 18,
+                            color: Colors.blue,
+                          ),
+                          SizedBox(width: 10),
+                          Text('View'),
+                        ],
+                      ),
                     ),
                     const PopupMenuItem(
                       value: 'edit',
-                      child: Row(children: [
-                        Icon(Icons.edit_outlined,
-                            size: 18, color: Colors.orange),
-                        SizedBox(width: 10),
-                        Text('Edit'),
-                      ]),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.edit_outlined,
+                            size: 18,
+                            color: Colors.orange,
+                          ),
+                          SizedBox(width: 10),
+                          Text('Edit'),
+                        ],
+                      ),
                     ),
                     const PopupMenuItem(
                       value: 'delete',
-                      child: Row(children: [
-                        Icon(Icons.delete_outline,
-                            size: 18, color: Colors.red),
-                        SizedBox(width: 10),
-                        Text('Delete',
-                            style: TextStyle(color: Colors.red)),
-                      ]),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.delete_outline,
+                            size: 18,
+                            color: Colors.red,
+                          ),
+                          SizedBox(width: 10),
+                          Text('Delete', style: TextStyle(color: Colors.red)),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -643,8 +671,7 @@ class _NoticeCard extends StatelessWidget {
                   color: Colors.blue,
                 ),
                 const SizedBox(width: 8),
-                if (notice.postedBy != null &&
-                    notice.postedBy!.isNotEmpty)
+                if (notice.postedBy != null && notice.postedBy!.isNotEmpty)
                   _tag(
                     icon: Icons.person_outline,
                     label: notice.postedBy!,
@@ -658,13 +685,13 @@ class _NoticeCard extends StatelessWidget {
     );
   }
 
-  Widget _tag(
-      {required IconData icon,
-      required String label,
-      required Color color}) {
+  Widget _tag({
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
     return Container(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.08),
         borderRadius: BorderRadius.circular(20),
@@ -677,9 +704,10 @@ class _NoticeCard extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-                fontSize: 11,
-                color: color,
-                fontWeight: FontWeight.w600),
+              fontSize: 11,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),

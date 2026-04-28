@@ -39,6 +39,12 @@ class AppLocalizationsBn extends AppLocalizations {
   String get darkMode => 'ডার্ক মোড';
 
   @override
+  String get lightMode => 'লাইট মোড';
+
+  @override
+  String get systemDefault => 'সিস্টেম ডিফল্ট';
+
+  @override
   String get logout => 'লগআউট';
 
   @override

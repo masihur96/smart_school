@@ -302,12 +302,6 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
 
   Widget _buildStudentCard(Student student, AttendanceStatus status) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
-      ),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(

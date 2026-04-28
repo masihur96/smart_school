@@ -32,17 +32,11 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
           // Theme Section
           _buildSectionHeader(l10n.theme, theme),
           _buildSettingTile(
-            icon: settings.themeMode == ThemeMode.dark
-                ? Icons.dark_mode
-                : Icons.light_mode,
-            title: l10n.darkMode,
+            icon: _getThemeIcon(settings.themeMode),
+            title: l10n.theme,
+            subtitle: _getThemeName(settings.themeMode, l10n),
             theme: theme,
-            trailing: Switch(
-              value: settings.themeMode == ThemeMode.dark,
-              onChanged: (value) {
-                settings.setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
-              },
-            ),
+            onTap: () => _showThemePicker(context, settings, l10n),
           ),
           const SizedBox(height: 24),
 
@@ -140,6 +134,87 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
     );
   }
 
+  IconData _getThemeIcon(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return Icons.light_mode;
+      case ThemeMode.dark:
+        return Icons.dark_mode;
+      case ThemeMode.system:
+        return Icons.brightness_auto;
+    }
+  }
+
+  String _getThemeName(ThemeMode mode, AppLocalizations l10n) {
+    switch (mode) {
+      case ThemeMode.light:
+        return l10n.lightMode;
+      case ThemeMode.dark:
+        return l10n.darkMode;
+      case ThemeMode.system:
+        return l10n.systemDefault;
+    }
+  }
+
+  void _showThemePicker(
+    BuildContext context,
+    SettingsProvider settings,
+    AppLocalizations l10n,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.theme),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildThemeOption(
+              context,
+              ThemeMode.light,
+              l10n.lightMode,
+              Icons.light_mode,
+              settings,
+            ),
+            _buildThemeOption(
+              context,
+              ThemeMode.dark,
+              l10n.darkMode,
+              Icons.dark_mode,
+              settings,
+            ),
+            _buildThemeOption(
+              context,
+              ThemeMode.system,
+              l10n.systemDefault,
+              Icons.brightness_auto,
+              settings,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeOption(
+    BuildContext context,
+    ThemeMode mode,
+    String title,
+    IconData icon,
+    SettingsProvider settings,
+  ) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      trailing: settings.themeMode == mode
+          ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+          : null,
+      onTap: () {
+        settings.setThemeMode(mode);
+        Navigator.pop(context);
+      },
+    );
+  }
+
   Widget _buildSectionHeader(String title, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 8),
@@ -164,7 +239,6 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
     Widget? trailing,
   }) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: Icon(icon, color: theme.colorScheme.onSurfaceVariant),
         title: Text(title, style: theme.textTheme.titleMedium),
@@ -172,7 +246,6 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
         trailing:
             trailing ?? (isAction ? const Icon(Icons.chevron_right) : null),
         onTap: onTap,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
