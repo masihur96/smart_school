@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/notifications/providers/notification_provider.dart';
-import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/notification_model.dart';
 
 class NotificationScreen extends StatefulWidget {
@@ -66,8 +65,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.notifications_none_outlined,
-                      size: 80, color: Colors.grey[400]),
+                  Icon(
+                    Icons.notifications_none_outlined,
+                    size: 80,
+                    color: Colors.grey[400],
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'No notifications yet',
@@ -95,24 +97,24 @@ class _NotificationScreenState extends State<NotificationScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          final auth = context.read<AuthNotifier>();
-          final user = auth.user;
-          if (user != null) {
-            context.read<NotificationNotifier>().sendTest(
-                  user.id,
-                  "Test Notification",
-                  "This is a test notification from the app",
-                );
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Test notification sent!')),
-            );
-          }
-        },
-        child: const Icon(Icons.send),
-        tooltip: 'Send Test Notification',
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     final auth = context.read<AuthNotifier>();
+      //     final user = auth.user;
+      //     if (user != null) {
+      //       context.read<NotificationNotifier>().sendTest(
+      //         user.id,
+      //         "Test Notification",
+      //         "This is a test notification from the app",
+      //       );
+      //       ScaffoldMessenger.of(context).showSnackBar(
+      //         const SnackBar(content: Text('Test notification sent!')),
+      //       );
+      //     }
+      //   },
+      //   child: const Icon(Icons.send),
+      //   tooltip: 'Send Test Notification',
+      // ),
     );
   }
 }
@@ -139,8 +141,9 @@ class _NotificationItem extends StatelessWidget {
       color: notification.isRead ? null : Colors.blue.withOpacity(0.05),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor:
-              notification.isRead ? Colors.grey[200] : Colors.blue[100],
+          backgroundColor: notification.isRead
+              ? Colors.grey[200]
+              : Colors.blue[100],
           child: Icon(
             Icons.notifications,
             color: notification.isRead ? Colors.grey[600] : Colors.blue[700],
@@ -149,7 +152,9 @@ class _NotificationItem extends StatelessWidget {
         title: Text(
           notification.title,
           style: TextStyle(
-            fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
+            fontWeight: notification.isRead
+                ? FontWeight.normal
+                : FontWeight.bold,
             fontSize: 16,
           ),
         ),
@@ -174,7 +179,7 @@ class _NotificationItem extends StatelessWidget {
         onTap: () {
           // Handle notification tap
           context.read<NotificationNotifier>().markAsRead(notification.id);
-          
+
           if (notification.data != null && notification.data!.isNotEmpty) {
             _showDataDialog(context, notification.data!);
           }
