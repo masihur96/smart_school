@@ -9,6 +9,8 @@
   "language": "Language",
   "theme": "Theme",
   "darkMode": "Dark Mode",
+  "lightMode": "Light Mode",
+  "systemDefault": "System Default",
   "logout": "Logout",
   "oldPassword": "Old Password",
   "newPassword": "New Password",

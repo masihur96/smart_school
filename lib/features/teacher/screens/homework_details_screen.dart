@@ -107,8 +107,6 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
 
   Widget _buildDetailsCard(Homework homework) {
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -216,11 +214,6 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
   Widget _buildStudentItem(String homeworkId, StudentHomework studentHomework) {
     final student = studentHomework.student;
     return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

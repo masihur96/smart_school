@@ -185,7 +185,6 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                     Text(
                       _nameController.text,
                       style: const TextStyle(
-                        color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -573,7 +572,6 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
     final examsNotifier = context.watch<ExamsNotifier>();
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: Text(isEditing ? 'Edit Exam' : 'Create Exam'),
         backgroundColor: Colors.purple,

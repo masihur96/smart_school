@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_school/core/theme/app_colors.dart';
-import 'package:smart_school/models/user_model.dart';
 import 'package:smart_school/configs/route_generator.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
+import 'package:smart_school/models/user_model.dart';
+
 import '../../../auth/providers/auth_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -77,7 +78,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
       body: CustomScrollView(
         slivers: [
           _buildSliverAppBar(context, user, authProvider.isLoading),
@@ -107,12 +107,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           }
                         },
                         icon: Icon(
-                          _isEditing ? Icons.check_circle_rounded : Icons.edit_rounded,
+                          _isEditing
+                              ? Icons.check_circle_rounded
+                              : Icons.edit_rounded,
                           size: 18,
                         ),
                         label: Text(_isEditing ? 'Save' : 'Edit'),
                         style: TextButton.styleFrom(
-                          foregroundColor: _isEditing ? Colors.green : AppColors.primary,
+                          foregroundColor: _isEditing
+                              ? Colors.green
+                              : AppColors.primary,
                         ),
                       ),
                     ],
@@ -185,7 +189,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         label: 'Roll Number',
                         value: user.rollNumber!,
                       ),
-                    if (user.designation != null && user.designation!.isNotEmpty)
+                    if (user.designation != null &&
+                        user.designation!.isNotEmpty)
                       _buildInfoTile(
                         context,
                         icon: Icons.badge_outlined,
@@ -219,9 +224,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       value: memberSince,
                     ),
                   ]),
-
-                  const SizedBox(height: 32),
-                  _buildLogoutButton(context),
+                  //
+                  // const SizedBox(height: 32),
+                  // _buildLogoutButton(context),
                   const SizedBox(height: 48),
                 ],
               ),
@@ -328,20 +333,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildInfoCard(BuildContext context, List<Widget> children) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(children: children),
-    );
+    return Card(child: Column(children: children));
   }
 
   Widget _buildInfoTile(
@@ -353,11 +345,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     bool isEditable = false,
     TextEditingController? controller,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey[100]!, width: 1)),
-      ),
+    return Card(
       child: Row(
         children: [
           Container(
@@ -401,7 +389,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF1E293B),
                     ),
                   ),
               ],
@@ -445,7 +432,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 color: Theme.of(context).primaryColor.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, size: 20, color: Theme.of(context).primaryColor),
+              child: Icon(
+                icon,
+                size: 20,
+                color: Theme.of(context).primaryColor,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -577,7 +568,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             },
             child: Text(
               l10n.confirmSignOut,
-              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

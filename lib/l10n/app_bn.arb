@@ -9,6 +9,8 @@
   "language": "ভাষা",
   "theme": "Theme",
   "darkMode": "ডার্ক মোড",
+  "lightMode": "লাইট মোড",
+  "systemDefault": "সিস্টেম ডিফল্ট",
   "logout": "লগআউট",
   "oldPassword": "পুরানো পাসওয়ার্ড",
   "newPassword": "নতুন পাসওয়ার্ড",

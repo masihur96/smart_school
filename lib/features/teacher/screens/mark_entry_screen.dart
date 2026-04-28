@@ -129,9 +129,6 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
 
   Widget _buildSelectionCard(ResultsNotifier notifier) {
     return Card(
-      elevation: 4,
-      shadowColor: Colors.black12,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -322,13 +319,6 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
           final bool isPass = marks != null && marks >= 40;
 
           return Card(
-            margin: const EdgeInsets.only(bottom: 16),
-            elevation: 1,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side:
-                  BorderSide(color: Colors.grey.withValues(alpha: 0.2), width: 1),
-            ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(

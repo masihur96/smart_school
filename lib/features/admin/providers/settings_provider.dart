@@ -3,7 +3,7 @@ import 'package:smart_school/core/utils/storage_service.dart';
 import 'package:smart_school/services/notification_service.dart';
 
 class SettingsProvider extends ChangeNotifier {
-  ThemeMode _themeMode = ThemeMode.light;
+  ThemeMode _themeMode = ThemeMode.system;
   Locale _locale = const Locale('en');
   bool _isHomeworkNotifyEnabled = true;
   bool _isAttendanceNotifyEnabled = true;
@@ -20,7 +20,13 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> _loadSettings() async {
     final theme = await StorageService.getTheme();
     if (theme != null) {
-      _themeMode = theme == 'dark' ? ThemeMode.dark : ThemeMode.light;
+      if (theme == 'dark') {
+        _themeMode = ThemeMode.dark;
+      } else if (theme == 'light') {
+        _themeMode = ThemeMode.light;
+      } else {
+        _themeMode = ThemeMode.system;
+      }
     }
 
     final localeCode = await StorageService.getLocale();
@@ -54,7 +60,19 @@ class SettingsProvider extends ChangeNotifier {
 
   Future<void> setThemeMode(ThemeMode mode) async {
     _themeMode = mode;
-    await StorageService.saveTheme(mode == ThemeMode.dark ? 'dark' : 'light');
+    String themeValue;
+    switch (mode) {
+      case ThemeMode.dark:
+        themeValue = 'dark';
+        break;
+      case ThemeMode.light:
+        themeValue = 'light';
+        break;
+      case ThemeMode.system:
+        themeValue = 'system';
+        break;
+    }
+    await StorageService.saveTheme(themeValue);
     notifyListeners();
   }
 
