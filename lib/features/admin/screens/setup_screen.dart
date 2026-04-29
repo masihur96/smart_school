@@ -53,7 +53,6 @@ class _SetupScreenState extends State<SetupScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _kBg,
       appBar: _buildAppBar(),
       body: TabBarView(
         controller: _tab,
@@ -154,7 +153,6 @@ class _ClassTab extends StatelessWidget {
     final classes = notifier.classes;
 
     return Scaffold(
-      backgroundColor: _kBg,
       body: notifier.isLoading
           ? const _LoadingView()
           : classes.isEmpty
@@ -181,30 +179,18 @@ class _ClassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      decoration: BoxDecoration(
-        color: _kCardBg,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 12,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
+    return Card(
       child: Column(
         children: [
           // ── Header strip ──
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: _kClassGrad,
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
+              // gradient: LinearGradient(
+              //   colors: _kClassGrad,
+              //   begin: Alignment.centerLeft,
+              //   end: Alignment.centerRight,
+              // ),
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(18),
               ),
@@ -217,18 +203,13 @@ class _ClassCard extends StatelessWidget {
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(
-                    Icons.class_outlined,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  child: const Icon(Icons.class_outlined, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     classRoom.name,
                     style: const TextStyle(
-                      color: Colors.white,
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.2,
@@ -249,11 +230,7 @@ class _ClassCard extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 12),
                     child: Text(
                       classRoom.description,
-                      style: TextStyle(
-                        color: _kTextMid.withOpacity(0.85),
-                        fontSize: 13,
-                        height: 1.5,
-                      ),
+                      style: TextStyle(fontSize: 13, height: 1.5),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -323,7 +300,6 @@ class _SectionTab extends StatelessWidget {
     final sections = notifier.sections;
 
     return Scaffold(
-      backgroundColor: _kBg,
       body: notifier.isLoading
           ? const _LoadingView()
           : sections.isEmpty
@@ -355,30 +331,18 @@ class _SectionCard extends StatelessWidget {
         )
         .name;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      decoration: BoxDecoration(
-        color: _kCardBg,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 12,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
+    return Card(
       child: Column(
         children: [
           // ── Header strip ──
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: _kSectionGrad,
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
+              // gradient: LinearGradient(
+              //   colors: _kSectionGrad,
+              //   begin: Alignment.centerLeft,
+              //   end: Alignment.centerRight,
+              // ),
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(18),
               ),
@@ -393,7 +357,7 @@ class _SectionCard extends StatelessWidget {
                   ),
                   child: const Icon(
                     Icons.tab_outlined,
-                    color: Colors.white,
+                    // color: Colors.white,
                     size: 20,
                   ),
                 ),
@@ -405,20 +369,13 @@ class _SectionCard extends StatelessWidget {
                       Text(
                         'Section ${section.name}',
                         style: const TextStyle(
-                          color: Colors.white,
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.2,
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Text(
-                        className,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontSize: 12,
-                        ),
-                      ),
+                      Text(className, style: TextStyle(fontSize: 12)),
                     ],
                   ),
                 ),
@@ -489,7 +446,6 @@ class _SubjectTab extends StatelessWidget {
     final subjects = notifier.subjects;
 
     return Scaffold(
-      backgroundColor: _kBg,
       body: notifier.isLoading
           ? const _LoadingView()
           : subjects.isEmpty
@@ -521,30 +477,13 @@ class _SubjectCard extends StatelessWidget {
         )
         .name;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      decoration: BoxDecoration(
-        color: _kCardBg,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 12,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
+    return Card(
       child: Column(
         children: [
           // ── Header strip ──
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: _kSubjectGrad,
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(18),
               ),
@@ -571,20 +510,13 @@ class _SubjectCard extends StatelessWidget {
                       Text(
                         subject.name,
                         style: const TextStyle(
-                          color: Colors.white,
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.2,
                         ),
                       ),
                       if (subject.code.isNotEmpty)
-                        Text(
-                          subject.code,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
-                            fontSize: 12,
-                          ),
-                        ),
+                        Text(subject.code, style: TextStyle(fontSize: 12)),
                     ],
                   ),
                 ),
@@ -602,7 +534,6 @@ class _SubjectCard extends StatelessWidget {
                     child: Text(
                       subject.code,
                       style: const TextStyle(
-                        color: Colors.white,
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                       ),
@@ -728,24 +659,16 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: _kTextMid),
+        Icon(icon, size: 16),
         const SizedBox(width: 8),
         Text(
           '$label: ',
-          style: const TextStyle(
-            color: _kTextMid,
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              color: _kTextDark,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -976,7 +899,7 @@ InputDecoration _inputDec(String label, {IconData? icon}) => InputDecoration(
   labelText: label,
   prefixIcon: icon != null ? Icon(icon, color: _kPrimary, size: 20) : null,
   filled: true,
-  fillColor: _kBg,
+
   border: OutlineInputBorder(
     borderRadius: BorderRadius.circular(12),
     borderSide: BorderSide.none,
