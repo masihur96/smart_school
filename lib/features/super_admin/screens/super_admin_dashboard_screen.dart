@@ -85,7 +85,6 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.backgroundLight,
         extendBodyBehindAppBar: true,
         appBar: AppBar(
           title: Text(
@@ -168,7 +167,6 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -179,7 +177,6 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -311,85 +308,71 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         crossAxisCount: 2,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
-        childAspectRatio: 1.4,
+        childAspectRatio: 1.3,
         children: [
           _buildStatCard(
             l10n.totalSchools,
             '${data.totalSchools}',
             Icons.business,
-            Colors.blue,
           ),
           _buildStatCard(
             l10n.totalStudents,
             '${data.totalStudents}',
             Icons.people,
-            Colors.green,
           ),
           _buildStatCard(
             l10n.totalTeachers,
             '${data.totalTeachers}',
             Icons.dns,
-            Colors.teal,
           ),
           _buildStatCard(
             l10n.activeSubscription,
             '${data.activeSubscriptions}',
             Icons.monetization_on,
-            Colors.deepPurple,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatCard(
-    String label,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
+  Widget _buildStatCard(String label, String value, IconData icon) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white30,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, size: 22),
             ),
-            child: Icon(icon, color: color, size: 22),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary.withOpacity(0.7),
-                  fontWeight: FontWeight.w500,
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildQuickActionsGrid(AppLocalizations l10n) {
     return MediaQuery.removePadding(
@@ -403,40 +386,25 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         mainAxisSpacing: 16,
         childAspectRatio: 1.6,
         children: [
-          _buildActionItem(
-            l10n.schools,
-            Icons.add_business_rounded,
-            Colors.indigo,
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => SuperAdminSchoolScreen()),
-              );
-            },
-          ),
-          _buildActionItem(
-            l10n.pricing,
-            Icons.terminal_rounded,
-            Colors.blueGrey,
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => PricingSchoolScreen()),
-              );
-            },
-          ),
-          _buildActionItem(
-            l10n.subscription,
-            Icons.podcasts_rounded,
-            Colors.deepOrange,
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => SubscriptionScreen()),
-              );
-            },
-          ),
-          _buildActionItem(l10n.backup, Icons.storage_rounded, Colors.teal, () {
+          _buildActionItem(l10n.schools, Icons.add_business_rounded, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => SuperAdminSchoolScreen()),
+            );
+          }),
+          _buildActionItem(l10n.pricing, Icons.terminal_rounded, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => PricingSchoolScreen()),
+            );
+          }),
+          _buildActionItem(l10n.subscription, Icons.podcasts_rounded, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => SubscriptionScreen()),
+            );
+          }),
+          _buildActionItem(l10n.backup, Icons.storage_rounded, () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => BackupScreen()),
@@ -447,33 +415,19 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
     );
   }
 
-  Widget _buildActionItem(
-    String title,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
+  Widget _buildActionItem(String title, IconData icon, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.primarySoft, width: 1.5),
-        ),
+      child: Card(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 20),
+            Icon(icon, size: 20),
             const SizedBox(width: 8),
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -547,20 +501,12 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
           children: [
             Text(
               l10n.managedSchools,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             Container(
               decoration: BoxDecoration(
                 boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
+                  BoxShadow(blurRadius: 10, offset: const Offset(0, 4)),
                 ],
               ),
               child: ElevatedButton.icon(
@@ -586,10 +532,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         const SizedBox(height: 12),
         Text(
           'Oversee operations for ${42} educational institutions',
-          style: TextStyle(
-            color: AppColors.textSecondary.withOpacity(0.7),
-            fontSize: 13,
-          ),
+          style: TextStyle(fontSize: 13),
         ),
         const SizedBox(height: 24),
         _buildSchoolCard(
@@ -653,7 +596,6 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                         style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
                         ),
                       ),
                     ),
@@ -689,50 +631,41 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.backgroundLight,
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
+          Divider(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.bar_chart_rounded, size: 18),
+                label: Text(
+                  l10n.analytics,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.bar_chart_rounded, size: 18),
-                  label: Text(
-                    l10n.analytics,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+
+                  elevation: 0,
+                  side: BorderSide(color: Colors.grey.shade300),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  minimumSize: const Size(0, 0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppColors.textPrimary,
-                    elevation: 0,
-                    side: BorderSide(color: Colors.grey.shade300),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    minimumSize: const Size(0, 0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    l10n.manage,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                child: Text(
+                  l10n.manage,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
@@ -742,9 +675,9 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
   Widget _buildSmallInfo(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 14, color: Colors.grey[600]),
+        Icon(icon, size: 14),
         const SizedBox(width: 4),
-        Text(text, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+        Text(text, style: TextStyle(fontSize: 12)),
       ],
     );
   }
@@ -757,19 +690,12 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
       children: [
         Text(
           l10n.systemConfiguration,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
           'Manage global application behaviors and security',
-          style: TextStyle(
-            color: AppColors.textSecondary.withOpacity(0.7),
-            fontSize: 13,
-          ),
+          style: TextStyle(fontSize: 13),
         ),
         const SizedBox(height: 24),
         _buildSettingsGroup('Access Control', [
@@ -800,11 +726,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         const SizedBox(height: 32),
         const Text(
           'Storage \u0026 Resources',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 20),
         _buildStorageInfo('Database Usage (PostgreSQL)', 0.65, Colors.blue),
@@ -864,7 +786,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+
               letterSpacing: 1.1,
             ),
           ),
@@ -875,30 +797,14 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
   }
 
   Widget _buildSettingToggle(String title, String subtitle, bool value) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.primarySoft, width: 1),
-      ),
+    return Card(
       child: SwitchListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
         title: Text(
           title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        subtitle: Text(
-          subtitle,
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary.withOpacity(0.7),
-          ),
-        ),
+        subtitle: Text(subtitle, style: TextStyle(fontSize: 12)),
         value: value,
         onChanged: (val) {},
         activeColor: AppColors.primary,
@@ -916,11 +822,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
           children: [
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
-              ),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             Text(
               '${(progress * 100).toInt()}%',
