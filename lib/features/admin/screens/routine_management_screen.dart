@@ -91,7 +91,6 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
     final bool isFiltered = _selectedClassId != null;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3FF),
       body: NestedScrollView(
         headerSliverBuilder: (context, _) => [
           _buildSliverHeader(context, classes, filteredSections),
@@ -584,20 +583,7 @@ class _RoutineEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: accentColor.withOpacity(0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-        border: Border.all(color: accentColor.withOpacity(0.1), width: 1),
-      ),
+    return Card(
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: IntrinsicHeight(
@@ -605,7 +591,7 @@ class _RoutineEntryCard extends StatelessWidget {
             children: [
               // Time Indicator side
               Container(
-                width: 80,
+                width: 90,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
                   color: accentColor.withOpacity(0.05),
@@ -619,7 +605,6 @@ class _RoutineEntryCard extends StatelessWidget {
                     Text(
                       entry.startTime.split(' ')[0],
                       style: TextStyle(
-                        color: accentColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -629,7 +614,6 @@ class _RoutineEntryCard extends StatelessWidget {
                           ? entry.startTime.split(' ')[1]
                           : '',
                       style: TextStyle(
-                        color: accentColor.withOpacity(0.6),
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
                       ),
@@ -644,7 +628,6 @@ class _RoutineEntryCard extends StatelessWidget {
                     Text(
                       entry.endTime.split(' ')[0],
                       style: TextStyle(
-                        color: accentColor.withOpacity(0.8),
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
                       ),
@@ -668,7 +651,7 @@ class _RoutineEntryCard extends StatelessWidget {
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 17,
-                                color: Color(0xFF1E1B4B),
+
                                 letterSpacing: -0.5,
                               ),
                             ),
@@ -679,16 +662,11 @@ class _RoutineEntryCard extends StatelessWidget {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          Icon(
-                            Icons.person_outline_rounded,
-                            size: 14,
-                            color: Colors.grey[500],
-                          ),
+                          Icon(Icons.person_outline_rounded, size: 14),
                           const SizedBox(width: 6),
                           Text(
                             teacherName,
                             style: TextStyle(
-                              color: Colors.grey[600],
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
                             ),
@@ -967,11 +945,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
       maxChildSize: 0.95,
       minChildSize: 0.5,
       expand: false,
-      builder: (_, scrollController) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
+      builder: (_, scrollController) => Card(
         child: Column(
           children: [
             // Drag handle
@@ -997,11 +971,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                       color: const Color(0xFF7C3AED).withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.add_alarm_rounded,
-                      color: Color(0xFF7C3AED),
-                      size: 22,
-                    ),
+                    child: const Icon(Icons.add_alarm_rounded, size: 22),
                   ),
                   const SizedBox(width: 14),
                   const Column(
@@ -1012,12 +982,11 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E1B4B),
                         ),
                       ),
                       Text(
                         'Fill in the details below',
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                        style: TextStyle(fontSize: 12),
                       ),
                     ],
                   ),
@@ -1174,7 +1143,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                           hintText: 'e.g. 101, Lab-A',
                           hintStyle: TextStyle(color: Colors.grey[400]),
                           filled: true,
-                          fillColor: const Color(0xFFF8F7FF),
+
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(
@@ -1339,15 +1308,11 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: const Color(0xFF7C3AED)),
+        Icon(icon, size: 16),
         const SizedBox(width: 6),
         Text(
           label,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
-            color: Color(0xFF1E1B4B),
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
         ),
       ],
     );
@@ -1372,7 +1337,6 @@ class _StyledDropdown<T> extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F7FF),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: value != null

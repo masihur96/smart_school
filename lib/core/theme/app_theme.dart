@@ -110,7 +110,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(color: Colors.white.withOpacity(0.1)),
         ),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        margin: const EdgeInsets.only(bottom: 14),
         clipBehavior: Clip.antiAlias,
         surfaceTintColor: Colors.transparent,
       ),
