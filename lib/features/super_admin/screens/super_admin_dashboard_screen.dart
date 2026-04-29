@@ -124,7 +124,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
             selectedItemColor: AppColors.primary,
             unselectedItemColor: Colors.grey,
             type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.white,
+            // backgroundColor: Colors.white,
             elevation: 0,
             items: [
               BottomNavigationBarItem(

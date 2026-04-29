@@ -26,7 +26,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       body: RefreshIndicator(
         onRefresh: () =>
             context.read<SubscriptionNotifier>().fetchSubscriptions(),
@@ -45,7 +44,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
                       ),
                     ),
                     Consumer<SubscriptionNotifier>(
@@ -53,7 +51,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                         return Text(
                           '${notifier.subscriptions.length} records',
                           style: TextStyle(
-                            color: AppColors.primary,
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
@@ -211,20 +208,7 @@ class SubscriptionCard extends StatelessWidget {
     final plan = subscription.pricingPlan;
     final school = subscription.school;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-        border: Border.all(color: Colors.grey.withOpacity(0.1), width: 1),
-      ),
+    return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -251,9 +235,7 @@ class SubscriptionCard extends StatelessWidget {
                     color: AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Center(
-                    child: Icon(Icons.school_rounded, color: AppColors.primary),
-                  ),
+                  child: const Center(child: Icon(Icons.school_rounded)),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -265,7 +247,6 @@ class SubscriptionCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -293,7 +274,7 @@ class SubscriptionCard extends StatelessWidget {
                                   subscription.schoolId,
                                   style: const TextStyle(
                                     fontSize: 12,
-                                    color: AppColors.primary,
+
                                     fontFamily: 'monospace',
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -313,19 +294,12 @@ class SubscriptionCard extends StatelessWidget {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          const Icon(
-                            Icons.email_outlined,
-                            size: 14,
-                            color: AppColors.textSecondary,
-                          ),
+                          const Icon(Icons.email_outlined, size: 14),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               school?.email ?? 'No email',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textSecondary,
-                              ),
+                              style: const TextStyle(fontSize: 13),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -335,18 +309,11 @@ class SubscriptionCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(
-                            Icons.phone_outlined,
-                            size: 14,
-                            color: AppColors.textSecondary,
-                          ),
+                          const Icon(Icons.phone_outlined, size: 14),
                           const SizedBox(width: 4),
                           Text(
                             school?.phone ?? 'No phone',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: AppColors.textSecondary,
-                            ),
+                            style: const TextStyle(fontSize: 13),
                           ),
                         ],
                       ),
@@ -399,7 +366,11 @@ class SubscriptionCard extends StatelessWidget {
                       ),
                       child: PopupMenuButton<String>(
                         padding: EdgeInsets.zero,
-                        icon: const Icon(Icons.more_horiz, size: 18, color: AppColors.textSecondary),
+                        icon: const Icon(
+                          Icons.more_horiz,
+                          size: 18,
+                          color: AppColors.textSecondary,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -408,12 +379,21 @@ class SubscriptionCard extends StatelessWidget {
                           if (value == 'status') {
                             final success = await context
                                 .read<SubscriptionNotifier>()
-                                .updateSubscriptionStatus(subscription.id, !isActive);
+                                .updateSubscriptionStatus(
+                                  subscription.id,
+                                  !isActive,
+                                );
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(success ? 'Status updated successfully' : 'Failed to update status'),
-                                  backgroundColor: success ? Colors.green : Colors.red,
+                                  content: Text(
+                                    success
+                                        ? 'Status updated successfully'
+                                        : 'Failed to update status',
+                                  ),
+                                  backgroundColor: success
+                                      ? Colors.green
+                                      : Colors.red,
                                 ),
                               );
                             }
@@ -422,15 +402,21 @@ class SubscriptionCard extends StatelessWidget {
                               context: context,
                               builder: (context) => AlertDialog(
                                 title: const Text('Delete Subscription'),
-                                content: const Text('Are you sure you want to delete this subscription? This action cannot be undone.'),
+                                content: const Text(
+                                  'Are you sure you want to delete this subscription? This action cannot be undone.',
+                                ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () => Navigator.pop(context, false),
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
                                     child: const Text('Cancel'),
                                   ),
                                   TextButton(
-                                    onPressed: () => Navigator.pop(context, true),
-                                    style: TextButton.styleFrom(foregroundColor: Colors.red),
+                                    onPressed: () =>
+                                        Navigator.pop(context, true),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: Colors.red,
+                                    ),
                                     child: const Text('Delete'),
                                   ),
                                 ],
@@ -444,8 +430,14 @@ class SubscriptionCard extends StatelessWidget {
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text(success ? 'Subscription deleted successfully' : 'Failed to delete subscription'),
-                                    backgroundColor: success ? Colors.green : Colors.red,
+                                    content: Text(
+                                      success
+                                          ? 'Subscription deleted successfully'
+                                          : 'Failed to delete subscription',
+                                    ),
+                                    backgroundColor: success
+                                        ? Colors.green
+                                        : Colors.red,
                                   ),
                                 );
                               }
@@ -458,12 +450,19 @@ class SubscriptionCard extends StatelessWidget {
                             child: Row(
                               children: [
                                 Icon(
-                                  isActive ? Icons.cancel_outlined : Icons.check_circle_outline,
+                                  isActive
+                                      ? Icons.cancel_outlined
+                                      : Icons.check_circle_outline,
                                   color: isActive ? Colors.red : Colors.green,
                                   size: 20,
                                 ),
                                 const SizedBox(width: 8),
-                                Text(isActive ? 'Deactivate' : 'Activate', style: TextStyle(color: isActive ? Colors.red : Colors.green)),
+                                Text(
+                                  isActive ? 'Deactivate' : 'Activate',
+                                  style: TextStyle(
+                                    color: isActive ? Colors.red : Colors.green,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -471,9 +470,16 @@ class SubscriptionCard extends StatelessWidget {
                             value: 'delete',
                             child: Row(
                               children: [
-                                Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                                Icon(
+                                  Icons.delete_outline,
+                                  color: Colors.red,
+                                  size: 20,
+                                ),
                                 SizedBox(width: 8),
-                                Text('Delete', style: TextStyle(color: Colors.red)),
+                                Text(
+                                  'Delete',
+                                  style: TextStyle(color: Colors.red),
+                                ),
                               ],
                             ),
                           ),
@@ -499,46 +505,41 @@ class SubscriptionCard extends StatelessWidget {
                       'Plan',
                       plan?.name ?? 'N/A',
                       Icons.star_rounded,
-                      Colors.orange,
                     ),
                     const SizedBox(width: 16),
                     _buildStatCard(
                       'Students',
                       '${subscription.lastStudentCount} / ${plan?.maxStudents ?? '∞'}',
                       Icons.people_alt_rounded,
-                      Colors.blue,
                     ),
                   ],
                 ),
                 const SizedBox(height: 20),
 
                 // Dates
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.withOpacity(0.1)),
-                  ),
-                  child: Row(
-                    children: [
-                      _buildDateItem(
-                        'Start Date',
-                        _formatDate(subscription.startDate),
-                        true,
-                      ),
-                      Container(
-                        width: 1,
-                        height: 30,
-                        color: Colors.grey.withOpacity(0.3),
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                      ),
-                      _buildDateItem(
-                        'End Date',
-                        _formatDate(subscription.endDate),
-                        false,
-                      ),
-                    ],
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: Row(
+                      children: [
+                        _buildDateItem(
+                          'Start Date',
+                          _formatDate(subscription.startDate),
+                          true,
+                        ),
+                        Container(
+                          width: 1,
+                          height: 30,
+
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                        ),
+                        _buildDateItem(
+                          'End Date',
+                          _formatDate(subscription.endDate),
+                          false,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
@@ -547,20 +548,12 @@ class SubscriptionCard extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
-                        Icons.location_on_outlined,
-                        size: 16,
-                        color: AppColors.textSecondary,
-                      ),
+                      const Icon(Icons.location_on_outlined, size: 16),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           school.address.replaceAll("\n", ", "),
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: AppColors.textSecondary,
-                            height: 1.4,
-                          ),
+                          style: const TextStyle(fontSize: 13, height: 1.4),
                         ),
                       ),
                     ],
@@ -570,19 +563,11 @@ class SubscriptionCard extends StatelessWidget {
             ),
           ),
 
+          Divider(),
+
           // Footer
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.02),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20),
-              ),
-              border: Border(
-                top: BorderSide(color: Colors.grey.withOpacity(0.08)),
-              ),
-            ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -599,17 +584,13 @@ class SubscriptionCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
                       ),
                     ),
                   ],
                 ),
                 Text(
                   'Created: ${_formatDate(subscription.createdAt)}',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textSecondary,
-                  ),
+                  style: const TextStyle(fontSize: 11),
                 ),
               ],
             ),
@@ -619,58 +600,46 @@ class SubscriptionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(
-    String label,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
+  Widget _buildStatCard(String label, String value, IconData icon) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.1)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(shape: BoxShape.circle),
+                child: Icon(icon, size: 18),
               ),
-              child: Icon(icon, size: 18, color: color),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w500,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 11,
+
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                    const SizedBox(height: 2),
+                    Text(
+                      value,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -688,14 +657,13 @@ class SubscriptionCard extends StatelessWidget {
                     ? Icons.calendar_today_rounded
                     : Icons.event_busy_rounded,
                 size: 14,
-                color: AppColors.textSecondary,
               ),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: const TextStyle(
                   fontSize: 11,
-                  color: AppColors.textSecondary,
+
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -704,11 +672,7 @@ class SubscriptionCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             date,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ],
       ),
