@@ -111,6 +111,7 @@ class AppTheme {
           side: BorderSide(color: Colors.white.withOpacity(0.1)),
         ),
         margin: const EdgeInsets.only(bottom: 14),
+
         clipBehavior: Clip.antiAlias,
         surfaceTintColor: Colors.transparent,
       ),

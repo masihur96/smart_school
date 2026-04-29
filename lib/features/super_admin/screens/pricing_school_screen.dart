@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+
 import '../models/pricing_plan_model.dart';
 import '../providers/pricing_notifier.dart';
 
@@ -32,7 +33,6 @@ class _PricingSchoolScreenState extends State<PricingSchoolScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
@@ -45,18 +45,13 @@ class _PricingSchoolScreenState extends State<PricingSchoolScreen> {
                 children: [
                   const Text(
                     'Available Plans',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   Consumer<PricingNotifier>(
                     builder: (context, notifier, _) {
                       return Text(
                         '${notifier.plans.length} Plans',
                         style: TextStyle(
-                          color: AppColors.primary,
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
                         ),
@@ -188,13 +183,10 @@ class _PricingSchoolScreenState extends State<PricingSchoolScreen> {
         return SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final plan = notifier.plans[index];
-                return PricingPlanCard(plan: plan);
-              },
-              childCount: notifier.plans.length,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final plan = notifier.plans[index];
+              return PricingPlanCard(plan: plan);
+            }, childCount: notifier.plans.length),
           ),
         );
       },
@@ -209,23 +201,7 @@ class PricingPlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-        border: Border.all(
-          color: plan.isCustom ? Colors.orange.withOpacity(0.3) : AppColors.primarySoft,
-          width: 1.5,
-        ),
-      ),
+    return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -246,25 +222,23 @@ class PricingPlanCard extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             plan.description,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: AppColors.textSecondary.withOpacity(0.7),
-                            ),
+                            style: TextStyle(fontSize: 13),
                           ),
                         ],
                       ),
                     ),
                     if (plan.isCustom)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Text(
@@ -283,14 +257,15 @@ class PricingPlanCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_horiz_rounded, color: AppColors.textSecondary),
+                      icon: const Icon(Icons.more_horiz_rounded),
                       onSelected: (value) {
                         if (value == 'edit') {
                           showModalBottomSheet(
                             context: context,
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
-                            builder: (context) => AddPricingPlanBottomSheet(plan: plan),
+                            builder: (context) =>
+                                AddPricingPlanBottomSheet(plan: plan),
                           );
                         } else if (value == 'delete') {
                           _showDeleteConfirmation(context);
@@ -311,9 +286,16 @@ class PricingPlanCard extends StatelessWidget {
                           value: 'delete',
                           child: Row(
                             children: [
-                              Icon(Icons.delete_outline_rounded, size: 20, color: Colors.red),
+                              Icon(
+                                Icons.delete_outline_rounded,
+                                size: 20,
+                                color: Colors.red,
+                              ),
                               SizedBox(width: 8),
-                              Text('Delete Plan', style: TextStyle(color: Colors.red)),
+                              Text(
+                                'Delete Plan',
+                                style: TextStyle(color: Colors.red),
+                              ),
                             ],
                           ),
                         ),
@@ -349,59 +331,45 @@ class PricingPlanCard extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.backgroundLight.withOpacity(0.5),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
+          Divider(),
+          Row(
+            children: [
+              const Icon(Icons.info_outline_rounded, size: 16),
+              const SizedBox(width: 8),
+              Text(
+                'Created: ${plan.createdAt?.split('T')[0] ?? 'N/A'}',
+                style: const TextStyle(),
               ),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.info_outline_rounded, size: 16, color: AppColors.textSecondary),
-                const SizedBox(width: 8),
-                Text(
-                  'Created: ${plan.createdAt?.split('T')[0] ?? 'N/A'}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                ),
-                const Spacer(),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text('View Details'),
-                ),
-              ],
-            ),
+              const Spacer(),
+              TextButton(onPressed: () {}, child: const Text('View Details')),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPricingDetail(BuildContext context, IconData icon, String label, String value) {
+  Widget _buildPricingDetail(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 14, color: AppColors.primary),
+              Icon(icon, size: 14),
               const SizedBox(width: 4),
-              Text(
-                label,
-                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-              ),
+              Text(label, style: const TextStyle(fontSize: 11)),
             ],
           ),
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -413,7 +381,9 @@ class PricingPlanCard extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Pricing Plan?'),
-        content: Text('Are you sure you want to delete "${plan.name}"? This action cannot be undone.'),
+        content: Text(
+          'Are you sure you want to delete "${plan.name}"? This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -422,14 +392,19 @@ class PricingPlanCard extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              final success = await context.read<PricingNotifier>().deletePricingPlan(plan.id!);
+              final success = await context
+                  .read<PricingNotifier>()
+                  .deletePricingPlan(plan.id!);
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('"${plan.name}" deleted')),
                 );
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('DELETE'),
           ),
         ],
@@ -443,7 +418,8 @@ class AddPricingPlanBottomSheet extends StatefulWidget {
   const AddPricingPlanBottomSheet({super.key, this.plan});
 
   @override
-  State<AddPricingPlanBottomSheet> createState() => _AddPricingPlanBottomSheetState();
+  State<AddPricingPlanBottomSheet> createState() =>
+      _AddPricingPlanBottomSheetState();
 }
 
 class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
@@ -461,10 +437,18 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
     super.initState();
     _nameController = TextEditingController(text: widget.plan?.name);
     _descController = TextEditingController(text: widget.plan?.description);
-    _minStudentsController = TextEditingController(text: widget.plan?.minStudents.toString() ?? '0');
-    _maxStudentsController = TextEditingController(text: widget.plan?.maxStudents.toString() ?? '');
-    _priceMonthController = TextEditingController(text: widget.plan?.pricePerMonth ?? '');
-    _priceStudentController = TextEditingController(text: widget.plan?.pricePerStudent ?? '');
+    _minStudentsController = TextEditingController(
+      text: widget.plan?.minStudents.toString() ?? '0',
+    );
+    _maxStudentsController = TextEditingController(
+      text: widget.plan?.maxStudents.toString() ?? '',
+    );
+    _priceMonthController = TextEditingController(
+      text: widget.plan?.pricePerMonth ?? '',
+    );
+    _priceStudentController = TextEditingController(
+      text: widget.plan?.pricePerStudent ?? '',
+    );
     _isCustom = widget.plan?.isCustom ?? false;
   }
 
@@ -506,7 +490,11 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(isEditing ? 'Pricing plan updated successfully!' : 'Pricing plan created successfully!'),
+            content: Text(
+              isEditing
+                  ? 'Pricing plan updated successfully!'
+                  : 'Pricing plan created successfully!',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -519,144 +507,156 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
     final padding = MediaQuery.of(context).viewInsets.bottom;
     final isEditing = widget.plan != null;
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-      ),
-      padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + padding),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                isEditing ? 'Update Pricing Plan' : 'Create New Plan',
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                isEditing ? 'Modify the pricing structure below' : 'Define a new pricing structure for institutions',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary.withOpacity(0.7),
-                ),
-              ),
-              const SizedBox(height: 24),
-              _buildTextField('Plan Name', _nameController, Icons.badge_outlined),
-              const SizedBox(height: 16),
-              _buildTextField('Description', _descController, Icons.description_outlined),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      'Min Students',
-                      _minStudentsController,
-                      Icons.group_remove_outlined,
-                      keyboardType: TextInputType.number,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTextField(
-                      'Max Students',
-                      _maxStudentsController,
-                      Icons.group_add_outlined,
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      'Price/Month',
-                      _priceMonthController,
-                      Icons.money_outlined,
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTextField(
-                      'Price/Student',
-                      _priceStudentController,
-                      Icons.person_pin_circle_outlined,
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundLight,
-                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                const SizedBox(height: 24),
+                Text(
+                  isEditing ? 'Update Pricing Plan' : 'Create New Plan',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  isEditing
+                      ? 'Modify the pricing structure below'
+                      : 'Define a new pricing structure for institutions',
+                  style: TextStyle(fontSize: 14),
+                ),
+                const SizedBox(height: 24),
+                _buildTextField(
+                  'Plan Name',
+                  _nameController,
+                  Icons.badge_outlined,
+                ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  'Description',
+                  _descController,
+                  Icons.description_outlined,
+                ),
+                const SizedBox(height: 16),
+                Row(
                   children: [
-                    const Text(
-                      'Custom Plan',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    Expanded(
+                      child: _buildTextField(
+                        'Min Students',
+                        _minStudentsController,
+                        Icons.group_remove_outlined,
+                        keyboardType: TextInputType.number,
+                      ),
                     ),
-                    Switch.adaptive(
-                      value: _isCustom,
-                      activeColor: AppColors.primary,
-                      onChanged: (val) => setState(() => _isCustom = val),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildTextField(
+                        'Max Students',
+                        _maxStudentsController,
+                        Icons.group_add_outlined,
+                        keyboardType: TextInputType.number,
+                      ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 32),
-              Consumer<PricingNotifier>(
-                builder: (context, notifier, child) {
-                  return ElevatedButton(
-                    onPressed: notifier.isLoading ? null : _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 56),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
+                        'Price/Month',
+                        _priceMonthController,
+                        Icons.money_outlined,
+                        keyboardType: TextInputType.number,
                       ),
-                      elevation: 0,
                     ),
-                    child: notifier.isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : Text(
-                            isEditing ? 'UPDATE PRICING PLAN' : 'CREATE PRICING PLAN',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildTextField(
+                        'Price/Student',
+                        _priceStudentController,
+                        Icons.person_pin_circle_outlined,
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundLight,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Custom Plan',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Switch.adaptive(
+                        value: _isCustom,
+                        activeColor: AppColors.primary,
+                        onChanged: (val) => setState(() => _isCustom = val),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Consumer<PricingNotifier>(
+                  builder: (context, notifier, child) {
+                    return ElevatedButton(
+                      onPressed: notifier.isLoading ? null : _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 56),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: notifier.isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                              isEditing
+                                  ? 'UPDATE PRICING PLAN'
+                                  : 'CREATE PRICING PLAN',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1,
+                              ),
                             ),
-                          ),
-                  );
-                },
-              ),
-            ],
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -674,7 +674,7 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
       keyboardType: keyboardType,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon, color: AppColors.primary),
+        prefixIcon: Icon(icon),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: Colors.grey.shade300),
@@ -688,7 +688,6 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         filled: true,
-        fillColor: Colors.grey.shade50,
       ),
       validator: (value) => value == null || value.isEmpty ? 'Required' : null,
     );
