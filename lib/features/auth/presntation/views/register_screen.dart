@@ -81,7 +81,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         title: const Text('Create Account'),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: const Color(0xFF6750A4),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -95,15 +94,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   'Join Smart School',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF6750A4),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Enter your details to register as Student.',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 32),
                 TextFormField(
