@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/route_generator.dart';
 import 'package:smart_school/features/admin/providers/settings_provider.dart';
-import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
-import 'package:smart_school/models/user_model.dart';
+import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
+import 'package:smart_school/models/user_model.dart';
 
 class SettingManagementScreen extends StatefulWidget {
   const SettingManagementScreen({super.key});
