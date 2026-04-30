@@ -1,25 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../providers/student_exam_provider.dart';
+import 'package:provider/provider.dart';
+
 import '../../../models/school_models.dart';
+import '../providers/student_exam_provider.dart';
 
 class StudentExamDetailScreen extends StatefulWidget {
   final Exam exam;
   const StudentExamDetailScreen({super.key, required this.exam});
 
   @override
-  State<StudentExamDetailScreen> createState() => _StudentExamDetailScreenState();
+  State<StudentExamDetailScreen> createState() =>
+      _StudentExamDetailScreenState();
 }
 
-class _StudentExamDetailScreenState extends State<StudentExamDetailScreen> with SingleTickerProviderStateMixin {
+class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    
+
     Future.microtask(() {
       final p = context.read<StudentExamNotifier>();
       p.fetchExamRoutine(widget.exam.id);
@@ -37,7 +40,6 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen> with 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: Text(widget.exam.name),
         backgroundColor: Colors.indigo[800],
@@ -56,11 +58,7 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen> with 
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildRoutineTab(),
-          _buildSyllabusTab(),
-          _buildResultsTab(),
-        ],
+        children: [_buildRoutineTab(), _buildSyllabusTab(), _buildResultsTab()],
       ),
     );
   }
@@ -68,7 +66,8 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen> with 
   Widget _buildRoutineTab() {
     return Consumer<StudentExamNotifier>(
       builder: (context, p, child) {
-        if (p.isLoading) return const Center(child: CircularProgressIndicator());
+        if (p.isLoading)
+          return const Center(child: CircularProgressIndicator());
         if (p.routine.isEmpty) return _buildEmptyState('No routine available.');
 
         return ListView.builder(
@@ -86,9 +85,13 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen> with 
   Widget _buildSyllabusTab() {
     return Consumer<StudentExamNotifier>(
       builder: (context, p, child) {
-        if (p.isLoading) return const Center(child: CircularProgressIndicator());
-        final syllabusItems = p.syllabus.where((a) => a.syllabus != null && a.syllabus!.isNotEmpty).toList();
-        if (syllabusItems.isEmpty) return _buildEmptyState('No syllabus detailed.');
+        if (p.isLoading)
+          return const Center(child: CircularProgressIndicator());
+        final syllabusItems = p.syllabus
+            .where((a) => a.syllabus != null && a.syllabus!.isNotEmpty)
+            .toList();
+        if (syllabusItems.isEmpty)
+          return _buildEmptyState('No syllabus detailed.');
 
         return ListView.builder(
           padding: const EdgeInsets.all(16),
@@ -96,8 +99,6 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen> with 
           itemBuilder: (context, index) {
             final assignment = syllabusItems[index];
             return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -105,7 +106,10 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen> with 
                   children: [
                     Text(
                       assignment.subjectName,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     const Divider(),
                     Text(
@@ -125,8 +129,10 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen> with 
   Widget _buildResultsTab() {
     return Consumer<StudentExamNotifier>(
       builder: (context, p, child) {
-        if (p.isLoading) return const Center(child: CircularProgressIndicator());
-        if (p.results.isEmpty) return _buildEmptyState('Results not published yet.');
+        if (p.isLoading)
+          return const Center(child: CircularProgressIndicator());
+        if (p.results.isEmpty)
+          return _buildEmptyState('Results not published yet.');
 
         return _buildResultsList(p.results);
       },
@@ -140,10 +146,16 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen> with 
       child: ListTile(
         leading: Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: Colors.indigo[50], shape: BoxShape.circle),
+          decoration: BoxDecoration(
+            color: Colors.indigo[50],
+            shape: BoxShape.circle,
+          ),
           child: const Icon(Icons.assignment, color: Colors.indigo),
         ),
-        title: Text(a.subjectName, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          a.subjectName,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -181,15 +193,24 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen> with 
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [Colors.indigo.shade800, Colors.indigo.shade500]),
+        gradient: LinearGradient(
+          colors: [Colors.indigo.shade800, Colors.indigo.shade500],
+        ),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         children: [
-          const Text('Total Performance', style: TextStyle(color: Colors.white70)),
+          const Text(
+            'Total Performance',
+            style: TextStyle(color: Colors.white70),
+          ),
           Text(
             '${percentage.toStringAsFixed(1)}%',
-            style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -202,7 +223,9 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen> with 
   }
 
   Widget _buildResultCard(Result result) {
-    final percentage = result.totalMarks > 0 ? (result.marksObtained / result.totalMarks) : 0.0;
+    final percentage = result.totalMarks > 0
+        ? (result.marksObtained / result.totalMarks)
+        : 0.0;
     final isPassed = result.marksObtained >= (result.totalMarks * 0.33);
 
     return Card(
@@ -218,8 +241,17 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen> with 
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(result.subject?.name ?? 'Subject', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    Text('By ${result.teacher?.name ?? 'Teacher'}', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                    Text(
+                      result.subject?.name ?? 'Subject',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      'By ${result.teacher?.name ?? 'Teacher'}',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                    ),
                   ],
                 ),
                 Text(
@@ -236,7 +268,9 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen> with 
             LinearProgressIndicator(
               value: percentage,
               backgroundColor: Colors.grey[200],
-              valueColor: AlwaysStoppedAnimation<Color>(isPassed ? Colors.green : Colors.indigo),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                isPassed ? Colors.green : Colors.indigo,
+              ),
             ),
           ],
         ),
@@ -251,7 +285,10 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen> with 
         children: [
           Icon(Icons.info_outline, size: 64, color: Colors.grey[300]),
           const SizedBox(height: 16),
-          Text(message, style: const TextStyle(color: Colors.grey, fontSize: 16)),
+          Text(
+            message,
+            style: const TextStyle(color: Colors.grey, fontSize: 16),
+          ),
         ],
       ),
     );

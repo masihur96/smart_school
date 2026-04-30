@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_school/models/student_model.dart';
-import 'package:smart_school/models/teacher_model.dart';
-import '../providers/student_routine_provider.dart';
-import '../providers/student_homework_provider.dart';
-import '../../admin/providers/student_provider.dart';
-import '../../admin/providers/setup_provider.dart';
-import '../../admin/providers/teacher_provider.dart';
-import '../../auth/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
+
 import '../../../models/school_models.dart' hide Teacher;
+import '../../auth/providers/auth_provider.dart';
+import '../providers/student_homework_provider.dart';
+import '../providers/student_routine_provider.dart';
 
 class StudentRoutineScreen extends StatefulWidget {
   const StudentRoutineScreen({super.key});
@@ -33,7 +29,9 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
 
     if (mounted) {
       context.read<StudentRoutineNotifier>().fetchRoutine(currentUser.classId!);
-      context.read<StudentHomeworkNotifier>().fetchHomework(currentUser.classId!);
+      context.read<StudentHomeworkNotifier>().fetchHomework(
+        currentUser.classId!,
+      );
     }
   }
 
@@ -73,10 +71,11 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF9FAFB),
         appBar: AppBar(
-          title: const Text('Academic Schedule',
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          title: const Text(
+            'Academic Schedule',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           backgroundColor: Colors.green,
           foregroundColor: Colors.white,
           elevation: 0,
@@ -122,8 +121,11 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
     );
   }
 
-  Widget _buildRoutineList(List<RoutineEntry> entries,
-      StudentRoutineNotifier routineNotifier, List<String> days) {
+  Widget _buildRoutineList(
+    List<RoutineEntry> entries,
+    StudentRoutineNotifier routineNotifier,
+    List<String> days,
+  ) {
     if (entries.isEmpty && !routineNotifier.isLoading) {
       return _buildEmptyState(
         icon: Icons.calendar_month_outlined,
@@ -133,7 +135,9 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
     }
 
     // Filter days that actually have entries
-    final activeDays = days.where((d) => entries.any((e) => e.day == d)).toList();
+    final activeDays = days
+        .where((d) => entries.any((e) => e.day == d))
+        .toList();
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 20),
@@ -141,7 +145,7 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
       itemBuilder: (context, index) {
         final day = activeDays[index];
         final dayEntries = entries.where((e) => e.day == day).toList();
-        
+
         // Sort day entries by start time
         dayEntries.sort((a, b) => a.startTime.compareTo(b.startTime));
 
@@ -166,7 +170,10 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                   if (isToday) ...[
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.green.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4),
@@ -193,7 +200,9 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
   }
 
   Widget _buildHomeworkList(
-      BuildContext context, StudentHomeworkNotifier homeworkNotifier) {
+    BuildContext context,
+    StudentHomeworkNotifier homeworkNotifier,
+  ) {
     final homeworkList = homeworkNotifier.homeworkList;
 
     if (homeworkNotifier.isLoading && homeworkList.isEmpty) {
@@ -222,8 +231,11 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
     );
   }
 
-  Widget _buildEmptyState(
-      {required IconData icon, required String title, required String subtitle}) {
+  Widget _buildEmptyState({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -267,7 +279,7 @@ class _RoutineCard extends StatelessWidget {
     final subjectName = entry.subjectEntity?.name ?? 'Unknown Subject';
     final teacherName = entry.teacherEntity?.name ?? 'Teacher Not Assigned';
     final room = entry.roomNumber ?? 'N/A';
-    
+
     // Format times to look cleaner (e.g. 09:00:00 -> 09:00 AM)
     String formatTime(String? timeStr) {
       if (timeStr == null || timeStr.isEmpty) return 'N/A';
@@ -282,20 +294,7 @@ class _RoutineCard extends StatelessWidget {
     final startTime = formatTime(entry.startTime);
     final endTime = formatTime(entry.endTime);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: Colors.grey[200]!),
-      ),
+    return Card(
       child: IntrinsicHeight(
         child: Row(
           children: [
@@ -322,7 +321,6 @@ class _RoutineCard extends StatelessWidget {
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
-                            color: Color(0xFF1F2937),
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -330,18 +328,14 @@ class _RoutineCard extends StatelessWidget {
                           endTime,
                           style: TextStyle(
                             fontSize: 11,
-                            color: Colors.grey[500],
+
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(width: 16),
-                    Container(
-                      height: 30,
-                      width: 1,
-                      color: Colors.grey[200],
-                    ),
+                    Container(height: 30, width: 1),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
@@ -352,21 +346,17 @@ class _RoutineCard extends StatelessWidget {
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
-                              color: Color(0xFF1F2937),
                             ),
                           ),
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              Icon(Icons.person_outline, size: 12, color: Colors.grey[600]),
+                              Icon(Icons.person_outline, size: 12),
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
                                   teacherName,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
+                                  style: TextStyle(fontSize: 12),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -377,7 +367,10 @@ class _RoutineCard extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.blue.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(8),
@@ -387,7 +380,6 @@ class _RoutineCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue,
                         ),
                       ),
                     ),
@@ -431,65 +423,50 @@ class _HomeworkCard extends StatelessWidget {
       statusText = 'Pending';
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      DateFormat('MMM d').format(hw.dueDate),
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: isOverdue ? Colors.red : Colors.grey[500],
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        DateFormat('MMM d').format(hw.dueDate),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: isOverdue ? Colors.red : Colors.grey[500],
+                        ),
                       ),
+                      _StatusChip(color: statusColor, text: statusText),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    hw.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
-                    _StatusChip(color: statusColor, text: statusText),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  hw.title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Color(0xFF1F2937),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  hw.description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 13,
-                    height: 1.4,
+                  const SizedBox(height: 4),
+                  Text(
+                    hw.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 13, height: 1.4),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

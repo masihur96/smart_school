@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../providers/student_homework_provider.dart';
+
+import '../../../models/school_models.dart';
 import '../../admin/providers/setup_provider.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../../models/school_models.dart';
-import 'package:intl/intl.dart';
+import '../providers/student_homework_provider.dart';
 
 class StudentHomeworkScreen extends StatefulWidget {
   final bool hideAppBar;
@@ -44,12 +45,13 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> {
     final subjects = context.watch<SubjectSetupNotifier>().subjects;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
       appBar: widget.hideAppBar
           ? null
           : AppBar(
-              title: const Text('My Homework',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              title: const Text(
+                'My Homework',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
               elevation: 0,
@@ -59,9 +61,9 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> {
           : RefreshIndicator(
               onRefresh: () async {
                 if (currentUser.classId != null) {
-                  await context
-                      .read<StudentHomeworkNotifier>()
-                      .fetchHomework(currentUser.classId!);
+                  await context.read<StudentHomeworkNotifier>().fetchHomework(
+                    currentUser.classId!,
+                  );
                 }
               },
               child: homeworkList.isEmpty
@@ -108,30 +110,29 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> {
               color: Colors.green.withOpacity(0.05),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.assignment_turned_in_outlined,
-                size: 64, color: Colors.green.withOpacity(0.3)),
+            child: Icon(
+              Icons.assignment_turned_in_outlined,
+              size: 64,
+              color: Colors.green.withOpacity(0.3),
+            ),
           ),
           const SizedBox(height: 20),
           const Text(
             'All caught up!',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1F2937),
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          Text(
-            'No homework assigned to your class yet.',
-            style: TextStyle(color: Colors.grey[500]),
-          ),
+          Text('No homework assigned to your class yet.'),
         ],
       ),
     );
   }
 
   void _showDetailSheet(
-      BuildContext context, StudentHomework sh, String subName) {
+    BuildContext context,
+    StudentHomework sh,
+    String subName,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -272,8 +273,11 @@ class _HomeworkCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(Icons.chevron_right_rounded,
-                      size: 16, color: Colors.green),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    size: 16,
+                    color: Colors.green,
+                  ),
                 ],
               ),
             ),
@@ -356,7 +360,10 @@ class _HomeworkDetailSheet extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.green.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
@@ -422,7 +429,11 @@ class _HomeworkDetailSheet extends StatelessWidget {
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.comment_outlined, size: 16, color: Colors.blue),
+                      Icon(
+                        Icons.comment_outlined,
+                        size: 16,
+                        color: Colors.blue,
+                      ),
                       SizedBox(width: 8),
                       Text(
                         'Teacher\'s Comment',
@@ -437,7 +448,9 @@ class _HomeworkDetailSheet extends StatelessWidget {
                   Text(
                     sh.comment!,
                     style: TextStyle(
-                        color: Colors.grey[700], fontStyle: FontStyle.italic),
+                      color: Colors.grey[700],
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
                 ],
               ),

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../providers/student_exam_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
+
 import '../../../models/school_models.dart';
+import '../providers/student_exam_provider.dart';
 import 'student_exam_detail_screen.dart';
 
 class StudentResultScreen extends StatefulWidget {
@@ -29,7 +31,6 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
     final exams = examNotifier.exams;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       appBar: widget.hideAppBar
           ? null
           : AppBar(
@@ -41,17 +42,18 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
               actions: [
                 IconButton(
                   icon: const Icon(Icons.refresh),
-                  onPressed: () => context.read<StudentExamNotifier>().fetchExams(),
+                  onPressed: () =>
+                      context.read<StudentExamNotifier>().fetchExams(),
                 ),
               ],
             ),
       body: examNotifier.isLoading
           ? const Center(child: CircularProgressIndicator())
           : examNotifier.error != null
-              ? _buildErrorState(examNotifier.error!)
-              : exams.isEmpty
-                  ? _buildEmptyState()
-                  : _buildExamsList(exams),
+          ? _buildErrorState(examNotifier.error!)
+          : exams.isEmpty
+          ? _buildEmptyState()
+          : _buildExamsList(exams),
     );
   }
 
@@ -67,21 +69,10 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
   }
 
   Widget _buildExamCard(Exam exam) {
-    final bool isFinished = exam.endDate != null && exam.endDate!.isBefore(DateTime.now());
+    final bool isFinished =
+        exam.endDate != null && exam.endDate!.isBefore(DateTime.now());
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return Card(
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -111,20 +102,25 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
-                              color: Colors.indigo,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: (isFinished ? Colors.grey : Colors.green).withOpacity(0.1),
+                              color: (isFinished ? Colors.grey : Colors.green)
+                                  .withOpacity(0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               isFinished ? 'Finished' : 'Ongoing / Upcoming',
                               style: TextStyle(
-                                color: isFinished ? Colors.grey[700] : Colors.green[700],
+                                color: isFinished
+                                    ? AppColors.white
+                                    : Colors.green[700],
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -133,14 +129,15 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
                         ],
                       ),
                     ),
-                    const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                    const Icon(Icons.arrow_forward_ios, size: 16),
                   ],
                 ),
                 const SizedBox(height: 16),
-                if (exam.description != null && exam.description!.isNotEmpty) ...[
+                if (exam.description != null &&
+                    exam.description!.isNotEmpty) ...[
                   Text(
                     exam.description!,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                    style: TextStyle(fontSize: 13),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -148,9 +145,21 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
                 ],
                 Row(
                   children: [
-                    _buildInfoItem(Icons.event, 'Start', DateFormat('MMM dd').format(exam.startDate ?? DateTime.now())),
+                    _buildInfoItem(
+                      Icons.event,
+                      'Start',
+                      DateFormat(
+                        'MMM dd',
+                      ).format(exam.startDate ?? DateTime.now()),
+                    ),
                     const SizedBox(width: 24),
-                    _buildInfoItem(Icons.event_available, 'End', DateFormat('MMM dd, yyyy').format(exam.endDate ?? DateTime.now())),
+                    _buildInfoItem(
+                      Icons.event_available,
+                      'End',
+                      DateFormat(
+                        'MMM dd, yyyy',
+                      ).format(exam.endDate ?? DateTime.now()),
+                    ),
                   ],
                 ),
               ],
@@ -169,8 +178,11 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: TextStyle(color: Colors.grey[500], fontSize: 10)),
-            Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+            Text(label, style: TextStyle(fontSize: 10)),
+            Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            ),
           ],
         ),
       ],
@@ -186,7 +198,11 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
           const SizedBox(height: 16),
           const Text(
             'No exams found.',
-            style: TextStyle(fontSize: 18, color: Colors.grey, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -214,11 +230,13 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
           ElevatedButton(
             onPressed: () => context.read<StudentExamNotifier>().fetchExams(),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
-            child: const Text('Try Again', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'Try Again',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
     );
   }
 }
-
