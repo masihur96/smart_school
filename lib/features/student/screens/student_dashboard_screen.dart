@@ -279,20 +279,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF2D3142),
-          ),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         if (onMore != null)
-          TextButton(
-            onPressed: onMore,
-            child: Text(
-              l10n.viewAll,
-              style: const TextStyle(color: Colors.green),
-            ),
-          ),
+          TextButton(onPressed: onMore, child: Text(l10n.viewAll)),
       ],
     );
   }
@@ -323,70 +313,63 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         .length;
     final percentage = totalDays == 0 ? 0.0 : presentDays / totalDays;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          CircularPercentIndicator(
-            radius: 45.0,
-            lineWidth: 10.0,
-            animation: true,
-            percent: percentage,
-            center: Text(
-              "${(percentage * 100).toInt()}%",
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            CircularPercentIndicator(
+              radius: 45.0,
+              lineWidth: 10.0,
+              animation: true,
+              percent: percentage,
+              center: Text(
+                "${(percentage * 100).toInt()}%",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              circularStrokeCap: CircularStrokeCap.round,
+              progressColor: Colors.green,
+              backgroundColor: Colors.green.withValues(alpha: 0.1),
             ),
-            circularStrokeCap: CircularStrokeCap.round,
-            progressColor: Colors.green,
-            backgroundColor: Colors.green.withValues(alpha: 0.1),
-          ),
-          const SizedBox(width: 24),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.attendanceOverview,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF2D3142),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  totalDays == 0
-                      ? l10n.noAttendanceRecordsFound
-                      : 'You were present $presentDays out of $totalDays recorded days.',
-                  style: TextStyle(color: Colors.grey[600], height: 1.4),
-                ),
-                const SizedBox(height: 12),
-                InkWell(
-                  onTap: () => setState(() => _selectedIndex = 1),
-                  child: Text(
-                    '${l10n.fullReport} →',
+            const SizedBox(width: 24),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.attendanceOverview,
                     style: const TextStyle(
-                      color: Colors.green,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 6),
+                  Text(
+                    totalDays == 0
+                        ? l10n.noAttendanceRecordsFound
+                        : 'You were present $presentDays out of $totalDays recorded days.',
+                    style: TextStyle(height: 1.4),
+                  ),
+                  const SizedBox(height: 12),
+                  InkWell(
+                    onTap: () => setState(() => _selectedIndex = 1),
+                    child: Text(
+                      '${l10n.fullReport} →',
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -533,76 +516,76 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         )
         .name;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.orange.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.orange.withValues(alpha: 0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                subject,
-                style: const TextStyle(
-                  color: Colors.orange,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-              Text(
-                '${l10n.due}: ${DateFormat('MMM d').format(hwData.dueDate)}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            hwData.title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  hwData.description,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: latest.status == 'done'
-                      ? Colors.green.withOpacity(0.1)
-                      : Colors.orange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  latest.status.toUpperCase(),
-                  style: TextStyle(
-                    color: latest.status == 'done'
-                        ? Colors.green
-                        : Colors.orange,
-                    fontSize: 10,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  subject,
+                  style: const TextStyle(
+                    color: Colors.orange,
                     fontWeight: FontWeight.bold,
+                    fontSize: 12,
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                Text(
+                  '${l10n.due}: ${DateFormat('MMM d').format(hwData.dueDate)}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              hwData.title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    hwData.description,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: latest.status == 'done'
+                        ? Colors.green.withOpacity(0.1)
+                        : Colors.orange.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    latest.status.toUpperCase(),
+                    style: TextStyle(
+                      color: latest.status == 'done'
+                          ? Colors.green
+                          : Colors.orange,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -656,60 +639,41 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 28),
               ),
-              child: Icon(icon, color: color, size: 28),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              label,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: Color(0xFF2D3142),
+              const SizedBox(height: 12),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildEmptyCard(String message) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Center(
-        child: Text(
-          message,
-          style: TextStyle(
-            color: Colors.grey[500],
-            fontStyle: FontStyle.italic,
-          ),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Center(
+          child: Text(message, style: TextStyle(fontStyle: FontStyle.italic)),
         ),
       ),
     );
