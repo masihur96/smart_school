@@ -82,7 +82,6 @@ class _TeacherRoutineScreenState extends State<TeacherRoutineScreen>
         .toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         title: const Text('My Class Routine'),
         backgroundColor: Colors.blue,
@@ -154,9 +153,9 @@ class _RoutineCard extends StatelessWidget {
     final subjectName = entry.subjectEntity?.name ?? 'Unknown Subject';
     final className = entry.classEntity?.name ?? 'Unknown Class';
     final sectionName = entry.sectionEntity?.name ?? '';
-    
-    final classDisplay = sectionName.isNotEmpty 
-        ? '$className ($sectionName)' 
+
+    final classDisplay = sectionName.isNotEmpty
+        ? '$className ($sectionName)'
         : className;
 
     return Card(
@@ -174,7 +173,6 @@ class _RoutineCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue,
                     ),
                   ),
                 ),
@@ -201,11 +199,11 @@ class _RoutineCard extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                const Icon(Icons.class_, size: 16, color: Colors.grey),
+                const Icon(Icons.class_, size: 16),
                 const SizedBox(width: 8),
                 Text(
                   'Class: $classDisplay',
-                  style: const TextStyle(fontSize: 14, color: Colors.black87),
+                  style: const TextStyle(fontSize: 14),
                 ),
               ],
             ),
@@ -217,7 +215,7 @@ class _RoutineCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(
                     'Teacher: ${entry.teacherEntity!.name}',
-                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                    style: const TextStyle(fontSize: 14),
                   ),
                 ],
               ),
@@ -226,11 +224,11 @@ class _RoutineCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(Icons.room, size: 16, color: Colors.grey),
+                  const Icon(Icons.room, size: 16),
                   const SizedBox(width: 8),
                   Text(
                     'Room: ${entry.roomNumber}',
-                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                    style: const TextStyle(fontSize: 14),
                   ),
                 ],
               ),

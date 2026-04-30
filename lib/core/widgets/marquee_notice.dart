@@ -29,7 +29,6 @@ class MarqueeNotice extends StatelessWidget {
       height: 44,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -38,7 +37,10 @@ class MarqueeNotice extends StatelessWidget {
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: Colors.green.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: Colors.green.withValues(alpha: 0.5),
+          width: 2,
+        ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
@@ -67,7 +69,6 @@ class MarqueeNotice extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF2D3142),
                 ),
                 scrollAxis: Axis.horizontal,
                 crossAxisAlignment: CrossAxisAlignment.center,

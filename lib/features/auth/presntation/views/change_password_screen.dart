@@ -45,7 +45,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               content: Text(l10n.passwordChangedSuccess),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
           Navigator.pop(context);
@@ -55,7 +57,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               content: Text(authNotifier.error ?? "Error"),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
         }
@@ -68,15 +72,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text(
           l10n.changePassword,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.black,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -108,7 +109,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 prefixIcon: Icons.lock_reset_rounded,
                 validator: (value) {
                   if (value == null || value.isEmpty) return l10n.fieldRequired;
-                  if (value.length < 6) return 'Password must be at least 6 characters';
+                  if (value.length < 6)
+                    return 'Password must be at least 6 characters';
                   if (value == _oldPasswordController.text) {
                     return 'New password cannot be same as old password';
                   }
@@ -120,11 +122,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 controller: _confirmPasswordController,
                 label: l10n.confirmPassword,
                 isObscure: _isObscureConfirm,
-                onToggle: () => setState(() => _isObscureConfirm = !_isObscureConfirm),
+                onToggle: () =>
+                    setState(() => _isObscureConfirm = !_isObscureConfirm),
                 prefixIcon: Icons.lock_clock_rounded,
                 validator: (value) {
                   if (value == null || value.isEmpty) return l10n.fieldRequired;
-                  if (value != _newPasswordController.text) return l10n.passwordsDoNotMatch;
+                  if (value != _newPasswordController.text)
+                    return l10n.passwordsDoNotMatch;
                   return null;
                 },
               ),
@@ -147,16 +151,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       ),
       child: Row(
         children: [
-          Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 20),
+          Icon(Icons.info_outline_rounded, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               'Your new password should be different from your current password.',
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey[700],
-                height: 1.4,
-              ),
+              style: TextStyle(fontSize: 13, height: 1.4),
             ),
           ),
         ],
@@ -177,11 +177,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF475569),
-          ),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -190,18 +186,23 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.white,
-            prefixIcon: Icon(prefixIcon, color: AppColors.primary, size: 20),
+
+            prefixIcon: Icon(prefixIcon, size: 20),
             suffixIcon: IconButton(
               icon: Icon(
-                isObscure ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                color: Colors.grey[400],
+                isObscure
+                    ? Icons.visibility_off_rounded
+                    : Icons.visibility_rounded,
+
                 size: 20,
               ),
               onPressed: onToggle,
               splashRadius: 20,
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: Colors.grey[200]!),
@@ -238,7 +239,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 18),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             elevation: 2,
             shadowColor: AppColors.primary.withOpacity(0.3),
           ),

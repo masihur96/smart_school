@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/models/school_models.dart';
 
+import '../../../models/student_model.dart';
 import '../../admin/providers/student_provider.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../../models/student_model.dart';
 import '../domain/entities/attendance.dart';
 import '../providers/attendance_provider.dart';
 
@@ -133,7 +134,6 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
         : <Student>[];
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       appBar: widget.hideAppBar
           ? null
           : AppBar(
@@ -174,23 +174,22 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue[700],
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
         ),
+        border: BoxBorder.all(width: 1, color: AppColors.white),
       ),
       child: Column(
         children: [
           Row(
             children: [
-              const Icon(Icons.calendar_month, color: Colors.white70, size: 20),
+              const Icon(Icons.calendar_month, size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   DateFormat('EEEE, MMM d, yyyy').format(_selectedDate),
                   style: const TextStyle(
-                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -209,18 +208,13 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                     _onSelectionChanged();
                   }
                 },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    'Change Date',
-                    style: TextStyle(color: Colors.white, fontSize: 12),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: const Text(
+                      'Change Date',
+                      style: TextStyle(fontSize: 12),
+                    ),
                   ),
                 ),
               ),
@@ -279,22 +273,20 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     required List<DropdownMenuItem<T>> items,
     required ValueChanged<T?> onChanged,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<T>(
-          value: value,
-          hint: Text(
-            label,
-            style: TextStyle(color: Colors.grey[400], fontSize: 14),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<T>(
+            value: value,
+            hint: Text(
+              label,
+              style: TextStyle(color: Colors.grey[400], fontSize: 14),
+            ),
+            isExpanded: true,
+            items: items,
+            onChanged: onChanged,
           ),
-          isExpanded: true,
-          items: items,
-          onChanged: onChanged,
         ),
       ),
     );
@@ -444,18 +436,8 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
   }
 
   Widget _buildBottomBar(bool hasStudents) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            offset: const Offset(0, -4),
-            blurRadius: 10,
-          ),
-        ],
-      ),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
       child: ElevatedButton(
         onPressed: !hasStudents ? null : _save,
         style: ElevatedButton.styleFrom(
