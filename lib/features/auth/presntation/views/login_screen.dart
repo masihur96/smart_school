@@ -101,23 +101,20 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(Icons.school, size: 80, color: Color(0xFF6750A4)),
+              const Icon(Icons.school, size: 80),
               const SizedBox(height: 16),
               Text(
                 'Smart School',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF6750A4),
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Welcome back! Please login to continue.',
                 textAlign: TextAlign.center,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 40),
               TextField(
