@@ -499,7 +499,7 @@ class _AddEditSchoolBottomSheetState extends State<AddEditSchoolBottomSheet> {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
