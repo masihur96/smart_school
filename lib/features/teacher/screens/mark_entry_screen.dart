@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../auth/providers/auth_provider.dart';
 import '../providers/result_provider.dart';
 
@@ -66,15 +67,18 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   void _onStudentChanged(String? studentId, String? studentName) {
     if (studentId == null ||
         _selectedExamId == null ||
-        _selectedClassId == null) return;
+        _selectedClassId == null)
+      return;
     setState(() {
       _selectedStudentId = studentId;
       _selectedStudentName = studentName;
       _markControllers.clear();
     });
-    context
-        .read<ResultsNotifier>()
-        .loadSubjects(_selectedExamId!, _selectedClassId!, studentId);
+    context.read<ResultsNotifier>().loadSubjects(
+      _selectedExamId!,
+      _selectedClassId!,
+      studentId,
+    );
   }
 
   @override
@@ -91,7 +95,6 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       appBar: widget.hideAppBar
           ? null
           : AppBar(
@@ -141,15 +144,13 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
               loading: notifier.examsLoading,
               items: notifier.exams
                   .map(
-                    (e) => DropdownMenuItem(
-                      value: e.id,
-                      child: Text(e.name),
-                    ),
+                    (e) => DropdownMenuItem(value: e.id, child: Text(e.name)),
                   )
                   .toList(),
               onChanged: (val) {
-                final exam =
-                    notifier.exams.where((e) => e.id == val).firstOrNull;
+                final exam = notifier.exams
+                    .where((e) => e.id == val)
+                    .firstOrNull;
                 _onExamChanged(val, exam?.name);
               },
             ),
@@ -163,10 +164,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
               loading: notifier.classesLoading,
               items: notifier.classes
                   .map(
-                    (c) => DropdownMenuItem(
-                      value: c.uuid,
-                      child: Text(c.name),
-                    ),
+                    (c) => DropdownMenuItem(value: c.uuid, child: Text(c.name)),
                   )
                   .toList(),
               onChanged: _selectedExamId == null
@@ -223,7 +221,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
           value: value,
           decoration: InputDecoration(
             labelText: label,
-            prefixIcon: Icon(icon, color: Colors.blue[700]),
+            prefixIcon: Icon(icon),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -237,8 +235,8 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
           ),
           items: items,
           onChanged: onChanged,
-          icon: Icon(Icons.keyboard_arrow_down, color: Colors.blue[700]),
-          style: const TextStyle(fontSize: 16, color: Colors.black87),
+          icon: Icon(Icons.keyboard_arrow_down),
+
           disabledHint: Text(
             'Select previous step first',
             style: TextStyle(color: Colors.grey[400]),
@@ -280,8 +278,11 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
           padding: const EdgeInsets.all(40.0),
           child: Column(
             children: [
-              Icon(Icons.warning_amber_rounded,
-                  size: 60, color: Colors.amber[300]),
+              Icon(
+                Icons.warning_amber_rounded,
+                size: 60,
+                color: Colors.amber[300],
+              ),
               const SizedBox(height: 16),
               const Text(
                 'No subjects found for this student.',
@@ -357,8 +358,9 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                     width: 100,
                     child: TextField(
                       controller: controller,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       textAlign: TextAlign.center,
                       onChanged: (_) => setState(() {}),
                       style: const TextStyle(
@@ -367,8 +369,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                       ),
                       decoration: InputDecoration(
                         hintText: '00',
-                        suffixText:
-                            marks != null ? (isPass ? 'P' : 'F') : null,
+                        suffixText: marks != null ? (isPass ? 'P' : 'F') : null,
                         suffixStyle: TextStyle(
                           color: isPass ? Colors.green : Colors.red,
                           fontWeight: FontWeight.bold,
@@ -376,8 +377,9 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                        ),
                       ),
                     ),
                   ),
@@ -470,7 +472,9 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     final user = context.read<AuthNotifier>().user;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: User not found. Please log in again.')),
+        const SnackBar(
+          content: Text('Error: User not found. Please log in again.'),
+        ),
       );
       return;
     }
@@ -494,7 +498,8 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     if (marks.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Please enter marks for at least one subject.')),
+          content: Text('Please enter marks for at least one subject.'),
+        ),
       );
       return;
     }

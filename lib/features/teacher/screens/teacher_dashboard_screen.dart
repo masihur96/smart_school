@@ -6,9 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/features/admin/screens/class_detail_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
-import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/marquee_notice.dart';
@@ -107,7 +107,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.grey.shade50,
         appBar: AppBar(
           title: Text(
             _getTitle(l10n),
@@ -136,7 +135,12 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         body: IndexedStack(
           index: _selectedIndex,
           children: [
-            _buildDashboardOverview(context, user?.name ?? 'Teacher', user!, l10n),
+            _buildDashboardOverview(
+              context,
+              user?.name ?? 'Teacher',
+              user!,
+              l10n,
+            ),
             const TeacherAttendanceScreen(hideAppBar: true),
             const MarkEntryScreen(hideAppBar: true),
             const HomeworkManagementScreen(hideAppBar: true),
@@ -158,7 +162,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             type: BottomNavigationBarType.fixed,
             selectedItemColor: Colors.green.shade700,
             unselectedItemColor: Colors.grey.shade500,
-            backgroundColor: Colors.white,
+
             elevation: 0,
             selectedLabelStyle: const TextStyle(
               fontWeight: FontWeight.bold,
@@ -193,13 +197,18 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
-  Widget _buildDashboardOverview(BuildContext context, String name, User user, AppLocalizations l10n) {
+  Widget _buildDashboardOverview(
+    BuildContext context,
+    String name,
+    User user,
+    AppLocalizations l10n,
+  ) {
     final provider = context.watch<TeacherDashboardProvider>();
     final classes = provider.todayClasses
         .where((c) => c.teacherId == user.id)
         .toList();
     classes.sort((a, b) => a.startTime.compareTo(b.startTime));
- 
+
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Column(
@@ -227,7 +236,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       l10n.scheduleToday,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.blueGrey.shade900,
                       ),
                     ),
                   ],
@@ -249,10 +257,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 const SizedBox(height: 32),
                 Text(
                   l10n.quickActions,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blueGrey.shade900,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 _buildQuickActionsGrid(context, l10n),
@@ -368,17 +375,23 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
-  Widget _buildSelfAttendanceButton(BuildContext context, User? user, AppLocalizations l10n) {
+  Widget _buildSelfAttendanceButton(
+    BuildContext context,
+    User? user,
+    AppLocalizations l10n,
+  ) {
     if (user?.role != UserRole.teacher) return const SizedBox.shrink();
- 
-    final attendance = context.watch<TeacherDashboardProvider>().todayAttendance;
+
+    final attendance = context
+        .watch<TeacherDashboardProvider>()
+        .todayAttendance;
     final status = attendance?.status; // 'clock-in' or 'clock-out'
- 
+
     IconData icon;
     String label;
     Color buttonColor;
     Color iconColor;
- 
+
     if (attendance == null) {
       icon = Icons.location_on;
       label = l10n.clockIn;
@@ -396,7 +409,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       buttonColor = Colors.green.shade50;
       iconColor = Colors.green;
     }
- 
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -411,10 +424,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             padding: const EdgeInsets.all(16),
             elevation: 4,
           ),
-          child: Icon(
-            icon,
-            size: 28,
-          ),
+          child: Icon(icon, size: 28),
         ),
         const SizedBox(height: 12),
         GestureDetector(
@@ -445,16 +455,18 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
-  Future<void> _performSelfAttendance(BuildContext context, User? user, AppLocalizations l10n) async {
+  Future<void> _performSelfAttendance(
+    BuildContext context,
+    User? user,
+    AppLocalizations l10n,
+  ) async {
     if (user == null ||
         user.lat == null ||
         user.lon == null ||
         user.radius == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.locationNotConfigured),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.locationNotConfigured)));
       return;
     }
 
@@ -616,26 +628,16 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      subjectName,
-                      style: TextStyle(color: Colors.grey.shade600),
-                    ),
+                    Text(subjectName),
                     if (classInfo.teacherEntity != null) ...[
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(
-                            Icons.person,
-                            size: 14,
-                            color: Colors.grey,
-                          ),
+                          const Icon(Icons.person, size: 14),
                           const SizedBox(width: 4),
                           Text(
                             classInfo.teacherEntity!.name,
-                            style: const TextStyle(
-                              color: Colors.black54,
-                              fontSize: 12,
-                            ),
+                            style: const TextStyle(fontSize: 12),
                           ),
                         ],
                       ),
@@ -646,30 +648,21 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      "${classInfo.startTime.split(':').take(2).join(':')} - ${classInfo.endTime.split(':').take(2).join(':')}",
-                      style: TextStyle(
-                        color: Colors.orange.shade800,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        "${classInfo.startTime.split(':').take(2).join(':')} - ${classInfo.endTime.split(':').take(2).join(':')}",
+                        style: TextStyle(
+                          color: Colors.orange.shade800,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 14,
-                    color: Colors.grey,
-                  ),
+                  const Icon(Icons.arrow_forward_ios, size: 14),
                 ],
               ),
             ],
@@ -720,10 +713,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           children: [
             Text(
               l10n.upcomingExams,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.blueGrey.shade900,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             if (exams.length > 2)
               TextButton(onPressed: () {}, child: Text(l10n.viewAll)),
@@ -955,18 +947,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     Color color, {
     required VoidCallback onTap,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return Card(
       child: Material(
         color: Colors.transparent,
         child: InkWell(
