@@ -33,13 +33,14 @@ class StudentDashboardScreen extends StatefulWidget {
 class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
   int _selectedIndex = 0;
 
+  User? user;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<StudentAttendanceNotifier>().fetchAttendance();
       context.read<NoticesNotifier>().fetchNoticesFromAPI();
-      final user = context.read<AuthNotifier>().user;
+      user = context.read<AuthNotifier>().user;
       if (user?.classId != null) {
         context.read<StudentHomeworkNotifier>().fetchHomework(
           user?.classId ?? "",
@@ -109,10 +110,24 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            _getTitle(l10n),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _getTitle(l10n),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              Text(
+                user?.school?.name ?? 'School Name',
+                style: const TextStyle(fontSize: 12, color: Colors.white70),
+              ),
+            ],
           ),
+          centerTitle: false,
           backgroundColor: Colors.green,
           foregroundColor: Colors.white,
           elevation: 0,
