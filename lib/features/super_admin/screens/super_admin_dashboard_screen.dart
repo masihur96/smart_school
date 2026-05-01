@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/widgets/app_drawer.dart';
 import 'package:smart_school/core/widgets/notification_icon_button.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/features/super_admin/providers/super_admin_dashboard_provider.dart';
 import 'package:smart_school/features/super_admin/screens/backup_screen.dart';
 import 'package:smart_school/features/super_admin/screens/pricing_school_screen.dart';
@@ -216,47 +218,51 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 40),
-                  Text(
-                    '${l10n.welcomeBack}, ${user?.name ?? 'Admin'}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: screenSize(context, .07)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${l10n.welcomeBack},\n ${user?.name ?? 'Admin'}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => ProfileScreen()),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                        width: 2,
+                      ),
+                    ),
+                    child: const CircleAvatar(
+                      radius: 24,
+                      backgroundColor: Colors.white24,
+                      child: Icon(
+                        Icons.admin_panel_settings,
+                        color: Colors.white,
+                        size: 28,
+                      ),
                     ),
                   ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
-                    width: 2,
-                  ),
                 ),
-                child: const CircleAvatar(
-                  radius: 24,
-                  backgroundColor: Colors.white24,
-                  child: Icon(
-                    Icons.admin_panel_settings,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 24),
+
           GestureDetector(
             onTap: () {
               Navigator.push(
