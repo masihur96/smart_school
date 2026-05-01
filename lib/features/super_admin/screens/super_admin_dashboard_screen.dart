@@ -10,6 +10,7 @@ import 'package:smart_school/features/super_admin/screens/backup_screen.dart';
 import 'package:smart_school/features/super_admin/screens/pricing_school_screen.dart';
 import 'package:smart_school/features/super_admin/screens/subscription_screen.dart';
 import 'package:smart_school/features/super_admin/screens/super_admin_school_screen.dart';
+import 'package:smart_school/features/super_admin/screens/system_status_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/user_model.dart';
 
@@ -256,28 +257,36 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
             ],
           ),
           const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.lens, color: Colors.greenAccent, size: 12),
-                const SizedBox(width: 8),
-                Text(
-                  l10n.systemStatusHealthy,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => SystemStatusScreen()),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.lens, color: Colors.greenAccent, size: 12),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.systemStatusHealthy,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
                   ),
-                ),
-                const Spacer(),
-                const Icon(Icons.sync, color: Colors.white70, size: 16),
-              ],
+                  const Spacer(),
+                  const Icon(Icons.sync, color: Colors.white70, size: 16),
+                ],
+              ),
             ),
           ),
         ],
