@@ -108,10 +108,24 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            _getTitle(l10n),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _getTitle(l10n),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              Text(
+                user?.school?.name ?? 'School Name',
+                style: const TextStyle(fontSize: 12, color: Colors.white70),
+              ),
+            ],
           ),
+          centerTitle: false,
           elevation: 0,
           backgroundColor: _selectedIndex == 0
               ? Colors.green.shade600
@@ -300,7 +314,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           ),
         ],
       ),
-      padding: const EdgeInsets.fromLTRB(24, 60, 24, 40),
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
       child: Row(
         children: [
           Container(
