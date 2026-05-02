@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
+import 'package:smart_school/models/user_model.dart';
 import 'package:smart_school/services/notification_service.dart';
 
 class SettingsProvider extends ChangeNotifier {
@@ -36,31 +37,46 @@ class SettingsProvider extends ChangeNotifier {
 
     _isHomeworkNotifyEnabled = await StorageService.getHomeworkNotify();
     _isAttendanceNotifyEnabled = await StorageService.getAttendanceNotify();
-
-    // Ensure topics are in sync upon app start
-    _syncTopics();
-
+    
     notifyListeners();
   }
 
-  void _syncTopics() {
+  void syncUserTopics(User? user) {
+    if (user != null) {
+      _syncTopics(user);
+    }
+  }
+
+  void _syncTopics(User? user) {
     final ns = NotificationService();
+
+    // Sync settings-based topics
     if (_isHomeworkNotifyEnabled) {
       ns.subscribeToTopic('homework');
     } else {
       ns.unsubscribeFromTopic('homework');
     }
-    // To receive class notifications
-    ns.subscribeToTopic('class_YOUR_CLASS_UUID');
-    // To receive school notifications
-    ns.subscribeToTopic('school_YOUR_SCHOOL_ID');
-    // To receive personal notifications
-    ns.subscribeToTopic('user_YOUR_USER_UUID');
 
     if (_isAttendanceNotifyEnabled) {
       ns.subscribeToTopic('attendance');
     } else {
       ns.unsubscribeFromTopic('attendance');
+    }
+
+    // Sync user-specific topics if user is provided
+    if (user != null) {
+      // To receive class notifications
+      if (user.classId != null && user.classId!.isNotEmpty) {
+        ns.subscribeToTopic('class_${user.classId}');
+      }
+
+      // To receive school notifications
+      if (user.schoolId != null && user.schoolId!.isNotEmpty) {
+        ns.subscribeToTopic('school_${user.schoolId}');
+      }
+
+      // To receive personal notifications
+      ns.subscribeToTopic('user_${user.id}');
     }
   }
 

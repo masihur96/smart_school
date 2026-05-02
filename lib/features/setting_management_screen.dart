@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/configs/route_generator.dart';
 import 'package:smart_school/features/admin/providers/settings_provider.dart';
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
+import 'package:smart_school/features/notifications/providers/notification_provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/user_model.dart';
@@ -23,6 +24,13 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
 
     final settings = context.watch<SettingsProvider>();
     final authNotifier = context.watch<AuthNotifier>();
+
+    // Sync topics when screen builds and user is available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (authNotifier.user != null) {
+        settings.syncUserTopics(authNotifier.user);
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingManagement)),
@@ -117,6 +125,21 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
               },
             ),
             const SizedBox(height: 32),
+          ],
+
+          // Admin Notification Testing Section
+          if (authNotifier.user?.role == UserRole.admin || 
+              authNotifier.user?.role == UserRole.superadmin) ...[
+            _buildSectionHeader("Developer Tools", theme),
+            _buildSettingTile(
+              icon: Icons.send_rounded,
+              title: "Send Test Notification",
+              subtitle: "Send a custom notification to a specific user",
+              theme: theme,
+              isAction: true,
+              onTap: () => _showSendNotificationDialog(context),
+            ),
+            const SizedBox(height: 24),
           ],
 
           // Logout Button
@@ -246,6 +269,108 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
         trailing:
             trailing ?? (isAction ? const Icon(Icons.chevron_right) : null),
         onTap: onTap,
+      ),
+    );
+  }
+
+  void _showSendNotificationDialog(BuildContext context) {
+    final titleController = TextEditingController();
+    final messageController = TextEditingController();
+    final receiverUuidController = TextEditingController();
+    final imageController = TextEditingController();
+    final pathController = TextEditingController(text: "/home");
+    final dataUuidController = TextEditingController(text: "123");
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Send Notification"),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: receiverUuidController,
+                decoration: const InputDecoration(
+                  labelText: "Receiver UUID",
+                  hintText: "Enter user UUID",
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(labelText: "Title"),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: messageController,
+                decoration: const InputDecoration(labelText: "Message"),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: imageController,
+                decoration: const InputDecoration(
+                  labelText: "Image URL (Optional)",
+                  hintText: "https://example.com/image.png",
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: pathController,
+                decoration: const InputDecoration(labelText: "Data Path"),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: dataUuidController,
+                decoration: const InputDecoration(labelText: "Data UUID"),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (receiverUuidController.text.isEmpty ||
+                  titleController.text.isEmpty ||
+                  messageController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Please fill required fields")),
+                );
+                return;
+              }
+
+              final notifier = context.read<NotificationNotifier>();
+              try {
+                await notifier.sendNotification(
+                  receiverUuid: receiverUuidController.text.trim(),
+                  title: titleController.text.trim(),
+                  message: messageController.text.trim(),
+                  image: imageController.text.trim().isEmpty 
+                      ? null 
+                      : imageController.text.trim(),
+                  additionalData: {
+                    "path": pathController.text.trim(),
+                    "uuid": dataUuidController.text.trim(),
+                  },
+                );
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Notification sent successfully")),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Failed to send: $e")),
+                );
+              }
+            },
+            child: const Text("Send"),
+          ),
+        ],
       ),
     );
   }
