@@ -157,6 +157,47 @@ class NotificationService {
     }
   }
 
+  Future<void> sendNotification({
+    required String receiverUuid,
+    required String title,
+    required String message,
+    Map<String, dynamic>? additionalData,
+    String? image,
+  }) async {
+    try {
+      final authToken = await StorageService.getToken();
+      if (authToken == null) throw Exception('No auth token found');
+
+      final response = await DataProvider().performRequest(
+        'POST',
+        APIPath.sendNotification,
+        data: {
+          "receiver_uuid": receiverUuid,
+          "title": title,
+          "message": message,
+          "additional_data": additionalData ?? {},
+          "image": image
+        },
+        header: {
+          'Authorization': 'Bearer $authToken',
+          'Content-Type': 'application/json',
+          'accept': '*/*'
+        },
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
+        log('Notification sent successfully');
+      } else {
+        log('Failed to send notification: ${response?.data}');
+        throw Exception('Failed to send notification');
+      }
+    } catch (e) {
+      log('Error sending notification: $e');
+      rethrow;
+    }
+  }
+
   void _handleMessage(RemoteMessage message) {
     // Example of handling JSON body
     if (message.data.isNotEmpty) {

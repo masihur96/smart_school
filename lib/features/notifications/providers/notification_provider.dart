@@ -47,6 +47,33 @@ class NotificationNotifier extends ChangeNotifier {
     }
   }
 
+  Future<void> sendNotification({
+    required String receiverUuid,
+    required String title,
+    required String message,
+    Map<String, dynamic>? additionalData,
+    String? image,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _notificationService.sendNotification(
+        receiverUuid: receiverUuid,
+        title: title,
+        message: message,
+        additionalData: additionalData,
+        image: image,
+      );
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void markAsRead(String id) {
     final index = _notifications.indexWhere((n) => n.id == id);
     if (index != -1) {

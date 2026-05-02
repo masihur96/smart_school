@@ -80,6 +80,7 @@ class APIPath {
   static String registerFcmToken = "$baseUrl/notifications/fcm-token";
   static String notifications = "$baseUrl/notifications";
   static String sendTestNotification = "$baseUrl/notifications/send-test";
+  static String sendNotification = "$baseUrl/notifications/send";
 
   // Student Exam Endpoints
   static String studentExams = "$baseUrl/student/exams";
