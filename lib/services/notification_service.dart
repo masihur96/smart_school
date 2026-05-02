@@ -206,15 +206,29 @@ class NotificationService {
 
       // User specific topic
       await subscribeToTopic('user_${user.id}');
+      await subscribeToTopic(user.id);
+
+      // Student specific topic
+      if (user.role == UserRole.student) {
+        await subscribeToTopic('student_${user.id}');
+      }
+
+      // School specific topic
+      if (user.schoolId != null && user.schoolId!.isNotEmpty) {
+        await subscribeToTopic('school_${user.schoolId}');
+        await subscribeToTopic(user.schoolId!);
+      }
 
       // Class specific topic
       if (user.classId != null && user.classId!.isNotEmpty) {
         await subscribeToTopic('class_${user.classId}');
+        await subscribeToTopic(user.classId!);
       }
 
       // Section specific topic
       if (user.sectionId != null && user.sectionId!.isNotEmpty) {
         await subscribeToTopic('section_${user.sectionId}');
+        await subscribeToTopic(user.sectionId!);
       }
 
       log('Successfully subscribed to all user topics for ${user.name}');
@@ -227,13 +241,25 @@ class NotificationService {
     try {
       await unsubscribeFromTopic('all');
       await unsubscribeFromTopic('user_${user.id}');
+      await unsubscribeFromTopic(user.id);
+
+      if (user.role == UserRole.student) {
+        await unsubscribeFromTopic('student_${user.id}');
+      }
+
+      if (user.schoolId != null && user.schoolId!.isNotEmpty) {
+        await unsubscribeFromTopic('school_${user.schoolId}');
+        await unsubscribeFromTopic(user.schoolId!);
+      }
 
       if (user.classId != null && user.classId!.isNotEmpty) {
         await unsubscribeFromTopic('class_${user.classId}');
+        await unsubscribeFromTopic(user.classId!);
       }
 
       if (user.sectionId != null && user.sectionId!.isNotEmpty) {
         await unsubscribeFromTopic('section_${user.sectionId}');
+        await unsubscribeFromTopic(user.sectionId!);
       }
 
       log('Successfully unsubscribed from all user topics for ${user.name}');
