@@ -39,7 +39,7 @@ class SettingsProvider extends ChangeNotifier {
 
     // Ensure topics are in sync upon app start
     _syncTopics();
-    
+
     notifyListeners();
   }
 
@@ -50,6 +50,12 @@ class SettingsProvider extends ChangeNotifier {
     } else {
       ns.unsubscribeFromTopic('homework');
     }
+    // To receive class notifications
+    ns.subscribeToTopic('class_YOUR_CLASS_UUID');
+    // To receive school notifications
+    ns.subscribeToTopic('school_YOUR_SCHOOL_ID');
+    // To receive personal notifications
+    ns.subscribeToTopic('user_YOUR_USER_UUID');
 
     if (_isAttendanceNotifyEnabled) {
       ns.subscribeToTopic('attendance');
