@@ -31,6 +31,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SuperAdminDashboardNotifier>().fetchDashboardData();
+      context.read<SuperAdminSchoolNotifier>().fetchSchools();
     });
   }
 
@@ -92,15 +93,11 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         appBar: AppBar(
           title: Text(
             _getTitle(l10n),
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          foregroundColor: AppColors.white,
-          backgroundColor: Colors.transparent,
+
           elevation: 0,
-          actions: [const NotificationIconButton(color: Colors.white)],
+          actions: [const NotificationIconButton()],
         ),
         drawer: const AppDrawer(),
         body: IndexedStack(
@@ -507,93 +504,110 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
 
   // --- SCHOOLS TAB ---
   Widget _buildSchoolsTab(AppLocalizations l10n) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
-      physics: const BouncingScrollPhysics(),
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              l10n.managedSchools,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(blurRadius: 10, offset: const Offset(0, 4)),
-                ],
+    final schoolNotifier = context.watch<SuperAdminSchoolNotifier>();
+    final dashboardNotifier = context.watch<SuperAdminDashboardNotifier>();
+    final schools = schoolNotifier.schools;
+    final isLoading = schoolNotifier.isLoading;
+    final totalSchools = dashboardNotifier.dashboardData.totalSchools;
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        await context.read<SuperAdminSchoolNotifier>().fetchSchools();
+        await context.read<SuperAdminDashboardNotifier>().fetchDashboardData();
+      },
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 130, 20, 20),
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                l10n.managedSchools,
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
-              child: ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.add_rounded, size: 20),
-                label: Text(l10n.addNew),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+              Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SuperAdminSchoolScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.add_rounded, size: 20),
+                  label: Text(l10n.addNew),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 0,
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'Oversee operations for ${42} educational institutions',
-          style: TextStyle(fontSize: 13),
-        ),
-        const SizedBox(height: 24),
-        _buildSchoolCard(
-          'Global International School',
-          'Active',
-          '1240 Students',
-          'Premium Plan',
-          l10n,
-        ),
-        _buildSchoolCard(
-          'St. Mary High School',
-          'Active',
-          '850 Students',
-          'Basic Plan',
-          l10n,
-        ),
-        _buildSchoolCard(
-          'Lakeside Academy',
-          'Suspended',
-          '0 Students',
-          'Trial Expired',
-          l10n,
-        ),
-        _buildSchoolCard(
-          'Oakwood Montessori',
-          'Trial',
-          '120 Students',
-          'Free Trial',
-          l10n,
-        ),
-      ],
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Oversee operations for $totalSchools educational institutions',
+            style: const TextStyle(fontSize: 13),
+          ),
+          const SizedBox(height: 24),
+          if (isLoading)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(40.0),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else if (schools.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(40.0),
+                child: Column(
+                  children: [
+                    Icon(Icons.business_outlined, size: 64, color: Colors.grey),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No schools found',
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            ...schools.map((school) => _buildSchoolCard(school, l10n)),
+        ],
+      ),
     );
   }
 
-  Widget _buildSchoolCard(
-    String name,
-    String status,
-    String students,
-    String plan,
-    AppLocalizations l10n,
-  ) {
-    final statusColor = status == 'Active'
-        ? Colors.green
-        : (status == 'Suspended' ? Colors.red : Colors.orange);
+  Widget _buildSchoolCard(SuperAdminSchool school, AppLocalizations l10n) {
+    final statusColor = school.isActive ? Colors.green : Colors.red;
+    final statusText = school.isActive ? 'Active' : 'Inactive';
 
     return Card(
+      margin: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -607,7 +621,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        name,
+                        school.name,
                         style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
@@ -624,7 +638,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
-                        status.toUpperCase(),
+                        statusText.toUpperCase(),
                         style: TextStyle(
                           color: statusColor,
                           fontSize: 10,
@@ -638,49 +652,72 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    _buildSmallInfo(Icons.people_alt_rounded, students),
+                    _buildSmallInfo(
+                      Icons.badge_rounded,
+                      'ID: ${school.schoolId}',
+                    ),
                     const SizedBox(width: 20),
-                    _buildSmallInfo(Icons.wallet_rounded, plan),
+                    _buildSmallInfo(
+                      Icons.phone_rounded,
+                      school.phone.isNotEmpty ? school.phone : 'No phone',
+                    ),
                   ],
+                ),
+                const SizedBox(height: 8),
+                _buildSmallInfo(
+                  Icons.email_rounded,
+                  school.email.isNotEmpty ? school.email : 'No email',
                 ),
               ],
             ),
           ),
-          Divider(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.bar_chart_rounded, size: 18),
-                label: Text(
-                  l10n.analytics,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-
-                  elevation: 0,
-                  side: BorderSide(color: Colors.grey.shade300),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  minimumSize: const Size(0, 0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton.icon(
+                  onPressed: () {
+                    // Navigate to analytics or similar
+                  },
+                  icon: const Icon(Icons.bar_chart_rounded, size: 18),
+                  label: Text(
+                    l10n.analytics,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
-                child: Text(
-                  l10n.manage,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SuperAdminSchoolScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primary,
+                    elevation: 0,
+                    side: BorderSide(color: Colors.grey.shade300),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    minimumSize: const Size(0, 0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    l10n.manage,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
