@@ -7,7 +7,9 @@ import 'package:smart_school/core/widgets/app_drawer.dart';
 import 'package:smart_school/core/widgets/notification_icon_button.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
+import 'package:smart_school/features/super_admin/models/school_model.dart';
 import 'package:smart_school/features/super_admin/providers/super_admin_dashboard_provider.dart';
+import 'package:smart_school/features/super_admin/providers/super_admin_school_provider.dart';
 import 'package:smart_school/features/super_admin/screens/backup_screen.dart';
 import 'package:smart_school/features/super_admin/screens/pricing_school_screen.dart';
 import 'package:smart_school/features/super_admin/screens/subscription_screen.dart';
@@ -526,8 +528,10 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
             children: [
               Text(
                 l10n.managedSchools,
-                style:
-                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Container(
                 decoration: BoxDecoration(
