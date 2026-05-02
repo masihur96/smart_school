@@ -87,16 +87,12 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
       expandedHeight: 180,
       pinned: true,
       elevation: 0,
-      backgroundColor: AppColors.primaryDark,
+      backgroundColor: AppColors.darkGrey,
       flexibleSpace: FlexibleSpaceBar(
         centerTitle: true,
         title: const Text(
           'School Management',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            fontSize: 16,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         background: Stack(
           fit: StackFit.expand,
