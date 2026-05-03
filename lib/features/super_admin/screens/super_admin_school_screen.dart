@@ -6,6 +6,7 @@ import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../models/school_model.dart';
 import '../providers/super_admin_school_provider.dart';
+import 'school_management_details_screen.dart';
 
 class SuperAdminSchoolScreen extends StatefulWidget {
   const SuperAdminSchoolScreen({super.key});
@@ -222,7 +223,15 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            SchoolManagementDetailsScreen(school: school),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: AppColors.primary,
@@ -564,7 +573,15 @@ class SchoolCard extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          SchoolManagementDetailsScreen(school: school),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: AppColors.textPrimary,

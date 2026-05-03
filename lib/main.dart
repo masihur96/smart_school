@@ -33,6 +33,7 @@ import 'features/super_admin/providers/subscription_provider.dart';
 import 'features/super_admin/providers/super_admin_dashboard_provider.dart';
 import 'features/super_admin/providers/super_admin_school_provider.dart';
 import 'features/super_admin/providers/trash_restore_provider.dart';
+import 'features/super_admin/providers/school_management_provider.dart';
 import 'features/teacher/data/datasources/homework_remote_datasource.dart';
 import 'features/teacher/data/datasources/mark_entry_remote_datasource.dart';
 import 'features/teacher/data/repositories/attendance_repository_impl.dart';
@@ -137,6 +138,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => TrashRestoreNotifier()),
         ChangeNotifierProvider(create: (_) => NotificationNotifier()),
         ChangeNotifierProvider(create: (_) => MarqueeProvider()),
+        ChangeNotifierProvider(create: (_) => SchoolManagementNotifier()),
       ],
       child: const MyApp(),
     ),
