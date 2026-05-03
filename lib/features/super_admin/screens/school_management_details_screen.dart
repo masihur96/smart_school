@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/features/super_admin/models/school_model.dart';
 import 'package:smart_school/features/super_admin/providers/school_management_provider.dart';
+import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
 
 class SchoolManagementDetailsScreen extends StatefulWidget {
@@ -21,14 +23,20 @@ class _SchoolManagementDetailsScreenState extends State<SchoolManagementDetailsS
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _fetchData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchData();
+    });
   }
 
   void _fetchData() {
-    final notifier = context.read<SchoolManagementNotifier>();
-    notifier.fetchSchoolMembers(schoolId: widget.school.id!, role: 'teacher');
-    notifier.fetchSchoolMembers(schoolId: widget.school.id!, role: 'student');
-    notifier.fetchSchoolMembers(schoolId: widget.school.id!, role: 'admin');
+    final schoolId = widget.school.id!;
+    context.read<SchoolManagementNotifier>().fetchSchoolMembers(schoolId: schoolId, role: 'teacher');
+    context.read<SchoolManagementNotifier>().fetchSchoolMembers(schoolId: schoolId, role: 'student');
+    context.read<SchoolManagementNotifier>().fetchSchoolMembers(schoolId: schoolId, role: 'admin');
+    
+    // Fetch classes and sections for resolution
+    context.read<ClassSetupNotifier>().fetchClasses(schoolId);
+    context.read<SectionSetupNotifier>().fetchSections();
   }
 
   @override
@@ -84,8 +92,8 @@ class _UserListTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SchoolManagementNotifier>(
-      builder: (context, notifier, child) {
+    return Consumer3<SchoolManagementNotifier, ClassSetupNotifier, SectionSetupNotifier>(
+      builder: (context, notifier, classNotifier, sectionNotifier, child) {
         final List<User> users;
         final bool isLoading;
 
@@ -100,7 +108,7 @@ class _UserListTab extends StatelessWidget {
           isLoading = notifier.isLoadingAdmins;
         }
 
-        if (isLoading) {
+        if (isLoading || classNotifier.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -120,6 +128,86 @@ class _UserListTab extends StatelessWidget {
           );
         }
 
+        // For Teachers and Students, group by Class
+        if (role == 'teacher' || role == 'student') {
+          final Map<String, List<User>> groupedUsers = {};
+          for (var user in users) {
+            final classId = user.classId ?? 'unassigned';
+            if (!groupedUsers.containsKey(classId)) {
+              groupedUsers[classId] = [];
+            }
+            groupedUsers[classId]!.add(user);
+          }
+
+          final sortedClassIds = groupedUsers.keys.toList();
+          // Sort such that 'unassigned' is last
+          sortedClassIds.sort((a, b) {
+            if (a == 'unassigned') return 1;
+            if (b == 'unassigned') return -1;
+            return a.compareTo(b);
+          });
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: sortedClassIds.length,
+            itemBuilder: (context, classIndex) {
+              final classId = sortedClassIds[classIndex];
+              final classUsers = groupedUsers[classId]!;
+              final className = classId == 'unassigned'
+                  ? 'Unassigned'
+                  : classNotifier.classes.firstWhere((c) => c.id == classId, orElse: () => ClassRoom(id: '', name: 'Unknown Class', schoolId: '')).name;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                    child: Row(
+                      children: [
+                        Icon(Icons.class_outlined, size: 18, color: AppColors.primary),
+                        const SizedBox(width: 8),
+                        Text(
+                          className,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${classUsers.length}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ...classUsers.map((user) => _UserCard(
+                    user: user,
+                    className: className,
+                    sectionName: user.sectionId != null 
+                        ? sectionNotifier.sections.firstWhere((s) => s.id == user.sectionId, orElse: () => Section(id: '', name: 'N/A', classId: '')).name
+                        : 'N/A',
+                  )),
+                  const SizedBox(height: 16),
+                ],
+              );
+            },
+          );
+        }
+
+        // For Admins, just a simple list
         return ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: users.length,
@@ -135,8 +223,14 @@ class _UserListTab extends StatelessWidget {
 
 class _UserCard extends StatelessWidget {
   final User user;
+  final String? className;
+  final String? sectionName;
 
-  const _UserCard({required this.user});
+  const _UserCard({
+    required this.user,
+    this.className,
+    this.sectionName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -146,41 +240,83 @@ class _UserCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.grey.shade200),
       ),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: AppColors.primary.withOpacity(0.1),
-          child: Text(
-            user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
-            style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-          ),
-        ),
-        title: Text(
-          user.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
           children: [
-            Text(user.email),
-            if (user.phone != null && user.phone!.isNotEmpty)
-              Text(user.phone!, style: const TextStyle(fontSize: 12)),
+            CircleAvatar(
+              backgroundColor: AppColors.primary.withOpacity(0.1),
+              child: Text(
+                user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
+                style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    user.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                  Text(
+                    user.email,
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                  ),
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      _buildInfoTag(Icons.person_outline, user.role.name.toUpperCase()),
+                      if (className != null && className != 'Unassigned')
+                        _buildInfoTag(Icons.class_outlined, className!),
+                      if (sectionName != null && sectionName != 'N/A')
+                        _buildInfoTag(Icons.grid_view_rounded, 'Section: $sectionName'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: (user.isActive ?? true) ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                (user.isActive ?? true) ? 'ACTIVE' : 'INACTIVE',
+                style: TextStyle(
+                  color: (user.isActive ?? true) ? Colors.green : Colors.red,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ],
         ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: (user.isActive ?? true) ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
+      ),
+    );
+  }
+
+  Widget _buildInfoTag(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: Colors.grey.shade600),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(fontSize: 10, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
           ),
-          child: Text(
-            (user.isActive ?? true) ? 'ACTIVE' : 'INACTIVE',
-            style: TextStyle(
-              color: (user.isActive ?? true) ? Colors.green : Colors.red,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+        ],
       ),
     );
   }
