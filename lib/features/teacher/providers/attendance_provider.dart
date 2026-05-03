@@ -92,8 +92,8 @@ class AttendanceNotifier extends ChangeNotifier {
         // Trigger notification
         NotificationService().triggerNotification(
           title: 'Attendance Submitted',
-          body: 'Attendance for class ${classId} has been submitted on ${dateString}.',
-          topic: 'class_${classId}',
+          body: 'Attendance for class $classId has been submitted for $dateString.',
+          topic: 'class_$classId',
           data: {
             'type': 'attendance',
             'classId': classId,
@@ -101,6 +101,20 @@ class AttendanceNotifier extends ChangeNotifier {
             'date': dateString,
           },
         );
+        NotificationService().triggerNotification(
+          title: 'Attendance Submitted',
+          body: 'Attendance for class $classId has been submitted for $dateString.',
+          topic: 'attendance',
+          data: {
+            'type': 'attendance',
+            'classId': classId,
+            'sectionId': sectionId,
+            'date': dateString,
+          },
+        );
+        // Also notify school admin
+        // Note: schoolId is not directly available here, but we can assume it's part of the context or data.
+        // If we don't have schoolId, we skip it or use 'all' if appropriate.
         return true;
       } else {
         log('Error submitting attendance: ${response?.data}');

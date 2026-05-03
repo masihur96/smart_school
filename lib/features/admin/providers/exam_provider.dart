@@ -5,6 +5,7 @@ import '../../../core/constants/api_path.dart';
 import '../../../core/utils/storage_service.dart';
 import '../../../configs/network/data_provider.dart';
 import '../../../models/school_models.dart';
+import '../../../services/notification_service.dart';
 
 class ExamsNotifier extends ChangeNotifier {
   List<Exam> _state = [];
@@ -86,6 +87,20 @@ class ExamsNotifier extends ChangeNotifier {
         }
         
         if (examId.isNotEmpty) {
+          // Trigger notification
+          NotificationService().triggerNotification(
+            title: 'New Exam Published',
+            body: 'Exam schedule for "$examName" is now available.',
+            topic: 'exam',
+            data: {'type': 'exam', 'id': examId},
+          );
+          NotificationService().triggerNotification(
+            title: 'New Exam Published',
+            body: 'Exam schedule for "$examName" is now available.',
+            topic: 'all',
+            data: {'type': 'exam', 'id': examId},
+          );
+
           for (final assign in assignments) {
             final assignData = {
               'class_uid': assign['class_uid'],
@@ -158,6 +173,15 @@ class ExamsNotifier extends ChangeNotifier {
 
       if (response != null && response.statusCode == 200) {
         log('Exam updated successfully');
+        
+        // Trigger notification
+        NotificationService().triggerNotification(
+          title: 'Exam Schedule Updated',
+          body: 'The schedule for "$examName" has been updated.',
+          topic: 'exam',
+          data: {'type': 'exam_update', 'id': examId},
+        );
+
         await _load();
       } else {
         log('Error updating exam: ${response?.data}');

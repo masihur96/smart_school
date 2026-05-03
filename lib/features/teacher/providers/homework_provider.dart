@@ -67,9 +67,20 @@ class HomeworkNotifier extends ChangeNotifier {
         addHomework(homework);
         // Trigger notification
         NotificationService().triggerNotification(
-          title: 'New Homework Assigned',
-          body: 'New homework for ${homework.description}: ${homework.title}',
+          title: 'New Homework: ${homework.title}',
+          body: 'Subject: ${homework.subjectId}',
           topic: 'class_${homework.classId}',
+          data: {
+            'type': 'homework',
+            'id': homework.id,
+            'classId': homework.classId,
+            'sectionId': homework.sectionId,
+          },
+        );
+        NotificationService().triggerNotification(
+          title: 'New Homework Assigned',
+          body: '${homework.title} for Class ${homework.classId}',
+          topic: 'homework',
           data: {
             'type': 'homework',
             'id': homework.id,

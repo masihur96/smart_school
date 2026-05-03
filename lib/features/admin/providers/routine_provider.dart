@@ -6,6 +6,7 @@ import 'package:smart_school/core/utils/storage_service.dart';
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
 import '../../../models/school_models.dart';
+import '../../../services/notification_service.dart';
 
 // Key format: classId_sectionId
 class RoutineNotifier extends ChangeNotifier {
@@ -139,6 +140,20 @@ class RoutineNotifier extends ChangeNotifier {
 
         // Add locally after successful API call
         addEntry(classId, sectionId, newEntry);
+
+        // Trigger notification
+        NotificationService().triggerNotification(
+          title: 'Class Routine Updated',
+          body: 'New routine added for Class $classId Section $sectionId.',
+          topic: 'class_$classId',
+          data: {'type': 'routine', 'classId': classId, 'sectionId': sectionId},
+        );
+        NotificationService().triggerNotification(
+          title: 'Class Routine Updated',
+          body: 'New routine added for Class $classId Section $sectionId.',
+          topic: 'routine',
+          data: {'type': 'routine', 'classId': classId, 'sectionId': sectionId},
+        );
       } else {
         log(
           'Error creating routine: ${response?.statusCode} - ${response?.data}',
@@ -193,6 +208,15 @@ class RoutineNotifier extends ChangeNotifier {
           newEntries[index] = entry;
           _state = {..._state, key: newEntries};
         }
+
+        // Trigger notification
+        NotificationService().triggerNotification(
+          title: 'Class Routine Updated',
+          body: 'The routine for Class $classId Section $sectionId has been updated.',
+          topic: 'class_$classId',
+          data: {'type': 'routine_update', 'classId': classId, 'sectionId': sectionId},
+        );
+
         notifyListeners();
       } else {
         log(

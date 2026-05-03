@@ -245,34 +245,63 @@ class NotificationService {
       // General topic
       await subscribeToTopic('all');
 
-      // User specific topic
-      await subscribeToTopic('user_${user.id}');
-      await subscribeToTopic(user.id);
-
-      // Student specific topic
-      if (user.role == UserRole.student) {
+      // Role-specific ID topics
+      if (user.role == UserRole.superadmin || user.role == UserRole.admin) {
+        await subscribeToTopic('admin_${user.id}');
+      } else if (user.role == UserRole.teacher) {
+        await subscribeToTopic('teacher_${user.id}');
+      } else if (user.role == UserRole.student) {
         await subscribeToTopic('student_${user.id}');
       }
+
+      // Legacy ID support (keep for compatibility if needed, or remove if strictly following new structure)
+      await subscribeToTopic(user.id);
 
       // School specific topic
       if (user.schoolId != null && user.schoolId!.isNotEmpty) {
         await subscribeToTopic('school_${user.schoolId}');
-        await subscribeToTopic(user.schoolId!);
       }
 
       // Class specific topic
       if (user.classId != null && user.classId!.isNotEmpty) {
         await subscribeToTopic('class_${user.classId}');
-        await subscribeToTopic(user.classId!);
       }
 
       // Section specific topic
       if (user.sectionId != null && user.sectionId!.isNotEmpty) {
         await subscribeToTopic('section_${user.sectionId}');
-        await subscribeToTopic(user.sectionId!);
       }
 
-      log('Successfully subscribed to all user topics for ${user.name}');
+      // Functional topics based on role
+      if (user.role == UserRole.superadmin) {
+        await subscribeToTopic('subscription');
+      }
+
+      if (user.role == UserRole.admin) {
+        await subscribeToTopic('notice');
+        await subscribeToTopic('exam');
+        await subscribeToTopic('routine');
+        await subscribeToTopic('result');
+        await subscribeToTopic('homework');
+        await subscribeToTopic('attendance');
+      }
+
+      if (user.role == UserRole.teacher) {
+        await subscribeToTopic('notice');
+        await subscribeToTopic('routine');
+        await subscribeToTopic('exam');
+      }
+
+      if (user.role == UserRole.student) {
+        await subscribeToTopic('notice');
+        await subscribeToTopic('routine');
+        await subscribeToTopic('exam');
+        await subscribeToTopic('result');
+        await subscribeToTopic('homework');
+        await subscribeToTopic('attendance');
+      }
+
+      log('Successfully subscribed to all user topics for ${user.name} (${user.role.name})');
     } catch (e) {
       log('Error subscribing to user topics: $e');
     }
@@ -281,26 +310,56 @@ class NotificationService {
   Future<void> unsubscribeFromUserTopics(User user) async {
     try {
       await unsubscribeFromTopic('all');
-      await unsubscribeFromTopic('user_${user.id}');
-      await unsubscribeFromTopic(user.id);
 
-      if (user.role == UserRole.student) {
+      if (user.role == UserRole.superadmin || user.role == UserRole.admin) {
+        await unsubscribeFromTopic('admin_${user.id}');
+      } else if (user.role == UserRole.teacher) {
+        await unsubscribeFromTopic('teacher_${user.id}');
+      } else if (user.role == UserRole.student) {
         await unsubscribeFromTopic('student_${user.id}');
       }
 
+      await unsubscribeFromTopic(user.id);
+
       if (user.schoolId != null && user.schoolId!.isNotEmpty) {
         await unsubscribeFromTopic('school_${user.schoolId}');
-        await unsubscribeFromTopic(user.schoolId!);
       }
 
       if (user.classId != null && user.classId!.isNotEmpty) {
         await unsubscribeFromTopic('class_${user.classId}');
-        await unsubscribeFromTopic(user.classId!);
       }
 
       if (user.sectionId != null && user.sectionId!.isNotEmpty) {
         await unsubscribeFromTopic('section_${user.sectionId}');
-        await unsubscribeFromTopic(user.sectionId!);
+      }
+
+      // Functional topics
+      if (user.role == UserRole.superadmin) {
+        await unsubscribeFromTopic('subscription');
+      }
+
+      if (user.role == UserRole.admin) {
+        await unsubscribeFromTopic('notice');
+        await unsubscribeFromTopic('exam');
+        await unsubscribeFromTopic('routine');
+        await unsubscribeFromTopic('result');
+        await unsubscribeFromTopic('homework');
+        await unsubscribeFromTopic('attendance');
+      }
+
+      if (user.role == UserRole.teacher) {
+        await unsubscribeFromTopic('notice');
+        await unsubscribeFromTopic('routine');
+        await unsubscribeFromTopic('exam');
+      }
+
+      if (user.role == UserRole.student) {
+        await unsubscribeFromTopic('notice');
+        await unsubscribeFromTopic('routine');
+        await unsubscribeFromTopic('exam');
+        await unsubscribeFromTopic('result');
+        await unsubscribeFromTopic('homework');
+        await unsubscribeFromTopic('attendance');
       }
 
       log('Successfully unsubscribed from all user topics for ${user.name}');
