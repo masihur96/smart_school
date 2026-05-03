@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/features/super_admin/providers/super_admin_dashboard_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../models/school_model.dart';
 import '../providers/super_admin_school_provider.dart';
@@ -32,38 +34,110 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final schoolNotifier = context.watch<SuperAdminSchoolNotifier>();
+    final dashboardNotifier = context.watch<SuperAdminDashboardNotifier>();
+    final schools = schoolNotifier.schools;
+    final isLoading = schoolNotifier.isLoading;
+    final totalSchools = dashboardNotifier.dashboardData.totalSchools;
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          _buildSliverAppBar(),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'All Institutions',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await context.read<SuperAdminSchoolNotifier>().fetchSchools();
+          await context
+              .read<SuperAdminDashboardNotifier>()
+              .fetchDashboardData();
+        },
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 130, 20, 20),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.managedSchools,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
                   ),
-                  Consumer<SuperAdminSchoolNotifier>(
-                    builder: (context, notifier, _) {
-                      return Text(
-                        '${notifier.schools.length} Schools',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SuperAdminSchoolScreen(),
                         ),
                       );
                     },
+                    icon: const Icon(Icons.add_rounded, size: 20),
+                    label: Text(l10n.addNew),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 0,
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-          _buildSchoolList(),
-        ],
+            const SizedBox(height: 12),
+            Text(
+              'Oversee operations for $totalSchools educational institutions',
+              style: const TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: 24),
+            if (isLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(40.0),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (schools.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(40.0),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.business_outlined,
+                        size: 64,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No schools found',
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              ...schools.map((school) => _buildSchoolCard(school, l10n)),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddEditSchoolSheet(),
@@ -78,6 +152,205 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
           ),
         ),
         elevation: 4,
+      ),
+    );
+  }
+
+  Widget _buildSchoolCard(SuperAdminSchool school, AppLocalizations l10n) {
+    final statusColor = school.isActive ? Colors.green : Colors.red;
+    final statusText = school.isActive ? 'Active' : 'Inactive';
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        school.name,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        statusText.toUpperCase(),
+                        style: TextStyle(
+                          color: statusColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildSmallInfo(Icons.badge_rounded, 'ID: ${school.schoolId}'),
+                const SizedBox(height: 16),
+                _buildSmallInfo(
+                  Icons.phone_rounded,
+                  school.phone.isNotEmpty ? school.phone : 'No phone',
+                ),
+                const SizedBox(height: 8),
+                _buildSmallInfo(
+                  Icons.email_rounded,
+                  school.email.isNotEmpty ? school.email : 'No email',
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                PopupMenuButton<String>(
+                  icon: const Icon(
+                    Icons.more_vert_rounded,
+                    color: AppColors.textSecondary,
+                  ),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) =>
+                            AddEditSchoolBottomSheet(school: school),
+                      );
+                    } else if (value == 'delete') {
+                      _showDeleteConfirmation(context, school);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit_outlined, size: 20),
+                          SizedBox(width: 8),
+                          Text('Edit Details'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.delete_outline_rounded,
+                            size: 20,
+                            color: Colors.red,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Delete School',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SuperAdminSchoolScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primary,
+                    elevation: 0,
+                    side: BorderSide(color: Colors.grey.shade300),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    minimumSize: const Size(0, 0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    l10n.manage,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSmallInfo(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 14),
+        const SizedBox(width: 4),
+        Text(text, style: TextStyle(fontSize: 12)),
+      ],
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, SuperAdminSchool school) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Institution?'),
+        content: Text(
+          'Are you sure you want to delete ${school.name}? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCEL'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await context
+                  .read<SuperAdminSchoolNotifier>()
+                  .deleteSchool(school.id!);
+              if (success && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${school.name} deleted')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('DELETE'),
+          ),
+        ],
       ),
     );
   }
