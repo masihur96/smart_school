@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
+import 'package:smart_school/features/notifications/providers/notification_provider.dart';
 import 'package:smart_school/features/super_admin/models/school_model.dart';
 import 'package:smart_school/features/super_admin/providers/school_management_provider.dart';
 import 'package:smart_school/models/school_models.dart';
@@ -34,7 +35,6 @@ class _SchoolManagementDetailsScreenState extends State<SchoolManagementDetailsS
     context.read<SchoolManagementNotifier>().fetchSchoolMembers(schoolId: schoolId, role: 'student');
     context.read<SchoolManagementNotifier>().fetchSchoolMembers(schoolId: schoolId, role: 'admin');
     
-    // Fetch classes and sections for resolution
     context.read<ClassSetupNotifier>().fetchClasses(schoolId);
     context.read<SectionSetupNotifier>().fetchSections();
   }
@@ -128,7 +128,6 @@ class _UserListTab extends StatelessWidget {
           );
         }
 
-        // For Teachers and Students, group by Class
         if (role == 'teacher' || role == 'student') {
           final Map<String, List<User>> groupedUsers = {};
           for (var user in users) {
@@ -140,7 +139,6 @@ class _UserListTab extends StatelessWidget {
           }
 
           final sortedClassIds = groupedUsers.keys.toList();
-          // Sort such that 'unassigned' is last
           sortedClassIds.sort((a, b) {
             if (a == 'unassigned') return 1;
             if (b == 'unassigned') return -1;
@@ -207,7 +205,6 @@ class _UserListTab extends StatelessWidget {
           );
         }
 
-        // For Admins, just a simple list
         return ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: users.length,
@@ -231,6 +228,85 @@ class _UserCard extends StatelessWidget {
     this.className,
     this.sectionName,
   });
+
+  void _showSendNotificationDialog(BuildContext context) {
+    final titleController = TextEditingController();
+    final messageController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.send_rounded, color: AppColors.primary),
+            const SizedBox(width: 8),
+            const Text('Send Notification'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Sending to: ${user.name}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: titleController,
+              decoration: InputDecoration(
+                labelText: 'Title',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                prefixIcon: const Icon(Icons.title_rounded),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: messageController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                labelText: 'Message',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                prefixIcon: const Icon(Icons.message_rounded),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCEL'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (titleController.text.isEmpty || messageController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please fill all fields')),
+                );
+                return;
+              }
+
+              final notifier = context.read<NotificationNotifier>();
+              await notifier.sendNotification(
+                receiverUuid: user.id,
+                title: titleController.text,
+                message: messageController.text,
+              );
+
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Notification sent successfully')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('SEND'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -279,20 +355,30 @@ class _UserCard extends StatelessWidget {
                 ],
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: (user.isActive ?? true) ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                (user.isActive ?? true) ? 'ACTIVE' : 'INACTIVE',
-                style: TextStyle(
-                  color: (user.isActive ?? true) ? Colors.green : Colors.red,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                IconButton(
+                  onPressed: () => _showSendNotificationDialog(context),
+                  icon: const Icon(Icons.notifications_active_outlined, color: AppColors.primary),
+                  tooltip: 'Send Notification',
                 ),
-              ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: (user.isActive ?? true) ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    (user.isActive ?? true) ? 'ACTIVE' : 'INACTIVE',
+                    style: TextStyle(
+                      color: (user.isActive ?? true) ? Colors.green : Colors.red,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -321,3 +407,4 @@ class _UserCard extends StatelessWidget {
     );
   }
 }
+
