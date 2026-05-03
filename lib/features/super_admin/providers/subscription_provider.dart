@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
 import '../../../core/utils/storage_service.dart';
+import '../../../services/notification_service.dart';
 import '../models/subscription_model.dart';
 
 class SubscriptionNotifier extends ChangeNotifier {
@@ -70,6 +71,16 @@ class SubscriptionNotifier extends ChangeNotifier {
       );
 
       if (response != null && response.statusCode == 200) {
+        log('Subscription updated successfully');
+
+        // Trigger notification to super admins and school
+        NotificationService().triggerNotification(
+          title: 'Subscription Update',
+          body: 'Subscription status has been changed to ${isActive ? "Active" : "Inactive"}.',
+          topic: 'subscription',
+          data: {'type': 'subscription_update', 'id': id, 'isActive': isActive},
+        );
+
         await fetchSubscriptions(); // Refresh the list from the server
         return true;
       } else {

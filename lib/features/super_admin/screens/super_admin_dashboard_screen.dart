@@ -12,6 +12,7 @@ import 'package:smart_school/features/super_admin/providers/super_admin_school_p
 import 'package:smart_school/features/super_admin/screens/backup_screen.dart';
 import 'package:smart_school/features/super_admin/screens/pricing_school_screen.dart';
 import 'package:smart_school/features/super_admin/screens/subscription_screen.dart';
+import 'package:smart_school/features/super_admin/screens/super_admin_notification_sender_screen.dart';
 import 'package:smart_school/features/super_admin/screens/super_admin_school_screen.dart';
 import 'package:smart_school/features/super_admin/screens/system_status_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
@@ -424,6 +425,12 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => BackupScreen()),
+            );
+          }),
+          _buildActionItem('Announcement', Icons.campaign_rounded, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SuperAdminNotificationSenderScreen()),
             );
           }),
         ],

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
 import '../../../core/utils/storage_service.dart';
+import '../../../services/notification_service.dart';
 import '../models/school_model.dart';
 
 class SuperAdminSchoolNotifier extends ChangeNotifier {
@@ -76,6 +77,15 @@ class SuperAdminSchoolNotifier extends ChangeNotifier {
       if (response != null &&
           (response.statusCode == 201 || response.statusCode == 200)) {
         log('School created successfully');
+        
+        // Trigger notification to super admins
+        NotificationService().triggerNotification(
+          title: 'New School Registration',
+          body: 'A new school "${school.name}" has been registered.',
+          topic: 'subscription',
+          data: {'type': 'registration', 'schoolName': school.name},
+        );
+
         await fetchSchools(); // Refresh list
         return true;
       } else {
@@ -114,6 +124,15 @@ class SuperAdminSchoolNotifier extends ChangeNotifier {
 
       if (response != null && response.statusCode == 200) {
         log('School updated successfully');
+        
+        // Trigger notification for verification/status updates
+        NotificationService().triggerNotification(
+          title: 'School Updated',
+          body: 'The status of "${school.name}" has been updated.',
+          topic: 'subscription',
+          data: {'type': 'update', 'schoolId': id, 'schoolName': school.name},
+        );
+
         await fetchSchools(); // Refresh list
         return true;
       } else {

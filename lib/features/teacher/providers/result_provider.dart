@@ -141,10 +141,20 @@ class ResultsNotifier extends ChangeNotifier {
       log('Marks submitted successfully');
 
       // Trigger notification
+      final classId = marks.isNotEmpty ? (marks.first['classId'] ?? '') : '';
       NotificationService().triggerNotification(
         title: 'Exam Results Published',
         body: 'Results for your recent exam have been published.',
-        topic: 'class_${marks.first['classId'] ?? ''}', 
+        topic: 'class_$classId',
+        data: {
+          'type': 'result',
+          'examId': examId,
+        },
+      );
+      NotificationService().triggerNotification(
+        title: 'Exam Results Published',
+        body: 'Exam results are now available.',
+        topic: 'result',
         data: {
           'type': 'result',
           'examId': examId,

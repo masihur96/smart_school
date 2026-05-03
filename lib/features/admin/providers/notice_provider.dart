@@ -99,22 +99,26 @@ class NoticesNotifier extends ChangeNotifier {
         final body = response.data;
         if (body is Map) {
           final responseData = body['data'] ?? body;
-          final serverId =
-              (responseData['id'] ?? responseData['_id'])?.toString();
+          final serverId = (responseData['id'] ?? responseData['_id'])
+              ?.toString();
           if (serverId != null) saved = notice.copyWith(id: serverId);
         }
         _dbService.notices.add(saved);
         _notices = [..._dbService.notices];
 
         // Trigger notification
+        final schoolId = notice.schoolId ?? "all";
         NotificationService().triggerNotification(
-          title: 'New School Notice',
-          body: notice.title,
-          topic: 'all',
-          data: {
-            'type': 'notice',
-            'id': saved.id,
-          },
+          title: 'New Notice: ${notice.title}',
+          body: notice.content,
+          topic: 'school_$schoolId',
+          data: {'type': 'notice', 'id': saved.id},
+        );
+        NotificationService().triggerNotification(
+          title: 'New Notice: ${notice.title}',
+          body: notice.content,
+          topic: 'notice',
+          data: {'type': 'notice', 'id': saved.id},
         );
       } else {
         throw Exception('Failed to create notice: ${response?.data}');
@@ -148,8 +152,7 @@ class NoticesNotifier extends ChangeNotifier {
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
         log('Successfully updated notice ${updated.id}');
-        final idx =
-            _dbService.notices.indexWhere((n) => n.id == updated.id);
+        final idx = _dbService.notices.indexWhere((n) => n.id == updated.id);
         if (idx != -1) {
           _dbService.notices[idx] = updated;
         }
