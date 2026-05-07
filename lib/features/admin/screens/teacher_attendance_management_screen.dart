@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import '../providers/attendance_management_provider.dart';
 
 class TeacherAttendanceManagementScreen extends StatefulWidget {
@@ -51,7 +52,7 @@ class _TeacherAttendanceManagementScreenState extends State<TeacherAttendanceMan
     return Scaffold(
       appBar: AppBar(
         title: const Text("Teacher Attendance"),
-        backgroundColor: const Color(0xFF1E1B4B),
+        backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
       ),
       body: Column(

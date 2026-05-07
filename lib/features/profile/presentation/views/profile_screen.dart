@@ -238,78 +238,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildSliverAppBar(BuildContext context, User user, bool isLoading) {
+    print(user.role.name.toLowerCase());
     final theme = Theme.of(context);
     return SliverAppBar(
       expandedHeight: 240,
       pinned: true,
       stretch: true,
-      backgroundColor: theme.primaryColor,
+      backgroundColor: user.role.name.toLowerCase()=="admin"?AppColors.primaryAdmin: theme.primaryColor,
       foregroundColor: AppColors.white,
       flexibleSpace: FlexibleSpaceBar(
         stretchModes: const [StretchMode.zoomBackground],
-        background: Stack(
-          alignment: Alignment.center,
+        background:  Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    theme.primaryColor,
-                    theme.primaryColor.withBlue(200),
-                  ],
+            const SizedBox(height: 40),
+            Stack(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundColor: theme.primaryColor.withOpacity(0.1),
+                    child: Icon(
+                      Icons.person,
+                      size: 60,
+                      color: theme.primaryColor,
+                    ),
+                  ),
                 ),
+                if (isLoading)
+                  const Positioned.fill(
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              user.name,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 40),
-                Stack(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundColor: theme.primaryColor.withOpacity(0.1),
-                        child: Icon(
-                          Icons.person,
-                          size: 60,
-                          color: theme.primaryColor,
-                        ),
-                      ),
-                    ),
-                    if (isLoading)
-                      const Positioned.fill(
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  user.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  user.email,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
+            Text(
+              user.email,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 14,
+              ),
             ),
           ],
         ),
