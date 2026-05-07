@@ -145,22 +145,30 @@ class AppDrawer extends StatelessWidget {
         );
       }, context),
 
-
       _buildDrawerItem(Icons.group_outlined, l10n.attendance, () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => StudentAttendanceManagementScreen()),
+          MaterialPageRoute(
+            builder: (_) => StudentAttendanceManagementScreen(),
+          ),
         );
-      }, context),         _buildDrawerItem(Icons.how_to_reg, l10n.teacherAttendance, () {
+      }, context),
+      _buildDrawerItem(Icons.how_to_reg, l10n.teacherAttendance, () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => TeacherAttendanceManagementScreen()),
+          MaterialPageRoute(
+            builder: (_) => TeacherAttendanceManagementScreen(),
+          ),
         );
       }, context),
       _buildDrawerItem(Icons.campaign, l10n.marqueeMessage, () {
         final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
-        Navigator.push(context, MaterialPageRoute(builder: (_) => AddEditMarqueeScreen(schoolId: schoolId)));
-
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AddEditMarqueeScreen(schoolId: schoolId),
+          ),
+        );
       }, context),
       _buildDrawerItem(Icons.assignment_turned_in, l10n.exams, () {
         Navigator.push(
@@ -210,6 +218,7 @@ class AppDrawer extends StatelessWidget {
           MaterialPageRoute(builder: (_) => const TeacherRoutineScreen()),
         );
       }, context),
+      _buildDrawerItem(Icons.pentagon_outlined, l10n.exams, () {}, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
         Navigator.push(
           context,

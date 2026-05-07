@@ -1425,27 +1425,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       children: [
         _buildActionGridItem(
           context,
-          l10n.attendance,
-          Icons.how_to_reg,
-          Colors.blue,
-          onTap: () => setState(() => _selectedIndex = 1),
-        ),
-        _buildActionGridItem(
-          context,
-          l10n.markEntry,
-          Icons.grade,
-          Colors.indigo,
-          onTap: () => setState(() => _selectedIndex = 2),
-        ),
-        _buildActionGridItem(
-          context,
-          l10n.homework,
-          Icons.menu_book,
-          Colors.orange,
-          onTap: () => setState(() => _selectedIndex = 3),
-        ),
-        _buildActionGridItem(
-          context,
           l10n.results, // Using results as report
           Icons.bar_chart,
           Colors.purple,
