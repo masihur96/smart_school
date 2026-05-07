@@ -26,6 +26,8 @@ import '../providers/teacher_provider.dart';
 import 'exam_management_screen.dart';
 import 'notice_management_screen.dart';
 import 'student_management_screen.dart';
+import 'student_attendance_management_screen.dart';
+import 'teacher_attendance_management_screen.dart';
 import '../models/admin_dashboard_model.dart';
 import '../providers/admin_dashboard_provider.dart';
 import '../../../core/services/geocoding_service.dart';
@@ -367,21 +369,30 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final absent = data.absent;
     final rate = data.attendanceRate;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      child: Column(
-        children: [
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const StudentAttendanceManagementScreen(),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
+        child: Column(
+          children: [
           Row(
             children: [
               Container(
@@ -455,8 +466,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildTeacherAttendanceCard(AttendTeacher data) {
     final total = data.totalTeachers;
@@ -469,18 +481,27 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ? const Color(0xFFF59E0B)
             : const Color(0xFFEF4444);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.purple.withValues(alpha: 0.07),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const TeacherAttendanceManagementScreen(),
+          ),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.purple.withValues(alpha: 0.07),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -776,8 +797,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ],
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildStatPill(
       String label,
