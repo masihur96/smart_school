@@ -277,15 +277,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         .map((notice) => _buildNoticeCard(context, notice)),
                     const SizedBox(height: 24),
                   ],
-                  Text(
-                    l10n.quickActions,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildQuickActionsGrid(context, l10n),
-                  const SizedBox(height: 32),
                 ],
               ),
             ),

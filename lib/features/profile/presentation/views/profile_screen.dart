@@ -244,11 +244,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       expandedHeight: 240,
       pinned: true,
       stretch: true,
-      backgroundColor: user.role.name.toLowerCase()=="admin"?AppColors.primaryAdmin: theme.primaryColor,
+      backgroundColor: user.role.name.toLowerCase() == "admin"
+          ? AppColors.primaryAdmin
+          : user.role.name.toLowerCase() == "teacher"
+          ? AppColors.primaryTeacher
+          : theme.primaryColor,
       foregroundColor: AppColors.white,
       flexibleSpace: FlexibleSpaceBar(
         stretchModes: const [StretchMode.zoomBackground],
-        background:  Column(
+        background: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(height: 40),

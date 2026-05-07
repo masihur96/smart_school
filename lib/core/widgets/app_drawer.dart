@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/screens/add_edit_marquee_screen.dart';
 import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
 import 'package:smart_school/features/admin/screens/exam_management_screen.dart';
@@ -21,6 +22,7 @@ import 'package:smart_school/features/teacher/screens/homework_management_screen
 import 'package:smart_school/features/teacher/screens/mark_entry_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_attendance_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
+import 'package:smart_school/features/teacher/screens/teacher_exam_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_routine_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
@@ -46,6 +48,7 @@ class AppDrawer extends StatelessWidget {
             accountEmail: Text(user.email),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
+
               child: Text(
                 user.name[0],
                 style: const TextStyle(
@@ -95,9 +98,9 @@ class AppDrawer extends StatelessWidget {
   Color _getRoleColor(UserRole role) {
     switch (role) {
       case UserRole.admin:
-        return Colors.purple;
+        return AppColors.primaryAdmin;
       case UserRole.teacher:
-        return Colors.blue;
+        return AppColors.primaryTeacher;
       case UserRole.student:
         return Colors.green;
       case UserRole.superadmin:
@@ -218,7 +221,12 @@ class AppDrawer extends StatelessWidget {
           MaterialPageRoute(builder: (_) => const TeacherRoutineScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.pentagon_outlined, l10n.exams, () {}, context),
+      _buildDrawerItem(Icons.pentagon_outlined, l10n.exams, () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const TeacherExamScreen()),
+        );
+      }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
         Navigator.push(
           context,
