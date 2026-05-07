@@ -17,6 +17,7 @@ import 'features/admin/providers/setup_provider.dart';
 import 'features/admin/providers/student_provider.dart';
 import 'features/admin/providers/teacher_provider.dart';
 import 'features/admin/providers/admin_dashboard_provider.dart';
+import 'features/admin/providers/attendance_management_provider.dart';
 import 'features/auth/data/datasources/auth_remote_data_source.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/domain/usecases/change_password_usecase.dart';
@@ -132,6 +133,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => TeacherAttendanceProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => AdminDashboardProvider()),
+        ChangeNotifierProvider(create: (_) => AttendanceManagementProvider()),
         ChangeNotifierProvider(create: (_) => SuperAdminDashboardNotifier()),
         ChangeNotifierProvider(create: (_) => AdminSchoolNotifier()),
         ChangeNotifierProvider(create: (_) => SuperAdminSchoolNotifier()),
