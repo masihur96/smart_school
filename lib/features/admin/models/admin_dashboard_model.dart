@@ -39,7 +39,7 @@ class AttendTeacher {
   final int present;
   final int absent;
   final double attendanceRate;
-  final List<dynamic> recentRecords;
+  final List<TeacherRecentRecord> recentRecords;
 
   AttendTeacher({
     required this.date,
@@ -57,7 +57,10 @@ class AttendTeacher {
       present: json['present'] ?? 0,
       absent: json['absent'] ?? 0,
       attendanceRate: (json['attendanceRate'] ?? 0).toDouble(),
-      recentRecords: json['recentRecords'] ?? [],
+      recentRecords: (json['recentRecords'] as List<dynamic>?)
+              ?.map((e) => TeacherRecentRecord.fromJson(e))
+              .toList() ??
+          [],
     );
   }
 }
@@ -180,6 +183,47 @@ class CurrentExam {
       description: json['description'] ?? '',
       startDate: json['start_date'] ?? '',
       endDate: json['end_date'] ?? '',
+    );
+  }
+}
+
+class TeacherRecentRecord {
+  final String id;
+  final String teacherName;
+  final String designation;
+  final String date;
+  final String time;
+  final String startTime;
+  final String? endTime;
+  final String status;
+  final String lat;
+  final String lon;
+
+  TeacherRecentRecord({
+    required this.id,
+    required this.teacherName,
+    required this.designation,
+    required this.date,
+    required this.time,
+    required this.startTime,
+    this.endTime,
+    required this.status,
+    required this.lat,
+    required this.lon,
+  });
+
+  factory TeacherRecentRecord.fromJson(Map<String, dynamic> json) {
+    return TeacherRecentRecord(
+      id: json['id'] ?? '',
+      teacherName: json['teacher']?['name'] ?? 'Unknown',
+      designation: json['teacher']?['designation'] ?? '',
+      date: json['date'] ?? '',
+      time: json['time'] ?? '',
+      startTime: json['startTime'] ?? '',
+      endTime: json['endTime'],
+      status: json['status'] ?? '',
+      lat: json['lat'] ?? '',
+      lon: json['lon'] ?? '',
     );
   }
 }

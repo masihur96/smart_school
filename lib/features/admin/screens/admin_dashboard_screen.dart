@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/features/admin/screens/add_edit_marquee_screen.dart';
 import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart';
 import 'package:smart_school/features/admin/screens/add_edit_teacher_screen.dart';
@@ -27,6 +28,8 @@ import 'notice_management_screen.dart';
 import 'student_management_screen.dart';
 import '../models/admin_dashboard_model.dart';
 import '../providers/admin_dashboard_provider.dart';
+import '../../../core/services/geocoding_service.dart';
+
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -344,38 +347,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildAttendanceCards(AdminDashboardData data) {
     return Column(
       children: [
-        _buildAttendanceDetailCard(
-          title: 'Student Attendance',
-          date: data.attendStudent.date,
-          total: data.attendStudent.totalStudents,
-          present: data.attendStudent.present,
-          absent: data.attendStudent.absent,
-          rate: data.attendStudent.attendanceRate,
-          color: Colors.blue,
-        ),
+        _buildStudentAttendanceCard(data.attendStudent),
         const SizedBox(height: 16),
-        _buildAttendanceDetailCard(
-          title: 'Teacher Attendance',
-          date: data.attendTeacher.date,
-          total: data.attendTeacher.totalTeachers,
-          present: data.attendTeacher.present,
-          absent: data.attendTeacher.absent,
-          rate: data.attendTeacher.attendanceRate,
-          color: Colors.purple,
-        ),
+        _buildTeacherAttendanceCard(data.attendTeacher),
       ],
     );
   }
 
-  Widget _buildAttendanceDetailCard({
-    required String title,
-    required String date,
-    required int total,
-    required int present,
-    required int absent,
-    required double rate,
-    required Color color,
-  }) {
+  Widget _buildStudentAttendanceCard(AttendStudent data) {
+    const color = Colors.blue;
+    final total = data.totalStudents;
+    final present = data.present;
+    final absent = data.absent;
+    final rate = data.attendanceRate;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -383,7 +368,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
@@ -397,16 +382,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  const Text(
+                    'Student Attendance',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Date: $date',
+                    'Date: ${data.date}',
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ],
@@ -414,17 +396,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   '${rate.toStringAsFixed(1)}%',
-                  style: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: const TextStyle(color: color, fontWeight: FontWeight.bold),
                 ),
-              )
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -434,6 +413,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               _buildAttendanceStatItem('Total', total.toString(), Colors.grey[700]!),
               _buildAttendanceStatItem('Present', present.toString(), Colors.green),
               _buildAttendanceStatItem('Absent', absent.toString(), Colors.red),
+              _buildAttendanceStatItem('Leave', data.leave.toString(), Colors.orange),
             ],
           ),
           const SizedBox(height: 16),
@@ -442,17 +422,383 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             child: LinearProgressIndicator(
               value: total > 0 ? (present / total) : 0,
               minHeight: 8,
-              backgroundColor: Colors.grey.withOpacity(0.2),
+              backgroundColor: Colors.grey.withValues(alpha: 0.2),
               valueColor: AlwaysStoppedAnimation<Color>(
                 rate >= 75 ? Colors.green : (rate >= 50 ? Colors.orange : Colors.red),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
+  Widget _buildTeacherAttendanceCard(AttendTeacher data) {
+    final total = data.totalTeachers;
+    final present = data.present;
+    final absent = data.absent;
+    final rate = data.attendanceRate;
+    final rateColor = rate >= 75
+        ? const Color(0xFF10B981)
+        : rate >= 50
+            ? const Color(0xFFF59E0B)
+            : const Color(0xFFEF4444);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.purple.withValues(alpha: 0.07),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Header ──────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.how_to_reg_rounded,
+                      color: Colors.purple, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Teacher Attendance',
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        data.date,
+                        style:
+                            TextStyle(fontSize: 11, color: Colors.grey[500]),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: rateColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${rate.toStringAsFixed(1)}%',
+                    style: TextStyle(
+                        color: rateColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Stats pills ─────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                _buildStatPill('Total', total.toString(),
+                    const Color(0xFF6B7280), Icons.groups_rounded),
+                const SizedBox(width: 8),
+                _buildStatPill('Present', present.toString(),
+                    const Color(0xFF10B981), Icons.check_circle_outline),
+                const SizedBox(width: 8),
+                _buildStatPill('Absent', absent.toString(),
+                    const Color(0xFFEF4444), Icons.cancel_outlined),
+              ],
+            ),
+          ),
+
+          // ── Progress bar ────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: total > 0 ? (present / total) : 0,
+                minHeight: 6,
+                backgroundColor: Colors.grey.withValues(alpha: 0.15),
+                valueColor: AlwaysStoppedAnimation<Color>(rateColor),
+              ),
+            ),
+          ),
+
+          // ── Records horizontal scroll ────────────────────
+          if (data.recentRecords.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 0, 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.access_time_rounded,
+                      size: 13, color: Colors.purple),
+                  const SizedBox(width: 5),
+                  Text(
+                    "Today's Records",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: screenSize(context, .3),
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                itemCount: data.recentRecords.length,
+                itemBuilder: (context, index) {
+                  final r = data.recentRecords[index];
+                  final isClockedIn = r.status == 'clock-in';
+                  final statusColor = isClockedIn
+                      ? const Color(0xFF10B981)
+                      : const Color(0xFF3B82F6);
+                  final initial = r.teacherName.isNotEmpty
+                      ? r.teacherName[0].toUpperCase()
+                      : '?';
+                  final inTime = r.startTime.length >= 5
+                      ? r.startTime.substring(0, 5)
+                      : r.startTime;
+                  final outTime =
+                      (r.endTime != null && r.endTime!.length >= 5)
+                          ? r.endTime!.substring(0, 5)
+                          : '--:--';
+                  final lat =
+                      double.tryParse(r.lat)?.toStringAsFixed(3) ?? r.lat;
+                  final lon =
+                      double.tryParse(r.lon)?.toStringAsFixed(3) ?? r.lon;
+
+                  return Container(
+                    width: 148,
+                    margin: const EdgeInsets.only(right: 10),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                          color: statusColor.withValues(alpha: 0.2),
+                          width: 1),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Avatar + status dot
+                        Row(
+                          children: [
+                            Stack(
+                              children: [
+                                Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    color: statusColor.withValues(alpha: 0.15),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      initial,
+                                      style: TextStyle(
+                                        color: statusColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  right: 0,
+                                  bottom: 0,
+                                  child: Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: statusColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),)
+
+                              ],
+                            ),
+
+                            SizedBox(width: 5,),
+
+                            // Name
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  r.teacherName,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  r.designation.isNotEmpty
+                                      ? r.designation
+                                      : 'Teacher',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 10,
+                                    color: Colors.grey[500],
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+
+
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        // In / Out times
+                        Row(
+                          children: [
+                            Icon(Icons.login_rounded,
+                                size: 10, color: Colors.green[600]),
+                            const SizedBox(width: 3),
+                            Text(inTime,
+                                style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.green[700],
+                                    fontWeight: FontWeight.w600)),
+                      Spacer(),
+                            Icon(Icons.logout_rounded,
+                                size: 10,
+                                color: outTime == '--:--'
+                                    ? Colors.grey
+                                    : Colors.blue[600]),
+                            const SizedBox(width: 3),
+                            Text(outTime,
+                                style: TextStyle(
+                                    fontSize: 10,
+                                    color: outTime == '--:--'
+                                        ? Colors.grey
+                                        : Colors.blue[700],
+                                    fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                        const SizedBox(height: 5),
+                        // Location – reverse geocoded
+                        FutureBuilder<String>(
+                          future: GeocodingService().getPlaceName(r.lat, r.lon),
+                          builder: (context, snapshot) {
+                            final place = snapshot.connectionState ==
+                                    ConnectionState.waiting
+                                ? '...'
+                                : (snapshot.data ??
+                                    '${double.tryParse(r.lat)?.toStringAsFixed(3) ?? r.lat}, '
+                                    '${double.tryParse(r.lon)?.toStringAsFixed(3) ?? r.lon}');
+                            return Row(
+                              children: [
+                                Icon(Icons.location_on_outlined,
+                                    size: 10, color: Colors.grey[400]),
+                                const SizedBox(width: 2),
+                                Expanded(
+                                  child: Text(
+                                    place,
+                                    style: TextStyle(
+                                        fontSize: 9, color: Colors.grey[500]),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ] else ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
+              child: Center(
+                child: Text(
+                  'No records for today',
+                  style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatPill(
+      String label,
+      String value,
+      Color color,
+      IconData icon,
+      ) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 4),
+
+            Text(
+              value,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+
+            const SizedBox(width: 4),
+
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
   Widget _buildAttendanceStatItem(String label, String value, Color color) {
     return Column(
       children: [
