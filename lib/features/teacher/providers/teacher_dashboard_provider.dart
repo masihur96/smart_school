@@ -6,8 +6,12 @@ import 'package:smart_school/core/utils/storage_service.dart';
 import '../../../../configs/network/data_provider.dart';
 import '../../../../core/constants/api_path.dart';
 import '../../../../models/school_models.dart';
+import '../data/models/teacher_dashboard_model.dart';
 
 class TeacherDashboardProvider extends ChangeNotifier {
+  TeacherDashboardData? _dashboardData;
+  TeacherDashboardData? get dashboardData => _dashboardData;
+
   List<RoutineEntry> _todayClasses = [];
   List<Exam> _exams = [];
   bool _isLoading = false;
@@ -121,6 +125,46 @@ class TeacherDashboardProvider extends ChangeNotifier {
       }
     } catch (e) {
       log('Error fetching today attendance: $e');
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchTeacherDashboard() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final url = APIPath.teacherDashboard;
+      log('Fetching teacher dashboard: $url');
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        url,
+        header: {
+          'Authorization': 'Bearer $token',
+          'accept': '*/*',
+        },
+      );
+
+      if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
+        _dashboardData = TeacherDashboardData.fromJson(response.data['data']);
+        // Sync older state if needed (optional, for backward compatibility during transition)
+        if (_dashboardData?.attendanceStatus?.record != null) {
+          _todayAttendance = _dashboardData!.attendanceStatus!.record;
+        }
+        _exams = _dashboardData?.recentExamList ?? [];
+      } else {
+        throw Exception('Failed to load dashboard: ${response?.statusCode} - ${response?.data}');
+      }
+    } catch (e) {
+      log('Error fetching teacher dashboard: $e');
       _error = e.toString();
     } finally {
       _isLoading = false;

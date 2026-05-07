@@ -270,6 +270,9 @@ class Homework {
   final DateTime dueDate;
   final DateTime createdAt;
   final List<StudentHomework> studentHomeworks;
+  final ClassRoom? classInfo;
+  final Subject? subjectInfo;
+  final Section? sectionInfo;
 
   Homework({
     required this.id,
@@ -283,6 +286,9 @@ class Homework {
     required this.dueDate,
     required this.createdAt,
     this.studentHomeworks = const [],
+    this.classInfo,
+    this.subjectInfo,
+    this.sectionInfo,
     this.deletedAt,
   });
 
@@ -303,6 +309,9 @@ class Homework {
     studentHomeworks: (json['studentHomeworks'] as List? ?? [])
         .map((e) => StudentHomework.fromJson(e))
         .toList(),
+    classInfo: json['classInfo'] != null ? ClassRoom.fromJson(json['classInfo']) : null,
+    subjectInfo: json['subjectInfo'] != null ? Subject.fromJson(json['subjectInfo']) : null,
+    sectionInfo: json['sectionInfo'] != null ? Section.fromJson(json['sectionInfo']) : null,
     deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
   );
 
@@ -318,6 +327,9 @@ class Homework {
     'dueDate': dueDate.toIso8601String(),
     'createdAt': createdAt.toIso8601String(),
     'studentHomeworks': studentHomeworks.map((e) => e.toJson()).toList(),
+    if (classInfo != null) 'classInfo': classInfo!.toJson(),
+    if (subjectInfo != null) 'subjectInfo': subjectInfo!.toJson(),
+    if (sectionInfo != null) 'sectionInfo': sectionInfo!.toJson(),
     'deletedAt': deletedAt?.toIso8601String(),
   };
 }

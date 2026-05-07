@@ -16,6 +16,7 @@ import '../../../core/widgets/notification_icon_button.dart';
 import '../../admin/providers/marquee_provider.dart';
 import '../../admin/providers/notice_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../data/models/teacher_dashboard_model.dart';
 import '../providers/teacher_dashboard_provider.dart';
 import 'homework_management_screen.dart';
 import 'mark_entry_screen.dart';
@@ -40,14 +41,8 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       final now = DateTime.now();
       final dayName = DateFormat('EEEE').format(now);
       final apiDateStr = DateFormat('yyyy-MM-dd').format(now);
+      context.read<TeacherDashboardProvider>().fetchTeacherDashboard();
       context.read<TeacherDashboardProvider>().fetchTodayClasses(dayName);
-      context.read<TeacherDashboardProvider>().fetchTodayAttendance(apiDateStr);
-      context.read<TeacherDashboardProvider>().fetchExams();
-      context.read<NoticesNotifier>().fetchNoticesFromAPI();
-      context.read<MarqueeProvider>().fetchMarquee(
-        'TEACHER',
-        user?.schoolId ?? "",
-      );
     });
   }
 
@@ -218,87 +213,112 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     AppLocalizations l10n,
   ) {
     final provider = context.watch<TeacherDashboardProvider>();
+    final data = provider.dashboardData;
     final classes = provider.todayClasses
         .where((c) => c.teacherId == user.id)
         .toList();
     classes.sort((a, b) => a.startTime.compareTo(b.startTime));
 
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildWelcomeHeader(context, name, classes.length, user, l10n),
-          Consumer2<NoticesNotifier, MarqueeProvider>(
-            builder: (context, noticeNotifier, marqueeProvider, child) {
-              return MarqueeNotice(
-                customText: marqueeProvider.teacherMarquee?.text,
-              );
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildExamsSection(context, l10n),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      l10n.scheduleToday,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+    return RefreshIndicator(
+      onRefresh: () => provider.fetchTeacherDashboard(),
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildModernHeader(context, name, classes.length, user, l10n),
+            if (data?.marqueeData != null)
+              MarqueeNotice(customText: data!.marqueeData!.text),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildAttendanceSection(context, data, l10n),
+                  const SizedBox(height: 24),
+                  if (data?.myClassAttendStudents.isNotEmpty ?? false) ...[
+                    _buildSectionHeader(l10n.attendance, onSeeAll: () {}),
+                    const SizedBox(height: 12),
+                    ...data!.myClassAttendStudents.map((stats) => _buildClassPerformanceCard(context, stats)),
+                    const SizedBox(height: 24),
+                  ],
+                  if (classes.isNotEmpty) ...[
+                    _buildSectionHeader(l10n.scheduleToday, onSeeAll: () {}),
+                    const SizedBox(height: 12),
+                    ...classes.map((c) => _buildClassCard(context, c)),
+                    const SizedBox(height: 24),
+                  ],
+                  _buildExamsSection(context, l10n),
+                  const SizedBox(height: 24),
+                  if (data?.mySubmittedHomework.isNotEmpty ?? false) ...[
+                    _buildSectionHeader(l10n.recentHomework, onSeeAll: () => setState(() => _selectedIndex = 3)),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 160,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: data!.mySubmittedHomework.length,
+                        itemBuilder: (context, index) => _buildHomeworkCard(context, data.mySubmittedHomework[index]),
                       ),
                     ),
+                    const SizedBox(height: 24),
                   ],
-                ),
-                const SizedBox(height: 12),
-                if (provider.isLoading)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32.0),
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                else if (provider.error != null)
-                  _buildErrorState(provider.error!)
-                else if (classes.isEmpty)
-                  _buildEmptyState()
-                else
-                  ...classes.map((c) => _buildClassCard(context, c)),
-                const SizedBox(height: 32),
-                Text(
-                  l10n.quickActions,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                _buildQuickActionsGrid(context, l10n),
-                const SizedBox(height: 32),
-              ],
+                  if (data?.recentNotice.isNotEmpty ?? false) ...[
+                    _buildSectionHeader(l10n.notices, onSeeAll: () {}),
+                    const SizedBox(height: 12),
+                    ...data!.recentNotice.take(3).map((notice) => _buildNoticeCard(context, notice)),
+                    const SizedBox(height: 24),
+                  ],
+                  Text(
+                    l10n.quickActions,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildQuickActionsGrid(context, l10n),
+                  const SizedBox(height: 32),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildWelcomeHeader(
+  Widget _buildSectionHeader(String title, {VoidCallback? onSeeAll}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+        ),
+        if (onSeeAll != null)
+          TextButton(
+            onPressed: onSeeAll,
+            child: Text(
+              'See All', // Use l10n if available
+              style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.w600),
+            ),
+          ),
+      ],
+    );
+  }
+
+
+  Widget _buildModernHeader(
     BuildContext context,
     String name,
     int count,
     User user,
     AppLocalizations l10n,
   ) {
-    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.green.shade600, Colors.green.shade400],
+          colors: [Colors.green.shade700, Colors.green.shade500],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -309,165 +329,359 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         boxShadow: [
           BoxShadow(
             color: Colors.green.withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(25, 20, 25, 30),
+      child: Column(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2),
-              boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8),
-              ],
-            ),
-            child: CircleAvatar(
-              radius: 35,
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person, size: 45, color: Colors.green.shade700),
-            ),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.hello + ',',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
-                  ),
+          Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
                 ),
-                Text(
-                  name,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.white24,
+                  child: const Icon(Icons.person, size: 40, color: Colors.white),
                 ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.calendar_today,
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Welcome back,',
+                      style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14),
+                    ),
+                    Text(
+                      name,
+                      style: const TextStyle(
                         color: Colors.white,
-                        size: 14,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '$count ${l10n.classesToday}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                    Text(
+                      user.school?.name ?? 'Smart School Management',
+                      style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              const NotificationIconButton(),
+            ],
           ),
-          const SizedBox(width: 8),
-          _buildSelfAttendanceButton(context, user, l10n),
+          const SizedBox(height: 25),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildHeaderStat('Classes', count.toString(), Icons.book),
+              _buildHeaderStat('Attendance', '92%', Icons.check_circle), // Static for now
+              _buildHeaderStat('Events', '3', Icons.event), // Static for now
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSelfAttendanceButton(
-    BuildContext context,
-    User? user,
-    AppLocalizations l10n,
-  ) {
-    if (user?.role != UserRole.teacher) return const SizedBox.shrink();
-
-    final attendance = context
-        .watch<TeacherDashboardProvider>()
-        .todayAttendance;
-    final status = attendance?.status; // 'clock-in' or 'clock-out'
-
-    IconData icon;
-    String label;
-    Color buttonColor;
-    Color iconColor;
-
-    if (attendance == null) {
-      icon = Icons.location_on;
-      label = l10n.clockIn;
-      buttonColor = Colors.white;
-      iconColor = Colors.green.shade700;
-    } else if (status == 'clock-in') {
-      icon = Icons.logout;
-      label = l10n.clockOut;
-      buttonColor = Colors.orange.shade50;
-      iconColor = Colors.orange.shade700;
-    } else {
-      // status == 'clock-out'
-      icon = Icons.check_circle;
-      label = l10n.clockedOut;
-      buttonColor = Colors.green.shade50;
-      iconColor = Colors.green;
-    }
-
+  Widget _buildHeaderStat(String label, String value, IconData icon) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        ElevatedButton(
-          onPressed: () {
-            _performSelfAttendance(context, user, l10n);
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: buttonColor,
-            foregroundColor: iconColor,
-            shape: const CircleBorder(),
-            padding: const EdgeInsets.all(16),
-            elevation: 4,
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(15),
           ),
-          child: Icon(icon, size: 28),
+          child: Icon(icon, color: Colors.white, size: 20),
         ),
-        const SizedBox(height: 12),
-        GestureDetector(
-          onTap: () {
-            final now = DateTime.now();
-            final dateStr = DateFormat('dd/MM/yyyy').format(now);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => TeacherSelfAttendanceDetailScreen(
-                  initialDate: dateStr,
-                  teacherId: user?.id ?? "",
-                  schoolId: user?.schoolId ?? '',
-                ),
-              ),
-            );
-          },
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+        const SizedBox(height: 8),
+        Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+        Text(label, style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 11)),
       ],
     );
   }
+
+  Widget _buildAttendanceSection(BuildContext context, TeacherDashboardData? data, AppLocalizations l10n) {
+    final status = data?.attendanceStatus;
+    final isClockedIn = status?.status == 'clock-in';
+    final isClockedOut = status?.status == 'clock-out';
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isClockedIn ? Colors.orange.shade50 : (isClockedOut ? Colors.green.shade50 : Colors.blue.shade50),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  isClockedIn ? Icons.logout : (isClockedOut ? Icons.check_circle : Icons.location_on),
+                  color: isClockedIn ? Colors.orange : (isClockedOut ? Colors.green : Colors.blue),
+                ),
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isClockedIn ? 'Working Since' : (isClockedOut ? 'Shift Completed' : 'Not Clocked In'),
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                    ),
+                    Text(
+                      isClockedIn ? (status?.clockInTime ?? '--:--') : (isClockedOut ? 'See you tomorrow!' : 'Ready to start?'),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => _performSelfAttendance(context, context.read<AuthNotifier>().user, l10n),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isClockedIn ? Colors.orange : (isClockedOut ? Colors.green.shade100 : Colors.green),
+                  foregroundColor: isClockedOut ? Colors.green : Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+                child: Text(
+                  isClockedIn ? l10n.clockOut : (isClockedOut ? 'Done' : l10n.clockIn),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          if (data?.myAttendanceList.isNotEmpty ?? false) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 15),
+              child: Divider(height: 1),
+            ),
+            SizedBox(
+              height: 40,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: data!.myAttendanceList.length,
+                itemBuilder: (context, index) {
+                  final att = data.myAttendanceList[index];
+                  return Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: att.status == 'clock-out' ? Colors.green.shade50 : Colors.orange.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Text(
+                        DateFormat('dd MMM').format(DateTime.parse(att.date)),
+                        style: TextStyle(
+                          color: att.status == 'clock-out' ? Colors.green.shade700 : Colors.orange.shade700,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClassPerformanceCard(BuildContext context, MyClassAttendStudent stats) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: CircularProgressIndicator(
+                    value: stats.attendanceRate / 100,
+                    strokeWidth: 6,
+                    backgroundColor: Colors.grey.shade100,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      stats.attendanceRate > 80 ? Colors.green : (stats.attendanceRate > 50 ? Colors.orange : Colors.red),
+                    ),
+                  ),
+                ),
+                Text(
+                  '${stats.attendanceRate.toInt()}%',
+                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    stats.classInfo?.name ?? 'Class',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  Text(
+                    '${stats.present} Present / ${stats.total} Total',
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Colors.grey),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHomeworkCard(BuildContext context, Homework homework) {
+    return Container(
+      width: 220,
+      margin: const EdgeInsets.only(right: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade100),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  homework.subjectInfo?.name ?? 'Subject',
+                  style: TextStyle(color: Colors.blue.shade800, fontSize: 10, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                homework.title,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                'Class: ${homework.classInfo?.name ?? "--"}',
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Due: ${DateFormat('dd MMM').format(homework.dueDate)}',
+                style: const TextStyle(fontSize: 10, color: Colors.red),
+              ),
+              const Icon(Icons.arrow_forward, size: 14, color: Colors.grey),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoticeCard(BuildContext context, Notice notice) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: notice.isImportant ? Colors.amber.shade50 : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: notice.isImportant ? Colors.amber.shade200 : Colors.grey.shade100),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              if (notice.isImportant)
+                const Padding(
+                  padding: EdgeInsets.only(right: 8),
+                  child: Icon(Icons.priority_high, color: Colors.amber, size: 16),
+                ),
+              Expanded(
+                child: Text(
+                  notice.title,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Text(
+                'New', // Logic for new label
+                style: TextStyle(color: Colors.blue.shade700, fontSize: 10, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            notice.content,
+            style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              const Icon(Icons.person, size: 12, color: Colors.grey),
+              const SizedBox(width: 4),
+              Text(notice.postedBy ?? 'Admin', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+              const Spacer(),
+              const Icon(Icons.access_time, size: 12, color: Colors.grey),
+              const SizedBox(width: 4),
+              const Text('Today', style: TextStyle(fontSize: 11, color: Colors.grey)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Future<void> _performSelfAttendance(
     BuildContext context,

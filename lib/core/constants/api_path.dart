@@ -23,6 +23,7 @@ class APIPath {
   static String createExam = "$baseUrl/admin/exams";
   static String adminDashboard = "$baseUrl/dashboard/admin";
   static String attendanceOverview = "$baseUrl/admin/attendance/overview";
+  static const String teacherDashboard = "$baseUrl/dashboard/teacher";
   static String todayClass = "$baseUrl/teacher/todays-classes";
   static String submitAttendance = "$baseUrl/teacher/attendance";
   static String selfAttendance = "$baseUrl/teacher/self-attendance";
