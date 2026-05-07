@@ -25,6 +25,8 @@ import '../providers/teacher_provider.dart';
 import 'exam_management_screen.dart';
 import 'notice_management_screen.dart';
 import 'student_management_screen.dart';
+import '../models/admin_dashboard_model.dart';
+import '../providers/admin_dashboard_provider.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -47,6 +49,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         final schoolId = context.read<AuthNotifier>().user?.schoolId;
 
         if (schoolId != null) {
+          context.read<AdminDashboardProvider>().fetchDashboardData();
           context.read<AttendanceNotifier>().fetchAttendanceOverview(
             year: _currentYear,
             month: _currentMonth,
@@ -83,15 +86,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final attendanceRecords = context.watch<AttendanceNotifier>().state;
-    final studentCount = context.watch<StudentsNotifier>().totalCount;
-    final teacherCount = context.watch<TeachersNotifier>().totalCount;
-    final classCount = context.watch<ClassSetupNotifier>().classes.length;
-    final noticeCount = context.watch<NoticesNotifier>().notices.length;
-
-    final isStudentsLoading = context.watch<StudentsNotifier>().isLoading;
-    final isTeachersLoading = context.watch<TeachersNotifier>().isLoading;
-    final isClassesLoading = context.watch<ClassSetupNotifier>().isLoading;
     final isNoticesLoading = context.watch<NoticesNotifier>().isLoading;
     final authNotifier = context.watch<AuthNotifier>();
     final l10n = AppLocalizations.of(context)!;
@@ -147,19 +141,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         body: IndexedStack(
           index: _selectedIndex,
           children: [
-            _buildDashboardOverview(
-              attendanceRecords,
-              authNotifier: authNotifier,
-              studentCount: studentCount,
-              teacherCount: teacherCount,
-              classCount: classCount,
-              noticeCount: noticeCount,
-              isStudentsLoading: isStudentsLoading,
-              isTeachersLoading: isTeachersLoading,
-              isClassesLoading: isClassesLoading,
-              isNoticesLoading: isNoticesLoading,
-              l10n: l10n,
-            ),
+            _buildDashboardOverview(l10n, authNotifier),
             const StudentManagementScreen(hideAppBar: true),
             const ExamManagementScreen(hideAppBar: true),
             const NoticeManagementScreen(hideAppBar: true),
@@ -194,474 +176,284 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildDashboardOverview(
-    List<AttendanceEntity> attendanceRecords, {
-    required AuthNotifier authNotifier,
-    required int studentCount,
-    required int teacherCount,
-    required int classCount,
-    required int noticeCount,
-    required bool isStudentsLoading,
-    required bool isTeachersLoading,
-    required bool isClassesLoading,
-    required bool isNoticesLoading,
-    required AppLocalizations l10n,
+
+  Widget _buildDashboardOverview(AppLocalizations l10n, AuthNotifier authNotifier) {
+    return Consumer<AdminDashboardProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading && provider.dashboardData == null) {
+          return const Center(child: CircularProgressIndicator(color: Colors.purple));
+        }
+
+        if (provider.error != null && provider.dashboardData == null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                const SizedBox(height: 16),
+                Text(provider.error!),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => provider.fetchDashboardData(),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.purple, foregroundColor: Colors.white),
+                  child: Text('Retry'),
+                )
+              ],
+            ),
+          );
+        }
+
+        final data = provider.dashboardData;
+        if (data == null) return const SizedBox.shrink();
+
+        return RefreshIndicator(
+          onRefresh: () => provider.fetchDashboardData(),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSubscriptionCard(authNotifier, l10n),
+                _buildSectionTitle(l10n.schoolOverview),
+                const SizedBox(height: 16),
+                _buildStatsOverview(data),
+                const SizedBox(height: 24),
+                _buildSectionTitle(l10n.attendanceOverview),
+                const SizedBox(height: 16),
+                _buildAttendanceCards(data),
+                const SizedBox(height: 24),
+                if (data.recentHomework.isNotEmpty) ...[
+                  _buildSectionTitle('Recent Homework'),
+                  const SizedBox(height: 12),
+                  _buildRecentHomework(data.recentHomework),
+                  const SizedBox(height: 24),
+                ],
+                if (data.currentExam.isNotEmpty) ...[
+                  _buildSectionTitle('Current Exams'),
+                  const SizedBox(height: 12),
+                  _buildCurrentExams(data.currentExam),
+                  const SizedBox(height: 24),
+                ],
+                if (data.recentNotice.isNotEmpty) ...[
+                  _buildSectionTitle('Recent Notices'),
+                  const SizedBox(height: 12),
+                  _buildRecentNotices(data.recentNotice),
+                  const SizedBox(height: 24),
+                ],
+                _buildSectionTitle(l10n.quickActions),
+                const SizedBox(height: 16),
+                _buildQuickActions(l10n),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF1E1B4B),
+      ),
+    );
+  }
+
+  Widget _buildStatsOverview(AdminDashboardData data) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildGradientStatCard(
+            title: 'Total Students',
+            value: data.attendStudent.totalStudents.toString(),
+            icon: Icons.people_outline,
+            gradient: const LinearGradient(colors: [Color(0xFF3B82F6), Color(0xFF2563EB)]),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildGradientStatCard(
+            title: 'Total Teachers',
+            value: data.attendTeacher.totalTeachers.toString(),
+            icon: Icons.person_outline,
+            gradient: const LinearGradient(colors: [Color(0xFF8B5CF6), Color(0xFF6D28D9)]),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGradientStatCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Gradient gradient,
   }) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: gradient.colors.last.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSubscriptionCard(authNotifier, l10n),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.white, size: 24),
+          ),
+          const SizedBox(height: 16),
           Text(
-            l10n.schoolOverview,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          const SizedBox(height: 16),
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 1,
-            children: [
-              _buildStatCard(
-                context,
-                l10n.totalStudents,
-                isStudentsLoading ? '...' : studentCount.toString(),
-                Icons.people,
-                Colors.blue,
-                onTap: () => setState(() => _selectedIndex = 1),
-              ),
-              _buildStatCard(
-                context,
-                l10n.totalTeachers,
-                isTeachersLoading ? '...' : teacherCount.toString(),
-                Icons.person,
-                Colors.orange,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => TeacherManagementScreen(),
-                    ),
-                  );
-                },
-              ),
-              _buildStatCard(
-                context,
-                l10n.totalClasses,
-                isClassesLoading ? '...' : classCount.toString(),
-                Icons.class_,
-                Colors.green,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => SetupScreen()),
-                  );
-                },
-              ),
-              _buildStatCard(
-                context,
-                l10n.activeNotices,
-                isNoticesLoading ? '...' : noticeCount.toString(),
-                Icons.announcement,
-                Colors.red,
-                onTap: () => setState(() => _selectedIndex = 3),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                l10n.attendanceOverview,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              _buildClassFilter(l10n),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildEnhancedAttendanceOverview(l10n),
-          const SizedBox(height: 24),
+          const SizedBox(height: 4),
           Text(
-            l10n.quickActions,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          _buildActionTile(
-            context,
-            l10n.addStudent,
-            Icons.person_add,
-            Colors.blue,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => AddEditStudentScreen()),
-              );
-            },
-          ),
-          _buildActionTile(
-            context,
-            l10n.addTeacher,
-            Icons.group_add,
-            Colors.orange,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => AddEditTeacherScreen()),
-              );
-            },
-          ),
-          _buildActionTile(
-            context,
-            l10n.postNotice,
-            Icons.post_add,
-            Colors.red,
-            onTap: () => setState(() => _selectedIndex = 3),
-          ),
-          _buildActionTile(
-            context,
-            l10n.manageRoutine,
-            Icons.calendar_month,
-            Colors.purple,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => RoutineManagementScreen()),
-              );
-            },
-          ),
-          _buildActionTile(
-            context,
-            l10n.teacherAttendance,
-            Icons.how_to_reg,
-            Colors.green,
-            onTap: () {
-              final schoolId =
-                  context.read<AuthNotifier>().user?.schoolId ?? '';
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      TeacherSelfAttendanceDetailScreen(schoolId: schoolId),
-                ),
-              );
-            },
-          ),
-          _buildActionTile(
-            context,
-            l10n.marqueeMessage,
-            Icons.campaign_outlined,
-            Colors.redAccent,
-            onTap: () {
-              final schoolId =
-                  context.read<AuthNotifier>().user?.schoolId ?? '';
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => AddEditMarqueeScreen(schoolId: schoolId),
-                ),
-              );
-            },
+            title,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color, {
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: color, size: 32),
-              const SizedBox(height: 8),
-              Text(
-                value,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                title,
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
-              ),
-            ],
-          ),
+  Widget _buildAttendanceCards(AdminDashboardData data) {
+    return Column(
+      children: [
+        _buildAttendanceDetailCard(
+          title: 'Student Attendance',
+          date: data.attendStudent.date,
+          total: data.attendStudent.totalStudents,
+          present: data.attendStudent.present,
+          absent: data.attendStudent.absent,
+          rate: data.attendStudent.attendanceRate,
+          color: Colors.blue,
         ),
-      ),
+        const SizedBox(height: 16),
+        _buildAttendanceDetailCard(
+          title: 'Teacher Attendance',
+          date: data.attendTeacher.date,
+          total: data.attendTeacher.totalTeachers,
+          present: data.attendTeacher.present,
+          absent: data.attendTeacher.absent,
+          rate: data.attendTeacher.attendanceRate,
+          color: Colors.purple,
+        ),
+      ],
     );
   }
 
-  Widget _buildActionTile(
-    BuildContext context,
-    String title,
-    IconData icon,
-    Color color, {
-    VoidCallback? onTap,
+  Widget _buildAttendanceDetailCard({
+    required String title,
+    required String date,
+    required int total,
+    required int present,
+    required int absent,
+    required double rate,
+    required Color color,
   }) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: color.withValues(alpha: 0.1),
-          child: Icon(icon, color: color),
-        ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: onTap,
-      ),
-    );
-  }
-
-  Widget _buildClassFilter(AppLocalizations l10n) {
-    final overview = context.watch<AttendanceNotifier>().overviewSummary;
-    if (overview == null || overview.data.isEmpty)
-      return const SizedBox.shrink();
-
-    final classes = overview.data;
-
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.purple.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.purple.withOpacity(0.1)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
       ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String?>(
-          value: _selectedClassId,
-          hint: Text(l10n.allClasses, style: const TextStyle(fontSize: 13)),
-          style: const TextStyle(
-            color: Colors.purple,
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
-          ),
-          items: [
-            DropdownMenuItem(value: null, child: Text(l10n.allClasses)),
-            ...classes.map(
-              (c) =>
-                  DropdownMenuItem(value: c.classId, child: Text(c.className)),
-            ),
-          ],
-          onChanged: (val) {
-            setState(() {
-              _selectedClassId = val;
-            });
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEnhancedAttendanceOverview(AppLocalizations l10n) {
-    final attendanceNotifier = context.watch<AttendanceNotifier>();
-    final overview = attendanceNotifier.overviewSummary;
-    final isLoading = attendanceNotifier.isLoading;
-
-    if (isLoading && overview == null) {
-      return Container(
-        height: 200,
-        alignment: Alignment.center,
-        child: const CircularProgressIndicator(),
-      );
-    }
-
-    if (overview == null) {
-      return Container(
-        height: 200,
-        width: double.infinity,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(24)),
-        child: _buildChartPlaceholder(),
-      );
-    }
-
-    // Determine what to show based on filter
-    final bool isAllClasses = _selectedClassId == null;
-    final String currentTitle = isAllClasses
-        ? '${_getMonthName(overview.month)} ${overview.year}'
-        : overview.data
-              .firstWhere((c) => c.classId == _selectedClassId)
-              .className;
-
-    final int present = isAllClasses
-        ? overview.grandTotalPresent
-        : overview.data
-              .firstWhere((c) => c.classId == _selectedClassId)
-              .totalPresent;
-
-    final int absent = isAllClasses
-        ? overview.grandTotalAbsent
-        : overview.data
-              .firstWhere((c) => c.classId == _selectedClassId)
-              .totalAbsent;
-
-    final int leave = isAllClasses
-        ? overview.grandTotalLeave
-        : overview.data
-              .firstWhere((c) => c.classId == _selectedClassId)
-              .totalLeave;
-
-    final double percentage = isAllClasses
-        ? overview.overallAttendancePercentage
-        : overview.data
-              .firstWhere((c) => c.classId == _selectedClassId)
-              .attendancePercentage;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      currentTitle,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1E1B4B),
-                      ),
-                    ),
-                    Text(
-                      isAllClasses
-                          ? l10n.schoolPerformance
-                          : l10n.classPerformance,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[500],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.purple.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '${percentage.toStringAsFixed(1)}%',
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
                     style: const TextStyle(
-                      color: Colors.purple,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildMonthStatItem(
-                  l10n.present,
-                  present.toString(),
-                  const Color(0xFF7C3AED),
-                ),
-                _buildMonthStatItem(
-                  l10n.absent,
-                  absent.toString(),
-                  const Color(0xFFEF4444),
-                ),
-                _buildMonthStatItem(
-                  l10n.leave,
-                  leave.toString(),
-                  const Color(0xFFF59E0B),
-                ),
-              ],
-            ),
-            // We could still show class-wise progress bars if "All Classes" is selected
-            if (isAllClasses && overview.data.length > 1) ...[
-              const SizedBox(height: 24),
-              Text(
-                l10n.classBreakdown,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Date: $date',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              ...overview.data
-                  .take(5)
-                  .map(
-                    (c) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                c.className,
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                              Text(
-                                '${c.attendancePercentage.toStringAsFixed(1)}%',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: c.attendancePercentage / 100,
-                              backgroundColor: Colors.grey[200],
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                c.attendancePercentage > 80
-                                    ? Colors.green
-                                    : Colors.orange,
-                              ),
-                              minHeight: 6,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '${rate.toStringAsFixed(1)}%',
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
                   ),
+                ),
+              )
             ],
-          ],
-        ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildAttendanceStatItem('Total', total.toString(), Colors.grey[700]!),
+              _buildAttendanceStatItem('Present', present.toString(), Colors.green),
+              _buildAttendanceStatItem('Absent', absent.toString(), Colors.red),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: total > 0 ? (present / total) : 0,
+              minHeight: 8,
+              backgroundColor: Colors.grey.withOpacity(0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                rate >= 75 ? Colors.green : (rate >= 50 ? Colors.orange : Colors.red),
+              ),
+            ),
+          )
+        ],
       ),
     );
   }
 
-  Widget _buildMonthStatItem(String label, String value, Color color) {
+  Widget _buildAttendanceStatItem(String label, String value, Color color) {
     return Column(
       children: [
         Text(
@@ -672,34 +464,296 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             color: color,
           ),
         ),
+        const SizedBox(height: 4),
         Text(
           label,
           style: TextStyle(
-            fontSize: 11,
-            color: Colors.grey[500],
-            fontWeight: FontWeight.w600,
+            fontSize: 12,
+            color: Colors.grey[600],
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],
     );
   }
 
-  String _getMonthName(int month) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return months[month - 1];
+  Widget _buildRecentHomework(List<RecentHomework> homeworkList) {
+    return SizedBox(
+      height: 160,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: homeworkList.length,
+        itemBuilder: (context, index) {
+          final hw = homeworkList[index];
+          return Container(
+            width: 280,
+            margin: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.blue.withOpacity(0.2)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.blue.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                )
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${hw.className} - ${hw.sectionName}',
+                        style: const TextStyle(fontSize: 10, color: Colors.blue, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Text(
+                      hw.dueDate,
+                      style: const TextStyle(fontSize: 10, color: Colors.grey),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  hw.title,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  hw.subjectName,
+                  style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                ),
+                const Spacer(),
+                Text(
+                  hw.description,
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildCurrentExams(List<CurrentExam> exams) {
+    return SizedBox(
+      height: 140,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: exams.length,
+        itemBuilder: (context, index) {
+          final exam = exams[index];
+          return Container(
+            width: 250,
+            margin: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.orange.shade400, Colors.deepOrange.shade400],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.assignment_turned_in, color: Colors.white, size: 28),
+                const Spacer(),
+                Text(
+                  exam.examName,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${exam.startDate} to ${exam.endDate}',
+                  style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildRecentNotices(List<RecentNotice> notices) {
+    return Column(
+      children: notices.map((notice) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.withOpacity(0.2)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: notice.isImportent ? Colors.red.withOpacity(0.1) : Colors.purple.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  notice.isImportent ? Icons.priority_high : Icons.notifications_none,
+                  color: notice.isImportent ? Colors.red : Colors.purple,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      notice.title,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      notice.content,
+                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'For: ${notice.targetAudience}',
+                          style: const TextStyle(fontSize: 11, color: Colors.blueGrey, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          notice.createdAt.split('T').first,
+                          style: const TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildQuickActions(AppLocalizations l10n) {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      childAspectRatio: 2.5,
+      children: [
+        _buildActionCard(
+          l10n.addStudent,
+          Icons.person_add,
+          Colors.blue,
+          () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditStudentScreen())),
+        ),
+        _buildActionCard(
+          l10n.addTeacher,
+          Icons.group_add,
+          Colors.orange,
+          () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditTeacherScreen())),
+        ),
+        _buildActionCard(
+          l10n.postNotice,
+          Icons.post_add,
+          Colors.red,
+          () => setState(() => _selectedIndex = 3),
+        ),
+        _buildActionCard(
+          l10n.manageRoutine,
+          Icons.calendar_month,
+          Colors.purple,
+          () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RoutineManagementScreen())),
+        ),
+        _buildActionCard(
+          l10n.teacherAttendance,
+          Icons.how_to_reg,
+          Colors.green,
+          () {
+            final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
+            Navigator.push(context, MaterialPageRoute(builder: (_) => TeacherSelfAttendanceDetailScreen(schoolId: schoolId)));
+          },
+        ),
+        _buildActionCard(
+          l10n.marqueeMessage,
+          Icons.campaign_outlined,
+          Colors.redAccent,
+          () {
+            final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
+            Navigator.push(context, MaterialPageRoute(builder: (_) => AddEditMarqueeScreen(schoolId: schoolId)));
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionCard(String title, IconData icon, Color color, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.withOpacity(0.1)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            )
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildSubscriptionCard(AuthNotifier auth, AppLocalizations l10n) {
@@ -709,18 +763,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final isValid = auth.isSubscriptionValid;
     final planName = sub.pricingPlan?.name ?? 'No Plan';
     final expiryDate = DateTime.tryParse(sub.endDate);
-    final formattedDate = expiryDate != null
-        ? DateFormat('MMM dd, yyyy').format(expiryDate)
-        : 'Unknown';
+    final formattedDate = expiryDate != null ? DateFormat('MMM dd, yyyy').format(expiryDate) : 'Unknown';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isValid
-              ? [Colors.purple.shade700, Colors.purple.shade400]
-              : [Colors.red.shade700, Colors.red.shade400],
+          colors: isValid ? [Colors.purple.shade700, Colors.purple.shade400] : [Colors.red.shade700, Colors.red.shade400],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -741,87 +791,29 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               color: Colors.white.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              isValid ? Icons.star : Icons.error_outline,
-              color: Colors.white,
-              size: 32,
-            ),
+            child: Icon(isValid ? Icons.star : Icons.error_outline, color: Colors.white, size: 32),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  planName,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                Text(planName, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
-                Text(
-                  '${sub.lastStudentCount} / ${sub.pricingPlan?.maxStudents ?? '∞'} ${l10n.studentsLabel}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                Text('${sub.lastStudentCount} / ${sub.pricingPlan?.maxStudents ?? '∞'} ${l10n.studentsLabel}', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 4),
-                Text(
-                  isValid
-                      ? 'Valid until $formattedDate'
-                      : 'Expired on $formattedDate',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 12,
-                  ),
-                ),
+                Text(isValid ? 'Valid until $formattedDate' : 'Expired on $formattedDate', style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12)),
               ],
             ),
           ),
           if (isValid)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                l10n.active,
-                style: TextStyle(
-                  color: Colors.purple.shade700,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+              child: Text(l10n.active, style: TextStyle(color: Colors.purple.shade700, fontWeight: FontWeight.bold, fontSize: 12)),
             ),
         ],
       ),
     );
   }
-}
-
-Widget _buildChartPlaceholder() {
-  return Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      Icon(
-        Icons.bar_chart_rounded,
-        size: 48,
-        color: Colors.purple.withOpacity(0.2),
-      ),
-      const SizedBox(height: 12),
-      Text(
-        'No attendance data found',
-        style: TextStyle(
-          color: Colors.grey[400],
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    ],
-  );
 }

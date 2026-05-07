@@ -21,6 +21,7 @@ class APIPath {
   static String createRoutine = "$baseUrl/general/routine";
   static String schoolData = "$baseUrl/general/school-data";
   static String createExam = "$baseUrl/admin/exams";
+  static String adminDashboard = "$baseUrl/dashboard/admin";
   static String attendanceOverview = "$baseUrl/admin/attendance/overview";
   static String todayClass = "$baseUrl/teacher/todays-classes";
   static String submitAttendance = "$baseUrl/teacher/attendance";
