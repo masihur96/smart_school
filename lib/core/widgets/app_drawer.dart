@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/features/admin/screens/add_edit_marquee_screen.dart';
 import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
 import 'package:smart_school/features/admin/screens/exam_management_screen.dart';
 import 'package:smart_school/features/admin/screens/notice_management_screen.dart';
 import 'package:smart_school/features/admin/screens/routine_management_screen.dart';
 import 'package:smart_school/features/admin/screens/setup_screen.dart';
+import 'package:smart_school/features/admin/screens/student_attendance_management_screen.dart';
 import 'package:smart_school/features/admin/screens/student_management_screen.dart';
 import 'package:smart_school/features/admin/screens/teacher_management_screen.dart';
 import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
@@ -22,6 +24,7 @@ import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.d
 import 'package:smart_school/features/teacher/screens/teacher_routine_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
+import '../../features/admin/screens/teacher_attendance_management_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../models/user_model.dart';
 
@@ -140,6 +143,24 @@ class AppDrawer extends StatelessWidget {
           context,
           MaterialPageRoute(builder: (_) => NoticeManagementScreen()),
         );
+      }, context),
+
+
+      _buildDrawerItem(Icons.group_outlined, l10n.attendance, () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => StudentAttendanceManagementScreen()),
+        );
+      }, context),         _buildDrawerItem(Icons.how_to_reg, l10n.teacherAttendance, () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => TeacherAttendanceManagementScreen()),
+        );
+      }, context),
+      _buildDrawerItem(Icons.campaign, l10n.marqueeMessage, () {
+        final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
+        Navigator.push(context, MaterialPageRoute(builder: (_) => AddEditMarqueeScreen(schoolId: schoolId)));
+
       }, context),
       _buildDrawerItem(Icons.assignment_turned_in, l10n.exams, () {
         Navigator.push(

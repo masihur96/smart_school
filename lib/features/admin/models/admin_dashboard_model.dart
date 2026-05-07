@@ -167,6 +167,7 @@ class CurrentExam {
   final String description;
   final String startDate;
   final String endDate;
+  final bool isPublished;
 
   CurrentExam({
     required this.id,
@@ -174,6 +175,7 @@ class CurrentExam {
     required this.description,
     required this.startDate,
     required this.endDate,
+    required this.isPublished,
   });
 
   factory CurrentExam.fromJson(Map<String, dynamic> json) {
@@ -183,6 +185,7 @@ class CurrentExam {
       description: json['description'] ?? '',
       startDate: json['start_date'] ?? '',
       endDate: json['end_date'] ?? '',
+      isPublished: json['is_published'] ?? false,
     );
   }
 }
