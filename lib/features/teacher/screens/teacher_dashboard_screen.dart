@@ -564,39 +564,8 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                             ],
                           ),
                           const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Icon(Icons.location_on, size: 10, color: Colors.grey.shade600),
-                              const SizedBox(width: 4),
-                              SizedBox(
-                                width: 80,
-                                child: FutureBuilder<String>(
-                                  future: context.read<TeacherDashboardProvider>().getAddressFromLatLng(att.lat, att.lon),
-                                  builder: (context, snapshot) {
-                                    return Text(
-                                      snapshot.data ?? '...',
-                                      style: TextStyle(
-                                        color: Colors.grey.shade700,
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    );
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '(${att.distanceFromCenter.toInt()}m)',
-                                style: TextStyle(
-                                  color: att.distanceFromCenter > 100 ? Colors.orange.shade700 : Colors.green.shade700,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
+                          _buildHistoryTime(Icons.location_on, "${att.distanceFromCenter.toInt()}m away"),
+
                         ],
                       ),
                     );
