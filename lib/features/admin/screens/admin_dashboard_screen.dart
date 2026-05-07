@@ -18,7 +18,6 @@ import '../../../core/widgets/notification_icon_button.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../teacher/domain/entities/attendance.dart';
 import '../../teacher/providers/attendance_provider.dart';
-import '../../teacher/screens/teacher_self_attendance_detail_screen.dart';
 import '../providers/notice_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
@@ -28,6 +27,7 @@ import 'notice_management_screen.dart';
 import 'student_management_screen.dart';
 import 'student_attendance_management_screen.dart';
 import 'teacher_attendance_management_screen.dart';
+import '../../teacher/screens/homework_management_screen.dart';
 import '../models/admin_dashboard_model.dart';
 import '../providers/admin_dashboard_provider.dart';
 import '../../../core/services/geocoding_service.dart';
@@ -224,24 +224,32 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 // const SizedBox(height: 16),
                 // _buildStatsOverview(data),
                 // const SizedBox(height: 24),
-                _buildSectionTitle(l10n.attendanceOverview,SizedBox()),
+                _buildSectionTitle(l10n.attendanceOverview,TextButton(onPressed: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const StudentAttendanceManagementScreen()));
+                }, child: const Text("View All"))),
                 const SizedBox(height: 16),
                 _buildAttendanceCards(data),
                 const SizedBox(height: 24),
                 if (data.recentHomework.isNotEmpty) ...[
-                  _buildSectionTitle('Recent Homework',TextButton(onPressed: (){}, child: Text("View All"))),
+                  _buildSectionTitle('Recent Homework',TextButton(onPressed: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeworkManagementScreen()));
+                  }, child: const Text("View All"))),
                   const SizedBox(height: 12),
                   _buildRecentHomework(data.recentHomework),
                   const SizedBox(height: 24),
                 ],
                 if (data.currentExam.isNotEmpty) ...[
-                  _buildSectionTitle('Current Exams',TextButton(onPressed: (){}, child: Text("View All"))),
+                  _buildSectionTitle('Current Exams',TextButton(onPressed: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ExamManagementScreen()));
+                  }, child: const Text("View All"))),
                   const SizedBox(height: 12),
                   _buildCurrentExams(data.currentExam),
                   const SizedBox(height: 24),
                 ],
                 if (data.recentNotice.isNotEmpty) ...[
-                  _buildSectionTitle('Recent Notices',TextButton(onPressed: (){}, child: Text("View All"))),
+                  _buildSectionTitle('Recent Notices',TextButton(onPressed: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const NoticeManagementScreen()));
+                  }, child: const Text("View All"))),
                   const SizedBox(height: 12),
                   _buildRecentNotices(data.recentNotice),
                   const SizedBox(height: 24),
@@ -1092,8 +1100,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Icons.how_to_reg,
           Colors.green,
           () {
-            final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
-            Navigator.push(context, MaterialPageRoute(builder: (_) => TeacherSelfAttendanceDetailScreen(schoolId: schoolId)));
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const TeacherAttendanceManagementScreen()));
           },
         ),
         _buildActionCard(
