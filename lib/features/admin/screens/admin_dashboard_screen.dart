@@ -218,33 +218,33 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildSubscriptionCard(authNotifier, l10n),
-                _buildSectionTitle(l10n.schoolOverview),
-                const SizedBox(height: 16),
-                _buildStatsOverview(data),
-                const SizedBox(height: 24),
-                _buildSectionTitle(l10n.attendanceOverview),
+                // _buildSectionTitle(l10n.schoolOverview),
+                // const SizedBox(height: 16),
+                // _buildStatsOverview(data),
+                // const SizedBox(height: 24),
+                _buildSectionTitle(l10n.attendanceOverview,SizedBox()),
                 const SizedBox(height: 16),
                 _buildAttendanceCards(data),
                 const SizedBox(height: 24),
                 if (data.recentHomework.isNotEmpty) ...[
-                  _buildSectionTitle('Recent Homework'),
+                  _buildSectionTitle('Recent Homework',TextButton(onPressed: (){}, child: Text("View All"))),
                   const SizedBox(height: 12),
                   _buildRecentHomework(data.recentHomework),
                   const SizedBox(height: 24),
                 ],
                 if (data.currentExam.isNotEmpty) ...[
-                  _buildSectionTitle('Current Exams'),
+                  _buildSectionTitle('Current Exams',TextButton(onPressed: (){}, child: Text("View All"))),
                   const SizedBox(height: 12),
                   _buildCurrentExams(data.currentExam),
                   const SizedBox(height: 24),
                 ],
                 if (data.recentNotice.isNotEmpty) ...[
-                  _buildSectionTitle('Recent Notices'),
+                  _buildSectionTitle('Recent Notices',TextButton(onPressed: (){}, child: Text("View All"))),
                   const SizedBox(height: 12),
                   _buildRecentNotices(data.recentNotice),
                   const SizedBox(height: 24),
                 ],
-                _buildSectionTitle(l10n.quickActions),
+                _buildSectionTitle(l10n.quickActions,SizedBox()),
                 const SizedBox(height: 16),
                 _buildQuickActions(l10n),
                 const SizedBox(height: 40),
@@ -256,14 +256,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF1E1B4B),
-      ),
+  Widget _buildSectionTitle(String title, Widget trailing) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1E1B4B),
+          ),
+        ),
+        trailing
+      ],
     );
   }
 
@@ -377,21 +383,33 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Student Attendance',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Date: ${data.date}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                ],
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.purple.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.group_outlined,
+                    color: Colors.purple, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Student Attendance',
+                      style: TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      data.date,
+                      style:
+                      TextStyle(fontSize: 11, color: Colors.grey[500]),
+                    ),
+                  ],
+                ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -406,14 +424,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
             ],
           ),
+
+
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildAttendanceStatItem('Total', total.toString(), Colors.grey[700]!),
-              _buildAttendanceStatItem('Present', present.toString(), Colors.green),
-              _buildAttendanceStatItem('Absent', absent.toString(), Colors.red),
-              _buildAttendanceStatItem('Leave', data.leave.toString(), Colors.orange),
+              _buildStatPill('Total', total.toString(),
+                  Colors.grey[700]!, Icons.groups_rounded),
+            _buildStatPill('Present', present.toString(),
+                Colors.green, Icons.how_to_reg_rounded),
+              _buildStatPill('Absent',  absent.toString(),
+                  Colors.red, Icons.unpublished_rounded),
+              _buildStatPill('Leave',  data.leave.toString(),
+                  Colors.orange, Icons.time_to_leave_outlined),
+
             ],
           ),
           const SizedBox(height: 16),
@@ -763,6 +788,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        margin: const EdgeInsets.symmetric( horizontal: 3),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(20),
@@ -770,8 +796,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 14, color: color),
-            const SizedBox(width: 4),
+            // Icon(icon, size: 14, color: color),
+            // const SizedBox(width: 4),
 
             Text(
               value,
