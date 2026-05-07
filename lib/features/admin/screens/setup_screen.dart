@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 
 import '../../../models/school_models.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -62,15 +63,12 @@ class _SetupScreenState extends State<SetupScreen>
   }
 
   PreferredSizeWidget _buildAppBar() {
+    final user = context.read<AuthNotifier>().user;
     return PreferredSize(
       preferredSize: const Size.fromHeight(120),
       child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: _kClassGrad,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+        decoration:  BoxDecoration(
+         color:  user?.role.name.toLowerCase()=="admin"?AppColors.primaryAdmin:AppColors.primary,
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
           boxShadow: [
             BoxShadow(

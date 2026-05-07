@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/screens/class_detail_screen.dart';
 import 'package:smart_school/models/teacher_model.dart';
 
@@ -121,97 +122,89 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
     List<ClassRoom> classes,
     List<Section> filteredSections,
   ) {
+    final user = context.read<AuthNotifier>().user;
     return SliverAppBar(
       expandedHeight: 220,
       floating: false,
       pinned: true,
-      backgroundColor: const Color(0xFF7C3AED),
+      backgroundColor:            user?.role.name.toLowerCase()=="admin"?AppColors.primaryAdmin:AppColors.primary,
       foregroundColor: Colors.white,
       elevation: 0,
       flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF7C3AED), Color(0xFF4F46E5)],
-            ),
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 50, 10, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Class Routine',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.5,
-                    ),
+        background: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 50, 10, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Class Routine',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Manage weekly timetable for each class',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 13,
-                    ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Manage weekly timetable for each class',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 13,
                   ),
-                  const SizedBox(height: 16),
-                  // Filter row
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _FilterDropdown(
-                          hint: 'Select Class',
-                          value: _selectedClassId,
-                          items: classes
-                              .map(
-                                (c) => DropdownMenuItem(
-                                  value: c.id,
-                                  child: Text(c.name),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (val) => setState(() {
-                            _selectedClassId = val;
-                            _selectedSectionId = null;
-                          }),
-                        ),
+                ),
+                const SizedBox(height: 16),
+                // Filter row
+                Row(
+                  children: [
+                    Expanded(
+                      child: _FilterDropdown(
+                        hint: 'Select Class',
+                        value: _selectedClassId,
+                        items: classes
+                            .map(
+                              (c) => DropdownMenuItem(
+                                value: c.id,
+                                child: Text(c.name),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (val) => setState(() {
+                          _selectedClassId = val;
+                          _selectedSectionId = null;
+                        }),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _FilterDropdown(
-                          hint: filteredSections.isEmpty
-                              ? 'No Sections'
-                              : 'All Sections',
-                          value: _selectedSectionId,
-                          items: [
-                            if (filteredSections.isNotEmpty)
-                              const DropdownMenuItem(
-                                value: null,
-                                child: Text('All Sections'),
-                              ),
-                            ...filteredSections.map(
-                              (s) => DropdownMenuItem(
-                                value: s.id,
-                                child: Text(s.name),
-                              ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _FilterDropdown(
+                        hint: filteredSections.isEmpty
+                            ? 'No Sections'
+                            : 'All Sections',
+                        value: _selectedSectionId,
+                        items: [
+                          if (filteredSections.isNotEmpty)
+                            const DropdownMenuItem(
+                              value: null,
+                              child: Text('All Sections'),
                             ),
-                          ],
-                          onChanged: filteredSections.isEmpty
-                              ? null
-                              : (val) =>
-                                    setState(() => _selectedSectionId = val),
-                        ),
+                          ...filteredSections.map(
+                            (s) => DropdownMenuItem(
+                              value: s.id,
+                              child: Text(s.name),
+                            ),
+                          ),
+                        ],
+                        onChanged: filteredSections.isEmpty
+                            ? null
+                            : (val) =>
+                                  setState(() => _selectedSectionId = val),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),

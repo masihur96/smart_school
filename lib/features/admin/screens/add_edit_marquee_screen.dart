@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 
 import '../providers/marquee_provider.dart';
 
@@ -57,7 +58,7 @@ class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add/Edit Marquee'),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
       ),
       body: Padding(
@@ -116,7 +117,7 @@ class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
                 child: ElevatedButton(
                   onPressed: isLoading ? null : _submitForm,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
