@@ -30,6 +30,7 @@ class AppColors {
   static const Color primarySoft = Color(0xFFF0F0F0);
   static const Color primaryDark = Color(0xFF2B3674);
   static const Color primaryAdmin = Colors.purple;
+  static const Color primaryTeacher= Colors.green;
 
   /* --------------------------------------------------
    * Background Colors

@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/custom_size.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/screens/class_detail_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
@@ -122,9 +123,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           ),
           centerTitle: false,
           elevation: 0,
-          backgroundColor: _selectedIndex == 0
-              ? Colors.green.shade600
-              : Colors.green,
+          backgroundColor: AppColors.primaryTeacher,
           foregroundColor: Colors.white,
           actions: [
             const NotificationIconButton(),
@@ -234,6 +233,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _buildSectionHeader("My ${l10n.attendance}", onSeeAll: () {}),
                   _buildAttendanceSection(context, data, l10n),
                   const SizedBox(height: 24),
                   if (data?.myClassAttendStudents.isNotEmpty ?? false) ...[
@@ -317,11 +317,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.green.shade700, Colors.green.shade500],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppColors.primaryTeacher,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(32),
           bottomRight: Radius.circular(32),
@@ -369,24 +365,16 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       ),
                     ),
                     Text(
-                      user.school?.name ?? 'Smart School Management',
+                      user.designation ?? 'General Teacher',
                       style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12),
                     ),
                   ],
                 ),
               ),
-              const NotificationIconButton(),
             ],
           ),
-          const SizedBox(height: 25),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildHeaderStat('Classes', count.toString(), Icons.book),
-              _buildHeaderStat('Attendance', '92%', Icons.check_circle), // Static for now
-              _buildHeaderStat('Events', '3', Icons.event), // Static for now
-            ],
-          ),
+
+
         ],
       ),
     );
