@@ -224,10 +224,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 // const SizedBox(height: 16),
                 // _buildStatsOverview(data),
                 // const SizedBox(height: 24),
-                _buildSectionTitle(l10n.attendanceOverview,TextButton(onPressed: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const StudentAttendanceManagementScreen()));
-                }, child: const Text("View All"))),
-                const SizedBox(height: 16),
+                // _buildSectionTitle(l10n.attendanceOverview,TextButton(onPressed: (){
+                //   Navigator.push(context, MaterialPageRoute(builder: (context) => const StudentAttendanceManagementScreen()));
+                // }, child: const Text("View All"))),
+                // const SizedBox(height: 16),
                 _buildAttendanceCards(data),
                 const SizedBox(height: 24),
                 if (data.recentHomework.isNotEmpty) ...[
@@ -254,10 +254,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   _buildRecentNotices(data.recentNotice),
                   const SizedBox(height: 24),
                 ],
-                _buildSectionTitle(l10n.quickActions,SizedBox()),
-                const SizedBox(height: 16),
-                _buildQuickActions(l10n),
-                const SizedBox(height: 40),
+
+
               ],
             ),
           ),
@@ -961,35 +959,61 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         itemCount: exams.length,
         itemBuilder: (context, index) {
           final exam = exams[index];
-          return Container(
-            width: 250,
+          return Card(
+            
+
             margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.orange.shade400, Colors.deepOrange.shade400],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+
+            child: SizedBox(
+              width: screenSize(context, .9),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Icon(Icons.assignment_turned_in, size: 28),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: exam.isPublished ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            exam.isPublished ? "PUBLISHED" : "DRAFT",
+                            style: TextStyle(
+                              color: exam.isPublished ? Colors.green : Colors.orange,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Text(
+                      exam.examName,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18,),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      exam.description,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${exam.startDate} to ${exam.endDate}',
+                      style: TextStyle( fontSize: 12),
+                    ),
+                  ],
+                ),
               ),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.assignment_turned_in, color: Colors.white, size: 28),
-                const Spacer(),
-                Text(
-                  exam.examName,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${exam.startDate} to ${exam.endDate}',
-                  style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12),
-                ),
-              ],
             ),
           );
         },
@@ -1062,100 +1086,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildQuickActions(AppLocalizations l10n) {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 2.5,
-      children: [
-        _buildActionCard(
-          l10n.addStudent,
-          Icons.person_add,
-          Colors.blue,
-          () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditStudentScreen())),
-        ),
-        _buildActionCard(
-          l10n.addTeacher,
-          Icons.group_add,
-          Colors.orange,
-          () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditTeacherScreen())),
-        ),
-        _buildActionCard(
-          l10n.postNotice,
-          Icons.post_add,
-          Colors.red,
-          () => setState(() => _selectedIndex = 3),
-        ),
-        _buildActionCard(
-          l10n.manageRoutine,
-          Icons.calendar_month,
-          Colors.purple,
-          () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RoutineManagementScreen())),
-        ),
-        _buildActionCard(
-          l10n.teacherAttendance,
-          Icons.how_to_reg,
-          Colors.green,
-          () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const TeacherAttendanceManagementScreen()));
-          },
-        ),
-        _buildActionCard(
-          l10n.marqueeMessage,
-          Icons.campaign_outlined,
-          Colors.redAccent,
-          () {
-            final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
-            Navigator.push(context, MaterialPageRoute(builder: (_) => AddEditMarqueeScreen(schoolId: schoolId)));
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionCard(String title, IconData icon, Color color, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.withOpacity(0.1)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            )
-          ],
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildSubscriptionCard(AuthNotifier auth, AppLocalizations l10n) {
     final sub = auth.adminSubscription;

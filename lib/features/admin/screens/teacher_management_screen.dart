@@ -443,32 +443,49 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          final studentCount = context.watch<StudentsNotifier>().totalCount;
-          final authState = context.watch<AuthNotifier>();
+
+          final studentCount =
+              context.read<StudentsNotifier>().totalCount;
+
+          final authState =
+          context.read<AuthNotifier>();
 
           final maxStudents =
-              authState.adminSubscription?.pricingPlan?.maxStudents;
+              authState.adminSubscription
+                  ?.pricingPlan
+                  ?.maxStudents;
 
-          if (maxStudents != null && studentCount >= maxStudents) {
+          if (maxStudents != null &&
+              studentCount >= maxStudents) {
+
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
                 title: const Text("Limit Reached"),
+
                 content: Text(
-                  "You have reached your student limit ($studentCount / $maxStudents).\n\nUpgrade your plan to add more students.",
+                  "You have reached your student limit "
+                      "($studentCount / $maxStudents).\n\n"
+                      "Upgrade your plan to add more students.",
                 ),
+
                 actions: [
+
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: const Text("Cancel"),
                   ),
+
                   ElevatedButton(
                     onPressed: () {
+
                       Navigator.pop(context);
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const AdminPricingPlanScreen(),
+                          builder: (_) =>
+                          const AdminPricingPlanScreen(),
                         ),
                       );
                     },
@@ -477,17 +494,25 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                 ],
               ),
             );
+
             return;
           }
 
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const AddEditTeacherScreen()),
+            MaterialPageRoute(
+              builder: (_) =>
+              const AddEditTeacherScreen(),
+            ),
           ).then((_) => _fetchTeachers());
         },
 
         backgroundColor: Colors.purple,
-        child: const Icon(Icons.add, color: Colors.white),
+
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
       ),
     );
   }
