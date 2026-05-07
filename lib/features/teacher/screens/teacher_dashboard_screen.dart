@@ -404,93 +404,76 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     final isClockedOut = status?.status == 'clock-out';
     final record = status?.record;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: isClockedIn ? Colors.orange.shade50 : (isClockedOut ? Colors.green.shade50 : Colors.blue.shade50),
-                  borderRadius: BorderRadius.circular(18),
+    return Card(
+      margin: const EdgeInsets.all(0.0),
+
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: isClockedIn ? Colors.orange.shade50 : (isClockedOut ? Colors.green.shade50 : Colors.blue.shade50),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Icon(
+                    isClockedIn ? Icons.timer : (isClockedOut ? Icons.task_alt : Icons.location_history),
+                    color: isClockedIn ? Colors.orange : (isClockedOut ? Colors.green : Colors.blue),
+                    size: 28,
+                  ),
                 ),
-                child: Icon(
-                  isClockedIn ? Icons.timer : (isClockedOut ? Icons.task_alt : Icons.location_history),
-                  color: isClockedIn ? Colors.orange : (isClockedOut ? Colors.green : Colors.blue),
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isClockedIn
-                          ? 'Shift In Progress'
-                          : (isClockedOut ? 'Shift Completed' : 'Not Started Yet'),
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isClockedIn
+                            ? 'Shift In Progress'
+                            : (isClockedOut ? 'Shift Completed' : 'Not Started Yet'),
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      DateFormat('EEEE, MMM dd').format(DateTime.now()),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                      const SizedBox(height: 4),
+                      Text(
+                        DateFormat('EEEE, MMM dd').format(DateTime.now()),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              ElevatedButton(
-                onPressed: () => _performSelfAttendance(context, context.read<AuthNotifier>().user, l10n),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isClockedIn ? Colors.orange : (isClockedOut ? Colors.green.shade50 : AppColors.primaryTeacher),
-                  foregroundColor: isClockedOut ? Colors.green : Colors.white,
-                  elevation: 0,
-                  shadowColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ElevatedButton(
+                  onPressed: () => _performSelfAttendance(context, context.read<AuthNotifier>().user, l10n),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isClockedIn ? Colors.orange : (isClockedOut ? Colors.green.shade50 : AppColors.primaryTeacher),
+                    foregroundColor: isClockedOut ? Colors.green : Colors.white,
+                    elevation: 0,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  ),
+                  child: Icon(
+                    isClockedIn ? Icons.logout_outlined : (isClockedOut ? Icons.update_outlined: Icons.login_outlined),
+
+                  ),
                 ),
-                child: Text(
-                  isClockedIn ? l10n.clockOut : (isClockedOut ? 'Update' : l10n.clockIn),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.shade100),
+              ],
             ),
-            child: Row(
+            const SizedBox(height: 10),
+            Row(
               children: [
                 _buildTimeInfo(
-                  'IN TIME',
                   status?.clockInTime ?? '--:--',
-                  Colors.green,
                   Icons.login_rounded,
                 ),
                 Container(
@@ -500,189 +483,143 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                   color: Colors.grey.shade300,
                 ),
                 _buildTimeInfo(
-                  'OUT TIME',
+
                   status?.clockOutTime ?? '--:--',
-                  Colors.red,
+
                   Icons.logout_rounded,
                 ),
                 const Spacer(),
-                if (record != null)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Row(
+                _buildTimeInfo(
+
+                  '${status?.record?.distanceFromCenter.toInt()}m',
+
+                  Icons.location_on,
+                ),
+
+
+              ],
+            ),
+            if (data?.myAttendanceList.isNotEmpty ?? false) ...[
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 18),
+                child: Divider(height: 1, thickness: 0.8),
+              ),
+              const Text(
+                'Recent History',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 100,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: data!.myAttendanceList.length,
+                  itemBuilder: (context, index) {
+                    final att = data.myAttendanceList[index];
+                    final date = DateTime.parse(att.date);
+                    final isClockOut = att.status == 'clock-out';
+
+                    return Container(
+                      margin: const EdgeInsets.only(right: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: isClockOut ? Colors.green.shade50 : Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isClockOut ? Colors.green.shade100 : Colors.orange.shade100,
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.location_on, size: 12, color: Colors.grey.shade600),
-                          const SizedBox(width: 4),
-                          FutureBuilder<String>(
-                            future: context.read<TeacherDashboardProvider>().getAddressFromLatLng(record.lat, record.lon),
-                            builder: (context, snapshot) {
-                              return ConstrainedBox(
-                                constraints: const BoxConstraints(maxWidth: 100),
-                                child: Text(
-                                  snapshot.data ?? 'Locating...',
-                                  style: TextStyle(
-                                    color: Colors.grey.shade600,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.3,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                          Row(
+
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                DateFormat('dd MMM').format(date),
+                                style: TextStyle(
+                                  color: isClockOut ? Colors.green.shade800 : Colors.orange.shade800,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              );
-                            },
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                isClockOut ? Icons.check_circle : Icons.login,
+                                size: 14,
+                                color: isClockOut ? Colors.green.shade600 : Colors.orange.shade600,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              _buildHistoryTime(Icons.login_outlined, att.startTime ?? att.time),
+                              const SizedBox(width: 8),
+                              _buildHistoryTime(Icons.logout_outlined, att.endTime ?? '--:--'),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(Icons.location_on, size: 10, color: Colors.grey.shade600),
+                              const SizedBox(width: 4),
+                              SizedBox(
+                                width: 80,
+                                child: FutureBuilder<String>(
+                                  future: context.read<TeacherDashboardProvider>().getAddressFromLatLng(att.lat, att.lon),
+                                  builder: (context, snapshot) {
+                                    return Text(
+                                      snapshot.data ?? '...',
+                                      style: TextStyle(
+                                        color: Colors.grey.shade700,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '(${att.distanceFromCenter.toInt()}m)',
+                                style: TextStyle(
+                                  color: att.distanceFromCenter > 100 ? Colors.orange.shade700 : Colors.green.shade700,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${record.distanceFromCenter.toInt()}m away',
-                        style: TextStyle(
-                          color: record.distanceFromCenter > 100 ? Colors.orange : Colors.green.shade700,
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-          if (data?.myAttendanceList.isNotEmpty ?? false) ...[
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 18),
-              child: Divider(height: 1, thickness: 0.8),
-            ),
-            const Text(
-              'Recent History',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 100,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                itemCount: data!.myAttendanceList.length,
-                itemBuilder: (context, index) {
-                  final att = data.myAttendanceList[index];
-                  final date = DateTime.parse(att.date);
-                  final isClockOut = att.status == 'clock-out';
-
-                  return Container(
-                    margin: const EdgeInsets.only(right: 12),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: isClockOut ? Colors.green.shade50 : Colors.orange.shade50,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isClockOut ? Colors.green.shade100 : Colors.orange.shade100,
-                        width: 1,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              DateFormat('dd MMM').format(date),
-                              style: TextStyle(
-                                color: isClockOut ? Colors.green.shade800 : Colors.orange.shade800,
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              isClockOut ? Icons.check_circle : Icons.login,
-                              size: 14,
-                              color: isClockOut ? Colors.green.shade600 : Colors.orange.shade600,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            _buildHistoryTime('In', att.startTime ?? att.time),
-                            const SizedBox(width: 8),
-                            _buildHistoryTime('Out', att.endTime ?? '--:--'),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(Icons.location_on, size: 10, color: Colors.grey.shade600),
-                            const SizedBox(width: 4),
-                            SizedBox(
-                              width: 80,
-                              child: FutureBuilder<String>(
-                                future: context.read<TeacherDashboardProvider>().getAddressFromLatLng(att.lat, att.lon),
-                                builder: (context, snapshot) {
-                                  return Text(
-                                    snapshot.data ?? '...',
-                                    style: TextStyle(
-                                      color: Colors.grey.shade700,
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '(${att.distanceFromCenter.toInt()}m)',
-                              style: TextStyle(
-                                color: att.distanceFromCenter > 100 ? Colors.orange.shade700 : Colors.green.shade700,
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildTimeInfo(String label, String time, Color color, IconData icon) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildTimeInfo( String time, IconData icon) {
+    return Row(
       children: [
-        Row(
-          children: [
-            Icon(icon, size: 12, color: Colors.grey.shade600),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
+        Icon(icon, size: 16),
+        const SizedBox(width: 4),
         Text(
           time,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 14,
             letterSpacing: 0.5,
           ),
         ),
@@ -691,14 +628,14 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   }
 
 
-  Widget _buildHistoryTime(String type, String time) {
-    return Column(
+  Widget _buildHistoryTime(IconData icon, String time) {
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          type,
-          style: TextStyle(color: Colors.grey.shade600, fontSize: 8, fontWeight: FontWeight.bold),
-        ),
+        Icon(icon,size: 10,),
+
+        SizedBox(width: 5,),
         Text(
           time,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: Colors.black87),
