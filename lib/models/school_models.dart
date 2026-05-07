@@ -859,6 +859,8 @@ class TeacherSelfAttendance {
   final String schoolId;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? startTime;
+  final String? endTime;
   final Teacher? teacher;
 
   TeacherSelfAttendance({
@@ -873,6 +875,8 @@ class TeacherSelfAttendance {
     required this.schoolId,
     required this.createdAt,
     required this.updatedAt,
+    this.startTime,
+    this.endTime,
     this.teacher,
   });
 
@@ -894,6 +898,8 @@ class TeacherSelfAttendance {
         updatedAt: json['updatedAt'] != null
             ? DateTime.parse(json['updatedAt'])
             : DateTime.now(),
+        startTime: json['startTime'],
+        endTime: json['endTime'],
         teacher: json['teacher'] != null ? Teacher.fromJson(json['teacher']) : null,
       );
 
@@ -909,6 +915,8 @@ class TeacherSelfAttendance {
         'schoolId': schoolId,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
+        if (startTime != null) 'startTime': startTime,
+        if (endTime != null) 'endTime': endTime,
         if (teacher != null) 'teacher': teacher!.toJson(),
       };
 }

@@ -1,7 +1,7 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
 import '../../../../configs/network/data_provider.dart';
 import '../../../../core/constants/api_path.dart';
@@ -9,8 +9,30 @@ import '../../../../models/school_models.dart';
 import '../data/models/teacher_dashboard_model.dart';
 
 class TeacherDashboardProvider extends ChangeNotifier {
+  final Map<String, String> _addressCache = {};
   TeacherDashboardData? _dashboardData;
   TeacherDashboardData? get dashboardData => _dashboardData;
+
+  Future<String> getAddressFromLatLng(String latStr, String lonStr) async {
+    final key = '$latStr,$lonStr';
+    if (_addressCache.containsKey(key)) return _addressCache[key]!;
+
+    try {
+      final double lat = double.parse(latStr);
+      final double lon = double.parse(lonStr);
+      List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
+      if (placemarks.isNotEmpty) {
+        final p = placemarks.first;
+        final address = '${p.street}, ${p.subLocality}, ${p.locality}';
+        _addressCache[key] = address;
+        return address;
+      }
+    } catch (e) {
+      log('Error reverse geocoding: $e');
+    }
+    return 'Unknown Location';
+  }
+
 
   List<RoutineEntry> _todayClasses = [];
   List<Exam> _exams = [];
