@@ -248,7 +248,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     const SizedBox(height: 24),
                   ],
                   _buildExamsSection(context, l10n),
-                  const SizedBox(height: 24),
+
                   if (data?.mySubmittedHomework.isNotEmpty ?? false) ...[
                     _buildSectionHeader(
                       l10n.recentHomework,
@@ -256,7 +256,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
-                      height: 160,
+                      height: 130,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         physics: const BouncingScrollPhysics(),
@@ -699,214 +699,273 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     BuildContext context,
     MyClassAttendStudent stats,
   ) {
+    final l10n = AppLocalizations.of(context)!;
+    final statusColor = stats.attendanceRate > 80
+        ? Colors.green
+        : (stats.attendanceRate > 50 ? Colors.orange : Colors.red);
+
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            // Navigate to class detail if needed
+          },
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                // Circular Progress Indicator
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 65,
+                      height: 65,
+                      child: CircularProgressIndicator(
+                        value: stats.attendanceRate / 100,
+                        strokeWidth: 6,
+                        backgroundColor: statusColor.withOpacity(0.1),
+                        valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                        strokeCap: StrokeCap.round,
+                      ),
+                    ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${stats.attendanceRate.toInt()}%',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: statusColor,
+                          ),
+                        ),
+                        Text(
+                          'RATE',
+                          style: TextStyle(
+                            fontSize: 8,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade500,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 20),
+                // Class Info and Stats
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        stats.classInfo?.name ?? 'Class',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildStatItem(
+                            l10n.present,
+                            stats.present.toString(),
+                            Colors.green,
+                          ),
+                          _buildStatItem(
+                            l10n.absent,
+                            stats.absent.toString(),
+                            Colors.red,
+                          ),
+                          _buildStatItem(
+                            l10n.leave,
+                            stats.leave.toString(),
+                            Colors.orange,
+                          ),
+                          _buildStatItem(
+                            'Total',
+                            stats.total.toString(),
+                            Colors.blue,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: Colors.grey.shade300,
+                  size: 16,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, String value, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            color: color,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.grey.shade500,
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHomeworkCard(BuildContext context, Homework homework) {
+    return Card(
+      margin: const EdgeInsets.only(right: 16),
+
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: 50,
-                  height: 50,
-                  child: CircularProgressIndicator(
-                    value: stats.attendanceRate / 100,
-                    strokeWidth: 6,
-                    backgroundColor: Colors.grey.shade100,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      stats.attendanceRate > 80
-                          ? Colors.green
-                          : (stats.attendanceRate > 50
-                                ? Colors.orange
-                                : Colors.red),
+        child: SizedBox(
+          width: screenSize(context, .8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    homework.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    homework.description,
+                    style: const TextStyle(fontSize: 12),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        '${homework.classInfo?.name ?? "--"} / ${homework.subjectInfo?.name ?? ""}',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 11,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+                    ],
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Due: ${DateFormat('dd MMM').format(homework.dueDate)}',
+                    style: const TextStyle(fontSize: 10, color: Colors.red),
+                  ),
+                  const Icon(Icons.arrow_forward, size: 14, color: Colors.grey),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoticeCard(BuildContext context, Notice notice) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                if (notice.isImportant)
+                  const Padding(
+                    padding: EdgeInsets.only(right: 8),
+                    child: Icon(
+                      Icons.priority_high,
+                      color: Colors.amber,
+                      size: 16,
+                    ),
+                  ),
+                Expanded(
+                  child: Text(
+                    notice.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Text(
-                  '${stats.attendanceRate.toInt()}%',
-                  style: const TextStyle(
+                  'New', // Logic for new label
+                  style: TextStyle(
+                    color: Colors.blue.shade700,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    stats.classInfo?.name ?? 'Class',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  Text(
-                    '${stats.present} Present / ${stats.total} Total',
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                  ),
-                ],
-              ),
+            const SizedBox(height: 6),
+            Text(
+              notice.content,
+              style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            const Icon(Icons.chevron_right, color: Colors.grey),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const Icon(Icons.person, size: 12, color: Colors.grey),
+                const SizedBox(width: 4),
+                Text(
+                  notice.postedBy ?? 'Admin',
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                ),
+                const Spacer(),
+                const Icon(Icons.access_time, size: 12, color: Colors.grey),
+                const SizedBox(width: 4),
+                const Text(
+                  'Today',
+                  style: TextStyle(fontSize: 11, color: Colors.grey),
+                ),
+              ],
+            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildHomeworkCard(BuildContext context, Homework homework) {
-    return Container(
-      width: 220,
-      margin: const EdgeInsets.only(right: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  homework.subjectInfo?.name ?? 'Subject',
-                  style: TextStyle(
-                    color: Colors.blue.shade800,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                homework.title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                'Class: ${homework.classInfo?.name ?? "--"}',
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Due: ${DateFormat('dd MMM').format(homework.dueDate)}',
-                style: const TextStyle(fontSize: 10, color: Colors.red),
-              ),
-              const Icon(Icons.arrow_forward, size: 14, color: Colors.grey),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNoticeCard(BuildContext context, Notice notice) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: notice.isImportant ? Colors.amber.shade50 : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: notice.isImportant
-              ? Colors.amber.shade200
-              : Colors.grey.shade100,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              if (notice.isImportant)
-                const Padding(
-                  padding: EdgeInsets.only(right: 8),
-                  child: Icon(
-                    Icons.priority_high,
-                    color: Colors.amber,
-                    size: 16,
-                  ),
-                ),
-              Expanded(
-                child: Text(
-                  notice.title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Text(
-                'New', // Logic for new label
-                style: TextStyle(
-                  color: Colors.blue.shade700,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            notice.content,
-            style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              const Icon(Icons.person, size: 12, color: Colors.grey),
-              const SizedBox(width: 4),
-              Text(
-                notice.postedBy ?? 'Admin',
-                style: const TextStyle(fontSize: 11, color: Colors.grey),
-              ),
-              const Spacer(),
-              const Icon(Icons.access_time, size: 12, color: Colors.grey),
-              const SizedBox(width: 4),
-              const Text(
-                'Today',
-                style: TextStyle(fontSize: 11, color: Colors.grey),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
