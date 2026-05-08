@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 
 import '../../auth/providers/auth_provider.dart';
 import '../providers/result_provider.dart';
@@ -99,7 +100,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
           ? null
           : AppBar(
               title: const Text('Mark Entry System'),
-              backgroundColor: Colors.blue[700],
+              backgroundColor: AppColors.primaryTeacher,
               foregroundColor: Colors.white,
               elevation: 0,
             ),
@@ -299,7 +300,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       children: [
         Row(
           children: [
-            const Icon(Icons.edit_note, color: Colors.blue),
+            const Icon(Icons.edit_note, color: AppColors.primaryTeacher,),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -330,7 +331,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                       color: Colors.blue[50],
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(Icons.book, color: Colors.blue[700]),
+                    child: Icon(Icons.book, color: AppColors.primaryTeacher,),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -410,7 +411,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       child: ElevatedButton(
         onPressed: notifier.submitting ? null : () => _saveMarks(notifier),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
+          backgroundColor: AppColors.primaryTeacher,
           shadowColor: Colors.transparent,
           padding: const EdgeInsets.symmetric(vertical: 18),
           minimumSize: const Size(double.infinity, 50),

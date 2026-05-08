@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 
 import '../../../models/school_models.dart';
 import '../../admin/providers/routine_provider.dart';
@@ -84,7 +85,7 @@ class _TeacherRoutineScreenState extends State<TeacherRoutineScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Class Routine'),
-        backgroundColor: Colors.blue,
+        backgroundColor: AppColors.primaryTeacher,
         foregroundColor: Colors.white,
         bottom: TabBar(
           controller: _tabController,
@@ -190,7 +191,7 @@ class _RoutineCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.blue,
+                      color: AppColors.primaryTeacher,
                     ),
                   ),
                 ),

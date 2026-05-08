@@ -138,7 +138,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
           ? null
           : AppBar(
               title: const Text('Student Attendance'),
-              backgroundColor: Colors.blue[700],
+              backgroundColor: AppColors.primaryTeacher,
               foregroundColor: Colors.white,
               elevation: 0,
             ),
@@ -441,7 +441,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
       child: ElevatedButton(
         onPressed: !hasStudents ? null : _save,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue[700],
+          backgroundColor:AppColors.primaryTeacher,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
