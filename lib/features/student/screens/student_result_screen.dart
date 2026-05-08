@@ -35,7 +35,7 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
           ? null
           : AppBar(
               title: const Text('Exams & Results'),
-              backgroundColor: Colors.indigo[800],
+              backgroundColor:  AppColors.primaryTeacher,
               foregroundColor: Colors.white,
               elevation: 0,
               centerTitle: true,

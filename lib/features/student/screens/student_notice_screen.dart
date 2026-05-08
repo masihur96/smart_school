@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 
 import '../../admin/providers/notice_provider.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -41,7 +42,7 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
       appBar: widget.isFromDrawer
           ? AppBar(
               title: const Text('School Notices'),
-              backgroundColor: Colors.indigo[800],
+              backgroundColor:  AppColors.primaryTeacher,
               foregroundColor: Colors.white,
               elevation: 0,
               centerTitle: true,

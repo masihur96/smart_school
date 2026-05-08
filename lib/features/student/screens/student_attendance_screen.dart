@@ -57,7 +57,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
           ? null
           : AppBar(
               title: const Text('My Attendance'),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColors.primaryTeacher,
               foregroundColor: Colors.white,
             ),
       body: isLoading && attendanceRecords.isEmpty
