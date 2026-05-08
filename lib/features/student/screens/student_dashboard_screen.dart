@@ -274,10 +274,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                         .map((notice) => _buildNoticeCard(context, notice)),
                     const SizedBox(height: 24),
                   ],
-                  _buildSectionHeader(l10n.quickActions),
-                  const SizedBox(height: 12),
-                  _buildQuickActionsGrid(context, l10n),
-                  const SizedBox(height: 32),
+
+
                 ],
               ),
             ),
