@@ -92,11 +92,7 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.purple.shade600, Colors.deepPurple.shade900],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+       color: AppColors.primaryTeacher,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/teacher/screens/homework_details_screen.dart';
 
 import '../../../models/school_models.dart';
@@ -79,7 +80,7 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
                 'My Homeworks',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              backgroundColor: const Color(0xFF7C3AED),
+              backgroundColor: AppColors.primaryTeacher,
               foregroundColor: Colors.white,
               elevation: 0,
             ),
@@ -198,7 +199,7 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddSheet(context),
-        backgroundColor: const Color(0xFF7C3AED),
+        backgroundColor: AppColors.primaryTeacher,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
         label: const Text(
@@ -327,9 +328,7 @@ class _HomeworkCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF7C3AED), Color(0xFF4F46E5)],
-                ),
+               color: AppColors.primaryTeacher,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
