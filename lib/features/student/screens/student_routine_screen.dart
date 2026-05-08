@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 
 import '../../../models/school_models.dart' hide Teacher;
 import '../../auth/providers/auth_provider.dart';
@@ -76,7 +77,7 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
             'Academic Schedule',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          backgroundColor: Colors.green,
+          backgroundColor:  AppColors.primaryTeacher,
           foregroundColor: Colors.white,
           elevation: 0,
           bottom: PreferredSize(
@@ -94,7 +95,7 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
-                labelColor: Colors.green,
+                labelColor:  AppColors.primaryTeacher,
                 unselectedLabelColor: Colors.white,
                 labelStyle: TextStyle(fontWeight: FontWeight.bold),
                 tabs: [
@@ -301,7 +302,7 @@ class _RoutineCard extends StatelessWidget {
             Container(
               width: 5,
               decoration: const BoxDecoration(
-                color: Colors.green,
+                color:  AppColors.primaryTeacher,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(16),
                   bottomLeft: Radius.circular(16),
