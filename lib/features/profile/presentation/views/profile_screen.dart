@@ -248,7 +248,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ? AppColors.primaryAdmin
           : user.role.name.toLowerCase() == "teacher"
           ? AppColors.primaryTeacher
-          : theme.primaryColor,
+          :user.role.name.toLowerCase() == "student"
+          ? AppColors.primaryStudent: theme.primaryColor,
       foregroundColor: AppColors.white,
       flexibleSpace: FlexibleSpaceBar(
         stretchModes: const [StretchMode.zoomBackground],

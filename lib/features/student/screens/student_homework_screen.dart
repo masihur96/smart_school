@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 
 import '../../../models/school_models.dart';
 import '../../admin/providers/setup_provider.dart';
@@ -215,7 +216,7 @@ class _HomeworkCard extends StatelessWidget {
                         child: Text(
                           subjectName,
                           style: const TextStyle(
-                            color: Colors.green,
+                            color: AppColors.primaryStudent,
                             fontWeight: FontWeight.bold,
                             fontSize: 11,
                           ),
@@ -269,14 +270,14 @@ class _HomeworkCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green,
+                      color: AppColors.primaryStudent,
                     ),
                   ),
                   const SizedBox(width: 4),
                   const Icon(
                     Icons.chevron_right_rounded,
                     size: 16,
-                    color: Colors.green,
+                    color: AppColors.primaryStudent,
                   ),
                 ],
               ),

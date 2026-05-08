@@ -118,7 +118,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           ),
           centerTitle: false,
           elevation: 0,
-          backgroundColor: Colors.green.shade600,
+          backgroundColor: AppColors.primaryStudent,
           foregroundColor: Colors.white,
           actions: [
             const NotificationIconButton(),
@@ -159,7 +159,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
             currentIndex: _selectedIndex > 3 ? 0 : _selectedIndex,
             onTap: _onItemTapped,
             type: BottomNavigationBarType.fixed,
-            selectedItemColor: Colors.green.shade700,
+            selectedItemColor: AppColors.primaryStudent,
             unselectedItemColor: Colors.grey.shade500,
             elevation: 0,
             selectedLabelStyle: const TextStyle(
@@ -212,7 +212,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           children: [
             _buildModernHeader(context, user, l10n),
             if (data?.marqueeData != null && data!.marqueeData!.text.isNotEmpty)
-              MarqueeNotice(customText: data.marqueeData!.text),
+              MarqueeNotice(customText: data.marqueeData!.text,color: AppColors.primaryStudent,),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Column(
@@ -303,8 +303,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
             child: Text(
               'See All', // Modify with l10n later if needed
               style: TextStyle(
-                color: Colors.green.shade700,
-                fontWeight: FontWeight.w600,
+                color: AppColors.primaryStudent,
+
               ),
             ),
           ),
@@ -320,7 +320,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.green.shade600,
+        color: AppColors.primaryStudent,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(32),
           bottomRight: Radius.circular(32),
@@ -608,11 +608,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       width: screenSize(context, .85),
       margin: const EdgeInsets.only(right: 16, bottom: 8),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.indigo.shade600, Colors.deepPurple.shade800],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+       color: AppColors.primaryStudent,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(

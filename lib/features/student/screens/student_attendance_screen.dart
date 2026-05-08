@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/models/school_models.dart';
 import '../providers/student_attendance_provider.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -96,7 +97,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                                 fontSize: 20,
                               ),
                             ),
-                            progressColor: Colors.green,
+                            progressColor: AppColors.primaryStudent,
                             backgroundColor: Colors.green.withOpacity(0.2),
                             circularStrokeCap: CircularStrokeCap.round,
                           ),
@@ -107,7 +108,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                               _buildStatItem(
                                 'Present',
                                 presentDays.toString(),
-                                color: Colors.green,
+                                color: AppColors.primaryStudent,
                               ),
                               _buildStatItem(
                                 'Leave',
@@ -154,7 +155,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                                   ? Icons.check_circle
                                   : (isLeave ? Icons.info : Icons.cancel),
                               color: isPresent
-                                  ? Colors.green
+                                  ? AppColors.primaryStudent
                                   : (isLeave ? Colors.orange : Colors.red),
                             ),
                             title: Text(
@@ -165,7 +166,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                                   record.status.name.substring(1),
                               style: TextStyle(
                                 color: isPresent
-                                    ? Colors.green
+                                    ? AppColors.primaryStudent
                                     : (isLeave ? Colors.orange : Colors.red),
                                 fontWeight: FontWeight.bold,
                               ),
