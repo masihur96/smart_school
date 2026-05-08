@@ -3,8 +3,9 @@ import 'package:marquee/marquee.dart';
 
 class MarqueeNotice extends StatelessWidget {
   final String? customText;
+  final Color? color;
 
-  const MarqueeNotice({super.key, this.customText});
+  const MarqueeNotice({super.key, this.customText,required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +39,7 @@ class MarqueeNotice extends StatelessWidget {
           ),
         ],
         border: Border.all(
-          color: Colors.green.withValues(alpha: 0.5),
+          color: color!.withValues(alpha: 0.5),
           width: 2,
         ),
       ),
@@ -49,8 +50,8 @@ class MarqueeNotice extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               height: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.green,
+              decoration:  BoxDecoration(
+                color: color,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(12),
                   bottomLeft: Radius.circular(12),

@@ -102,7 +102,7 @@ class AppDrawer extends StatelessWidget {
       case UserRole.teacher:
         return AppColors.primaryTeacher;
       case UserRole.student:
-        return Colors.green;
+        return AppColors.primaryStudent;
       case UserRole.superadmin:
         return Colors.deepPurple;
     }

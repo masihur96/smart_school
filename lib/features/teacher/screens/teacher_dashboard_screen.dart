@@ -224,7 +224,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           children: [
             _buildModernHeader(context, name, classes.length, user, l10n),
             if (data?.marqueeData != null)
-              MarqueeNotice(customText: data!.marqueeData!.text),
+              MarqueeNotice(customText: data!.marqueeData!.text,color: AppColors.primaryTeacher,),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Column(
