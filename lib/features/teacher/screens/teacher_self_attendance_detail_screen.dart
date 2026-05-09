@@ -69,7 +69,6 @@ class _TeacherSelfAttendanceDetailScreenState
     final teachers = context.watch<TeachersNotifier>().teachers;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: const Text(
           'Teacher Attendance',
@@ -86,10 +85,10 @@ class _TeacherSelfAttendanceDetailScreenState
             child: provider.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : provider.error != null
-                    ? _buildErrorWidget(provider.error!)
-                    : provider.attendanceList.isEmpty
-                        ? _buildEmptyWidget()
-                        : _buildAttendanceList(provider.attendanceList),
+                ? _buildErrorWidget(provider.error!)
+                : provider.attendanceList.isEmpty
+                ? _buildEmptyWidget()
+                : _buildAttendanceList(provider.attendanceList),
           ),
         ],
       ),
@@ -100,7 +99,6 @@ class _TeacherSelfAttendanceDetailScreenState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
@@ -118,15 +116,22 @@ class _TeacherSelfAttendanceDetailScreenState
                 labelText: 'Select Teacher',
                 prefixIcon: const Icon(Icons.person_search),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               value: _selectedTeacherId,
               items: [
-                const DropdownMenuItem(value: null, child: Text('All Teachers')),
-                ...teachers.map((t) => DropdownMenuItem(
-                      value: t.userId,
-                      child: Text(t.user?.name ?? 'Unknown'),
-                    )),
+                const DropdownMenuItem(
+                  value: null,
+                  child: Text('All Teachers'),
+                ),
+                ...teachers.map(
+                  (t) => DropdownMenuItem(
+                    value: t.userId,
+                    child: Text(t.user?.name ?? 'Unknown'),
+                  ),
+                ),
               ],
               onChanged: (val) {
                 setState(() => _selectedTeacherId = val);
@@ -152,21 +157,30 @@ class _TeacherSelfAttendanceDetailScreenState
                     }
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 15,
+                    ),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey.shade400),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
+                        const Icon(
+                          Icons.calendar_today,
+                          size: 20,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           _selectedDate == null
                               ? 'Filter by Date'
                               : DateFormat('dd/MM/yyyy').format(_selectedDate!),
                           style: TextStyle(
-                            color: _selectedDate == null ? Colors.grey.shade600 : Colors.black,
+                            color: _selectedDate == null
+                                ? Colors.grey.shade600
+                                : Colors.black,
                           ),
                         ),
                       ],
@@ -174,7 +188,8 @@ class _TeacherSelfAttendanceDetailScreenState
                   ),
                 ),
               ),
-              if (_selectedDate != null || (isAdmin && _selectedTeacherId != null))
+              if (_selectedDate != null ||
+                  (isAdmin && _selectedTeacherId != null))
                 IconButton(
                   onPressed: () {
                     setState(() {
@@ -208,25 +223,20 @@ class _TeacherSelfAttendanceDetailScreenState
     final isPresent = attendance.status.toLowerCase() == 'present';
     final teacherName = attendance.teacher?.name ?? 'Teacher';
 
-    return Container(
+    return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+
       child: Column(
         children: [
           ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
             leading: CircleAvatar(
-              backgroundColor: isPresent ? Colors.green.shade50 : Colors.red.shade50,
+              backgroundColor: isPresent
+                  ? Colors.green.shade50
+                  : Colors.red.shade50,
               child: Icon(
                 isPresent ? Icons.check_circle : Icons.cancel,
                 color: isPresent ? Colors.green : Colors.red,
@@ -243,13 +253,17 @@ class _TeacherSelfAttendanceDetailScreenState
                 color: isPresent ? Colors.green.shade50 : Colors.red.shade50,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isPresent ? Colors.green.shade200 : Colors.red.shade200,
+                  color: isPresent
+                      ? Colors.green.shade200
+                      : Colors.red.shade200,
                 ),
               ),
               child: Text(
                 attendance.status.toUpperCase(),
                 style: TextStyle(
-                  color: isPresent ? Colors.green.shade700 : Colors.red.shade700,
+                  color: isPresent
+                      ? Colors.green.shade700
+                      : Colors.red.shade700,
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                 ),
@@ -261,8 +275,15 @@ class _TeacherSelfAttendanceDetailScreenState
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildMiniInfo(Icons.location_on, 'Dist: ${attendance.distanceFromCenter.toStringAsFixed(1)}m'),
-                _buildMiniInfo(Icons.my_location, '${attendance.lat}, ${attendance.lon}', flex: 2),
+                _buildMiniInfo(
+                  Icons.location_on,
+                  'Dist: ${attendance.distanceFromCenter.toStringAsFixed(1)}m',
+                ),
+                _buildMiniInfo(
+                  Icons.my_location,
+                  '${attendance.lat}, ${attendance.lon}',
+                  flex: 2,
+                ),
               ],
             ),
           ),
@@ -302,10 +323,7 @@ class _TeacherSelfAttendanceDetailScreenState
             style: TextStyle(color: Colors.grey, fontSize: 16),
           ),
           const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: _fetchData,
-            child: const Text('Refresh'),
-          ),
+          ElevatedButton(onPressed: _fetchData, child: const Text('Refresh')),
         ],
       ),
     );
