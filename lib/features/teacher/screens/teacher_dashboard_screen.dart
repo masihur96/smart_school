@@ -7,6 +7,7 @@ import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/screens/class_detail_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
+import 'package:smart_school/features/teacher/screens/teacher_self_attendance_detail_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
@@ -15,11 +16,14 @@ import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/marquee_notice.dart';
 import '../../../core/widgets/notification_icon_button.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../student/screens/student_notice_screen.dart';
 import '../data/models/teacher_dashboard_model.dart';
 import '../providers/teacher_dashboard_provider.dart';
 import 'homework_management_screen.dart';
 import 'mark_entry_screen.dart';
 import 'teacher_attendance_screen.dart';
+import 'teacher_exam_screen.dart';
+import 'teacher_routine_screen.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
   const TeacherDashboardScreen({super.key});
@@ -233,11 +237,33 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionHeader("My ${l10n.attendance}", onSeeAll: () {}),
+                  _buildSectionHeader(
+                    "My ${l10n.attendance}",
+                    onSeeAll: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => TeacherSelfAttendanceDetailScreen(
+                            schoolId: user.schoolId ?? "",
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                   _buildAttendanceSection(context, data, l10n),
                   const SizedBox(height: 24),
                   if (data?.myClassAttendStudents.isNotEmpty ?? false) ...[
-                    _buildSectionHeader(l10n.attendance, onSeeAll: () {}),
+                    _buildSectionHeader(
+                      l10n.attendance,
+                      onSeeAll: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const TeacherAttendanceScreen(),
+                          ),
+                        );
+                      },
+                    ),
                     const SizedBox(height: 12),
                     ...data!.myClassAttendStudents.map(
                       (stats) => _buildClassPerformanceCard(context, stats),
@@ -245,9 +271,30 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     const SizedBox(height: 24),
                   ],
                   if (classes.isNotEmpty) ...[
-                    _buildSectionHeader(l10n.scheduleToday, onSeeAll: () {}),
+                    _buildSectionHeader(
+                      l10n.scheduleToday,
+                      onSeeAll: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const TeacherRoutineScreen(),
+                          ),
+                        );
+                      },
+                    ),
                     const SizedBox(height: 12),
-                    ...classes.map((c) => _buildClassCard(context, c)),
+                    SizedBox(
+                      height: 180,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: classes.length,
+                        itemBuilder: (context, index) => Padding(
+                          padding: const EdgeInsets.only(right: 16),
+                          child: _buildClassCard(context, classes[index]),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 24),
                   ],
                   _buildExamsSection(context, l10n),
@@ -273,7 +320,18 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     const SizedBox(height: 24),
                   ],
                   if (data?.recentNotice.isNotEmpty ?? false) ...[
-                    _buildSectionHeader(l10n.notices, onSeeAll: () {}),
+                    _buildSectionHeader(
+                      l10n.notices,
+                      onSeeAll: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const StudentNoticeScreen(isFromDrawer: true),
+                          ),
+                        );
+                      },
+                    ),
                     const SizedBox(height: 12),
                     ...data!.recentNotice
                         .take(3)
@@ -1091,86 +1149,107 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         classInfo.subjectEntity?.name ?? 'Subject ${classInfo.subjectId}';
 
     return Card(
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ClassDetailScreen(
-                subjectID: classInfo.subjectId ?? "",
-                classRoom: classInfo.classEntity!,
-                sectionId: classInfo.sectionId,
-              ),
-            ),
-          );
-        },
-        borderRadius: BorderRadius.circular(16),
+      child: SizedBox(
+        width: screenSize(context, .45),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Icon(Icons.book, color: Colors.blue.shade700),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
+          padding: const EdgeInsets.all(10.0),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ClassDetailScreen(
+                      subjectID: classInfo.subjectId ?? "",
+                      classRoom: classInfo.classEntity!,
+                      sectionId: classInfo.sectionId,
+                    ),
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(24),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            "${classInfo.startTime.split(':').take(2).join(':')} - ${classInfo.endTime.split(':').take(2).join(':')}",
+                            style: TextStyle(
+                              color: Colors.blue.shade700,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
                     Text(
                       className,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 18,
+                        letterSpacing: -0.5,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    Text(subjectName),
-                    if (classInfo.teacherEntity != null) ...[
-                      const SizedBox(height: 4),
+                    Text(
+                      subjectName,
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 12),
+                    if (classInfo.teacherEntity != null)
                       Row(
                         children: [
-                          const Icon(Icons.person, size: 14),
-                          const SizedBox(width: 4),
-                          Text(
-                            classInfo.teacherEntity!.name,
-                            style: const TextStyle(fontSize: 12),
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.person, size: 12),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              classInfo.teacherEntity!.name,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade700,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                       ),
-                    ],
                   ],
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        "${classInfo.startTime.split(':').take(2).join(':')} - ${classInfo.endTime.split(':').take(2).join(':')}",
-                        style: TextStyle(
-                          color: Colors.orange.shade800,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Icon(Icons.arrow_forward_ios, size: 14),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -1223,7 +1302,17 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             if (exams.length > 2)
-              TextButton(onPressed: () {}, child: Text(l10n.viewAll)),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const TeacherExamScreen(),
+                    ),
+                  );
+                },
+                child: Text(l10n.viewAll),
+              ),
           ],
         ),
         const SizedBox(height: 12),
