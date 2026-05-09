@@ -224,7 +224,10 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           children: [
             _buildModernHeader(context, name, classes.length, user, l10n),
             if (data?.marqueeData != null)
-              MarqueeNotice(customText: data!.marqueeData!.text,color: AppColors.primaryTeacher,),
+              MarqueeNotice(
+                customText: data!.marqueeData!.text,
+                color: AppColors.primaryTeacher,
+              ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Column(
@@ -545,7 +548,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 ),
                 const Spacer(),
                 _buildTimeInfo(
-                  '${status?.record?.distanceFromCenter.toInt()}m',
+                  '${status?.record?.distanceFromCenter.toInt() ?? "Not Yet "}m',
 
                   Icons.location_on,
                 ),
@@ -556,11 +559,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 5.0),
                 child: const Text(
                   'Recent History',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 12),
