@@ -4,35 +4,26 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
-import 'package:smart_school/features/admin/screens/add_edit_marquee_screen.dart';
-import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart';
-import 'package:smart_school/features/admin/screens/add_edit_teacher_screen.dart';
-import 'package:smart_school/features/admin/screens/routine_management_screen.dart'
-    hide SizedBox;
-import 'package:smart_school/features/admin/screens/setup_screen.dart';
-import 'package:smart_school/features/admin/screens/teacher_management_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
+import '../../../core/services/geocoding_service.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/notification_icon_button.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../teacher/domain/entities/attendance.dart';
 import '../../teacher/providers/attendance_provider.dart';
+import '../../teacher/screens/homework_management_screen.dart';
+import '../models/admin_dashboard_model.dart';
+import '../providers/admin_dashboard_provider.dart';
 import '../providers/notice_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
 import '../providers/teacher_provider.dart';
 import 'exam_management_screen.dart';
 import 'notice_management_screen.dart';
-import 'student_management_screen.dart';
 import 'student_attendance_management_screen.dart';
+import 'student_management_screen.dart';
 import 'teacher_attendance_management_screen.dart';
-import '../../teacher/screens/homework_management_screen.dart';
-import '../models/admin_dashboard_model.dart';
-import '../providers/admin_dashboard_provider.dart';
-import '../../../core/services/geocoding_service.dart';
-
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -183,12 +174,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-
-  Widget _buildDashboardOverview(AppLocalizations l10n, AuthNotifier authNotifier) {
+  Widget _buildDashboardOverview(
+    AppLocalizations l10n,
+    AuthNotifier authNotifier,
+  ) {
     return Consumer<AdminDashboardProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading && provider.dashboardData == null) {
-          return const Center(child: CircularProgressIndicator(color: Colors.purple));
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.purple),
+          );
         }
 
         if (provider.error != null && provider.dashboardData == null) {
@@ -202,9 +197,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => provider.fetchDashboardData(),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.purple, foregroundColor: Colors.white),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.purple,
+                    foregroundColor: Colors.white,
+                  ),
                   child: Text('Retry'),
-                )
+                ),
               ],
             ),
           );
@@ -233,31 +231,64 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 _buildAttendanceCards(data),
                 const SizedBox(height: 24),
                 if (data.recentHomework.isNotEmpty) ...[
-                  _buildSectionTitle('Recent Homework',TextButton(onPressed: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeworkManagementScreen()));
-                  }, child: const Text("View All"))),
+                  _buildSectionTitle(
+                    'Recent Homework',
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const HomeworkManagementScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text("View All"),
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   _buildRecentHomework(data.recentHomework),
                   const SizedBox(height: 24),
                 ],
                 if (data.currentExam.isNotEmpty) ...[
-                  _buildSectionTitle('Current Exams',TextButton(onPressed: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ExamManagementScreen()));
-                  }, child: const Text("View All"))),
+                  _buildSectionTitle(
+                    'Current Exams',
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ExamManagementScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text("View All"),
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   _buildCurrentExams(data.currentExam),
                   const SizedBox(height: 24),
                 ],
                 if (data.recentNotice.isNotEmpty) ...[
-                  _buildSectionTitle('Recent Notices',TextButton(onPressed: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const NoticeManagementScreen()));
-                  }, child: const Text("View All"))),
+                  _buildSectionTitle(
+                    'Recent Notices',
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const NoticeManagementScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text("View All"),
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   _buildRecentNotices(data.recentNotice),
                   const SizedBox(height: 24),
                 ],
-
-
               ],
             ),
           ),
@@ -272,13 +303,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1E1B4B),
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        trailing
+        trailing,
       ],
     );
   }
@@ -291,7 +318,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             title: 'Total Students',
             value: data.attendStudent.totalStudents.toString(),
             icon: Icons.people_outline,
-            gradient: const LinearGradient(colors: [Color(0xFF3B82F6), Color(0xFF2563EB)]),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
+            ),
           ),
         ),
         const SizedBox(width: 16),
@@ -300,7 +329,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             title: 'Total Teachers',
             value: data.attendTeacher.totalTeachers.toString(),
             icon: Icons.person_outline,
-            gradient: const LinearGradient(colors: [Color(0xFF8B5CF6), Color(0xFF6D28D9)]),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF8B5CF6), Color(0xFF6D28D9)],
+            ),
           ),
         ),
       ],
@@ -323,7 +354,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             color: gradient.colors.last.withOpacity(0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -386,97 +417,117 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
         );
       },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            )
-          ],
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.purple.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.group_outlined,
+                      color: Colors.purple,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Student Attendance',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          data.date,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${rate.toStringAsFixed(1)}%',
+                      style: const TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStatPill(
+                    'Total',
+                    total.toString(),
+                    Colors.grey[700]!,
+                    Icons.groups_rounded,
+                  ),
+                  _buildStatPill(
+                    'Present',
+                    present.toString(),
+                    Colors.green,
+                    Icons.how_to_reg_rounded,
+                  ),
+                  _buildStatPill(
+                    'Absent',
+                    absent.toString(),
+                    Colors.red,
+                    Icons.unpublished_rounded,
+                  ),
+                  _buildStatPill(
+                    'Leave',
+                    data.leave.toString(),
+                    Colors.orange,
+                    Icons.time_to_leave_outlined,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: total > 0 ? (present / total) : 0,
+                  minHeight: 8,
+                  backgroundColor: Colors.grey.withValues(alpha: 0.2),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    rate >= 75
+                        ? Colors.green
+                        : (rate >= 50 ? Colors.orange : Colors.red),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        child: Column(
-          children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.purple.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.group_outlined,
-                    color: Colors.purple, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Student Attendance',
-                      style: TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      data.date,
-                      style:
-                      TextStyle(fontSize: 11, color: Colors.grey[500]),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '${rate.toStringAsFixed(1)}%',
-                  style: const TextStyle(color: color, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-
-
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildStatPill('Total', total.toString(),
-                  Colors.grey[700]!, Icons.groups_rounded),
-            _buildStatPill('Present', present.toString(),
-                Colors.green, Icons.how_to_reg_rounded),
-              _buildStatPill('Absent',  absent.toString(),
-                  Colors.red, Icons.unpublished_rounded),
-              _buildStatPill('Leave',  data.leave.toString(),
-                  Colors.orange, Icons.time_to_leave_outlined),
-
-            ],
-          ),
-          const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: total > 0 ? (present / total) : 0,
-              minHeight: 8,
-              backgroundColor: Colors.grey.withValues(alpha: 0.2),
-              valueColor: AlwaysStoppedAnimation<Color>(
-                rate >= 75 ? Colors.green : (rate >= 50 ? Colors.orange : Colors.red),
-              ),
-            ),
-          ),
-        ],
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildTeacherAttendanceCard(AttendTeacher data) {
     final total = data.totalTeachers;
@@ -486,8 +537,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final rateColor = rate >= 75
         ? const Color(0xFF10B981)
         : rate >= 50
-            ? const Color(0xFFF59E0B)
-            : const Color(0xFFEF4444);
+        ? const Color(0xFFF59E0B)
+        : const Color(0xFFEF4444);
 
     return InkWell(
       onTap: () {
@@ -498,327 +549,364 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
         );
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.purple.withValues(alpha: 0.07),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            )
-          ],
-        ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Header ──────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.purple.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.how_to_reg_rounded,
-                      color: Colors.purple, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Teacher Attendance',
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.bold),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Header ──────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      child: const Icon(
+                        Icons.how_to_reg_rounded,
+                        color: Colors.purple,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Teacher Attendance',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            data.date,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: rateColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${rate.toStringAsFixed(1)}%',
+                        style: TextStyle(
+                          color: rateColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // ── Stats pills ─────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    _buildStatPill(
+                      'Total',
+                      total.toString(),
+                      const Color(0xFF6B7280),
+                      Icons.groups_rounded,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildStatPill(
+                      'Present',
+                      present.toString(),
+                      const Color(0xFF10B981),
+                      Icons.check_circle_outline,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildStatPill(
+                      'Absent',
+                      absent.toString(),
+                      const Color(0xFFEF4444),
+                      Icons.cancel_outlined,
+                    ),
+                  ],
+                ),
+              ),
+
+              // ── Progress bar ────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: LinearProgressIndicator(
+                    value: total > 0 ? (present / total) : 0,
+                    minHeight: 6,
+                    backgroundColor: Colors.grey.withValues(alpha: 0.15),
+                    valueColor: AlwaysStoppedAnimation<Color>(rateColor),
+                  ),
+                ),
+              ),
+
+              // ── Records horizontal scroll ────────────────────
+              if (data.recentRecords.isNotEmpty) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 0, 8),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.access_time_rounded,
+                        size: 13,
+                        color: Colors.purple,
+                      ),
+                      const SizedBox(width: 5),
                       Text(
-                        data.date,
-                        style:
-                            TextStyle(fontSize: 11, color: Colors.grey[500]),
+                        "Today's Records",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
+                        ),
                       ),
                     ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: rateColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '${rate.toStringAsFixed(1)}%',
-                    style: TextStyle(
-                        color: rateColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // ── Stats pills ─────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                _buildStatPill('Total', total.toString(),
-                    const Color(0xFF6B7280), Icons.groups_rounded),
-                const SizedBox(width: 8),
-                _buildStatPill('Present', present.toString(),
-                    const Color(0xFF10B981), Icons.check_circle_outline),
-                const SizedBox(width: 8),
-                _buildStatPill('Absent', absent.toString(),
-                    const Color(0xFFEF4444), Icons.cancel_outlined),
-              ],
-            ),
-          ),
-
-          // ── Progress bar ────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: total > 0 ? (present / total) : 0,
-                minHeight: 6,
-                backgroundColor: Colors.grey.withValues(alpha: 0.15),
-                valueColor: AlwaysStoppedAnimation<Color>(rateColor),
-              ),
-            ),
-          ),
-
-          // ── Records horizontal scroll ────────────────────
-          if (data.recentRecords.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 0, 8),
-              child: Row(
-                children: [
-                  const Icon(Icons.access_time_rounded,
-                      size: 13, color: Colors.purple),
-                  const SizedBox(width: 5),
-                  Text(
-                    "Today's Records",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: screenSize(context, .3),
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                itemCount: data.recentRecords.length,
-                itemBuilder: (context, index) {
-                  final r = data.recentRecords[index];
-                  final isClockedIn = r.status == 'clock-in';
-                  final statusColor = isClockedIn
-                      ? const Color(0xFF10B981)
-                      : const Color(0xFF3B82F6);
-                  final initial = r.teacherName.isNotEmpty
-                      ? r.teacherName[0].toUpperCase()
-                      : '?';
-                  final inTime = r.startTime.length >= 5
-                      ? r.startTime.substring(0, 5)
-                      : r.startTime;
-                  final outTime =
-                      (r.endTime != null && r.endTime!.length >= 5)
+                SizedBox(
+                  height: screenSize(context, .3),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    itemCount: data.recentRecords.length,
+                    itemBuilder: (context, index) {
+                      final r = data.recentRecords[index];
+                      final isClockedIn = r.status == 'clock-in';
+                      final statusColor = isClockedIn
+                          ? const Color(0xFF10B981)
+                          : const Color(0xFF3B82F6);
+                      final initial = r.teacherName.isNotEmpty
+                          ? r.teacherName[0].toUpperCase()
+                          : '?';
+                      final inTime = r.startTime.length >= 5
+                          ? r.startTime.substring(0, 5)
+                          : r.startTime;
+                      final outTime =
+                          (r.endTime != null && r.endTime!.length >= 5)
                           ? r.endTime!.substring(0, 5)
                           : '--:--';
-                  final lat =
-                      double.tryParse(r.lat)?.toStringAsFixed(3) ?? r.lat;
-                  final lon =
-                      double.tryParse(r.lon)?.toStringAsFixed(3) ?? r.lon;
+                      final lat =
+                          double.tryParse(r.lat)?.toStringAsFixed(3) ?? r.lat;
+                      final lon =
+                          double.tryParse(r.lon)?.toStringAsFixed(3) ?? r.lon;
 
-                  return Container(
-                    width: 148,
-                    margin: const EdgeInsets.only(right: 10),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                          color: statusColor.withValues(alpha: 0.2),
-                          width: 1),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Avatar + status dot
-                        Row(
+                      return Container(
+                        width: 148,
+                        margin: const EdgeInsets.only(right: 10),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: statusColor.withValues(alpha: 0.2),
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Stack(
+                            // Avatar + status dot
+                            Row(
                               children: [
-                                Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    color: statusColor.withValues(alpha: 0.15),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      initial,
-                                      style: TextStyle(
-                                        color: statusColor,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
+                                Stack(
+                                  children: [
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        color: statusColor.withValues(
+                                          alpha: 0.15,
+                                        ),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          initial,
+                                          style: TextStyle(
+                                            color: statusColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                    Positioned(
+                                      right: 0,
+                                      bottom: 0,
+                                      child: Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: statusColor,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Positioned(
-                                  right: 0,
-                                  bottom: 0,
-                                  child: Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: statusColor,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),)
 
+                                SizedBox(width: 5),
+
+                                // Name
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      r.teacherName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      r.designation.isNotEmpty
+                                          ? r.designation
+                                          : 'Teacher',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 10,
+                                        color: Colors.grey[500],
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
-
-                            SizedBox(width: 5,),
-
-                            // Name
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            const SizedBox(height: 6),
+                            // In / Out times
+                            Row(
                               children: [
-                                Text(
-                                  r.teacherName,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                Icon(
+                                  Icons.login_rounded,
+                                  size: 10,
+                                  color: Colors.green[600],
                                 ),
+                                const SizedBox(width: 3),
                                 Text(
-                                  r.designation.isNotEmpty
-                                      ? r.designation
-                                      : 'Teacher',
+                                  inTime,
                                   style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 10,
-                                    color: Colors.grey[500],
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-
-
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        // In / Out times
-                        Row(
-                          children: [
-                            Icon(Icons.login_rounded,
-                                size: 10, color: Colors.green[600]),
-                            const SizedBox(width: 3),
-                            Text(inTime,
-                                style: TextStyle(
                                     fontSize: 10,
                                     color: Colors.green[700],
-                                    fontWeight: FontWeight.w600)),
-                      Spacer(),
-                            Icon(Icons.logout_rounded,
-                                size: 10,
-                                color: outTime == '--:--'
-                                    ? Colors.grey
-                                    : Colors.blue[600]),
-                            const SizedBox(width: 3),
-                            Text(outTime,
-                                style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Spacer(),
+                                Icon(
+                                  Icons.logout_rounded,
+                                  size: 10,
+                                  color: outTime == '--:--'
+                                      ? Colors.grey
+                                      : Colors.blue[600],
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  outTime,
+                                  style: TextStyle(
                                     fontSize: 10,
                                     color: outTime == '--:--'
                                         ? Colors.grey
                                         : Colors.blue[700],
-                                    fontWeight: FontWeight.w600)),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                        // Location – reverse geocoded
-                        FutureBuilder<String>(
-                          future: GeocodingService().getPlaceName(r.lat, r.lon),
-                          builder: (context, snapshot) {
-                            final place = snapshot.connectionState ==
-                                    ConnectionState.waiting
-                                ? '...'
-                                : (snapshot.data ??
-                                    '${double.tryParse(r.lat)?.toStringAsFixed(3) ?? r.lat}, '
-                                    '${double.tryParse(r.lon)?.toStringAsFixed(3) ?? r.lon}');
-                            return Row(
-                              children: [
-                                Icon(Icons.location_on_outlined,
-                                    size: 10, color: Colors.grey[400]),
-                                const SizedBox(width: 2),
-                                Expanded(
-                                  child: Text(
-                                    place,
-                                    style: TextStyle(
-                                        fontSize: 9, color: Colors.grey[500]),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
-                            );
-                          },
+                            ),
+                            const SizedBox(height: 5),
+                            // Location – reverse geocoded
+                            FutureBuilder<String>(
+                              future: GeocodingService().getPlaceName(
+                                r.lat,
+                                r.lon,
+                              ),
+                              builder: (context, snapshot) {
+                                final place =
+                                    snapshot.connectionState ==
+                                        ConnectionState.waiting
+                                    ? '...'
+                                    : (snapshot.data ??
+                                          '${double.tryParse(r.lat)?.toStringAsFixed(3) ?? r.lat}, '
+                                              '${double.tryParse(r.lon)?.toStringAsFixed(3) ?? r.lon}');
+                                return Row(
+                                  children: [
+                                    Icon(
+                                      Icons.location_on_outlined,
+                                      size: 10,
+                                      color: Colors.grey[400],
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Expanded(
+                                      child: Text(
+                                        place,
+                                        style: TextStyle(
+                                          fontSize: 9,
+                                          color: Colors.grey[500],
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
                         ),
-
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ] else ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
-              child: Center(
-                child: Text(
-                  'No records for today',
-                  style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ),
-          ],
-        ],
+              ] else ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
+                  child: Center(
+                    child: Text(
+                      'No records for today',
+                      style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildStatPill(
-      String label,
-      String value,
-      Color color,
-      IconData icon,
-      ) {
+    String label,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-        margin: const EdgeInsets.symmetric( horizontal: 3),
+        margin: const EdgeInsets.symmetric(horizontal: 3),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(20),
@@ -828,7 +916,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           children: [
             // Icon(icon, size: 14, color: color),
             // const SizedBox(width: 4),
-
             Text(
               value,
               style: TextStyle(
@@ -844,10 +931,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               child: Text(
                 label,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 10, color: Colors.grey),
               ),
             ),
           ],
@@ -855,6 +939,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       ),
     );
   }
+
   Widget _buildAttendanceStatItem(String label, String value, Color color) {
     return Column(
       children: [
@@ -887,65 +972,70 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         itemCount: homeworkList.length,
         itemBuilder: (context, index) {
           final hw = homeworkList[index];
-          return Container(
-            width: 280,
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.blue.withOpacity(0.2)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.blue.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                )
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          return Card(
+            margin: EdgeInsets.only(right: 5),
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: SizedBox(
+                width: 280,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '${hw.className} - ${hw.sectionName}',
-                        style: const TextStyle(fontSize: 10, color: Colors.blue, fontWeight: FontWeight.bold),
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '${hw.className} - ${hw.sectionName}',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          hw.dueDate,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 12),
                     Text(
-                      hw.dueDate,
-                      style: const TextStyle(fontSize: 10, color: Colors.grey),
+                      hw.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      hw.subjectName,
+                      style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                    ),
+                    const Spacer(),
+                    Text(
+                      hw.description,
+                      style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  hw.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  hw.subjectName,
-                  style: TextStyle(color: Colors.grey[700], fontSize: 13),
-                ),
-                const Spacer(),
-                Text(
-                  hw.description,
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+              ),
             ),
           );
         },
@@ -962,8 +1052,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         itemBuilder: (context, index) {
           final exam = exams[index];
           return Card(
-            
-
             margin: const EdgeInsets.only(right: 16),
 
             child: SizedBox(
@@ -978,15 +1066,22 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       children: [
                         const Icon(Icons.assignment_turned_in, size: 28),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: exam.isPublished ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                            color: exam.isPublished
+                                ? Colors.green.withOpacity(0.1)
+                                : Colors.orange.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             exam.isPublished ? "PUBLISHED" : "DRAFT",
                             style: TextStyle(
-                              color: exam.isPublished ? Colors.green : Colors.orange,
+                              color: exam.isPublished
+                                  ? Colors.green
+                                  : Colors.orange,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
@@ -997,21 +1092,27 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     const Spacer(),
                     Text(
                       exam.examName,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18,),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       exam.description,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '${exam.startDate} to ${exam.endDate}',
-                      style: TextStyle( fontSize: 12),
+                      style: TextStyle(fontSize: 12),
                     ),
                   ],
                 ),
@@ -1046,18 +1147,27 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: notice.isImportent ? Colors.red.withOpacity(0.1) : Colors.purple.withOpacity(0.1),
+                            color: notice.isImportent
+                                ? Colors.red.withOpacity(0.1)
+                                : Colors.purple.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            notice.isImportent ? Icons.priority_high : Icons.notifications_none,
-                            color: notice.isImportent ? Colors.red : Colors.purple,
+                            notice.isImportent
+                                ? Icons.priority_high
+                                : Icons.notifications_none,
+                            color: notice.isImportent
+                                ? Colors.red
+                                : Colors.purple,
                             size: 20,
                           ),
                         ),
                         if (notice.isImportent)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.red.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
@@ -1076,7 +1186,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     const Spacer(),
                     Text(
                       notice.title,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1093,11 +1206,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       children: [
                         Text(
                           'For: ${notice.targetAudience}',
-                          style: const TextStyle(fontSize: 11, color: Colors.blueGrey, fontWeight: FontWeight.w600),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.blueGrey,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         Text(
                           notice.createdAt.split('T').first,
-                          style: const TextStyle(fontSize: 11, color: Colors.grey),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                          ),
                         ),
                       ],
                     ),
@@ -1111,7 +1231,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-
   Widget _buildSubscriptionCard(AuthNotifier auth, AppLocalizations l10n) {
     final sub = auth.adminSubscription;
     if (sub == null) return const SizedBox.shrink();
@@ -1119,14 +1238,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final isValid = auth.isSubscriptionValid;
     final planName = sub.pricingPlan?.name ?? 'No Plan';
     final expiryDate = DateTime.tryParse(sub.endDate);
-    final formattedDate = expiryDate != null ? DateFormat('MMM dd, yyyy').format(expiryDate) : 'Unknown';
+    final formattedDate = expiryDate != null
+        ? DateFormat('MMM dd, yyyy').format(expiryDate)
+        : 'Unknown';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isValid ? [Colors.purple.shade700, Colors.purple.shade400] : [Colors.red.shade700, Colors.red.shade400],
+          colors: isValid
+              ? [Colors.purple.shade700, Colors.purple.shade400]
+              : [Colors.red.shade700, Colors.red.shade400],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -1147,26 +1270,62 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               color: Colors.white.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
-            child: Icon(isValid ? Icons.star : Icons.error_outline, color: Colors.white, size: 32),
+            child: Icon(
+              isValid ? Icons.star : Icons.error_outline,
+              color: Colors.white,
+              size: 32,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(planName, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(
+                  planName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text('${sub.lastStudentCount} / ${sub.pricingPlan?.maxStudents ?? '∞'} ${l10n.studentsLabel}', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                Text(
+                  '${sub.lastStudentCount} / ${sub.pricingPlan?.maxStudents ?? '∞'} ${l10n.studentsLabel}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(isValid ? 'Valid until $formattedDate' : 'Expired on $formattedDate', style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12)),
+                Text(
+                  isValid
+                      ? 'Valid until $formattedDate'
+                      : 'Expired on $formattedDate',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
           ),
           if (isValid)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-              child: Text(l10n.active, style: TextStyle(color: Colors.purple.shade700, fontWeight: FontWeight.bold, fontSize: 12)),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                l10n.active,
+                style: TextStyle(
+                  color: Colors.purple.shade700,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
             ),
         ],
       ),
