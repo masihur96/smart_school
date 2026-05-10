@@ -184,8 +184,9 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                   children: [
                     Text(
                       _nameController.text,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
+                        color: Colors.white.withOpacity(0.85),
                         fontSize: 16,
                       ),
                     ),
