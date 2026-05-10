@@ -241,4 +241,48 @@ class ExamsNotifier extends ChangeNotifier {
       log('Error updating publish status: $e');
     }
   }
+
+  Future<bool> submitMarks({
+    required String examId,
+    required String teacherId,
+    required String schoolId,
+    required List<Map<String, dynamic>> marks,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final data = {
+        'examId': examId,
+        'teacherId': teacherId,
+        'schoolId': schoolId,
+        'marks': marks,
+      };
+
+      final response = await DataProvider().performRequest(
+        'POST',
+        APIPath.submitMarks,
+        data: data,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
+        log('Marks submitted successfully');
+        return true;
+      } else {
+        log('Error submitting marks: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      log('Error submitting marks: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }
