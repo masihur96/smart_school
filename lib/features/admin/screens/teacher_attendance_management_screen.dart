@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+
 import '../providers/attendance_management_provider.dart';
 
 class TeacherAttendanceManagementScreen extends StatefulWidget {
   const TeacherAttendanceManagementScreen({super.key});
 
   @override
-  State<TeacherAttendanceManagementScreen> createState() => _TeacherAttendanceManagementScreenState();
+  State<TeacherAttendanceManagementScreen> createState() =>
+      _TeacherAttendanceManagementScreenState();
 }
 
-class _TeacherAttendanceManagementScreenState extends State<TeacherAttendanceManagementScreen> {
+class _TeacherAttendanceManagementScreenState
+    extends State<TeacherAttendanceManagementScreen> {
   DateTime _selectedDate = DateTime.now();
   final TextEditingController _searchController = TextEditingController();
 
@@ -73,7 +76,9 @@ class _TeacherAttendanceManagementScreenState extends State<TeacherAttendanceMan
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 0,
+                          ),
                         ),
                         onChanged: (value) => _fetchData(),
                       ),
@@ -87,7 +92,10 @@ class _TeacherAttendanceManagementScreenState extends State<TeacherAttendanceMan
                           color: const Color(0xFF1E1B4B).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.calendar_today, color: Color(0xFF1E1B4B)),
+                        child: const Icon(
+                          Icons.calendar_today,
+                          color: Color(0xFF1E1B4B),
+                        ),
                       ),
                     ),
                   ],
@@ -98,12 +106,18 @@ class _TeacherAttendanceManagementScreenState extends State<TeacherAttendanceMan
                   children: [
                     Text(
                       "Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}",
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
                     ),
                     if (_searchController.text.isNotEmpty)
                       Text(
                         "Results for '${_searchController.text}'",
-                        style: const TextStyle(fontSize: 12, color: Colors.blue),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue,
+                        ),
                       ),
                   ],
                 ),
@@ -114,89 +128,137 @@ class _TeacherAttendanceManagementScreenState extends State<TeacherAttendanceMan
             child: provider.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : provider.error != null
-                    ? Center(child: Text("Error: ${provider.error}"))
-                    : provider.teacherAttendance.isEmpty
-                        ? const Center(child: Text("No records found"))
-                        : ListView.builder(
-                            itemCount: provider.teacherAttendance.length,
-                            padding: const EdgeInsets.all(16),
-                            itemBuilder: (context, index) {
-                              final record = provider.teacherAttendance[index];
-                              final status = record['status']?.toString().toLowerCase();
-                              final inTime = record['startTime'] ?? "--:--";
-                              final outTime = record['endTime'] ?? "--:--";
+                ? Center(child: Text("Error: ${provider.error}"))
+                : provider.teacherAttendance.isEmpty
+                ? const Center(child: Text("No records found"))
+                : ListView.builder(
+                    itemCount: provider.teacherAttendance.length,
+                    padding: const EdgeInsets.all(16),
+                    itemBuilder: (context, index) {
+                      final record = provider.teacherAttendance[index];
+                      final status = record['status']?.toString().toLowerCase();
+                      final inTime = record['startTime'] ?? "--:--";
+                      final outTime = record['endTime'] ?? "--:--";
 
-                              return Card(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Column(
-                                    children: [
-                                      ListTile(
-                                        contentPadding: EdgeInsets.zero,
-                                        leading: CircleAvatar(
-                                          backgroundColor: Colors.blue.withOpacity(0.1),
-                                          child: Text(
-                                            (record['teacherName'] ?? record['name'] ?? "?")[0].toUpperCase(),
-                                            style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                        title: Text(
-                                          record['teacherName'] ?? record['name'] ?? "Unknown Teacher",
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
-                                        ),
-                                        subtitle: Text(record['designation'] ?? "Teacher"),
-                                        trailing: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                          decoration: BoxDecoration(
-                                            color: _getStatusColor(status).withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(20),
-                                          ),
-                                          child: Text(
-                                            record['status']?.toString().toUpperCase() ?? "UNKNOWN",
-                                            style: TextStyle(
-                                              color: _getStatusColor(status),
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const Divider(),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                        children: [
-                                          _buildDetailItem(Icons.login, "In Time", inTime, Colors.green),
-                                          _buildDetailItem(Icons.logout, "Out Time", outTime, Colors.blue),
-                                          _buildDetailItem(Icons.location_on, "Location", 
-                                            record['lat'] != null ? "View" : "N/A", Colors.orange),
-                                        ],
-                                      ),
-                                    ],
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            children: [
+                              ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.blue.withOpacity(0.1),
+                                  child: Text(
+                                    (record['teacherName'] ??
+                                            record['name'] ??
+                                            "?")[0]
+                                        .toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              );
-                            },
+                                title: Text(
+                                  record['teacherName'] ??
+                                      record['name'] ??
+                                      "Unknown Teacher",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  record['designation'] ?? "Teacher",
+                                ),
+                                trailing: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _getStatusColor(
+                                      status,
+                                    ).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    record['status']
+                                            ?.toString()
+                                            .toUpperCase() ??
+                                        "UNKNOWN",
+                                    style: TextStyle(
+                                      color: _getStatusColor(status),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const Divider(),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  _buildDetailItem(
+                                    Icons.login,
+                                    "In Time",
+                                    inTime,
+                                    Colors.green,
+                                  ),
+                                  _buildDetailItem(
+                                    Icons.logout,
+                                    "Out Time",
+                                    outTime,
+                                    Colors.blue,
+                                  ),
+                                  _buildDetailItem(
+                                    Icons.location_on,
+                                    "Location",
+                                    record['lat'] != null ? "View" : "N/A",
+                                    Colors.orange,
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDetailItem(IconData icon, String label, String value, Color color) {
+  Widget _buildDetailItem(
+    IconData icon,
+    String label,
+    String value,
+    Color color,
+  ) {
     return Column(
       children: [
         Row(
           children: [
             Icon(icon, size: 14, color: color),
             const SizedBox(width: 4),
-            Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 10, color: Colors.grey),
+            ),
           ],
         ),
         const SizedBox(height: 2),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+        Text(
+          value,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+        ),
       ],
     );
   }
