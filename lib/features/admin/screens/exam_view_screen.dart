@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
+
 import '../../../models/school_models.dart';
 import '../../../models/student_model.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -33,9 +35,10 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
   void _fetchStudents() {
     if (_selectedAssignment != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<StudentsNotifier>().fetchStudentsBySection(
-              classId: _selectedAssignment!.classId,
-            ).then((_) {
+        context
+            .read<StudentsNotifier>()
+            .fetchStudentsBySection(classId: _selectedAssignment!.classId)
+            .then((_) {
               if (mounted) {
                 _populateExistingMarks();
               }
@@ -46,23 +49,33 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
 
   void _populateExistingMarks() {
     if (_selectedAssignment == null) return;
-    
+
     final students = context.read<StudentsNotifier>().students;
     if (students.isEmpty) return;
 
     setState(() {
       for (var student in students) {
         final existingResult = widget.exam.results.firstWhere(
-          (r) => r.studentId == student.userId && r.subjectId == _selectedAssignment!.subjectId,
-          orElse: () => Result(id: '', examId: '', studentId: '', marksObtained: -1, totalMarks: 100, remarks: ''),
+          (r) =>
+              r.studentId == student.userId &&
+              r.subjectId == _selectedAssignment!.subjectId,
+          orElse: () => Result(
+            id: '',
+            examId: '',
+            studentId: '',
+            marksObtained: -1,
+            totalMarks: 100,
+            remarks: '',
+          ),
         );
 
         if (existingResult.marksObtained != -1) {
-          _getMarksController(student.userId).text = 
-              existingResult.marksObtained == existingResult.marksObtained.toInt() 
-              ? existingResult.marksObtained.toInt().toString() 
+          _getMarksController(student.userId).text =
+              existingResult.marksObtained ==
+                  existingResult.marksObtained.toInt()
+              ? existingResult.marksObtained.toInt().toString()
               : existingResult.marksObtained.toString();
-          _getTotalMarksController(student.userId).text = 
+          _getTotalMarksController(student.userId).text =
               existingResult.totalMarks == existingResult.totalMarks.toInt()
               ? existingResult.totalMarks.toInt().toString()
               : existingResult.totalMarks.toString();
@@ -117,7 +130,6 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
     final students = studentNotifier.students;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
       body: CustomScrollView(
         slivers: [
           _buildAppBar(),
@@ -143,7 +155,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
       expandedHeight: 120,
       pinned: true,
       elevation: 0,
-      backgroundColor: Colors.indigo.shade800,
+      backgroundColor: AppColors.primaryAdmin,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
           widget.exam.name,
@@ -153,27 +165,18 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
             color: Colors.white,
           ),
         ),
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Colors.indigo.shade900, Colors.indigo.shade700],
-            ),
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                right: -20,
-                top: -20,
-                child: Icon(
-                  Icons.assignment_outlined,
-                  size: 150,
-                  color: Colors.white.withOpacity(0.1),
-                ),
+        background: Stack(
+          children: [
+            Positioned(
+              right: -20,
+              top: -20,
+              child: Icon(
+                Icons.assignment_outlined,
+                size: 150,
+                color: Colors.white.withOpacity(0.1),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       foregroundColor: Colors.white,
@@ -203,19 +206,24 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
               _buildInfoItem(
                 Icons.calendar_month_outlined,
                 'Start Date',
-                DateFormat('MMM dd, yyyy').format(widget.exam.startDate ?? DateTime.now()),
+                DateFormat(
+                  'MMM dd, yyyy',
+                ).format(widget.exam.startDate ?? DateTime.now()),
                 Colors.blue,
               ),
               const Spacer(),
               _buildInfoItem(
                 Icons.event_available_outlined,
                 'End Date',
-                DateFormat('MMM dd, yyyy').format(widget.exam.endDate ?? DateTime.now()),
+                DateFormat(
+                  'MMM dd, yyyy',
+                ).format(widget.exam.endDate ?? DateTime.now()),
                 Colors.orange,
               ),
             ],
           ),
-          if (widget.exam.description != null && widget.exam.description!.isNotEmpty) ...[
+          if (widget.exam.description != null &&
+              widget.exam.description!.isNotEmpty) ...[
             const Divider(height: 24),
             const Text(
               'Description',
@@ -240,7 +248,12 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
     );
   }
 
-  Widget _buildInfoItem(IconData icon, String label, String value, Color color) {
+  Widget _buildInfoItem(
+    IconData icon,
+    String label,
+    String value,
+    Color color,
+  ) {
     return Row(
       children: [
         Container(
@@ -257,7 +270,11 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
           children: [
             Text(
               label,
-              style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),
             ),
             Text(
               value,
@@ -284,7 +301,11 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
               ),
               Text(
                 '${widget.exam.assignments.length} Total',
-                style: TextStyle(color: Colors.indigo.shade700, fontSize: 12, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: AppColors.primaryAdmin,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -307,22 +328,25 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
                 },
                 child: Container(
                   width: 160,
-                  margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 8,
+                  ),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.indigo.shade600 : Colors.white,
+                    color: isSelected ? AppColors.primaryAdmin : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: isSelected 
-                            ? Colors.indigo.withOpacity(0.3) 
+                        color: isSelected
+                            ? Colors.indigo.withOpacity(0.3)
                             : Colors.black.withOpacity(0.03),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
                     ],
-                    border: isSelected 
-                        ? null 
+                    border: isSelected
+                        ? null
                         : Border.all(color: Colors.grey.shade200),
                   ),
                   child: Column(
@@ -343,7 +367,9 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
                       Text(
                         'Class ${assignment.className}',
                         style: TextStyle(
-                          color: isSelected ? Colors.white70 : Colors.grey.shade600,
+                          color: isSelected
+                              ? Colors.white70
+                              : Colors.grey.shade600,
                           fontSize: 12,
                         ),
                       ),
@@ -353,13 +379,17 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
                           Icon(
                             Icons.calendar_today,
                             size: 10,
-                            color: isSelected ? Colors.white60 : Colors.grey.shade400,
+                            color: isSelected
+                                ? Colors.white60
+                                : Colors.grey.shade400,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             DateFormat('MMM dd').format(assignment.date),
                             style: TextStyle(
-                              color: isSelected ? Colors.white60 : Colors.grey.shade400,
+                              color: isSelected
+                                  ? Colors.white60
+                                  : Colors.grey.shade400,
                               fontSize: 10,
                             ),
                           ),
@@ -386,7 +416,10 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
     );
   }
 
-  Widget _buildStudentList(StudentsNotifier studentNotifier, List<Student> students) {
+  Widget _buildStudentList(
+    StudentsNotifier studentNotifier,
+    List<Student> students,
+  ) {
     if (studentNotifier.isLoading) {
       return const SliverFillRemaining(
         child: Center(child: CircularProgressIndicator()),
@@ -399,7 +432,11 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.person_off_outlined, size: 64, color: Colors.grey.shade300),
+              Icon(
+                Icons.person_off_outlined,
+                size: 64,
+                color: Colors.grey.shade300,
+              ),
               const SizedBox(height: 16),
               Text(
                 'No students found',
@@ -414,116 +451,122 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final student = students[index];
-            return Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final student = students[index];
+          return Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ExpansionTile(
+              tilePadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
               ),
-              child: ExpansionTile(
-                tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                leading: CircleAvatar(
-                  backgroundColor: Colors.indigo.shade50,
-                  child: Text(
-                    student.user?.name?[0] ?? 'S',
-                    style: TextStyle(
-                      color: Colors.indigo.shade800,
-                      fontWeight: FontWeight.bold,
-                    ),
+              leading: CircleAvatar(
+                backgroundColor: Colors.indigo.shade50,
+                child: Text(
+                  student.user?.name[0] ?? 'S',
+                  style: TextStyle(
+                    color: AppColors.primaryAdmin,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                title: Text(
-                  student.user?.name ?? 'N/A',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              ),
+              title: Text(
+                student.user?.name ?? 'N/A',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
                 ),
-                subtitle: Text(
-                  'Roll: ${student.rollId}',
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                ),
-                trailing: _getMarksController(student.userId).text.isNotEmpty
-                    ? Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.green.shade50,
-                          borderRadius: BorderRadius.circular(8),
+              ),
+              subtitle: Text(
+                'Roll: ${student.rollId}',
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              ),
+              trailing: _getMarksController(student.userId).text.isNotEmpty
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${_getMarksController(student.userId).text} / ${_getTotalMarksController(student.userId).text}',
+                        style: TextStyle(
+                          color: Colors.green.shade700,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
                         ),
-                        child: Text(
-                          '${_getMarksController(student.userId).text} / ${_getTotalMarksController(student.userId).text}',
-                          style: TextStyle(
-                            color: Colors.green.shade700,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                      ),
+                    )
+                  : null,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                  child: Column(
+                    children: [
+                      const Divider(),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildMarkField(
+                              'Marks Obtained',
+                              _getMarksController(student.userId),
+                              TextInputType.numberWithOptions(decimal: true),
+                              Icons.grade_outlined,
+                              onChanged: (val) => setState(() {}),
+                            ),
                           ),
-                        ),
-                      )
-                    : null,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                    child: Column(
-                      children: [
-                        const Divider(),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildMarkField(
-                                'Marks Obtained',
-                                _getMarksController(student.userId),
-                                TextInputType.numberWithOptions(decimal: true),
-                                Icons.grade_outlined,
-                                onChanged: (val) => setState(() {}),
-                              ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildMarkField(
+                              'Total Marks',
+                              _getTotalMarksController(student.userId),
+                              TextInputType.number,
+                              Icons.summarize_outlined,
+                              onChanged: (val) => setState(() {}),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _buildMarkField(
-                                'Total Marks',
-                                _getTotalMarksController(student.userId),
-                                TextInputType.number,
-                                Icons.summarize_outlined,
-                                onChanged: (val) => setState(() {}),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _buildMarkField(
-                          'Remarks',
-                          _getRemarksController(student.userId),
-                          TextInputType.text,
-                          Icons.note_alt_outlined,
-                        ),
-                      ],
-                    ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      _buildMarkField(
+                        'Remarks',
+                        _getRemarksController(student.userId),
+                        TextInputType.text,
+                        Icons.note_alt_outlined,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          },
-          childCount: students.length,
-        ),
+                ),
+              ],
+            ),
+          );
+        }, childCount: students.length),
       ),
     );
   }
 
   Widget _buildMarkField(
-    String label, 
-    TextEditingController controller, 
-    TextInputType type, 
-    IconData icon,
-    {Function(String)? onChanged}
-  ) {
+    String label,
+    TextEditingController controller,
+    TextInputType type,
+    IconData icon, {
+    Function(String)? onChanged,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -543,7 +586,10 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
           decoration: InputDecoration(
             isDense: true,
             prefixIcon: Icon(icon, size: 18, color: Colors.indigo.shade300),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: Colors.grey.shade200),
@@ -583,7 +629,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
               ? null
               : () => _submitMarks(context, students),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.indigo.shade700,
+            backgroundColor: AppColors.primaryAdmin,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 18),
             shape: RoundedRectangleBorder(
@@ -607,7 +653,10 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
                     SizedBox(width: 8),
                     Text(
                       'Save All Marks',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -623,9 +672,9 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
     final schoolId = authNotifier.user?.schoolId;
 
     if (schoolId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('School ID not found')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('School ID not found')));
       return;
     }
 
@@ -644,24 +693,26 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
         'marksObtained': marksObtained,
         'totalMarks':
             double.tryParse(_getTotalMarksController(student.userId).text) ??
-                100.0,
+            100.0,
         'remarks': _getRemarksController(student.userId).text,
       });
     }
 
     if (marksList.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter marks for at least one student')),
+        const SnackBar(
+          content: Text('Please enter marks for at least one student'),
+        ),
       );
       return;
     }
 
     final success = await context.read<ExamsNotifier>().submitMarks(
-          examId: widget.exam.id,
-          teacherId: _selectedAssignment!.examinerId,
-          schoolId: schoolId,
-          marks: marksList,
-        );
+      examId: widget.exam.id,
+      teacherId: _selectedAssignment!.examinerId,
+      schoolId: schoolId,
+      marks: marksList,
+    );
 
     if (context.mounted) {
       if (success) {
