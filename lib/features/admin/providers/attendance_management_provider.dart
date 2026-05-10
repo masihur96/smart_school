@@ -1,5 +1,7 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
+
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
 import '../../../core/utils/storage_service.dart';
@@ -22,22 +24,30 @@ class AttendanceManagementProvider extends ChangeNotifier {
 
     try {
       final token = await StorageService.getToken();
-      final dateStr = date != null ? "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}" : null;
+      final dateStr = date != null
+          ? "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}"
+          : null;
 
       final query = <String, dynamic>{};
       if (name != null && name.isNotEmpty) query['name'] = name;
       if (dateStr != null) query['date'] = dateStr;
 
+      print("${query}");
+
       final response = await DataProvider().performRequest(
         'GET',
-        APIPath.attendanceOverview, // Using overview endpoint for student attendance report
+        APIPath
+            .attendanceOverview, // Using overview endpoint for student attendance report
         query: query,
         header: {'Authorization': 'Bearer $token'},
       );
+      print("${response!.data}");
 
       if (response != null && response.statusCode == 200) {
         // The API structure for admin attendance overview might vary, assuming a 'data' array
-        _studentAttendance = response.data['data'] is List ? response.data['data'] : [];
+        _studentAttendance = response.data['data'] is List
+            ? response.data['data']
+            : [];
       } else {
         _error = "Failed to fetch student attendance";
       }
@@ -57,7 +67,9 @@ class AttendanceManagementProvider extends ChangeNotifier {
 
     try {
       final token = await StorageService.getToken();
-      final dateStr = date != null ? "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}" : null;
+      final dateStr = date != null
+          ? "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}"
+          : null;
 
       final query = <String, dynamic>{};
       if (name != null && name.isNotEmpty) query['name'] = name;
@@ -71,7 +83,9 @@ class AttendanceManagementProvider extends ChangeNotifier {
       );
 
       if (response != null && response.statusCode == 200) {
-        _teacherAttendance = response.data['data'] is List ? response.data['data'] : [];
+        _teacherAttendance = response.data['data'] is List
+            ? response.data['data']
+            : [];
       } else {
         _error = "Failed to fetch teacher attendance";
       }

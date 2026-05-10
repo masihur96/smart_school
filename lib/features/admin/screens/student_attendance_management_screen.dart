@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+
 import '../providers/attendance_management_provider.dart';
 
 class StudentAttendanceManagementScreen extends StatefulWidget {
   const StudentAttendanceManagementScreen({super.key});
 
   @override
-  State<StudentAttendanceManagementScreen> createState() => _StudentAttendanceManagementScreenState();
+  State<StudentAttendanceManagementScreen> createState() =>
+      _StudentAttendanceManagementScreenState();
 }
 
-class _StudentAttendanceManagementScreenState extends State<StudentAttendanceManagementScreen> {
+class _StudentAttendanceManagementScreenState
+    extends State<StudentAttendanceManagementScreen> {
   DateTime _selectedDate = DateTime.now();
   final TextEditingController _searchController = TextEditingController();
 
@@ -74,7 +77,9 @@ class _StudentAttendanceManagementScreenState extends State<StudentAttendanceMan
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 0,
+                          ),
                         ),
                         onChanged: (value) => _fetchData(),
                       ),
@@ -88,7 +93,10 @@ class _StudentAttendanceManagementScreenState extends State<StudentAttendanceMan
                           color: const Color(0xFF1E1B4B).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.calendar_today, color: Color(0xFF1E1B4B)),
+                        child: const Icon(
+                          Icons.calendar_today,
+                          color: Color(0xFF1E1B4B),
+                        ),
                       ),
                     ),
                   ],
@@ -99,12 +107,18 @@ class _StudentAttendanceManagementScreenState extends State<StudentAttendanceMan
                   children: [
                     Text(
                       "Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}",
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
                     ),
                     if (_searchController.text.isNotEmpty)
-                       Text(
+                      Text(
                         "Results for '${_searchController.text}'",
-                        style: const TextStyle(fontSize: 12, color: Colors.blue),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue,
+                        ),
                       ),
                   ],
                 ),
@@ -115,50 +129,70 @@ class _StudentAttendanceManagementScreenState extends State<StudentAttendanceMan
             child: provider.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : provider.error != null
-                    ? Center(child: Text("Error: ${provider.error}"))
-                    : provider.studentAttendance.isEmpty
-                        ? const Center(child: Text("No records found"))
-                        : ListView.builder(
-                            itemCount: provider.studentAttendance.length,
-                            padding: const EdgeInsets.all(16),
-                            itemBuilder: (context, index) {
-                              final record = provider.studentAttendance[index];
-                              // Assuming record structure from the API
-                              return Card(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                child: ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundColor: Colors.purple.withOpacity(0.1),
-                                    child: Text(
-                                      (record['studentName'] ?? record['name'] ?? "?")[0].toUpperCase(),
-                                      style: const TextStyle(color: Colors.purple, fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  title: Text(
-                                    record['studentName'] ?? record['name'] ?? "Unknown Student",
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  subtitle: Text("Class: ${record['className'] ?? 'N/A'} - Section: ${record['sectionName'] ?? 'N/A'}"),
-                                  trailing: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: _getStatusColor(record['status']?.toString().toLowerCase()).withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      record['status']?.toString().toUpperCase() ?? "UNKNOWN",
-                                      style: TextStyle(
-                                        color: _getStatusColor(record['status']?.toString().toLowerCase()),
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
+                ? Center(child: Text("Error: ${provider.error}"))
+                : provider.studentAttendance.isEmpty
+                ? const Center(child: Text("No records found"))
+                : ListView.builder(
+                    itemCount: provider.studentAttendance.length,
+                    padding: const EdgeInsets.all(16),
+                    itemBuilder: (context, index) {
+                      final record = provider.studentAttendance[index];
+                      // Assuming record structure from the API
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.purple.withOpacity(0.1),
+                            child: Text(
+                              (record['studentName'] ??
+                                      record['name'] ??
+                                      "?")[0]
+                                  .toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.purple,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
+                          title: Text(
+                            record['studentName'] ??
+                                record['name'] ??
+                                "Unknown Student",
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                            "Class: ${record['className'] ?? 'N/A'} - Section: ${record['sectionName'] ?? 'N/A'}",
+                          ),
+                          trailing: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _getStatusColor(
+                                record['status']?.toString().toLowerCase(),
+                              ).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              record['status']?.toString().toUpperCase() ??
+                                  "UNKNOWN",
+                              style: TextStyle(
+                                color: _getStatusColor(
+                                  record['status']?.toString().toLowerCase(),
+                                ),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
