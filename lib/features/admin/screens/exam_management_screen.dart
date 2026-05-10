@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/models/teacher_model.dart';
 
 import '../../../models/school_models.dart' hide Teacher;
@@ -48,7 +49,12 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
     return Scaffold(
       appBar: widget.hideAppBar
           ? null
-          : AppBar(title: const Text('Exam Management'), elevation: 0),
+          : AppBar(
+              title: const Text('Exam Management'),
+              elevation: 0,
+              backgroundColor: AppColors.primaryAdmin,
+              foregroundColor: AppColors.white,
+            ),
       body: Column(
         children: [
           // Filter Section
