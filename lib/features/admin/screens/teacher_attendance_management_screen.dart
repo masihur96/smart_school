@@ -154,7 +154,8 @@ class _TeacherAttendanceManagementScreenState
                                 leading: CircleAvatar(
                                   backgroundColor: Colors.blue.withOpacity(0.1),
                                   child: Text(
-                                    (record['teacherName'] ??
+                                    (record['teacher']?['name'] ??
+                                            record['teacherName'] ??
                                             record['name'] ??
                                             "?")[0]
                                         .toUpperCase(),
@@ -165,7 +166,8 @@ class _TeacherAttendanceManagementScreenState
                                   ),
                                 ),
                                 title: Text(
-                                  record['teacherName'] ??
+                                  record['teacher']?['name'] ??
+                                      record['teacherName'] ??
                                       record['name'] ??
                                       "Unknown Teacher",
                                   style: const TextStyle(
@@ -173,7 +175,9 @@ class _TeacherAttendanceManagementScreenState
                                   ),
                                 ),
                                 subtitle: Text(
-                                  record['designation'] ?? "Teacher",
+                                  record['teacher']?['designation'] ??
+                                      record['designation'] ??
+                                      "Teacher",
                                 ),
                                 trailing: Container(
                                   padding: const EdgeInsets.symmetric(
@@ -222,6 +226,16 @@ class _TeacherAttendanceManagementScreenState
                                     record['lat'] != null ? "View" : "N/A",
                                     Colors.orange,
                                   ),
+                                  if (record['distanceFromCenter'] != null)
+                                    _buildDetailItem(
+                                      Icons.straighten,
+                                      "Distance",
+                                      (record['distanceFromCenter'] as num) >
+                                              1000
+                                          ? "${((record['distanceFromCenter'] as num) / 1000).toStringAsFixed(2)}km"
+                                          : "${(record['distanceFromCenter'] as num).toStringAsFixed(1)}m",
+                                      Colors.purple,
+                                    ),
                                 ],
                               ),
                             ],
