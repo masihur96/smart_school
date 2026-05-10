@@ -611,6 +611,7 @@ class Exam {
   final DateTime? startDate;
   final DateTime? endDate;
   final List<ExamAssignment> assignments;
+  final List<Result> results;
   final bool isPublished;
 
   Exam({
@@ -620,6 +621,7 @@ class Exam {
     this.startDate,
     this.endDate,
     this.assignments = const [],
+    this.results = const [],
     this.isPublished = false,
     this.deletedAt,
   });
@@ -652,6 +654,13 @@ class Exam {
           .toList();
     }
 
+    List<Result> results = [];
+    if (json['results'] != null && json['results'] is List) {
+      results = (json['results'] as List)
+          .map((r) => Result.fromJson(r))
+          .toList();
+    }
+
     return Exam(
       id: id,
       name: name,
@@ -659,6 +668,7 @@ class Exam {
       startDate: startDate,
       endDate: endDate,
       assignments: assignments,
+      results: results,
       isPublished: (json['isPublished'] ?? json['is_published']) ?? false,
       deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
     );
@@ -679,6 +689,7 @@ class Result {
   final String id;
   final String examId;
   final String studentId;
+  final String? subjectId;
   final double marksObtained;
   final double totalMarks;
   final String remarks;
@@ -690,6 +701,7 @@ class Result {
     required this.id,
     required this.examId,
     required this.studentId,
+    this.subjectId,
     required this.marksObtained,
     required this.totalMarks,
     required this.remarks,
@@ -721,6 +733,7 @@ class Result {
       id: json['id'] ?? '',
       examId: json['examId'] ?? '',
       studentId: json['studentId'] ?? '',
+      subjectId: json['subjectId'],
       marksObtained: parsedMarksObtained,
       totalMarks: parsedTotalMarks,
       remarks: json['remarks'] ?? '',
