@@ -67,8 +67,10 @@ class _SetupScreenState extends State<SetupScreen>
     return PreferredSize(
       preferredSize: const Size.fromHeight(120),
       child: Container(
-        decoration:  BoxDecoration(
-         color:  user?.role.name.toLowerCase()=="admin"?AppColors.primaryAdmin:AppColors.primary,
+        decoration: BoxDecoration(
+          color: user?.role.name.toLowerCase() == "admin"
+              ? AppColors.primaryAdmin
+              : AppColors.primary,
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
           boxShadow: [
             BoxShadow(
@@ -494,11 +496,7 @@ class _SubjectCard extends StatelessWidget {
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(
-                    Icons.book_outlined,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  child: const Icon(Icons.book_outlined, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
