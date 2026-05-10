@@ -8,6 +8,7 @@ import '../providers/exam_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
 import 'add_edit_exam_screen.dart';
+import 'exam_view_screen.dart';
 
 class ExamManagementScreen extends StatefulWidget {
   final bool hideAppBar;
@@ -224,7 +225,13 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                                     icon: const Icon(Icons.more_vert),
                                     onSelected: (value) async {
                                       if (value == 'view') {
-                                        _showExamDetails(context, exam);
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                ExamViewScreen(exam: exam),
+                                          ),
+                                        );
                                       } else if (value == 'edit') {
                                         Navigator.push(
                                           context,

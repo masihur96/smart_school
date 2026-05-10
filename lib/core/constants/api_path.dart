@@ -93,4 +93,6 @@ class APIPath {
       "$baseUrl/student/exam-syllabus/$id";
   static String studentExamResults(String id) =>
       "$baseUrl/student/exam-results/$id";
+
+  static String submitMarks = "$baseUrl/admin/marks";
 }
