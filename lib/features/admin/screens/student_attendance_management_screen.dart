@@ -63,7 +63,7 @@ class _StudentAttendanceManagementScreenState
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            color: Colors.white,
+
             child: Column(
               children: [
                 Row(
@@ -93,10 +93,7 @@ class _StudentAttendanceManagementScreenState
                           color: const Color(0xFF1E1B4B).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(
-                          Icons.calendar_today,
-                          color: Color(0xFF1E1B4B),
-                        ),
+                        child: const Icon(Icons.calendar_today),
                       ),
                     ),
                   ],
