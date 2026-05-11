@@ -273,6 +273,7 @@ class Homework {
   final ClassRoom? classInfo;
   final Subject? subjectInfo;
   final Section? sectionInfo;
+  final Teacher? teacherInfo;
 
   Homework({
     required this.id,
@@ -289,6 +290,7 @@ class Homework {
     this.classInfo,
     this.subjectInfo,
     this.sectionInfo,
+    this.teacherInfo,
     this.deletedAt,
   });
 
@@ -309,10 +311,29 @@ class Homework {
     studentHomeworks: (json['studentHomeworks'] as List? ?? [])
         .map((e) => StudentHomework.fromJson(e))
         .toList(),
-    classInfo: json['classInfo'] != null ? ClassRoom.fromJson(json['classInfo']) : null,
-    subjectInfo: json['subjectInfo'] != null ? Subject.fromJson(json['subjectInfo']) : null,
-    sectionInfo: json['sectionInfo'] != null ? Section.fromJson(json['sectionInfo']) : null,
-    deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
+    classInfo: json['classInfo'] != null
+        ? ClassRoom.fromJson(json['classInfo'])
+        : (json['classEntity'] != null
+            ? ClassRoom.fromJson(json['classEntity'])
+            : null),
+    subjectInfo: json['subjectInfo'] != null
+        ? Subject.fromJson(json['subjectInfo'])
+        : (json['subjectEntity'] != null
+            ? Subject.fromJson(json['subjectEntity'])
+            : null),
+    sectionInfo: json['sectionInfo'] != null
+        ? Section.fromJson(json['sectionInfo'])
+        : (json['sectionEntity'] != null
+            ? Section.fromJson(json['sectionEntity'])
+            : null),
+    teacherInfo: json['teacherInfo'] != null
+        ? Teacher.fromJson(json['teacherInfo'])
+        : (json['teacherEntity'] != null
+            ? Teacher.fromJson(json['teacherEntity'])
+            : null),
+    deletedAt: json['deletedAt'] != null
+        ? DateTime.tryParse(json['deletedAt'].toString())
+        : null,
   );
 
   Map<String, dynamic> toJson() => {

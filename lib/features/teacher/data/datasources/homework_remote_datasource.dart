@@ -141,6 +141,49 @@ class HomeworkRemoteDataSource {
     }
   }
 
+  Future<List<Homework>> fetchAdminHomework({
+    String? classId,
+    String? sectionId,
+    String? subjectId,
+    String? date,
+    String? schoolId,
+  }) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    final query = <String, dynamic>{};
+    if (classId != null && classId.isNotEmpty) query['classId'] = classId;
+    if (sectionId != null && sectionId.isNotEmpty)
+      query['sectionId'] = sectionId;
+    if (subjectId != null && subjectId.isNotEmpty)
+      query['subjectId'] = subjectId;
+    if (date != null && date.isNotEmpty) query['date'] = date;
+    if (schoolId != null && schoolId.isNotEmpty) query['schoolId'] = schoolId;
+
+    log('Fetch Admin Homework query: $query');
+
+    final response = await _dataProvider.performRequest(
+      'GET',
+      APIPath.adminHomework,
+      query: query,
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response == null || response.statusCode == null) {
+      throw Exception('No response from server');
+    }
+
+    if (response.statusCode! >= 200 && response.statusCode! < 300) {
+      final dynamic rawData = response.data;
+      final List data = rawData is List
+          ? rawData
+          : (rawData is Map ? (rawData['data'] ?? []) : []);
+      return data.map((json) => Homework.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch admin homework');
+    }
+  }
+
   Future<Homework> fetchHomeworkDetails(String id) async {
     final token = await StorageService.getToken();
     if (token == null) throw Exception('No authentication token found');
