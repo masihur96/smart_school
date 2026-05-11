@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
 
@@ -99,11 +98,7 @@ class AuthNotifier extends ChangeNotifier {
         }
 
         // Register FCM Token
-        final fcmToken = await FirebaseMessaging.instance.getToken();
-        if (fcmToken != null) {
-          await NotificationService().registerToken(fcmToken);
-          await NotificationService().subscribeToUserTopics(_user!);
-        }
+        await NotificationService().subscribeToUserTopics(_user!);
       } else {
         _user = null;
       }
@@ -160,11 +155,7 @@ class AuthNotifier extends ChangeNotifier {
       }
 
       // Register FCM Token
-      final fcmToken = await FirebaseMessaging.instance.getToken();
-      if (fcmToken != null) {
-        await NotificationService().registerToken(fcmToken);
-        await NotificationService().subscribeToUserTopics(_user!);
-      }
+      await NotificationService().subscribeToUserTopics(_user!);
 
       _isLoading = false;
       notifyListeners();
@@ -359,10 +350,7 @@ class AuthNotifier extends ChangeNotifier {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
-        data: {
-          'name': name,
-          'phone': phone,
-        },
+        data: {'name': name, 'phone': phone},
       );
 
       if (response != null && response.statusCode == 200) {
