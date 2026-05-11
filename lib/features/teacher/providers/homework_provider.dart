@@ -147,6 +147,40 @@ class HomeworkNotifier extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateAdminHomework(Homework homework) async {
+    if (_homeworkRepository == null) {
+      _updateLocal(homework);
+      return true;
+    }
+    try {
+      final success = await _homeworkRepository.updateAdminHomework(homework);
+      if (success) {
+        _updateLocal(homework);
+      }
+      return success;
+    } catch (e) {
+      log('Error updating admin homework: $e');
+      rethrow;
+    }
+  }
+
+  Future<bool> removeAdminHomework(String id) async {
+    if (_homeworkRepository == null) {
+      _removeLocal(id);
+      return true;
+    }
+    try {
+      final success = await _homeworkRepository.deleteAdminHomework(id);
+      if (success) {
+        _removeLocal(id);
+      }
+      return success;
+    } catch (e) {
+      log('Error deleting admin homework: $e');
+      rethrow;
+    }
+  }
+
   Future<void> fetchHomework({
     String? classId,
     String? sectionId,
