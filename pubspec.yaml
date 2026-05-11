@@ -55,6 +55,7 @@ dependencies:
   marquee: ^2.3.0
   uuid: ^4.3.3
   geocoding: ^4.0.0
+  flutter_local_notifications: ^21.0.0
 
 
 dev_dependencies:
