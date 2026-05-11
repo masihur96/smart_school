@@ -161,6 +161,41 @@ class HomeworkNotifier extends ChangeNotifier {
     }
   }
 
+  Future<void> fetchAdminHomework({
+    String? classId,
+    String? sectionId,
+    String? subjectId,
+    String? date,
+    String? schoolId,
+  }) async {
+    if (_homeworkRepository == null) return;
+
+    _isLoading = true;
+    notifyListeners();
+
+    log(
+      'fetchAdminHomework: classId=$classId, sectionId=$sectionId, subjectId=$subjectId, date=$date, schoolId=$schoolId',
+    );
+    try {
+      final results = await _homeworkRepository.fetchAdminHomework(
+        classId: classId,
+        sectionId: sectionId,
+        subjectId: subjectId,
+        date: date,
+        schoolId: schoolId,
+      );
+
+      log('fetchAdminHomework results count: ${results.length}');
+      _homeworkRecords = results.where((h) => !h.isDeleted).toList();
+    } catch (e) {
+      log('Error fetching admin homework: $e');
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Homework? _selectedHomework;
   Homework? get selectedHomework => _selectedHomework;
 

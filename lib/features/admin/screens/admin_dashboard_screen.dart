@@ -19,6 +19,7 @@ import '../providers/notice_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
 import '../providers/teacher_provider.dart';
+import 'admin_homework_management_screen.dart';
 import 'exam_management_screen.dart';
 import 'notice_management_screen.dart';
 import 'student_attendance_management_screen.dart';
@@ -239,7 +240,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                const HomeworkManagementScreen(),
+                                const AdminHomeworkManagementScreen(),
                           ),
                         );
                       },
