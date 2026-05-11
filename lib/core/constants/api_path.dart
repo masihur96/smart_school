@@ -30,6 +30,8 @@ class APIPath {
   static String selfAttendance = "$baseUrl/teacher/self-attendance";
   static String adminTeacherAttendance = "$baseUrl/admin/teacher-attendance";
   static String adminHomework = "$baseUrl/admin/homework";
+  static String updateAdminHomework(String id) => "$baseUrl/admin/homework/$id";
+  static String deleteAdminHomework(String id) => "$baseUrl/admin/homework/$id";
   static String submitHomeWork = "$baseUrl/teacher/homework";
   static String studentAttendance = "$baseUrl/student/attendance";
   static String studentRoutine = "$baseUrl/student/routine";

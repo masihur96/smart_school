@@ -141,7 +141,11 @@ class _AdminHomeworkManagementScreenState
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final hw = homeworkList[index];
-                        return _HomeworkCard(homework: hw);
+                        return _HomeworkCard(
+                          homework: hw,
+                          onDelete: () => _deleteHomework(hw.id),
+                          onEdit: () => _editHomework(hw),
+                        );
                       },
                     ),
             ),
@@ -400,12 +404,74 @@ class _AdminHomeworkManagementScreenState
       builder: (_) => const _AddHomeworkSheet(),
     );
   }
+
+  Future<void> _deleteHomework(String id) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Delete Homework'),
+            content: const Text('Are you sure you want to delete this homework?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Delete', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed == true) {
+      setState(() => _isLoading = true);
+      try {
+        final success = await context.read<HomeworkNotifier>().removeAdminHomework(
+          id,
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                success ? 'Homework deleted' : 'Failed to delete homework',
+              ),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
+        }
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  void _editHomework(Homework homework) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _AddHomeworkSheet(homework: homework),
+    );
+  }
 }
 
 class _HomeworkCard extends StatelessWidget {
   final Homework homework;
+  final VoidCallback onDelete;
+  final VoidCallback onEdit;
 
-  const _HomeworkCard({required this.homework});
+  const _HomeworkCard({
+    required this.homework,
+    required this.onDelete,
+    required this.onEdit,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -478,6 +544,45 @@ class _HomeworkCard extends StatelessWidget {
                   ),
                 ),
                 _buildStatusChip(isPast),
+                const SizedBox(width: 4),
+                PopupMenuButton<String>(
+                  padding: EdgeInsets.zero,
+                  icon: Icon(Icons.more_vert, color: Colors.grey.shade600),
+                  onSelected: (val) {
+                    if (val == 'edit') {
+                      onEdit();
+                    } else if (val == 'delete') {
+                      onDelete();
+                    }
+                  },
+                  itemBuilder:
+                      (ctx) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit_outlined, size: 20),
+                              SizedBox(width: 8),
+                              Text('Edit'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.delete_outline,
+                                size: 20,
+                                color: Colors.red,
+                              ),
+                              SizedBox(width: 8),
+                              Text('Delete', style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                      ],
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -582,7 +687,8 @@ class _HomeworkCard extends StatelessWidget {
 }
 
 class _AddHomeworkSheet extends StatefulWidget {
-  const _AddHomeworkSheet({super.key});
+  final Homework? homework;
+  const _AddHomeworkSheet({super.key, this.homework});
 
   @override
   State<_AddHomeworkSheet> createState() => _AddHomeworkSheetState();
@@ -597,6 +703,21 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
   String? _selectedSectionId;
   String? _selectedSubjectId;
   String? _selectedTeacherId;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.homework != null) {
+      _titleController.text = widget.homework!.title;
+      _descController.text = widget.homework!.description;
+      _dueDate = widget.homework!.dueDate;
+      _selectedClassId = widget.homework!.classId;
+      _selectedSectionId =
+          widget.homework!.sectionId.isEmpty ? null : widget.homework!.sectionId;
+      _selectedSubjectId = widget.homework!.subjectId;
+      _selectedTeacherId = widget.homework!.teacherId;
+    }
+  }
 
   @override
   void dispose() {
@@ -638,7 +759,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     if (user == null) return;
 
     final homework = Homework(
-      id: '',
+      id: widget.homework?.id ?? '',
       title: _titleController.text.trim(),
       description: _descController.text.trim(),
       classId: _selectedClassId!,
@@ -647,18 +768,24 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
       teacherId: _selectedTeacherId!,
       schoolId: user.schoolId ?? '',
       dueDate: _dueDate,
-      createdAt: DateTime.now(),
+      createdAt: widget.homework?.createdAt ?? DateTime.now(),
     );
 
-    final success = await context.read<HomeworkNotifier>().submitAdminHomework(
-      homework,
-    );
+    final success = widget.homework == null
+        ? await context.read<HomeworkNotifier>().submitAdminHomework(homework)
+        : await context.read<HomeworkNotifier>().updateAdminHomework(homework);
 
     if (mounted) {
       if (success) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Homework assigned successfully!')),
+          SnackBar(
+            content: Text(
+              widget.homework == null
+                  ? 'Homework assigned successfully!'
+                  : 'Homework updated successfully!',
+            ),
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -710,9 +837,11 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                     ),
                   ),
                 ),
-                const Text(
-                  'Assign New Homework',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Text(
+                  widget.homework == null
+                      ? 'Assign New Homework'
+                      : 'Update Homework',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
                 DropdownButtonFormField<String>(
@@ -724,7 +853,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                             DropdownMenuItem(value: c.id, child: Text(c.name)),
                       )
                       .toList(),
-                  onChanged: (val) => setState(() {
+                  onChanged: widget.homework != null ? null : (val) => setState(() {
                     _selectedClassId = val;
                     _selectedSectionId = null;
                     _selectedSubjectId = null;
@@ -741,7 +870,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                             DropdownMenuItem(value: s.id, child: Text(s.name)),
                       )
                       .toList(),
-                  onChanged: (val) => setState(() => _selectedSectionId = val),
+                  onChanged: widget.homework != null ? null : (val) => setState(() => _selectedSectionId = val),
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
@@ -753,7 +882,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                             DropdownMenuItem(value: s.id, child: Text(s.name)),
                       )
                       .toList(),
-                  onChanged: (val) => setState(() => _selectedSubjectId = val),
+                  onChanged: widget.homework != null ? null : (val) => setState(() => _selectedSubjectId = val),
                   validator: (v) => v == null ? 'Subject is required' : null,
                 ),
                 const SizedBox(height: 16),
@@ -768,7 +897,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                         ),
                       )
                       .toList(),
-                  onChanged: (val) => setState(() => _selectedTeacherId = val),
+                  onChanged: widget.homework != null ? null : (val) => setState(() => _selectedTeacherId = val),
                   validator: (v) => v == null ? 'Teacher is required' : null,
                 ),
                 const SizedBox(height: 16),

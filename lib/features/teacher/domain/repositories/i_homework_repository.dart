@@ -6,7 +6,9 @@ abstract class IHomeworkRepository {
   Future<bool> submitHomework(Homework homework);
   Future<bool> submitAdminHomework(Homework homework);
   Future<bool> updateHomework(Homework homework);
+  Future<bool> updateAdminHomework(Homework homework);
   Future<bool> deleteHomework(String id);
+  Future<bool> deleteAdminHomework(String id);
   Future<List<Homework>> fetchHomework({
     String? classId,
     String? sectionId,
