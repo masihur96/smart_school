@@ -96,6 +96,23 @@ class HomeworkNotifier extends ChangeNotifier {
     }
   }
 
+  Future<bool> submitAdminHomework(Homework homework) async {
+    if (_homeworkRepository == null) {
+      addHomework(homework);
+      return true;
+    }
+    try {
+      final success = await _homeworkRepository.submitAdminHomework(homework);
+      if (success) {
+        addHomework(homework);
+      }
+      return success;
+    } catch (e) {
+      log('Error submitting admin homework: $e');
+      rethrow;
+    }
+  }
+
   Future<bool> updateHomework(Homework homework) async {
     if (_homeworkRepository == null) {
       _updateLocal(homework);

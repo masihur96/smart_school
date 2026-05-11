@@ -6,6 +6,7 @@ import 'package:smart_school/features/teacher/screens/homework_details_screen.da
 
 import '../../../models/school_models.dart';
 import '../../admin/providers/setup_provider.dart';
+import '../../admin/providers/teacher_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../teacher/providers/homework_provider.dart';
 
@@ -40,6 +41,7 @@ class _AdminHomeworkManagementScreenState
       await context.read<ClassSetupNotifier>().fetchSchoolData();
       await context.read<SectionSetupNotifier>().fetchSchoolData();
       await context.read<SubjectSetupNotifier>().fetchSchoolData();
+      await context.read<TeachersNotifier>().fetchTeachers();
       await _onFetchHomework();
     }
     if (mounted) setState(() => _isLoading = false);
@@ -54,12 +56,12 @@ class _AdminHomeworkManagementScreenState
           : null;
 
       await context.read<HomeworkNotifier>().fetchAdminHomework(
-            classId: _selectedClass,
-            sectionId: _selectedSection,
-            subjectId: _selectedSubject,
-            date: dateStr,
-            schoolId: schoolId,
-          );
+        classId: _selectedClass,
+        sectionId: _selectedSection,
+        subjectId: _selectedSubject,
+        date: dateStr,
+        schoolId: schoolId,
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -126,11 +128,7 @@ class _AdminHomeworkManagementScreenState
       ),
       body: Column(
         children: [
-          _buildFilterBar(
-            classes,
-            filteredSections,
-            filteredSubjects,
-          ),
+          _buildFilterBar(classes, filteredSections, filteredSubjects),
           if (_isLoading)
             const LinearProgressIndicator(color: AppColors.primaryAdmin)
           else
@@ -148,6 +146,16 @@ class _AdminHomeworkManagementScreenState
                     ),
             ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showAddHomeworkSheet(context),
+        backgroundColor: AppColors.primaryAdmin,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add),
+        label: const Text(
+          'Assign Homework',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -178,8 +186,13 @@ class _AdminHomeworkManagementScreenState
                   label: 'Class',
                   value: _selectedClass,
                   items: [
-                    const DropdownMenuItem(value: null, child: Text('All Classes')),
-                    ...classes.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))),
+                    const DropdownMenuItem(
+                      value: null,
+                      child: Text('All Classes'),
+                    ),
+                    ...classes.map(
+                      (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
+                    ),
                   ],
                   onChanged: (val) {
                     setState(() {
@@ -197,8 +210,13 @@ class _AdminHomeworkManagementScreenState
                   label: 'Section',
                   value: _selectedSection,
                   items: [
-                    const DropdownMenuItem(value: null, child: Text('All Sections')),
-                    ...sections.map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))),
+                    const DropdownMenuItem(
+                      value: null,
+                      child: Text('All Sections'),
+                    ),
+                    ...sections.map(
+                      (s) => DropdownMenuItem(value: s.id, child: Text(s.name)),
+                    ),
                   ],
                   onChanged: (val) {
                     setState(() => _selectedSection = val);
@@ -216,8 +234,13 @@ class _AdminHomeworkManagementScreenState
                   label: 'Subject',
                   value: _selectedSubject,
                   items: [
-                    const DropdownMenuItem(value: null, child: Text('All Subjects')),
-                    ...subjects.map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))),
+                    const DropdownMenuItem(
+                      value: null,
+                      child: Text('All Subjects'),
+                    ),
+                    ...subjects.map(
+                      (s) => DropdownMenuItem(value: s.id, child: Text(s.name)),
+                    ),
                   ],
                   onChanged: (val) {
                     setState(() => _selectedSubject = val);
@@ -230,7 +253,10 @@ class _AdminHomeworkManagementScreenState
                 child: InkWell(
                   onTap: () => _selectDate(context),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.grey.shade50,
                       borderRadius: BorderRadius.circular(12),
@@ -244,11 +270,17 @@ class _AdminHomeworkManagementScreenState
                               ? 'Select Date'
                               : DateFormat('dd/MM/yyyy').format(_selectedDate!),
                           style: TextStyle(
-                            color: _selectedDate == null ? Colors.grey.shade600 : Colors.black,
+                            color: _selectedDate == null
+                                ? Colors.grey.shade600
+                                : Colors.black,
                             fontSize: 14,
                           ),
                         ),
-                        Icon(Icons.calendar_today, size: 18, color: Colors.grey.shade600),
+                        Icon(
+                          Icons.calendar_today,
+                          size: 18,
+                          color: Colors.grey.shade600,
+                        ),
                       ],
                     ),
                   ),
@@ -282,7 +314,10 @@ class _AdminHomeworkManagementScreenState
         labelText: label,
         filled: true,
         fillColor: Colors.grey.shade50,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 12,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -293,7 +328,10 @@ class _AdminHomeworkManagementScreenState
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primaryAdmin, width: 1.5),
+          borderSide: const BorderSide(
+            color: AppColors.primaryAdmin,
+            width: 1.5,
+          ),
         ),
       ),
       value: value,
@@ -309,7 +347,11 @@ class _AdminHomeworkManagementScreenState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.assignment_outlined, size: 80, color: Colors.grey.shade300),
+          Icon(
+            Icons.assignment_outlined,
+            size: 80,
+            color: Colors.grey.shade300,
+          ),
           const SizedBox(height: 16),
           Text(
             'No homework found',
@@ -339,12 +381,23 @@ class _AdminHomeworkManagementScreenState
               backgroundColor: AppColors.primaryAdmin,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: const Text('Reset Filters'),
           ),
         ],
       ),
+    );
+  }
+
+  void _showAddHomeworkSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _AddHomeworkSheet(),
     );
   }
 }
@@ -357,8 +410,10 @@ class _HomeworkCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final due = DateFormat('dd MMM, yyyy').format(homework.dueDate);
-    final isPast = homework.dueDate.isBefore(DateTime.now().subtract(const Duration(days: 1)));
-    
+    final isPast = homework.dueDate.isBefore(
+      DateTime.now().subtract(const Duration(days: 1)),
+    );
+
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -452,13 +507,19 @@ class _HomeworkCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.event_outlined, size: 16, color: Colors.grey.shade500),
+                    Icon(
+                      Icons.event_outlined,
+                      size: 16,
+                      color: Colors.grey.shade500,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       'Due: $due',
                       style: TextStyle(
                         fontSize: 13,
-                        color: isPast ? Colors.red.shade400 : Colors.grey.shade700,
+                        color: isPast
+                            ? Colors.red.shade400
+                            : Colors.grey.shade700,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -518,4 +579,273 @@ class _HomeworkCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _AddHomeworkSheet extends StatefulWidget {
+  const _AddHomeworkSheet({super.key});
+
+  @override
+  State<_AddHomeworkSheet> createState() => _AddHomeworkSheetState();
+}
+
+class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _titleController = TextEditingController();
+  final _descController = TextEditingController();
+  DateTime _dueDate = DateTime.now().add(const Duration(days: 1));
+  String? _selectedClassId;
+  String? _selectedSectionId;
+  String? _selectedSubjectId;
+  String? _selectedTeacherId;
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDueDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dueDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (ctx, child) => Theme(
+        data: Theme.of(ctx).copyWith(
+          colorScheme: const ColorScheme.light(primary: AppColors.primaryAdmin),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null) setState(() => _dueDate = picked);
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_selectedClassId == null ||
+        _selectedSubjectId == null ||
+        _selectedTeacherId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select class, subject and teacher'),
+        ),
+      );
+      return;
+    }
+
+    final user = context.read<AuthNotifier>().user;
+    if (user == null) return;
+
+    final homework = Homework(
+      id: '',
+      title: _titleController.text.trim(),
+      description: _descController.text.trim(),
+      classId: _selectedClassId!,
+      sectionId: _selectedSectionId ?? '',
+      subjectId: _selectedSubjectId!,
+      teacherId: _selectedTeacherId!,
+      schoolId: user.schoolId ?? '',
+      dueDate: _dueDate,
+      createdAt: DateTime.now(),
+    );
+
+    final success = await context.read<HomeworkNotifier>().submitAdminHomework(
+      homework,
+    );
+
+    if (mounted) {
+      if (success) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Homework assigned successfully!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to save homework')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final classes = context.watch<ClassSetupNotifier>().classes;
+    final sections = context.watch<SectionSetupNotifier>().sections;
+    final subjects = context.watch<SubjectSetupNotifier>().subjects;
+    final teachers = context.watch<TeachersNotifier>().teachers;
+
+    final filteredSections = sections
+        .where((s) => s.classId == _selectedClassId)
+        .toList();
+    final filteredSubjects = subjects
+        .where((s) => s.classId == _selectedClassId)
+        .toList();
+
+    return Container(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 24),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const Text(
+                  'Assign New Homework',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
+                DropdownButtonFormField<String>(
+                  decoration: _inputDeco('Select Class'),
+                  value: _selectedClassId,
+                  items: classes
+                      .map(
+                        (c) =>
+                            DropdownMenuItem(value: c.id, child: Text(c.name)),
+                      )
+                      .toList(),
+                  onChanged: (val) => setState(() {
+                    _selectedClassId = val;
+                    _selectedSectionId = null;
+                    _selectedSubjectId = null;
+                  }),
+                  validator: (v) => v == null ? 'Class is required' : null,
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  decoration: _inputDeco('Select Section (Optional)'),
+                  value: _selectedSectionId,
+                  items: filteredSections
+                      .map(
+                        (s) =>
+                            DropdownMenuItem(value: s.id, child: Text(s.name)),
+                      )
+                      .toList(),
+                  onChanged: (val) => setState(() => _selectedSectionId = val),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  decoration: _inputDeco('Select Subject'),
+                  value: _selectedSubjectId,
+                  items: filteredSubjects
+                      .map(
+                        (s) =>
+                            DropdownMenuItem(value: s.id, child: Text(s.name)),
+                      )
+                      .toList(),
+                  onChanged: (val) => setState(() => _selectedSubjectId = val),
+                  validator: (v) => v == null ? 'Subject is required' : null,
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  decoration: _inputDeco('Assign to Teacher'),
+                  value: _selectedTeacherId,
+                  items: teachers
+                      .map(
+                        (t) => DropdownMenuItem(
+                          value: t.user?.id ?? "",
+                          child: Text(t.user?.name ?? ""),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (val) => setState(() => _selectedTeacherId = val),
+                  validator: (v) => v == null ? 'Teacher is required' : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _titleController,
+                  decoration: _inputDeco('Homework Title'),
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'Title is required'
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _descController,
+                  decoration: _inputDeco('Description / Instructions'),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+                GestureDetector(
+                  onTap: _pickDueDate,
+                  child: AbsorbPointer(
+                    child: TextFormField(
+                      decoration: _inputDeco('Due Date').copyWith(
+                        suffixIcon: const Icon(Icons.calendar_today_rounded),
+                      ),
+                      controller: TextEditingController(
+                        text: DateFormat('dd/MM/yyyy').format(_dueDate),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryAdmin,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Assign Homework',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDeco(String label) => InputDecoration(
+    labelText: label,
+    filled: true,
+    fillColor: Colors.grey.shade50,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide.none,
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Colors.grey.shade200),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: AppColors.primaryAdmin, width: 1.5),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+  );
 }
