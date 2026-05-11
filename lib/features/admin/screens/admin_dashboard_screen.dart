@@ -35,28 +35,13 @@ class AdminDashboardScreen extends StatefulWidget {
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   int _selectedIndex = 0;
-  String? _selectedClassId;
-  final int _currentYear = DateTime.now().year;
-  final int _currentMonth = DateTime.now().month;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        final schoolId = context.read<AuthNotifier>().user?.schoolId;
-
-        if (schoolId != null) {
-          context.read<AdminDashboardProvider>().fetchDashboardData();
-          context.read<AttendanceNotifier>().fetchAttendanceOverview(
-            year: _currentYear,
-            month: _currentMonth,
-          );
-          context.read<StudentsNotifier>().fetchStudents();
-          context.read<TeachersNotifier>().fetchTeachers();
-          context.read<ClassSetupNotifier>().fetchClasses(schoolId);
-          context.read<NoticesNotifier>().fetchNoticesFromAPI();
-        }
+        context.read<AdminDashboardProvider>().fetchDashboardData();
       }
     });
   }
@@ -84,7 +69,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isNoticesLoading = context.watch<NoticesNotifier>().isLoading;
     final authNotifier = context.watch<AuthNotifier>();
     final l10n = AppLocalizations.of(context)!;
     return PopScope(

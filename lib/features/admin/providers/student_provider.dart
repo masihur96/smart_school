@@ -1,10 +1,12 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import '../../../models/student_model.dart';
-import '../../../services/database_service.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
+
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
+import '../../../models/student_model.dart';
+import '../../../services/database_service.dart';
 
 class StudentsNotifier extends ChangeNotifier {
   final DatabaseService _dbService;
@@ -26,11 +28,11 @@ class StudentsNotifier extends ChangeNotifier {
   int get totalCount => _totalCount;
 
   Future<void> fetchStudents({
-    String? classId, 
-    String? sectionId, 
+    String? classId,
+    String? sectionId,
     bool? isActive,
     String? search,
-    bool loadMore = false
+    bool loadMore = false,
   }) async {
     if (loadMore) {
       if (_isLoadingMore || !_hasMore) return;
@@ -53,7 +55,8 @@ class StudentsNotifier extends ChangeNotifier {
         'limit': '10',
       };
       if (classId != null && classId.isNotEmpty) query['classId'] = classId;
-      if (sectionId != null && sectionId.isNotEmpty) query['sectionId'] = sectionId;
+      if (sectionId != null && sectionId.isNotEmpty)
+        query['sectionId'] = sectionId;
       if (isActive != null) query['isActive'] = isActive.toString();
       if (search != null && search.isNotEmpty) query['search'] = search;
 
@@ -64,25 +67,25 @@ class StudentsNotifier extends ChangeNotifier {
         header: {'Authorization': 'Bearer $token'},
       );
 
-
-
       if (response != null && response.statusCode == 200) {
-        print("Student Query:: ${response.data}");
         // API response structure: { data: { total, page, limit, data: [...] } }
-        final inner = response.data is Map ? response.data['data'] : response.data;
+        final inner = response.data is Map
+            ? response.data['data']
+            : response.data;
         final List<dynamic> data = inner is List
             ? inner
             : (inner is Map ? (inner['data'] as List<dynamic>? ?? []) : []);
-        
+
         print("Extracted Data Length: ${data.length}");
 
         final responseTotal = (inner is Map && inner['total'] != null)
             ? int.tryParse(inner['total'].toString()) ?? 0
             : data.length;
-        
+
         _totalCount = responseTotal;
-        
-        if (data.length < 10 || (loadMore && _students.length + data.length >= responseTotal)) {
+
+        if (data.length < 10 ||
+            (loadMore && _students.length + data.length >= responseTotal)) {
           _hasMore = false;
         }
 
@@ -92,18 +95,20 @@ class StudentsNotifier extends ChangeNotifier {
 
         for (var item in data) {
           try {
-             print("Parsing student item: $item");
-             final parsedStudent = Student.fromJson(item);
-             if (parsedStudent.isDeleted) continue; // Filter out soft-deleted students
-             print("Parsed Student: classId=${parsedStudent.classId}");
-             _dbService.students.add(parsedStudent);
-          } catch(e, stacktrace) {
-             print("Error parsing student: $e");
-             print("Stacktrace: $stacktrace");
+            final parsedStudent = Student.fromJson(item);
+            if (parsedStudent.isDeleted)
+              continue; // Filter out soft-deleted students
+
+            _dbService.students.add(parsedStudent);
+          } catch (e, stacktrace) {
+            print("Error parsing student: $e");
+            print("Stacktrace: $stacktrace");
           }
         }
         _students = [..._dbService.students];
-        print("Total students in notifier: ${_students.length}. Provided classId: $classId");
+        print(
+          "Total students in notifier: ${_students.length}. Provided classId: $classId",
+        );
       } else {
         log("Error fetching students: ${response?.data}");
         _hasMore = false;
@@ -167,7 +172,8 @@ class StudentsNotifier extends ChangeNotifier {
         for (var item in data) {
           try {
             final parsedStudent = Student.fromJson(item);
-            if (parsedStudent.isDeleted) continue; // Filter out soft-deleted students
+            if (parsedStudent.isDeleted)
+              continue; // Filter out soft-deleted students
             _dbService.students.add(parsedStudent);
           } catch (e) {
             log('Error parsing student: $e');
@@ -175,7 +181,9 @@ class StudentsNotifier extends ChangeNotifier {
         }
         _students = [..._dbService.students];
         _totalCount = _students.length;
-        log('fetchStudentsBySection: loaded ${_students.length} students for classId=$classId, sectionId=$sectionId');
+        log(
+          'fetchStudentsBySection: loaded ${_students.length} students for classId=$classId, sectionId=$sectionId',
+        );
       } else {
         log('fetchStudentsBySection error: ${response?.data}');
       }
@@ -186,8 +194,6 @@ class StudentsNotifier extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-
 
   void addStudent(Student student) {
     _dbService.students.add(student);
@@ -353,7 +359,8 @@ class StudentsNotifier extends ChangeNotifier {
         header: {'Authorization': 'Bearer $token'},
       );
 
-      if (response != null && (response.statusCode == 200 || response.statusCode == 204)) {
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 204)) {
         _dbService.students.removeWhere((s) => s.userId == userId);
         _students = [..._dbService.students];
       } else {

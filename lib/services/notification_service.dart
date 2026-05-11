@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:smart_school/configs/network/data_provider.dart';
 import 'package:smart_school/core/constants/api_path.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
-import 'package:smart_school/configs/network/data_provider.dart';
 import 'package:smart_school/models/notification_model.dart';
 import 'package:smart_school/models/user_model.dart';
 
@@ -36,14 +34,6 @@ class NotificationService {
       log('User declined or has not accepted permission');
     }
 
-    // Get the token for this device
-    String? token = await _fcm.getToken();
-    log("FCM Token: $token");
-
-    if (token != null) {
-      await registerToken(token);
-    }
-
     // Handle background messages
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
@@ -65,36 +55,6 @@ class NotificationService {
       log('A new onMessageOpenedApp event was published!');
       _handleMessage(message);
     });
-  }
-
-  Future<void> registerToken(String fcmToken) async {
-    try {
-      final authToken = await StorageService.getToken();
-      if (authToken == null) {
-        log('No auth token found, skipping token registration');
-        return;
-      }
-
-      final deviceType = Platform.isAndroid ? 'android' : 'ios';
-
-      final response = await DataProvider().performRequest(
-        'POST',
-        APIPath.registerFcmToken,
-        data: {
-          'token': fcmToken,
-          'deviceType': deviceType,
-        },
-        header: {'Authorization': 'Bearer $authToken'},
-      );
-
-      if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
-        log('FCM Token registered successfully');
-      } else {
-        log('Failed to register FCM Token: ${response?.data}');
-      }
-    } catch (e) {
-      log('Error registering FCM token: $e');
-    }
   }
 
   Future<List<NotificationModel>> getNotifications() async {
@@ -142,12 +102,13 @@ class NotificationService {
           "body": body,
           "topic": topic,
           "userId": userId,
-          "data": data ?? {}
+          "data": data ?? {},
         },
         header: {'Authorization': 'Bearer $authToken'},
       );
 
-      if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
         log('Test notification sent successfully');
       } else {
         log('Failed to send test notification: ${response?.data}');
@@ -176,12 +137,12 @@ class NotificationService {
           "title": title,
           "message": message,
           "additional_data": additionalData ?? {},
-          "image": image
+          "image": image,
         },
         header: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
-          'accept': '*/*'
+          'accept': '*/*',
         },
       );
 
@@ -301,7 +262,9 @@ class NotificationService {
         await subscribeToTopic('attendance');
       }
 
-      log('Successfully subscribed to all user topics for ${user.name} (${user.role.name})');
+      log(
+        'Successfully subscribed to all user topics for ${user.name} (${user.role.name})',
+      );
     } catch (e) {
       log('Error subscribing to user topics: $e');
     }
