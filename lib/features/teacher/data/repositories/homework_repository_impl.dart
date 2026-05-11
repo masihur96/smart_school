@@ -15,6 +15,11 @@ class HomeworkRepositoryImpl implements IHomeworkRepository {
   }
 
   @override
+  Future<bool> submitAdminHomework(Homework homework) async {
+    return await _remoteDataSource.submitAdminHomework(homework);
+  }
+
+  @override
   Future<bool> updateHomework(Homework homework) async {
     return await _remoteDataSource.updateHomework(homework);
   }

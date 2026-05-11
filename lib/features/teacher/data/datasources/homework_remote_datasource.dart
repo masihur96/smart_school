@@ -27,10 +27,6 @@ class HomeworkRemoteDataSource {
       'schoolId': homework.schoolId,
     };
 
-    // Note: The user's curl also has schoolId.
-    // If the Homework model doesn't have it, we might need a DTO or fetch it from user profile.
-    // For now, I'll assume the backend can handle it or we'll add it if needed.
-
     log('Submit homework payload: $payload');
 
     final response = await _dataProvider.performRequest(
@@ -52,6 +48,45 @@ class HomeworkRemoteDataSource {
       return true;
     } else {
       final message = response.data?['message'] ?? 'Failed to submit homework';
+      throw Exception(message);
+    }
+  }
+
+  Future<bool> submitAdminHomework(Homework homework) async {
+    final token = await StorageService.getToken();
+    if (token == null) {
+      throw Exception('No authentication token found');
+    }
+
+    final payload = {
+      'classId': homework.classId,
+      'subjectId': homework.subjectId,
+      'teacherId': homework.teacherId,
+      'title': homework.title,
+      'description': homework.description,
+      'dueDate': homework.dueDate.toIso8601String().split('T')[0],
+      'sectionId': homework.sectionId,
+      'schoolId': homework.schoolId,
+    };
+
+    log('Submit Admin homework payload: $payload');
+
+    final response = await _dataProvider.performRequest(
+      'POST',
+      APIPath.adminHomework,
+      data: payload,
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response == null || response.statusCode == null) {
+      throw Exception('No response from server');
+    }
+
+    if (response.statusCode! >= 200 && response.statusCode! < 300) {
+      return true;
+    } else {
+      final message =
+          response.data?['message'] ?? 'Failed to submit admin homework';
       throw Exception(message);
     }
   }
