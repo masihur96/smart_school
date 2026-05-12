@@ -158,7 +158,7 @@ class _ClassTab extends StatelessWidget {
           : classes.isEmpty
           ? const _EmptyView(label: 'No classes yet')
           : ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               itemCount: classes.length,
               itemBuilder: (ctx, i) => _ClassCard(classRoom: classes[i]),
             ),
@@ -305,7 +305,7 @@ class _SectionTab extends StatelessWidget {
           : sections.isEmpty
           ? const _EmptyView(label: 'No sections yet')
           : ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               itemCount: sections.length,
               itemBuilder: (ctx, i) => _SectionCard(section: sections[i]),
             ),
@@ -451,7 +451,7 @@ class _SubjectTab extends StatelessWidget {
           : subjects.isEmpty
           ? const _EmptyView(label: 'No subjects yet')
           : ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               itemCount: subjects.length,
               itemBuilder: (ctx, i) => _SubjectCard(subject: subjects[i]),
             ),
