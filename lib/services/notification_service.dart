@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:smart_school/configs/network/data_provider.dart';
 import 'package:smart_school/core/constants/api_path.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
@@ -15,6 +16,15 @@ class NotificationService {
   NotificationService._internal();
 
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
+
+  static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
+    'high_importance_channel', // id
+    'High Importance Notifications', // title
+    description: 'This channel is used for important notifications.', // description
+    importance: Importance.max,
+  );
 
   Future<void> initialize() async {
     // Request permissions for iOS
@@ -24,6 +34,29 @@ class NotificationService {
       provisional: false,
       sound: true,
     );
+
+    // Initialize local notifications
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/launcher_icon');
+    const DarwinInitializationSettings initializationSettingsDarwin =
+        DarwinInitializationSettings();
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsDarwin,
+    );
+
+    await _localNotifications.initialize(
+      settings: initializationSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        // Handle notification click if needed
+      },
+    );
+
+    // Create notification channel for Android
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(_channel);
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
       log('User granted permission');
@@ -42,8 +75,35 @@ class NotificationService {
       log('Got a message whilst in the foreground!');
       log('Message data: ${message.data}');
 
-      if (message.notification != null) {
-        log('Message also contained a notification: ${message.notification}');
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+
+      if (notification != null) {
+        log('Message also contained a notification: ${notification.title}');
+        
+        // Show local notification for Android/iOS in foreground
+        _localNotifications.show(
+          id: notification.hashCode,
+          title: notification.title,
+          body: notification.body,
+          notificationDetails: NotificationDetails(
+            android: AndroidNotificationDetails(
+              _channel.id,
+              _channel.name,
+              channelDescription: _channel.description,
+              icon: '@mipmap/launcher_icon',
+              importance: Importance.max,
+              priority: Priority.high,
+              showWhen: true,
+            ),
+            iOS: const DarwinNotificationDetails(
+              presentAlert: true,
+              presentBadge: true,
+              presentSound: true,
+            ),
+          ),
+          payload: jsonEncode(message.data),
+        );
       }
 
       // Handle the JSON body here if needed

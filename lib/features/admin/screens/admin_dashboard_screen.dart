@@ -11,14 +11,8 @@ import '../../../core/services/geocoding_service.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/notification_icon_button.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../teacher/providers/attendance_provider.dart';
-import '../../teacher/screens/homework_management_screen.dart';
 import '../models/admin_dashboard_model.dart';
 import '../providers/admin_dashboard_provider.dart';
-import '../providers/notice_provider.dart';
-import '../providers/setup_provider.dart';
-import '../providers/student_provider.dart';
-import '../providers/teacher_provider.dart';
 import 'admin_homework_management_screen.dart';
 import 'exam_management_screen.dart';
 import 'notice_management_screen.dart';
@@ -403,6 +397,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         );
       },
       child: Card(
+        margin: EdgeInsets.zero,
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Column(
@@ -507,6 +502,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                 ),
               ),
+
+              // ── Records horizontal scroll ────────────────────
             ],
           ),
         ),
@@ -535,6 +532,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         );
       },
       child: Card(
+        margin: EdgeInsets.zero,
+
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Column(
@@ -962,7 +961,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: SizedBox(
-                width: 280,
+                width: screenSize(context, .85),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1037,12 +1036,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         itemBuilder: (context, index) {
           final exam = exams[index];
           return Card(
-            margin: const EdgeInsets.only(right: 16),
+            margin: const EdgeInsets.only(right: 5),
 
-            child: SizedBox(
-              width: screenSize(context, .9),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SizedBox(
+                width: screenSize(context, .85),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
