@@ -55,12 +55,18 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
   void _populateExistingMarks() {
     if (_selectedAssignment == null) return;
 
+    final examsNotifier = context.read<ExamsNotifier>();
+    final currentExam = examsNotifier.state.firstWhere(
+      (e) => e.id == widget.exam.id,
+      orElse: () => widget.exam,
+    );
+
     final students = context.read<StudentsNotifier>().students;
     if (students.isEmpty) return;
 
     setState(() {
       for (var student in students) {
-        final existingResult = widget.exam.results.firstWhere(
+        final existingResult = currentExam.results.firstWhere(
           (r) =>
               r.studentId == student.userId &&
               r.subjectId == _selectedAssignment!.subjectId,
@@ -737,7 +743,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        Navigator.pop(context);
+        _populateExistingMarks();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

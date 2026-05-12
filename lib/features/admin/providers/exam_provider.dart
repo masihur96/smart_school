@@ -272,6 +272,7 @@ class ExamsNotifier extends ChangeNotifier {
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
         log('Marks submitted successfully');
+        await _load();
         return true;
       } else {
         log('Error submitting marks: ${response?.data}');
