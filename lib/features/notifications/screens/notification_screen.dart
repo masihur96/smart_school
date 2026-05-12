@@ -86,11 +86,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
           return RefreshIndicator(
             onRefresh: () => notifier.fetchNotifications(),
-            child: ListView.separated(
+            child: ListView.builder(
               itemCount: notifier.notifications.length,
-              separatorBuilder: (context, index) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final notification = notifier.notifications[index];
+
                 return _NotificationItem(notification: notification);
               },
             ),
@@ -137,7 +137,8 @@ class _NotificationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 5, horizontal: 16),
       color: notification.isRead ? null : Colors.blue.withOpacity(0.05),
       child: ListTile(
         leading: CircleAvatar(
