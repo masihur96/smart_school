@@ -636,39 +636,45 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
 
   Widget _buildBottomBar(List<Student> students) {
     return SafeArea(
-      child: ElevatedButton(
-        onPressed: _selectedAssignment == null || students.isEmpty
-            ? null
-            : () => _submitMarks(context, students),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryAdmin,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 18),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 16.0, right: 16, bottom: 10),
+        child: ElevatedButton(
+          onPressed: _selectedAssignment == null || students.isEmpty
+              ? null
+              : () => _submitMarks(context, students),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primaryAdmin,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 18),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 0,
           ),
-          elevation: 0,
-        ),
-        child: context.watch<ExamsNotifier>().isLoading
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            : const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.check_circle_outline),
-                  SizedBox(width: 8),
-                  Text(
-                    'Save All Marks',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          child: context.watch<ExamsNotifier>().isLoading
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
                   ),
-                ],
-              ),
+                )
+              : const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.check_circle_outline),
+                    SizedBox(width: 8),
+                    Text(
+                      'Save All Marks',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }
