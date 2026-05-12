@@ -18,6 +18,8 @@ class ExamViewScreen extends StatefulWidget {
 }
 
 class _ExamViewScreenState extends State<ExamViewScreen> {
+  late List<ExamAssignment> _sortedAssignments;
+  String? _selectedClassId;
   ExamAssignment? _selectedAssignment;
   final Map<String, TextEditingController> _marksControllers = {};
   final Map<String, TextEditingController> _totalMarksControllers = {};
@@ -26,8 +28,11 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.exam.assignments.isNotEmpty) {
-      _selectedAssignment = widget.exam.assignments.first;
+    _sortedAssignments = List<ExamAssignment>.from(widget.exam.assignments)
+      ..sort((a, b) => a.className.compareTo(b.className));
+    if (_sortedAssignments.isNotEmpty) {
+      _selectedAssignment = _sortedAssignments.first;
+      _selectedClassId = _selectedAssignment!.classId;
       _fetchStudents();
     }
   }
@@ -127,7 +132,15 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
   @override
   Widget build(BuildContext context) {
     final studentNotifier = context.watch<StudentsNotifier>();
-    final students = studentNotifier.students;
+    final students = List<Student>.from(studentNotifier.students)
+      ..sort((a, b) {
+        final aRoll = int.tryParse(a.rollId) ?? 0;
+        final bRoll = int.tryParse(b.rollId) ?? 0;
+        if (aRoll != 0 || bRoll != 0) {
+          return aRoll.compareTo(bRoll);
+        }
+        return a.rollId.compareTo(b.rollId);
+      });
 
     return Scaffold(
       body: CustomScrollView(
@@ -265,119 +278,149 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
   }
 
   Widget _buildAssignmentSelector() {
+    final uniqueClasses = <String, String>{};
+    for (var a in _sortedAssignments) {
+      uniqueClasses[a.classId] = a.className;
+    }
+
+    final filteredAssignments = _sortedAssignments
+        .where((a) => a.classId == _selectedClassId)
+        .toList();
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade100),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Exam Selection',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                Text(
+                  '${_sortedAssignments.length} Assignments',
+                  style: TextStyle(
+                    color: AppColors.primaryAdmin,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDropdownField<String>(
+                    label: 'Class',
+                    value: _selectedClassId,
+                    items: uniqueClasses.entries.map((e) {
+                      return DropdownMenuItem(
+                        value: e.key,
+                        child: Text(e.value),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedClassId = val;
+                        final newFiltered = _sortedAssignments
+                            .where((a) => a.classId == val)
+                            .toList();
+                        if (newFiltered.isNotEmpty) {
+                          _selectedAssignment = newFiltered.first;
+                        } else {
+                          _selectedAssignment = null;
+                        }
+                      });
+                      _fetchStudents();
+                    },
+                    icon: Icons.school_outlined,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildDropdownField<ExamAssignment>(
+                    label: 'Subject',
+                    value: _selectedAssignment,
+                    items: filteredAssignments.map((a) {
+                      return DropdownMenuItem(
+                        value: a,
+                        child: Text(
+                          a.subjectName,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedAssignment = val;
+                      });
+                      _fetchStudents();
+                    },
+                    icon: Icons.book_outlined,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdownField<T>({
+    required String label,
+    required T? value,
+    required List<DropdownMenuItem<T>> items,
+    required ValueChanged<T?> onChanged,
+    required IconData icon,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Assignments',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              Text(
-                '${widget.exam.assignments.length} Total',
-                style: TextStyle(
-                  color: AppColors.primaryAdmin,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey.shade600,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(
-          height: 110,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            itemCount: widget.exam.assignments.length,
-            itemBuilder: (context, index) {
-              final assignment = widget.exam.assignments[index];
-              final isSelected = _selectedAssignment == assignment;
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedAssignment = assignment;
-                  });
-                  _fetchStudents();
-                },
-                child: Container(
-                  width: 160,
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 8,
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primaryAdmin : null,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: isSelected
-                            ? Colors.indigo.withOpacity(0.3)
-                            : Colors.black.withOpacity(0.03),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                    border: isSelected
-                        ? null
-                        : Border.all(color: Colors.grey.shade200),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        assignment.subjectName,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: isSelected ? Colors.white : null,
-                          fontSize: 14,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Class ${assignment.className}',
-                        style: TextStyle(
-                          color: isSelected
-                              ? Colors.white70
-                              : Colors.grey.shade600,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today,
-                            size: 10,
-                            color: isSelected
-                                ? Colors.white60
-                                : Colors.grey.shade400,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            DateFormat('MMM dd').format(assignment.date),
-                            style: TextStyle(
-                              color: isSelected
-                                  ? Colors.white60
-                                  : Colors.grey.shade400,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
+        const SizedBox(height: 6),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<T>(
+              value: value,
+              items: items,
+              onChanged: onChanged,
+              isExpanded: true,
+              icon: Icon(
+                Icons.keyboard_arrow_down,
+                color: Colors.grey.shade400,
+              ),
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.black87,
+                fontWeight: FontWeight.w500,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              dropdownColor: Colors.white,
+            ),
           ),
         ),
       ],
@@ -436,93 +479,103 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
 
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: ExpansionTile(
-                tilePadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  dividerColor:
+                      Colors.transparent, // Removes top & bottom borders
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
                 ),
-                leading: CircleAvatar(
-                  backgroundColor: Colors.indigo.shade50,
-                  child: Text(
-                    student.user?.name[0] ?? 'S',
-                    style: TextStyle(
-                      color: AppColors.primaryAdmin,
+                child: ExpansionTile(
+                  tilePadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.indigo.shade50,
+                    child: Text(
+                      student.user?.name[0] ?? 'S',
+                      style: TextStyle(
+                        color: AppColors.primaryAdmin,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  title: Text(
+                    student.user?.name ?? 'N/A',
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
+                      fontSize: 15,
                     ),
                   ),
-                ),
-                title: Text(
-                  student.user?.name ?? 'N/A',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                  subtitle: Text(
+                    'Roll: ${student.rollId}',
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                   ),
-                ),
-                subtitle: Text(
-                  'Roll: ${student.rollId}',
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                ),
-                trailing: _getMarksController(student.userId).text.isNotEmpty
-                    ? Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.green.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '${_getMarksController(student.userId).text} / ${_getTotalMarksController(student.userId).text}',
-                          style: TextStyle(
-                            color: Colors.green.shade700,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                  trailing: _getMarksController(student.userId).text.isNotEmpty
+                      ? Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
                           ),
-                        ),
-                      )
-                    : null,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                    child: Column(
-                      children: [
-                        const Divider(),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildMarkField(
-                                'Marks Obtained',
-                                _getMarksController(student.userId),
-                                TextInputType.numberWithOptions(decimal: true),
-                                Icons.grade_outlined,
-                                onChanged: (val) => setState(() {}),
-                              ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '${_getMarksController(student.userId).text} / ${_getTotalMarksController(student.userId).text}',
+                            style: TextStyle(
+                              color: Colors.green.shade700,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _buildMarkField(
-                                'Total Marks',
-                                _getTotalMarksController(student.userId),
-                                TextInputType.number,
-                                Icons.summarize_outlined,
-                                onChanged: (val) => setState(() {}),
+                          ),
+                        )
+                      : null,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                      child: Column(
+                        children: [
+                          const Divider(),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildMarkField(
+                                  'Marks Obtained',
+                                  _getMarksController(student.userId),
+                                  TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                                  Icons.grade_outlined,
+                                  onChanged: (val) => setState(() {}),
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _buildMarkField(
-                          'Remarks',
-                          _getRemarksController(student.userId),
-                          TextInputType.text,
-                          Icons.note_alt_outlined,
-                        ),
-                      ],
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildMarkField(
+                                  'Total Marks',
+                                  _getTotalMarksController(student.userId),
+                                  TextInputType.number,
+                                  Icons.summarize_outlined,
+                                  onChanged: (val) => setState(() {}),
+                                ),
+                              ),
+                            ],
+                          ),
+                          // const SizedBox(height: 16),
+                          // _buildMarkField(
+                          //   'Remarks',
+                          //   _getRemarksController(student.userId),
+                          //   TextInputType.text,
+                          //   Icons.note_alt_outlined,
+                          // ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
