@@ -127,7 +127,9 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
       expandedHeight: 220,
       floating: false,
       pinned: true,
-      backgroundColor:            user?.role.name.toLowerCase()=="admin"?AppColors.primaryAdmin:AppColors.primary,
+      backgroundColor: user?.role.name.toLowerCase() == "admin"
+          ? AppColors.primaryAdmin
+          : AppColors.primary,
       foregroundColor: Colors.white,
       elevation: 0,
       flexibleSpace: FlexibleSpaceBar(
@@ -198,8 +200,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                         ],
                         onChanged: filteredSections.isEmpty
                             ? null
-                            : (val) =>
-                                  setState(() => _selectedSectionId = val),
+                            : (val) => setState(() => _selectedSectionId = val),
                       ),
                     ),
                   ],
@@ -358,7 +359,7 @@ class _DayRoutineTab extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+      padding: const EdgeInsets.only(top: 16),
       itemCount: entries.length,
       itemBuilder: (context, index) {
         final entry = entries[index];
