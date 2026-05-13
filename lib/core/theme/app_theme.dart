@@ -56,6 +56,13 @@ class AppTheme {
         clipBehavior: Clip.antiAlias,
         surfaceTintColor: Colors.white,
       ),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        textStyle: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
+        ),
+      ),
     );
   }
 
@@ -114,6 +121,13 @@ class AppTheme {
 
         clipBehavior: Clip.antiAlias,
         surfaceTintColor: Colors.transparent,
+      ),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        textStyle: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.white,
+        ),
       ),
     );
   }
