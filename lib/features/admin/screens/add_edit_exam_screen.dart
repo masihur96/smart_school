@@ -297,11 +297,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
           initialChildSize: 0.75,
           maxChildSize: 0.92,
           minChildSize: 0.5,
-          builder: (_, scrollCtr) => Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-            ),
+          builder: (_, scrollCtr) => Card(
             child: Column(
               children: [
                 const SizedBox(height: 8),
@@ -801,20 +797,9 @@ class _AssignmentCard extends StatelessWidget {
             ?.name ??
         'Unknown';
 
-    return Container(
+    return Card(
       margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: Colors.purple.shade50,
@@ -861,7 +846,7 @@ class _AssignmentCard extends StatelessWidget {
         ),
         isThreeLine: true,
         trailing: PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert, size: 20),
+          icon: const Icon(Icons.more_vert, size: 20, color: Colors.grey),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

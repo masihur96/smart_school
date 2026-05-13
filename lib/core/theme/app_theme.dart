@@ -66,6 +66,9 @@ class AppTheme {
           color: Colors.black,
         ),
       ),
+      listTileTheme: ListTileThemeData(
+        titleTextStyle: TextStyle(color: Colors.white),
+      ),
     );
   }
 
@@ -134,6 +137,9 @@ class AppTheme {
           fontWeight: FontWeight.w500,
           color: Colors.white,
         ),
+      ),
+      listTileTheme: ListTileThemeData(
+        titleTextStyle: TextStyle(color: Colors.white),
       ),
     );
   }
