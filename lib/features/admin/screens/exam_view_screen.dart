@@ -410,8 +410,9 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
               items: items,
               onChanged: onChanged,
               isExpanded: true,
+
               icon: Icon(Icons.keyboard_arrow_down),
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+
               borderRadius: BorderRadius.circular(12),
             ),
           ),
