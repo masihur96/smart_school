@@ -410,11 +410,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       color: Colors.purple.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
-                      Icons.group_outlined,
-                      color: Colors.purple,
-                      size: 20,
-                    ),
+                    child: const Icon(Icons.group_outlined, size: 20),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -428,13 +424,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(
-                          data.date,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[500],
-                          ),
-                        ),
+                        Text(data.date, style: TextStyle(fontSize: 11)),
                       ],
                     ),
                   ),
@@ -449,10 +439,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     child: Text(
                       '${rate.toStringAsFixed(1)}%',
-                      style: const TextStyle(
-                        color: color,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -550,11 +537,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         color: Colors.purple.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(
-                        Icons.how_to_reg_rounded,
-                        color: Colors.purple,
-                        size: 20,
-                      ),
+                      child: const Icon(Icons.how_to_reg_rounded, size: 20),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -590,7 +573,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       child: Text(
                         '${rate.toStringAsFixed(1)}%',
                         style: TextStyle(
-                          color: rateColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
                         ),
@@ -902,11 +884,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             // const SizedBox(width: 4),
             Text(
               value,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
             ),
 
             const SizedBox(width: 4),
@@ -915,7 +893,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               child: Text(
                 label,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 10, color: Colors.grey),
+                style: const TextStyle(fontSize: 10),
               ),
             ),
           ],
