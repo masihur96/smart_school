@@ -111,6 +111,11 @@ class StudentDetailScreen extends StatelessWidget {
                     _buildInfoRow(Icons.numbers, 'Roll Number', student.rollId),
                     _buildInfoRow(Icons.class_, 'Class', className),
                     _buildInfoRow(Icons.grid_view, 'Section', sectionName),
+                    _buildInfoRow(
+                      Icons.grid_view,
+                      'About',
+                      student.user?.designation ?? "N/A",
+                    ),
                     _buildStatusRow(student.isActive),
                   ]),
                   const SizedBox(height: 24),
