@@ -93,10 +93,14 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
       },
       child: Scaffold(
         extendBodyBehindAppBar: true,
+
         appBar: AppBar(
           title: Text(
             _getTitle(l10n),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
 
           elevation: 0,
@@ -430,7 +434,9 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
           _buildActionItem('Announcement', Icons.campaign_rounded, () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const SuperAdminNotificationSenderScreen()),
+              MaterialPageRoute(
+                builder: (_) => const SuperAdminNotificationSenderScreen(),
+              ),
             );
           }),
         ],

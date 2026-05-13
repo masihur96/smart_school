@@ -13,7 +13,7 @@ class NotificationIconButton extends StatelessWidget {
       children: [
         IconButton(
           icon: const Icon(Icons.notifications_none_outlined),
-          color: color,
+          color: Colors.white,
           onPressed: () {
             Navigator.pushNamed(context, RouteGenerator.notificationRoute);
           },
@@ -30,10 +30,7 @@ class NotificationIconButton extends StatelessWidget {
                   color: Colors.red,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                constraints: const BoxConstraints(
-                  minWidth: 16,
-                  minHeight: 16,
-                ),
+                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                 child: Text(
                   '${notifier.unreadCount}',
                   style: const TextStyle(

@@ -194,9 +194,10 @@ class _BackupScreenState extends State<BackupScreen>
                               children: [
                                 Row(
                                   children: [
+                                    SizedBox(width: 40),
                                     Container(
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
+                                        horizontal: 18,
                                         vertical: 4,
                                       ),
                                       decoration: BoxDecoration(
@@ -276,14 +277,10 @@ class _BackupScreenState extends State<BackupScreen>
         decoration: InputDecoration(
           hintText: 'Search records...',
           hintStyle: TextStyle(
-            color: Colors.white.withOpacity(0.4),
+            // color: Colors.white.withOpacity(0.4),4ß
             fontSize: 14,
           ),
-          prefixIcon: Icon(
-            Icons.search_rounded,
-            color: Colors.white.withOpacity(0.5),
-            size: 20,
-          ),
+          prefixIcon: Icon(Icons.search_rounded, size: 20),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
                   icon: const Icon(

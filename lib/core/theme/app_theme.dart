@@ -17,6 +17,9 @@ class AppTheme {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: const IconThemeData(
+          color: Colors.white, // Drawer menu icon color
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -81,6 +84,9 @@ class AppTheme {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: const IconThemeData(
+          color: Colors.white, // Drawer menu icon color
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -129,6 +135,7 @@ class AppTheme {
           color: Colors.white,
         ),
       ),
+      drawerTheme: DrawerThemeData(backgroundColor: Colors.redAccent),
     );
   }
 }
