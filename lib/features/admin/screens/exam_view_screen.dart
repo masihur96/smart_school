@@ -401,7 +401,6 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            // color: Colors.grey.shade50,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.grey.shade200),
           ),
@@ -411,17 +410,9 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
               items: items,
               onChanged: onChanged,
               isExpanded: true,
-              icon: Icon(
-                Icons.keyboard_arrow_down,
-                // color: Colors.grey.shade400,
-              ),
-              style: const TextStyle(
-                fontSize: 14,
-                // color: Colors.black87,
-                fontWeight: FontWeight.w500,
-              ),
+              icon: Icon(Icons.keyboard_arrow_down),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               borderRadius: BorderRadius.circular(12),
-              dropdownColor: Colors.white,
             ),
           ),
         ),
@@ -512,7 +503,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
                   ),
                   subtitle: Text(
                     'Roll: ${student.rollId}',
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                    style: TextStyle(fontSize: 12),
                   ),
                   trailing: _getMarksController(student.userId).text.isNotEmpty
                       ? Container(
