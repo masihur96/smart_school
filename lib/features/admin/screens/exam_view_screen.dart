@@ -314,11 +314,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
                 ),
                 Text(
                   '${_sortedAssignments.length} Assignments',
-                  style: TextStyle(
-                    color: AppColors.primaryAdmin,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -405,7 +401,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: Colors.grey.shade50,
+            // color: Colors.grey.shade50,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.grey.shade200),
           ),
@@ -417,11 +413,11 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
               isExpanded: true,
               icon: Icon(
                 Icons.keyboard_arrow_down,
-                color: Colors.grey.shade400,
+                // color: Colors.grey.shade400,
               ),
               style: const TextStyle(
                 fontSize: 14,
-                color: Colors.black87,
+                // color: Colors.black87,
                 fontWeight: FontWeight.w500,
               ),
               borderRadius: BorderRadius.circular(12),

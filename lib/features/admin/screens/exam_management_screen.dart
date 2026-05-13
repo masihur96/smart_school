@@ -155,28 +155,45 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                         child: Stack(
                           children: [
                             Padding(
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(16),
                               child: Row(
                                 children: [
-                                  Container(
-                                    width: 50,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Colors.purple.shade300,
-                                          Colors.purple.shade600,
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
+                                  Column(
+                                    children: [
+                                      Container(
+                                        width: 50,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              Colors.purple.shade300,
+                                              Colors.purple.shade600,
+                                            ],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.assignment,
+                                          color: Colors.white,
+                                          size: 28,
+                                        ),
                                       ),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.assignment,
-                                      color: Colors.white,
-                                      size: 28,
-                                    ),
+                                      SizedBox(height: 10),
+                                      Text(
+                                        exam.isPublished
+                                            ? 'Published'
+                                            : 'Draft',
+                                        style: TextStyle(
+                                          color: exam.isPublished
+                                              ? Colors.green
+                                              : Colors.orange,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   const SizedBox(width: 16),
                                   Expanded(
@@ -201,10 +218,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                                         const SizedBox(height: 4),
                                         Text(
                                           subtitleText,
-                                          style: TextStyle(
-                                            color: Colors.grey.shade600,
-                                            fontSize: 13,
-                                          ),
+                                          style: TextStyle(fontSize: 13),
                                         ),
                                         const SizedBox(height: 4),
                                         Row(
@@ -212,15 +226,12 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                                             Icon(
                                               Icons.calendar_today_outlined,
                                               size: 14,
-                                              color: Colors.grey.shade400,
+                                              // color: Colors.grey.shade400,
                                             ),
                                             const SizedBox(width: 4),
                                             Text(
                                               '${DateFormat('MMM dd, yyyy').format(exam.startDate ?? DateTime.now())} - ${DateFormat('MMM dd, yyyy').format(exam.endDate ?? DateTime.now())}',
-                                              style: TextStyle(
-                                                color: Colors.grey.shade500,
-                                                fontSize: 12,
-                                              ),
+                                              style: TextStyle(fontSize: 12),
                                             ),
                                           ],
                                         ),
@@ -333,32 +344,6 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                                     ],
                                   ),
                                 ],
-                              ),
-                            ),
-                            Positioned(
-                              right: 5,
-                              top: 5,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: exam.isPublished
-                                      ? Colors.green.shade50
-                                      : Colors.orange.shade50,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  exam.isPublished ? 'Published' : 'Draft',
-                                  style: TextStyle(
-                                    color: exam.isPublished
-                                        ? Colors.green
-                                        : Colors.orange,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
                               ),
                             ),
                           ],
