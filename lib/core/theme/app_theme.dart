@@ -135,7 +135,6 @@ class AppTheme {
           color: Colors.white,
         ),
       ),
-      drawerTheme: DrawerThemeData(backgroundColor: Colors.redAccent),
     );
   }
 }
