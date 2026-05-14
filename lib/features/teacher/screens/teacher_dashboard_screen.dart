@@ -113,6 +113,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 _getTitle(l10n),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                   fontSize: 18,
                 ),
               ),
@@ -126,6 +127,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           elevation: 0,
           backgroundColor: AppColors.primaryTeacher,
           foregroundColor: Colors.white,
+          iconTheme: IconThemeData(color: Colors.white70),
           actions: [
             const NotificationIconButton(),
             IconButton(

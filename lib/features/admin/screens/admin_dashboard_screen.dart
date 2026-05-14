@@ -96,7 +96,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(_getTitle(l10n)),
+          title: Text(
+            _getTitle(l10n),
+            style: TextStyle(color: AppColors.white),
+          ),
+          iconTheme: IconThemeData(color: AppColors.white),
 
           backgroundColor: AppColors.primaryAdmin,
           foregroundColor: Colors.white,
@@ -389,6 +393,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
     return InkWell(
       onTap: () {
+        print(data.data.length);
+
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -490,7 +496,101 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
               ),
 
-              // ── Records horizontal scroll ────────────────────
+              // ── Student Records horizontal scroll ────────────
+              if (data.data.isNotEmpty) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 14, 0, 6),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.access_time_rounded,
+                        size: 13,
+                        color: Colors.purple,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        "Today's Records",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 80,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.only(bottom: 8),
+                    itemCount: data.data.length,
+                    itemBuilder: (context, index) {
+                      final r = data.data[index];
+                      final statusColor = _studentStatusColor(r.status);
+                      final statusIcon = _studentStatusIcon(r.status);
+                      final initial = r.studentName.isNotEmpty
+                          ? r.studentName[0].toUpperCase()
+                          : '?';
+                      return Container(
+                        width: 100,
+                        margin: const EdgeInsets.only(right: 10),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: 0.06),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: statusColor.withValues(alpha: 0.25),
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              r.studentName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 11,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Roll: ${r.rollNumber}',
+                              style: TextStyle(
+                                fontSize: 9,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              r.className,
+                              style: TextStyle(
+                                fontSize: 9,
+                                color: Colors.grey[500],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ] else ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 14, 0, 8),
+                  child: Center(
+                    child: Text(
+                      'No records for today',
+                      style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -861,6 +961,32 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ),
       ),
     );
+  }
+
+  Color _studentStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'present':
+        return const Color(0xFF10B981);
+      case 'absent':
+        return const Color(0xFFEF4444);
+      case 'leave':
+        return const Color(0xFFF59E0B);
+      default:
+        return const Color(0xFF6B7280);
+    }
+  }
+
+  IconData _studentStatusIcon(String status) {
+    switch (status.toLowerCase()) {
+      case 'present':
+        return Icons.check_circle_outline_rounded;
+      case 'absent':
+        return Icons.cancel_outlined;
+      case 'leave':
+        return Icons.time_to_leave_outlined;
+      default:
+        return Icons.help_outline;
+    }
   }
 
   Widget _buildStatPill(
