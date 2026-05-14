@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/features/admin/providers/setup_provider.dart';
+import 'package:smart_school/models/school_models.dart';
 
 import '../../auth/providers/auth_provider.dart';
 import '../providers/result_provider.dart';
@@ -15,132 +17,244 @@ class MarkEntryScreen extends StatefulWidget {
 
 class _MarkEntryScreenState extends State<MarkEntryScreen> {
   String? _selectedExamId;
-  String? _selectedExamName;
+  Exam? _selectedExam;
   String? _selectedClassId;
-  String? _selectedClassName;
-  String? _selectedStudentId;
-  String? _selectedStudentName;
+  String? _selectedSectionId;
+  ExamAssignment? _selectedAssignment;
 
-  final Map<String, TextEditingController> _markControllers = {};
+  final Map<String, TextEditingController> _marksControllers = {};
+  final Map<String, TextEditingController> _totalMarksControllers = {};
+  final Map<String, TextEditingController> _remarksControllers = {};
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ResultsNotifier>().loadExams();
+      context.read<SectionSetupNotifier>().fetchSections();
     });
   }
 
   @override
   void dispose() {
-    for (final c in _markControllers.values) {
-      c.dispose();
-    }
+    _disposeControllers();
     super.dispose();
   }
 
-  void _onExamChanged(String? examId, String? examName) {
-    if (examId == null) return;
-    setState(() {
-      _selectedExamId = examId;
-      _selectedExamName = examName;
-      _selectedClassId = null;
-      _selectedClassName = null;
-      _selectedStudentId = null;
-      _selectedStudentName = null;
-      _markControllers.clear();
-    });
-    context.read<ResultsNotifier>().loadClasses(examId);
+  void _disposeControllers() {
+    for (var c in _marksControllers.values) c.dispose();
+    for (var c in _totalMarksControllers.values) c.dispose();
+    for (var c in _remarksControllers.values) c.dispose();
+    _marksControllers.clear();
+    _totalMarksControllers.clear();
+    _remarksControllers.clear();
   }
 
-  void _onClassChanged(String? classId, String? className) {
-    if (classId == null || _selectedExamId == null) return;
+  void _onExamChanged(Exam? exam) {
+    setState(() {
+      _selectedExam = exam;
+      _selectedExamId = exam?.id;
+      _selectedClassId = null;
+      _selectedSectionId = null;
+      _selectedAssignment = null;
+      _disposeControllers();
+    });
+  }
+
+  void _onClassChanged(String? classId) {
     setState(() {
       _selectedClassId = classId;
-      _selectedClassName = className;
-      _selectedStudentId = null;
-      _selectedStudentName = null;
-      _markControllers.clear();
+      _selectedSectionId = null;
+      _selectedAssignment = null;
+      _disposeControllers();
     });
-    context.read<ResultsNotifier>().loadStudents(_selectedExamId!, classId);
   }
 
-  void _onStudentChanged(String? studentId, String? studentName) {
-    if (studentId == null ||
-        _selectedExamId == null ||
-        _selectedClassId == null)
-      return;
+  void _onSectionChanged(String? sectionId) {
     setState(() {
-      _selectedStudentId = studentId;
-      _selectedStudentName = studentName;
-      _markControllers.clear();
+      _selectedSectionId = sectionId;
+      _selectedAssignment = null;
+      _disposeControllers();
     });
-    context.read<ResultsNotifier>().loadSubjects(
-      _selectedExamId!,
-      _selectedClassId!,
+    _fetchStudents();
+  }
+
+  void _onAssignmentChanged(ExamAssignment? assignment) {
+    setState(() {
+      _selectedAssignment = assignment;
+      _disposeControllers();
+    });
+    _fetchStudents();
+  }
+
+  void _fetchStudents() {
+    if (_selectedClassId != null) {
+      context
+          .read<ResultsNotifier>()
+          .loadStudents(
+            _selectedExam?.id ?? '',
+            _selectedClassId!,
+            sectionId: _selectedSectionId,
+          )
+          .then((_) {
+            if (mounted) {
+              _populateExistingMarks();
+            }
+          });
+    }
+  }
+
+  void _populateExistingMarks() {
+    if (_selectedExam == null || _selectedAssignment == null) return;
+
+    final students = context.read<ResultsNotifier>().students;
+    if (students.isEmpty) return;
+
+    setState(() {
+      for (var student in students) {
+        final existingResult = _selectedExam!.results.firstWhere(
+          (r) =>
+              r.studentId == student.id &&
+              r.subjectId == _selectedAssignment!.subjectId,
+          orElse: () => Result(
+            id: '',
+            examId: '',
+            studentId: '',
+            marksObtained: -1,
+            totalMarks: 100,
+            remarks: '',
+          ),
+        );
+
+        if (existingResult.marksObtained != -1) {
+          _getMarksController(student.id).text =
+              existingResult.marksObtained ==
+                  existingResult.marksObtained.toInt()
+              ? existingResult.marksObtained.toInt().toString()
+              : existingResult.marksObtained.toString();
+          _getTotalMarksController(student.id).text =
+              existingResult.totalMarks == existingResult.totalMarks.toInt()
+              ? existingResult.totalMarks.toInt().toString()
+              : existingResult.totalMarks.toString();
+          _getRemarksController(student.id).text = existingResult.remarks;
+        } else {
+          _getMarksController(student.id).clear();
+          _getTotalMarksController(student.id).text = '100';
+          _getRemarksController(student.id).clear();
+        }
+      }
+    });
+  }
+
+  TextEditingController _getMarksController(String studentId) {
+    return _marksControllers.putIfAbsent(
       studentId,
+      () => TextEditingController(),
+    );
+  }
+
+  TextEditingController _getTotalMarksController(String studentId) {
+    return _totalMarksControllers.putIfAbsent(
+      studentId,
+      () => TextEditingController(text: '100'),
+    );
+  }
+
+  TextEditingController _getRemarksController(String studentId) {
+    return _remarksControllers.putIfAbsent(
+      studentId,
+      () => TextEditingController(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final notifier = context.watch<ResultsNotifier>();
-
-    // Initialise controllers for subjects once loaded
-    for (final sub in notifier.subjects) {
-      if (!_markControllers.containsKey(sub.uuid)) {
-        _markControllers[sub.uuid] = TextEditingController(
-          text: sub.existingMark != null ? sub.existingMark.toString() : '',
-        );
-      }
-    }
+    final students = notifier.students;
 
     return Scaffold(
-      appBar: widget.hideAppBar
-          ? null
-          : AppBar(
-              title: const Text('Mark Entry System'),
-              backgroundColor: AppColors.primaryTeacher,
-              foregroundColor: Colors.white,
-              elevation: 0,
-            ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSelectionCard(notifier),
-                  const SizedBox(height: 28),
-                  if (_selectedStudentId != null) ...[
-                    _buildMarkEntrySection(notifier),
-                    const SizedBox(height: 32),
-                    if (notifier.subjects.isNotEmpty)
-                      _buildSaveButton(notifier),
-                    const SizedBox(height: 40),
-                  ] else
-                    _buildEmptySelectionState(),
-                ],
-              ),
+      body: CustomScrollView(
+        slivers: [
+          // _buildAppBar(),
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                _buildFilterCard(notifier),
+                if (_selectedAssignment != null)
+                  _buildSectionHeader('Students (${students.length})'),
+              ],
             ),
           ),
+          if (_selectedAssignment != null)
+            _buildStudentList(notifier, students)
+          else
+            _buildEmptyState(),
         ],
       ),
+      bottomNavigationBar: _selectedAssignment != null
+          ? _buildBottomBar(students)
+          : null,
     );
   }
 
-  Widget _buildSelectionCard(ResultsNotifier notifier) {
+  Widget _buildAppBar() {
+    return SliverAppBar(
+      expandedHeight: 0,
+      pinned: true,
+      elevation: 0,
+      backgroundColor: AppColors.primaryTeacher,
+      foregroundColor: Colors.white,
+      // flexibleSpace: FlexibleSpaceBar(
+      //   title: const Text(
+      //     'Mark Entry System',
+      //     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+      //   ),
+      //   background: Stack(
+      //     children: [
+      //       Positioned(
+      //         right: -20,
+      //         top: -20,
+      //         child: Icon(
+      //           Icons.edit_document,
+      //           size: 150,
+      //           color: Colors.white.withValues(alpha: 0.1),
+      //         ),
+      //       ),
+      //     ],
+      //   ),
+      // ),
+    );
+  }
+
+  Widget _buildFilterCard(ResultsNotifier notifier) {
+    final uniqueClasses = <String, String>{};
+    if (_selectedExam != null) {
+      for (var a in _selectedExam!.assignments) {
+        uniqueClasses[a.classId] = a.className;
+      }
+    }
+
+    final sections = context.watch<SectionSetupNotifier>().sections;
+    final filteredSections = sections
+        .where((s) => s.classId == _selectedClassId)
+        .toList();
+
+    final filteredAssignments =
+        _selectedExam?.assignments
+            .where((a) => a.classId == _selectedClassId)
+            .toList() ??
+        [];
+
     return Card(
+      margin: const EdgeInsets.all(16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // ── Exam Dropdown ─────────────────────────────────────────────
             _buildDropdownField<String>(
               label: 'Examination',
-              icon: Icons.assignment,
+              icon: Icons.assignment_outlined,
               value: _selectedExamId,
               loading: notifier.examsLoading,
               items: notifier.exams
@@ -148,59 +262,64 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                     (e) => DropdownMenuItem(value: e.id, child: Text(e.name)),
                   )
                   .toList(),
-              onChanged: (val) {
-                final exam = notifier.exams
-                    .where((e) => e.id == val)
-                    .firstOrNull;
-                _onExamChanged(val, exam?.name);
+              onChanged: (id) {
+                final exam = notifier.exams.firstWhere((e) => e.id == id);
+                _onExamChanged(exam);
               },
             ),
             const SizedBox(height: 16),
-
-            // ── Class Dropdown ─────────────────────────────────────────────
-            _buildDropdownField<String>(
-              label: 'Classroom',
-              icon: Icons.meeting_room,
-              value: _selectedClassId,
-              loading: notifier.classesLoading,
-              items: notifier.classes
-                  .map(
-                    (c) => DropdownMenuItem(value: c.uuid, child: Text(c.name)),
-                  )
-                  .toList(),
-              onChanged: _selectedExamId == null
-                  ? null
-                  : (val) {
-                      final cls = notifier.classes
-                          .where((c) => c.uuid == val)
-                          .firstOrNull;
-                      _onClassChanged(val, cls?.name);
-                    },
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDropdownField<String>(
+                    label: 'Class',
+                    icon: Icons.school_outlined,
+                    value: _selectedClassId,
+                    enabled: _selectedExam != null,
+                    items: uniqueClasses.entries
+                        .map(
+                          (e) => DropdownMenuItem(
+                            value: e.key,
+                            child: Text(e.value),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: _onClassChanged,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildDropdownField<String>(
+                    label: 'Section',
+                    icon: Icons.grid_view_outlined,
+                    value: _selectedSectionId,
+                    enabled: _selectedClassId != null,
+                    items: filteredSections
+                        .map(
+                          (s) => DropdownMenuItem(
+                            value: s.id,
+                            child: Text(s.name),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: _onSectionChanged,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
-
-            // ── Student Dropdown ───────────────────────────────────────────
-            _buildDropdownField<String>(
-              label: 'Student',
-              icon: Icons.person_search,
-              value: _selectedStudentId,
-              loading: notifier.studentsLoading,
-              items: notifier.students
+            _buildDropdownField<ExamAssignment>(
+              label: 'Subject Assignment',
+              icon: Icons.book_outlined,
+              value: _selectedAssignment,
+              enabled: _selectedClassId != null,
+              items: filteredAssignments
                   .map(
-                    (s) => DropdownMenuItem(
-                      value: s.id,
-                      child: Text('${s.rollNumber}. ${s.name}'),
-                    ),
+                    (a) =>
+                        DropdownMenuItem(value: a, child: Text(a.subjectName)),
                   )
                   .toList(),
-              onChanged: _selectedClassId == null
-                  ? null
-                  : (val) {
-                      final student = notifier.students
-                          .where((s) => s.id == val)
-                          .firstOrNull;
-                      _onStudentChanged(val, student?.name);
-                    },
+              onChanged: _onAssignmentChanged,
             ),
           ],
         ),
@@ -215,251 +334,321 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     required List<DropdownMenuItem<T>> items,
     required ValueChanged<T?>? onChanged,
     bool loading = false,
+    bool enabled = true,
   }) {
-    return Stack(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[600],
+          ),
+        ),
+        const SizedBox(height: 6),
         DropdownButtonFormField<T>(
           value: value,
           decoration: InputDecoration(
-            labelText: label,
-            prefixIcon: Icon(icon),
+            prefixIcon: Icon(icon, size: 20),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
+              borderSide: BorderSide(color: Colors.grey.shade200),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade200),
             ),
             filled: true,
-            fillColor: Colors.blue.withValues(alpha: 0.05),
+            fillColor: enabled
+                ? Colors.blue.withValues(alpha: 0.05)
+                : Colors.grey[100],
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 12,
             ),
           ),
           items: items,
-          onChanged: onChanged,
-          icon: Icon(Icons.keyboard_arrow_down),
-
+          onChanged: enabled ? onChanged : null,
+          icon: loading
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.keyboard_arrow_down),
           disabledHint: Text(
-            'Select previous step first',
+            enabled ? 'Select' : 'Select previous first',
             style: TextStyle(color: Colors.grey[400]),
           ),
         ),
-        if (loading)
-          Positioned(
-            right: 48,
-            top: 0,
-            bottom: 0,
-            child: Center(
-              child: SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.blue[700],
-                ),
-              ),
-            ),
-          ),
       ],
     );
   }
 
-  Widget _buildMarkEntrySection(ResultsNotifier notifier) {
-    if (notifier.subjectsLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 40),
-          child: CircularProgressIndicator(),
-        ),
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          if (_selectedAssignment != null)
+            Text(
+              _selectedAssignment!.subjectName,
+              style: TextStyle(
+                color: AppColors.primaryTeacher,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStudentList(
+    ResultsNotifier notifier,
+    List<TeacherAssignmentStudent> students,
+  ) {
+    if (notifier.studentsLoading) {
+      return const SliverFillRemaining(
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    if (notifier.subjects.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(40.0),
+    if (students.isEmpty) {
+      return SliverFillRemaining(
+        child: Center(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.warning_amber_rounded,
-                size: 60,
-                color: Colors.amber[300],
+                Icons.person_off_outlined,
+                size: 64,
+                color: Colors.grey[300],
               ),
               const SizedBox(height: 16),
-              const Text(
-                'No subjects found for this student.',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
+              const Text('No students found for this selection'),
             ],
           ),
         ),
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.edit_note, color: AppColors.primaryTeacher,),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Enter Marks for ${_selectedStudentName ?? "Student"}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        ...notifier.subjects.map((sub) {
-          final controller = _markControllers[sub.uuid];
-          final marksText = controller?.text ?? '';
-          final double? marks = double.tryParse(marksText);
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final student = students[index];
+          final marksStr = _getMarksController(student.id).text;
+          final marks = double.tryParse(marksStr);
+          final isEntered = marksStr.isNotEmpty;
           final bool isPass = marks != null && marks >= 40;
 
           return Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[50],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(Icons.book, color: AppColors.primaryTeacher,),
+            margin: const EdgeInsets.only(bottom: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ExpansionTile(
+              leading: CircleAvatar(
+                backgroundColor: AppColors.primaryTeacher.withValues(
+                  alpha: 0.1,
+                ),
+                child: Text(
+                  student.name[0],
+                  style: const TextStyle(
+                    color: AppColors.primaryTeacher,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          sub.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          'Total: 100 Marks',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    width: 100,
-                    child: TextField(
-                      controller: controller,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      textAlign: TextAlign.center,
-                      onChanged: (_) => setState(() {}),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: '00',
-                        suffixText: marks != null ? (isPass ? 'P' : 'F') : null,
-                        suffixStyle: TextStyle(
-                          color: isPass ? Colors.green : Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 10,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
+              title: Text(
+                student.name,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text('Roll: ${student.rollNumber}'),
+              trailing: isEntered
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isPass ? Colors.green[50] : Colors.red[50],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${marks.toString()} / ${_getTotalMarksController(student.id).text}',
+                        style: TextStyle(
+                          color: isPass ? Colors.green[700] : Colors.red[700],
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    )
+                  : const Icon(Icons.add_circle_outline, color: Colors.grey),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Column(
+                    children: [
+                      const Divider(),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildMarkField(
+                              'Marks Obtained',
+                              _getMarksController(student.id),
+                              const TextInputType.numberWithOptions(
+                                decimal: true,
+                              ),
+                              Icons.grade_outlined,
+                              onChanged: (val) => setState(() {}),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildMarkField(
+                              'Total Marks',
+                              _getTotalMarksController(student.id),
+                              TextInputType.number,
+                              Icons.summarize_outlined,
+                              onChanged: (val) => setState(() {}),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      _buildMarkField(
+                        'Remarks',
+                        _getRemarksController(student.id),
+                        TextInputType.text,
+                        Icons.note_alt_outlined,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           );
-        }),
+        }, childCount: students.length),
+      ),
+    );
+  }
+
+  Widget _buildMarkField(
+    String label,
+    TextEditingController controller,
+    TextInputType type,
+    IconData icon, {
+    Function(String)? onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey[700],
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 6),
+        TextField(
+          controller: controller,
+          keyboardType: type,
+          onChanged: onChanged,
+          decoration: InputDecoration(
+            isDense: true,
+            prefixIcon: Icon(icon, size: 18),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: Colors.grey.shade200),
+            ),
+            filled: true,
+            fillColor: Colors.grey[50],
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildSaveButton(ResultsNotifier notifier) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        gradient: LinearGradient(
-          colors: [Colors.blue[800]!, Colors.blue[600]!],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withValues(alpha: 0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+  Widget _buildBottomBar(List<TeacherAssignmentStudent> students) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ElevatedButton(
+          onPressed: context.watch<ResultsNotifier>().submitting
+              ? null
+              : () => _saveAllMarks(students),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primaryTeacher,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 0,
           ),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: notifier.submitting ? null : () => _saveMarks(notifier),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryTeacher,
-          shadowColor: Colors.transparent,
-          padding: const EdgeInsets.symmetric(vertical: 18),
-          minimumSize: const Size(double.infinity, 50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        child: notifier.submitting
-            ? const CircularProgressIndicator(color: Colors.white)
-            : const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.save_rounded, color: Colors.white),
-                  SizedBox(width: 12),
-                  Text(
-                    'Confirm & Save Results',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+          child: context.watch<ResultsNotifier>().submitting
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
                   ),
-                ],
-              ),
+                )
+              : const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.save_outlined),
+                    SizedBox(width: 8),
+                    Text(
+                      'Save All Results',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }
 
-  Widget _buildEmptySelectionState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.only(top: 40),
+  Widget _buildEmptyState() {
+    return SliverFillRemaining(
+      child: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.manage_search, size: 100, color: Colors.grey[200]),
-            const SizedBox(height: 20),
+            Icon(Icons.manage_search, size: 80, color: Colors.grey[200]),
+            const SizedBox(height: 16),
             Text(
-              'Ready to Record Marks?',
+              'Select Filters to Start',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
+                color: Colors.grey[400],
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Select exam, class and student above to proceed',
-              style: TextStyle(color: Colors.grey[500]),
+              'Choose exam and classroom to enter marks',
+              style: TextStyle(color: Colors.grey[400]),
             ),
           ],
         ),
@@ -467,56 +656,54 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     );
   }
 
-  Future<void> _saveMarks(ResultsNotifier notifier) async {
-    if (_selectedStudentId == null || _selectedExamId == null) return;
+  Future<void> _saveAllMarks(List<TeacherAssignmentStudent> students) async {
+    if (_selectedExam == null || _selectedAssignment == null) return;
 
-    final user = context.read<AuthNotifier>().user;
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error: User not found. Please log in again.'),
-        ),
-      );
-      return;
+    final authNotifier = context.read<AuthNotifier>();
+    final user = authNotifier.user;
+    if (user == null) return;
+
+    final List<Map<String, dynamic>> marksList = [];
+
+    for (var student in students) {
+      final marksStr = _getMarksController(student.id).text.trim();
+      if (marksStr.isEmpty) continue;
+
+      final marksObtained = double.tryParse(marksStr);
+      if (marksObtained == null) continue;
+
+      marksList.add({
+        'studentId': student.id,
+        'subjectId': _selectedAssignment!.subjectId,
+        'marksObtained': marksObtained,
+        'totalMarks':
+            double.tryParse(_getTotalMarksController(student.id).text) ?? 100.0,
+        'remarks': _getRemarksController(student.id).text,
+      });
     }
 
-    final marks = <Map<String, dynamic>>[];
-
-    for (final sub in notifier.subjects) {
-      final text = _markControllers[sub.uuid]?.text ?? '';
-      if (text.isNotEmpty) {
-        final marksObtained = double.tryParse(text) ?? 0.0;
-        marks.add({
-          'studentId': _selectedStudentId,
-          'subjectId': sub.uuid,
-          'marksObtained': marksObtained,
-          'totalMarks': 100,
-          'remarks': marksObtained >= 40 ? 'Pass' : 'Fail',
-        });
-      }
-    }
-
-    if (marks.isEmpty) {
+    if (marksList.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter marks for at least one subject.'),
+          content: Text('Please enter marks for at least one student'),
         ),
       );
       return;
     }
 
     try {
-      await notifier.submitMarks(
-        examId: _selectedExamId!,
+      await context.read<ResultsNotifier>().submitMarks(
+        examId: _selectedExam!.id,
         teacherId: user.id,
         schoolId: user.schoolId ?? '',
-        marks: marks,
+        marks: marksList,
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Marks saved successfully!'),
             backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -526,6 +713,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
           SnackBar(
             content: Text('Failed to save marks: $e'),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }

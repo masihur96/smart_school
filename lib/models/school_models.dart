@@ -589,6 +589,8 @@ class ExamAssignment {
   final String examId;
   final String classId;
   final String className;
+  final String? sectionId;
+  final String? sectionName;
   final String subjectId;
   final String subjectName;
   final String examinerId;
@@ -601,6 +603,8 @@ class ExamAssignment {
     required this.examId,
     required this.classId,
     required this.className,
+    this.sectionId,
+    this.sectionName,
     required this.subjectId,
     required this.subjectName,
     required this.examinerId,
@@ -615,6 +619,8 @@ class ExamAssignment {
       examId: json['examId'] ?? '',
       classId: json['class']?['uuid'] ?? '',
       className: json['class']?['name'] ?? '',
+      sectionId: json['section']?['uuid'],
+      sectionName: json['section']?['name'],
       subjectId: json['subject']?['uuid'] ?? '',
       subjectName: json['subject']?['name'] ?? '',
       examinerId: json['examiner']?['uuid'] ?? '',

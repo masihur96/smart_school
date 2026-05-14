@@ -18,7 +18,7 @@ class MarkEntryRemoteDataSource {
   /// GET /teacher/assignments/exams
   Future<List<Exam>> getTeacherExams() async {
     final token = await _getToken();
-    final url = '${APIPath.teacherAssignment}/exams';
+    final url = APIPath.teacherExams;
     log('Fetching teacher exams: $url');
 
     final response = await _dataProvider.performRequest(
@@ -77,10 +77,13 @@ class MarkEntryRemoteDataSource {
 
   /// GET /teacher/assignments/exams/{examId}/classes/{classId}/students
   Future<List<TeacherAssignmentStudent>> getClassStudents(
-      String examId, String classId) async {
+      String examId, String classId, {String? sectionId}) async {
     final token = await _getToken();
-    final url =
+    var url =
         '${APIPath.teacherAssignment}/exams/$examId/classes/$classId/students';
+    if (sectionId != null && sectionId.isNotEmpty) {
+      url += '?sectionId=$sectionId';
+    }
     log('Fetching class students: $url');
 
     final response = await _dataProvider.performRequest(
