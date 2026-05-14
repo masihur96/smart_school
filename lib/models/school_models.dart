@@ -614,19 +614,25 @@ class ExamAssignment {
   });
 
   factory ExamAssignment.fromJson(Map<String, dynamic> json) {
+    // Robust parsing for nested or flat structures
+    final classData = json['class'];
+    final subjectData = json['subject'];
+    final sectionData = json['section'];
+    final examinerData = json['examiner'];
+
     return ExamAssignment(
-      id: json['id'] ?? '',
-      examId: json['examId'] ?? '',
-      classId: json['class']?['uuid'] ?? '',
-      className: json['class']?['name'] ?? '',
-      sectionId: json['section']?['uuid'],
-      sectionName: json['section']?['name'],
-      subjectId: json['subject']?['uuid'] ?? '',
-      subjectName: json['subject']?['name'] ?? '',
-      examinerId: json['examiner']?['uuid'] ?? '',
-      examinerName: json['examiner']?['name'] ?? '',
+      id: json['id'] ?? json['uuid'] ?? '',
+      examId: json['examId'] ?? json['exam_id'] ?? '',
+      classId: (classData is Map ? (classData['uuid'] ?? classData['id']) : null) ?? json['classId'] ?? json['class_id'] ?? json['class_uid'] ?? '',
+      className: (classData is Map ? classData['name'] : null) ?? json['className'] ?? json['class_name'] ?? '',
+      sectionId: (sectionData is Map ? (sectionData['uuid'] ?? sectionData['id']) : null) ?? json['sectionId'] ?? json['section_id'] ?? json['section_uid'],
+      sectionName: (sectionData is Map ? sectionData['name'] : null) ?? json['sectionName'] ?? json['section_name'],
+      subjectId: (subjectData is Map ? (subjectData['uuid'] ?? subjectData['id']) : null) ?? json['subjectId'] ?? json['subject_id'] ?? json['subject_uid'] ?? '',
+      subjectName: (subjectData is Map ? subjectData['name'] : null) ?? json['subjectName'] ?? json['subject_name'] ?? '',
+      examinerId: (examinerData is Map ? (examinerData['uuid'] ?? examinerData['id']) : null) ?? json['examinerId'] ?? json['examiner_id'] ?? json['examiner_uid'] ?? '',
+      examinerName: (examinerData is Map ? examinerData['name'] : null) ?? json['examinerName'] ?? json['examiner_name'] ?? '',
       date: DateTime.tryParse(json['date']?.toString() ?? '') ?? DateTime.now(),
-      syllabus: json['syllabus'],
+      syllabus: json['syllabus']?.toString(),
     );
   }
 }
@@ -658,33 +664,37 @@ class Exam {
 
   factory Exam.fromJson(Map<String, dynamic> json) {
     // Support both API snake_case and legacy camelCase keys
-    final String id =
-        json['id'] ?? json['_id'] ?? json['uid'] ?? '';
-    final String name =
-        json['exam_name'] ?? json['name'] ?? '';
+    final String id = json['id'] ?? json['_id'] ?? json['uid'] ?? '';
+    final String name = json['exam_name'] ?? json['name'] ?? '';
     final String? description = json['description'];
 
     DateTime? startDate;
     if (json['start_date'] != null) {
       startDate = DateTime.tryParse(json['start_date'].toString());
+    } else if (json['startDate'] != null) {
+      startDate = DateTime.tryParse(json['startDate'].toString());
     }
 
     DateTime? endDate;
     if (json['end_date'] != null) {
       endDate = DateTime.tryParse(json['end_date'].toString());
+    } else if (json['endDate'] != null) {
+      endDate = DateTime.tryParse(json['endDate'].toString());
     }
 
     List<ExamAssignment> assignments = [];
-    if (json['assignments'] != null && json['assignments'] is List) {
-      assignments = (json['assignments'] as List)
-          .map((a) => ExamAssignment.fromJson(a))
+    final dynamic assignmentsJson = json['assignments'] ?? json['exam_assignments'] ?? json['Assignments'] ?? json['routines'];
+    if (assignmentsJson != null && assignmentsJson is List) {
+      assignments = assignmentsJson
+          .map((a) => ExamAssignment.fromJson(a as Map<String, dynamic>))
           .toList();
     }
 
     List<Result> results = [];
-    if (json['results'] != null && json['results'] is List) {
-      results = (json['results'] as List)
-          .map((r) => Result.fromJson(r))
+    final dynamic resultsJson = json['results'] ?? json['exam_results'] ?? json['Results'];
+    if (resultsJson != null && resultsJson is List) {
+      results = resultsJson
+          .map((r) => Result.fromJson(r as Map<String, dynamic>))
           .toList();
     }
 
