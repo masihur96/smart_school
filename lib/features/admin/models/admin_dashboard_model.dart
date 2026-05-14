@@ -73,6 +73,7 @@ class AttendStudent {
   final int absent;
   final int leave;
   final double attendanceRate;
+  final List<StudentAttendanceRecord> data;
 
   AttendStudent({
     required this.date,
@@ -82,6 +83,7 @@ class AttendStudent {
     required this.absent,
     required this.leave,
     required this.attendanceRate,
+    required this.data,
   });
 
   factory AttendStudent.fromJson(Map<String, dynamic> json) {
@@ -93,6 +95,45 @@ class AttendStudent {
       absent: json['absent'] ?? 0,
       leave: json['leave'] ?? 0,
       attendanceRate: (json['attendanceRate'] ?? 0).toDouble(),
+      data: (json['data'] as List<dynamic>?)
+              ?.map((e) => StudentAttendanceRecord.fromJson(e))
+              .toList() ??
+          [],
+    );
+  }
+}
+
+class StudentAttendanceRecord {
+  final String id;
+  final String studentId;
+  final String studentName;
+  final String rollNumber;
+  final String designation;
+  final String status;
+  final String date;
+  final String className;
+
+  StudentAttendanceRecord({
+    required this.id,
+    required this.studentId,
+    required this.studentName,
+    required this.rollNumber,
+    required this.designation,
+    required this.status,
+    required this.date,
+    required this.className,
+  });
+
+  factory StudentAttendanceRecord.fromJson(Map<String, dynamic> json) {
+    return StudentAttendanceRecord(
+      id: json['id'] ?? '',
+      studentId: json['studentId'] ?? '',
+      studentName: json['student']?['name'] ?? 'Unknown',
+      rollNumber: json['student']?['rollNumber'] ?? '',
+      designation: json['student']?['designation'] ?? '',
+      status: json['status'] ?? '',
+      date: json['date'] ?? '',
+      className: json['class']?['name'] ?? '',
     );
   }
 }
