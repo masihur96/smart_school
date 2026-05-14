@@ -25,11 +25,14 @@ const _kDivider = Color(0xFFEDE9F8);
 class ClassDetailScreen extends StatefulWidget {
   final ClassRoom classRoom;
   final String subjectID;
+  final String routineId;
   final String? sectionId;
 
   const ClassDetailScreen({
     super.key,
     required this.subjectID,
+    required this.routineId,
+
     required this.classRoom,
     this.sectionId,
   });
@@ -147,26 +150,25 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
       fullMap[student.userId] =
           _attendanceMap[student.userId] ?? AttendanceStatus.present;
     }
+    //
+    // if (_selectedRoutineId == null) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(
+    //       content: Text('Please select a period before saving attendance.'),
+    //       backgroundColor: Colors.orange,
+    //       behavior: SnackBarBehavior.floating,
+    //     ),
+    //   );
+    //   return;
+    // }
 
-    final bool success;
-
-    if (_selectedRoutineId != null) {
-      success = await context
-          .read<AttendanceNotifier>()
-          .submitPeriodAttendanceToAPI(
-            date: _selectedDate,
-            routineId: _selectedRoutineId!,
-            attendanceMap: fullMap,
-          );
-    } else {
-      success = await context.read<AttendanceNotifier>().submitAttendanceToAPI(
-        date: _selectedDate,
-        takenBy: teacherId,
-        classId: widget.classRoom.id,
-        sectionId: widget.sectionId,
-        attendanceMap: fullMap,
-      );
-    }
+    final success = await context
+        .read<AttendanceNotifier>()
+        .submitPeriodAttendanceToAPI(
+          date: _selectedDate,
+          routineId: widget.routineId,
+          attendanceMap: fullMap,
+        );
 
     if (!mounted) return;
 
@@ -300,7 +302,7 @@ class _AttendanceTab extends StatelessWidget {
   final VoidCallback onPickDate;
   final VoidCallback onSave;
   final void Function(String studentId, AttendanceStatus status)
-      onStatusChanged;
+  onStatusChanged;
   final void Function(String? routineId) onRoutineChanged;
 
   const _AttendanceTab({
@@ -378,18 +380,18 @@ class _AttendanceTab extends StatelessWidget {
             ],
           ),
         ),
-        const Divider(height: 1),
-
-        // Period selector
-        _PeriodSelector(
-          classId: classRoom.id,
-          sectionId: sectionId,
-          subjectId: subjectId,
-          selectedDate: selectedDate,
-          selectedRoutineId: selectedRoutineId,
-          onChanged: onRoutineChanged,
-        ),
-        const Divider(height: 1),
+        // const Divider(height: 1),
+        //
+        // // Period selector
+        // _PeriodSelector(
+        //   classId: classRoom.id,
+        //   sectionId: sectionId,
+        //   subjectId: subjectId,
+        //   selectedDate: selectedDate,
+        //   selectedRoutineId: selectedRoutineId,
+        //   onChanged: onRoutineChanged,
+        // ),
+        // const Divider(height: 1),
 
         // Student list
         Expanded(
@@ -1495,9 +1497,11 @@ class _PeriodSelector extends StatelessWidget {
           children: [
             Icon(Icons.info_outline, size: 16, color: Colors.orange[700]),
             const SizedBox(width: 8),
-            Text(
-              'No periods scheduled for today',
-              style: TextStyle(color: Colors.orange[700], fontSize: 12),
+            const Expanded(
+              child: Text(
+                'No periods scheduled for this subject on this day',
+                style: TextStyle(color: Colors.orange, fontSize: 12),
+              ),
             ),
           ],
         ),
