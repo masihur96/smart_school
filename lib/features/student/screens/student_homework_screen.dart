@@ -53,7 +53,7 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> {
                 'My Homework',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              backgroundColor: AppColors.primaryTeacher,
+              backgroundColor: AppColors.primaryStudent,
               foregroundColor: Colors.white,
               elevation: 0,
             ),

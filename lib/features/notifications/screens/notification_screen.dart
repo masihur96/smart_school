@@ -25,7 +25,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notifications'),
+
         centerTitle: true,
+        leading: BackButton(),
         elevation: 0,
         actions: [
           IconButton(

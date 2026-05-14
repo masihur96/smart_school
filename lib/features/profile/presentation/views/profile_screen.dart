@@ -248,8 +248,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ? AppColors.primaryAdmin
           : user.role.name.toLowerCase() == "teacher"
           ? AppColors.primaryTeacher
-          :user.role.name.toLowerCase() == "student"
-          ? AppColors.primaryStudent: theme.primaryColor,
+          : user.role.name.toLowerCase() == "student"
+          ? AppColors.primaryStudent
+          : theme.primaryColor,
       foregroundColor: AppColors.white,
       flexibleSpace: FlexibleSpaceBar(
         stretchModes: const [StretchMode.zoomBackground],
@@ -343,7 +344,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: Theme.of(context).primaryColor.withOpacity(0.08),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, size: 20, color: Theme.of(context).primaryColor),
+            child: Icon(icon, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -352,11 +353,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey[500],
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
                 ),
                 if (_isEditing && isEditable && controller != null)
                   TextField(
@@ -421,11 +418,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 color: Theme.of(context).primaryColor.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                icon,
-                size: 20,
-                color: Theme.of(context).primaryColor,
-              ),
+              child: Icon(icon, size: 20),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -437,7 +430,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF1E293B),
                     ),
                   ),
                   Text(

@@ -142,26 +142,29 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
   Widget _buildAssignmentCard(ExamAssignment a) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.indigo[50],
-            shape: BoxShape.circle,
+
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: ListTile(
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.indigo[50],
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.assignment, color: Colors.indigo),
           ),
-          child: const Icon(Icons.assignment, color: Colors.indigo),
-        ),
-        title: Text(
-          a.subjectName,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Examiner: ${a.examinerName}'),
-            Text('Date: ${DateFormat('EEEE, MMM dd, yyyy').format(a.date)}'),
-          ],
+          title: Text(
+            a.subjectName,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Examiner: ${a.examinerName}'),
+              Text('Date: ${DateFormat('EEEE, MMM dd, yyyy').format(a.date)}'),
+            ],
+          ),
         ),
       ),
     );
