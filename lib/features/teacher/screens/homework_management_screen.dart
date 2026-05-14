@@ -319,6 +319,7 @@ class _HomeworkCard extends StatelessWidget {
     final isPast = homework.dueDate.isBefore(DateTime.now());
 
     return Card(
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Row(
@@ -328,7 +329,7 @@ class _HomeworkCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-               color: AppColors.primaryTeacher,
+                color: AppColors.primaryTeacher,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
