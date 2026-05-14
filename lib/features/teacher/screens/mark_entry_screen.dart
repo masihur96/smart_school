@@ -454,87 +454,88 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            child: ExpansionTile(
-              leading: CircleAvatar(
-                backgroundColor: AppColors.primaryTeacher.withValues(
-                  alpha: 0.1,
-                ),
-                child: Text(
-                  student.name[0],
-                  style: const TextStyle(
-                    color: AppColors.primaryTeacher,
-                    fontWeight: FontWeight.bold,
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                dividerColor:
+                    Colors.transparent, // Removes top & bottom borders
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+              ),
+              child: ExpansionTile(
+                leading: CircleAvatar(
+                  backgroundColor: AppColors.primaryTeacher.withValues(
+                    alpha: 0.1,
+                  ),
+                  child: Text(
+                    student.name[0],
+                    style: const TextStyle(
+                      color: AppColors.primaryTeacher,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-              title: Text(
-                student.name,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text('Roll: ${student.rollNumber}'),
-              trailing: isEntered
-                  ? Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isPass ? Colors.green[50] : Colors.red[50],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '${marks.toString()} / ${_getTotalMarksController(student.id).text}',
-                        style: TextStyle(
-                          color: isPass ? Colors.green[700] : Colors.red[700],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                title: Text(
+                  student.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text('Roll: ${student.rollNumber}'),
+                trailing: isEntered
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
                         ),
-                      ),
-                    )
-                  : const Icon(Icons.add_circle_outline, color: Colors.grey),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Column(
-                    children: [
-                      const Divider(),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildMarkField(
-                              'Marks Obtained',
-                              _getMarksController(student.id),
-                              const TextInputType.numberWithOptions(
-                                decimal: true,
+                        decoration: BoxDecoration(
+                          color: isPass ? Colors.green[50] : Colors.red[50],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '${marks.toString()} / ${_getTotalMarksController(student.id).text}',
+                          style: TextStyle(
+                            color: isPass ? Colors.green[700] : Colors.red[700],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      )
+                    : const Icon(Icons.add_circle_outline, color: Colors.grey),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Column(
+                      children: [
+                        const Divider(),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildMarkField(
+                                'Marks Obtained',
+                                _getMarksController(student.id),
+                                const TextInputType.numberWithOptions(
+                                  decimal: true,
+                                ),
+                                Icons.grade_outlined,
+                                onChanged: (val) => setState(() {}),
                               ),
-                              Icons.grade_outlined,
-                              onChanged: (val) => setState(() {}),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildMarkField(
-                              'Total Marks',
-                              _getTotalMarksController(student.id),
-                              TextInputType.number,
-                              Icons.summarize_outlined,
-                              onChanged: (val) => setState(() {}),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildMarkField(
+                                'Total Marks',
+                                _getTotalMarksController(student.id),
+                                TextInputType.number,
+                                Icons.summarize_outlined,
+                                onChanged: (val) => setState(() {}),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      _buildMarkField(
-                        'Remarks',
-                        _getRemarksController(student.id),
-                        TextInputType.text,
-                        Icons.note_alt_outlined,
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         }, childCount: students.length),
