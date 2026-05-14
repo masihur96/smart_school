@@ -66,7 +66,9 @@ class _SplashScreenState extends State<SplashScreen>
           if (user.school == null) {
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => const AdminRegisterSchoolScreen()),
+              MaterialPageRoute(
+                builder: (context) => const AdminRegisterSchoolScreen(),
+              ),
               (Route<dynamic> route) => false,
             );
           } else {
@@ -184,10 +186,16 @@ class _SplashScreenState extends State<SplashScreen>
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.school_rounded,
-                        size: 80,
-                        color: Color(0xFF1A1A2E),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: SizedBox(
+                          height: 100,
+                          width: 100,
+                          child: Image.asset(
+                            "assets/icon/icon.png",
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                     ),
                   ),
