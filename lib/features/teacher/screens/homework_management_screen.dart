@@ -20,6 +20,7 @@ class HomeworkManagementScreen extends StatefulWidget {
 
 class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
   String? _selectedClass;
+  String? _selectedSection;
   String? _selectedSubject;
   bool _isLoading = false;
 
@@ -48,6 +49,7 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
     try {
       await context.read<HomeworkNotifier>().fetchHomework(
         classId: _selectedClass,
+        sectionId: _selectedSection,
         subjectId: _selectedSubject,
       );
     } finally {
@@ -91,6 +93,7 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
+              // color: Colors.white,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
@@ -99,51 +102,85 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
                 ),
               ],
             ),
-            child: Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: DropdownButtonFormField<String?>(
-                    decoration: _inputDeco('Class'),
-                    value: _selectedClass,
-                    items: [
-                      const DropdownMenuItem(
-                        value: null,
-                        child: Text('All Classes'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String?>(
+                        decoration: _inputDeco('Class'),
+                        value: _selectedClass,
+                        items: [
+                          const DropdownMenuItem(
+                            value: null,
+                            child: Text('All Classes'),
+                          ),
+                          ...classes.map(
+                            (c) => DropdownMenuItem(
+                              value: c.id,
+                              child: Text(c.name),
+                            ),
+                          ),
+                        ],
+                        onChanged: (val) {
+                          setState(() {
+                            _selectedClass = val;
+                            _selectedSection = null;
+                            _selectedSubject = null;
+                          });
+                          _onFetchHomework();
+                        },
                       ),
-                      ...classes.map(
-                        (c) =>
-                            DropdownMenuItem(value: c.id, child: Text(c.name)),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: DropdownButtonFormField<String?>(
+                        decoration: _inputDeco('Section'),
+                        value: _selectedSection,
+                        items: [
+                          const DropdownMenuItem(
+                            value: null,
+                            child: Text('All Sections'),
+                          ),
+                          ...context
+                              .read<SectionSetupNotifier>()
+                              .sections
+                              .where((s) => s.classId == _selectedClass)
+                              .map(
+                                (s) => DropdownMenuItem(
+                                  value: s.id,
+                                  child: Text(s.name),
+                                ),
+                              ),
+                        ],
+                        onChanged: (val) {
+                          setState(() {
+                            _selectedSection = val;
+                          });
+                          _onFetchHomework();
+                        },
                       ),
-                    ],
-                    onChanged: (val) {
-                      setState(() {
-                        _selectedClass = val;
-                        _selectedSubject = null;
-                      });
-                      _onFetchHomework();
-                    },
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: DropdownButtonFormField<String?>(
-                    decoration: _inputDeco('Subject'),
-                    value: _selectedSubject,
-                    items: [
-                      const DropdownMenuItem(
-                        value: null,
-                        child: Text('All Subjects'),
-                      ),
-                      ...filteredSubjects.map(
-                        (s) =>
-                            DropdownMenuItem(value: s.id, child: Text(s.name)),
-                      ),
-                    ],
-                    onChanged: (val) {
-                      setState(() => _selectedSubject = val);
-                      _onFetchHomework();
-                    },
-                  ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String?>(
+                  decoration: _inputDeco('Subject'),
+                  value: _selectedSubject,
+                  isExpanded: true,
+                  items: [
+                    const DropdownMenuItem(
+                      value: null,
+                      child: Text('All Subjects'),
+                    ),
+                    ...filteredSubjects.map(
+                      (s) => DropdownMenuItem(value: s.id, child: Text(s.name)),
+                    ),
+                  ],
+                  onChanged: (val) {
+                    setState(() => _selectedSubject = val);
+                    _onFetchHomework();
+                  },
                 ),
               ],
             ),
