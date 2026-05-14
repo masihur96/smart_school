@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
@@ -8,7 +9,6 @@ import 'package:smart_school/features/profile/presentation/views/profile_screen.
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
-import 'package:percent_indicator/percent_indicator.dart';
 
 import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/marquee_notice.dart';
@@ -18,8 +18,8 @@ import '../data/models/student_dashboard_model.dart';
 import '../providers/student_dashboard_provider.dart';
 import 'student_attendance_screen.dart';
 import 'student_homework_screen.dart';
-import 'student_result_screen.dart';
 import 'student_notice_screen.dart';
+import 'student_result_screen.dart';
 import 'student_routine_screen.dart';
 
 class StudentDashboardScreen extends StatefulWidget {
@@ -108,6 +108,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
+                  color: Colors.white,
                 ),
               ),
               Text(
@@ -120,6 +121,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           elevation: 0,
           backgroundColor: AppColors.primaryStudent,
           foregroundColor: Colors.white,
+          iconTheme: IconThemeData(color: Colors.white),
           actions: [
             const NotificationIconButton(),
             IconButton(
@@ -212,15 +214,21 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           children: [
             _buildModernHeader(context, user, l10n),
             if (data?.marqueeData != null && data!.marqueeData!.text.isNotEmpty)
-              MarqueeNotice(customText: data.marqueeData!.text,color: AppColors.primaryStudent,),
+              MarqueeNotice(
+                customText: data.marqueeData!.text,
+                color: AppColors.primaryStudent,
+              ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionHeader("My ${l10n.attendance}", onSeeAll: () {
-                    setState(() => _selectedIndex = 1);
-                  }),
+                  _buildSectionHeader(
+                    "My ${l10n.attendance}",
+                    onSeeAll: () {
+                      setState(() => _selectedIndex = 1);
+                    },
+                  ),
                   _buildAttendanceSection(context, data, l10n),
                   const SizedBox(height: 24),
                   if (data?.myRecentExamListWithResult.isNotEmpty ?? false) ...[
@@ -236,7 +244,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                         physics: const BouncingScrollPhysics(),
                         itemCount: data!.myRecentExamListWithResult.length,
                         itemBuilder: (context, index) {
-                          final examData = data.myRecentExamListWithResult[index];
+                          final examData =
+                              data.myRecentExamListWithResult[index];
                           return _buildExamResultCard(context, examData);
                         },
                       ),
@@ -274,8 +283,6 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                         .map((notice) => _buildNoticeCard(context, notice)),
                     const SizedBox(height: 24),
                   ],
-
-
                 ],
               ),
             ),
@@ -302,10 +309,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
             onPressed: onSeeAll,
             child: Text(
               'See All', // Modify with l10n later if needed
-              style: TextStyle(
-                color: AppColors.primaryStudent,
-
-              ),
+              style: TextStyle(color: AppColors.primaryStudent),
             ),
           ),
       ],
@@ -454,10 +458,16 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                   ),
                 ),
                 Text(
-                  DateFormat(
-                    'EEE, MMM dd',
-                  ).format(DateTime.tryParse(data?.todayAttendanceStatus?.date ?? '') ?? DateTime.now()),
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  DateFormat('EEE, MMM dd').format(
+                    DateTime.tryParse(
+                          data?.todayAttendanceStatus?.date ?? '',
+                        ) ??
+                        DateTime.now(),
+                  ),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -548,9 +558,14 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: isDone ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                      color: isDone
+                          ? Colors.green.withOpacity(0.1)
+                          : Colors.orange.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -567,7 +582,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
               const SizedBox(height: 8),
               Text(
                 homework?.title ?? '',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -580,11 +598,19 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
               const Spacer(),
               Row(
                 children: [
-                  Icon(Icons.calendar_today, size: 12, color: Colors.red.shade400),
+                  Icon(
+                    Icons.calendar_today,
+                    size: 12,
+                    color: Colors.red.shade400,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     'Due: ${homework?.dueDate != null ? DateFormat('dd MMM').format(homework!.dueDate) : "N/A"}',
-                    style: TextStyle(fontSize: 11, color: Colors.red.shade400, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.red.shade400,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -599,7 +625,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     BuildContext context,
     MyRecentExamWithResult examData,
   ) {
-    if (examData.exam == null || examData.result == null) return const SizedBox();
+    if (examData.exam == null || examData.result == null)
+      return const SizedBox();
 
     final exam = examData.exam!;
     final result = examData.result!;
@@ -608,7 +635,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       width: screenSize(context, .85),
       margin: const EdgeInsets.only(right: 16, bottom: 8),
       decoration: BoxDecoration(
-       color: AppColors.primaryStudent,
+        color: AppColors.primaryStudent,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -779,7 +806,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       children: [
         _buildActionGridItem(
           context,
-          l10n.myRoutine, 
+          l10n.myRoutine,
           Icons.calendar_month_rounded,
           Colors.purple,
           onTap: () => Navigator.push(
@@ -799,14 +826,14 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           l10n.material,
           Icons.library_books_rounded,
           Colors.blue,
-          onTap: () {}, 
+          onTap: () {},
         ),
         _buildActionGridItem(
           context,
           l10n.queries,
           Icons.contact_support_rounded,
           Colors.teal,
-          onTap: () {}, 
+          onTap: () {},
         ),
       ],
     );
