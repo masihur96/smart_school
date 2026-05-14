@@ -396,6 +396,7 @@ class _DayRoutineTab extends StatelessWidget {
                     id: classId,
                     name: entry.classEntity?.name ?? "",
                   ),
+                  routineId: entry.id ?? "",
                   sectionId: entry.sectionId,
                   subjectID: entry.subjectId,
                 ),
