@@ -197,16 +197,16 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
             ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddSheet(context),
-        backgroundColor: AppColors.primaryTeacher,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add),
-        label: const Text(
-          'Add Homework',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
+      // floatingActionButton: FloatingActionButton.extended(
+      //   onPressed: () => _showAddSheet(context),
+      //   backgroundColor: AppColors.primaryTeacher,
+      //   foregroundColor: Colors.white,
+      //   icon: const Icon(Icons.add),
+      //   label: const Text(
+      //     'Add Homework',
+      //     style: TextStyle(fontWeight: FontWeight.bold),
+      //   ),
+      // ),
     );
   }
 
