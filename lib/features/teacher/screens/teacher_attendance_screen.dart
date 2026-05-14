@@ -165,7 +165,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomBar(students.isNotEmpty),
+      // bottomNavigationBar: _buildBottomBar(students.isNotEmpty),
     );
   }
 
@@ -378,7 +378,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
   }) {
     final bool isActive = status == currentStatus;
     return InkWell(
-      onTap: () => setState(() => _attendanceMap[studentId] = status),
+      // onTap: () => setState(() => _attendanceMap[studentId] = status),
       borderRadius: BorderRadius.circular(12),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
