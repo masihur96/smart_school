@@ -21,6 +21,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   String? _selectedClassId;
   String? _selectedSectionId;
   ExamAssignment? _selectedAssignment;
+  bool _showFilters = true;
 
   final Map<String, TextEditingController> _marksControllers = {};
   final Map<String, TextEditingController> _totalMarksControllers = {};
@@ -175,11 +176,11 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // _buildAppBar(),
+          _buildAppBar(),
           SliverToBoxAdapter(
             child: Column(
               children: [
-                _buildFilterCard(notifier),
+                if (_showFilters) _buildFilterCard(notifier),
                 if (_selectedAssignment != null)
                   _buildSectionHeader('Students (${students.length})'),
               ],
@@ -204,25 +205,17 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       elevation: 0,
       backgroundColor: AppColors.primaryTeacher,
       foregroundColor: Colors.white,
-      // flexibleSpace: FlexibleSpaceBar(
-      //   title: const Text(
-      //     'Mark Entry System',
-      //     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-      //   ),
-      //   background: Stack(
-      //     children: [
-      //       Positioned(
-      //         right: -20,
-      //         top: -20,
-      //         child: Icon(
-      //           Icons.edit_document,
-      //           size: 150,
-      //           color: Colors.white.withValues(alpha: 0.1),
-      //         ),
-      //       ),
-      //     ],
-      //   ),
-      // ),
+      title: const Text(
+        'Mark Entry System',
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+      ),
+      actions: [
+        IconButton(
+          onPressed: () => setState(() => _showFilters = !_showFilters),
+          icon: Icon(_showFilters ? Icons.filter_list_off : Icons.filter_list),
+          tooltip: _showFilters ? 'Hide Filters' : 'Show Filters',
+        ),
+      ],
     );
   }
 

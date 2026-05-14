@@ -5,8 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
-import 'package:smart_school/features/admin/screens/class_detail_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
+import 'package:smart_school/features/teacher/screens/schedule_class_details.dart';
 import 'package:smart_school/features/teacher/screens/teacher_self_attendance_detail_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
@@ -1161,7 +1161,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => ClassDetailScreen(
+                    builder: (_) => ScheduleClassDetails(
                       subjectID: classInfo.subjectId ?? "",
                       classRoom: classInfo.classEntity!,
                       sectionId: classInfo.sectionId,
