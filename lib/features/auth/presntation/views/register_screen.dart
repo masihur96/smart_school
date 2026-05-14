@@ -90,6 +90,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: SizedBox(
+                      height: 100,
+                      width: 100,
+                      child: Image.asset(
+                        "assets/icon/icon.png",
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 40),
                 Text(
                   'Join Smart School',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(

@@ -101,10 +101,23 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(Icons.school, size: 80),
+              Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: SizedBox(
+                    height: 100,
+                    width: 100,
+                    child: Image.asset(
+                      "assets/icon/icon.png",
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+
               const SizedBox(height: 16),
               Text(
-                'Smart School',
+                'SchoolCare',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
