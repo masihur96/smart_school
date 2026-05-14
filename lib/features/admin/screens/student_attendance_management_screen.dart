@@ -54,10 +54,14 @@ class _StudentAttendanceManagementScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Student Attendance"),
+        title: const Text(
+          "Student Attendance",
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: AppColors.primaryAdmin,
 
         foregroundColor: Colors.white,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
