@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/teacher/providers/attendance_provider.dart';
@@ -8,6 +9,7 @@ import '../../../models/school_models.dart';
 import '../../../models/student_model.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../teacher/providers/homework_provider.dart';
+import '../providers/routine_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
 
@@ -43,6 +45,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
 
   // Attendance state: studentId → status
   final Map<String, AttendanceStatus> _attendanceMap = {};
+  String? _selectedRoutineId;
 
   @override
   void initState() {
@@ -69,6 +72,11 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
       );
 
       _loadAttendanceForDate();
+
+      // Load routines
+      if (schoolId.isNotEmpty) {
+        context.read<RoutineNotifier>().fetchAllRoutines(schoolId);
+      }
     });
   }
 
@@ -140,15 +148,25 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
           _attendanceMap[student.userId] ?? AttendanceStatus.present;
     }
 
-    final success = await context
-        .read<AttendanceNotifier>()
-        .submitAttendanceToAPI(
-          date: _selectedDate,
-          takenBy: teacherId,
-          classId: widget.classRoom.id,
-          sectionId: widget.sectionId,
-          attendanceMap: fullMap,
-        );
+    final bool success;
+
+    if (_selectedRoutineId != null) {
+      success = await context
+          .read<AttendanceNotifier>()
+          .submitPeriodAttendanceToAPI(
+            date: _selectedDate,
+            routineId: _selectedRoutineId!,
+            attendanceMap: fullMap,
+          );
+    } else {
+      success = await context.read<AttendanceNotifier>().submitAttendanceToAPI(
+        date: _selectedDate,
+        takenBy: teacherId,
+        classId: widget.classRoom.id,
+        sectionId: widget.sectionId,
+        attendanceMap: fullMap,
+      );
+    }
 
     if (!mounted) return;
 
@@ -241,13 +259,18 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
             _AttendanceTab(
               classRoom: widget.classRoom,
               sectionId: widget.sectionId,
+              subjectId: widget.subjectID,
               selectedDate: _selectedDate,
               dateLabel: dateLabel,
               attendanceMap: _attendanceMap,
+              selectedRoutineId: _selectedRoutineId,
               onPickDate: _pickDate,
               onSave: _saveAttendance,
               onStatusChanged: (studentId, status) {
                 setState(() => _attendanceMap[studentId] = status);
+              },
+              onRoutineChanged: (routineId) {
+                setState(() => _selectedRoutineId = routineId);
               },
             ),
             _HomeworkTab(
@@ -269,23 +292,29 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
 class _AttendanceTab extends StatelessWidget {
   final ClassRoom classRoom;
   final String? sectionId;
+  final String subjectId;
   final DateTime selectedDate;
   final String dateLabel;
   final Map<String, AttendanceStatus> attendanceMap;
+  final String? selectedRoutineId;
   final VoidCallback onPickDate;
   final VoidCallback onSave;
   final void Function(String studentId, AttendanceStatus status)
-  onStatusChanged;
+      onStatusChanged;
+  final void Function(String? routineId) onRoutineChanged;
 
   const _AttendanceTab({
     required this.classRoom,
     this.sectionId,
+    required this.subjectId,
     required this.selectedDate,
     required this.dateLabel,
     required this.attendanceMap,
+    this.selectedRoutineId,
     required this.onPickDate,
     required this.onSave,
     required this.onStatusChanged,
+    required this.onRoutineChanged,
   });
 
   @override
@@ -348,6 +377,17 @@ class _AttendanceTab extends StatelessWidget {
               ),
             ],
           ),
+        ),
+        const Divider(height: 1),
+
+        // Period selector
+        _PeriodSelector(
+          classId: classRoom.id,
+          sectionId: sectionId,
+          subjectId: subjectId,
+          selectedDate: selectedDate,
+          selectedRoutineId: selectedRoutineId,
+          onChanged: onRoutineChanged,
         ),
         const Divider(height: 1),
 
@@ -428,6 +468,8 @@ class _StudentAttendanceCard extends StatelessWidget {
         return Colors.green;
       case AttendanceStatus.absent:
         return Colors.red;
+      case AttendanceStatus.late:
+        return Colors.blue;
       case AttendanceStatus.leave:
         return Colors.orange;
     }
@@ -528,6 +570,14 @@ class _AttendanceToggle extends StatelessWidget {
           active: current == AttendanceStatus.absent,
           activeColor: Colors.red,
           onTap: () => onChanged(AttendanceStatus.absent),
+        ),
+        const SizedBox(width: 4),
+        _ToggleChip(
+          label: 'Late',
+          tooltip: 'Late',
+          active: current == AttendanceStatus.late,
+          activeColor: Colors.blue,
+          onTap: () => onChanged(AttendanceStatus.late),
         ),
         const SizedBox(width: 4),
         _ToggleChip(
@@ -1396,6 +1446,104 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Period Selector
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _PeriodSelector extends StatelessWidget {
+  final String classId;
+  final String? sectionId;
+  final String subjectId;
+  final DateTime selectedDate;
+  final String? selectedRoutineId;
+  final void Function(String?) onChanged;
+
+  const _PeriodSelector({
+    required this.classId,
+    this.sectionId,
+    required this.subjectId,
+    required this.selectedDate,
+    this.selectedRoutineId,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final routineNotifier = context.watch<RoutineNotifier>();
+    final dayName = DateFormat('EEEE').format(selectedDate);
+
+    final allRoutines = routineNotifier.getRoutine(classId, sectionId ?? '');
+    final routines = allRoutines
+        .where(
+          (r) =>
+              r.subjectId == subjectId &&
+              r.day.toLowerCase() == dayName.toLowerCase(),
+        )
+        .toList();
+
+    if (routines.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        color: Colors.orange.withOpacity(0.05),
+        child: Row(
+          children: [
+            Icon(Icons.info_outline, size: 16, color: Colors.orange[700]),
+            const SizedBox(width: 8),
+            Text(
+              'No periods scheduled for today',
+              style: TextStyle(color: Colors.orange[700], fontSize: 12),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      color: Colors.white,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: routines.length,
+        itemBuilder: (context, index) {
+          final routine = routines[index];
+          final isSelected = routine.id == selectedRoutineId;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ChoiceChip(
+              label: Text('${routine.startTime} - ${routine.endTime}'),
+              selected: isSelected,
+              onSelected: (selected) {
+                onChanged(selected ? routine.id : null);
+              },
+              selectedColor: AppColors.primaryAdmin.withOpacity(0.2),
+              checkmarkColor: AppColors.primaryAdmin,
+              labelStyle: TextStyle(
+                color: isSelected ? AppColors.primaryAdmin : Colors.black87,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 12,
+              ),
+              backgroundColor: Colors.grey[100],
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: isSelected
+                      ? AppColors.primaryAdmin
+                      : Colors.transparent,
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
