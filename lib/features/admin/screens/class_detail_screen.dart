@@ -156,7 +156,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Attendance saved successfully!'),
-          backgroundColor: Color(0xFF7C3AED),
+          backgroundColor: AppColors.primaryAdmin,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -304,11 +304,7 @@ class _AttendanceTab extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             children: [
-              const Icon(
-                Icons.calendar_today,
-                size: 18,
-                color: Color(0xFF7C3AED),
-              ),
+              const Icon(Icons.calendar_today, size: 18),
               const SizedBox(width: 8),
               const Text(
                 'Date:',
@@ -323,7 +319,7 @@ class _AttendanceTab extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF7C3AED).withOpacity(0.1),
+                    color: AppColors.primaryAdmin.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: const Color(0xFF7C3AED).withOpacity(0.3),
@@ -335,17 +331,12 @@ class _AttendanceTab extends StatelessWidget {
                       Text(
                         dateLabel,
                         style: const TextStyle(
-                          color: Color(0xFF7C3AED),
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
                         ),
                       ),
                       const SizedBox(width: 6),
-                      const Icon(
-                        Icons.arrow_drop_down,
-                        size: 18,
-                        color: Color(0xFF7C3AED),
-                      ),
+                      const Icon(Icons.arrow_drop_down, size: 18),
                     ],
                   ),
                 ),
@@ -400,7 +391,7 @@ class _AttendanceTab extends StatelessWidget {
                   icon: const Icon(Icons.save_alt_rounded),
                   label: const Text('Save Attendance'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7C3AED),
+                    backgroundColor: AppColors.primaryAdmin,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
