@@ -1,12 +1,14 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import '../domain/entities/attendance.dart';
-import '../domain/repositories/i_attendance_repository.dart';
-import '../../../core/utils/storage_service.dart';
+
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
+import '../../../core/utils/storage_service.dart';
 import '../../../models/school_models.dart';
 import '../../../services/notification_service.dart';
+import '../domain/entities/attendance.dart';
+import '../domain/repositories/i_attendance_repository.dart';
 
 class AttendanceNotifier extends ChangeNotifier {
   final IAttendanceRepository _repository;
@@ -66,10 +68,9 @@ class AttendanceNotifier extends ChangeNotifier {
       final dateString =
           '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
-      final records = attendanceMap.entries.map((e) => {
-            "studentId": e.key,
-            "status": e.value.name,
-          }).toList();
+      final records = attendanceMap.entries
+          .map((e) => {"studentId": e.key, "status": e.value.name})
+          .toList();
 
       final data = {
         "date": dateString,
@@ -92,7 +93,8 @@ class AttendanceNotifier extends ChangeNotifier {
         // Trigger notification
         NotificationService().triggerNotification(
           title: 'Attendance Submitted',
-          body: 'Attendance for class $classId has been submitted for $dateString.',
+          body:
+              'Attendance for class $classId has been submitted for $dateString.',
           topic: 'class_$classId',
           data: {
             'type': 'attendance',
@@ -103,7 +105,8 @@ class AttendanceNotifier extends ChangeNotifier {
         );
         NotificationService().triggerNotification(
           title: 'Attendance Submitted',
-          body: 'Attendance for class $classId has been submitted for $dateString.',
+          body:
+              'Attendance for class $classId has been submitted for $dateString.',
           topic: 'attendance',
           data: {
             'type': 'attendance',
@@ -128,6 +131,55 @@ class AttendanceNotifier extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> submitPeriodAttendanceToAPI({
+    required String routineId,
+    required DateTime date,
+    required Map<String, AttendanceStatus> attendanceMap,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final dateString =
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
+      final records = attendanceMap.entries
+          .map((e) => {"studentId": e.key, "status": e.value.name})
+          .toList();
+
+      final data = {
+        "routineId": routineId,
+        "date": dateString,
+        "records": records,
+      };
+
+      final response = await DataProvider().performRequest(
+        'POST',
+        APIPath.submitPeriodAttendance,
+        data: data,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
+        log('Successfully submitted period attendance');
+        return true;
+      } else {
+        log('Error submitting period attendance: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      log('Error submitting period attendance: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   AttendanceStatus _parseStatus(dynamic status) {
     if (status == null) return AttendanceStatus.present;
     final statusStr = status.toString().toLowerCase();
@@ -151,10 +203,7 @@ class AttendanceNotifier extends ChangeNotifier {
       final dateString =
           '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
-      final query = <String, dynamic>{
-        'classId': classId,
-        'date': dateString,
-      };
+      final query = <String, dynamic>{'classId': classId, 'date': dateString};
       if (sectionId != null && sectionId.isNotEmpty) {
         query['sectionId'] = sectionId;
       }
@@ -179,27 +228,33 @@ class AttendanceNotifier extends ChangeNotifier {
                 final docDateStr = item['date']?.toString() ?? '';
                 final docDate = DateTime.tryParse(docDateStr) ?? date;
                 final docTakenBy = item['takenBy']?.toString() ?? '';
-                final recordsRaw = List<Map<String, dynamic>>.from(item['records']);
+                final recordsRaw = List<Map<String, dynamic>>.from(
+                  item['records'],
+                );
                 for (var r in recordsRaw) {
-                  fetchedRecords.add(AttendanceEntity(
-                    id: r['id']?.toString() ?? '',
-                    studentId: r['studentId']?.toString() ?? '',
-                    date: docDate,
-                    status: _parseStatus(r['status']),
-                    takenBy: docTakenBy,
-                  ));
+                  fetchedRecords.add(
+                    AttendanceEntity(
+                      id: r['id']?.toString() ?? '',
+                      studentId: r['studentId']?.toString() ?? '',
+                      date: docDate,
+                      status: _parseStatus(r['status']),
+                      takenBy: docTakenBy,
+                    ),
+                  );
                 }
               } else {
                 // Flat record case (individual record)
                 final recDateStr = item['date']?.toString() ?? '';
                 final recDate = DateTime.tryParse(recDateStr) ?? date;
-                fetchedRecords.add(AttendanceEntity(
-                  id: item['id']?.toString() ?? '',
-                  studentId: item['studentId']?.toString() ?? '',
-                  date: recDate,
-                  status: _parseStatus(item['status']),
-                  takenBy: item['takenBy']?.toString() ?? '',
-                ));
+                fetchedRecords.add(
+                  AttendanceEntity(
+                    id: item['id']?.toString() ?? '',
+                    studentId: item['studentId']?.toString() ?? '',
+                    date: recDate,
+                    status: _parseStatus(item['status']),
+                    takenBy: item['takenBy']?.toString() ?? '',
+                  ),
+                );
               }
             }
           }
@@ -209,26 +264,34 @@ class AttendanceNotifier extends ChangeNotifier {
             final docDateStr = rawData['date']?.toString() ?? '';
             final docDate = DateTime.tryParse(docDateStr) ?? date;
             final docTakenBy = rawData['takenBy']?.toString() ?? '';
-            final recordsRaw = List<Map<String, dynamic>>.from(rawData['records']);
+            final recordsRaw = List<Map<String, dynamic>>.from(
+              rawData['records'],
+            );
             for (var r in recordsRaw) {
-              fetchedRecords.add(AttendanceEntity(
-                id: r['id']?.toString() ?? '',
-                studentId: r['studentId']?.toString() ?? '',
-                date: docDate,
-                status: _parseStatus(r['status']),
-                takenBy: docTakenBy,
-              ));
+              fetchedRecords.add(
+                AttendanceEntity(
+                  id: r['id']?.toString() ?? '',
+                  studentId: r['studentId']?.toString() ?? '',
+                  date: docDate,
+                  status: _parseStatus(r['status']),
+                  takenBy: docTakenBy,
+                ),
+              );
             }
           }
         }
 
         // Update state for this date
-        _state.removeWhere((r) =>
-            r.date.year == date.year &&
-            r.date.month == date.month &&
-            r.date.day == date.day);
+        _state.removeWhere(
+          (r) =>
+              r.date.year == date.year &&
+              r.date.month == date.month &&
+              r.date.day == date.day,
+        );
         _state.addAll(fetchedRecords);
-        log('Fetched ${fetchedRecords.length} attendance records for $dateString');
+        log(
+          'Fetched ${fetchedRecords.length} attendance records for $dateString',
+        );
       }
     } catch (e) {
       log('Error fetching attendance: $e');
@@ -264,27 +327,33 @@ class AttendanceNotifier extends ChangeNotifier {
                 final docDateStr = item['date']?.toString() ?? '';
                 final docDate = DateTime.tryParse(docDateStr) ?? DateTime.now();
                 final docTakenBy = item['takenBy']?.toString() ?? '';
-                final recordsRaw = List<Map<String, dynamic>>.from(item['records']);
+                final recordsRaw = List<Map<String, dynamic>>.from(
+                  item['records'],
+                );
                 for (var r in recordsRaw) {
-                  fetchedRecords.add(AttendanceEntity(
-                    id: r['id']?.toString() ?? '',
-                    studentId: r['studentId']?.toString() ?? '',
-                    date: docDate,
-                    status: _parseStatus(r['status']),
-                    takenBy: docTakenBy,
-                  ));
+                  fetchedRecords.add(
+                    AttendanceEntity(
+                      id: r['id']?.toString() ?? '',
+                      studentId: r['studentId']?.toString() ?? '',
+                      date: docDate,
+                      status: _parseStatus(r['status']),
+                      takenBy: docTakenBy,
+                    ),
+                  );
                 }
               } else {
                 // Individual record
                 final recDateStr = item['date']?.toString() ?? '';
                 final recDate = DateTime.tryParse(recDateStr) ?? DateTime.now();
-                fetchedRecords.add(AttendanceEntity(
-                  id: item['id']?.toString() ?? '',
-                  studentId: item['studentId']?.toString() ?? '',
-                  date: recDate,
-                  status: _parseStatus(item['status']),
-                  takenBy: item['takenBy']?.toString() ?? '',
-                ));
+                fetchedRecords.add(
+                  AttendanceEntity(
+                    id: item['id']?.toString() ?? '',
+                    studentId: item['studentId']?.toString() ?? '',
+                    date: recDate,
+                    status: _parseStatus(item['status']),
+                    takenBy: item['takenBy']?.toString() ?? '',
+                  ),
+                );
               }
             }
           }
@@ -316,10 +385,7 @@ class AttendanceNotifier extends ChangeNotifier {
       final response = await DataProvider().performRequest(
         'GET',
         APIPath.attendanceOverview,
-        query: {
-          'year': qYear.toString(),
-          'month': qMonth.toString(),
-        },
+        query: {'year': qYear.toString(), 'month': qMonth.toString()},
         header: {'Authorization': 'Bearer $token'},
       );
 

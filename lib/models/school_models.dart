@@ -150,7 +150,7 @@ class Subject {
   };
 }
 
-enum AttendanceStatus { present, absent, leave }
+enum AttendanceStatus { present, absent, late, leave }
 
 class Attendance {
   final String id;

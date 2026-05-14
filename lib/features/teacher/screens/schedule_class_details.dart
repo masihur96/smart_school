@@ -430,6 +430,8 @@ class _StudentAttendanceCard extends StatelessWidget {
         return Colors.green;
       case AttendanceStatus.absent:
         return Colors.red;
+      case AttendanceStatus.late:
+        return Colors.blue;
       case AttendanceStatus.leave:
         return Colors.orange;
     }
@@ -519,6 +521,14 @@ class _AttendanceToggle extends StatelessWidget {
           active: current == AttendanceStatus.absent,
           activeColor: Colors.red,
           onTap: () => onChanged(AttendanceStatus.absent),
+        ),
+        const SizedBox(width: 4),
+        _ToggleChip(
+          label: 'Late',
+          tooltip: 'Late',
+          active: current == AttendanceStatus.late,
+          activeColor: Colors.blue,
+          onTap: () => onChanged(AttendanceStatus.late),
         ),
         const SizedBox(width: 4),
         _ToggleChip(
