@@ -31,6 +31,7 @@ class ExamsNotifier extends ChangeNotifier {
 
       if (response != null && response.statusCode == 200) {
         final dynamic raw = response.data;
+        log('Raw exam data: $raw'); // Debugging assignments zero issue
         final List<dynamic> data = raw is List
             ? raw
             : (raw is Map ? (raw['data'] ?? raw['exams'] ?? []) : []);

@@ -85,20 +85,31 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
     AppLocalizations l10n,
   ) {
     final assignmentsCount = exam.assignments.length;
-    final startDateStr = exam.startDate != null
-        ? DateFormat('MMM dd, yyyy').format(exam.startDate!)
-        : 'N/A';
+    final resultsCount = exam.results.length;
+
+    final dateRange = exam.startDate != null && exam.endDate != null
+        ? '${DateFormat('MMM dd').format(exam.startDate!)} - ${DateFormat('MMM dd, yyyy').format(exam.endDate!)}'
+        : (exam.startDate != null
+              ? DateFormat('MMM dd, yyyy').format(exam.startDate!)
+              : 'N/A');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-       color: AppColors.primaryTeacher,
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primaryTeacher,
+            AppColors.primaryTeacher.withOpacity(0.8),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.purple.withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+            color: AppColors.primaryTeacher.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -108,11 +119,11 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
         child: Stack(
           children: [
             Positioned(
-              right: -20,
-              top: -20,
+              right: -30,
+              top: -30,
               child: Icon(
                 Icons.assignment_rounded,
-                size: 120,
+                size: 150,
                 color: Colors.white.withOpacity(0.1),
               ),
             ),
@@ -129,8 +140,9 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
                           exam.name,
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 20,
+                            fontSize: 22,
                             fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -139,93 +151,108 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
+                          horizontal: 12,
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                          ),
                         ),
                         child: Text(
-                          exam.isPublished ? 'Published' : 'Upcoming',
+                          exam.isPublished ? 'Published' : 'Draft',
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 10,
+                            fontSize: 11,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    exam.description ?? '',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 14,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Starts On',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.6),
-                              fontSize: 11,
-                            ),
-                          ),
-                          Text(
-                            startDateStr,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                  const SizedBox(height: 12),
+                  if (exam.description != null && exam.description!.isNotEmpty)
+                    Text(
+                      exam.description!,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: 14,
+                        height: 1.4,
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.menu_book,
-                              size: 16,
-                              color: Colors.deepPurple.shade900,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              '$assignmentsCount Routines',
-                              style: TextStyle(
-                                color: Colors.deepPurple.shade900,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      _buildInfoBadge(
+                        Icons.calendar_today,
+                        dateRange,
+                        Colors.blue.shade50,
+                        Colors.blue.shade900,
+                      ),
+                      const SizedBox(width: 12),
+                      _buildInfoBadge(
+                        Icons.menu_book,
+                        '${exam.assignments.length} Routines',
+                        Colors.amber.shade50,
+                        Colors.amber.shade900,
                       ),
                     ],
                   ),
+                  if (resultsCount > 0) ...[
+                    const SizedBox(height: 12),
+                    _buildInfoBadge(
+                      Icons.check_circle_outline,
+                      '$resultsCount Results Recorded',
+                      Colors.green.shade50,
+                      Colors.green.shade900,
+                    ),
+                  ],
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoBadge(
+    IconData icon,
+    String label,
+    Color bgColor,
+    Color textColor,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: AppColors.primaryTeacher),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColors.primaryTeacher.withOpacity(0.8),
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -241,8 +268,8 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
         maxChildSize: 0.95,
         builder: (context, scrollController) => Container(
           decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            color: Color(0xFFF8F9FE),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
           ),
           child: Column(
             children: [
@@ -301,31 +328,38 @@ class TeacherExamRoutineView extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.purple.shade50,
-                    borderRadius: BorderRadius.circular(16),
+                    color: AppColors.primaryTeacher.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Icon(Icons.event_note, color: Colors.purple.shade700),
+                  child: Icon(
+                    Icons.event_note,
+                    color: AppColors.primaryTeacher,
+                    size: 28,
+                  ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 20),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Exam Schedules',
+                        'EXAM SCHEDULES',
                         style: TextStyle(
-                          color: Colors.grey.shade500,
+                          color: AppColors.primaryTeacher.withOpacity(0.6),
                           fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.2,
                         ),
                       ),
+                      const SizedBox(height: 4),
                       Text(
                         exam.name,
                         style: const TextStyle(
-                          fontSize: 20,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          color: Color(0xFF1A1C1E),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -339,10 +373,15 @@ class TeacherExamRoutineView extends StatelessWidget {
           TabBar(
             isScrollable: true,
             tabAlignment: TabAlignment.start,
-            indicatorColor: Colors.purple.shade700,
-            labelColor: Colors.purple.shade700,
-            unselectedLabelColor: Colors.grey,
-            labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+            indicatorColor: AppColors.primaryTeacher,
+            indicatorSize: TabBarIndicatorSize.label,
+            labelColor: AppColors.primaryTeacher,
+            unselectedLabelColor: Colors.grey.shade400,
+            labelStyle: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             tabs: classNames.map((c) => Tab(text: 'Class $c')).toList(),
           ),
           Expanded(
@@ -360,21 +399,24 @@ class TeacherExamRoutineView extends StatelessWidget {
                     final dateStr = DateFormat(
                       'EEEE, MMM dd',
                     ).format(assignment.date);
+                    final hasSection =
+                        assignment.sectionName != null &&
+                        assignment.sectionName!.isNotEmpty;
 
                     return Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      padding: const EdgeInsets.all(20),
+                      margin: const EdgeInsets.only(bottom: 20),
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.grey.shade100),
+                        borderRadius: BorderRadius.circular(28),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.02),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
+                            color: Colors.black.withOpacity(0.03),
+                            blurRadius: 15,
+                            offset: const Offset(0, 8),
                           ),
                         ],
+                        border: Border.all(color: Colors.white),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -382,15 +424,17 @@ class TeacherExamRoutineView extends StatelessWidget {
                           Row(
                             children: [
                               Container(
-                                padding: const EdgeInsets.all(10),
+                                padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: Colors.purple.shade50,
-                                  borderRadius: BorderRadius.circular(12),
+                                  color: AppColors.primaryTeacher.withOpacity(
+                                    0.08,
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: Icon(
-                                  Icons.book_outlined,
-                                  size: 20,
-                                  color: Colors.purple.shade700,
+                                  Icons.book_rounded,
+                                  size: 24,
+                                  color: AppColors.primaryTeacher,
                                 ),
                               ),
                               const SizedBox(width: 16),
@@ -401,16 +445,18 @@ class TeacherExamRoutineView extends StatelessWidget {
                                     Text(
                                       assignment.subjectName,
                                       style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 18,
+                                        color: Color(0xFF1A1C1E),
                                       ),
                                     ),
+                                    const SizedBox(height: 2),
                                     Text(
                                       dateStr,
                                       style: TextStyle(
-                                        color: Colors.purple.shade700,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.primaryTeacher,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ],
@@ -418,66 +464,41 @@ class TeacherExamRoutineView extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Divider(height: 1),
-                          ),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.person_outline,
-                                size: 16,
-                                color: Colors.black54,
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Examiner: ',
-                                style: TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              Text(
-                                assignment.examinerName,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (assignment.syllabus != null &&
-                              assignment.syllabus!.isNotEmpty &&
-                              assignment.syllabus != "N/A") ...[
-                            const SizedBox(height: 8),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          const SizedBox(height: 20),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Column(
                               children: [
-                                const Icon(
-                                  Icons.menu_book_outlined,
-                                  size: 16,
-                                  color: Colors.black54,
+                                _buildDetailRow(
+                                  Icons.person_rounded,
+                                  'Examiner',
+                                  assignment.examinerName,
                                 ),
-                                const SizedBox(width: 8),
-                                const Text(
-                                  'Syllabus: ',
-                                  style: TextStyle(
-                                    color: Colors.black54,
-                                    fontSize: 13,
+                                if (hasSection) ...[
+                                  const SizedBox(height: 12),
+                                  _buildDetailRow(
+                                    Icons.grid_view_rounded,
+                                    'Section',
+                                    assignment.sectionName!,
                                   ),
-                                ),
-                                Expanded(
-                                  child: Text(
+                                ],
+                                if (assignment.syllabus != null &&
+                                    assignment.syllabus!.isNotEmpty &&
+                                    assignment.syllabus != "N/A") ...[
+                                  const SizedBox(height: 12),
+                                  _buildDetailRow(
+                                    Icons.description_rounded,
+                                    'Syllabus',
                                     assignment.syllabus!,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                    ),
                                   ),
-                                ),
+                                ],
                               ],
                             ),
-                          ],
+                          ),
                         ],
                       ),
                     );
@@ -488,6 +509,33 @@ class TeacherExamRoutineView extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: Colors.grey.shade400),
+        const SizedBox(width: 12),
+        Text(
+          '$label: ',
+          style: TextStyle(
+            color: Colors.grey.shade500,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Color(0xFF1A1C1E),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
