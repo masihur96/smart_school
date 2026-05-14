@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/teacher/providers/attendance_provider.dart';
 import 'package:smart_school/features/teacher/screens/homework_details_screen.dart';
 
@@ -1042,6 +1043,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
+            backgroundColor: AppColors.primaryTeacher,
             content: Text(
               widget.homework == null
                   ? 'Homework assigned successfully!'
