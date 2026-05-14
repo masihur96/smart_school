@@ -153,7 +153,6 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                 : students.isEmpty
                 ? _buildEmptyState()
                 : ListView.builder(
-                    padding: const EdgeInsets.all(16),
                     itemCount: students.length,
                     itemBuilder: (context, index) {
                       final student = students[index];
@@ -220,7 +219,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
@@ -274,6 +273,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     required ValueChanged<T?> onChanged,
   }) {
     return Card(
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: DropdownButtonHideUnderline(
@@ -294,6 +294,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
 
   Widget _buildStudentCard(Student student, AttendanceStatus status) {
     return Card(
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -441,7 +442,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
       child: ElevatedButton(
         onPressed: !hasStudents ? null : _save,
         style: ElevatedButton.styleFrom(
-          backgroundColor:AppColors.primaryTeacher,
+          backgroundColor: AppColors.primaryTeacher,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
