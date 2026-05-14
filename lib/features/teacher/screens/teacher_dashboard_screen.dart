@@ -284,13 +284,13 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
-                      height: 180,
+                      height: 170,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         physics: const BouncingScrollPhysics(),
                         itemCount: classes.length,
                         itemBuilder: (context, index) => Padding(
-                          padding: const EdgeInsets.only(right: 16),
+                          padding: const EdgeInsets.only(right: 5),
                           child: _buildClassCard(context, classes[index]),
                         ),
                       ),
@@ -1149,6 +1149,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         classInfo.subjectEntity?.name ?? 'Subject ${classInfo.subjectId}';
 
     return Card(
+      margin: EdgeInsets.zero,
       child: SizedBox(
         width: screenSize(context, .45),
         child: Padding(

@@ -67,7 +67,7 @@ class AppTheme {
         ),
       ),
       listTileTheme: ListTileThemeData(
-        titleTextStyle: TextStyle(color: Colors.white),
+        titleTextStyle: TextStyle(color: Colors.black),
       ),
     );
   }
