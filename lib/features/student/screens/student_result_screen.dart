@@ -35,7 +35,7 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
           ? null
           : AppBar(
               title: const Text('Exams & Results'),
-              backgroundColor:  AppColors.primaryTeacher,
+              backgroundColor: AppColors.primaryTeacher,
               foregroundColor: Colors.white,
               elevation: 0,
               centerTitle: true,
@@ -173,7 +173,7 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
   Widget _buildInfoItem(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.indigo.withOpacity(0.5)),
+        Icon(icon, size: 16),
         const SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
