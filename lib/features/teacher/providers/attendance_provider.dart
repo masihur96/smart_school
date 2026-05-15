@@ -7,6 +7,8 @@ import '../../../core/constants/api_path.dart';
 import '../../../core/utils/storage_service.dart';
 import '../../../models/school_models.dart';
 import '../../../services/notification_service.dart';
+import 'package:intl/intl.dart';
+import '../../../models/period_attendance_model.dart';
 import '../domain/entities/attendance.dart';
 import '../domain/repositories/i_attendance_repository.dart';
 
@@ -15,6 +17,11 @@ class AttendanceNotifier extends ChangeNotifier {
   List<AttendanceEntity> _state = [];
   bool _isLoading = false;
   AttendanceOverview? _overviewSummary;
+  List<PeriodAttendance> _periodAttendanceRecords = [];
+  int _total = 0;
+  int _page = 1;
+  int _totalPages = 1;
+  int _limit = 50;
 
   AttendanceNotifier(this._repository) {
     _load(DateTime.now());
@@ -23,6 +30,10 @@ class AttendanceNotifier extends ChangeNotifier {
   List<AttendanceEntity> get state => _state;
   bool get isLoading => _isLoading;
   AttendanceOverview? get overviewSummary => _overviewSummary;
+  List<PeriodAttendance> get periodAttendanceRecords => _periodAttendanceRecords;
+  int get total => _total;
+  int get page => _page;
+  int get totalPages => _totalPages;
 
   Future<void> _load(DateTime date) async {
     _state = await _repository.getAttendanceForDate(date);
@@ -126,6 +137,89 @@ class AttendanceNotifier extends ChangeNotifier {
     } catch (e) {
       log('Error submitting attendance: $e');
       return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchPeriodAttendance({
+    String? studentName,
+    String? studentId,
+    String? classId,
+    String? sectionId,
+    String? subjectId,
+    String? teacherId,
+    String? routineId,
+    DateTime? date,
+    DateTime? startDate,
+    DateTime? endDate,
+    int page = 1,
+    int limit = 50,
+  }) async {
+    if (page == 1) {
+      _isLoading = true;
+      _periodAttendanceRecords = [];
+      notifyListeners();
+    }
+
+    try {
+      final token = await StorageService.getToken();
+      final query = <String, String>{
+        'page': page.toString(),
+        'limit': limit.toString(),
+      };
+
+      if (studentName != null && studentName.isNotEmpty) {
+        query['studentName'] = studentName;
+      }
+      if (studentId != null && studentId.isNotEmpty) {
+        query['studentId'] = studentId;
+      }
+      if (classId != null && classId.isNotEmpty) {
+        query['classId'] = classId;
+      }
+      if (sectionId != null && sectionId.isNotEmpty) {
+        query['sectionId'] = sectionId;
+      }
+      if (subjectId != null && subjectId.isNotEmpty) {
+        query['subjectId'] = subjectId;
+      }
+      if (teacherId != null && teacherId.isNotEmpty) {
+        query['teacherId'] = teacherId;
+      }
+      if (routineId != null && routineId.isNotEmpty) {
+        query['routineId'] = routineId;
+      }
+
+      final df = DateFormat('yyyy-MM-dd');
+      if (date != null) query['date'] = df.format(date);
+      if (startDate != null) query['startDate'] = df.format(startDate);
+      if (endDate != null) query['endDate'] = df.format(endDate);
+
+      log("Fetching period attendance with query: $query");
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.teacherPeriodAttendance,
+        query: query,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final periodResponse = PeriodAttendanceResponse.fromJson(response.data);
+        if (page == 1) {
+          _periodAttendanceRecords = periodResponse.data.data;
+        } else {
+          _periodAttendanceRecords.addAll(periodResponse.data.data);
+        }
+        _total = periodResponse.data.total;
+        _page = periodResponse.data.page;
+        _totalPages = periodResponse.data.totalPages;
+        _limit = periodResponse.data.limit;
+      }
+    } catch (e) {
+      log('Error fetching period attendance: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
