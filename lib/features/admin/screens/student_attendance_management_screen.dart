@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/features/admin/providers/setup_provider.dart';
+import 'package:smart_school/models/school_models.dart';
 
 import '../providers/attendance_management_provider.dart';
 
@@ -17,20 +19,62 @@ class _StudentAttendanceManagementScreenState
     extends State<StudentAttendanceManagementScreen> {
   DateTime _selectedDate = DateTime.now();
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  String? _selectedClassId;
+  String? _selectedSectionId;
+  String? _selectedSubjectId;
 
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    _scrollController.addListener(_onScroll);
+    _fetchInitialData();
   }
 
-  void _fetchData() {
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      final provider = context.read<AttendanceManagementProvider>();
+      if (!provider.isLoading && provider.page < provider.totalPages) {
+        provider.fetchStudentAttendance(
+          name: _searchController.text,
+          date: _selectedDate,
+          classId: _selectedClassId,
+          sectionId: _selectedSectionId,
+          subjectId: _selectedSubjectId,
+          page: provider.page + 1,
+        );
+      }
+    }
+  }
+
+  void _fetchInitialData() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AttendanceManagementProvider>().fetchStudentAttendance(
-        name: _searchController.text,
-        date: _selectedDate,
-      );
+      context.read<ClassSetupNotifier>().fetchSchoolData();
+      context.read<SectionSetupNotifier>().fetchSchoolData();
+      context.read<SubjectSetupNotifier>().fetchSchoolData();
+
+      _fetchData();
     });
+  }
+
+  void _fetchData({int page = 1}) {
+    context.read<AttendanceManagementProvider>().fetchStudentAttendance(
+          name: _searchController.text,
+          date: _selectedDate,
+          classId: _selectedClassId,
+          sectionId: _selectedSectionId,
+          subjectId: _selectedSubjectId,
+          page: page,
+        );
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -50,7 +94,22 @@ class _StudentAttendanceManagementScreenState
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<AttendanceManagementProvider>();
+    final attendanceProvider = context.watch<AttendanceManagementProvider>();
+    final classProvider = context.watch<ClassSetupNotifier>();
+    final sectionProvider = context.watch<SectionSetupNotifier>();
+    final subjectProvider = context.watch<SubjectSetupNotifier>();
+
+    final filteredSections = _selectedClassId == null
+        ? sectionProvider.sections
+        : sectionProvider.sections
+            .where((s) => s.classId == _selectedClassId)
+            .toList();
+
+    final filteredSubjects = _selectedClassId == null
+        ? subjectProvider.subjects
+        : subjectProvider.subjects
+            .where((s) => s.classId == _selectedClassId)
+            .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -59,15 +118,23 @@ class _StudentAttendanceManagementScreenState
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: AppColors.primaryAdmin,
-
         foregroundColor: Colors.white,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
             child: Column(
               children: [
                 Row(
@@ -94,13 +161,65 @@ class _StudentAttendanceManagementScreenState
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E1B4B).withOpacity(0.1),
+                          color: AppColors.primaryAdmin.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.calendar_today),
+                        child: const Icon(Icons.calendar_today,
+                            color: AppColors.primaryAdmin),
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 12),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildFilterDropdown<ClassRoom>(
+                        hint: "Class",
+                        value: _selectedClassId,
+                        items: classProvider.classes,
+                        itemLabel: (item) => item.name,
+                        itemValue: (item) => item.id,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedClassId = value;
+                            _selectedSectionId = null;
+                            _selectedSubjectId = null;
+                          });
+                          _fetchData();
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      _buildFilterDropdown<Section>(
+                        hint: "Section",
+                        value: _selectedSectionId,
+                        items: filteredSections,
+                        itemLabel: (item) => item.name,
+                        itemValue: (item) => item.id,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedSectionId = value;
+                          });
+                          _fetchData();
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      _buildFilterDropdown<Subject>(
+                        hint: "Subject",
+                        value: _selectedSubjectId,
+                        items: filteredSubjects,
+                        itemLabel: (item) => item.name,
+                        itemValue: (item) => item.id,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedSubjectId = value;
+                          });
+                          _fetchData();
+                        },
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -113,101 +232,197 @@ class _StudentAttendanceManagementScreenState
                         color: Colors.grey,
                       ),
                     ),
-                    if (_searchController.text.isNotEmpty)
-                      Text(
-                        "Results for '${_searchController.text}'",
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.blue,
-                        ),
+                    Text(
+                      "Total: ${attendanceProvider.total}",
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
                       ),
+                    ),
                   ],
                 ),
               ],
             ),
           ),
           Expanded(
-            child: provider.isLoading
+            child: attendanceProvider.studentAttendance.isEmpty &&
+                    attendanceProvider.isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : provider.error != null
-                ? Center(child: Text("Error: ${provider.error}"))
-                : provider.studentAttendance.isEmpty
-                ? const Center(child: Text("No records found"))
-                : ListView.builder(
-                    itemCount: provider.studentAttendance.length,
-                    padding: const EdgeInsets.all(16),
-                    itemBuilder: (context, index) {
-                      final record = provider.studentAttendance[index];
-                      // Assuming record structure from the API
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.purple.withOpacity(0.1),
-                            child: Text(
-                              (record['studentName'] ??
-                                      record['name'] ??
-                                      "?")[0]
-                                  .toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.purple,
-                                fontWeight: FontWeight.bold,
-                              ),
+                : attendanceProvider.error != null
+                    ? Center(child: Text("Error: ${attendanceProvider.error}"))
+                    : attendanceProvider.studentAttendance.isEmpty
+                        ? const Center(child: Text("No records found"))
+                        : RefreshIndicator(
+                            onRefresh: () async => _fetchData(),
+                            child: ListView.builder(
+                              controller: _scrollController,
+                              itemCount: attendanceProvider
+                                      .studentAttendance.length +
+                                  (attendanceProvider.isLoading ? 1 : 0),
+                              padding: const EdgeInsets.all(16),
+                              itemBuilder: (context, index) {
+                                if (index ==
+                                    attendanceProvider
+                                        .studentAttendance.length) {
+                                  return const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                }
+                                final record = attendanceProvider
+                                    .studentAttendance[index];
+                                return Card(
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  elevation: 2,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: ExpansionTile(
+                                    leading: CircleAvatar(
+                                      backgroundColor:
+                                          _getStatusColor(record.status)
+                                              .withOpacity(0.1),
+                                      child: Text(
+                                        record.studentName.isNotEmpty
+                                            ? record.studentName[0]
+                                                .toUpperCase()
+                                            : "?",
+                                        style: TextStyle(
+                                          color: _getStatusColor(record.status),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    title: Text(
+                                      record.studentName,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    subtitle: Text(
+                                      "Class: ${record.classInfo?.name ?? 'N/A'} | Section: ${record.sectionInfo?.name ?? 'N/A'}",
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                    trailing: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: _getStatusColor(record.status)
+                                            .withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        record.status.toUpperCase(),
+                                        style: TextStyle(
+                                          color: _getStatusColor(record.status),
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                    ),
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            _buildDetailRow(
+                                                "Subject",
+                                                record.subjectInfo?.name ??
+                                                    'N/A'),
+                                            _buildDetailRow(
+                                                "Teacher",
+                                                record.teacherInfo?.name ??
+                                                    'N/A'),
+                                            _buildDetailRow(
+                                                "Time",
+                                                "${record.routineInfo?.startTime ?? ''} - ${record.routineInfo?.endTime ?? ''}"),
+                                            _buildDetailRow(
+                                                "Room",
+                                                record.routineInfo
+                                                        ?.roomNumber ??
+                                                    'N/A'),
+                                            _buildDetailRow("Date", record.date),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
                             ),
                           ),
-                          title: Text(
-                            record['studentName'] ??
-                                record['name'] ??
-                                "Unknown Student",
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(
-                            "Class: ${record['className'] ?? 'N/A'} - Section: ${record['sectionName'] ?? 'N/A'}",
-                          ),
-                          trailing: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _getStatusColor(
-                                record['status']?.toString().toLowerCase(),
-                              ).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              record['status']?.toString().toUpperCase() ??
-                                  "UNKNOWN",
-                              style: TextStyle(
-                                color: _getStatusColor(
-                                  record['status']?.toString().toLowerCase(),
-                                ),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
           ),
         ],
       ),
     );
   }
 
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4.0),
+      child: Row(
+        children: [
+          Text("$label: ",
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: Colors.grey)),
+          Text(value),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterDropdown<T>({
+    required String hint,
+    required String? value,
+    required List<T> items,
+    required String Function(T) itemLabel,
+    required String Function(T) itemValue,
+    required void Function(String?) onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          hint: Text(hint, style: const TextStyle(fontSize: 12)),
+          items: [
+            DropdownMenuItem<String>(
+              value: null,
+              child: Text("All $hint", style: const TextStyle(fontSize: 12)),
+            ),
+            ...items.map((item) {
+              return DropdownMenuItem<String>(
+                value: itemValue(item),
+                child: Text(itemLabel(item),
+                    style: const TextStyle(fontSize: 12)),
+              );
+            }),
+          ],
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
   Color _getStatusColor(String? status) {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case 'present':
         return Colors.green;
       case 'absent':
         return Colors.red;
       case 'leave':
         return Colors.orange;
+      case 'late':
+        return Colors.blue;
       default:
         return Colors.grey;
     }
