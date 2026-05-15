@@ -17,7 +17,7 @@ class StudentAttendanceManagementScreen extends StatefulWidget {
 
 class _StudentAttendanceManagementScreenState
     extends State<StudentAttendanceManagementScreen> {
-  DateTime _selectedDate = DateTime.now();
+  DateTime? _selectedDate;
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -80,7 +80,7 @@ class _StudentAttendanceManagementScreenState
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
+      initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
@@ -161,13 +161,29 @@ class _StudentAttendanceManagementScreenState
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryAdmin.withOpacity(0.1),
+                          color: _selectedDate != null
+                              ? AppColors.primaryAdmin
+                              : AppColors.primaryAdmin.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.calendar_today,
-                            color: AppColors.primaryAdmin),
+                        child: Icon(
+                          Icons.calendar_today,
+                          color: _selectedDate != null
+                              ? Colors.white
+                              : AppColors.primaryAdmin,
+                        ),
                       ),
                     ),
+                    if (_selectedDate != null)
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedDate = null;
+                          });
+                          _fetchData();
+                        },
+                        icon: const Icon(Icons.clear, color: Colors.red),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -226,7 +242,9 @@ class _StudentAttendanceManagementScreenState
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}",
+                      _selectedDate == null
+                          ? "All Dates"
+                          : "Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate!)}",
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.grey,
@@ -300,9 +318,31 @@ class _StudentAttendanceManagementScreenState
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
-                                    subtitle: Text(
-                                      "Class: ${record.classInfo?.name ?? 'N/A'} | Section: ${record.sectionInfo?.name ?? 'N/A'}",
-                                      style: const TextStyle(fontSize: 12),
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Class: ${record.classInfo?.name ?? 'N/A'} | Section: ${record.sectionInfo?.name ?? 'N/A'}",
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          "Subject: ${record.subjectInfo?.name ?? 'N/A'}",
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: AppColors.primaryAdmin,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Date: ${record.date}",
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                     trailing: Container(
                                       padding: const EdgeInsets.symmetric(
@@ -331,10 +371,6 @@ class _StudentAttendanceManagementScreenState
                                               CrossAxisAlignment.start,
                                           children: [
                                             _buildDetailRow(
-                                                "Subject",
-                                                record.subjectInfo?.name ??
-                                                    'N/A'),
-                                            _buildDetailRow(
                                                 "Teacher",
                                                 record.teacherInfo?.name ??
                                                     'N/A'),
@@ -346,7 +382,6 @@ class _StudentAttendanceManagementScreenState
                                                 record.routineInfo
                                                         ?.roomNumber ??
                                                     'N/A'),
-                                            _buildDetailRow("Date", record.date),
                                           ],
                                         ),
                                       ),
