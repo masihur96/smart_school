@@ -24,12 +24,14 @@ class ScheduleClassDetails extends StatefulWidget {
   final ClassRoom classRoom;
   final String subjectID;
   final String? sectionId;
+  final String? routineId;
 
   const ScheduleClassDetails({
     super.key,
     required this.subjectID,
     required this.classRoom,
     this.sectionId,
+    this.routineId,
   });
 
   @override
@@ -140,15 +142,26 @@ class _ScheduleClassDetailsState extends State<ScheduleClassDetails>
           _attendanceMap[student.userId] ?? AttendanceStatus.present;
     }
 
-    final success = await context
-        .read<AttendanceNotifier>()
-        .submitAttendanceToAPI(
-          date: _selectedDate,
-          takenBy: teacherId,
-          classId: widget.classRoom.id,
-          sectionId: widget.sectionId,
-          attendanceMap: fullMap,
-        );
+    bool success = false;
+    if (widget.routineId != null && widget.routineId!.isNotEmpty) {
+      // Use new period-based attendance API
+      success = await context
+          .read<AttendanceNotifier>()
+          .submitPeriodAttendanceToAPI(
+            routineId: widget.routineId!,
+            date: _selectedDate,
+            attendanceMap: fullMap,
+          );
+    } else {
+      // Fallback to legacy attendance API
+      success = await context.read<AttendanceNotifier>().submitAttendanceToAPI(
+        date: _selectedDate,
+        takenBy: teacherId,
+        classId: widget.classRoom.id,
+        sectionId: widget.sectionId,
+        attendanceMap: fullMap,
+      );
+    }
 
     if (!mounted) return;
 

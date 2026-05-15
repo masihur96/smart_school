@@ -1167,6 +1167,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       subjectID: classInfo.subjectId ?? "",
                       classRoom: classInfo.classEntity!,
                       sectionId: classInfo.sectionId,
+                      routineId: classInfo.id,
                     ),
                   ),
                 );
