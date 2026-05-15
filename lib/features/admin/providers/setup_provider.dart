@@ -115,7 +115,7 @@ class ClassSetupNotifier extends ChangeNotifier {
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
         final responseData = response.data['data'] ?? response.data;
-        final newId = responseData['_id']?.toString() ?? responseData['id']?.toString() ?? DateTime.now().toString();
+        final newId = responseData['uuid']?.toString() ?? responseData['id']?.toString() ?? responseData['_id']?.toString() ?? DateTime.now().toString();
 
         _dbService.classes.add(
           ClassRoom(

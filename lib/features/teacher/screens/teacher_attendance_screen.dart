@@ -5,6 +5,7 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/teacher/providers/attendance_provider.dart';
+import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/period_attendance_model.dart';
 
 class TeacherAttendanceScreen extends StatefulWidget {
@@ -12,14 +13,14 @@ class TeacherAttendanceScreen extends StatefulWidget {
   const TeacherAttendanceScreen({super.key, this.hideAppBar = false});
 
   @override
-  State<TeacherAttendanceScreen> createState() =>
-      _TeacherAttendanceScreenState();
+  State<TeacherAttendanceScreen> createState() => _TeacherAttendanceScreenState();
 }
 
 class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
-  DateTime? _selectedDate;
+  DateTime? _startDate;
+  DateTime? _endDate;
   String? _selectedClassId;
   String? _selectedSectionId;
   String? _selectedSubjectId;
@@ -55,13 +56,14 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
 
   void _fetchData({int page = 1}) {
     context.read<AttendanceNotifier>().fetchPeriodAttendance(
-      studentName: _searchController.text,
-      date: _selectedDate,
-      classId: _selectedClassId,
-      sectionId: _selectedSectionId,
-      subjectId: _selectedSubjectId,
-      page: page,
-    );
+          studentName: _searchController.text,
+          startDate: _startDate,
+          endDate: _endDate,
+          classId: _selectedClassId,
+          sectionId: _selectedSectionId,
+          subjectId: _selectedSubjectId,
+          page: page,
+        );
   }
 
   @override
@@ -89,8 +91,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
           Expanded(
             child: Consumer<AttendanceNotifier>(
               builder: (context, provider, child) {
-                if (provider.isLoading &&
-                    provider.periodAttendanceRecords.isEmpty) {
+                if (provider.isLoading && provider.periodAttendanceRecords.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
@@ -101,8 +102,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                 return ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.all(16),
-                  itemCount:
-                      provider.periodAttendanceRecords.length +
+                  itemCount: provider.periodAttendanceRecords.length +
                       (provider.page < provider.totalPages ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (index < provider.periodAttendanceRecords.length) {
@@ -167,10 +167,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                   hint: 'Class',
                   value: _selectedClassId,
                   items: classProvider.classes
-                      .map(
-                        (c) =>
-                            DropdownMenuItem(value: c.id, child: Text(c.name)),
-                      )
+                      .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
                       .toList(),
                   onChanged: (value) {
                     setState(() {
@@ -189,10 +186,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                   value: _selectedSectionId,
                   items: sectionProvider.sections
                       .where((s) => s.classId == _selectedClassId)
-                      .map(
-                        (s) =>
-                            DropdownMenuItem(value: s.id, child: Text(s.name)),
-                      )
+                      .map((s) => DropdownMenuItem(value: s.id, child: Text(s.name)))
                       .toList(),
                   onChanged: (value) {
                     setState(() => _selectedSectionId = value);
@@ -211,15 +205,8 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                   hint: 'Subject',
                   value: _selectedSubjectId,
                   items: subjectProvider.subjects
-                      .where(
-                        (s) =>
-                            s.classId == _selectedClassId ||
-                            _selectedClassId == null,
-                      )
-                      .map(
-                        (s) =>
-                            DropdownMenuItem(value: s.id, child: Text(s.name)),
-                      )
+                      .where((s) => s.classId == _selectedClassId || _selectedClassId == null)
+                      .map((s) => DropdownMenuItem(value: s.id, child: Text(s.name)))
                       .toList(),
                   onChanged: (value) {
                     setState(() => _selectedSubjectId = value);
@@ -230,51 +217,39 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: GestureDetector(
-                  onTap: _pickDate,
+                  onTap: _pickDateRange,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.calendar_today,
-                          size: 18,
-                          color: Colors.grey[600],
-                        ),
+                        Icon(Icons.date_range, size: 18, color: Colors.grey[600]),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            _selectedDate == null
-                                ? 'Date'
-                                : DateFormat(
-                                    'MMM dd, yyyy',
-                                  ).format(_selectedDate!),
+                            (_startDate == null || _endDate == null)
+                                ? 'Date Range'
+                                : '${DateFormat('MMM dd').format(_startDate!)} - ${DateFormat('MMM dd').format(_endDate!)}',
                             style: TextStyle(
-                              color: _selectedDate == null
-                                  ? Colors.grey[600]
-                                  : Colors.black,
-                              fontSize: 13,
+                              color: (_startDate == null) ? Colors.grey[600] : Colors.black,
+                              fontSize: 12,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (_selectedDate != null)
+                        if (_startDate != null)
                           GestureDetector(
                             onTap: () {
-                              setState(() => _selectedDate = null);
+                              setState(() {
+                                _startDate = null;
+                                _endDate = null;
+                              });
                               _fetchData();
                             },
-                            child: const Icon(
-                              Icons.close,
-                              size: 16,
-                              color: Colors.red,
-                            ),
+                            child: const Icon(Icons.close, size: 16, color: Colors.red),
                           ),
                       ],
                     ),
@@ -312,15 +287,32 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     );
   }
 
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
+  Future<void> _pickDateRange() async {
+    final picked = await showDateRangePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
+      initialDateRange: (_startDate != null && _endDate != null)
+          ? DateTimeRange(start: _startDate!, end: _endDate!)
+          : null,
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primaryTeacher,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
-      setState(() => _selectedDate = picked);
+      setState(() {
+        _startDate = picked.start;
+        _endDate = picked.end;
+      });
       _fetchData();
     }
   }
@@ -334,17 +326,10 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
           const SizedBox(height: 16),
           Text(
             'No attendance records found',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(color: Colors.grey[600], fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Try adjusting your filters',
-            style: TextStyle(color: Colors.grey),
-          ),
+          const Text('Try adjusting your filters', style: TextStyle(color: Colors.grey)),
         ],
       ),
     );
@@ -384,14 +369,8 @@ class _AttendanceRecordCard extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                record.studentName.isNotEmpty
-                    ? record.studentName[0].toUpperCase()
-                    : '?',
-                style: TextStyle(
-                  color: statusColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
+                record.studentName.isNotEmpty ? record.studentName[0].toUpperCase() : '?',
+                style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 18),
               ),
             ),
           ),
@@ -410,28 +389,19 @@ class _AttendanceRecordCard extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       record.status.toUpperCase(),
-                      style: TextStyle(
-                        color: statusColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    DateFormat(
-                      'MMM dd, yyyy',
-                    ).format(DateTime.parse(record.date)),
+                    DateFormat('MMM dd, yyyy').format(DateTime.parse(record.date)),
                     style: TextStyle(color: Colors.grey[500], fontSize: 12),
                   ),
                 ],
@@ -444,26 +414,11 @@ class _AttendanceRecordCard extends StatelessWidget {
               child: Column(
                 children: [
                   const Divider(),
-                  _buildDetailRow(
-                    Icons.book,
-                    'Subject',
-                    record.subjectInfo?.name ?? '--',
-                  ),
-                  _buildDetailRow(
-                    Icons.person,
-                    'Teacher',
-                    record.teacherInfo?.name ?? '--',
-                  ),
-                  _buildDetailRow(
-                    Icons.access_time,
-                    'Routine',
-                    '${record.routineInfo?.startTime ?? "--"} - ${record.routineInfo?.endTime ?? "--"}',
-                  ),
-                  _buildDetailRow(
-                    Icons.calendar_today,
-                    'Day',
-                    record.routineInfo?.day ?? '--',
-                  ),
+                  _buildDetailRow(Icons.book, 'Subject', record.subjectInfo?.name ?? '--'),
+                  _buildDetailRow(Icons.person, 'Teacher', record.teacherInfo?.name ?? '--'),
+                  _buildDetailRow(Icons.access_time, 'Routine',
+                      '${record.routineInfo?.startTime ?? "--"} - ${record.routineInfo?.endTime ?? "--"}'),
+                  _buildDetailRow(Icons.calendar_today, 'Day', record.routineInfo?.day ?? '--'),
                 ],
               ),
             ),
@@ -482,10 +437,7 @@ class _AttendanceRecordCard extends StatelessWidget {
           const SizedBox(width: 12),
           Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
           const Spacer(),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
-          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
         ],
       ),
     );
