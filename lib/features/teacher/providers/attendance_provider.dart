@@ -158,7 +158,7 @@ class AttendanceNotifier extends ChangeNotifier {
 
       final response = await DataProvider().performRequest(
         'POST',
-        APIPath.periodAttendance,
+        APIPath.teacherPeriodAttendance,
         data: data,
         header: {'Authorization': 'Bearer $token'},
       );
