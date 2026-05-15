@@ -93,17 +93,17 @@ class PeriodAttendance {
 
   factory PeriodAttendance.fromJson(Map<String, dynamic> json) {
     return PeriodAttendance(
-      id: json['id'] ?? '',
-      routineId: json['routineId'] ?? '',
-      studentId: json['studentId'] ?? '',
-      studentName: json['studentName'] ?? '',
-      classId: json['classId'] ?? '',
-      sectionId: json['sectionId'] ?? '',
-      subjectId: json['subjectId'] ?? '',
-      teacherId: json['teacherId'] ?? '',
+      id: json['id'] ?? json['uuid'] ?? json['_id'] ?? '',
+      routineId: json['routineId'] ?? json['routine_id'] ?? '',
+      studentId: json['studentId'] ?? json['student_id'] ?? '',
+      studentName: json['studentName'] ?? json['name'] ?? '',
+      classId: json['classId'] ?? json['class_id'] ?? '',
+      sectionId: json['sectionId'] ?? json['section_id'] ?? '',
+      subjectId: json['subjectId'] ?? json['subject_id'] ?? '',
+      teacherId: json['teacherId'] ?? json['teacher_id'] ?? '',
       date: json['date'] ?? '',
       status: json['status'] ?? '',
-      schoolId: json['schoolId'] ?? '',
+      schoolId: json['schoolId'] ?? json['school_id'] ?? '',
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : DateTime.now(),

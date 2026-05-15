@@ -76,9 +76,9 @@ class ClassRoom {
   final DateTime? deletedAt;
 
   factory ClassRoom.fromJson(Map<String, dynamic> json) => ClassRoom(
-    id: json['id'] ?? json['_id'] ?? '',
+    id: json['uuid'] ?? json['id'] ?? json['_id'] ?? '',
     name: json['name'] ?? '',
-    schoolId: json['schoolId'] ?? '',
+    schoolId: json['schoolId'] ?? json['school_id'] ?? '',
     description: json['description'] ?? '',
     deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
   );
@@ -103,8 +103,8 @@ class Section {
   bool get isDeleted => deletedAt != null;
 
   factory Section.fromJson(Map<String, dynamic> json) => Section(
-    id: json['id'] ?? json['_id'] ?? '',
-    classId: json['classId'] ?? '',
+    id: json['uuid'] ?? json['id'] ?? json['_id'] ?? '',
+    classId: json['classId'] ?? json['class_id'] ?? '',
     name: json['name'] ?? '',
     deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
   );
@@ -132,11 +132,11 @@ class Subject {
   final DateTime? deletedAt;
 
   factory Subject.fromJson(Map<String, dynamic> json) => Subject(
-    id: json['id'] ?? json['_id'] ?? '',
+    id: json['uuid'] ?? json['id'] ?? json['_id'] ?? '',
     name: json['name'] ?? '',
     code: json['code'] ?? '',
-    classId: json['classId'] ?? '',
-    schoolId: json['schoolId'] ?? '',
+    classId: json['classId'] ?? json['class_id'] ?? '',
+    schoolId: json['schoolId'] ?? json['school_id'] ?? '',
     deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
   );
 
@@ -547,7 +547,7 @@ class RoutineEntry {
   factory RoutineEntry.fromJson(Map<String, dynamic> json) {
     log('Parsing RoutineEntry from JSON: $json');
     return RoutineEntry(
-      id: json['id'] ?? json['_id'],
+      id: json['uuid'] ?? json['id'] ?? json['_id'],
       classId: json['classId'],
       sectionId: json['sectionId'],
       schoolId: json['schoolId'],
@@ -621,7 +621,7 @@ class ExamAssignment {
     final examinerData = json['examiner'];
 
     return ExamAssignment(
-      id: json['id'] ?? json['uuid'] ?? '',
+      id: json['uuid'] ?? json['id'] ?? '',
       examId: json['examId'] ?? json['exam_id'] ?? '',
       classId: (classData is Map ? (classData['uuid'] ?? classData['id']) : null) ?? json['classId'] ?? json['class_id'] ?? json['class_uid'] ?? '',
       className: (classData is Map ? classData['name'] : null) ?? json['className'] ?? json['class_name'] ?? '',
@@ -879,7 +879,7 @@ class Teacher {
   final DateTime? deletedAt;
 
   factory Teacher.fromJson(Map<String, dynamic> json) => Teacher(
-        id: json['id'] ?? '',
+        id: json['uuid'] ?? json['id'] ?? '',
         name: json['name'] ?? '',
         email: json['email'],
         phone: json['phone'],
