@@ -164,7 +164,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
 
     final success = await context
         .read<AttendanceNotifier>()
-        .submitPeriodAttendanceToAPI(
+        .submitPeriodAttendanceToAdminDashboard(
           date: _selectedDate,
           routineId: widget.routineId,
           attendanceMap: fullMap,

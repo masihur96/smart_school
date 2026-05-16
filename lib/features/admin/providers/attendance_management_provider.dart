@@ -69,7 +69,7 @@ class AttendanceManagementProvider extends ChangeNotifier {
 
       final response = await DataProvider().performRequest(
         'GET',
-        APIPath.periodAttendance,
+        APIPath.adminPeriodAttendance,
         query: query,
         header: {'Authorization': 'Bearer $token'},
       );
@@ -120,8 +120,9 @@ class AttendanceManagementProvider extends ChangeNotifier {
       );
 
       if (response != null && response.statusCode == 200) {
-        _teacherAttendance =
-            response.data['data'] is List ? response.data['data'] : [];
+        _teacherAttendance = response.data['data'] is List
+            ? response.data['data']
+            : [];
       } else {
         _error = "Failed to fetch teacher attendance";
       }

@@ -98,6 +98,6 @@ class APIPath {
       "$baseUrl/student/exam-results/$id";
 
   static String submitMarks = "$baseUrl/admin/marks";
-  static String periodAttendance = "$baseUrl/admin/attendance/period";
+  static String adminPeriodAttendance = "$baseUrl/admin/attendance/period";
   static String teacherPeriodAttendance = "$baseUrl/attendance/period";
 }
