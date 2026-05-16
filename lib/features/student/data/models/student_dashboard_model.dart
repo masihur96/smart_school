@@ -44,27 +44,26 @@ class StudentDashboardData {
 
 class TodayAttendanceStatus {
   final String date;
-  final String status;
-  final Attendance? record;
+  final List<StudentDashboardAttendanceRecord> records;
 
   TodayAttendanceStatus({
     required this.date,
-    required this.status,
-    this.record,
+    this.records = const [],
   });
 
   factory TodayAttendanceStatus.fromJson(Map<String, dynamic> json) {
     return TodayAttendanceStatus(
       date: json['date'] ?? '',
-      status: json['status'] ?? 'not-marked',
-      record: json['record'] != null ? Attendance.fromJson(json['record']) : null,
+      records: (json['records'] as List? ?? [])
+          .map((e) => StudentDashboardAttendanceRecord.fromJson(e))
+          .toList(),
     );
   }
 }
 
 class MyAttendanceList {
   final AttendanceSummary? summary;
-  final List<Attendance> records;
+  final List<StudentDashboardAttendanceRecord> records;
 
   MyAttendanceList({
     this.summary,
@@ -77,8 +76,33 @@ class MyAttendanceList {
           ? AttendanceSummary.fromJson(json['summary'])
           : null,
       records: (json['records'] as List? ?? [])
-          .map((e) => Attendance.fromJson(e))
+          .map((e) => StudentDashboardAttendanceRecord.fromJson(e))
           .toList(),
+    );
+  }
+}
+
+class StudentDashboardAttendanceRecord {
+  final String id;
+  final String date;
+  final String status;
+  final Subject? subjectInfo;
+
+  StudentDashboardAttendanceRecord({
+    required this.id,
+    required this.date,
+    required this.status,
+    this.subjectInfo,
+  });
+
+  factory StudentDashboardAttendanceRecord.fromJson(Map<String, dynamic> json) {
+    return StudentDashboardAttendanceRecord(
+      id: json['id'] ?? '',
+      date: json['date'] ?? '',
+      status: json['status'] ?? 'not-marked',
+      subjectInfo: json['subjectInfo'] != null
+          ? Subject.fromJson(json['subjectInfo'])
+          : null,
     );
   }
 }
