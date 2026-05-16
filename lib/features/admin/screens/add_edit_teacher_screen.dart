@@ -338,10 +338,19 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
 
             // Location Settings Section
             isEditing
-                ? _buildSectionHeader(
-                    context,
-                    'Arrival Settings',
-                    Icons.location_on_outlined,
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildSectionHeader(
+                        context,
+                        'Arrival Settings',
+                        Icons.location_on_outlined,
+                      ),
+                      IconButton(
+                        onPressed: () {},
+                        icon: Icon(Icons.location_on_outlined),
+                      ),
+                    ],
                   )
                 : SizedBox(),
             isEditing
