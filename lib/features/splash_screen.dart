@@ -131,71 +131,80 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          FadeTransition(
-            opacity: _opacityAnimation,
-            child: ScaleTransition(
-              scale: _scaleAnimation,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: SizedBox(
-                  height: 100,
-                  width: 100,
-                  child: Image.asset("assets/icon/icon.png", fit: BoxFit.cover),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Spacer(),
+            const SizedBox(height: 8),
+            FadeTransition(
+              opacity: _opacityAnimation,
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: SizedBox(
+                    height: 100,
+                    width: 100,
+                    child: Image.asset(
+                      "assets/icon/icon.png",
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 32),
-          FadeTransition(
-            opacity: _opacityAnimation,
-            child: Text(
-              'Smart School',
-              style: GoogleFonts.outfit(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
+            const SizedBox(height: 32),
+            FadeTransition(
+              opacity: _opacityAnimation,
+              child: Text(
+                'SchoolCare',
+                style: GoogleFonts.outfit(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
 
-                letterSpacing: 2,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    offset: const Offset(0, 4),
-                    blurRadius: 8,
+                  letterSpacing: 2,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      offset: const Offset(0, 4),
+                      blurRadius: 8,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            FadeTransition(
+              opacity: _opacityAnimation,
+              child: Text(
+                'Excellence in Education',
+                style: GoogleFonts.outfit(fontSize: 16, letterSpacing: 1.5),
+              ),
+            ),
+            Spacer(),
+
+            FadeTransition(
+              opacity: _opacityAnimation,
+              child: const Column(
+                children: [
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(strokeWidth: 3),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'STAY TUNED',
+                    style: TextStyle(fontSize: 12, letterSpacing: 3),
                   ),
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          FadeTransition(
-            opacity: _opacityAnimation,
-            child: Text(
-              'Excellence in Education',
-              style: GoogleFonts.outfit(fontSize: 16, letterSpacing: 1.5),
-            ),
-          ),
-
-          FadeTransition(
-            opacity: _opacityAnimation,
-            child: const Column(
-              children: [
-                SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: CircularProgressIndicator(strokeWidth: 3),
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'STAY TUNED',
-                  style: TextStyle(fontSize: 12, letterSpacing: 3),
-                ),
-              ],
-            ),
-          ),
-        ],
+            const SizedBox(height: 48),
+          ],
+        ),
       ),
     );
   }
