@@ -68,13 +68,13 @@ class _StudentAttendanceManagementScreenState
 
   void _fetchData({int page = 1}) {
     context.read<AttendanceManagementProvider>().fetchStudentAttendance(
-          name: _searchController.text,
-          date: _selectedDate,
-          classId: _selectedClassId,
-          sectionId: _selectedSectionId,
-          subjectId: _selectedSubjectId,
-          page: page,
-        );
+      name: _searchController.text,
+      date: _selectedDate,
+      classId: _selectedClassId,
+      sectionId: _selectedSectionId,
+      subjectId: _selectedSubjectId,
+      page: page,
+    );
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -102,14 +102,14 @@ class _StudentAttendanceManagementScreenState
     final filteredSections = _selectedClassId == null
         ? sectionProvider.sections
         : sectionProvider.sections
-            .where((s) => s.classId == _selectedClassId)
-            .toList();
+              .where((s) => s.classId == _selectedClassId)
+              .toList();
 
     final filteredSubjects = _selectedClassId == null
         ? subjectProvider.subjects
         : subjectProvider.subjects
-            .where((s) => s.classId == _selectedClassId)
-            .toList();
+              .where((s) => s.classId == _selectedClassId)
+              .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -125,16 +125,7 @@ class _StudentAttendanceManagementScreenState
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
+
             child: Column(
               children: [
                 Row(
@@ -252,10 +243,7 @@ class _StudentAttendanceManagementScreenState
                     ),
                     Text(
                       "Total: ${attendanceProvider.total}",
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),
@@ -263,134 +251,133 @@ class _StudentAttendanceManagementScreenState
             ),
           ),
           Expanded(
-            child: attendanceProvider.studentAttendance.isEmpty &&
+            child:
+                attendanceProvider.studentAttendance.isEmpty &&
                     attendanceProvider.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : attendanceProvider.error != null
-                    ? Center(child: Text("Error: ${attendanceProvider.error}"))
-                    : attendanceProvider.studentAttendance.isEmpty
-                        ? const Center(child: Text("No records found"))
-                        : RefreshIndicator(
-                            onRefresh: () async => _fetchData(),
-                            child: ListView.builder(
-                              controller: _scrollController,
-                              itemCount: attendanceProvider
-                                      .studentAttendance.length +
-                                  (attendanceProvider.isLoading ? 1 : 0),
-                              padding: const EdgeInsets.all(16),
-                              itemBuilder: (context, index) {
-                                if (index ==
-                                    attendanceProvider
-                                        .studentAttendance.length) {
-                                  return const Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  );
-                                }
-                                final record = attendanceProvider
-                                    .studentAttendance[index];
-                                return Card(
-                                  margin: const EdgeInsets.only(bottom: 12),
-                                  elevation: 2,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: ExpansionTile(
-                                    leading: CircleAvatar(
-                                      backgroundColor:
-                                          _getStatusColor(record.status)
-                                              .withOpacity(0.1),
-                                      child: Text(
-                                        record.studentName.isNotEmpty
-                                            ? record.studentName[0]
-                                                .toUpperCase()
-                                            : "?",
-                                        style: TextStyle(
-                                          color: _getStatusColor(record.status),
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    title: Text(
-                                      record.studentName,
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    subtitle: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Class: ${record.classInfo?.name ?? 'N/A'} | Section: ${record.sectionInfo?.name ?? 'N/A'}",
-                                          style: const TextStyle(fontSize: 12),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          "Subject: ${record.subjectInfo?.name ?? 'N/A'}",
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            color: AppColors.primaryAdmin,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        Text(
-                                          "Date: ${record.date}",
-                                          style: const TextStyle(
-                                            fontSize: 10,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    trailing: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: _getStatusColor(record.status)
-                                            .withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        record.status.toUpperCase(),
-                                        style: TextStyle(
-                                          color: _getStatusColor(record.status),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 10,
-                                        ),
-                                      ),
-                                    ),
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            _buildDetailRow(
-                                                "Teacher",
-                                                record.teacherInfo?.name ??
-                                                    'N/A'),
-                                            _buildDetailRow(
-                                                "Time",
-                                                "${record.routineInfo?.startTime ?? ''} - ${record.routineInfo?.endTime ?? ''}"),
-                                            _buildDetailRow(
-                                                "Room",
-                                                record.routineInfo
-                                                        ?.roomNumber ??
-                                                    'N/A'),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
+                ? Center(child: Text("Error: ${attendanceProvider.error}"))
+                : attendanceProvider.studentAttendance.isEmpty
+                ? const Center(child: Text("No records found"))
+                : RefreshIndicator(
+                    onRefresh: () async => _fetchData(),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount:
+                          attendanceProvider.studentAttendance.length +
+                          (attendanceProvider.isLoading ? 1 : 0),
+                      padding: const EdgeInsets.all(16),
+                      itemBuilder: (context, index) {
+                        if (index ==
+                            attendanceProvider.studentAttendance.length) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(),
                             ),
+                          );
+                        }
+                        final record =
+                            attendanceProvider.studentAttendance[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
+                          child: ExpansionTile(
+                            leading: CircleAvatar(
+                              backgroundColor: _getStatusColor(
+                                record.status,
+                              ).withOpacity(0.1),
+                              child: Text(
+                                record.studentName.isNotEmpty
+                                    ? record.studentName[0].toUpperCase()
+                                    : "?",
+                                style: TextStyle(
+                                  color: _getStatusColor(record.status),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            title: Text(
+                              record.studentName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Class: ${record.classInfo?.name ?? 'N/A'} | Section: ${record.sectionInfo?.name ?? 'N/A'}",
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  "Subject: ${record.subjectInfo?.name ?? 'N/A'}",
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.primaryAdmin,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  "Date: ${record.date}",
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            trailing: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _getStatusColor(
+                                  record.status,
+                                ).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                record.status.toUpperCase(),
+                                style: TextStyle(
+                                  color: _getStatusColor(record.status),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ),
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildDetailRow(
+                                      "Teacher",
+                                      record.teacherInfo?.name ?? 'N/A',
+                                    ),
+                                    _buildDetailRow(
+                                      "Time",
+                                      "${record.routineInfo?.startTime ?? ''} - ${record.routineInfo?.endTime ?? ''}",
+                                    ),
+                                    _buildDetailRow(
+                                      "Room",
+                                      record.routineInfo?.roomNumber ?? 'N/A',
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
           ),
         ],
       ),
@@ -402,9 +389,13 @@ class _StudentAttendanceManagementScreenState
       padding: const EdgeInsets.only(bottom: 4.0),
       child: Row(
         children: [
-          Text("$label: ",
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold, color: Colors.grey)),
+          Text(
+            "$label: ",
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
+          ),
           Text(value),
         ],
       ),
@@ -437,8 +428,10 @@ class _StudentAttendanceManagementScreenState
             ...items.map((item) {
               return DropdownMenuItem<String>(
                 value: itemValue(item),
-                child: Text(itemLabel(item),
-                    style: const TextStyle(fontSize: 12)),
+                child: Text(
+                  itemLabel(item),
+                  style: const TextStyle(fontSize: 12),
+                ),
               );
             }),
           ],

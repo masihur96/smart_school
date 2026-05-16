@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/screens/class_detail_screen.dart';
 import 'package:smart_school/models/teacher_model.dart';
@@ -124,7 +125,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
   ) {
     final user = context.read<AuthNotifier>().user;
     return SliverAppBar(
-      expandedHeight: 220,
+      expandedHeight: 160,
       floating: false,
       pinned: true,
       backgroundColor: user?.role.name.toLowerCase() == "admin"
@@ -132,31 +133,36 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
           : AppColors.primary,
       foregroundColor: Colors.white,
       elevation: 0,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Class Routine',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Manage weekly timetable for each class',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.8),
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
       flexibleSpace: FlexibleSpaceBar(
         background: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 50, 10, 16),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Class Routine',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Manage weekly timetable for each class',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 16),
+                SizedBox(height: screenSize(context, .12)),
                 // Filter row
                 Row(
                   children: [
@@ -259,20 +265,12 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
               color: const Color(0xFF7C3AED).withOpacity(0.08),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.calendar_month_outlined,
-              size: 50,
-              color: Color(0xFF7C3AED),
-            ),
+            child: const Icon(Icons.calendar_month_outlined, size: 50),
           ),
           const SizedBox(height: 20),
           const Text(
             'Select Class',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1E1B4B),
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
@@ -1271,7 +1269,7 @@ class _FilterDropdown extends StatelessWidget {
         child: DropdownButton<String>(
           value: value,
           isExpanded: true,
-          dropdownColor: const Color(0xFF4F46E5),
+          // dropdownColor: const Color(0xFF4F46E5),
           style: const TextStyle(color: Colors.white, fontSize: 13),
           hint: Text(
             hint,

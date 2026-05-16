@@ -45,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _controller.forward();
-    // _checkAuth();
+    _checkAuth();
   }
 
   Future<void> _checkAuth() async {
