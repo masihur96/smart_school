@@ -76,7 +76,6 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
       appBar: widget.hideAppBar
           ? null
           : AppBar(
@@ -151,7 +150,6 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
             decoration: InputDecoration(
               hintText: 'Search student name...',
               prefixIcon: const Icon(Icons.search),
-              fillColor: Colors.white,
               filled: true,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -233,53 +231,51 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
               Expanded(
                 child: GestureDetector(
                   onTap: _pickDateRange,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.date_range,
-                          size: 18,
-                          color: Colors.grey[600],
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            (_startDate == null || _endDate == null)
-                                ? 'Date Range'
-                                : '${DateFormat('MMM dd').format(_startDate!)} - ${DateFormat('MMM dd').format(_endDate!)}',
-                            style: TextStyle(
-                              color: (_startDate == null)
-                                  ? Colors.grey[600]
-                                  : Colors.black,
-                              fontSize: 12,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0,
+                        vertical: 14,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.date_range,
+                            size: 18,
+                            color: Colors.grey[600],
                           ),
-                        ),
-                        if (_startDate != null)
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _startDate = null;
-                                _endDate = null;
-                              });
-                              _fetchData();
-                            },
-                            child: const Icon(
-                              Icons.close,
-                              size: 16,
-                              color: Colors.red,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              (_startDate == null || _endDate == null)
+                                  ? 'Date Range'
+                                  : '${DateFormat('MMM dd').format(_startDate!)} - ${DateFormat('MMM dd').format(_endDate!)}',
+                              style: TextStyle(
+                                color: (_startDate == null)
+                                    ? Colors.grey[600]
+                                    : Colors.black,
+                                fontSize: 12,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                      ],
+                          if (_startDate != null)
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _startDate = null;
+                                  _endDate = null;
+                                });
+                                _fetchData();
+                              },
+                              child: const Icon(
+                                Icons.close,
+                                size: 16,
+                                color: Colors.red,
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -297,19 +293,17 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     required List<DropdownMenuItem<T>> items,
     required ValueChanged<T?> onChanged,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<T>(
-          value: value,
-          hint: Text(hint, style: const TextStyle(fontSize: 13)),
-          isExpanded: true,
-          items: items,
-          onChanged: onChanged,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<T>(
+            value: value,
+            hint: Text(hint, style: const TextStyle(fontSize: 13)),
+            isExpanded: true,
+            items: items,
+            onChanged: onChanged,
+          ),
         ),
       ),
     );
@@ -324,16 +318,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
       builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: AppColors.primaryTeacher,
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
+        return child!;
       },
     );
     if (picked != null) {
@@ -379,19 +364,9 @@ class _AttendanceRecordCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusColor = _getStatusColor(record.status);
 
-    return Container(
+    return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
