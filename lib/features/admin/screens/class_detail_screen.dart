@@ -200,44 +200,39 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
       body: NestedScrollView(
         headerSliverBuilder: (ctx, _) => [
           SliverAppBar(
-            expandedHeight: 160,
+            expandedHeight: 100,
             floating: false,
+            centerTitle: false,
             pinned: true,
             backgroundColor: AppColors.primaryAdmin,
             foregroundColor: Colors.white,
             elevation: 0,
-            iconTheme: IconThemeData(color: AppColors.white),
-            flexibleSpace: FlexibleSpaceBar(
-              background: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 50, 20, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.classRoom.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        widget.classRoom.description.isNotEmpty
-                            ? widget.classRoom.description
-                            : 'Class details & management',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.classRoom.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
                   ),
                 ),
-              ),
+                const SizedBox(height: 4),
+                Text(
+                  widget.classRoom.description.isNotEmpty
+                      ? widget.classRoom.description
+                      : 'Class details & management',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 13,
+                  ),
+                ),
+              ],
             ),
+            iconTheme: IconThemeData(color: AppColors.white),
+            // flexibleSpace: FlexibleSpaceBar(background: SafeArea()),
             bottom: TabBar(
               controller: _tabController,
               indicatorColor: Colors.white,
@@ -330,8 +325,7 @@ class _AttendanceTab extends StatelessWidget {
     return Column(
       children: [
         // Date selector bar
-        Container(
-          color: Colors.white,
+        Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             children: [
@@ -380,18 +374,6 @@ class _AttendanceTab extends StatelessWidget {
             ],
           ),
         ),
-        // const Divider(height: 1),
-        //
-        // // Period selector
-        // _PeriodSelector(
-        //   classId: classRoom.id,
-        //   sectionId: sectionId,
-        //   subjectId: subjectId,
-        //   selectedDate: selectedDate,
-        //   selectedRoutineId: selectedRoutineId,
-        //   onChanged: onRoutineChanged,
-        // ),
-        // const Divider(height: 1),
 
         // Student list
         Expanded(
@@ -482,19 +464,8 @@ class _StudentAttendanceCard extends StatelessWidget {
     final name = student.user?.name ?? 'Unknown';
     final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-        border: Border.all(color: _kDivider.withOpacity(0.5), width: 1),
-      ),
+    return Card(
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Row(
@@ -523,7 +494,6 @@ class _StudentAttendanceCard extends StatelessWidget {
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
-                      color: Color(0xFF1E1B4B),
                     ),
                   ),
                   const SizedBox(height: 2),
