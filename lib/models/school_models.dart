@@ -155,35 +155,80 @@ enum AttendanceStatus { present, absent, late, leave }
 class Attendance {
   final String id;
   final String studentId;
+  final String? studentName;
   final DateTime date;
   final AttendanceStatus status;
-  final String takenBy; // teacher id
+  final String? takenBy; // teacher id
+  final String? routineId;
+  final String? classId;
+  final String? sectionId;
+  final String? subjectId;
+  final String? schoolId;
+  
+  final ClassRoom? classInfo;
+  final Section? sectionInfo;
+  final Subject? subjectInfo;
+  final Teacher? teacherInfo;
+  final RoutineEntry? routineInfo;
 
   Attendance({
     required this.id,
     required this.studentId,
+    this.studentName,
     required this.date,
     required this.status,
-    required this.takenBy,
+    this.takenBy,
+    this.routineId,
+    this.classId,
+    this.sectionId,
+    this.subjectId,
+    this.schoolId,
+    this.classInfo,
+    this.sectionInfo,
+    this.subjectInfo,
+    this.teacherInfo,
+    this.routineInfo,
   });
 
   factory Attendance.fromJson(Map<String, dynamic> json) => Attendance(
-    id: json['id'],
-    studentId: json['studentId'],
-    date: DateTime.parse(json['date']),
+    id: json['id'] ?? '',
+    studentId: json['studentId'] ?? '',
+    studentName: json['studentName'],
+    date: json['date'] != null ? DateTime.parse(json['date']) : DateTime.now(),
     status: AttendanceStatus.values.firstWhere(
       (e) => e.name == json['status'],
       orElse: () => AttendanceStatus.absent,
     ),
-    takenBy: json['takenBy'],
+    takenBy: json['takenBy'] ?? json['teacherId'],
+    routineId: json['routineId'],
+    classId: json['classId'],
+    sectionId: json['sectionId'],
+    subjectId: json['subjectId'],
+    schoolId: json['schoolId'],
+    classInfo: json['class'] != null ? ClassRoom.fromJson(json['class']) : null,
+    sectionInfo: json['section'] != null ? Section.fromJson(json['section']) : null,
+    subjectInfo: json['subject'] != null ? Subject.fromJson(json['subject']) : null,
+    teacherInfo: json['teacher'] != null ? Teacher.fromJson(json['teacher']) : null,
+    routineInfo: json['routine'] != null ? RoutineEntry.fromJson(json['routine']) : null,
   );
 
   Map<String, dynamic> toJson() => {
     'id': id,
     'studentId': studentId,
+    'studentName': studentName,
     'date': date.toIso8601String(),
     'status': status.name,
     'takenBy': takenBy,
+    'routineId': routineId,
+    'classId': classId,
+    'sectionId': sectionId,
+    'subjectId': subjectId,
+    'schoolId': schoolId,
+    if (classInfo != null) 'class': classInfo!.toJson(),
+    if (sectionInfo != null) 'section': sectionInfo!.toJson(),
+    if (subjectInfo != null) 'subject': subjectInfo!.toJson(),
+    if (teacherInfo != null) 'teacher': teacherInfo!.toJson(),
+    if (routineInfo != null) 'routine': routineInfo!.toJson(),
   };
 }
 

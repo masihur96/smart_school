@@ -18,12 +18,29 @@ class StudentAttendanceScreen extends StatefulWidget {
 }
 
 class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
+  DateTime? _selectedDate;
+  String? _selectedSubjectId;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<StudentAttendanceNotifier>().fetchAttendance();
     });
+  }
+
+  void _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
   }
 
   @override
@@ -38,18 +55,45 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
     final isLoading = attendanceNotifier.isLoading;
     final error = attendanceNotifier.error;
 
+    // Extract subjects for filtering
+    final subjects = <String, String>{};
+    for (var r in attendanceRecords) {
+      if (r.subjectInfo != null && r.subjectId != null) {
+        subjects[r.subjectId!] = r.subjectInfo!.name;
+      }
+    }
+
+    // Apply filters
+    var filteredRecords = attendanceRecords.where((r) {
+      bool matchDate = true;
+      bool matchSubject = true;
+
+      if (_selectedDate != null) {
+        matchDate =
+            r.date.year == _selectedDate!.year &&
+            r.date.month == _selectedDate!.month &&
+            r.date.day == _selectedDate!.day;
+      }
+
+      if (_selectedSubjectId != null && _selectedSubjectId != 'all') {
+        matchSubject = r.subjectId == _selectedSubjectId;
+      }
+
+      return matchDate && matchSubject;
+    }).toList();
+
     // Sorting records by date (most recent first)
-    final sortedRecords = [...attendanceRecords];
+    final sortedRecords = [...filteredRecords];
     sortedRecords.sort((a, b) => b.date.compareTo(a.date));
 
-    final totalDays = attendanceRecords.length;
-    final presentDays = attendanceRecords
+    final totalDays = filteredRecords.length;
+    final presentDays = filteredRecords
         .where((r) => r.status == AttendanceStatus.present)
         .length;
-    final leaveDays = attendanceRecords
+    final leaveDays = filteredRecords
         .where((r) => r.status == AttendanceStatus.leave)
         .length;
-    final absentDays = attendanceRecords
+    final absentDays = filteredRecords
         .where((r) => r.status == AttendanceStatus.absent)
         .length;
     final attendancePercentage = totalDays == 0 ? 0.0 : presentDays / totalDays;
@@ -58,9 +102,13 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
       appBar: widget.hideAppBar
           ? null
           : AppBar(
-              title: const Text('My Attendance'),
-              backgroundColor: AppColors.primaryTeacher,
+              title: Text(
+                'My Attendance',
+                style: TextStyle(color: AppColors.white),
+              ),
+              backgroundColor: AppColors.primaryStudent,
               foregroundColor: Colors.white,
+              iconTheme: IconThemeData(color: AppColors.white),
             ),
       body: isLoading && attendanceRecords.isEmpty
           ? const Center(child: CircularProgressIndicator())
@@ -107,7 +155,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildStatItem(
-                                'Total Days',
+                                'Total Classes',
                                 totalDays.toString(),
                               ),
                               _buildStatItem(
@@ -130,21 +178,128 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                         ],
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text(
-                        'Attendance Records',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Filter Attendance',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () => _selectDate(context),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.grey.shade400,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          _selectedDate == null
+                                              ? 'All Dates'
+                                              : DateFormat(
+                                                  'MMM d, yyyy',
+                                                ).format(_selectedDate!),
+                                          style: TextStyle(
+                                            color: _selectedDate == null
+                                                ? Colors.grey.shade600
+                                                : Colors.black87,
+                                          ),
+                                        ),
+                                        if (_selectedDate != null)
+                                          GestureDetector(
+                                            onTap: () => setState(
+                                              () => _selectedDate = null,
+                                            ),
+                                            child: const Icon(
+                                              Icons.close,
+                                              size: 18,
+                                              color: Colors.grey,
+                                            ),
+                                          )
+                                        else
+                                          const Icon(
+                                            Icons.calendar_today,
+                                            size: 18,
+                                            color: Colors.grey,
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.grey.shade400,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      isExpanded: true,
+                                      value: _selectedSubjectId,
+                                      hint: const Text('All Subjects'),
+                                      items: [
+                                        const DropdownMenuItem(
+                                          value: 'all',
+                                          child: Text('All Subjects'),
+                                        ),
+                                        ...subjects.entries.map((e) {
+                                          return DropdownMenuItem(
+                                            value: e.key,
+                                            child: Text(e.value),
+                                          );
+                                        }),
+                                      ],
+                                      onChanged: (value) {
+                                        setState(() {
+                                          if (value == 'all') {
+                                            _selectedSubjectId = null;
+                                          } else {
+                                            _selectedSubjectId = value;
+                                          }
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                    if (attendanceRecords.isEmpty && !isLoading)
+                    const Divider(height: 1, thickness: 1),
+                    if (sortedRecords.isEmpty && !isLoading)
                       const Center(
                         child: Padding(
                           padding: EdgeInsets.all(32),
-                          child: Text('No attendance records found.'),
+                          child: Text(
+                            'No attendance records found for the selected filters.',
+                          ),
                         ),
                       )
                     else
@@ -159,28 +314,84 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                           final isLeave =
                               record.status == AttendanceStatus.leave;
 
+                          final subjectName =
+                              record.subjectInfo?.name ?? 'Unknown Subject';
+                          final timeStr = record.routineInfo != null
+                              ? '${record.routineInfo!.startTime} - ${record.routineInfo!.endTime}'
+                              : null;
+
                           return ListTile(
-                            leading: Icon(
-                              isPresent
-                                  ? Icons.check_circle
-                                  : (isLeave ? Icons.info : Icons.cancel),
-                              color: isPresent
-                                  ? AppColors.primaryStudent
-                                  : (isLeave ? Colors.orange : Colors.red),
-                            ),
-                            title: Text(
-                              DateFormat(
-                                'EEEE, MMM d, yyyy',
-                              ).format(record.date),
-                            ),
-                            trailing: Text(
-                              record.status.name.substring(0, 1).toUpperCase() +
-                                  record.status.name.substring(1),
-                              style: TextStyle(
+                            leading: CircleAvatar(
+                              backgroundColor: isPresent
+                                  ? Colors.green.withOpacity(0.1)
+                                  : (isLeave
+                                        ? Colors.orange.withOpacity(0.1)
+                                        : Colors.red.withOpacity(0.1)),
+                              child: Icon(
+                                isPresent
+                                    ? Icons.check_circle
+                                    : (isLeave ? Icons.info : Icons.cancel),
                                 color: isPresent
                                     ? AppColors.primaryStudent
                                     : (isLeave ? Colors.orange : Colors.red),
+                              ),
+                            ),
+                            title: Text(
+                              subjectName,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 4),
+                                Text(
+                                  DateFormat(
+                                    'EEEE, MMM d, yyyy',
+                                  ).format(record.date),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                                if (timeStr != null) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    timeStr,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            trailing: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isPresent
+                                    ? Colors.green.withOpacity(0.1)
+                                    : (isLeave
+                                          ? Colors.orange.withOpacity(0.1)
+                                          : Colors.red.withOpacity(0.1)),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                record.status.name
+                                        .substring(0, 1)
+                                        .toUpperCase() +
+                                    record.status.name.substring(1),
+                                style: TextStyle(
+                                  color: isPresent
+                                      ? AppColors.primaryStudent
+                                      : (isLeave ? Colors.orange : Colors.red),
+
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
                           );
