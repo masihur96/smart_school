@@ -82,6 +82,7 @@ class MyClassAttendStudent {
   final int total;
   final ClassRoom? classInfo;
   final double attendanceRate;
+  final List<TeacherClassAttendRecord> records;
 
   MyClassAttendStudent({
     required this.classId,
@@ -91,6 +92,7 @@ class MyClassAttendStudent {
     required this.total,
     this.classInfo,
     required this.attendanceRate,
+    this.records = const [],
   });
 
   factory MyClassAttendStudent.fromJson(Map<String, dynamic> json) {
@@ -104,6 +106,35 @@ class MyClassAttendStudent {
           ? ClassRoom.fromJson(json['classInfo'])
           : null,
       attendanceRate: (json['attendanceRate'] as num?)?.toDouble() ?? 0.0,
+      records: (json['records'] as List? ?? [])
+          .map((e) => TeacherClassAttendRecord.fromJson(e))
+          .toList(),
+    );
+  }
+}
+
+class TeacherClassAttendRecord {
+  final String id;
+  final String studentId;
+  final String studentName;
+  final String status;
+  final String date;
+
+  TeacherClassAttendRecord({
+    required this.id,
+    required this.studentId,
+    required this.studentName,
+    required this.status,
+    required this.date,
+  });
+
+  factory TeacherClassAttendRecord.fromJson(Map<String, dynamic> json) {
+    return TeacherClassAttendRecord(
+      id: json['id'] ?? '',
+      studentId: json['studentId'] ?? '',
+      studentName: json['studentName'] ?? 'Unknown',
+      status: json['status'] ?? '',
+      date: json['date'] ?? '',
     );
   }
 }

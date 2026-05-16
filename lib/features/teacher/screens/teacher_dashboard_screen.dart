@@ -755,6 +755,8 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         : (stats.attendanceRate > 50 ? Colors.orange : Colors.red);
 
     return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -764,99 +766,199 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           borderRadius: BorderRadius.circular(24),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Circular Progress Indicator
-                Stack(
-                  alignment: Alignment.center,
+                Row(
                   children: [
-                    SizedBox(
-                      width: 65,
-                      height: 65,
-                      child: CircularProgressIndicator(
-                        value: stats.attendanceRate / 100,
-                        strokeWidth: 6,
-                        backgroundColor: statusColor.withOpacity(0.1),
-                        valueColor: AlwaysStoppedAnimation<Color>(statusColor),
-                        strokeCap: StrokeCap.round,
-                      ),
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
+                    // Circular Progress Indicator
+                    Stack(
+                      alignment: Alignment.center,
                       children: [
-                        Text(
-                          '${stats.attendanceRate.toInt()}%',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: statusColor,
+                        SizedBox(
+                          width: 65,
+                          height: 65,
+                          child: CircularProgressIndicator(
+                            value: stats.attendanceRate / 100,
+                            strokeWidth: 6,
+                            backgroundColor: statusColor.withOpacity(0.1),
+                            valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                            strokeCap: StrokeCap.round,
                           ),
                         ),
-                        Text(
-                          'RATE',
-                          style: TextStyle(
-                            fontSize: 8,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade500,
-                            letterSpacing: 0.5,
-                          ),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${stats.attendanceRate.toInt()}%',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: statusColor,
+                              ),
+                            ),
+                            Text(
+                              'RATE',
+                              style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade500,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-                const SizedBox(width: 20),
-                // Class Info and Stats
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        stats.classInfo?.name ?? 'Class',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          letterSpacing: 0.2,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    const SizedBox(width: 20),
+                    // Class Info and Stats
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildStatItem(
-                            l10n.present,
-                            stats.present.toString(),
-                            Colors.green,
+                          Text(
+                            stats.classInfo?.name ?? 'Class',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              letterSpacing: 0.2,
+                            ),
                           ),
-                          _buildStatItem(
-                            l10n.absent,
-                            stats.absent.toString(),
-                            Colors.red,
-                          ),
-                          _buildStatItem(
-                            l10n.leave,
-                            stats.leave.toString(),
-                            Colors.orange,
-                          ),
-                          _buildStatItem(
-                            'Total',
-                            stats.total.toString(),
-                            Colors.blue,
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildStatItem(
+                                l10n.present,
+                                stats.present.toString(),
+                                Colors.green,
+                              ),
+                              _buildStatItem(
+                                l10n.absent,
+                                stats.absent.toString(),
+                                Colors.red,
+                              ),
+                              _buildStatItem(
+                                l10n.leave,
+                                stats.leave.toString(),
+                                Colors.orange,
+                              ),
+                              _buildStatItem(
+                                'Total',
+                                stats.total.toString(),
+                                Colors.blue,
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Colors.grey.shade300,
+                      size: 16,
+                    ),
+                  ],
+                ),
+                if (stats.records.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  const Divider(height: 1),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Student Attendance',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade800,
+                    ),
                   ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  color: Colors.grey.shade300,
-                  size: 16,
-                ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 85,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: stats.records.length,
+                      itemBuilder: (context, index) {
+                        final record = stats.records[index];
+                        return _buildStudentAvatarCard(record);
+                      },
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildStudentAvatarCard(TeacherClassAttendRecord record) {
+    Color getStatusColor() {
+      switch (record.status.toLowerCase()) {
+        case 'present':
+          return Colors.green;
+        case 'absent':
+          return Colors.red;
+        case 'late':
+          return Colors.orange;
+        case 'leave':
+          return Colors.blue;
+        default:
+          return Colors.grey;
+      }
+    }
+
+    final color = getStatusColor();
+    final firstLetter = record.studentName.isNotEmpty ? record.studentName[0] : '?';
+
+    return Container(
+      width: 65,
+      margin: const EdgeInsets.only(right: 12),
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              CircleAvatar(
+                radius: 25,
+                backgroundColor: color.withOpacity(0.1),
+                child: Text(
+                  firstLetter.toUpperCase(),
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            record.studentName,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
