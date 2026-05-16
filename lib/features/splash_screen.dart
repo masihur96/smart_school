@@ -45,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _controller.forward();
-    _checkAuth();
+    // _checkAuth();
   }
 
   Future<void> _checkAuth() async {
@@ -131,141 +131,71 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1A1A2E), // Deep midnight blue
-              Color(0xFF16213E), // Dark Navy
-              Color(0xFF0F3460), // Royal blue touch
-            ],
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          FadeTransition(
+            opacity: _opacityAnimation,
+            child: ScaleTransition(
+              scale: _scaleAnimation,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: SizedBox(
+                  height: 100,
+                  width: 100,
+                  child: Image.asset("assets/icon/icon.png", fit: BoxFit.cover),
+                ),
+              ),
+            ),
           ),
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Background Decorative Circles
-            Positioned(
-              top: -100,
-              right: -100,
-              child: _buildDecorativeCircle(
-                200,
-                Colors.white.withValues(alpha: 0.03),
-              ),
-            ),
-            Positioned(
-              bottom: -50,
-              left: -50,
-              child: _buildDecorativeCircle(
-                150,
-                Colors.white.withValues(alpha: 0.02),
-              ),
-            ),
+          const SizedBox(height: 32),
+          FadeTransition(
+            opacity: _opacityAnimation,
+            child: Text(
+              'Smart School',
+              style: GoogleFonts.outfit(
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
 
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+                letterSpacing: 2,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    offset: const Offset(0, 4),
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          FadeTransition(
+            opacity: _opacityAnimation,
+            child: Text(
+              'Excellence in Education',
+              style: GoogleFonts.outfit(fontSize: 16, letterSpacing: 1.5),
+            ),
+          ),
+
+          FadeTransition(
+            opacity: _opacityAnimation,
+            child: const Column(
               children: [
-                FadeTransition(
-                  opacity: _opacityAnimation,
-                  child: ScaleTransition(
-                    scale: _scaleAnimation,
-                    child: Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.blue.withValues(alpha: 0.2),
-                            blurRadius: 30,
-                            spreadRadius: 10,
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: SizedBox(
-                          height: 100,
-                          width: 100,
-                          child: Image.asset(
-                            "assets/icon/icon.png",
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(strokeWidth: 3),
                 ),
-                const SizedBox(height: 32),
-                FadeTransition(
-                  opacity: _opacityAnimation,
-                  child: Text(
-                    'Smart School',
-                    style: GoogleFonts.outfit(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 2,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          offset: const Offset(0, 4),
-                          blurRadius: 8,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                FadeTransition(
-                  opacity: _opacityAnimation,
-                  child: Text(
-                    'Excellence in Education',
-                    style: GoogleFonts.outfit(
-                      fontSize: 16,
-                      color: Colors.white70,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
+                SizedBox(height: 16),
+                Text(
+                  'STAY TUNED',
+                  style: TextStyle(fontSize: 12, letterSpacing: 3),
                 ),
               ],
             ),
-
-            Positioned(
-              bottom: 60,
-              child: FadeTransition(
-                opacity: _opacityAnimation,
-                child: const Column(
-                  children: [
-                    SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.white70,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'STAY TUNED',
-                      style: TextStyle(
-                        color: Colors.white38,
-                        fontSize: 12,
-                        letterSpacing: 3,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
