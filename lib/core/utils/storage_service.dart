@@ -45,23 +45,19 @@ class StorageService {
   }
 
   static Future<void> saveEmail(String email) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_userEmailKey, email);
+    await _storage.write(key: _userEmailKey, value: email);
   }
 
   static Future<String?> getEmail() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_userEmailKey);
+    return await _storage.read(key: _userEmailKey);
   }
 
   static Future<void> savePassword(String password) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_userPasswordKey, password);
+    await _storage.write(key: _userPasswordKey, value: password);
   }
 
   static Future<String?> getPassword() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_userPasswordKey);
+    return await _storage.read(key: _userPasswordKey);
   }
 
   static Future<void> saveTheme(String theme) async {
@@ -105,9 +101,8 @@ class StorageService {
   }
 
   static Future<void> clearCredential() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_userEmailKey);
-    await prefs.remove(_userPasswordKey);
+    await _storage.delete(key: _userEmailKey);
+    await _storage.delete(key: _userPasswordKey);
   }
 
   static Future<void> clear() async {

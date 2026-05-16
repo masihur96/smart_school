@@ -9,6 +9,9 @@ import 'package:smart_school/features/super_admin/screens/super_admin_dashboard_
 import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
 import 'package:smart_school/models/user_model.dart';
 
+import 'package:smart_school/core/utils/biometric_service.dart';
+import 'package:smart_school/core/utils/storage_service.dart';
+
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -22,6 +25,25 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  bool _canUseBiometrics = false;
+  final BiometricService _biometricService = BiometricService();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometrics();
+  }
+
+  Future<void> _checkBiometrics() async {
+    final hasCredentials = await StorageService.getEmail() != null &&
+        await StorageService.getPassword() != null;
+    if (hasCredentials) {
+      final isAvailable = await _biometricService.isBiometricAvailable();
+      setState(() {
+        _canUseBiometrics = isAvailable;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -40,6 +62,10 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (authNotifier.user != null) {
+      // Save credentials for biometric login
+      await StorageService.saveEmail(_emailController.text.trim());
+      await StorageService.savePassword(_passwordController.text);
+
       Widget dashboard;
       switch (authNotifier.user!.role) {
         case UserRole.admin:
@@ -75,6 +101,19 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.text = email;
     _passwordController.text = password;
     _login();
+  }
+
+  Future<void> _biometricLogin() async {
+    final authenticated = await _biometricService.authenticate();
+    if (authenticated) {
+      final email = await StorageService.getEmail();
+      final password = await StorageService.getPassword();
+      if (email != null && password != null) {
+        _emailController.text = email;
+        _passwordController.text = password;
+        await _login();
+      }
+    }
   }
 
   @override
@@ -160,11 +199,29 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: !_isPasswordVisible,
               ),
               const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: authNotifier.isLoading ? null : _login,
-                child: authNotifier.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Login', style: TextStyle(fontSize: 18)),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: authNotifier.isLoading ? null : _login,
+                      child: authNotifier.isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text('Login', style: TextStyle(fontSize: 18)),
+                    ),
+                  ),
+                  if (_canUseBiometrics) ...[
+                    const SizedBox(width: 12),
+                    IconButton(
+                      onPressed: authNotifier.isLoading ? null : _biometricLogin,
+                      icon: const Icon(
+                        Icons.fingerprint,
+                        size: 40,
+                        color: Color(0xFF6750A4),
+                      ),
+                      tooltip: 'Login with biometrics',
+                    ),
+                  ],
+                ],
               ),
               const SizedBox(height: 16),
               Row(
