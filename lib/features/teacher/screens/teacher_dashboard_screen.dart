@@ -1197,9 +1197,38 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       print(position.latitude);
       print(position.longitude);
 
-      if (distanceInMeters >= user.radius!) {
-        // 4. Submit attendance
+      if (distanceInMeters <= user.radius!) {
+        // 4. Confirm before submitting
         if (mounted) {
+          final confirm = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Confirm Attendance'),
+              content: Text(
+                'Are you sure you want to submit your attendance?\n\n'
+                'Distance from center: ${distanceInMeters.toStringAsFixed(0)}m\n'
+                'Allowed radius: ${user.radius}m',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(l10n.cancel),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryTeacher,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Confirm'),
+                ),
+              ],
+            ),
+          );
+
+          if (confirm != true || !mounted) return;
+
+          // 5. Submit attendance
           context
               .read<TeacherDashboardProvider>()
               .submitSelfAttendance(position.latitude, position.longitude)
