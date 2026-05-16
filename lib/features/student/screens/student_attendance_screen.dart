@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/models/school_models.dart';
-import '../providers/student_attendance_provider.dart';
+
 import '../../auth/providers/auth_provider.dart';
-import 'package:intl/intl.dart';
-import 'package:percent_indicator/percent_indicator.dart';
+import '../providers/student_attendance_provider.dart';
 
 class StudentAttendanceScreen extends StatefulWidget {
   final bool hideAppBar;
   const StudentAttendanceScreen({super.key, this.hideAppBar = false});
 
   @override
-  State<StudentAttendanceScreen> createState() => _StudentAttendanceScreenState();
+  State<StudentAttendanceScreen> createState() =>
+      _StudentAttendanceScreenState();
 }
 
 class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
@@ -104,7 +106,10 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildStatItem('Total Days', totalDays.toString()),
+                              _buildStatItem(
+                                'Total Days',
+                                totalDays.toString(),
+                              ),
                               _buildStatItem(
                                 'Present',
                                 presentDays.toString(),
@@ -129,7 +134,10 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                       padding: EdgeInsets.all(16.0),
                       child: Text(
                         'Attendance Records',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       ),
                     ),
                     if (attendanceRecords.isEmpty && !isLoading)
@@ -146,8 +154,10 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                         itemCount: sortedRecords.length,
                         itemBuilder: (context, index) {
                           final record = sortedRecords[index];
-                          final isPresent = record.status == AttendanceStatus.present;
-                          final isLeave = record.status == AttendanceStatus.leave;
+                          final isPresent =
+                              record.status == AttendanceStatus.present;
+                          final isLeave =
+                              record.status == AttendanceStatus.leave;
 
                           return ListTile(
                             leading: Icon(
@@ -159,7 +169,9 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                                   : (isLeave ? Colors.orange : Colors.red),
                             ),
                             title: Text(
-                              DateFormat('EEEE, MMM d, yyyy').format(record.date),
+                              DateFormat(
+                                'EEEE, MMM d, yyyy',
+                              ).format(record.date),
                             ),
                             trailing: Text(
                               record.status.name.substring(0, 1).toUpperCase() +
