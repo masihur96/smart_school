@@ -102,7 +102,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
       floatingActionButton: isFiltered
           ? FloatingActionButton.extended(
               onPressed: () => _showAddEntrySheet(context),
-              backgroundColor: const Color(0xFF7C3AED),
+              backgroundColor: AppColors.primaryAdmin,
               icon: const Icon(Icons.add, color: Colors.white),
               label: const Text(
                 'Add Entry',
@@ -615,7 +615,7 @@ class _RoutineEntryCard extends StatelessWidget {
                     Container(
                       width: 1,
                       height: 12,
-                      color: accentColor.withOpacity(0.2),
+                      color: accentColor.withOpacity(0.5),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -1190,7 +1190,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                                 ? null
                                 : _save,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
+                              backgroundColor: AppColors.primaryAdmin,
                               shadowColor: Colors.transparent,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
