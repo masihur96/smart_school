@@ -193,47 +193,38 @@ class _ScheduleClassDetailsState extends State<ScheduleClassDetails>
       body: NestedScrollView(
         headerSliverBuilder: (ctx, _) => [
           SliverAppBar(
-            expandedHeight: 160,
+            expandedHeight: 80,
             floating: false,
             pinned: true,
+            centerTitle: false,
             backgroundColor: AppColors.primaryTeacher,
             foregroundColor: Colors.white,
             elevation: 0,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                color: AppColors.primaryTeacher,
-
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.classRoom.name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.classRoom.description.isNotEmpty
-                              ? widget.classRoom.description
-                              : 'Class details & management',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.classRoom.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
                   ),
                 ),
-              ),
+                const SizedBox(height: 4),
+                Text(
+                  widget.classRoom.description.isNotEmpty
+                      ? widget.classRoom.description
+                      : 'Class details & management',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 13,
+                  ),
+                ),
+              ],
             ),
+
             bottom: TabBar(
               controller: _tabController,
               indicatorColor: Colors.white,
