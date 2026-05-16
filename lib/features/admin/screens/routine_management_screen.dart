@@ -1270,7 +1270,7 @@ class _FilterDropdown extends StatelessWidget {
           value: value,
           isExpanded: true,
           // dropdownColor: const Color(0xFF4F46E5),
-          style: const TextStyle(color: Colors.white, fontSize: 13),
+          // style: const TextStyle(color: Colors.white, fontSize: 13),
           hint: Text(
             hint,
             style: TextStyle(

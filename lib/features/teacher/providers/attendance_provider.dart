@@ -1,14 +1,14 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
 import '../../../core/utils/storage_service.dart';
+import '../../../models/period_attendance_model.dart';
 import '../../../models/school_models.dart';
 import '../../../services/notification_service.dart';
-import 'package:intl/intl.dart';
-import '../../../models/period_attendance_model.dart';
 import '../domain/entities/attendance.dart';
 import '../domain/repositories/i_attendance_repository.dart';
 
@@ -30,7 +30,8 @@ class AttendanceNotifier extends ChangeNotifier {
   List<AttendanceEntity> get state => _state;
   bool get isLoading => _isLoading;
   AttendanceOverview? get overviewSummary => _overviewSummary;
-  List<PeriodAttendance> get periodAttendanceRecords => _periodAttendanceRecords;
+  List<PeriodAttendance> get periodAttendanceRecords =>
+      _periodAttendanceRecords;
   int get total => _total;
   int get page => _page;
   int get totalPages => _totalPages;
@@ -253,6 +254,54 @@ class AttendanceNotifier extends ChangeNotifier {
       final response = await DataProvider().performRequest(
         'POST',
         APIPath.teacherPeriodAttendance,
+        data: data,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
+        log('Successfully submitted period attendance');
+        return true;
+      } else {
+        log('Error submitting period attendance: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      log('Error submitting period attendance: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> submitPeriodAttendanceToAdminDashboard({
+    required String routineId,
+    required DateTime date,
+    required Map<String, AttendanceStatus> attendanceMap,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final dateString =
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
+      final records = attendanceMap.entries
+          .map((e) => {"studentId": e.key, "status": e.value.name})
+          .toList();
+
+      final data = {
+        "routineId": routineId,
+        "date": dateString,
+        "records": records,
+      };
+
+      final response = await DataProvider().performRequest(
+        'POST',
+        APIPath.adminPeriodAttendance,
         data: data,
         header: {'Authorization': 'Bearer $token'},
       );
