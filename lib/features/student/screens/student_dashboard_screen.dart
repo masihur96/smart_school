@@ -393,10 +393,29 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     StudentDashboardData? data,
     AppLocalizations l10n,
   ) {
-    final status = data?.todayAttendanceStatus?.status ?? 'not-marked';
+    final records = data?.todayAttendanceStatus?.records ?? [];
+    
+    String status = 'not-marked';
+    if (records.isNotEmpty) {
+      bool anyAbsent = records.any((r) => r.status == 'absent');
+      bool anyLate = records.any((r) => r.status == 'late');
+      bool anyLeave = records.any((r) => r.status == 'leave');
+      
+      if (anyAbsent) {
+        status = 'absent';
+      } else if (anyLeave) {
+        status = 'leave';
+      } else if (anyLate) {
+        status = 'late';
+      } else {
+        status = 'present';
+      }
+    }
+
     final isPresent = status == 'present';
     final isAbsent = status == 'absent';
     final isLeave = status == 'leave';
+    final isLate = status == 'late';
 
     // Status mapping for color & icon
     IconData statusIcon = Icons.help_outline;
@@ -410,6 +429,9 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     } else if (isLeave) {
       statusIcon = Icons.beach_access;
       statusColor = Colors.orange;
+    } else if (isLate) {
+      statusIcon = Icons.access_time_filled;
+      statusColor = Colors.orange.shade800;
     } else {
       statusIcon = Icons.access_time;
       statusColor = Colors.blue; // not marked
@@ -497,6 +519,104 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                     Colors.blue,
                   ),
                 ],
+              ),
+            ],
+            if (data?.myAttendanceList?.records.isNotEmpty ?? false) ...[
+              const SizedBox(height: 16),
+              Divider(color: Colors.grey.shade200),
+              const SizedBox(height: 8),
+              Text(
+                'Recent Records',
+                style: TextStyle(
+                  color: Colors.grey.shade800,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 90,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: data!.myAttendanceList!.records.length,
+                  itemBuilder: (context, index) {
+                    final record = data.myAttendanceList!.records[index];
+                    final isPresent = record.status == 'present';
+                    final isLeave = record.status == 'leave';
+                    final isLate = record.status == 'late';
+                    
+                    Color recordColor = Colors.red;
+                    IconData recordIcon = Icons.cancel;
+                    if (isPresent) {
+                      recordColor = Colors.green;
+                      recordIcon = Icons.check_circle;
+                    } else if (isLeave) {
+                      recordColor = Colors.orange;
+                      recordIcon = Icons.info;
+                    } else if (isLate) {
+                      recordColor = Colors.orange.shade800;
+                      recordIcon = Icons.access_time_filled;
+                    }
+
+                    return Container(
+                      width: 140,
+                      margin: const EdgeInsets.only(right: 12),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: recordColor.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: recordColor.withOpacity(0.2)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(recordIcon, color: recordColor, size: 14),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  record.status.toUpperCase(),
+                                  style: TextStyle(
+                                    color: recordColor,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Spacer(),
+                          Text(
+                            record.subjectInfo?.name ?? 'Subject',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            DateFormat('MMM dd, yyyy').format(
+                              DateTime.tryParse(record.date) ?? DateTime.now(),
+                            ),
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 11,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ],
