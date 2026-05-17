@@ -204,13 +204,25 @@ class AuthNotifier extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    if (_user != null) {
-      await NotificationService().unsubscribeFromUserTopics(_user!);
-    }
+    // Capture user to unsubscribe in background
+    final userToUnsubscribe = _user;
+    
+    // Clear state synchronously so that immediate navigations (e.g. to LoginScreen)
+    // don't see a stale non-null user and auto-navigate back to the dashboard.
     _user = null;
     _adminSubscription = null;
-    await StorageService.clear();
     notifyListeners();
+
+    // Clear local storage immediately to prevent race conditions with new logins.
+    await StorageService.clear();
+
+    if (userToUnsubscribe != null) {
+      try {
+        await NotificationService().unsubscribeFromUserTopics(userToUnsubscribe);
+      } catch (e) {
+        log("Logout unsubscription error: $e");
+      }
+    }
   }
 
   Future<void> _fetchAdminSubscription(String schoolId) async {
@@ -301,6 +313,14 @@ class AuthNotifier extends ChangeNotifier {
 
   void clearError() {
     _error = null;
+    notifyListeners();
+  }
+
+  /// Retry fetching the admin subscription (e.g. after a transient network
+  /// failure during biometric login). Notifies listeners when done.
+  Future<void> refreshSubscription() async {
+    if (_user?.schoolId == null) return;
+    await _fetchAdminSubscription(_user!.schoolId!);
     notifyListeners();
   }
 

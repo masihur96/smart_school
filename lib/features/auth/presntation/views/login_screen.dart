@@ -26,26 +26,25 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isPasswordVisible = false;
   bool _canUseBiometrics = false;
   bool _isBiometricLoading = false;
+
+  /// Guards against double-navigation if build() fires multiple times
+  /// while the subscription retry is in-flight.
+  bool _isNavigating = false;
+
   final BiometricService _biometricService = BiometricService();
 
   @override
   void initState() {
     super.initState();
-    // Use post-frame so the widget is fully mounted before any async work.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkBiometrics();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkBiometrics());
   }
 
   Future<void> _checkBiometrics() async {
-    final hasCredentials =
-        await StorageService.getEmail() != null &&
-        await StorageService.getPassword() != null;
-    if (hasCredentials) {
+    final email = await StorageService.getEmail();
+    final password = await StorageService.getPassword();
+    if (email != null && password != null) {
       final isAvailable = await _biometricService.isBiometricAvailable();
-      setState(() {
-        _canUseBiometrics = isAvailable;
-      });
+      if (mounted) setState(() => _canUseBiometrics = isAvailable);
     }
   }
 
@@ -56,6 +55,62 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  // ─── Navigation ────────────────────────────────────────────────────────────
+  // Called reactively from build() via addPostFrameCallback every time
+  // authNotifier.user becomes non-null. This works even when the widget was
+  // recreated during the biometric overlay (the classic !mounted early-return
+  // bug), because navigation is driven by watched state, not the async callsite.
+
+  Future<void> _navigateToDashboard(AuthNotifier authNotifier) async {
+    if (_isNavigating) return;
+    if (authNotifier.user == null) return;
+    _isNavigating = true;
+
+    // If subscription wasn't fetched (network blip during biometric overlay),
+    // retry once before deciding which screen to open.
+    final role = authNotifier.user!.role;
+    if ((role == UserRole.admin || role == UserRole.teacher) &&
+        authNotifier.adminSubscription == null) {
+      await Future.delayed(const Duration(milliseconds: 600));
+      if (!mounted) return;
+      await authNotifier.refreshSubscription();
+      if (!mounted) return;
+    }
+
+    Widget dashboard;
+    switch (role) {
+      case UserRole.admin:
+        if (authNotifier.user!.school == null) {
+          dashboard = const AdminRegisterSchoolScreen();
+        } else {
+          dashboard = authNotifier.isSubscriptionValid
+              ? const AdminDashboardScreen()
+              : const AdminPricingPlanScreen();
+        }
+        break;
+      case UserRole.teacher:
+        dashboard = authNotifier.isSubscriptionValid
+            ? const TeacherDashboardScreen()
+            : const AdminPricingPlanScreen();
+        break;
+      case UserRole.student:
+        dashboard = const StudentDashboardScreen();
+        break;
+      case UserRole.superadmin:
+        dashboard = const SuperAdminDashboardScreen();
+        break;
+    }
+
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => dashboard),
+    );
+  }
+
+  // ─── Login (email + password) ───────────────────────────────────────────────
+  // Does NOT navigate — navigation is handled reactively in build().
+
   Future<void> _login() async {
     final authNotifier = context.read<AuthNotifier>();
     await authNotifier.login(
@@ -63,82 +118,43 @@ class _LoginScreenState extends State<LoginScreen> {
       _passwordController.text,
     );
 
-    if (!mounted) return;
-
+    // Save credentials for future biometric logins.
+    // We do this outside the mounted check so it always runs.
     if (authNotifier.user != null) {
-      // Save credentials for biometric login and refresh availability flag
       await StorageService.saveEmail(_emailController.text.trim());
       await StorageService.savePassword(_passwordController.text);
-      await _checkBiometrics(); // so fingerprint button shows on next launch
-
-      if (!mounted) return;
-
-      Widget dashboard;
-      switch (authNotifier.user!.role) {
-        case UserRole.admin:
-          if (authNotifier.user!.school == null) {
-            dashboard = const AdminRegisterSchoolScreen();
-          } else {
-            dashboard = authNotifier.isSubscriptionValid
-                ? const AdminDashboardScreen()
-                : const AdminPricingPlanScreen();
-          }
-          break;
-        case UserRole.teacher:
-          dashboard = authNotifier.isSubscriptionValid
-              ? const TeacherDashboardScreen()
-              : const AdminPricingPlanScreen();
-          break;
-        case UserRole.student:
-          dashboard = const StudentDashboardScreen();
-          break;
-        case UserRole.superadmin:
-          dashboard = const SuperAdminDashboardScreen();
-          break;
-      }
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => dashboard),
-      );
     }
+    // Navigation is triggered by build() watching authNotifier.user.
   }
 
-  void _quickLogin(String email, String password) {
-    _emailController.text = email;
-    _passwordController.text = password;
-    _login();
-  }
+  // ─── Biometric login ────────────────────────────────────────────────────────
 
   Future<void> _biometricLogin() async {
     if (_isBiometricLoading) return;
-
-    // Clear stale error state before attempting biometric auth
     if (!mounted) return;
-    context.read<AuthNotifier>().clearError();
 
+    context.read<AuthNotifier>().clearError();
     setState(() => _isBiometricLoading = true);
 
     try {
       final authenticated = await _biometricService.authenticate();
-      if (!mounted) return;
 
       if (authenticated) {
         final email = await StorageService.getEmail();
         final password = await StorageService.getPassword();
-        if (!mounted) return;
 
         if (email != null && password != null) {
-          _emailController.text = email;
-          _passwordController.text = password;
-          await _login();
+          // Directly call provider login — credentials are already stored,
+          // no need to re-save. Navigation is reactive via build().
+          await context.read<AuthNotifier>().login(email, password);
         } else {
-          // Stored credentials were lost — prompt manual login
-          setState(() => _canUseBiometrics = false);
+          // Credentials were cleared from secure storage — fall back to manual.
           if (mounted) {
+            setState(() => _canUseBiometrics = false);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Biometric credentials expired. Please log in manually.'),
+                content: Text(
+                    'Biometric credentials expired. Please log in manually.'),
                 backgroundColor: Colors.orange,
               ),
             );
@@ -150,12 +166,22 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  // ─── Build ──────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     final authNotifier = context.watch<AuthNotifier>();
 
-    // Listen for errors using a post-frame callback
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      // Reactive navigation: fires whenever user becomes non-null,
+      // regardless of which code path triggered the login.
+      if (authNotifier.user != null && !authNotifier.isLoading) {
+        _navigateToDashboard(authNotifier);
+      }
+
+      // Show error snackbar
       if (authNotifier.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -187,14 +213,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 16),
               Text(
                 'SchoolCare',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -223,11 +248,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ? Icons.visibility
                           : Icons.visibility_off,
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
-                      });
-                    },
+                    onPressed: () => setState(
+                        () => _isPasswordVisible = !_isPasswordVisible),
                   ),
                 ),
                 obscureText: !_isPasswordVisible,
@@ -239,8 +261,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: ElevatedButton(
                       onPressed: authNotifier.isLoading ? null : _login,
                       child: authNotifier.isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Login', style: TextStyle(fontSize: 18)),
+                          ? const CircularProgressIndicator(
+                              color: Colors.white)
+                          : const Text('Login',
+                              style: TextStyle(fontSize: 18)),
                     ),
                   ),
                   if (_canUseBiometrics) ...[
@@ -251,10 +275,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: _isBiometricLoading
                           ? const Padding(
                               padding: EdgeInsets.all(10.0),
-                              child: CircularProgressIndicator(strokeWidth: 2.5),
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2.5),
                             )
                           : IconButton(
-                              onPressed: authNotifier.isLoading ? null : _biometricLogin,
+                              onPressed: authNotifier.isLoading
+                                  ? null
+                                  : _biometricLogin,
                               icon: const Icon(Icons.fingerprint, size: 40),
                               tooltip: 'Login with biometrics',
                             ),
@@ -271,14 +298,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                   TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const RegisterScreen(),
-                        ),
-                      );
-                    },
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const RegisterScreen()),
+                    ),
                     child: const Text(
                       'Register',
                       style: TextStyle(
@@ -289,47 +313,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 40),
-              // Row(
-              //   children: [
-              //     Expanded(child: Divider(color: Colors.grey[300])),
-              //     Padding(
-              //       padding: const EdgeInsets.symmetric(horizontal: 16),
-              //       child: Text(
-              //         'Quick Login',
-              //         style: TextStyle(color: Colors.grey[500]),
-              //       ),
-              //     ),
-              //     Expanded(child: Divider(color: Colors.grey[300])),
-              //   ],
-              // ),
-              // const SizedBox(height: 16),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              //   children: [
-              //     _QuickLoginButton(
-              //       label: 'Admin',
-              //       color: Colors.purple,
-              //       onTap: () => _quickLogin('admin@gmail.com', "Admin@"),
-              //     ),
-              //     _QuickLoginButton(
-              //       label: 'Teacher',
-              //       color: Colors.blue,
-              //       onTap: () => _quickLogin('emdadul@gmail.com', "Emdadul@"),
-              //     ),
-              //     _QuickLoginButton(
-              //       label: 'Student',
-              //       color: Colors.green,
-              //       onTap: () => _quickLogin('ariful@gmail.com', "Ariful@"),
-              //     ),
-              //   ],
-              // ),
-              // SizedBox(height: 20),
-              // _QuickLoginButton(
-              //   label: 'Super Admin',
-              //   color: Colors.purple,
-              //   onTap: () => _quickLogin('superadmin@gmail.com', "SuperAdmin@"),
-              // ),
             ],
           ),
         ),

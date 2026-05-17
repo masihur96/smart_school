@@ -108,6 +108,14 @@ class StorageService {
   static Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+
+    // Preserve biometric credentials across clear
+    final email = await getEmail();
+    final password = await getPassword();
+
     await _storage.deleteAll();
+
+    if (email != null) await saveEmail(email);
+    if (password != null) await savePassword(password);
   }
 }
