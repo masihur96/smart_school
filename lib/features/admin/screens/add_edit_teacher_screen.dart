@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 
 import '../../../models/teacher_model.dart';
@@ -17,6 +18,7 @@ class AddEditTeacherScreen extends StatefulWidget {
 class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  bool _isFetchingLocation = false;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -59,6 +61,56 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
     _lonController.dispose();
     _radiusController.dispose();
     super.dispose();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    setState(() {
+      _isFetchingLocation = true;
+    });
+
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw Exception('Location services are disabled.');
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw Exception('Location permissions are denied');
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        throw Exception(
+            'Location permissions are permanently denied.');
+      }
+
+      Position position = await Geolocator.getCurrentPosition();
+      
+      if (mounted) {
+        setState(() {
+          _latController.text = position.latitude.toString();
+          _lonController.text = position.longitude.toString();
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location fetched successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error getting location: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isFetchingLocation = false;
+        });
+      }
+    }
   }
 
   Future<void> _save() async {
@@ -346,10 +398,22 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                         'Arrival Settings',
                         Icons.location_on_outlined,
                       ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(Icons.location_on_outlined),
-                      ),
+                      _isFetchingLocation
+                          ? const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.purple,
+                                ),
+                              ),
+                            )
+                          : IconButton(
+                              onPressed: _getCurrentLocation,
+                              icon: const Icon(Icons.location_on_outlined),
+                            ),
                     ],
                   )
                 : SizedBox(),
