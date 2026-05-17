@@ -624,7 +624,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               ),
               const SizedBox(height: 12),
               SizedBox(
-                height: screenSize(context, .21),
+                height: screenSize(context, .23),
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
@@ -782,7 +782,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                             value: stats.attendanceRate / 100,
                             strokeWidth: 6,
                             backgroundColor: statusColor.withOpacity(0.1),
-                            valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              statusColor,
+                            ),
                             strokeCap: StrokeCap.round,
                           ),
                         ),
@@ -911,7 +913,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     }
 
     final color = getStatusColor();
-    final firstLetter = record.studentName.isNotEmpty ? record.studentName[0] : '?';
+    final firstLetter = record.studentName.isNotEmpty
+        ? record.studentName[0]
+        : '?';
 
     return Container(
       width: 65,
@@ -950,10 +954,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           const SizedBox(height: 6),
           Text(
             record.studentName,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
