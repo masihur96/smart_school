@@ -689,7 +689,7 @@ class _HomeworkTab extends StatelessWidget {
           child: FloatingActionButton.extended(
             heroTag: 'hw_fab',
             onPressed: () => _showAddSheet(context),
-            backgroundColor: const Color(0xFF7C3AED),
+            backgroundColor: AppColors.primaryAdmin,
             icon: const Icon(Icons.add, color: Colors.white),
             label: const Text(
               'Add Homework',
@@ -803,19 +803,8 @@ class _HomeworkCard extends StatelessWidget {
         '${homework.dueDate.day.toString().padLeft(2, '0')}/${homework.dueDate.month.toString().padLeft(2, '0')}/${homework.dueDate.year}';
     final isPast = homework.dueDate.isBefore(DateTime.now());
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF7C3AED).withOpacity(0.06),
-            blurRadius: 14,
-            offset: const Offset(0, 5),
-          ),
-        ],
-        border: Border.all(color: const Color(0xFF7C3AED).withOpacity(0.08)),
-      ),
+    return Card(
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Row(
@@ -826,9 +815,7 @@ class _HomeworkCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF7C3AED), Color(0xFF4F46E5)],
-                ),
+                color: AppColors.primaryAdmin,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -855,7 +842,7 @@ class _HomeworkCard extends StatelessWidget {
                   Text(
                     subjectName,
                     style: TextStyle(
-                      color: const Color(0xFF7C3AED),
+                      color: AppColors.primaryAdmin,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1037,9 +1024,13 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
 
     final bool success;
     if (widget.homework == null) {
-      success = await context.read<HomeworkNotifier>().submitHomework(homework);
+      success = await context.read<HomeworkNotifier>().submitAdminHomework(
+        homework,
+      );
     } else {
-      success = await context.read<HomeworkNotifier>().updateHomework(homework);
+      success = await context.read<HomeworkNotifier>().updateAdminHomework(
+        homework,
+      );
     }
 
     if (mounted) {
@@ -1047,7 +1038,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: AppColors.primaryTeacher,
+            backgroundColor: AppColors.primaryAdmin,
             content: Text(
               widget.homework == null
                   ? 'Homework assigned successfully!'
@@ -1079,12 +1070,9 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     final dueLabel =
         '${_dueDate.day.toString().padLeft(2, '0')}/${_dueDate.month.toString().padLeft(2, '0')}/${_dueDate.year}';
 
-    return Container(
+    return Card(
       margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
@@ -1108,11 +1096,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                 ),
                 Text(
                   widget.homework == null ? 'Add Homework' : 'Edit Homework',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E1B4B),
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
 
@@ -1179,7 +1163,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                   child: ElevatedButton(
                     onPressed: _submit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7C3AED),
+                      backgroundColor: AppColors.primaryAdmin,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
@@ -1208,7 +1192,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
   InputDecoration _inputDeco(String label) => InputDecoration(
     labelText: label,
     filled: true,
-    fillColor: const Color(0xFFF5F3FF),
+
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide.none,
@@ -1219,7 +1203,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
+      borderSide: const BorderSide(color: AppColors.primaryAdmin, width: 1.5),
     ),
     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
   );
