@@ -6,6 +6,7 @@ import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../core/services/geocoding_service.dart';
 import '../../../core/widgets/app_drawer.dart';
@@ -164,9 +165,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Consumer<AdminDashboardProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading && provider.dashboardData == null) {
-          return const Center(
-            child: CircularProgressIndicator(color: Colors.purple),
-          );
+          return _buildShimmerLoading(context);
         }
 
         if (provider.error != null && provider.dashboardData == null) {
@@ -1416,6 +1415,236 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildShimmerLoading(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Subscription Card Mock
+            Container(
+              height: 110,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Student Attendance Card Mock
+            Card(
+              margin: EdgeInsets.zero,
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(width: 36, height: 36, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(width: 120, height: 14, color: Colors.white),
+                              const SizedBox(height: 4),
+                              Container(width: 80, height: 10, color: Colors.white),
+                            ],
+                          ),
+                        ),
+                        Container(width: 40, height: 20, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20))),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: List.generate(4, (index) => Expanded(
+                        child: Container(
+                          height: 30,
+                          margin: const EdgeInsets.symmetric(horizontal: 3),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                        ),
+                      )),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(height: 8, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))),
+                    const SizedBox(height: 14),
+                    Container(width: 100, height: 12, color: Colors.white),
+                    const SizedBox(height: 6),
+                    SizedBox(
+                      height: 80,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: 4,
+                        itemBuilder: (context, index) => Container(
+                          width: 100,
+                          margin: const EdgeInsets.only(right: 10),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Teacher Attendance Card Mock
+            Card(
+              margin: EdgeInsets.zero,
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                      child: Row(
+                        children: [
+                          Container(width: 36, height: 36, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(width: 130, height: 14, color: Colors.white),
+                                const SizedBox(height: 4),
+                                Container(width: 80, height: 10, color: Colors.white),
+                              ],
+                            ),
+                          ),
+                          Container(width: 40, height: 20, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20))),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: List.generate(3, (index) => Expanded(
+                          child: Container(
+                            height: 30,
+                            margin: const EdgeInsets.symmetric(horizontal: 3),
+                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                          ),
+                        )),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                      child: Container(height: 6, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6))),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 14, 0, 8),
+                      child: Container(width: 100, height: 12, color: Colors.white),
+                    ),
+                    SizedBox(
+                      height: screenSize(context, .3),
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                        itemCount: 3,
+                        itemBuilder: (context, index) => Container(
+                          width: 148,
+                          margin: const EdgeInsets.only(right: 10),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Recent Homework Section Title Mock
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(height: 20, width: 150, color: Colors.white),
+                Container(height: 16, width: 60, color: Colors.white),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Recent Homework List Mock
+            SizedBox(
+              height: 160,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: 3,
+                itemBuilder: (context, index) => Container(
+                  width: screenSize(context, .85),
+                  margin: const EdgeInsets.only(right: 5),
+                  child: Card(
+                    child: Container(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Current Exams Section Title Mock
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(height: 20, width: 120, color: Colors.white),
+                Container(height: 16, width: 60, color: Colors.white),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Current Exams List Mock
+            SizedBox(
+              height: 140,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: 3,
+                itemBuilder: (context, index) => Container(
+                  width: screenSize(context, .85),
+                  margin: const EdgeInsets.only(right: 5),
+                  child: Card(
+                    child: Container(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Recent Notices Section Title Mock
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(height: 20, width: 120, color: Colors.white),
+                Container(height: 16, width: 60, color: Colors.white),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Recent Notices List Mock
+            SizedBox(
+              height: 160,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: 3,
+                itemBuilder: (context, index) => Container(
+                  width: screenSize(context, .9),
+                  margin: const EdgeInsets.only(right: 16),
+                  child: Card(
+                    child: Container(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
