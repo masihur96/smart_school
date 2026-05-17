@@ -14,13 +14,14 @@ class AppTheme {
       ),
       textTheme: GoogleFonts.outfitTextTheme(),
       appBarTheme: const AppBarTheme(
-        centerTitle: true,
+        centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(
-          color: Colors.black, // Drawer menu icon color
+          color: Colors.white, // Drawer menu icon color
         ),
-        titleTextStyle: TextStyle(color: Colors.black, fontSize: 16),
+        foregroundColor: Colors.white,
+        titleTextStyle: TextStyle(fontSize: 20),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
