@@ -1,9 +1,11 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
+import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
 import '../../../core/utils/storage_service.dart';
-import '../../../configs/network/data_provider.dart';
 import '../../../models/school_models.dart';
 import '../../../services/notification_service.dart';
 
@@ -31,11 +33,14 @@ class ExamsNotifier extends ChangeNotifier {
 
       if (response != null && response.statusCode == 200) {
         final dynamic raw = response.data;
-        log('Raw exam data: $raw'); // Debugging assignments zero issue
+
         final List<dynamic> data = raw is List
             ? raw
             : (raw is Map ? (raw['data'] ?? raw['exams'] ?? []) : []);
-        _state = data.map((e) => Exam.fromJson(e)).where((e) => !e.isDeleted).toList();
+        _state = data
+            .map((e) => Exam.fromJson(e))
+            .where((e) => !e.isDeleted)
+            .toList();
       } else {
         log('Error fetching exams: ${response?.data}');
       }
@@ -86,7 +91,7 @@ class ExamsNotifier extends ChangeNotifier {
             examId = respData['id'] ?? '';
           }
         }
-        
+
         if (examId.isNotEmpty) {
           // Trigger notification
           NotificationService().triggerNotification(
@@ -122,9 +127,7 @@ class ExamsNotifier extends ChangeNotifier {
         await _load();
       } else {
         log('Error creating exam: ${response?.data}');
-        throw Exception(
-          response?.data?['message'] ?? 'Failed to create exam',
-        );
+        throw Exception(response?.data?['message'] ?? 'Failed to create exam');
       }
     } catch (e) {
       log('Error creating exam: $e');
@@ -155,14 +158,18 @@ class ExamsNotifier extends ChangeNotifier {
         'description': description,
         'start_date': DateFormat('yyyy-MM-dd').format(startDate),
         'end_date': DateFormat('yyyy-MM-dd').format(endDate),
-        'assignments': assignments.map((a) => {
-          if (a.containsKey('id')) 'id': a['id'],
-          'class_uid': a['class_uid'],
-          'subject_uid': a['subject_uid'],
-          'examiner_uid': a['examiner_uid'],
-          'date': DateFormat('yyyy-MM-dd').format(a['date']),
-          'syllabus': a['syllabus'],
-        }).toList(),
+        'assignments': assignments
+            .map(
+              (a) => {
+                if (a.containsKey('id')) 'id': a['id'],
+                'class_uid': a['class_uid'],
+                'subject_uid': a['subject_uid'],
+                'examiner_uid': a['examiner_uid'],
+                'date': DateFormat('yyyy-MM-dd').format(a['date']),
+                'syllabus': a['syllabus'],
+              },
+            )
+            .toList(),
       };
 
       final response = await DataProvider().performRequest(
@@ -174,7 +181,7 @@ class ExamsNotifier extends ChangeNotifier {
 
       if (response != null && response.statusCode == 200) {
         log('Exam updated successfully');
-        
+
         // Trigger notification
         NotificationService().triggerNotification(
           title: 'Exam Schedule Updated',
@@ -186,9 +193,7 @@ class ExamsNotifier extends ChangeNotifier {
         await _load();
       } else {
         log('Error updating exam: ${response?.data}');
-        throw Exception(
-          response?.data?['message'] ?? 'Failed to update exam',
-        );
+        throw Exception(response?.data?['message'] ?? 'Failed to update exam');
       }
     } catch (e) {
       log('Error updating exam: $e');
