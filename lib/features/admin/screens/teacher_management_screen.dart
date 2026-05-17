@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/student_provider.dart';
 import 'package:smart_school/features/admin/screens/add_edit_teacher_screen.dart';
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
@@ -80,10 +81,8 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Teacher Management'),
-        backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
-        elevation: 0,
+        title: Text('Teacher Management'),
+        backgroundColor: AppColors.primaryAdmin,
       ),
       body: Column(
         children: [
@@ -443,21 +442,14 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          final studentCount = context.read<StudentsNotifier>().totalCount;
 
-          final studentCount =
-              context.read<StudentsNotifier>().totalCount;
-
-          final authState =
-          context.read<AuthNotifier>();
+          final authState = context.read<AuthNotifier>();
 
           final maxStudents =
-              authState.adminSubscription
-                  ?.pricingPlan
-                  ?.maxStudents;
+              authState.adminSubscription?.pricingPlan?.maxStudents;
 
-          if (maxStudents != null &&
-              studentCount >= maxStudents) {
-
+          if (maxStudents != null && studentCount >= maxStudents) {
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
@@ -465,12 +457,11 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
 
                 content: Text(
                   "You have reached your student limit "
-                      "($studentCount / $maxStudents).\n\n"
-                      "Upgrade your plan to add more students.",
+                  "($studentCount / $maxStudents).\n\n"
+                  "Upgrade your plan to add more students.",
                 ),
 
                 actions: [
-
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: const Text("Cancel"),
@@ -478,14 +469,12 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
 
                   ElevatedButton(
                     onPressed: () {
-
                       Navigator.pop(context);
 
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                          const AdminPricingPlanScreen(),
+                          builder: (_) => const AdminPricingPlanScreen(),
                         ),
                       );
                     },
@@ -500,19 +489,13 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
 
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) =>
-              const AddEditTeacherScreen(),
-            ),
+            MaterialPageRoute(builder: (_) => const AddEditTeacherScreen()),
           ).then((_) => _fetchTeachers());
         },
 
         backgroundColor: Colors.purple,
 
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 
 import '../../../models/teacher_model.dart';
@@ -83,12 +84,11 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
       }
 
       if (permission == LocationPermission.deniedForever) {
-        throw Exception(
-            'Location permissions are permanently denied.');
+        throw Exception('Location permissions are permanently denied.');
       }
 
       Position position = await Geolocator.getCurrentPosition();
-      
+
       if (mounted) {
         setState(() {
           _latController.text = position.latitude.toString();
@@ -100,9 +100,9 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error getting location: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error getting location: $e')));
       }
     } finally {
       if (mounted) {
@@ -186,9 +186,13 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'Edit Teacher' : 'Register Teacher'),
+        title: Text(
+          isEditing ? 'Edit Teacher' : 'Register Teacher',
+          style: TextStyle(color: AppColors.white),
+        ),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
+        iconTheme: IconThemeData(color: AppColors.white),
       ),
       body: Form(
         key: _formKey,
