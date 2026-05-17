@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/utils/biometric_service.dart';
+import 'package:smart_school/core/utils/storage_service.dart';
 import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
 import 'package:smart_school/features/admin/screens/register_school_screen.dart';
@@ -8,9 +10,6 @@ import 'package:smart_school/features/student/screens/student_dashboard_screen.d
 import 'package:smart_school/features/super_admin/screens/super_admin_dashboard_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
 import 'package:smart_school/models/user_model.dart';
-
-import 'package:smart_school/core/utils/biometric_service.dart';
-import 'package:smart_school/core/utils/storage_service.dart';
 
 import 'register_screen.dart';
 
@@ -35,7 +34,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _checkBiometrics() async {
-    final hasCredentials = await StorageService.getEmail() != null &&
+    final hasCredentials =
+        await StorageService.getEmail() != null &&
         await StorageService.getPassword() != null;
     if (hasCredentials) {
       final isAvailable = await _biometricService.isBiometricAvailable();
@@ -212,12 +212,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   if (_canUseBiometrics) ...[
                     const SizedBox(width: 12),
                     IconButton(
-                      onPressed: authNotifier.isLoading ? null : _biometricLogin,
-                      icon: const Icon(
-                        Icons.fingerprint,
-                        size: 40,
-                        color: Color(0xFF6750A4),
-                      ),
+                      onPressed: authNotifier.isLoading
+                          ? null
+                          : _biometricLogin,
+                      icon: const Icon(Icons.fingerprint, size: 40),
                       tooltip: 'Login with biometrics',
                     ),
                   ],
