@@ -11,7 +11,7 @@ class BiometricService {
           await _auth.canCheckBiometrics || await _auth.isDeviceSupported();
       if (!canAuthenticate) return false;
 
-      // Also verify at least one biometric is actually enrolled
+      // Verify at least one biometric is enrolled
       final List<BiometricType> available = await _auth.getAvailableBiometrics();
       return available.isNotEmpty;
     } on PlatformException catch (e) {
@@ -31,24 +31,17 @@ class BiometricService {
 
   /// Authenticate the user with biometrics (or device PIN as fallback).
   ///
-  /// Key fixes for the "first attempt fails" bug:
-  /// - biometricOnly: false  → allows PIN fallback that some devices need on
-  ///   the very first call to warm up the authentication session.
-  /// - persistAcrossBackgrounding: true → keeps the prompt alive if the user
-  ///   briefly switches away from the app during the auth dialog.
-  /// - stopAuthentication() before each call → resets any hung session.
+  /// - biometricOnly: false  → allows PIN fallback so first-attempt works on
+  ///   devices that need it to warm up the authentication session.
+  /// - persistAcrossBackgrounding: true → keeps the prompt alive if user
+  ///   briefly switches away during the auth dialog.
   Future<bool> authenticate() async {
-    // Reset any previously hung authentication session
-    try {
-      await _auth.stopAuthentication();
-    } catch (_) {}
-
     try {
       return await _auth.authenticate(
         localizedReason: 'Please authenticate to login to SchoolCare',
-        biometricOnly: false,            // allow PIN fallback on first attempt
+        biometricOnly: false,
         sensitiveTransaction: false,
-        persistAcrossBackgrounding: true, // keep dialog alive on app switch
+        persistAcrossBackgrounding: true,
       );
     } on PlatformException catch (e) {
       print('[BiometricService] authenticate error: $e');
