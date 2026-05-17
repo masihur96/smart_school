@@ -1420,15 +1420,25 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildShimmerLoading(BuildContext context) {
-    // Helper: plain shimmer block
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Shimmer sweep colors — adapt to theme
+    final Color shimBase      = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final Color shimHighlight = isDark ? const Color(0xFF3D3D3D) : const Color(0xFFF5F5F5);
+    // Block fill color (must differ from Shimmer background so the sweep is visible)
+    final Color blockColor    = isDark ? const Color(0xFF3A3A3A) : Colors.white;
+
     Widget sBox(double w, double h, {double r = 6}) => Container(
           width: w, height: h,
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(r)),
+          decoration: BoxDecoration(
+            color: blockColor,
+            borderRadius: BorderRadius.circular(r),
+          ),
         );
 
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: shimBase,
+      highlightColor: shimHighlight,
       child: SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16.0),
@@ -1439,7 +1449,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white, borderRadius: BorderRadius.circular(24),
+                color: blockColor, borderRadius: BorderRadius.circular(24),
               ),
               child: Row(children: [
                 sBox(56, 56, r: 28),
@@ -1480,7 +1490,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       child: Container(
                         height: 30, margin: const EdgeInsets.symmetric(horizontal: 3),
                         padding: const EdgeInsets.symmetric(horizontal: 8),
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                        decoration: BoxDecoration(color: blockColor, borderRadius: BorderRadius.circular(20)),
                         child: Center(child: sBox(55, 10, r: 4)),
                       ),
                     ))),
@@ -1501,7 +1511,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         itemBuilder: (_, __) => Container(
                           width: 100, margin: const EdgeInsets.only(right: 10),
                           padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+                          decoration: BoxDecoration(color: blockColor, borderRadius: BorderRadius.circular(14)),
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             sBox(70, 11, r: 4), const SizedBox(height: 5),
                             sBox(50, 9, r: 4),  const SizedBox(height: 5),
@@ -1542,7 +1552,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       child: Row(children: List.generate(3, (_) => Expanded(
                         child: Container(
                           height: 30, margin: const EdgeInsets.symmetric(horizontal: 3),
-                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                          decoration: BoxDecoration(color: blockColor, borderRadius: BorderRadius.circular(20)),
                           child: Center(child: sBox(55, 10, r: 4)),
                         ),
                       ))),
@@ -1568,7 +1578,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         itemBuilder: (_, __) => Container(
                           width: 148, margin: const EdgeInsets.only(right: 10),
                           padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                          decoration: BoxDecoration(color: blockColor, borderRadius: BorderRadius.circular(16)),
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             // Avatar + name + designation
                             Row(children: [
