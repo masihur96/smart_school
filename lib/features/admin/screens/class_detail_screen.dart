@@ -9,6 +9,7 @@ import '../../../models/school_models.dart';
 import '../../../models/student_model.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../teacher/providers/homework_provider.dart';
+import '../providers/attendance_management_provider.dart';
 import '../providers/routine_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
@@ -84,20 +85,21 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
   }
 
   Future<void> _loadAttendanceForDate() async {
-    await context.read<AttendanceNotifier>().fetchAttendanceFromAPI(
+    await context.read<AttendanceManagementProvider>().fetchStudentAttendance(
       classId: widget.classRoom.id,
       sectionId: widget.sectionId,
       date: _selectedDate,
     );
 
     if (mounted) {
-      final records = context.read<AttendanceNotifier>().getRecordsForDate(
-        _selectedDate,
-      );
+      final records = context.read<AttendanceManagementProvider>().studentAttendance;
       setState(() {
         _attendanceMap.clear();
         for (var record in records) {
-          _attendanceMap[record.studentId] = record.status;
+          _attendanceMap[record.studentId] = AttendanceStatus.values.firstWhere(
+            (e) => e.name.toLowerCase() == record.status.toLowerCase(),
+            orElse: () => AttendanceStatus.present,
+          );
         }
       });
     }
