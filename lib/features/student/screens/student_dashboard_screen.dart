@@ -9,6 +9,7 @@ import 'package:smart_school/features/profile/presentation/views/profile_screen.
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/marquee_notice.dart';
@@ -204,6 +205,32 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
   ) {
     final provider = context.watch<StudentDashboardProvider>();
     final data = provider.dashboardData;
+
+    if (provider.isLoading && data == null) {
+      return _buildShimmerLoading(context, user, l10n);
+    }
+
+    if (provider.error != null && data == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(provider.error!),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => provider.fetchStudentDashboard(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryStudent,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
 
     return RefreshIndicator(
       onRefresh: () => provider.fetchStudentDashboard(),
@@ -996,6 +1023,273 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerLoading(BuildContext context, User? user, AppLocalizations l10n) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // Shimmer sweep colors
+    final Color shimBase = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
+    final Color shimHighlight = isDark ? const Color(0xFF3D3D3D) : const Color(0xFFF5F5F5);
+    // Block fill color
+    final Color blockColor = isDark ? const Color(0xFF3A3A3A) : Colors.white;
+
+    Widget sBox(double w, double h, {double r = 6}) => Container(
+          width: w,
+          height: h,
+          decoration: BoxDecoration(
+            color: blockColor,
+            borderRadius: BorderRadius.circular(r),
+          ),
+        );
+
+    return Shimmer.fromColors(
+      baseColor: shimBase,
+      highlightColor: shimHighlight,
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Modern Header Mock
+            Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Colors.black, // Just to give the shimmer base a background shape
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(32),
+                  bottomRight: Radius.circular(32),
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(25, 20, 25, 30),
+              child: Row(
+                children: [
+                  sBox(60, 60, r: 30),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        sBox(120, 14),
+                        const SizedBox(height: 8),
+                        sBox(180, 24),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // My Attendance Header Mock
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      sBox(140, 22),
+                      sBox(60, 16),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Attendance Section Mock
+                  Card(
+                    margin: const EdgeInsets.all(0.0),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              sBox(56, 56, r: 18),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    sBox(90, 12),
+                                    const SizedBox(height: 6),
+                                    sBox(110, 18),
+                                  ],
+                                ),
+                              ),
+                              sBox(80, 14),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [sBox(40, 18), const SizedBox(height: 6), sBox(50, 10)]),
+                              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [sBox(40, 18), const SizedBox(height: 6), sBox(50, 10)]),
+                              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [sBox(40, 18), const SizedBox(height: 6), sBox(50, 10)]),
+                              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [sBox(40, 18), const SizedBox(height: 6), sBox(50, 10)]),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          sBox(double.infinity, 1),
+                          const SizedBox(height: 16),
+                          sBox(120, 16),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 90,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: 3,
+                              itemBuilder: (context, index) => Container(
+                                width: 140,
+                                margin: const EdgeInsets.only(right: 12),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: blockColor,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        sBox(14, 14, r: 7),
+                                        const SizedBox(width: 6),
+                                        sBox(60, 12),
+                                      ],
+                                    ),
+                                    const Spacer(),
+                                    sBox(100, 14),
+                                    const SizedBox(height: 6),
+                                    sBox(80, 12),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Exams Header Mock
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      sBox(100, 22),
+                      sBox(60, 16),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 160,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 2,
+                      itemBuilder: (context, index) => Container(
+                        width: screenSize(context, .85),
+                        margin: const EdgeInsets.only(right: 16, bottom: 8),
+                        decoration: BoxDecoration(
+                          color: blockColor,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Row(
+                            children: [
+                              sBox(80, 80, r: 40),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    sBox(120, 18),
+                                    const SizedBox(height: 8),
+                                    sBox(90, 14),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        sBox(40, 20),
+                                        const SizedBox(width: 8),
+                                        sBox(60, 14),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Homework Header Mock
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      sBox(140, 22),
+                      sBox(60, 16),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 140,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 2,
+                      itemBuilder: (context, index) => Container(
+                        width: screenSize(context, .75),
+                        margin: const EdgeInsets.only(right: 16, bottom: 8),
+                        decoration: BoxDecoration(
+                          color: blockColor,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  sBox(80, 14),
+                                  sBox(50, 20),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              sBox(160, 16),
+                              const SizedBox(height: 8),
+                              sBox(220, 14),
+                              const Spacer(),
+                              Row(
+                                children: [
+                                  sBox(12, 12, r: 6),
+                                  const SizedBox(width: 4),
+                                  sBox(80, 12),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
