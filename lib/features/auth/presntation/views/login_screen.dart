@@ -25,12 +25,16 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _canUseBiometrics = false;
+  bool _isBiometricLoading = false;
   final BiometricService _biometricService = BiometricService();
 
   @override
   void initState() {
     super.initState();
-    _checkBiometrics();
+    // Use post-frame so the widget is fully mounted before any async work.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkBiometrics();
+    });
   }
 
   Future<void> _checkBiometrics() async {
@@ -62,9 +66,12 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (authNotifier.user != null) {
-      // Save credentials for biometric login
+      // Save credentials for biometric login and refresh availability flag
       await StorageService.saveEmail(_emailController.text.trim());
       await StorageService.savePassword(_passwordController.text);
+      await _checkBiometrics(); // so fingerprint button shows on next launch
+
+      if (!mounted) return;
 
       Widget dashboard;
       switch (authNotifier.user!.role) {
@@ -104,15 +111,42 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _biometricLogin() async {
-    final authenticated = await _biometricService.authenticate();
-    if (authenticated) {
-      final email = await StorageService.getEmail();
-      final password = await StorageService.getPassword();
-      if (email != null && password != null) {
-        _emailController.text = email;
-        _passwordController.text = password;
-        await _login();
+    if (_isBiometricLoading) return;
+
+    // Clear stale error state before attempting biometric auth
+    if (!mounted) return;
+    context.read<AuthNotifier>().clearError();
+
+    setState(() => _isBiometricLoading = true);
+
+    try {
+      final authenticated = await _biometricService.authenticate();
+      if (!mounted) return;
+
+      if (authenticated) {
+        final email = await StorageService.getEmail();
+        final password = await StorageService.getPassword();
+        if (!mounted) return;
+
+        if (email != null && password != null) {
+          _emailController.text = email;
+          _passwordController.text = password;
+          await _login();
+        } else {
+          // Stored credentials were lost — prompt manual login
+          setState(() => _canUseBiometrics = false);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Biometric credentials expired. Please log in manually.'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
+        }
       }
+    } finally {
+      if (mounted) setState(() => _isBiometricLoading = false);
     }
   }
 
@@ -211,12 +245,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   if (_canUseBiometrics) ...[
                     const SizedBox(width: 12),
-                    IconButton(
-                      onPressed: authNotifier.isLoading
-                          ? null
-                          : _biometricLogin,
-                      icon: const Icon(Icons.fingerprint, size: 40),
-                      tooltip: 'Login with biometrics',
+                    SizedBox(
+                      width: 52,
+                      height: 52,
+                      child: _isBiometricLoading
+                          ? const Padding(
+                              padding: EdgeInsets.all(10.0),
+                              child: CircularProgressIndicator(strokeWidth: 2.5),
+                            )
+                          : IconButton(
+                              onPressed: authNotifier.isLoading ? null : _biometricLogin,
+                              icon: const Icon(Icons.fingerprint, size: 40),
+                              tooltip: 'Login with biometrics',
+                            ),
                     ),
                   ],
                 ],
