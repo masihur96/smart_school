@@ -1420,6 +1420,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildShimmerLoading(BuildContext context) {
+    // Helper: plain shimmer block
+    Widget sBox(double w, double h, {double r = 6}) => Container(
+          width: w, height: h,
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(r)),
+        );
+
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
@@ -1429,17 +1435,28 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Subscription Card Mock
+            // ── Subscription Card ──────────────────────────────
             Container(
-              height: 110,
-              width: double.infinity,
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
+                color: Colors.white, borderRadius: BorderRadius.circular(24),
               ),
+              child: Row(children: [
+                sBox(56, 56, r: 28),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    sBox(140, 18, r: 4), const SizedBox(height: 8),
+                    sBox(110, 14, r: 4), const SizedBox(height: 6),
+                    sBox(130, 12, r: 4),
+                  ]),
+                ),
+                sBox(52, 28, r: 20),
+              ]),
             ),
             const SizedBox(height: 24),
-            // Student Attendance Card Mock
+
+            // ── Student Attendance Card ────────────────────────
             Card(
               margin: EdgeInsets.zero,
               child: Padding(
@@ -1447,49 +1464,49 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Container(width: 36, height: 36, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(width: 120, height: 14, color: Colors.white),
-                              const SizedBox(height: 4),
-                              Container(width: 80, height: 10, color: Colors.white),
-                            ],
-                          ),
-                        ),
-                        Container(width: 40, height: 20, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20))),
-                      ],
-                    ),
+                    // Header: icon + title + date + rate badge
+                    Row(children: [
+                      sBox(36, 36, r: 12),
+                      const SizedBox(width: 12),
+                      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        sBox(140, 15, r: 4), const SizedBox(height: 5),
+                        sBox(90, 11, r: 4),
+                      ])),
+                      sBox(50, 26, r: 20),
+                    ]),
                     const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: List.generate(4, (index) => Expanded(
-                        child: Container(
-                          height: 30,
-                          margin: const EdgeInsets.symmetric(horizontal: 3),
-                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-                        ),
-                      )),
-                    ),
+                    // 4 stat pills: Total / Present / Absent / Leave
+                    Row(children: List.generate(4, (_) => Expanded(
+                      child: Container(
+                        height: 30, margin: const EdgeInsets.symmetric(horizontal: 3),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                        child: Center(child: sBox(55, 10, r: 4)),
+                      ),
+                    ))),
                     const SizedBox(height: 16),
-                    Container(height: 8, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))),
+                    // Progress bar
+                    sBox(double.infinity, 8, r: 8),
                     const SizedBox(height: 14),
-                    Container(width: 100, height: 12, color: Colors.white),
-                    const SizedBox(height: 6),
+                    // "Today's Records" label
+                    Row(children: [sBox(13, 13, r: 6), const SizedBox(width: 5), sBox(100, 12, r: 4)]),
+                    const SizedBox(height: 8),
+                    // Student mini-cards
                     SizedBox(
                       height: 80,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: 4,
-                        itemBuilder: (context, index) => Container(
-                          width: 100,
-                          margin: const EdgeInsets.only(right: 10),
+                        itemBuilder: (_, __) => Container(
+                          width: 100, margin: const EdgeInsets.only(right: 10),
+                          padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            sBox(70, 11, r: 4), const SizedBox(height: 5),
+                            sBox(50, 9, r: 4),  const SizedBox(height: 5),
+                            sBox(60, 9, r: 4),
+                          ]),
                         ),
                       ),
                     ),
@@ -1498,7 +1515,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            // Teacher Attendance Card Mock
+
+            // ── Teacher Attendance Card ────────────────────────
             Card(
               margin: EdgeInsets.zero,
               child: Padding(
@@ -1508,45 +1526,38 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                      child: Row(
-                        children: [
-                          Container(width: 36, height: 36, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(width: 130, height: 14, color: Colors.white),
-                                const SizedBox(height: 4),
-                                Container(width: 80, height: 10, color: Colors.white),
-                              ],
-                            ),
-                          ),
-                          Container(width: 40, height: 20, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20))),
-                        ],
-                      ),
+                      child: Row(children: [
+                        sBox(36, 36, r: 12),
+                        const SizedBox(width: 12),
+                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          sBox(140, 15, r: 4), const SizedBox(height: 5),
+                          sBox(90, 11, r: 4),
+                        ])),
+                        sBox(50, 26, r: 20),
+                      ]),
                     ),
+                    // 3 stat pills
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: List.generate(3, (index) => Expanded(
-                          child: Container(
-                            height: 30,
-                            margin: const EdgeInsets.symmetric(horizontal: 3),
-                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-                          ),
-                        )),
-                      ),
+                      child: Row(children: List.generate(3, (_) => Expanded(
+                        child: Container(
+                          height: 30, margin: const EdgeInsets.symmetric(horizontal: 3),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                          child: Center(child: sBox(55, 10, r: 4)),
+                        ),
+                      ))),
                     ),
+                    // Progress bar
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                      child: Container(height: 6, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6))),
+                      child: sBox(double.infinity, 6, r: 6),
                     ),
+                    // "Today's Records" label
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 14, 0, 8),
-                      child: Container(width: 100, height: 12, color: Colors.white),
+                      child: Row(children: [sBox(13, 13, r: 6), const SizedBox(width: 5), sBox(100, 12, r: 4)]),
                     ),
+                    // Teacher mini-cards
                     SizedBox(
                       height: screenSize(context, .3),
                       child: ListView.builder(
@@ -1554,10 +1565,27 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         physics: const NeverScrollableScrollPhysics(),
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                         itemCount: 3,
-                        itemBuilder: (context, index) => Container(
-                          width: 148,
-                          margin: const EdgeInsets.only(right: 10),
+                        itemBuilder: (_, __) => Container(
+                          width: 148, margin: const EdgeInsets.only(right: 10),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            // Avatar + name + designation
+                            Row(children: [
+                              sBox(32, 32, r: 16),
+                              const SizedBox(width: 5),
+                              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                sBox(70, 12, r: 4), const SizedBox(height: 4),
+                                sBox(50, 10, r: 4),
+                              ]),
+                            ]),
+                            const SizedBox(height: 8),
+                            // In / Out time row
+                            Row(children: [sBox(38, 10, r: 4), const Spacer(), sBox(38, 10, r: 4)]),
+                            const SizedBox(height: 6),
+                            // Location
+                            sBox(100, 9, r: 4),
+                          ]),
                         ),
                       ),
                     ),
@@ -1566,83 +1594,115 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            // Recent Homework Section Title Mock
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(height: 20, width: 150, color: Colors.white),
-                Container(height: 16, width: 60, color: Colors.white),
-              ],
-            ),
+
+            // ── Recent Homework ────────────────────────────────
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              sBox(150, 18, r: 4), sBox(55, 14, r: 4),
+            ]),
             const SizedBox(height: 12),
-            // Recent Homework List Mock
             SizedBox(
               height: 160,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: 3,
-                itemBuilder: (context, index) => Container(
-                  width: screenSize(context, .85),
-                  margin: const EdgeInsets.only(right: 5),
+                itemBuilder: (_, __) => Container(
+                  width: screenSize(context, .85), margin: const EdgeInsets.only(right: 5),
                   child: Card(
-                    child: Container(color: Colors.white),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        // Class badge + due date
+                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                          sBox(80, 20, r: 8), sBox(60, 10, r: 4),
+                        ]),
+                        const SizedBox(height: 12),
+                        sBox(200, 16, r: 4),   // title
+                        const SizedBox(height: 8),
+                        sBox(120, 13, r: 4),   // subject
+                        const Spacer(),
+                        sBox(double.infinity, 11, r: 4), // description line 1
+                        const SizedBox(height: 4),
+                        sBox(180, 11, r: 4),             // description line 2
+                      ]),
+                    ),
                   ),
                 ),
               ),
             ),
             const SizedBox(height: 24),
-            // Current Exams Section Title Mock
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(height: 20, width: 120, color: Colors.white),
-                Container(height: 16, width: 60, color: Colors.white),
-              ],
-            ),
+
+            // ── Current Exams ──────────────────────────────────
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              sBox(120, 18, r: 4), sBox(55, 14, r: 4),
+            ]),
             const SizedBox(height: 12),
-            // Current Exams List Mock
             SizedBox(
               height: 140,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: 3,
-                itemBuilder: (context, index) => Container(
-                  width: screenSize(context, .85),
-                  margin: const EdgeInsets.only(right: 5),
+                itemBuilder: (_, __) => Container(
+                  width: screenSize(context, .85), margin: const EdgeInsets.only(right: 5),
                   child: Card(
-                    child: Container(color: Colors.white),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                          sBox(28, 28, r: 6), sBox(70, 22, r: 12),
+                        ]),
+                        const Spacer(),
+                        sBox(180, 18, r: 4),   // exam name
+                        const SizedBox(height: 6),
+                        sBox(140, 12, r: 4),   // description
+                        const SizedBox(height: 6),
+                        sBox(160, 12, r: 4),   // date range
+                      ]),
+                    ),
                   ),
                 ),
               ),
             ),
             const SizedBox(height: 24),
-            // Recent Notices Section Title Mock
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(height: 20, width: 120, color: Colors.white),
-                Container(height: 16, width: 60, color: Colors.white),
-              ],
-            ),
+
+            // ── Recent Notices ─────────────────────────────────
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              sBox(130, 18, r: 4), sBox(55, 14, r: 4),
+            ]),
             const SizedBox(height: 12),
-            // Recent Notices List Mock
             SizedBox(
               height: 160,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: 3,
-                itemBuilder: (context, index) => Container(
-                  width: screenSize(context, .9),
-                  margin: const EdgeInsets.only(right: 16),
+                itemBuilder: (_, __) => Container(
+                  width: screenSize(context, .9), margin: const EdgeInsets.only(right: 16),
                   child: Card(
-                    child: Container(color: Colors.white),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                          sBox(40, 40, r: 20), sBox(80, 22, r: 12),
+                        ]),
+                        const Spacer(),
+                        sBox(200, 16, r: 4),             // title
+                        const SizedBox(height: 6),
+                        sBox(double.infinity, 12, r: 4), // content line 1
+                        const SizedBox(height: 4),
+                        sBox(180, 12, r: 4),             // content line 2
+                        const SizedBox(height: 10),
+                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                          sBox(90, 11, r: 4), sBox(70, 11, r: 4),
+                        ]),
+                      ]),
+                    ),
                   ),
                 ),
               ),
             ),
+            const SizedBox(height: 24),
           ],
         ),
       ),
