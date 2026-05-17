@@ -261,8 +261,7 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
         : '?';
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-
+      // margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
