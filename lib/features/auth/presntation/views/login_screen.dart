@@ -260,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: authNotifier.isLoading ? null : _login,
-                      child: authNotifier.isLoading
+                      child: (authNotifier.isLoading && !_isBiometricLoading)
                           ? const CircularProgressIndicator(
                               color: Colors.white)
                           : const Text('Login',
