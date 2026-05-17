@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
@@ -220,6 +221,32 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         .where((c) => c.teacherId == user.id)
         .toList();
     classes.sort((a, b) => a.startTime.compareTo(b.startTime));
+
+    if (provider.isLoading && data == null) {
+      return _buildShimmerLoading(context, name, user, l10n);
+    }
+
+    if (provider.error != null && data == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(provider.error!),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => provider.fetchTeacherDashboard(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryTeacher,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
 
     return RefreshIndicator(
       onRefresh: () => provider.fetchTeacherDashboard(),
@@ -1727,6 +1754,368 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildShimmerLoading(
+    BuildContext context,
+    String name,
+    User user,
+    AppLocalizations l10n,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final Color shimBase = isDark
+        ? const Color(0xFF2A2A2A)
+        : const Color(0xFFE0E0E0);
+    final Color shimHighlight = isDark
+        ? const Color(0xFF3D3D3D)
+        : const Color(0xFFF5F5F5);
+    final Color blockColor = isDark ? const Color(0xFF3A3A3A) : Colors.white;
+
+    Widget sBox(double w, double h, {double r = 6}) => Container(
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        color: blockColor,
+        borderRadius: BorderRadius.circular(r),
+      ),
+    );
+
+    return Shimmer.fromColors(
+      baseColor: shimBase,
+      highlightColor: shimHighlight,
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Modern Header Mock
+            Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Colors
+                    .black, // Just to give the shimmer base a background shape
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(32),
+                  bottomRight: Radius.circular(32),
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(25, 20, 25, 30),
+              child: Row(
+                children: [
+                  sBox(60, 60, r: 30),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        sBox(120, 14),
+                        const SizedBox(height: 8),
+                        sBox(180, 24),
+                        const SizedBox(height: 8),
+                        sBox(100, 12),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // My Attendance Header Mock
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [sBox(140, 22), sBox(60, 16)],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // My Attendance Section Mock
+                  Card(
+                    margin: const EdgeInsets.all(0.0),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              sBox(56, 56, r: 18),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    sBox(100, 12),
+                                    const SizedBox(height: 6),
+                                    sBox(130, 18),
+                                  ],
+                                ),
+                              ),
+                              sBox(50, 40, r: 14), // Button
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  sBox(16, 16, r: 8),
+                                  const SizedBox(width: 4),
+                                  sBox(40, 14),
+                                ],
+                              ),
+                              sBox(1, 30),
+                              Row(
+                                children: [
+                                  sBox(16, 16, r: 8),
+                                  const SizedBox(width: 4),
+                                  sBox(40, 14),
+                                ],
+                              ),
+                              const Spacer(),
+                              Row(
+                                children: [
+                                  sBox(16, 16, r: 8),
+                                  const SizedBox(width: 4),
+                                  sBox(40, 14),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          sBox(100, 14),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: screenSize(context, .23),
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: 3,
+                              itemBuilder: (context, index) => Container(
+                                width: 140,
+                                margin: const EdgeInsets.only(right: 12),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: blockColor,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        sBox(50, 14),
+                                        sBox(14, 14, r: 7),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [sBox(40, 10), sBox(40, 10)],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    sBox(60, 10),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Attendance (Class Performance) Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [sBox(100, 22), sBox(60, 16)],
+                  ),
+                  const SizedBox(height: 12),
+                  // Attendance Card
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              sBox(65, 65, r: 32), // Circular progress
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    sBox(80, 18),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Column(
+                                          children: [
+                                            sBox(20, 16),
+                                            const SizedBox(height: 4),
+                                            sBox(40, 10),
+                                          ],
+                                        ),
+                                        Column(
+                                          children: [
+                                            sBox(20, 16),
+                                            const SizedBox(height: 4),
+                                            sBox(40, 10),
+                                          ],
+                                        ),
+                                        Column(
+                                          children: [
+                                            sBox(20, 16),
+                                            const SizedBox(height: 4),
+                                            sBox(40, 10),
+                                          ],
+                                        ),
+                                        Column(
+                                          children: [
+                                            sBox(20, 16),
+                                            const SizedBox(height: 4),
+                                            sBox(40, 10),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              sBox(16, 16, r: 8), // arrow
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          sBox(double.infinity, 1),
+                          const SizedBox(height: 12),
+                          sBox(140, 14),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            height: 85,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: 4,
+                              itemBuilder: (context, index) => Container(
+                                width: 65,
+                                margin: const EdgeInsets.only(right: 12),
+                                child: Column(
+                                  children: [
+                                    sBox(50, 50, r: 25), // avatar
+                                    const SizedBox(height: 6),
+                                    sBox(50, 10), // name
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Schedule Today
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [sBox(140, 22), sBox(60, 16)],
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 170,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 2,
+                      itemBuilder: (context, index) => Container(
+                        width: screenSize(context, .45),
+                        margin: const EdgeInsets.only(right: 5),
+                        decoration: BoxDecoration(
+                          color: blockColor,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            sBox(80, 16),
+                            const SizedBox(height: 6),
+                            sBox(60, 12),
+                            const SizedBox(height: 16),
+                            sBox(40, 14),
+                            const Spacer(),
+                            sBox(80, 12),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Recent Homework
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [sBox(150, 22), sBox(60, 16)],
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 130,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 2,
+                      itemBuilder: (context, index) => Container(
+                        width: screenSize(context, .8),
+                        margin: const EdgeInsets.only(right: 16),
+                        decoration: BoxDecoration(
+                          color: blockColor,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            sBox(120, 14),
+                            const SizedBox(height: 6),
+                            sBox(double.infinity, 12),
+                            const SizedBox(height: 4),
+                            sBox(180, 12),
+                            const Spacer(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [sBox(80, 10), sBox(14, 14, r: 7)],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
