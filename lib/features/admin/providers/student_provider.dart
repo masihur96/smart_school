@@ -153,7 +153,6 @@ class StudentsNotifier extends ChangeNotifier {
       );
 
       if (response != null && response.statusCode == 200) {
-        log('fetchStudentsBySection response: ${response.data}');
         final rawData = response.data;
         List<dynamic> data = [];
 

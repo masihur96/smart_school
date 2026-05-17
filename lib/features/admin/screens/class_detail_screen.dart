@@ -68,7 +68,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
       }
 
       // Load homework for this class
-      context.read<HomeworkNotifier>().fetchHomework(
+      context.read<HomeworkNotifier>().fetchAdminHomework(
         classId: widget.classRoom.id,
         sectionId: widget.sectionId,
         subjectId: widget.subjectID,

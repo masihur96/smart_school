@@ -26,36 +26,36 @@ class School {
   });
 
   factory School.fromJson(Map<String, dynamic> json) => School(
-        id: json['id'] ?? '',
-        schoolId: json['schoolId'] ?? '',
-        name: json['name'] ?? '',
-        address: json['address'] ?? '',
-        phone: json['phone'] ?? '',
-        email: json['email'] ?? '',
-        isActive: json['isActive'] ?? false,
-        createdAt: json['createdAt'] != null
-            ? DateTime.tryParse(json['createdAt'].toString())
-            : null,
-        updatedAt: json['updatedAt'] != null
-            ? DateTime.tryParse(json['updatedAt'].toString())
-            : null,
-        deletedAt: json['deletedAt'] != null
-            ? DateTime.tryParse(json['deletedAt'].toString())
-            : null,
-      );
+    id: json['id'] ?? '',
+    schoolId: json['schoolId'] ?? '',
+    name: json['name'] ?? '',
+    address: json['address'] ?? '',
+    phone: json['phone'] ?? '',
+    email: json['email'] ?? '',
+    isActive: json['isActive'] ?? false,
+    createdAt: json['createdAt'] != null
+        ? DateTime.tryParse(json['createdAt'].toString())
+        : null,
+    updatedAt: json['updatedAt'] != null
+        ? DateTime.tryParse(json['updatedAt'].toString())
+        : null,
+    deletedAt: json['deletedAt'] != null
+        ? DateTime.tryParse(json['deletedAt'].toString())
+        : null,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'schoolId': schoolId,
-        'name': name,
-        'address': address,
-        'phone': phone,
-        'email': email,
-        'isActive': isActive,
-        'createdAt': createdAt?.toIso8601String(),
-        'updatedAt': updatedAt?.toIso8601String(),
-        'deletedAt': deletedAt?.toIso8601String(),
-      };
+    'id': id,
+    'schoolId': schoolId,
+    'name': name,
+    'address': address,
+    'phone': phone,
+    'email': email,
+    'isActive': isActive,
+    'createdAt': createdAt?.toIso8601String(),
+    'updatedAt': updatedAt?.toIso8601String(),
+    'deletedAt': deletedAt?.toIso8601String(),
+  };
 }
 
 class ClassRoom {
@@ -80,7 +80,9 @@ class ClassRoom {
     name: json['name'] ?? '',
     schoolId: json['schoolId'] ?? json['school_id'] ?? '',
     description: json['description'] ?? '',
-    deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
+    deletedAt: json['deletedAt'] != null
+        ? DateTime.tryParse(json['deletedAt'].toString())
+        : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -98,7 +100,12 @@ class Section {
   final String name; // e.g., "A"
   final DateTime? deletedAt;
 
-  Section({required this.id, required this.classId, required this.name, this.deletedAt});
+  Section({
+    required this.id,
+    required this.classId,
+    required this.name,
+    this.deletedAt,
+  });
 
   bool get isDeleted => deletedAt != null;
 
@@ -106,10 +113,17 @@ class Section {
     id: json['uuid'] ?? json['id'] ?? json['_id'] ?? '',
     classId: json['classId'] ?? json['class_id'] ?? '',
     name: json['name'] ?? '',
-    deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
+    deletedAt: json['deletedAt'] != null
+        ? DateTime.tryParse(json['deletedAt'].toString())
+        : null,
   );
 
-  Map<String, dynamic> toJson() => {'id': id, 'classId': classId, 'name': name, 'deletedAt': deletedAt?.toIso8601String()};
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'classId': classId,
+    'name': name,
+    'deletedAt': deletedAt?.toIso8601String(),
+  };
 }
 
 class Subject {
@@ -137,7 +151,9 @@ class Subject {
     code: json['code'] ?? '',
     classId: json['classId'] ?? json['class_id'] ?? '',
     schoolId: json['schoolId'] ?? json['school_id'] ?? '',
-    deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
+    deletedAt: json['deletedAt'] != null
+        ? DateTime.tryParse(json['deletedAt'].toString())
+        : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -164,7 +180,7 @@ class Attendance {
   final String? sectionId;
   final String? subjectId;
   final String? schoolId;
-  
+
   final ClassRoom? classInfo;
   final Section? sectionInfo;
   final Subject? subjectInfo;
@@ -206,10 +222,18 @@ class Attendance {
     subjectId: json['subjectId'],
     schoolId: json['schoolId'],
     classInfo: json['class'] != null ? ClassRoom.fromJson(json['class']) : null,
-    sectionInfo: json['section'] != null ? Section.fromJson(json['section']) : null,
-    subjectInfo: json['subject'] != null ? Subject.fromJson(json['subject']) : null,
-    teacherInfo: json['teacher'] != null ? Teacher.fromJson(json['teacher']) : null,
-    routineInfo: json['routine'] != null ? RoutineEntry.fromJson(json['routine']) : null,
+    sectionInfo: json['section'] != null
+        ? Section.fromJson(json['section'])
+        : null,
+    subjectInfo: json['subject'] != null
+        ? Subject.fromJson(json['subject'])
+        : null,
+    teacherInfo: json['teacher'] != null
+        ? Teacher.fromJson(json['teacher'])
+        : null,
+    routineInfo: json['routine'] != null
+        ? RoutineEntry.fromJson(json['routine'])
+        : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -351,31 +375,35 @@ class Homework {
     title: json['title'] ?? '',
     description: json['description'] ?? '',
     schoolId: json['schoolId'] ?? '',
-    dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : DateTime.now(),
-    createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+    dueDate: json['dueDate'] != null
+        ? DateTime.parse(json['dueDate'])
+        : DateTime.now(),
+    createdAt: json['createdAt'] != null
+        ? DateTime.parse(json['createdAt'])
+        : DateTime.now(),
     studentHomeworks: (json['studentHomeworks'] as List? ?? [])
         .map((e) => StudentHomework.fromJson(e))
         .toList(),
     classInfo: json['classInfo'] != null
         ? ClassRoom.fromJson(json['classInfo'])
         : (json['classEntity'] != null
-            ? ClassRoom.fromJson(json['classEntity'])
-            : null),
+              ? ClassRoom.fromJson(json['classEntity'])
+              : null),
     subjectInfo: json['subjectInfo'] != null
         ? Subject.fromJson(json['subjectInfo'])
         : (json['subjectEntity'] != null
-            ? Subject.fromJson(json['subjectEntity'])
-            : null),
+              ? Subject.fromJson(json['subjectEntity'])
+              : null),
     sectionInfo: json['sectionInfo'] != null
         ? Section.fromJson(json['sectionInfo'])
         : (json['sectionEntity'] != null
-            ? Section.fromJson(json['sectionEntity'])
-            : null),
+              ? Section.fromJson(json['sectionEntity'])
+              : null),
     teacherInfo: json['teacherInfo'] != null
         ? Teacher.fromJson(json['teacherInfo'])
         : (json['teacherEntity'] != null
-            ? Teacher.fromJson(json['teacherEntity'])
-            : null),
+              ? Teacher.fromJson(json['teacherEntity'])
+              : null),
     deletedAt: json['deletedAt'] != null
         ? DateTime.tryParse(json['deletedAt'].toString())
         : null,
@@ -425,18 +453,27 @@ class StudentHomework {
     this.homework,
   });
 
-  factory StudentHomework.fromJson(Map<String, dynamic> json) => StudentHomework(
-    id: json['id'] ?? '',
-    homeworkId: json['homeworkId'] ?? '',
-    studentId: json['studentId'] ?? '',
-    status: json['status'] ?? 'pending',
-    comment: json['comment'],
-    updatedBy: json['updatedBy'],
-    createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
-    updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),
-    student: json['student'] != null ? StudentSummary.fromJson(json['student']) : null,
-    homework: json['homework'] != null ? Homework.fromJson(json['homework']) : null,
-  );
+  factory StudentHomework.fromJson(Map<String, dynamic> json) =>
+      StudentHomework(
+        id: json['id'] ?? '',
+        homeworkId: json['homeworkId'] ?? '',
+        studentId: json['studentId'] ?? '',
+        status: json['status'] ?? 'pending',
+        comment: json['comment'],
+        updatedBy: json['updatedBy'],
+        createdAt: json['createdAt'] != null
+            ? DateTime.parse(json['createdAt'])
+            : DateTime.now(),
+        updatedAt: json['updatedAt'] != null
+            ? DateTime.parse(json['updatedAt'])
+            : DateTime.now(),
+        student: json['student'] != null
+            ? StudentSummary.fromJson(json['student'])
+            : null,
+        homework: json['homework'] != null
+            ? Homework.fromJson(json['homework'])
+            : null,
+      );
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -490,7 +527,8 @@ class Notice {
   final String content;
   final String? classId; // For local UI logic only
   final String? schoolId;
-  final String? targetAudience; // API field: "Students", "Teachers", "Parents", "All"
+  final String?
+  targetAudience; // API field: "Students", "Teachers", "Parents", "All"
   final String? postedBy; // Name of poster, e.g. "Principal"
   final bool isImportant;
 
@@ -518,7 +556,9 @@ class Notice {
     targetAudience: json['targetAudience'] ?? json['audience'],
     postedBy: json['postedBy'],
     isImportant: json['isImportant'] ?? json['isImportent'] ?? false,
-    deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
+    deletedAt: json['deletedAt'] != null
+        ? DateTime.tryParse(json['deletedAt'].toString())
+        : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -590,7 +630,6 @@ class RoutineEntry {
   final DateTime? deletedAt;
 
   factory RoutineEntry.fromJson(Map<String, dynamic> json) {
-    log('Parsing RoutineEntry from JSON: $json');
     return RoutineEntry(
       id: json['uuid'] ?? json['id'] ?? json['_id'],
       classId: json['classId'],
@@ -602,11 +641,21 @@ class RoutineEntry {
       subjectId: json['subjectId'] ?? '',
       teacherId: json['teacherId'] ?? '',
       roomNumber: json['roomNumber'],
-      classEntity: json['classEntity'] != null ? ClassRoom.fromJson(json['classEntity']) : null,
-      subjectEntity: json['subjectEntity'] != null ? Subject.fromJson(json['subjectEntity']) : null,
-      sectionEntity: json['sectionEntity'] != null ? Section.fromJson(json['sectionEntity']) : null,
-      teacherEntity: json['teacherEntity'] != null ? Teacher.fromJson(json['teacherEntity']) : null,
-      deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
+      classEntity: json['classEntity'] != null
+          ? ClassRoom.fromJson(json['classEntity'])
+          : null,
+      subjectEntity: json['subjectEntity'] != null
+          ? Subject.fromJson(json['subjectEntity'])
+          : null,
+      sectionEntity: json['sectionEntity'] != null
+          ? Section.fromJson(json['sectionEntity'])
+          : null,
+      teacherEntity: json['teacherEntity'] != null
+          ? Teacher.fromJson(json['teacherEntity'])
+          : null,
+      deletedAt: json['deletedAt'] != null
+          ? DateTime.tryParse(json['deletedAt'].toString())
+          : null,
     );
   }
 
@@ -668,14 +717,54 @@ class ExamAssignment {
     return ExamAssignment(
       id: json['uuid'] ?? json['id'] ?? '',
       examId: json['examId'] ?? json['exam_id'] ?? '',
-      classId: (classData is Map ? (classData['uuid'] ?? classData['id']) : null) ?? json['classId'] ?? json['class_id'] ?? json['class_uid'] ?? '',
-      className: (classData is Map ? classData['name'] : null) ?? json['className'] ?? json['class_name'] ?? '',
-      sectionId: (sectionData is Map ? (sectionData['uuid'] ?? sectionData['id']) : null) ?? json['sectionId'] ?? json['section_id'] ?? json['section_uid'],
-      sectionName: (sectionData is Map ? sectionData['name'] : null) ?? json['sectionName'] ?? json['section_name'],
-      subjectId: (subjectData is Map ? (subjectData['uuid'] ?? subjectData['id']) : null) ?? json['subjectId'] ?? json['subject_id'] ?? json['subject_uid'] ?? '',
-      subjectName: (subjectData is Map ? subjectData['name'] : null) ?? json['subjectName'] ?? json['subject_name'] ?? '',
-      examinerId: (examinerData is Map ? (examinerData['uuid'] ?? examinerData['id']) : null) ?? json['examinerId'] ?? json['examiner_id'] ?? json['examiner_uid'] ?? '',
-      examinerName: (examinerData is Map ? examinerData['name'] : null) ?? json['examinerName'] ?? json['examiner_name'] ?? '',
+      classId:
+          (classData is Map ? (classData['uuid'] ?? classData['id']) : null) ??
+          json['classId'] ??
+          json['class_id'] ??
+          json['class_uid'] ??
+          '',
+      className:
+          (classData is Map ? classData['name'] : null) ??
+          json['className'] ??
+          json['class_name'] ??
+          '',
+      sectionId:
+          (sectionData is Map
+              ? (sectionData['uuid'] ?? sectionData['id'])
+              : null) ??
+          json['sectionId'] ??
+          json['section_id'] ??
+          json['section_uid'],
+      sectionName:
+          (sectionData is Map ? sectionData['name'] : null) ??
+          json['sectionName'] ??
+          json['section_name'],
+      subjectId:
+          (subjectData is Map
+              ? (subjectData['uuid'] ?? subjectData['id'])
+              : null) ??
+          json['subjectId'] ??
+          json['subject_id'] ??
+          json['subject_uid'] ??
+          '',
+      subjectName:
+          (subjectData is Map ? subjectData['name'] : null) ??
+          json['subjectName'] ??
+          json['subject_name'] ??
+          '',
+      examinerId:
+          (examinerData is Map
+              ? (examinerData['uuid'] ?? examinerData['id'])
+              : null) ??
+          json['examinerId'] ??
+          json['examiner_id'] ??
+          json['examiner_uid'] ??
+          '',
+      examinerName:
+          (examinerData is Map ? examinerData['name'] : null) ??
+          json['examinerName'] ??
+          json['examiner_name'] ??
+          '',
       date: DateTime.tryParse(json['date']?.toString() ?? '') ?? DateTime.now(),
       syllabus: json['syllabus']?.toString(),
     );
@@ -728,7 +817,11 @@ class Exam {
     }
 
     List<ExamAssignment> assignments = [];
-    final dynamic assignmentsJson = json['assignments'] ?? json['exam_assignments'] ?? json['Assignments'] ?? json['routines'];
+    final dynamic assignmentsJson =
+        json['assignments'] ??
+        json['exam_assignments'] ??
+        json['Assignments'] ??
+        json['routines'];
     if (assignmentsJson != null && assignmentsJson is List) {
       assignments = assignmentsJson
           .map((a) => ExamAssignment.fromJson(a as Map<String, dynamic>))
@@ -736,7 +829,8 @@ class Exam {
     }
 
     List<Result> results = [];
-    final dynamic resultsJson = json['results'] ?? json['exam_results'] ?? json['Results'];
+    final dynamic resultsJson =
+        json['results'] ?? json['exam_results'] ?? json['Results'];
     if (resultsJson != null && resultsJson is List) {
       results = resultsJson
           .map((r) => Result.fromJson(r as Map<String, dynamic>))
@@ -752,7 +846,9 @@ class Exam {
       assignments: assignments,
       results: results,
       isPublished: (json['isPublished'] ?? json['is_published']) ?? false,
-      deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
+      deletedAt: json['deletedAt'] != null
+          ? DateTime.tryParse(json['deletedAt'].toString())
+          : null,
     );
   }
 
@@ -820,8 +916,12 @@ class Result {
       totalMarks: parsedTotalMarks,
       remarks: json['remarks'] ?? '',
       exam: json['exam'] != null ? Exam.fromJson(json['exam']) : null,
-      subject: json['subject'] != null ? Subject.fromJson(json['subject']) : null,
-      teacher: json['teacher'] != null ? Teacher.fromJson(json['teacher']) : null,
+      subject: json['subject'] != null
+          ? Subject.fromJson(json['subject'])
+          : null,
+      teacher: json['teacher'] != null
+          ? Teacher.fromJson(json['teacher'])
+          : null,
     );
   }
 
@@ -880,7 +980,7 @@ class TeacherAssignmentSubject {
 
   factory TeacherAssignmentSubject.fromJson(Map<String, dynamic> json) {
     final subjectObj = json['subject'] as Map<String, dynamic>?;
-    
+
     double? parsedMark;
     if (json['existingMark'] != null) {
       final existing = json['existingMark'];
@@ -924,22 +1024,24 @@ class Teacher {
   final DateTime? deletedAt;
 
   factory Teacher.fromJson(Map<String, dynamic> json) => Teacher(
-        id: json['uuid'] ?? json['id'] ?? '',
-        name: json['name'] ?? '',
-        email: json['email'],
-        phone: json['phone'],
-        designation: json['designation'],
-        deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
-      );
+    id: json['uuid'] ?? json['id'] ?? '',
+    name: json['name'] ?? '',
+    email: json['email'],
+    phone: json['phone'],
+    designation: json['designation'],
+    deletedAt: json['deletedAt'] != null
+        ? DateTime.tryParse(json['deletedAt'].toString())
+        : null,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'email': email,
-        'phone': phone,
-        'designation': designation,
-        'deletedAt': deletedAt?.toIso8601String(),
-      };
+    'id': id,
+    'name': name,
+    'email': email,
+    'phone': phone,
+    'designation': designation,
+    'deletedAt': deletedAt?.toIso8601String(),
+  };
 }
 
 class TeacherSelfAttendance {
@@ -975,45 +1077,45 @@ class TeacherSelfAttendance {
     this.teacher,
   });
 
-  factory TeacherSelfAttendance.fromJson(Map<String, dynamic> json) =>
-      TeacherSelfAttendance(
-        id: json['id'] ?? '',
-        teacherId: json['teacherId'] ?? '',
-        date: json['date'] ?? '',
-        time: json['time'] ?? '',
-        lat: json['lat']?.toString() ?? '',
-        lon: json['lon']?.toString() ?? '',
-        distanceFromCenter:
-            (json['distanceFromCenter'] as num?)?.toDouble() ?? 0.0,
-        status: json['status'] ?? '',
-        schoolId: json['schoolId'] ?? '',
-        createdAt: json['createdAt'] != null
-            ? DateTime.parse(json['createdAt'])
-            : DateTime.now(),
-        updatedAt: json['updatedAt'] != null
-            ? DateTime.parse(json['updatedAt'])
-            : DateTime.now(),
-        startTime: json['startTime'],
-        endTime: json['endTime'],
-        teacher: json['teacher'] != null ? Teacher.fromJson(json['teacher']) : null,
-      );
+  factory TeacherSelfAttendance.fromJson(
+    Map<String, dynamic> json,
+  ) => TeacherSelfAttendance(
+    id: json['id'] ?? '',
+    teacherId: json['teacherId'] ?? '',
+    date: json['date'] ?? '',
+    time: json['time'] ?? '',
+    lat: json['lat']?.toString() ?? '',
+    lon: json['lon']?.toString() ?? '',
+    distanceFromCenter: (json['distanceFromCenter'] as num?)?.toDouble() ?? 0.0,
+    status: json['status'] ?? '',
+    schoolId: json['schoolId'] ?? '',
+    createdAt: json['createdAt'] != null
+        ? DateTime.parse(json['createdAt'])
+        : DateTime.now(),
+    updatedAt: json['updatedAt'] != null
+        ? DateTime.parse(json['updatedAt'])
+        : DateTime.now(),
+    startTime: json['startTime'],
+    endTime: json['endTime'],
+    teacher: json['teacher'] != null ? Teacher.fromJson(json['teacher']) : null,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'teacherId': teacherId,
-        'date': date,
-        'time': time,
-        'lat': lat,
-        'lon': lon,
-        'distanceFromCenter': distanceFromCenter,
-        'status': status,
-        'schoolId': schoolId,
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
-        if (startTime != null) 'startTime': startTime,
-        if (endTime != null) 'endTime': endTime,
-        if (teacher != null) 'teacher': teacher!.toJson(),
-      };
+    'id': id,
+    'teacherId': teacherId,
+    'date': date,
+    'time': time,
+    'lat': lat,
+    'lon': lon,
+    'distanceFromCenter': distanceFromCenter,
+    'status': status,
+    'schoolId': schoolId,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+    if (startTime != null) 'startTime': startTime,
+    if (endTime != null) 'endTime': endTime,
+    if (teacher != null) 'teacher': teacher!.toJson(),
+  };
 }
 
 class Marquee {
