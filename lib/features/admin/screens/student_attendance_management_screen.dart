@@ -58,8 +58,6 @@ class _StudentAttendanceManagementScreenState
 
   void _fetchInitialData() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ClassSetupNotifier>().fetchSchoolData();
-      context.read<SectionSetupNotifier>().fetchSchoolData();
       context.read<SubjectSetupNotifier>().fetchSchoolData();
 
       _fetchData();
