@@ -835,7 +835,6 @@ class _HomeworkCard extends StatelessWidget {
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: Color(0xFF1E1B4B),
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -1225,110 +1224,93 @@ class _ViewHomeworkSheet extends StatelessWidget {
         '${homework.dueDate.day.toString().padLeft(2, '0')}/${homework.dueDate.month.toString().padLeft(2, '0')}/${homework.dueDate.year}';
     final isPast = homework.dueDate.isBefore(DateTime.now());
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Handle
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 24),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 24),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+
+            // Subject Tag
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+                color: AppColors.primaryAdmin.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                subjectName,
+                style: const TextStyle(
+                  color: AppColors.primaryAdmin,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
+            const SizedBox(height: 12),
 
-          // Subject Tag
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFF7C3AED).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              subjectName,
+            // Title
+            Text(
+              homework.title,
               style: const TextStyle(
-                color: Color(0xFF7C3AED),
-                fontSize: 12,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
+
+                letterSpacing: -0.5,
               ),
             ),
-          ),
-          const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
-          // Title
-          Text(
-            homework.title,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1E1B4B),
-              letterSpacing: -0.5,
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Info Row (Due Date)
-          Row(
-            children: [
-              Icon(
-                Icons.calendar_today_rounded,
-                size: 18,
-                color: isPast ? Colors.red : Colors.grey[600],
-              ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Due Date',
-                    style: TextStyle(color: Colors.grey[500], fontSize: 11),
-                  ),
-                  Text(
-                    due,
-                    style: TextStyle(
-                      color: isPast ? Colors.red : const Color(0xFF1E1B4B),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+            // Info Row (Due Date)
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_today_rounded,
+                  size: 18,
+                  color: isPast ? Colors.red : Colors.grey[600],
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Due Date',
+                      style: TextStyle(color: Colors.grey[500], fontSize: 11),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
+                    Text(
+                      due,
+                      style: TextStyle(
+                        color: isPast ? Colors.red : null,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
 
-          // Description Section
-          const Text(
-            'Description',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1E1B4B),
+            // Description Section
+            const Text(
+              'Description',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F3FF),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: const Color(0xFF7C3AED).withOpacity(0.1),
-              ),
-            ),
-            child: Text(
+            const SizedBox(height: 8),
+            Text(
               homework.description.isNotEmpty
                   ? homework.description
                   : 'No description provided.',
@@ -1338,29 +1320,29 @@ class _ViewHomeworkSheet extends StatelessWidget {
                 height: 1.5,
               ),
             ),
-          ),
-          const SizedBox(height: 32),
+            const SizedBox(height: 32),
 
-          // Close Button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF7C3AED),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+            // Close Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryAdmin,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: const Text(
+                  'Close',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                 ),
               ),
-              child: const Text(
-                'Close',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
