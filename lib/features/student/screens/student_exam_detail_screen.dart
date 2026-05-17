@@ -245,7 +245,7 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      result.subject?.name ?? 'Subject',
+                      result.exam?. ?? 'Subject',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
