@@ -167,7 +167,7 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
   }
 }
 
-class _AdminPricingPlanCard extends StatelessWidget {
+class _AdminPricingPlanCard extends StatefulWidget {
   final PricingPlan plan;
   final int currentCount;
   final bool isActive;
@@ -177,6 +177,13 @@ class _AdminPricingPlanCard extends StatelessWidget {
     required this.currentCount,
     required this.isActive,
   });
+
+  @override
+  State<_AdminPricingPlanCard> createState() => _AdminPricingPlanCardState();
+}
+
+class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -194,13 +201,13 @@ class _AdminPricingPlanCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      plan.name,
+                      widget.plan.name,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (plan.isCustom)
+                    if (widget.plan.isCustom)
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
@@ -221,7 +228,7 @@ class _AdminPricingPlanCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
-                if (isActive)
+                if (widget.isActive)
                   Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.symmetric(
@@ -248,18 +255,18 @@ class _AdminPricingPlanCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                Text(plan.description, style: TextStyle(fontSize: 14)),
+                Text(widget.plan.description, style: TextStyle(fontSize: 14)),
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _buildFeature(
                       Icons.people_outline,
-                      '${currentCount} / ${plan.maxStudents} Students',
+                      '${widget.currentCount} / ${widget.plan.maxStudents} Students',
                     ),
                     _buildFeature(
                       Icons.calendar_today_outlined,
-                      plan.pricePerMonth == "0"
+                      widget.plan.pricePerMonth == "0"
                           ? "Weekly Billing"
                           : 'Monthly Billing',
                     ),
@@ -271,26 +278,35 @@ class _AdminPricingPlanCard extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      '\$${plan.pricePerMonth}',
+                      '\$${widget.plan.pricePerMonth}',
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(plan.pricePerMonth == "0" ? ' / week' : ' / month'),
+                    Text(widget.plan.pricePerMonth == "0" ? ' / week' : ' / month'),
                   ],
                 ),
               ],
             ),
           ),
           InkWell(
-            onTap: () async {
+            onTap: _isLoading ? null : () async {
+              setState(() {
+                _isLoading = true;
+              });
               final auth = context.read<AuthNotifier>();
               final isFree =
-                  plan.pricePerMonth == '0' ||
-                  plan.name.toLowerCase().contains('free');
+                  widget.plan.pricePerMonth == '0' ||
+                  widget.plan.name.toLowerCase().contains('free');
 
-              final success = await auth.assignPricingPlan(plan.id!, isFree);
+              final success = await auth.assignPricingPlan(widget.plan.id!, isFree);
+
+              if (mounted) {
+                setState(() {
+                  _isLoading = false;
+                });
+              }
 
               if (success && context.mounted) {
                 if (isFree) {
@@ -306,7 +322,7 @@ class _AdminPricingPlanCard extends StatelessWidget {
                   }
                 } else {
                   // Show professional success dialog for paid plans
-                  _showSuccessDialog(context, auth, plan);
+                  _showSuccessDialog(context, auth, widget.plan);
                 }
               } else if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -331,15 +347,24 @@ class _AdminPricingPlanCard extends StatelessWidget {
                   bottomRight: Radius.circular(24),
                 ),
               ),
-              child: const Center(
-                child: Text(
-                  'CHOOSE THIS PLAN',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
-                ),
+              child: Center(
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text(
+                        'CHOOSE THIS PLAN',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
               ),
             ),
           ),
@@ -481,3 +506,4 @@ class _AdminPricingPlanCard extends StatelessWidget {
     );
   }
 }
+
