@@ -42,7 +42,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _checkBiometrics() async {
     final email = await StorageService.getEmail();
     final password = await StorageService.getPassword();
-    if (email != null && password != null) {
+    final isBiometricEnabled = await StorageService.getBiometricEnabled();
+    
+    if (email != null && password != null && isBiometricEnabled) {
       final isAvailable = await _biometricService.isBiometricAvailable();
       if (mounted) setState(() => _canUseBiometrics = isAvailable);
     }
@@ -117,13 +119,6 @@ class _LoginScreenState extends State<LoginScreen> {
       _emailController.text.trim(),
       _passwordController.text,
     );
-
-    // Save credentials for future biometric logins.
-    // We do this outside the mounted check so it always runs.
-    if (authNotifier.user != null) {
-      await StorageService.saveEmail(_emailController.text.trim());
-      await StorageService.savePassword(_passwordController.text);
-    }
     // Navigation is triggered by build() watching authNotifier.user.
   }
 

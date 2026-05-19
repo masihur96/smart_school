@@ -7,6 +7,8 @@ import 'package:smart_school/features/notifications/providers/notification_provi
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/user_model.dart';
+import 'package:smart_school/core/utils/biometric_service.dart';
+import 'package:smart_school/core/utils/storage_service.dart';
 
 class SettingManagementScreen extends StatefulWidget {
   const SettingManagementScreen({super.key});
@@ -94,6 +96,36 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
 
           // Security Section
           _buildSectionHeader(l10n.security, theme),
+          _buildSettingTile(
+            icon: Icons.fingerprint,
+            title: "Biometric Login",
+            theme: theme,
+            trailing: Switch(
+              value: settings.isBiometricEnabled,
+              onChanged: (value) async {
+                if (value) {
+                  final isAvailable =
+                      await BiometricService().isBiometricAvailable();
+                  if (isAvailable) {
+                    if (context.mounted) {
+                      await _showBiometricSetupDialog(context, settings);
+                    }
+                  } else {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text(
+                                'Biometrics not available on this device.')),
+                      );
+                    }
+                  }
+                } else {
+                  await settings.setBiometricEnabled(false);
+                  await StorageService.clearCredential();
+                }
+              },
+            ),
+          ),
           _buildSettingTile(
             icon: Icons.lock_outline,
             title: l10n.changePassword,
@@ -372,6 +404,76 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _showBiometricSetupDialog(
+      BuildContext context, SettingsProvider settings) async {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    bool isPasswordVisible = false;
+
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("Setup Biometric Login"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                      "Please enter your credentials to enable biometric login."),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: emailController,
+                    decoration:
+                        const InputDecoration(labelText: "Email or Phone"),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: passwordController,
+                    decoration: InputDecoration(
+                      labelText: "Password",
+                      suffixIcon: IconButton(
+                        icon: Icon(isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off),
+                        onPressed: () => setState(
+                            () => isPasswordVisible = !isPasswordVisible),
+                      ),
+                    ),
+                    obscureText: !isPasswordVisible,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (emailController.text.trim().isEmpty ||
+                        passwordController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Please fill all fields")),
+                      );
+                      return;
+                    }
+                    await StorageService.saveEmail(emailController.text.trim());
+                    await StorageService.savePassword(passwordController.text);
+                    await settings.setBiometricEnabled(true);
+                    if (context.mounted) Navigator.pop(context);
+                  },
+                  child: const Text("Enable"),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

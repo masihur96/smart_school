@@ -8,11 +8,13 @@ class SettingsProvider extends ChangeNotifier {
   Locale _locale = const Locale('en');
   bool _isHomeworkNotifyEnabled = true;
   bool _isAttendanceNotifyEnabled = true;
+  bool _isBiometricEnabled = false;
 
   ThemeMode get themeMode => _themeMode;
   Locale get locale => _locale;
   bool get isHomeworkNotifyEnabled => _isHomeworkNotifyEnabled;
   bool get isAttendanceNotifyEnabled => _isAttendanceNotifyEnabled;
+  bool get isBiometricEnabled => _isBiometricEnabled;
 
   SettingsProvider() {
     _loadSettings();
@@ -37,6 +39,7 @@ class SettingsProvider extends ChangeNotifier {
 
     _isHomeworkNotifyEnabled = await StorageService.getHomeworkNotify();
     _isAttendanceNotifyEnabled = await StorageService.getAttendanceNotify();
+    _isBiometricEnabled = await StorageService.getBiometricEnabled();
     
     notifyListeners();
   }
@@ -123,6 +126,12 @@ class SettingsProvider extends ChangeNotifier {
     } else {
       await NotificationService().unsubscribeFromTopic('attendance');
     }
+    notifyListeners();
+  }
+
+  Future<void> setBiometricEnabled(bool value) async {
+    _isBiometricEnabled = value;
+    await StorageService.saveBiometricEnabled(value);
     notifyListeners();
   }
 }
