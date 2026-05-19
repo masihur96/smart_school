@@ -68,6 +68,28 @@ class _LoginScreenState extends State<LoginScreen> {
     if (authNotifier.user == null) return;
     _isNavigating = true;
 
+    if (authNotifier.user?.isActive == false) {
+      await authNotifier.logout();
+      _isNavigating = false;
+      if (!mounted) return;
+      _showInactiveDialog(
+        title: 'Account Inactive',
+        message: 'Your account is currently inactive. Please communicate with your principal or administrator for assistance.',
+      );
+      return;
+    }
+
+    if (authNotifier.user?.school?.isActive == false) {
+      await authNotifier.logout();
+      _isNavigating = false;
+      if (!mounted) return;
+      _showInactiveDialog(
+        title: 'School Inactive',
+        message: 'Your school account is currently inactive. Please communicate with SchoolCare support for assistance.',
+      );
+      return;
+    }
+
     // If subscription wasn't fetched (network blip during biometric overlay),
     // retry once before deciding which screen to open.
     final role = authNotifier.user!.role;
@@ -107,6 +129,23 @@ class _LoginScreenState extends State<LoginScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => dashboard),
+    );
+  }
+
+  void _showInactiveDialog({required String title, required String message}) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 
