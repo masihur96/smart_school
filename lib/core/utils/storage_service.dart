@@ -11,6 +11,7 @@ class StorageService {
   static const String _localeKey = 'app_locale';
   static const String _homeworkNotifyKey = 'homework_notify';
   static const String _attendanceNotifyKey = 'attendance_notify';
+  static const String _biometricEnabledKey = 'biometric_enabled';
 
   static const _storage = FlutterSecureStorage();
 
@@ -100,6 +101,16 @@ class StorageService {
     return prefs.getBool(_attendanceNotifyKey) ?? true;
   }
 
+  static Future<void> saveBiometricEnabled(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_biometricEnabledKey, value);
+  }
+
+  static Future<bool> getBiometricEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_biometricEnabledKey) ?? false;
+  }
+
   static Future<void> clearCredential() async {
     await _storage.delete(key: _userEmailKey);
     await _storage.delete(key: _userPasswordKey);
@@ -107,15 +118,32 @@ class StorageService {
 
   static Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
+    
+    // Preserve app settings
+    final theme = await getTheme();
+    final locale = await getLocale();
+    final hwNotify = await getHomeworkNotify();
+    final attNotify = await getAttendanceNotify();
+    final isBiometricEnabled = await getBiometricEnabled();
+
     await prefs.clear();
 
-    // Preserve biometric credentials across clear
+    // Restore app settings
+    if (theme != null) await saveTheme(theme);
+    if (locale != null) await saveLocale(locale);
+    await saveHomeworkNotify(hwNotify);
+    await saveAttendanceNotify(attNotify);
+    await saveBiometricEnabled(isBiometricEnabled);
+
+    // Preserve biometric credentials across clear ONLY if biometric is enabled
     final email = await getEmail();
     final password = await getPassword();
 
     await _storage.deleteAll();
 
-    if (email != null) await saveEmail(email);
-    if (password != null) await savePassword(password);
+    if (isBiometricEnabled) {
+      if (email != null) await saveEmail(email);
+      if (password != null) await savePassword(password);
+    }
   }
 }
