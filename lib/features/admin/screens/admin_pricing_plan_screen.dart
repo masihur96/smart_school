@@ -70,6 +70,10 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
                   final plan = pricingNotifier.plans[index];
+
+                  // print(subscription?.pricingPlan?.id == plan.id);
+                  print(subscription?.pricingPlan?.id);
+                  print(plan.id);
                   return _AdminPricingPlanCard(
                     plan: plan,
                     currentCount: subscription?.lastStudentCount ?? 0,
@@ -284,59 +288,67 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(widget.plan.pricePerMonth == "0" ? ' / week' : ' / month'),
+                    Text(
+                      widget.plan.pricePerMonth == "0" ? ' / week' : ' / month',
+                    ),
                   ],
                 ),
               ],
             ),
           ),
           InkWell(
-            onTap: _isLoading ? null : () async {
-              setState(() {
-                _isLoading = true;
-              });
-              final auth = context.read<AuthNotifier>();
-              final isFree =
-                  widget.plan.pricePerMonth == '0' ||
-                  widget.plan.name.toLowerCase().contains('free');
+            onTap: _isLoading
+                ? null
+                : () async {
+                    setState(() {
+                      _isLoading = true;
+                    });
+                    final auth = context.read<AuthNotifier>();
+                    final isFree =
+                        widget.plan.pricePerMonth == '0' ||
+                        widget.plan.name.toLowerCase().contains('free');
 
-              final success = await auth.assignPricingPlan(widget.plan.id!, isFree);
-
-              if (mounted) {
-                setState(() {
-                  _isLoading = false;
-                });
-              }
-
-              if (success && context.mounted) {
-                if (isFree) {
-                  // Direct navigation for Free plans as they are auto-activated
-                  if (auth.isSubscriptionValid) {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AdminDashboardScreen(),
-                      ),
-                      (route) => false,
+                    final success = await auth.assignPricingPlan(
+                      widget.plan.id!,
+                      isFree,
                     );
-                  }
-                } else {
-                  // Show professional success dialog for paid plans
-                  _showSuccessDialog(context, auth, widget.plan);
-                }
-              } else if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(auth.error ?? 'Failed to assign plan'),
-                    backgroundColor: Colors.red,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                );
-              }
-            },
+
+                    if (mounted) {
+                      setState(() {
+                        _isLoading = false;
+                      });
+                    }
+
+                    if (success && context.mounted) {
+                      if (isFree) {
+                        // Direct navigation for Free plans as they are auto-activated
+                        if (auth.isSubscriptionValid) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const AdminDashboardScreen(),
+                            ),
+                            (route) => false,
+                          );
+                        }
+                      } else {
+                        // Show professional success dialog for paid plans
+                        _showSuccessDialog(context, auth, widget.plan);
+                      }
+                    } else if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(auth.error ?? 'Failed to assign plan'),
+                          backgroundColor: Colors.red,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      );
+                    }
+                  },
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -354,7 +366,9 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         ),
                       )
                     : const Text(
@@ -506,4 +520,3 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
     );
   }
 }
-
