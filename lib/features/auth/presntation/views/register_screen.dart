@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -75,12 +76,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
         authNotifier.clearError();
       }
     });
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Account'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        title: Text(
+          'Create Account',
+          style: TextStyle(color: isDark ? AppColors.white : AppColors.black),
+        ),
+        iconTheme: IconThemeData(
+          color: isDark ? AppColors.white : AppColors.black,
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -105,14 +111,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 SizedBox(height: 40),
                 Text(
-                  'Join Smart School',
+                  'Join SchoolCare',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Enter your details to register as Student.',
+                  'Enter your details to register as principal.',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 32),
@@ -149,7 +155,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         _isPasswordVisible
                             ? Icons.visibility
                             : Icons.visibility_off,
-                        color: Theme.of(context).primaryColor,
                       ),
                       onPressed: () {
                         setState(() {

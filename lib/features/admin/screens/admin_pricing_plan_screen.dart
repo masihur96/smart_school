@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
@@ -84,21 +85,19 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
 
   Widget _buildAppBar() {
     return SliverAppBar(
-      expandedHeight: 120,
+      expandedHeight: 60,
       pinned: true,
-      elevation: 0,
-      backgroundColor: AppColors.primary,
-      foregroundColor: AppColors.white,
-      flexibleSpace: const FlexibleSpaceBar(
+
+      flexibleSpace: FlexibleSpaceBar(
         centerTitle: true,
         title: Text(
           'Subscription Required',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(fontSize: screenSize(context, .04)),
         ),
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.logout, color: Colors.white),
+          icon: const Icon(Icons.logout),
           onPressed: () async {
             await context.read<AuthNotifier>().logout();
             if (mounted) {
@@ -181,20 +180,9 @@ class _AdminPricingPlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Card(
       margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-        border: Border.all(color: AppColors.primarySoft, width: 1.5),
-      ),
+
       child: Column(
         children: [
           Padding(
@@ -210,7 +198,6 @@ class _AdminPricingPlanCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
                       ),
                     ),
                     if (plan.isCustom)
@@ -226,7 +213,6 @@ class _AdminPricingPlanCard extends StatelessWidget {
                         child: const Text(
                           'CUSTOM',
                           style: TextStyle(
-                            color: Colors.orange,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
@@ -255,7 +241,6 @@ class _AdminPricingPlanCard extends StatelessWidget {
                         Text(
                           'YOUR CURRENT PLAN',
                           style: TextStyle(
-                            color: Colors.green,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
@@ -263,13 +248,7 @@ class _AdminPricingPlanCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                Text(
-                  plan.description,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary.withOpacity(0.7),
-                  ),
-                ),
+                Text(plan.description, style: TextStyle(fontSize: 14)),
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -286,9 +265,9 @@ class _AdminPricingPlanCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 14),
                 const Divider(),
-                const SizedBox(height: 24),
+
                 Row(
                   children: [
                     Text(
@@ -296,13 +275,9 @@ class _AdminPricingPlanCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
                       ),
                     ),
-                    Text(
-                      plan.pricePerMonth == "0" ? ' / week' : ' / month',
-                      style: TextStyle(color: AppColors.textSecondary),
-                    ),
+                    Text(plan.pricePerMonth == "0" ? ' / week' : ' / month'),
                   ],
                 ),
               ],
@@ -496,7 +471,7 @@ class _AdminPricingPlanCard extends StatelessWidget {
   Widget _buildFeature(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: AppColors.primary),
+        Icon(icon, size: 16),
         const SizedBox(width: 8),
         Text(
           text,
