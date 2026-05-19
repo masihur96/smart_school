@@ -219,36 +219,78 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                DropdownButtonFormField<bool?>(
-                  decoration: InputDecoration(
-                    labelText: 'Status',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<bool?>(
+                        decoration: InputDecoration(
+                          labelText: 'Status',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
+                        items: const [
+                          DropdownMenuItem<bool?>(
+                            value: null,
+                            child: Text('All Status'),
+                          ),
+                          DropdownMenuItem<bool?>(
+                            value: true,
+                            child: Text('Active Only'),
+                          ),
+                          DropdownMenuItem<bool?>(
+                            value: false,
+                            child: Text('Inactive Only'),
+                          ),
+                        ],
+                        value: _selectedStatus,
+                        onChanged: (val) {
+                          setState(() => _selectedStatus = val);
+                          _applyFilters();
+                        },
+                      ),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                  ),
-                  items: const [
-                    DropdownMenuItem<bool?>(
-                      value: null,
-                      child: Text('All Status'),
-                    ),
-                    DropdownMenuItem<bool?>(
-                      value: true,
-                      child: Text('Active Only'),
-                    ),
-                    DropdownMenuItem<bool?>(
-                      value: false,
-                      child: Text('Inactive Only'),
+                    const SizedBox(width: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.purple.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Total',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.purple,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            '${studentsNotifier.totalCount}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.purple,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
-                  value: _selectedStatus,
-                  onChanged: (val) {
-                    setState(() => _selectedStatus = val);
-                    _applyFilters();
-                  },
                 ),
               ],
             ),
@@ -274,44 +316,200 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                         return Card(
                           margin: const EdgeInsets.symmetric(vertical: 5),
 
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.all(8),
-                            leading: Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.purple.shade300,
-                                    Colors.purple.shade600,
-                                  ],
-                                ),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: Hero(
-                                  tag: 'student-avatar-${student.userId}',
-                                  child: Text(
-                                    student.user?.name[0] ?? '?',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20,
+                          child: Stack(
+                            children: [
+                              ListTile(
+                                contentPadding: const EdgeInsets.all(8),
+                                leading: Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.purple.shade300,
+                                        Colors.purple.shade600,
+                                      ],
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Hero(
+                                      tag: 'student-avatar-${student.userId}',
+                                      child: Text(
+                                        student.user?.name[0] ?? '?',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
-                            title: Row(
-                              children: [
-                                Text(
+                                title: Text(
                                   student.user?.name ?? 'Unknown',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                Container(
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 4),
+                                    Text('Roll: ${student.rollId}'),
+                                    Text(
+                                      classes
+                                          .firstWhere(
+                                            (c) => c.id == student.classId,
+                                            orElse: () => ClassRoom(
+                                              id: '',
+                                              name: 'Unknown',
+                                            ),
+                                          )
+                                          .name,
+                                    ),
+                                  ],
+                                ),
+
+                                trailing: PopupMenuButton<String>(
+                                  icon: const Icon(Icons.more_vert),
+                                  onSelected: (value) {
+                                    if (value == 'view') {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => StudentDetailScreen(
+                                            student: student,
+                                          ),
+                                        ),
+                                      ).then((_) => _applyFilters());
+                                    } else if (value == 'edit') {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => AddEditStudentScreen(
+                                            student: student,
+                                          ),
+                                        ),
+                                      ).then((_) {
+                                        _applyFilters();
+                                      });
+                                    } else if (value == 'status') {
+                                      context
+                                          .read<StudentsNotifier>()
+                                          .toggleStudentStatus(student.userId);
+                                    } else if (value == 'delete') {
+                                      showDialog(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          title: const Text('Delete Student'),
+                                          content: const Text(
+                                            'Are you sure you want to delete this student?',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(ctx),
+                                              child: const Text('Cancel'),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                context
+                                                    .read<StudentsNotifier>()
+                                                    .deleteStudent(
+                                                      student.userId,
+                                                    );
+                                                Navigator.pop(ctx);
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.red,
+                                              ),
+                                              child: const Text(
+                                                'Delete',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  itemBuilder: (BuildContext context) =>
+                                      <PopupMenuEntry<String>>[
+                                        const PopupMenuItem<String>(
+                                          value: 'view',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.visibility,
+                                                color: Colors.purple,
+                                              ),
+                                              SizedBox(width: 8),
+                                              Text('View Details'),
+                                            ],
+                                          ),
+                                        ),
+                                        const PopupMenuItem<String>(
+                                          value: 'edit',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.edit,
+                                                color: Colors.blue,
+                                              ),
+                                              SizedBox(width: 8),
+                                              Text('Edit'),
+                                            ],
+                                          ),
+                                        ),
+                                        PopupMenuItem<String>(
+                                          value: 'status',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                student.isActive
+                                                    ? Icons.block
+                                                    : Icons.check_circle,
+                                                color: student.isActive
+                                                    ? Colors.orange
+                                                    : Colors.green,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                student.isActive
+                                                    ? 'Deactivate'
+                                                    : 'Activate',
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const PopupMenuItem<String>(
+                                          value: 'delete',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.delete,
+                                                color: Colors.red,
+                                              ),
+                                              SizedBox(width: 8),
+                                              Text(
+                                                'Delete',
+                                                style: TextStyle(
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                ),
+                              ),
+                              Positioned(
+                                right: 10,
+                                top: 10,
+                                child: Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 6,
                                     vertical: 2,
@@ -333,146 +531,8 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 4),
-                                Text('Roll: ${student.rollId}'),
-                                Text(
-                                  classes
-                                      .firstWhere(
-                                        (c) => c.id == student.classId,
-                                        orElse: () =>
-                                            ClassRoom(id: '', name: 'Unknown'),
-                                      )
-                                      .name,
-                                ),
-                              ],
-                            ),
-                            trailing: PopupMenuButton<String>(
-                              icon: const Icon(Icons.more_vert),
-                              onSelected: (value) {
-                                if (value == 'view') {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          StudentDetailScreen(student: student),
-                                    ),
-                                  ).then((_) => _applyFilters());
-                                } else if (value == 'edit') {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => AddEditStudentScreen(
-                                        student: student,
-                                      ),
-                                    ),
-                                  ).then((_) {
-                                    _applyFilters();
-                                  });
-                                } else if (value == 'status') {
-                                  context
-                                      .read<StudentsNotifier>()
-                                      .toggleStudentStatus(student.userId);
-                                } else if (value == 'delete') {
-                                  showDialog(
-                                    context: context,
-                                    builder: (ctx) => AlertDialog(
-                                      title: const Text('Delete Student'),
-                                      content: const Text(
-                                        'Are you sure you want to delete this student?',
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(ctx),
-                                          child: const Text('Cancel'),
-                                        ),
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            context
-                                                .read<StudentsNotifier>()
-                                                .deleteStudent(student.userId);
-                                            Navigator.pop(ctx);
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.red,
-                                          ),
-                                          child: const Text(
-                                            'Delete',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }
-                              },
-                              itemBuilder: (BuildContext context) =>
-                                  <PopupMenuEntry<String>>[
-                                    const PopupMenuItem<String>(
-                                      value: 'view',
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.visibility,
-                                            color: Colors.purple,
-                                          ),
-                                          SizedBox(width: 8),
-                                          Text('View Details'),
-                                        ],
-                                      ),
-                                    ),
-                                    const PopupMenuItem<String>(
-                                      value: 'edit',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.edit, color: Colors.blue),
-                                          SizedBox(width: 8),
-                                          Text('Edit'),
-                                        ],
-                                      ),
-                                    ),
-                                    PopupMenuItem<String>(
-                                      value: 'status',
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            student.isActive
-                                                ? Icons.block
-                                                : Icons.check_circle,
-                                            color: student.isActive
-                                                ? Colors.orange
-                                                : Colors.green,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            student.isActive
-                                                ? 'Deactivate'
-                                                : 'Activate',
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const PopupMenuItem<String>(
-                                      value: 'delete',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.delete, color: Colors.red),
-                                          SizedBox(width: 8),
-                                          Text(
-                                            'Delete',
-                                            style: TextStyle(color: Colors.red),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                            ),
+                              ),
+                            ],
                           ),
                         );
                       },
