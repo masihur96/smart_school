@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/route_generator.dart';
-import 'package:smart_school/features/admin/providers/settings_provider.dart';
-import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
-import 'package:smart_school/features/notifications/providers/notification_provider.dart';
-import 'package:smart_school/features/auth/providers/auth_provider.dart';
-import 'package:smart_school/l10n/app_localizations.dart';
-import 'package:smart_school/models/user_model.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/utils/biometric_service.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
+import 'package:smart_school/features/admin/providers/settings_provider.dart';
+import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
+import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/features/notifications/providers/notification_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
+import 'package:smart_school/models/user_model.dart';
 
 class SettingManagementScreen extends StatefulWidget {
   const SettingManagementScreen({super.key});
@@ -33,9 +34,18 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
         settings.syncUserTopics(authNotifier.user);
       }
     });
-
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.settingManagement)),
+      appBar: AppBar(
+        title: Text(
+          l10n.settingManagement,
+          style: TextStyle(color: isDark ? AppColors.white : AppColors.black),
+        ),
+
+        iconTheme: IconThemeData(
+          color: isDark ? AppColors.white : AppColors.black,
+        ),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -104,8 +114,8 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
               value: settings.isBiometricEnabled,
               onChanged: (value) async {
                 if (value) {
-                  final isAvailable =
-                      await BiometricService().isBiometricAvailable();
+                  final isAvailable = await BiometricService()
+                      .isBiometricAvailable();
                   if (isAvailable) {
                     if (context.mounted) {
                       await _showBiometricSetupDialog(context, settings);
@@ -114,8 +124,10 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                            content: Text(
-                                'Biometrics not available on this device.')),
+                          content: Text(
+                            'Biometrics not available on this device.',
+                          ),
+                        ),
                       );
                     }
                   }
@@ -160,7 +172,7 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
           ],
 
           // Admin Notification Testing Section
-          if (authNotifier.user?.role == UserRole.admin || 
+          if (authNotifier.user?.role == UserRole.admin ||
               authNotifier.user?.role == UserRole.superadmin) ...[
             _buildSectionHeader("Developer Tools", theme),
             _buildSettingTile(
@@ -382,8 +394,8 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
                   receiverUuid: receiverUuidController.text.trim(),
                   title: titleController.text.trim(),
                   message: messageController.text.trim(),
-                  image: imageController.text.trim().isEmpty 
-                      ? null 
+                  image: imageController.text.trim().isEmpty
+                      ? null
                       : imageController.text.trim(),
                   additionalData: {
                     "path": pathController.text.trim(),
@@ -392,12 +404,14 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
                 );
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Notification sent successfully")),
+                  const SnackBar(
+                    content: Text("Notification sent successfully"),
+                  ),
                 );
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Failed to send: $e")),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text("Failed to send: $e")));
               }
             },
             child: const Text("Send"),
@@ -408,7 +422,9 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
   }
 
   Future<void> _showBiometricSetupDialog(
-      BuildContext context, SettingsProvider settings) async {
+    BuildContext context,
+    SettingsProvider settings,
+  ) async {
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
     bool isPasswordVisible = false;
@@ -424,12 +440,14 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text(
-                      "Please enter your credentials to enable biometric login."),
+                    "Please enter your credentials to enable biometric login.",
+                  ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: emailController,
-                    decoration:
-                        const InputDecoration(labelText: "Email or Phone"),
+                    decoration: const InputDecoration(
+                      labelText: "Email or Phone",
+                    ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
@@ -437,11 +455,14 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
                     decoration: InputDecoration(
                       labelText: "Password",
                       suffixIcon: IconButton(
-                        icon: Icon(isPasswordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off),
+                        icon: Icon(
+                          isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
                         onPressed: () => setState(
-                            () => isPasswordVisible = !isPasswordVisible),
+                          () => isPasswordVisible = !isPasswordVisible,
+                        ),
                       ),
                     ),
                     obscureText: !isPasswordVisible,

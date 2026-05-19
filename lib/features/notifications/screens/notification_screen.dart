@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/notifications/providers/notification_provider.dart';
 import 'package:smart_school/models/notification_model.dart';
 
@@ -22,13 +23,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(
+          'Notifications',
+          style: TextStyle(color: isDark ? AppColors.white : AppColors.black),
+        ),
+        iconTheme: IconThemeData(
+          color: isDark ? AppColors.white : AppColors.black,
+        ),
 
-        centerTitle: true,
         leading: BackButton(),
-        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
