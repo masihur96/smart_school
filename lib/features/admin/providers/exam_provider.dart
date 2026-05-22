@@ -226,6 +226,38 @@ class ExamsNotifier extends ChangeNotifier {
     }
   }
 
+  Future<bool> duplicateExam(String examId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final response = await DataProvider().performRequest(
+        'POST',
+        '${APIPath.createExam}/$examId/duplicate',
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
+        log('Exam duplicated successfully');
+        await _load();
+        return true;
+      } else {
+        log('Error duplicating exam: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      log('Error duplicating exam: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> updatePublishStatus(String examId, bool isPublished) async {
     try {
       final token = await StorageService.getToken();
