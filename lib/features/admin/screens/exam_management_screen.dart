@@ -707,33 +707,66 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
   void _confirmDelete(BuildContext context, Exam exam) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Exam'),
-        content: Text(
-          'Are you sure you want to delete ${exam.name}? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        bool isDeleting = false;
+
+        return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            title: const Text('Delete Exam'),
+            content: Text(
+              'Are you sure you want to delete "${exam.name}"? This action cannot be undone.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: isDeleting ? null : () => Navigator.pop(dialogContext),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(90, 38),
+                ),
+                onPressed: isDeleting
+                    ? null
+                    : () async {
+                        setState(() => isDeleting = true);
+
+                        final success = await context
+                            .read<ExamsNotifier>()
+                            .deleteExam(exam.id);
+
+                        if (dialogContext.mounted) {
+                          Navigator.pop(dialogContext);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                success
+                                    ? '"${exam.name}" deleted successfully!'
+                                    : 'Failed to delete exam. Please try again.',
+                              ),
+                              backgroundColor:
+                                  success ? Colors.red : Colors.orange,
+                            ),
+                          );
+                        }
+                      },
+                child: isDeleting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
+                      )
+                    : const Text('Delete'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              await context.read<ExamsNotifier>().deleteExam(exam.id);
-              if (context.mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Exam deleted successfully!'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
