@@ -269,6 +269,8 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                                           exam,
                                           false,
                                         );
+                                      } else if (value == 'duplicate') {
+                                        _duplicateExam(context, exam);
                                       } else if (value == 'delete') {
                                         _confirmDelete(context, exam);
                                       }
@@ -328,6 +330,19 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                                             ],
                                           ),
                                         ),
+                                      const PopupMenuItem(
+                                        value: 'duplicate',
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.copy_outlined,
+                                              color: Colors.indigo,
+                                            ),
+                                            SizedBox(width: 8),
+                                            Text('Duplicate Exam'),
+                                          ],
+                                        ),
+                                      ),
                                       const PopupMenuItem(
                                         value: 'delete',
                                         child: Row(
@@ -638,6 +653,51 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
               foregroundColor: Colors.white,
             ),
             child: Text(newStatus ? 'Publish' : 'Unpublish'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _duplicateExam(BuildContext context, Exam exam) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Duplicate Exam'),
+        content: Text(
+          'Are you sure you want to duplicate "${exam.name}"? A new copy will be created.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.copy_outlined, size: 16),
+            label: const Text('Duplicate'),
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await context
+                  .read<ExamsNotifier>()
+                  .duplicateExam(exam.id);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? '"${exam.name}" duplicated successfully!'
+                          : 'Failed to duplicate exam. Please try again.',
+                    ),
+                    backgroundColor:
+                        success ? Colors.indigo : Colors.red,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.indigo,
+              foregroundColor: Colors.white,
+            ),
           ),
         ],
       ),

@@ -71,13 +71,29 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
                 delegate: SliverChildBuilderDelegate((context, index) {
                   final plan = pricingNotifier.plans[index];
 
-                  // print(subscription?.pricingPlan?.id == plan.id);
+                  final isPlanFree =
+                      plan.pricePerMonth == '0' ||
+                      plan.name.toLowerCase().contains('free');
+                  final isCurrentPlanFree =
+                      subscription?.pricingPlan?.pricePerMonth == '0' ||
+                      (subscription?.pricingPlan?.name.toLowerCase().contains(
+                            'free',
+                          ) ??
+                          false);
+                  final isCurrentFreePlanExpired =
+                      isCurrentPlanFree && !authNotifier.isSubscriptionValid;
+                  final isAlreadyUsedFreePlan =
+                      isPlanFree && isCurrentFreePlanExpired;
+
+                  print(subscription?.pricingPlan?.pricePerMonth);
                   print(subscription?.pricingPlan?.id);
                   print(plan.id);
+
                   return _AdminPricingPlanCard(
                     plan: plan,
                     currentCount: subscription?.lastStudentCount ?? 0,
                     isActive: subscription?.pricingPlan?.id == plan.id,
+                    isAlreadyUsedFreePlan: isAlreadyUsedFreePlan,
                   );
                 }, childCount: pricingNotifier.plans.length),
               ),
@@ -175,11 +191,13 @@ class _AdminPricingPlanCard extends StatefulWidget {
   final PricingPlan plan;
   final int currentCount;
   final bool isActive;
+  final bool isAlreadyUsedFreePlan;
 
   const _AdminPricingPlanCard({
     required this.plan,
     required this.currentCount,
     required this.isActive,
+    this.isAlreadyUsedFreePlan = false,
   });
 
   @override
@@ -297,7 +315,7 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
             ),
           ),
           InkWell(
-            onTap: _isLoading
+            onTap: _isLoading || widget.isAlreadyUsedFreePlan
                 ? null
                 : () async {
                     setState(() {
@@ -351,10 +369,12 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                   },
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.only(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+              decoration: BoxDecoration(
+                color: widget.isAlreadyUsedFreePlan
+                    ? Colors.grey
+                    : AppColors.primary,
+                borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(24),
                   bottomRight: Radius.circular(24),
                 ),
@@ -371,12 +391,16 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                           ),
                         ),
                       )
-                    : const Text(
-                        'CHOOSE THIS PLAN',
+                    : Text(
+                        widget.isAlreadyUsedFreePlan
+                            ? 'ALREADY USED THIS FREE PLAN FOR THIS ACCOUNT'
+                            : 'CHOOSE THIS PLAN',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.2,
+                          fontSize: widget.isAlreadyUsedFreePlan ? 12 : 14,
                         ),
                       ),
               ),
