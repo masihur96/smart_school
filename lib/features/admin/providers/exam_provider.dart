@@ -204,7 +204,10 @@ class ExamsNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteExam(String id) async {
+  Future<bool> deleteExam(String id) async {
+    _isLoading = true;
+    notifyListeners();
+
     try {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
@@ -218,11 +221,17 @@ class ExamsNotifier extends ChangeNotifier {
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 204)) {
         await _load();
+        return true;
       } else {
         log('Error deleting exam: ${response?.data}');
+        return false;
       }
     } catch (e) {
       log('Error deleting exam: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
