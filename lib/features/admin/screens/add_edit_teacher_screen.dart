@@ -522,15 +522,11 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
       padding: const EdgeInsets.only(bottom: 12.0, left: 4),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: Colors.purple),
+          Icon(icon, size: 20),
           const SizedBox(width: 8),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ],
       ),

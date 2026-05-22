@@ -619,7 +619,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             Row(
               children: [
                 _buildTimeInfo(
-                  status?.clockInTime ?? '--:--',
+                  status?.clockInTime != null
+                      ? DateFormat(
+                          'hh:mm a',
+                        ).format(DateTime.parse(status!.clockInTime!))
+                      : '--:--',
                   Icons.login_rounded,
                 ),
                 Container(
