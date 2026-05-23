@@ -933,6 +933,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
   late final TextEditingController _titleController;
   late final TextEditingController _descController;
   late DateTime _dueDate;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -984,6 +985,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     }
 
     print("Add Homework Subject ID:: ${widget.subjectId}");
+    print("Homework ID:: ${widget.homework?.id}");
 
     final homework = Homework(
       id: widget.homework?.id ?? '',
@@ -999,6 +1001,8 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     );
     {}
 
+    setState(() => _isLoading = true);
+
     final bool success;
     if (widget.homework == null) {
       success = await context.read<HomeworkNotifier>().submitHomework(homework);
@@ -1007,6 +1011,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     }
 
     if (mounted) {
+      setState(() => _isLoading = false);
       if (success) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1133,24 +1138,35 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _submit,
+                    onPressed: _isLoading ? null : _submit,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryTeacher,
                       foregroundColor: Colors.white,
+                      disabledBackgroundColor: AppColors.primaryTeacher
+                          .withOpacity(0.6),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    child: Text(
-                      widget.homework == null
-                          ? 'Assign Homework'
-                          : 'Update Homework',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              valueColor: AlwaysStoppedAnimation(Colors.white),
+                            ),
+                          )
+                        : Text(
+                            widget.homework == null
+                                ? 'Assign Homework'
+                                : 'Update Homework',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
                   ),
                 ),
               ],
