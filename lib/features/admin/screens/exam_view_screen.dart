@@ -727,7 +727,6 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Marks submitted successfully'),
-            backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
         );
