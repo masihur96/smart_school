@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart';
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
 import 'package:smart_school/features/admin/screens/student_detail_screen.dart';
@@ -97,7 +98,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
           ? null
           : AppBar(
               title: const Text('Student Management'),
-              backgroundColor: Colors.purple,
+              backgroundColor: AppColors.primaryAdmin,
               foregroundColor: Colors.white,
               actions: [
                 IconButton(
@@ -256,39 +257,26 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.purple.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.purple.withOpacity(0.3),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Total',
+                          style: TextStyle(
+                            fontSize: 12,
+
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'Total',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.purple,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        Text(
+                          '${studentsNotifier.totalCount}',
+                          style: const TextStyle(
+                            fontSize: 16,
+
+                            fontWeight: FontWeight.bold,
                           ),
-                          Text(
-                            '${studentsNotifier.totalCount}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.purple,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

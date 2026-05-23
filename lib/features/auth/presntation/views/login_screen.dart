@@ -43,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = await StorageService.getEmail();
     final password = await StorageService.getPassword();
     final isBiometricEnabled = await StorageService.getBiometricEnabled();
-    
+
     if (email != null && password != null && isBiometricEnabled) {
       final isAvailable = await _biometricService.isBiometricAvailable();
       if (mounted) setState(() => _canUseBiometrics = isAvailable);
@@ -74,7 +74,8 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
       _showInactiveDialog(
         title: 'Account Inactive',
-        message: 'Your account is currently inactive. Please communicate with your principal or administrator for assistance.',
+        message:
+            'Your account is currently inactive. Please communicate with your principal or administrator for assistance.',
       );
       return;
     }
@@ -85,7 +86,8 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
       _showInactiveDialog(
         title: 'School Inactive',
-        message: 'Your school account is currently inactive. Please communicate with SchoolCare support for assistance.',
+        message:
+            'Your school account is currently inactive. Please communicate with SchoolCare support for assistance.',
       );
       return;
     }
@@ -188,7 +190,8 @@ class _LoginScreenState extends State<LoginScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text(
-                    'Biometric credentials expired. Please log in manually.'),
+                  'Biometric credentials expired. Please log in manually.',
+                ),
                 backgroundColor: Colors.orange,
               ),
             );
@@ -252,8 +255,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 'SchoolCare',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -283,7 +286,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           : Icons.visibility_off,
                     ),
                     onPressed: () => setState(
-                        () => _isPasswordVisible = !_isPasswordVisible),
+                      () => _isPasswordVisible = !_isPasswordVisible,
+                    ),
                   ),
                 ),
                 obscureText: !_isPasswordVisible,
@@ -295,10 +299,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: ElevatedButton(
                       onPressed: authNotifier.isLoading ? null : _login,
                       child: (authNotifier.isLoading && !_isBiometricLoading)
-                          ? const CircularProgressIndicator(
-                              color: Colors.white)
-                          : const Text('Login',
-                              style: TextStyle(fontSize: 18)),
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text('Login', style: TextStyle(fontSize: 18)),
                     ),
                   ),
                   if (_canUseBiometrics) ...[
@@ -310,7 +312,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ? const Padding(
                               padding: EdgeInsets.all(10.0),
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2.5),
+                                strokeWidth: 2.5,
+                              ),
                             )
                           : IconButton(
                               onPressed: authNotifier.isLoading
@@ -334,15 +337,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextButton(
                     onPressed: () => Navigator.push(
                       context,
-                      MaterialPageRoute(
-                          builder: (_) => const RegisterScreen()),
+                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
                     ),
                     child: const Text(
                       'Register',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF6750A4),
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
