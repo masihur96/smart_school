@@ -620,9 +620,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               children: [
                 _buildTimeInfo(
                   status?.clockInTime != null
-                      ? DateFormat(
-                          'hh:mm a',
-                        ).format(DateTime.parse(status!.clockInTime!))
+                      ? DateFormat('hh:mm a').format(
+                          DateFormat(
+                            'HH:mm:ss',
+                          ).parse(status?.clockInTime ?? "00:00:00"),
+                        )
                       : '--:--',
                   Icons.login_rounded,
                 ),
@@ -633,7 +635,13 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                   color: Colors.grey.shade300,
                 ),
                 _buildTimeInfo(
-                  status?.clockOutTime ?? '--:--',
+                  status?.clockOutTime == null
+                      ? '--:--'
+                      : DateFormat('hh:mm a').format(
+                          DateFormat(
+                            'HH:mm:ss',
+                          ).parse(status?.clockOutTime ?? '--:--'),
+                        ),
 
                   Icons.logout_rounded,
                 ),
