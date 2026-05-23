@@ -147,12 +147,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         body: IndexedStack(
           index: _selectedIndex,
           children: [
-            _buildDashboardOverview(
-              context,
-              user?.name ?? 'Teacher',
-              user!,
-              l10n,
-            ),
+            user == null
+                ? SizedBox()
+                : _buildDashboardOverview(context, user.name, user, l10n),
             const TeacherAttendanceScreen(hideAppBar: true),
             const MarkEntryScreen(hideAppBar: true),
             const HomeworkManagementScreen(hideAppBar: true),
