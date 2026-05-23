@@ -367,7 +367,7 @@ class Homework {
   final DateTime? deletedAt;
 
   factory Homework.fromJson(Map<String, dynamic> json) => Homework(
-    id: json['id'] ?? '',
+    id: json['uuid'] ?? json['id'] ?? json['_id'] ?? '',
     teacherId: json['teacherId'] ?? '',
     classId: json['classId'] ?? '',
     sectionId: json['sectionId'] ?? '',

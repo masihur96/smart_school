@@ -92,7 +92,9 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
     );
 
     if (mounted) {
-      final records = context.read<AttendanceManagementProvider>().studentAttendance;
+      final records = context
+          .read<AttendanceManagementProvider>()
+          .studentAttendance;
       setState(() {
         _attendanceMap.clear();
         for (var record in records) {
@@ -998,7 +1000,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() => _isLoading = true);
 
     final authNotifier = context.read<AuthNotifier>();

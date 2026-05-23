@@ -96,16 +96,12 @@ class HomeworkRemoteDataSource {
     if (token == null) throw Exception('No authentication token found');
 
     final payload = {
-      'classId': homework.classId,
-      'subjectId': homework.subjectId,
-      'teacherId': homework.teacherId,
       'title': homework.title,
       'description': homework.description,
       'dueDate': homework.dueDate.toIso8601String().split('T')[0],
-      'sectionId': homework.sectionId,
-      'schoolId': homework.schoolId,
     };
-
+    log('updateHomework homework payload: $payload');
+    log('updateHomework homework payload: ${homework.id}');
     final response = await _dataProvider.performRequest(
       'PUT',
       '${APIPath.submitHomeWork}/${homework.id}',
@@ -274,8 +270,9 @@ class HomeworkRemoteDataSource {
 
     if (response.statusCode! >= 200 && response.statusCode! < 300) {
       final dynamic rawData = response.data;
-      final Map<String, dynamic> data =
-          rawData is Map ? (rawData['data'] ?? rawData) : {};
+      final Map<String, dynamic> data = rawData is Map
+          ? (rawData['data'] ?? rawData)
+          : {};
       return Homework.fromJson(data);
     } else {
       throw Exception('Failed to fetch homework details');
@@ -290,10 +287,7 @@ class HomeworkRemoteDataSource {
     final token = await StorageService.getToken();
     if (token == null) throw Exception('No authentication token found');
 
-    final payload = {
-      'status': status,
-      if (comment != null) 'comment': comment,
-    };
+    final payload = {'status': status, if (comment != null) 'comment': comment};
 
     final response = await _dataProvider.performRequest(
       'PATCH',
@@ -317,10 +311,7 @@ class HomeworkRemoteDataSource {
     final token = await StorageService.getToken();
     if (token == null) throw Exception('No authentication token found');
 
-    final payload = {
-      'status': status,
-      if (comment != null) 'comment': comment,
-    };
+    final payload = {'status': status, if (comment != null) 'comment': comment};
 
     final response = await _dataProvider.performRequest(
       'PATCH',
@@ -345,10 +336,7 @@ class HomeworkRemoteDataSource {
     final token = await StorageService.getToken();
     if (token == null) throw Exception('No authentication token found');
 
-    final payload = {
-      'status': status,
-      if (comment != null) 'comment': comment,
-    };
+    final payload = {'status': status, if (comment != null) 'comment': comment};
 
     final response = await _dataProvider.performRequest(
       'PATCH',
