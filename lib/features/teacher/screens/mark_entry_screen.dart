@@ -20,7 +20,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   Exam? _selectedExam;
   String? _selectedClassId;
   String? _selectedSectionId;
-  ExamAssignment? _selectedAssignment;
+  Subject? _selectedSubject;
   bool _showFilters = true;
 
   final Map<String, TextEditingController> _marksControllers = {};
@@ -57,7 +57,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       _selectedExamId = exam?.id;
       _selectedClassId = null;
       _selectedSectionId = null;
-      _selectedAssignment = null;
+      _selectedSubject = null;
       _disposeControllers();
     });
   }
@@ -66,23 +66,31 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     setState(() {
       _selectedClassId = classId;
       _selectedSectionId = null;
-      _selectedAssignment = null;
+      _selectedSubject = null;
       _disposeControllers();
     });
+    if (_selectedExamId != null && classId != null) {
+      context.read<ResultsNotifier>().loadExamAssignedSubjects(_selectedExamId!, classId);
+    }
   }
 
   void _onSectionChanged(String? sectionId) {
     setState(() {
       _selectedSectionId = sectionId;
-      _selectedAssignment = null;
+      _selectedSubject = null;
       _disposeControllers();
     });
+    if (_selectedExamId != null && _selectedClassId != null) {
+      context.read<ResultsNotifier>().loadExamAssignedSubjects(
+          _selectedExamId!, _selectedClassId!,
+          sectionId: sectionId);
+    }
     _fetchStudents();
   }
 
-  void _onAssignmentChanged(ExamAssignment? assignment) {
+  void _onSubjectChanged(Subject? subject) {
     setState(() {
-      _selectedAssignment = assignment;
+      _selectedSubject = subject;
       _disposeControllers();
     });
     _fetchStudents();
@@ -106,7 +114,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   }
 
   void _populateExistingMarks() {
-    if (_selectedExam == null || _selectedAssignment == null) return;
+    if (_selectedExam == null || _selectedSubject == null) return;
 
     final students = context.read<ResultsNotifier>().students;
     if (students.isEmpty) return;
@@ -116,7 +124,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
         final existingResult = _selectedExam!.results.firstWhere(
           (r) =>
               r.studentId == student.id &&
-              r.subjectId == _selectedAssignment!.subjectId,
+              r.subjectId == _selectedSubject!.id,
           orElse: () => Result(
             id: '',
             examId: '',
@@ -181,18 +189,18 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
             child: Column(
               children: [
                 if (_showFilters) _buildFilterCard(notifier),
-                if (_selectedAssignment != null)
+                if (_selectedSubject != null)
                   _buildSectionHeader('Students (${students.length})'),
               ],
             ),
           ),
-          if (_selectedAssignment != null)
+          if (_selectedSubject != null)
             _buildStudentList(notifier, students)
           else
             _buildEmptyState(),
         ],
       ),
-      bottomNavigationBar: _selectedAssignment != null
+      bottomNavigationBar: _selectedSubject != null
           ? _buildBottomBar(students)
           : null,
     );
@@ -232,11 +240,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
         .where((s) => s.classId == _selectedClassId)
         .toList();
 
-    final filteredAssignments =
-        _selectedExam?.assignments
-            .where((a) => a.classId == _selectedClassId)
-            .toList() ??
-        [];
+    final filteredSubjects = notifier.examSubjects;
 
     return Card(
       margin: const EdgeInsets.all(16),
@@ -301,18 +305,19 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            _buildDropdownField<ExamAssignment>(
-              label: 'Subject Assignment',
+            _buildDropdownField<Subject>(
+              label: 'Subject',
               icon: Icons.book_outlined,
-              value: _selectedAssignment,
+              value: _selectedSubject,
+              loading: notifier.examSubjectsLoading,
               enabled: _selectedClassId != null,
-              items: filteredAssignments
+              items: filteredSubjects
                   .map(
-                    (a) =>
-                        DropdownMenuItem(value: a, child: Text(a.subjectName)),
+                    (s) =>
+                        DropdownMenuItem(value: s, child: Text(s.name)),
                   )
                   .toList(),
-              onChanged: _onAssignmentChanged,
+              onChanged: _onSubjectChanged,
             ),
           ],
         ),
@@ -390,9 +395,9 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
             title,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
-          if (_selectedAssignment != null)
+          if (_selectedSubject != null)
             Text(
-              _selectedAssignment!.subjectName,
+              _selectedSubject!.name,
               style: TextStyle(
                 color: AppColors.primaryTeacher,
                 fontWeight: FontWeight.bold,
@@ -651,7 +656,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   }
 
   Future<void> _saveAllMarks(List<TeacherAssignmentStudent> students) async {
-    if (_selectedExam == null || _selectedAssignment == null) return;
+    if (_selectedExam == null || _selectedSubject == null) return;
 
     final authNotifier = context.read<AuthNotifier>();
     final user = authNotifier.user;
@@ -668,7 +673,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
 
       marksList.add({
         'studentId': student.id,
-        'subjectId': _selectedAssignment!.subjectId,
+        'subjectId': _selectedSubject!.id,
         'marksObtained': marksObtained,
         'totalMarks':
             double.tryParse(_getTotalMarksController(student.id).text) ?? 100.0,

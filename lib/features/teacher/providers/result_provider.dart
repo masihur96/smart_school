@@ -24,6 +24,9 @@ class ResultsNotifier extends ChangeNotifier {
   List<TeacherAssignmentSubject> _subjects = [];
   bool _subjectsLoading = false;
 
+  List<Subject> _examSubjects = [];
+  bool _examSubjectsLoading = false;
+
   // ─── Submit state ─────────────────────────────────────────────────────────
   bool _submitting = false;
 
@@ -46,6 +49,9 @@ class ResultsNotifier extends ChangeNotifier {
   List<TeacherAssignmentSubject> get subjects => _subjects;
   bool get subjectsLoading => _subjectsLoading;
 
+  List<Subject> get examSubjects => _examSubjects;
+  bool get examSubjectsLoading => _examSubjectsLoading;
+
   bool get submitting => _submitting;
 
   // Legacy getter
@@ -60,6 +66,7 @@ class ResultsNotifier extends ChangeNotifier {
     _classes = [];
     _students = [];
     _subjects = [];
+    _examSubjects = [];
     notifyListeners();
     try {
       _exams = await _repository.getTeacherExams();
@@ -119,6 +126,21 @@ class ResultsNotifier extends ChangeNotifier {
       log('Error loading subjects: $e');
     } finally {
       _subjectsLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadExamAssignedSubjects(String examId, String classId, {String? sectionId}) async {
+    _examSubjectsLoading = true;
+    _examSubjects = [];
+    notifyListeners();
+    try {
+      _examSubjects = await _repository.getExamAssignedSubjects(examId, classId, sectionId: sectionId);
+      log('Loaded ${_examSubjects.length} subjects for exam $examId, class $classId, section $sectionId');
+    } catch (e) {
+      log('Error loading exam subjects: $e');
+    } finally {
+      _examSubjectsLoading = false;
       notifyListeners();
     }
   }
