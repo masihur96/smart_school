@@ -730,12 +730,22 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                             children: [
                               _buildHistoryTime(
                                 Icons.login_outlined,
-                                att.startTime ?? att.time,
+                                DateFormat('hh:mm a').format(
+                                  DateTime.parse(
+                                    att.startTime ?? att.time,
+                                  ).toLocal(),
+                                ),
                               ),
                               const SizedBox(width: 8),
                               _buildHistoryTime(
                                 Icons.logout_outlined,
-                                att.endTime ?? '--:--',
+                                att.endTime == null
+                                    ? '--:--'
+                                    : DateFormat('hh:mm a').format(
+                                        DateTime.parse(
+                                          att.endTime ?? '--:--',
+                                        ).toLocal(),
+                                      ),
                               ),
                             ],
                           ),
@@ -780,11 +790,12 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Icon(icon, size: 10),
+        Icon(icon, size: 10, color: Colors.black87),
 
         SizedBox(width: 5),
         Text(
           time,
+
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 10,
