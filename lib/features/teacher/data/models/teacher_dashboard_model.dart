@@ -81,6 +81,7 @@ class MyClassAttendStudent {
   final int leave;
   final int total;
   final ClassRoom? classInfo;
+  final Subject? subjectInfo;
   final double attendanceRate;
   final List<TeacherClassAttendRecord> records;
 
@@ -91,6 +92,7 @@ class MyClassAttendStudent {
     required this.leave,
     required this.total,
     this.classInfo,
+    this.subjectInfo,
     required this.attendanceRate,
     this.records = const [],
   });
@@ -104,7 +106,10 @@ class MyClassAttendStudent {
       total: json['total'] ?? 0,
       classInfo: json['classInfo'] != null
           ? ClassRoom.fromJson(json['classInfo'])
-          : null,
+          : (json['classEntity'] != null ? ClassRoom.fromJson(json['classEntity']) : null),
+      subjectInfo: json['subjectInfo'] != null
+          ? Subject.fromJson(json['subjectInfo'])
+          : (json['subjectEntity'] != null ? Subject.fromJson(json['subjectEntity']) : null),
       attendanceRate: (json['attendanceRate'] as num?)?.toDouble() ?? 0.0,
       records: (json['records'] as List? ?? [])
           .map((e) => TeacherClassAttendRecord.fromJson(e))

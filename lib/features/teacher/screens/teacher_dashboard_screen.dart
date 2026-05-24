@@ -291,8 +291,25 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       },
                     ),
                     const SizedBox(height: 12),
-                    ...data!.myClassAttendStudents.map(
-                      (stats) => _buildClassPerformanceCard(context, stats),
+                    SizedBox(
+                      height: 270,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: data!.myClassAttendStudents.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 12.0),
+                            child: SizedBox(
+                              width: screenSize(context, 0.88),
+                              child: _buildClassPerformanceCard(
+                                context,
+                                data!.myClassAttendStudents[index],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                     const SizedBox(height: 24),
                   ],
@@ -855,7 +872,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            stats.classInfo?.name ?? 'Class',
+                            stats.subjectInfo?.name ?? stats.classInfo?.name ?? 'Subject',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
