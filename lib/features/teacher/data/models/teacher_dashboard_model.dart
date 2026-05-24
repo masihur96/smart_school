@@ -48,6 +48,8 @@ class TeacherDashboardData {
 
 class DashboardAttendanceStatus {
   final String date;
+  final String? subjectId;
+  final Subject? subjectInfo;
   final String status;
   final String? clockInTime;
   final String? clockOutTime;
@@ -55,6 +57,8 @@ class DashboardAttendanceStatus {
 
   DashboardAttendanceStatus({
     required this.date,
+    this.subjectId,
+    this.subjectInfo,
     required this.status,
     this.clockInTime,
     this.clockOutTime,
@@ -64,6 +68,8 @@ class DashboardAttendanceStatus {
   factory DashboardAttendanceStatus.fromJson(Map<String, dynamic> json) {
     return DashboardAttendanceStatus(
       date: json['date'] ?? '',
+      subjectId: json['subjectId'],
+      subjectInfo: json['subjectInfo'] != null ? Subject.fromJson(json['subjectInfo']) : null,
       status: json['status'] ?? '',
       clockInTime: json['clockInTime'],
       clockOutTime: json['clockOutTime'],
@@ -124,6 +130,8 @@ class TeacherClassAttendRecord {
   final String studentName;
   final String status;
   final String date;
+  final String? subjectId;
+  final Subject? subjectInfo;
 
   TeacherClassAttendRecord({
     required this.id,
@@ -131,6 +139,8 @@ class TeacherClassAttendRecord {
     required this.studentName,
     required this.status,
     required this.date,
+    this.subjectId,
+    this.subjectInfo,
   });
 
   factory TeacherClassAttendRecord.fromJson(Map<String, dynamic> json) {
@@ -140,6 +150,8 @@ class TeacherClassAttendRecord {
       studentName: json['studentName'] ?? 'Unknown',
       status: json['status'] ?? '',
       date: json['date'] ?? '',
+      subjectId: json['subjectId'],
+      subjectInfo: json['subjectInfo'] != null ? Subject.fromJson(json['subjectInfo']) : null,
     );
   }
 }
