@@ -3,6 +3,7 @@ import '../../../../models/school_models.dart';
 abstract class IResultRepository {
   Future<List<Exam>> getTeacherExams();
   Future<List<TeacherAssignmentClass>> getExamClasses(String examId);
+  Future<List<Subject>> getExamAssignedSubjects(String examId, String classId, {String? sectionId});
   Future<List<TeacherAssignmentStudent>> getClassStudents(
       String examId, String classId, {String? sectionId});
   Future<List<TeacherAssignmentSubject>> getStudentSubjects(

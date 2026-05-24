@@ -111,6 +111,38 @@ class MarkEntryRemoteDataSource {
     }
   }
 
+  /// GET /teacher/assignments/exams/{examId}/subjects?classId={classId}&sectionId={sectionId}
+  Future<List<Subject>> getExamAssignedSubjects(String examId, String classId, {String? sectionId}) async {
+    final token = await _getToken();
+    var url = '${APIPath.teacherAssignment}/exams/$examId/subjects?classId=$classId';
+    if (sectionId != null && sectionId.isNotEmpty) {
+      url += '&sectionId=$sectionId';
+    }
+    log('Fetching exam class assigned subjects: $url');
+
+    final response = await _dataProvider.performRequest(
+      'GET',
+      url,
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response == null || response.statusCode == null) {
+      throw Exception('No response from server');
+    }
+
+    if (response.statusCode! >= 200 && response.statusCode! < 300) {
+      final dynamic rawData = response.data;
+      final List data = rawData is List
+          ? rawData
+          : (rawData is Map ? (rawData['data'] ?? []) : []);
+      log('Exam assigned subjects count: ${data.length}');
+      return data.map((json) => Subject.fromJson(json)).toList();
+    } else {
+      throw Exception(
+          response.data?['message'] ?? 'Failed to fetch assigned subjects for exam');
+    }
+  }
+
   /// GET /teacher/assignments/exams/{examId}/classes/{classId}/students/{studentId}/subjects
   Future<List<TeacherAssignmentSubject>> getStudentSubjects(
       String examId, String classId, String studentId) async {
