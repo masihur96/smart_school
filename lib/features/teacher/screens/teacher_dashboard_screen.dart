@@ -1116,57 +1116,98 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       print(position.longitude);
 
       if (distanceInMeters <= user.radius!) {
-        // 4. Confirm before submitting
+        // 4. Confirm before submitting (with loading button inside dialog)
         if (mounted) {
-          final confirm = await showDialog<bool>(
+          await showDialog<void>(
             context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Confirm Attendance'),
-              content: Text(
-                'Are you sure you want to submit your attendance?\n\n'
-                'Distance from center: ${distanceInMeters.toStringAsFixed(0)}m\n'
-                'Allowed radius: ${user.radius}m',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: Text(l10n.cancel),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryTeacher,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Confirm'),
-                ),
-              ],
-            ),
-          );
-
-          if (confirm != true || !mounted) return;
-
-          // 5. Submit attendance
-          context
-              .read<TeacherDashboardProvider>()
-              .submitSelfAttendance(position.latitude, position.longitude)
-              .then((_) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(l10n.attendanceMarkedSuccessfully),
-                      backgroundColor: Colors.green,
+            barrierDismissible: false,
+            builder: (dialogContext) {
+              bool isSubmitting = false;
+              return StatefulBuilder(
+                builder: (ctx, setDialogState) {
+                  return AlertDialog(
+                    title: const Text('Confirm Attendance'),
+                    content: Text(
+                      'Are you sure you want to submit your attendance?\n\n'
+                      'Distance from center: ${distanceInMeters.toStringAsFixed(0)}m\n'
+                      'Allowed radius: ${user.radius}m',
                     ),
+                    actions: [
+                      TextButton(
+                        onPressed: isSubmitting
+                            ? null
+                            : () => Navigator.of(dialogContext).pop(),
+                        child: Text(l10n.cancel),
+                      ),
+                      ElevatedButton(
+                        onPressed: isSubmitting
+                            ? null
+                            : () async {
+                                setDialogState(() => isSubmitting = true);
+                                try {
+                                  await context
+                                      .read<TeacherDashboardProvider>()
+                                      .submitSelfAttendance(
+                                        position.latitude,
+                                        position.longitude,
+                                      );
+
+                                  // Refresh full dashboard after success
+                                  if (mounted) {
+                                    context
+                                        .read<TeacherDashboardProvider>()
+                                        .fetchTeacherDashboard();
+                                  }
+
+                                  if (dialogContext.mounted) {
+                                    Navigator.of(dialogContext).pop();
+                                  }
+
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          l10n.attendanceMarkedSuccessfully,
+                                        ),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  setDialogState(() => isSubmitting = false);
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          '${l10n.submissionFailed}: $e',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryTeacher,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(90, 40),
+                        ),
+                        child: isSubmitting
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('Confirm'),
+                      ),
+                    ],
                   );
-                }
-              })
-              .catchError((e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('${l10n.submissionFailed}: $e')),
-                  );
-                }
-              });
+                },
+              );
+            },
+          );
         }
       } else {
         if (mounted) {
