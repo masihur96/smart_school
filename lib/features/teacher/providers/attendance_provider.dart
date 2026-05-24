@@ -335,7 +335,12 @@ class AttendanceNotifier extends ChangeNotifier {
   Future<void> fetchAttendanceFromAPI({
     required String classId,
     String? sectionId,
+    String? subjectId,
+    String? teacherId,
+    String? routineId,
     required DateTime date,
+    int page = 1,
+    int limit = 50,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -343,88 +348,57 @@ class AttendanceNotifier extends ChangeNotifier {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
 
-      final dateString =
-          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+      final df = DateFormat('yyyy-MM-dd');
+      final dateString = df.format(date);
 
-      final query = <String, dynamic>{'classId': classId, 'date': dateString};
+      final query = <String, String>{
+        'classId': classId,
+        'date': dateString,
+        'page': page.toString(),
+        'limit': limit.toString(),
+      };
       if (sectionId != null && sectionId.isNotEmpty) {
         query['sectionId'] = sectionId;
       }
+      if (subjectId != null && subjectId.isNotEmpty) {
+        query['subjectId'] = subjectId;
+      }
+      if (teacherId != null && teacherId.isNotEmpty) {
+        query['teacherId'] = teacherId;
+      }
+      if (routineId != null && routineId.isNotEmpty) {
+        query['routineId'] = routineId;
+      }
+
+      log('fetchAttendanceFromAPI query: $query');
 
       final response = await DataProvider().performRequest(
         'GET',
-        APIPath.submitAttendance,
+        APIPath.teacherPeriodAttendance,
         query: query,
         header: {'Authorization': 'Bearer $token'},
       );
 
       if (response != null && response.statusCode == 200) {
-        log("Attendance Response:: ${response.data}");
-        final rawData = response.data['data'];
-        final List<AttendanceEntity> fetchedRecords = [];
+        log('Period Attendance Response:: ${response.data}');
 
-        if (rawData is List) {
-          for (var item in rawData) {
-            if (item is Map) {
-              if (item.containsKey('records') && item['records'] is List) {
-                // Nested records case (e.g. daily documentation)
-                final docDateStr = item['date']?.toString() ?? '';
-                final docDate = DateTime.tryParse(docDateStr) ?? date;
-                final docTakenBy = item['takenBy']?.toString() ?? '';
-                final recordsRaw = List<Map<String, dynamic>>.from(
-                  item['records'],
-                );
-                for (var r in recordsRaw) {
-                  fetchedRecords.add(
-                    AttendanceEntity(
-                      id: r['id']?.toString() ?? '',
-                      studentId: r['studentId']?.toString() ?? '',
-                      date: docDate,
-                      status: _parseStatus(r['status']),
-                      takenBy: docTakenBy,
-                    ),
-                  );
-                }
-              } else {
-                // Flat record case (individual record)
-                final recDateStr = item['date']?.toString() ?? '';
-                final recDate = DateTime.tryParse(recDateStr) ?? date;
-                fetchedRecords.add(
-                  AttendanceEntity(
-                    id: item['id']?.toString() ?? '',
-                    studentId: item['studentId']?.toString() ?? '',
-                    date: recDate,
-                    status: _parseStatus(item['status']),
-                    takenBy: item['takenBy']?.toString() ?? '',
-                  ),
-                );
-              }
-            }
-          }
-        } else if (rawData is Map) {
-          // Single record object
-          if (rawData.containsKey('records') && rawData['records'] is List) {
-            final docDateStr = rawData['date']?.toString() ?? '';
-            final docDate = DateTime.tryParse(docDateStr) ?? date;
-            final docTakenBy = rawData['takenBy']?.toString() ?? '';
-            final recordsRaw = List<Map<String, dynamic>>.from(
-              rawData['records'],
-            );
-            for (var r in recordsRaw) {
-              fetchedRecords.add(
-                AttendanceEntity(
-                  id: r['id']?.toString() ?? '',
-                  studentId: r['studentId']?.toString() ?? '',
-                  date: docDate,
-                  status: _parseStatus(r['status']),
-                  takenBy: docTakenBy,
-                ),
-              );
-            }
-          }
-        }
+        // Parse using PeriodAttendanceResponse model
+        final periodResponse = PeriodAttendanceResponse.fromJson(response.data);
+        final List<PeriodAttendance> periodRecords = periodResponse.data.data;
 
-        // Update state for this date
+        // Map PeriodAttendance -> AttendanceEntity for use with existing logic
+        final List<AttendanceEntity> fetchedRecords = periodRecords.map((r) {
+          final recDate = DateTime.tryParse(r.date) ?? date;
+          return AttendanceEntity(
+            id: r.id,
+            studentId: r.studentId,
+            date: recDate,
+            status: _parseStatus(r.status),
+            takenBy: r.teacherId,
+          );
+        }).toList();
+
+        // Replace records for this date
         _state.removeWhere(
           (r) =>
               r.date.year == date.year &&
@@ -432,9 +406,16 @@ class AttendanceNotifier extends ChangeNotifier {
               r.date.day == date.day,
         );
         _state.addAll(fetchedRecords);
-        log(
-          'Fetched ${fetchedRecords.length} attendance records for $dateString',
-        );
+
+        // Also update _periodAttendanceRecords for direct access
+        _periodAttendanceRecords = periodRecords;
+        _total = periodResponse.data.total;
+        _page = periodResponse.data.page;
+        _totalPages = periodResponse.data.totalPages;
+
+        log('Fetched ${fetchedRecords.length} period attendance records for $dateString');
+      } else {
+        log('fetchAttendanceFromAPI: non-200 response ${response?.statusCode} – ${response?.data}');
       }
     } catch (e) {
       log('Error fetching attendance: $e');
