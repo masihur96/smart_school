@@ -292,7 +292,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
-                      height: 270,
+                      height: 280,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         physics: const BouncingScrollPhysics(),
