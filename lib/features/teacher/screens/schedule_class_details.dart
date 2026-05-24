@@ -75,9 +75,15 @@ class _ScheduleClassDetailsState extends State<ScheduleClassDetails>
   }
 
   Future<void> _loadAttendanceForDate() async {
+    final authNotifier = context.read<AuthNotifier>();
+    final teacherId = authNotifier.user?.id;
+
     await context.read<AttendanceNotifier>().fetchAttendanceFromAPI(
       classId: widget.classRoom.id,
       sectionId: widget.sectionId,
+      subjectId: widget.subjectID,
+      teacherId: teacherId,
+      routineId: widget.routineId,
       date: _selectedDate,
     );
 
@@ -248,6 +254,8 @@ class _ScheduleClassDetailsState extends State<ScheduleClassDetails>
             _AttendanceTab(
               classRoom: widget.classRoom,
               sectionId: widget.sectionId,
+              subjectId: widget.subjectID,
+              routineId: widget.routineId,
               selectedDate: _selectedDate,
               dateLabel: dateLabel,
               attendanceMap: _attendanceMap,
@@ -276,6 +284,8 @@ class _ScheduleClassDetailsState extends State<ScheduleClassDetails>
 class _AttendanceTab extends StatelessWidget {
   final ClassRoom classRoom;
   final String? sectionId;
+  final String? subjectId;
+  final String? routineId;
   final DateTime selectedDate;
   final String dateLabel;
   final Map<String, AttendanceStatus> attendanceMap;
@@ -287,6 +297,8 @@ class _AttendanceTab extends StatelessWidget {
   const _AttendanceTab({
     required this.classRoom,
     this.sectionId,
+    this.subjectId,
+    this.routineId,
     required this.selectedDate,
     required this.dateLabel,
     required this.attendanceMap,
@@ -357,7 +369,10 @@ class _AttendanceTab extends StatelessWidget {
         ),
         const Divider(height: 1),
 
-        // Student list
+        // ── Attendance summary chips ──────────────────────────────────────────
+        if (!isLoading && students.isNotEmpty)
+          _AttendanceSummaryBar(attendanceMap: attendanceMap, total: students.length),
+
         Expanded(
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -408,6 +423,135 @@ class _AttendanceTab extends StatelessWidget {
               ),
             ),
           ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Student Attendance Card
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Attendance Summary Bar
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _AttendanceSummaryBar extends StatelessWidget {
+  final Map<String, AttendanceStatus> attendanceMap;
+  final int total;
+
+  const _AttendanceSummaryBar({
+    required this.attendanceMap,
+    required this.total,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final present =
+        attendanceMap.values.where((s) => s == AttendanceStatus.present).length;
+    final absent =
+        attendanceMap.values.where((s) => s == AttendanceStatus.absent).length;
+    final late =
+        attendanceMap.values.where((s) => s == AttendanceStatus.late).length;
+    final leave =
+        attendanceMap.values.where((s) => s == AttendanceStatus.leave).length;
+    final unmarked = total - attendanceMap.length;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFEDE9F8), Color(0xFFF4F2FB)],
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFF7C3AED).withOpacity(0.12)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _SummaryChip(
+            label: 'Present',
+            count: present,
+            color: Colors.green,
+            icon: Icons.check_circle_rounded,
+          ),
+          _SummaryChip(
+            label: 'Absent',
+            count: absent,
+            color: Colors.red,
+            icon: Icons.cancel_rounded,
+          ),
+          _SummaryChip(
+            label: 'Late',
+            count: late,
+            color: Colors.blue,
+            icon: Icons.access_time_rounded,
+          ),
+          _SummaryChip(
+            label: 'Leave',
+            count: leave,
+            color: Colors.orange,
+            icon: Icons.event_busy_rounded,
+          ),
+          if (unmarked > 0)
+            _SummaryChip(
+              label: 'Unmarked',
+              count: unmarked,
+              color: Colors.grey,
+              icon: Icons.help_outline_rounded,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SummaryChip extends StatelessWidget {
+  final String label;
+  final int count;
+  final Color color;
+  final IconData icon;
+
+  const _SummaryChip({
+    required this.label,
+    required this.count,
+    required this.color,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.12),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              '$count',
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
   }
