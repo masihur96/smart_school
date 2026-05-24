@@ -304,7 +304,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                               width: screenSize(context, 0.88),
                               child: _buildClassPerformanceCard(
                                 context,
-                                data!.myClassAttendStudents[index],
+                                data.myClassAttendStudents[index],
                               ),
                             ),
                           );
@@ -761,13 +761,66 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
+  String convertToLocal(String? time) {
+    try {
+      if (time == null || time.isEmpty) {
+        return "--:--";
+      }
+
+      final parsed = DateFormat("hh:mm a").parse(time);
+
+      final now = DateTime.now();
+
+      final fullDate = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        parsed.hour,
+        parsed.minute,
+      );
+
+      return DateFormat("hh:mm a").format(fullDate.toLocal());
+    } catch (e) {
+      print(e);
+      return "--:--";
+    }
+  }
+
+  String convertServerToLocal(String? time) {
+    try {
+      if (time == null || time.isEmpty || time == "--:--") {
+        return "--:--";
+      }
+
+      final parsed = DateFormat("hh:mm a").parse(time);
+
+      final now = DateTime.now();
+
+      final serverTime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        parsed.hour,
+        parsed.minute,
+      );
+
+      final local = serverTime.toLocal();
+
+      return DateFormat("hh:mm a").format(local);
+    } catch (e) {
+      print("Time parse error: $e");
+      return "--:--";
+    }
+  }
+
   Widget _buildTimeInfo(String time, IconData icon) {
     return Row(
       children: [
         Icon(icon, size: 16),
         const SizedBox(width: 4),
         Text(
-          time,
+          convertServerToLocal(time),
+
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 14,
