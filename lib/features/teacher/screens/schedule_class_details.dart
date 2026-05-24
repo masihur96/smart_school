@@ -53,15 +53,15 @@ class _ScheduleClassDetailsState extends State<ScheduleClassDetails>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Load students for this class + section
-      context.read<StudentsNotifier>().fetchStudentsBySection(
-        classId: widget.classRoom.id,
-        sectionId: widget.sectionId,
-      );
+      // context.read<StudentsNotifier>().fetchStudentsBySection(
+      //   classId: widget.classRoom.id,
+      //   sectionId: widget.sectionId,
+      // );
       // Ensure subjects are loaded for homework
-      final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
-      if (schoolId.isNotEmpty) {
-        context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
-      }
+      // final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
+      // if (schoolId.isNotEmpty) {
+      //   context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
+      // }
 
       // Load homework for this class
       context.read<HomeworkNotifier>().fetchHomework(
