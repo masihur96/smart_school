@@ -53,10 +53,10 @@ class _ScheduleClassDetailsState extends State<ScheduleClassDetails>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Load students for this class + section
-      // context.read<StudentsNotifier>().fetchStudentsBySection(
-      //   classId: widget.classRoom.id,
-      //   sectionId: widget.sectionId,
-      // );
+      context.read<StudentsNotifier>().fetchStudentsBySection(
+        classId: widget.classRoom.id,
+        sectionId: widget.sectionId,
+      );
       // Ensure subjects are loaded for homework
       // final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
       // if (schoolId.isNotEmpty) {
@@ -371,7 +371,10 @@ class _AttendanceTab extends StatelessWidget {
 
         // ── Attendance summary chips ──────────────────────────────────────────
         if (!isLoading && students.isNotEmpty)
-          _AttendanceSummaryBar(attendanceMap: attendanceMap, total: students.length),
+          _AttendanceSummaryBar(
+            attendanceMap: attendanceMap,
+            total: students.length,
+          ),
 
         Expanded(
           child: isLoading
@@ -447,14 +450,18 @@ class _AttendanceSummaryBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final present =
-        attendanceMap.values.where((s) => s == AttendanceStatus.present).length;
-    final absent =
-        attendanceMap.values.where((s) => s == AttendanceStatus.absent).length;
-    final late =
-        attendanceMap.values.where((s) => s == AttendanceStatus.late).length;
-    final leave =
-        attendanceMap.values.where((s) => s == AttendanceStatus.leave).length;
+    final present = attendanceMap.values
+        .where((s) => s == AttendanceStatus.present)
+        .length;
+    final absent = attendanceMap.values
+        .where((s) => s == AttendanceStatus.absent)
+        .length;
+    final late = attendanceMap.values
+        .where((s) => s == AttendanceStatus.late)
+        .length;
+    final leave = attendanceMap.values
+        .where((s) => s == AttendanceStatus.leave)
+        .length;
     final unmarked = total - attendanceMap.length;
 
     return Container(

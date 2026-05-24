@@ -23,26 +23,34 @@ class HomeworkNotifier extends ChangeNotifier {
 
   void addHomework(Homework homework) {
     _dbService.homeworkRecords.add(homework);
-    _homeworkRecords = [..._dbService.homeworkRecords];
+    _homeworkRecords.add(homework);
     notifyListeners();
   }
 
   void _removeLocal(String id) {
     _dbService.homeworkRecords.removeWhere((h) => h.id == id);
-    _homeworkRecords = [..._dbService.homeworkRecords];
+    _homeworkRecords.removeWhere((h) => h.id == id);
     notifyListeners();
   }
 
   void _updateLocal(Homework homework) {
-    final index = _dbService.homeworkRecords.indexWhere(
+    final dbIndex = _dbService.homeworkRecords.indexWhere(
       (h) => h.id == homework.id,
     );
-    if (index != -1) {
-      _dbService.homeworkRecords[index] = homework;
+    if (dbIndex != -1) {
+      _dbService.homeworkRecords[dbIndex] = homework;
     } else {
       _dbService.homeworkRecords.add(homework);
     }
-    _homeworkRecords = [..._dbService.homeworkRecords];
+
+    final index = _homeworkRecords.indexWhere(
+      (h) => h.id == homework.id,
+    );
+    if (index != -1) {
+      _homeworkRecords[index] = homework;
+    } else {
+      _homeworkRecords.add(homework);
+    }
     notifyListeners();
   }
 
