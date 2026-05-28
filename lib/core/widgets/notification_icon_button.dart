@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_school/configs/route_generator.dart';
 import 'package:smart_school/features/notifications/providers/notification_provider.dart';
+import 'package:smart_school/features/notifications/screens/notification_screen.dart';
 
 class NotificationIconButton extends StatelessWidget {
   final Color? color;
@@ -15,7 +15,12 @@ class NotificationIconButton extends StatelessWidget {
           icon: const Icon(Icons.notifications_none_outlined),
           color: Colors.white,
           onPressed: () {
-            Navigator.pushNamed(context, RouteGenerator.notificationRoute);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => NotificationScreen(color: color!),
+              ),
+            );
           },
         ),
         Consumer<NotificationNotifier>(

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
 import 'package:smart_school/features/auth/presntation/views/change_password_screen.dart';
+import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
 import 'package:smart_school/features/splash_screen.dart';
-
-import 'package:smart_school/features/notifications/screens/notification_screen.dart';
 
 class RouteGenerator {
   static const String splashRoute = '/'; // ✅ Add this
@@ -32,8 +30,8 @@ class RouteGenerator {
       case changePasswordRoute:
         return MaterialPageRoute(builder: (_) => const ChangePasswordScreen());
 
-      case notificationRoute:
-        return MaterialPageRoute(builder: (_) => const NotificationScreen());
+      // case notificationRoute:
+      //   return MaterialPageRoute(builder: (_) => const NotificationScreen());
 
       default:
         return MaterialPageRoute(builder: (_) => LoginScreen());

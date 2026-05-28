@@ -6,7 +6,8 @@ import 'package:smart_school/features/notifications/providers/notification_provi
 import 'package:smart_school/models/notification_model.dart';
 
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({super.key});
+  final Color color;
+  const NotificationScreen({super.key, required this.color});
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
@@ -26,6 +27,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: widget.color,
         title: Text(
           'Notifications',
           style: TextStyle(color: isDark ? AppColors.white : AppColors.black),
@@ -175,12 +177,11 @@ class _NotificationItem extends StatelessWidget {
               notification.body,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Colors.grey[700]),
             ),
             const SizedBox(height: 6),
             Text(
               _formatTime(notification.createdAt),
-              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+              style: TextStyle(fontSize: 12),
             ),
           ],
         ),
