@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/student_provider.dart';
@@ -567,11 +568,19 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                 Icons.email_outlined,
                 'Email',
                 user?.email ?? 'N/A',
+                actionIcon: Icons.send,
+                onTap: user?.email != null
+                    ? () => _launchUrl('mailto:${user!.email}')
+                    : null,
               ),
               _buildDetailItem(
                 Icons.phone_outlined,
                 'Phone',
                 user?.phone ?? 'N/A',
+                actionIcon: Icons.call,
+                onTap: user?.phone != null
+                    ? () => _launchUrl('tel:${user!.phone}')
+                    : null,
               ),
               const SizedBox(height: 20),
               const Text(
@@ -613,29 +622,64 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
     );
   }
 
-  Widget _buildDetailItem(IconData icon, String label, String value) {
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  Widget _buildDetailItem(
+    IconData icon,
+    String label,
+    String value, {
+    IconData? actionIcon,
+    VoidCallback? onTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
         children: [
           Icon(icon, size: 20, color: Colors.purple.shade300),
           const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
-              ),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: 12,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (actionIcon != null && onTap != null)
+            Material(
+              color: Colors.purple.shade50,
+              shape: const CircleBorder(),
+              child: InkWell(
+                onTap: onTap,
+                customBorder: const CircleBorder(),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(
+                    actionIcon,
+                    size: 18,
+                    color: Colors.purple.shade600,
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
         ],
       ),
     );
