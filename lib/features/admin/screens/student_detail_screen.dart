@@ -34,24 +34,25 @@ class StudentDetailScreen extends StatelessWidget {
         slivers: [
           SliverAppBar(
             expandedHeight: 200.0,
+            title: Text(student.user?.name ?? 'Student Details'),
             floating: false,
             pinned: true,
             backgroundColor: Colors.purple,
             foregroundColor: Colors.white,
             flexibleSpace: FlexibleSpaceBar(
-              title: Column(
-                children: [
-                  Text(
-                    student.user?.name ?? 'Student Details',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
-                    ),
-                  ),
-                ],
-              ),
-
+              // title: Column(
+              //
+              //   children: [
+              //     Text(
+              //       student.user?.name ?? 'Student Details',
+              //       style: const TextStyle(
+              //         color: Colors.white,
+              //         fontWeight: FontWeight.bold,
+              //         shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+              //       ),
+              //     ),
+              //   ],
+              // ),
               background: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -61,27 +62,33 @@ class StudentDetailScreen extends StatelessWidget {
                   ),
                 ),
                 child: Center(
-                  child: Hero(
-                    tag: 'student-avatar-${student.userId}',
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: Colors.white24,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 3),
-                      ),
-                      child: Center(
-                        child: Text(
-                          student.user?.name[0] ?? '?',
-                          style: const TextStyle(
-                            fontSize: 48,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                  child: Column(
+                    children: [
+                      Spacer(),
+                      Hero(
+                        tag: 'student-avatar-${student.userId}',
+                        child: Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.white24,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 3),
+                          ),
+                          child: Center(
+                            child: Text(
+                              student.user?.name[0] ?? '?',
+                              style: const TextStyle(
+                                fontSize: 48,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                      SizedBox(height: 30),
+                    ],
                   ),
                 ),
               ),
