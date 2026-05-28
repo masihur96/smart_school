@@ -335,34 +335,178 @@ class SubscriptionCard extends StatelessWidget {
                 // ── Status badge + actions ─────────────────────────────
                 if (isExpired)
                   // Expired plan: show only the "Expired" badge, no menu
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFF3E0),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.timer_off_rounded,
-                          size: 12,
-                          color: Color(0xFFF57C00),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
                         ),
-                        SizedBox(width: 6),
-                        Text(
-                          'Expired',
-                          style: TextStyle(
-                            color: Color(0xFFF57C00),
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF3E0),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.timer_off_rounded,
+                              size: 12,
+                              color: Color(0xFFF57C00),
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              'Expired',
+                              style: TextStyle(
+                                color: Color(0xFFF57C00),
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        height: 32,
+                        width: 32,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.grey.withOpacity(0.2),
                           ),
                         ),
-                      ],
-                    ),
+                        child: PopupMenuButton<String>(
+                          padding: EdgeInsets.zero,
+                          icon: const Icon(
+                            Icons.more_horiz,
+                            size: 18,
+                            color: AppColors.textSecondary,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          position: PopupMenuPosition.under,
+                          onSelected: (value) async {
+                            if (value == 'status') {
+                              final success = await context
+                                  .read<SubscriptionNotifier>()
+                                  .updateSubscriptionStatus(
+                                    subscription.id,
+                                    !isActive,
+                                  );
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      success
+                                          ? 'Status updated successfully'
+                                          : 'Failed to update status',
+                                      style: TextStyle(color: AppColors.white),
+                                    ),
+                                    backgroundColor: success
+                                        ? Colors.green
+                                        : Colors.red,
+                                  ),
+                                );
+                              }
+                            } else if (value == 'delete') {
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Delete Subscription'),
+                                  content: const Text(
+                                    'Are you sure you want to delete this subscription? This action cannot be undone.',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: Colors.red,
+                                      ),
+                                      child: const Text('Delete'),
+                                    ),
+                                  ],
+                                ),
+                              );
+
+                              if (confirm == true && context.mounted) {
+                                final success = await context
+                                    .read<SubscriptionNotifier>()
+                                    .deleteSubscription(subscription.id);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        success
+                                            ? 'Subscription deleted successfully'
+                                            : 'Failed to delete subscription',
+                                        style: TextStyle(
+                                          color: AppColors.white,
+                                        ),
+                                      ),
+                                      backgroundColor: success
+                                          ? Colors.green
+                                          : Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'status',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    isActive
+                                        ? Icons.cancel_outlined
+                                        : Icons.check_circle_outline,
+                                    color: isActive ? Colors.red : Colors.green,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    isActive ? 'Deactivate' : 'Activate',
+                                    style: TextStyle(
+                                      color: isActive
+                                          ? Colors.red
+                                          : Colors.green,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.red,
+                                    size: 20,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Delete',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   )
                 else
                   // Non-expired plan: Active/Inactive badge + popup menu
@@ -408,8 +552,9 @@ class SubscriptionCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
-                          border:
-                              Border.all(color: Colors.grey.withOpacity(0.2)),
+                          border: Border.all(
+                            color: Colors.grey.withOpacity(0.2),
+                          ),
                         ),
                         child: PopupMenuButton<String>(
                           padding: EdgeInsets.zero,
@@ -437,11 +582,11 @@ class SubscriptionCard extends StatelessWidget {
                                       success
                                           ? 'Status updated successfully'
                                           : 'Failed to update status',
-                                      style:
-                                          TextStyle(color: AppColors.white),
+                                      style: TextStyle(color: AppColors.white),
                                     ),
-                                    backgroundColor:
-                                        success ? Colors.green : Colors.red,
+                                    backgroundColor: success
+                                        ? Colors.green
+                                        : Colors.red,
                                   ),
                                 );
                               }
@@ -482,8 +627,9 @@ class SubscriptionCard extends StatelessWidget {
                                         success
                                             ? 'Subscription deleted successfully'
                                             : 'Failed to delete subscription',
-                                        style:
-                                            TextStyle(color: AppColors.white),
+                                        style: TextStyle(
+                                          color: AppColors.white,
+                                        ),
                                       ),
                                       backgroundColor: success
                                           ? Colors.green
@@ -503,8 +649,7 @@ class SubscriptionCard extends StatelessWidget {
                                     isActive
                                         ? Icons.cancel_outlined
                                         : Icons.check_circle_outline,
-                                    color:
-                                        isActive ? Colors.red : Colors.green,
+                                    color: isActive ? Colors.red : Colors.green,
                                     size: 20,
                                   ),
                                   const SizedBox(width: 8),
