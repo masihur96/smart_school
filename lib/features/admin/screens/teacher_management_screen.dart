@@ -294,26 +294,16 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                                       teacher.designation.isEmpty
                                           ? 'Teacher'
                                           : teacher.designation,
-                                      style: TextStyle(
-                                        color: Colors.grey.shade600,
-                                        fontSize: 13,
-                                      ),
+                                      style: TextStyle(fontSize: 13),
                                     ),
                                     const SizedBox(height: 4),
                                     Row(
                                       children: [
-                                        Icon(
-                                          Icons.email_outlined,
-                                          size: 14,
-                                          color: Colors.grey.shade400,
-                                        ),
+                                        Icon(Icons.email_outlined, size: 14),
                                         const SizedBox(width: 4),
                                         Text(
                                           user?.email ?? '',
-                                          style: TextStyle(
-                                            color: Colors.grey.shade500,
-                                            fontSize: 12,
-                                          ),
+                                          style: TextStyle(fontSize: 12),
                                         ),
                                       ],
                                     ),
