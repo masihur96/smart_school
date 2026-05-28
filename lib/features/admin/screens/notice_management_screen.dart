@@ -145,12 +145,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
             _infoRow(Icons.person_outline, 'Posted by', notice.postedBy ?? '—'),
             if (notice.isImportant) ...[
               const SizedBox(height: 6),
-              _infoRow(
-                Icons.warning_amber_rounded,
-                'Priority',
-                'Important',
-                color: Colors.red,
-              ),
+              _infoRow(Icons.warning_amber_rounded, 'Priority', 'Important'),
             ],
           ],
         ),
@@ -164,23 +159,14 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
     );
   }
 
-  Widget _infoRow(
-    IconData icon,
-    String label,
-    String value, {
-    Color color = Colors.purple,
-  }) {
+  Widget _infoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: color),
+        Icon(icon, size: 16),
         const SizedBox(width: 6),
         Text(
           '$label: ',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: color,
-          ),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         ),
         Expanded(child: Text(value, style: const TextStyle(fontSize: 12))),
       ],

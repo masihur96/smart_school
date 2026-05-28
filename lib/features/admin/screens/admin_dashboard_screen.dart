@@ -106,7 +106,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           backgroundColor: AppColors.primaryAdmin,
           foregroundColor: Colors.white,
           actions: [
-            const NotificationIconButton(),
+            NotificationIconButton(color: AppColors.primaryAdmin),
             IconButton(
               icon: const Icon(Icons.account_circle),
               onPressed: () {
