@@ -112,7 +112,6 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
         IconButton(
           icon: const Icon(Icons.logout),
           onPressed: () async {
-            await context.read<AuthNotifier>().logout();
             if (mounted) {
               Navigator.pushAndRemoveUntil(
                 context,
@@ -120,6 +119,7 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
                 (route) => false,
               );
             }
+            await context.read<AuthNotifier>().logout();
           },
         ),
       ],
@@ -441,20 +441,13 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                 children: [
                   const Text(
                     'Perfect Choice!',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'You have successfully registered for the ${plan.name} plan. To activate your account, a request needs to be sent to our administration team.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary.withOpacity(0.8),
-                    ),
+                    style: TextStyle(fontSize: 14),
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
@@ -466,7 +459,6 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                           content: Text(
                             'Activation request sent successfully. You will receive a confirmation email within 12 hours.',
                           ),
-                          backgroundColor: Colors.green,
                         ),
                       );
                     },
@@ -482,10 +474,7 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'Decide Later',
-                      style: TextStyle(color: AppColors.textSecondary),
-                    ),
+                    child: Text('Decide Later'),
                   ),
                 ],
               ),

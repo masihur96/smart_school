@@ -390,7 +390,9 @@ class SubscriptionCard extends StatelessWidget {
                                     success
                                         ? 'Status updated successfully'
                                         : 'Failed to update status',
+                                    style: TextStyle(color: AppColors.white),
                                   ),
+
                                   backgroundColor: success
                                       ? Colors.green
                                       : Colors.red,
@@ -434,6 +436,7 @@ class SubscriptionCard extends StatelessWidget {
                                       success
                                           ? 'Subscription deleted successfully'
                                           : 'Failed to delete subscription',
+                                      style: TextStyle(color: AppColors.white),
                                     ),
                                     backgroundColor: success
                                         ? Colors.green
