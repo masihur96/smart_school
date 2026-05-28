@@ -131,8 +131,9 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
     return Consumer<StudentExamNotifier>(
       builder: (context, p, child) {
         print(p.exams.first.isPublished);
-        if (p.isLoading)
+        if (p.isLoading) {
           return const Center(child: CircularProgressIndicator());
+        }
         if (p.results.isEmpty || !widget.exam.isPublished)
           return _buildEmptyState('Results not published yet.');
 

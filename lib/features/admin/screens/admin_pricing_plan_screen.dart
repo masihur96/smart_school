@@ -74,26 +74,19 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
                   final isPlanFree =
                       plan.pricePerMonth == '0' ||
                       plan.name.toLowerCase().contains('free');
-                  final isCurrentPlanFree =
-                      subscription?.pricingPlan?.pricePerMonth == '0' ||
-                      (subscription?.pricingPlan?.name.toLowerCase().contains(
-                            'free',
-                          ) ??
-                          false);
-                  final isCurrentFreePlanExpired =
-                      isCurrentPlanFree && !authNotifier.isSubscriptionValid;
-                  final isAlreadyUsedFreePlan =
-                      isPlanFree && isCurrentFreePlanExpired;
+                  final isSubscriptionExpired =
+                      subscription != null && !authNotifier.isSubscriptionValid;
 
-                  print(subscription?.pricingPlan?.pricePerMonth);
-                  print(subscription?.pricingPlan?.id);
-                  print(plan.id);
+                  // Hide free plan cards when any current plan is expired
+                  if (isPlanFree && isSubscriptionExpired) {
+                    return const SizedBox.shrink();
+                  }
 
                   return _AdminPricingPlanCard(
                     plan: plan,
                     currentCount: subscription?.lastStudentCount ?? 0,
                     isActive: subscription?.pricingPlan?.id == plan.id,
-                    isAlreadyUsedFreePlan: isAlreadyUsedFreePlan,
+                    isAlreadyUsedFreePlan: false,
                   );
                 }, childCount: pricingNotifier.plans.length),
               ),
