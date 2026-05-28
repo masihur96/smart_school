@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../core/services/geocoding_service.dart';
 import '../../../core/widgets/app_drawer.dart';
@@ -429,7 +429,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(data.date, style: TextStyle(fontSize: 11)),
+                        Text(
+                          formatDate(data.date),
+                          style: TextStyle(fontSize: 11),
+                        ),
                       ],
                     ),
                   ),
@@ -651,7 +654,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             ),
                           ),
                           Text(
-                            data.date,
+                            formatDate(data.date),
+
                             style: TextStyle(
                               fontSize: 11,
                               color: Colors.grey[500],
@@ -1090,7 +1094,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           ),
                         ),
                         Text(
-                          hw.dueDate,
+                          formatDate(hw.dueDate),
                           style: const TextStyle(
                             fontSize: 10,
                             color: Colors.grey,
@@ -1198,7 +1202,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${exam.startDate} to ${exam.endDate}',
+                      '${formatDate(exam.startDate)} to ${formatDate(exam.endDate)}',
                       style: TextStyle(fontSize: 12),
                     ),
                   ],
@@ -1209,6 +1213,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         },
       ),
     );
+  }
+
+  String formatDate(String? utcDate) {
+    if (utcDate == null || utcDate.isEmpty) {
+      return '--';
+    }
+
+    final localDate = DateTime.parse(utcDate).toLocal();
+
+    return DateFormat('dd MMM yyyy').format(localDate);
   }
 
   Widget _buildRecentNotices(List<RecentNotice> notices) {
@@ -1300,7 +1314,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           ),
                         ),
                         Text(
-                          notice.createdAt.split('T').first,
+                          formatDate(notice.createdAt),
+
                           style: const TextStyle(
                             fontSize: 11,
                             color: Colors.grey,
@@ -1423,18 +1438,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Shimmer sweep colors — adapt to theme
-    final Color shimBase      = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
-    final Color shimHighlight = isDark ? const Color(0xFF3D3D3D) : const Color(0xFFF5F5F5);
+    final Color shimBase = isDark
+        ? const Color(0xFF2A2A2A)
+        : const Color(0xFFE0E0E0);
+    final Color shimHighlight = isDark
+        ? const Color(0xFF3D3D3D)
+        : const Color(0xFFF5F5F5);
     // Block fill color (must differ from Shimmer background so the sweep is visible)
-    final Color blockColor    = isDark ? const Color(0xFF3A3A3A) : Colors.white;
+    final Color blockColor = isDark ? const Color(0xFF3A3A3A) : Colors.white;
 
     Widget sBox(double w, double h, {double r = 6}) => Container(
-          width: w, height: h,
-          decoration: BoxDecoration(
-            color: blockColor,
-            borderRadius: BorderRadius.circular(r),
-          ),
-        );
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        color: blockColor,
+        borderRadius: BorderRadius.circular(r),
+      ),
+    );
 
     return Shimmer.fromColors(
       baseColor: shimBase,
@@ -1449,20 +1469,28 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: blockColor, borderRadius: BorderRadius.circular(24),
+                color: blockColor,
+                borderRadius: BorderRadius.circular(24),
               ),
-              child: Row(children: [
-                sBox(56, 56, r: 28),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    sBox(140, 18, r: 4), const SizedBox(height: 8),
-                    sBox(110, 14, r: 4), const SizedBox(height: 6),
-                    sBox(130, 12, r: 4),
-                  ]),
-                ),
-                sBox(52, 28, r: 20),
-              ]),
+              child: Row(
+                children: [
+                  sBox(56, 56, r: 28),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        sBox(140, 18, r: 4),
+                        const SizedBox(height: 8),
+                        sBox(110, 14, r: 4),
+                        const SizedBox(height: 6),
+                        sBox(130, 12, r: 4),
+                      ],
+                    ),
+                  ),
+                  sBox(52, 28, r: 20),
+                ],
+              ),
             ),
             const SizedBox(height: 24),
 
@@ -1475,31 +1503,54 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Header: icon + title + date + rate badge
-                    Row(children: [
-                      sBox(36, 36, r: 12),
-                      const SizedBox(width: 12),
-                      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        sBox(140, 15, r: 4), const SizedBox(height: 5),
-                        sBox(90, 11, r: 4),
-                      ])),
-                      sBox(50, 26, r: 20),
-                    ]),
+                    Row(
+                      children: [
+                        sBox(36, 36, r: 12),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              sBox(140, 15, r: 4),
+                              const SizedBox(height: 5),
+                              sBox(90, 11, r: 4),
+                            ],
+                          ),
+                        ),
+                        sBox(50, 26, r: 20),
+                      ],
+                    ),
                     const SizedBox(height: 20),
                     // 4 stat pills: Total / Present / Absent / Leave
-                    Row(children: List.generate(4, (_) => Expanded(
-                      child: Container(
-                        height: 30, margin: const EdgeInsets.symmetric(horizontal: 3),
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        decoration: BoxDecoration(color: blockColor, borderRadius: BorderRadius.circular(20)),
-                        child: Center(child: sBox(55, 10, r: 4)),
+                    Row(
+                      children: List.generate(
+                        4,
+                        (_) => Expanded(
+                          child: Container(
+                            height: 30,
+                            margin: const EdgeInsets.symmetric(horizontal: 3),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            decoration: BoxDecoration(
+                              color: blockColor,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Center(child: sBox(55, 10, r: 4)),
+                          ),
+                        ),
                       ),
-                    ))),
+                    ),
                     const SizedBox(height: 16),
                     // Progress bar
                     sBox(double.infinity, 8, r: 8),
                     const SizedBox(height: 14),
                     // "Today's Records" label
-                    Row(children: [sBox(13, 13, r: 6), const SizedBox(width: 5), sBox(100, 12, r: 4)]),
+                    Row(
+                      children: [
+                        sBox(13, 13, r: 6),
+                        const SizedBox(width: 5),
+                        sBox(100, 12, r: 4),
+                      ],
+                    ),
                     const SizedBox(height: 8),
                     // Student mini-cards
                     SizedBox(
@@ -1509,14 +1560,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: 4,
                         itemBuilder: (_, __) => Container(
-                          width: 100, margin: const EdgeInsets.only(right: 10),
+                          width: 100,
+                          margin: const EdgeInsets.only(right: 10),
                           padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(color: blockColor, borderRadius: BorderRadius.circular(14)),
-                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            sBox(70, 11, r: 4), const SizedBox(height: 5),
-                            sBox(50, 9, r: 4),  const SizedBox(height: 5),
-                            sBox(60, 9, r: 4),
-                          ]),
+                          decoration: BoxDecoration(
+                            color: blockColor,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              sBox(70, 11, r: 4),
+                              const SizedBox(height: 5),
+                              sBox(50, 9, r: 4),
+                              const SizedBox(height: 5),
+                              sBox(60, 9, r: 4),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -1536,26 +1596,43 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                      child: Row(children: [
-                        sBox(36, 36, r: 12),
-                        const SizedBox(width: 12),
-                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          sBox(140, 15, r: 4), const SizedBox(height: 5),
-                          sBox(90, 11, r: 4),
-                        ])),
-                        sBox(50, 26, r: 20),
-                      ]),
+                      child: Row(
+                        children: [
+                          sBox(36, 36, r: 12),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                sBox(140, 15, r: 4),
+                                const SizedBox(height: 5),
+                                sBox(90, 11, r: 4),
+                              ],
+                            ),
+                          ),
+                          sBox(50, 26, r: 20),
+                        ],
+                      ),
                     ),
                     // 3 stat pills
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(children: List.generate(3, (_) => Expanded(
-                        child: Container(
-                          height: 30, margin: const EdgeInsets.symmetric(horizontal: 3),
-                          decoration: BoxDecoration(color: blockColor, borderRadius: BorderRadius.circular(20)),
-                          child: Center(child: sBox(55, 10, r: 4)),
+                      child: Row(
+                        children: List.generate(
+                          3,
+                          (_) => Expanded(
+                            child: Container(
+                              height: 30,
+                              margin: const EdgeInsets.symmetric(horizontal: 3),
+                              decoration: BoxDecoration(
+                                color: blockColor,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Center(child: sBox(55, 10, r: 4)),
+                            ),
+                          ),
                         ),
-                      ))),
+                      ),
                     ),
                     // Progress bar
                     Padding(
@@ -1565,7 +1642,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     // "Today's Records" label
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 14, 0, 8),
-                      child: Row(children: [sBox(13, 13, r: 6), const SizedBox(width: 5), sBox(100, 12, r: 4)]),
+                      child: Row(
+                        children: [
+                          sBox(13, 13, r: 6),
+                          const SizedBox(width: 5),
+                          sBox(100, 12, r: 4),
+                        ],
+                      ),
                     ),
                     // Teacher mini-cards
                     SizedBox(
@@ -1576,26 +1659,46 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                         itemCount: 3,
                         itemBuilder: (_, __) => Container(
-                          width: 148, margin: const EdgeInsets.only(right: 10),
+                          width: 148,
+                          margin: const EdgeInsets.only(right: 10),
                           padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(color: blockColor, borderRadius: BorderRadius.circular(16)),
-                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            // Avatar + name + designation
-                            Row(children: [
-                              sBox(32, 32, r: 16),
-                              const SizedBox(width: 5),
-                              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                sBox(70, 12, r: 4), const SizedBox(height: 4),
-                                sBox(50, 10, r: 4),
-                              ]),
-                            ]),
-                            const SizedBox(height: 8),
-                            // In / Out time row
-                            Row(children: [sBox(38, 10, r: 4), const Spacer(), sBox(38, 10, r: 4)]),
-                            const SizedBox(height: 6),
-                            // Location
-                            sBox(100, 9, r: 4),
-                          ]),
+                          decoration: BoxDecoration(
+                            color: blockColor,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Avatar + name + designation
+                              Row(
+                                children: [
+                                  sBox(32, 32, r: 16),
+                                  const SizedBox(width: 5),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      sBox(70, 12, r: 4),
+                                      const SizedBox(height: 4),
+                                      sBox(50, 10, r: 4),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              // In / Out time row
+                              Row(
+                                children: [
+                                  sBox(38, 10, r: 4),
+                                  const Spacer(),
+                                  sBox(38, 10, r: 4),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              // Location
+                              sBox(100, 9, r: 4),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -1606,9 +1709,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             const SizedBox(height: 24),
 
             // ── Recent Homework ────────────────────────────────
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              sBox(150, 18, r: 4), sBox(55, 14, r: 4),
-            ]),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [sBox(150, 18, r: 4), sBox(55, 14, r: 4)],
+            ),
             const SizedBox(height: 12),
             SizedBox(
               height: 160,
@@ -1617,24 +1721,29 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: 3,
                 itemBuilder: (_, __) => Container(
-                  width: screenSize(context, .85), margin: const EdgeInsets.only(right: 5),
+                  width: screenSize(context, .85),
+                  margin: const EdgeInsets.only(right: 5),
                   child: Card(
                     child: Padding(
                       padding: const EdgeInsets.all(12),
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        // Class badge + due date
-                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                          sBox(80, 20, r: 8), sBox(60, 10, r: 4),
-                        ]),
-                        const SizedBox(height: 12),
-                        sBox(200, 16, r: 4),   // title
-                        const SizedBox(height: 8),
-                        sBox(120, 13, r: 4),   // subject
-                        const Spacer(),
-                        sBox(double.infinity, 11, r: 4), // description line 1
-                        const SizedBox(height: 4),
-                        sBox(180, 11, r: 4),             // description line 2
-                      ]),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Class badge + due date
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [sBox(80, 20, r: 8), sBox(60, 10, r: 4)],
+                          ),
+                          const SizedBox(height: 12),
+                          sBox(200, 16, r: 4), // title
+                          const SizedBox(height: 8),
+                          sBox(120, 13, r: 4), // subject
+                          const Spacer(),
+                          sBox(double.infinity, 11, r: 4), // description line 1
+                          const SizedBox(height: 4),
+                          sBox(180, 11, r: 4), // description line 2
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -1643,9 +1752,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             const SizedBox(height: 24),
 
             // ── Current Exams ──────────────────────────────────
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              sBox(120, 18, r: 4), sBox(55, 14, r: 4),
-            ]),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [sBox(120, 18, r: 4), sBox(55, 14, r: 4)],
+            ),
             const SizedBox(height: 12),
             SizedBox(
               height: 140,
@@ -1654,21 +1764,26 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: 3,
                 itemBuilder: (_, __) => Container(
-                  width: screenSize(context, .85), margin: const EdgeInsets.only(right: 5),
+                  width: screenSize(context, .85),
+                  margin: const EdgeInsets.only(right: 5),
                   child: Card(
                     child: Padding(
                       padding: const EdgeInsets.all(10),
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                          sBox(28, 28, r: 6), sBox(70, 22, r: 12),
-                        ]),
-                        const Spacer(),
-                        sBox(180, 18, r: 4),   // exam name
-                        const SizedBox(height: 6),
-                        sBox(140, 12, r: 4),   // description
-                        const SizedBox(height: 6),
-                        sBox(160, 12, r: 4),   // date range
-                      ]),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [sBox(28, 28, r: 6), sBox(70, 22, r: 12)],
+                          ),
+                          const Spacer(),
+                          sBox(180, 18, r: 4), // exam name
+                          const SizedBox(height: 6),
+                          sBox(140, 12, r: 4), // description
+                          const SizedBox(height: 6),
+                          sBox(160, 12, r: 4), // date range
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -1677,9 +1792,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             const SizedBox(height: 24),
 
             // ── Recent Notices ─────────────────────────────────
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              sBox(130, 18, r: 4), sBox(55, 14, r: 4),
-            ]),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [sBox(130, 18, r: 4), sBox(55, 14, r: 4)],
+            ),
             const SizedBox(height: 12),
             SizedBox(
               height: 160,
@@ -1688,25 +1804,34 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: 3,
                 itemBuilder: (_, __) => Container(
-                  width: screenSize(context, .9), margin: const EdgeInsets.only(right: 16),
+                  width: screenSize(context, .9),
+                  margin: const EdgeInsets.only(right: 16),
                   child: Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                          sBox(40, 40, r: 20), sBox(80, 22, r: 12),
-                        ]),
-                        const Spacer(),
-                        sBox(200, 16, r: 4),             // title
-                        const SizedBox(height: 6),
-                        sBox(double.infinity, 12, r: 4), // content line 1
-                        const SizedBox(height: 4),
-                        sBox(180, 12, r: 4),             // content line 2
-                        const SizedBox(height: 10),
-                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                          sBox(90, 11, r: 4), sBox(70, 11, r: 4),
-                        ]),
-                      ]),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              sBox(40, 40, r: 20),
+                              sBox(80, 22, r: 12),
+                            ],
+                          ),
+                          const Spacer(),
+                          sBox(200, 16, r: 4), // title
+                          const SizedBox(height: 6),
+                          sBox(double.infinity, 12, r: 4), // content line 1
+                          const SizedBox(height: 4),
+                          sBox(180, 12, r: 4), // content line 2
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [sBox(90, 11, r: 4), sBox(70, 11, r: 4)],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

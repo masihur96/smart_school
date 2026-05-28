@@ -591,11 +591,7 @@ class _NoticeCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         notice.content,
-                        style: TextStyle(
-                          color: Colors.grey[700],
-                          fontSize: 13,
-                          height: 1.4,
-                        ),
+                        style: TextStyle(fontSize: 13, height: 1.4),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -699,15 +695,11 @@ class _NoticeCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: color),
+          Icon(icon, size: 12),
           const SizedBox(width: 4),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 11,
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
           ),
         ],
       ),
