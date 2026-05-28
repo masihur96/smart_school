@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/features/admin/providers/student_provider.dart';
@@ -132,16 +133,28 @@ class StudentDetailScreen extends StatelessWidget {
                       Icons.email,
                       'Email',
                       student.user?.email ?? 'N/A',
+                      actionIcon: Icons.send,
+                      onTap: student.user?.email != null
+                          ? () => _launchUrl('mailto:${student.user!.email}')
+                          : null,
                     ),
                     _buildInfoRow(
                       Icons.phone,
                       'Phone',
                       student.user?.phone ?? 'N/A',
+                      actionIcon: Icons.call,
+                      onTap: student.user?.phone != null
+                          ? () => _launchUrl('tel:${student.user!.phone}')
+                          : null,
                     ),
                     _buildInfoRow(
                       Icons.contact_phone,
                       'Guardian Contact',
                       student.guardianContact,
+                      actionIcon: Icons.call,
+                      onTap: student.guardianContact.isNotEmpty
+                          ? () => _launchUrl('tel:${student.guardianContact}')
+                          : null,
                     ),
                   ]),
                   const SizedBox(height: 32),
@@ -237,7 +250,20 @@ class StudentDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  Widget _buildInfoRow(
+    IconData icon,
+    String label,
+    String value, {
+    IconData? actionIcon,
+    VoidCallback? onTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -262,6 +288,23 @@ class StudentDetailScreen extends StatelessWidget {
               ],
             ),
           ),
+          if (actionIcon != null && onTap != null)
+            Material(
+              color: Colors.purple.shade50,
+              shape: const CircleBorder(),
+              child: InkWell(
+                onTap: onTap,
+                customBorder: const CircleBorder(),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(
+                    actionIcon,
+                    size: 18,
+                    color: Colors.purple.shade600,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
