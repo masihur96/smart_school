@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/teacher/providers/homework_provider.dart';
 import 'package:smart_school/models/school_models.dart';
 
@@ -26,6 +27,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Homework Details'),
+        backgroundColor: AppColors.primaryTeacher,
         elevation: 0,
         actions: [
           IconButton(
@@ -120,7 +122,6 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                     homework.title,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
                     ),
                   ),
                 ),
@@ -221,15 +222,9 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: Theme.of(
-                    context,
-                  ).primaryColor.withOpacity(0.1),
                   child: Text(
                     student?.name.substring(0, 1).toUpperCase() ?? 'S',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -247,10 +242,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                       if (student?.rollNumber != null)
                         Text(
                           'Roll: ${student!.rollNumber}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey.shade600,
-                          ),
+                          style: TextStyle(fontSize: 13),
                         ),
                     ],
                   ),
@@ -275,7 +267,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                       studentHomework.comment!,
                       style: TextStyle(
                         fontStyle: FontStyle.italic,
-                        color: Colors.grey.shade700,
+
                         fontSize: 14,
                       ),
                     ),
@@ -320,7 +312,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
         color = Colors.orange;
         break;
       case 'done':
-        color = Colors.purple;
+        color = AppColors.primaryTeacher;
         break;
       default:
         color = Colors.grey;
