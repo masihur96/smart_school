@@ -321,7 +321,7 @@ class _StudentAttendanceManagementScreenState
                                   ),
                                 ),
                                 Text(
-                                  "Date: ${record.date}",
+                                  "Date: ${formatDate(record.date)}",
                                   style: const TextStyle(
                                     fontSize: 10,
                                     color: Colors.grey,
@@ -380,6 +380,16 @@ class _StudentAttendanceManagementScreenState
         ],
       ),
     );
+  }
+
+  String formatDate(String? utcDate) {
+    if (utcDate == null || utcDate.isEmpty) {
+      return '--';
+    }
+
+    final localDate = DateTime.parse(utcDate).toLocal();
+
+    return DateFormat('dd MMM yyyy, hh:mm a').format(localDate);
   }
 
   Widget _buildDetailRow(String label, String value) {
