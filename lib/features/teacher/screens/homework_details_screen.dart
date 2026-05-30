@@ -55,6 +55,25 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
             return const Center(child: Text('Homework not found'));
           }
 
+          final sortedStudentHomeworks = List.of(homework.studentHomeworks);
+          sortedStudentHomeworks.sort((a, b) {
+            final rollA = a.student?.rollNumber;
+            final rollB = b.student?.rollNumber;
+            
+            final intRollA = int.tryParse(rollA ?? '');
+            final intRollB = int.tryParse(rollB ?? '');
+
+            if (intRollA != null && intRollB != null) {
+              return intRollA.compareTo(intRollB);
+            } else if (intRollA != null) {
+              return -1;
+            } else if (intRollB != null) {
+              return 1;
+            } else {
+              return (rollA ?? '').compareTo(rollB ?? '');
+            }
+          });
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -66,7 +85,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Students (${homework.studentHomeworks.length})',
+                      'Students (${sortedStudentHomeworks.length})',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -80,7 +99,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                if (homework.studentHomeworks.isEmpty)
+                if (sortedStudentHomeworks.isEmpty)
                   const Center(
                     child: Padding(
                       padding: EdgeInsets.all(20.0),
@@ -91,11 +110,11 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                   ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: homework.studentHomeworks.length,
+                    itemCount: sortedStudentHomeworks.length,
                     separatorBuilder: (context, index) =>
                         const SizedBox(height: 12),
                     itemBuilder: (context, index) {
-                      final studentHomework = homework.studentHomeworks[index];
+                      final studentHomework = sortedStudentHomeworks[index];
                       return _buildStudentItem(homework.id, studentHomework);
                     },
                   ),
