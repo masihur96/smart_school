@@ -172,19 +172,19 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
           ],
 
           // Admin Notification Testing Section
-          if (authNotifier.user?.role == UserRole.admin ||
-              authNotifier.user?.role == UserRole.superadmin) ...[
-            _buildSectionHeader("Developer Tools", theme),
-            _buildSettingTile(
-              icon: Icons.send_rounded,
-              title: "Send Test Notification",
-              subtitle: "Send a custom notification to a specific user",
-              theme: theme,
-              isAction: true,
-              onTap: () => _showSendNotificationDialog(context),
-            ),
-            const SizedBox(height: 24),
-          ],
+          // if (authNotifier.user?.role == UserRole.admin ||
+          //     authNotifier.user?.role == UserRole.superadmin) ...[
+          //   _buildSectionHeader("Developer Tools", theme),
+          //   _buildSettingTile(
+          //     icon: Icons.send_rounded,
+          //     title: "Send Test Notification",
+          //     subtitle: "Send a custom notification to a specific user",
+          //     theme: theme,
+          //     isAction: true,
+          //     onTap: () => _showSendNotificationDialog(context),
+          //   ),
+          //   const SizedBox(height: 24),
+          // ],
 
           // Logout Button
           // ElevatedButton.icon(
