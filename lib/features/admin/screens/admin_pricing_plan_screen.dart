@@ -78,7 +78,7 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
                       subscription != null && !authNotifier.isSubscriptionValid;
 
                   // Hide free plan cards when any current plan is expired
-                  if (isPlanFree && isSubscriptionExpired || isPlanFree) {
+                  if (isPlanFree && isSubscriptionExpired) {
                     return const SizedBox.shrink();
                   }
 
