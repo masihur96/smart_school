@@ -70,7 +70,10 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       _disposeControllers();
     });
     if (_selectedExamId != null && classId != null) {
-      context.read<ResultsNotifier>().loadExamAssignedSubjects(_selectedExamId!, classId);
+      context.read<ResultsNotifier>().loadExamAssignedSubjects(
+        _selectedExamId!,
+        classId,
+      );
     }
   }
 
@@ -82,8 +85,10 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     });
     if (_selectedExamId != null && _selectedClassId != null) {
       context.read<ResultsNotifier>().loadExamAssignedSubjects(
-          _selectedExamId!, _selectedClassId!,
-          sectionId: sectionId);
+        _selectedExamId!,
+        _selectedClassId!,
+        sectionId: sectionId,
+      );
     }
     _fetchStudents();
   }
@@ -123,8 +128,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       for (var student in students) {
         final existingResult = _selectedExam!.results.firstWhere(
           (r) =>
-              r.studentId == student.id &&
-              r.subjectId == _selectedSubject!.id,
+              r.studentId == student.id && r.subjectId == _selectedSubject!.id,
           orElse: () => Result(
             id: '',
             examId: '',
@@ -312,10 +316,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
               loading: notifier.examSubjectsLoading,
               enabled: _selectedClassId != null,
               items: filteredSubjects
-                  .map(
-                    (s) =>
-                        DropdownMenuItem(value: s, child: Text(s.name)),
-                  )
+                  .map((s) => DropdownMenuItem(value: s, child: Text(s.name)))
                   .toList(),
               onChanged: _onSubjectChanged,
             ),
@@ -339,17 +340,14 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[600],
-          ),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 6),
         DropdownButtonFormField<T>(
           value: value,
           decoration: InputDecoration(
             prefixIcon: Icon(icon, size: 20),
+            hintText: 'Select',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: Colors.grey.shade200),
@@ -359,14 +357,13 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
               borderSide: BorderSide(color: Colors.grey.shade200),
             ),
             filled: true,
-            fillColor: enabled
-                ? Colors.blue.withValues(alpha: 0.05)
-                : Colors.grey[100],
+
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 12,
             ),
           ),
+
           items: items,
           onChanged: enabled ? onChanged : null,
           icon: loading
@@ -376,10 +373,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.keyboard_arrow_down),
-          disabledHint: Text(
-            enabled ? 'Select' : 'Select previous first',
-            style: TextStyle(color: Colors.grey[400]),
-          ),
+          disabledHint: Text(enabled ? 'Select' : 'Previous first'),
         ),
       ],
     );
@@ -437,11 +431,21 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       );
     }
 
+    final sortedStudents = List<TeacherAssignmentStudent>.from(students)
+      ..sort((a, b) {
+        final numA = int.tryParse(a.rollNumber);
+        final numB = int.tryParse(b.rollNumber);
+        if (numA != null && numB != null) {
+          return numA.compareTo(numB);
+        }
+        return a.rollNumber.compareTo(b.rollNumber);
+      });
+
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate((context, index) {
-          final student = students[index];
+          final student = sortedStudents[index];
           final marksStr = _getMarksController(student.id).text;
           final marks = double.tryParse(marksStr);
           final isEntered = marksStr.isNotEmpty;
@@ -536,7 +540,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
               ),
             ),
           );
-        }, childCount: students.length),
+        }, childCount: sortedStudents.length),
       ),
     );
   }
