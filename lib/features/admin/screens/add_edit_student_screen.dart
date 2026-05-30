@@ -25,6 +25,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   String? _selectedClass;
   String? _selectedSection;
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -53,6 +54,9 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
 
   void _save() async {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
       final user = context.read<AuthNotifier>().user;
       final schoolId = user?.schoolId ?? '';
 
@@ -90,6 +94,12 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
         }
       }
     }
@@ -236,12 +246,18 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: _save,
+              onPressed: _isLoading ? null : _save,
               style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-              child: Text(
-                widget.student != null ? 'Update Student' : 'Save Student',
-                style: const TextStyle(color: Colors.white, fontSize: 18),
-              ),
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    )
+                  : Text(
+                      widget.student != null ? 'Update Student' : 'Save Student',
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                    ),
             ),
           ],
         ),
