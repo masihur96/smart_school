@@ -364,9 +364,11 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
     String selectedStatus = currentStatus;
     final commentController = TextEditingController(text: currentComment);
     final isBulk = studentId == null;
+    bool isUpdating = false;
 
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
@@ -404,15 +406,18 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                       ),
                       DropdownMenuItem(value: 'done', child: Text('Done')),
                     ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        setDialogState(() => selectedStatus = value);
-                      }
-                    },
+                    onChanged: isUpdating
+                        ? null
+                        : (value) {
+                            if (value != null) {
+                              setDialogState(() => selectedStatus = value);
+                            }
+                          },
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: commentController,
+                    enabled: !isUpdating,
                     decoration: const InputDecoration(
                       labelText: 'Comment',
                       border: OutlineInputBorder(),
@@ -424,51 +429,70 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: isUpdating ? null : () => Navigator.pop(context),
                   child: const Text('Cancel'),
                 ),
                 ElevatedButton(
-                  onPressed: () async {
-                    final navigator = Navigator.of(context);
-                    final scaffoldMessenger = ScaffoldMessenger.of(context);
+                  onPressed: isUpdating
+                      ? null
+                      : () async {
+                          setDialogState(() {
+                            isUpdating = true;
+                          });
 
-                    final success = isBulk
-                        ? await context
-                              .read<HomeworkNotifier>()
-                              .bulkUpdateStudentHomeworkStatus(
-                                homeworkId: homeworkId,
-                                status: selectedStatus,
-                                comment: commentController.text,
-                              )
-                        : await context
-                              .read<HomeworkNotifier>()
-                              .updateStudentHomeworkStatus(
-                                homeworkId: homeworkId,
-                                studentId: studentId!,
-                                status: selectedStatus,
-                                comment: commentController.text,
-                              );
+                          final navigator = Navigator.of(context);
+                          final scaffoldMessenger =
+                              ScaffoldMessenger.of(context);
 
-                    if (success) {
-                      navigator.pop();
-                      scaffoldMessenger.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            isBulk
-                                ? 'Bulk status updated successfully'
-                                : 'Student status updated successfully',
+                          final success = isBulk
+                              ? await context
+                                    .read<HomeworkNotifier>()
+                                    .bulkUpdateStudentHomeworkStatus(
+                                      homeworkId: homeworkId,
+                                      status: selectedStatus,
+                                      comment: commentController.text,
+                                    )
+                              : await context
+                                    .read<HomeworkNotifier>()
+                                    .updateStudentHomeworkStatus(
+                                      homeworkId: homeworkId,
+                                      studentId: studentId!,
+                                      status: selectedStatus,
+                                      comment: commentController.text,
+                                    );
+
+                          if (success) {
+                            navigator.pop();
+                            scaffoldMessenger.showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  isBulk
+                                      ? 'Bulk status updated successfully'
+                                      : 'Student status updated successfully',
+                                ),
+                              ),
+                            );
+                          } else {
+                            setDialogState(() {
+                              isUpdating = false;
+                            });
+                            scaffoldMessenger.showSnackBar(
+                              const SnackBar(
+                                content: Text('Failed to update status'),
+                              ),
+                            );
+                          }
+                        },
+                  child: isUpdating
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
                           ),
-                        ),
-                      );
-                    } else {
-                      scaffoldMessenger.showSnackBar(
-                        const SnackBar(
-                          content: Text('Failed to update status'),
-                        ),
-                      );
-                    }
-                  },
-                  child: Text(isBulk ? 'Bulk Update' : 'Update'),
+                        )
+                      : Text(isBulk ? 'Bulk Update' : 'Update'),
                 ),
               ],
             );
