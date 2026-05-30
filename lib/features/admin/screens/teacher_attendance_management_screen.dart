@@ -376,13 +376,15 @@ class _LocationAddressTextState extends State<_LocationAddressText> {
           if (place.subLocality != null && place.subLocality!.isNotEmpty) {
             addressParts.add(place.subLocality!);
           }
-          if (place.locality != null && place.locality!.isNotEmpty && !addressParts.contains(place.locality!)) {
+          if (place.locality != null &&
+              place.locality!.isNotEmpty &&
+              !addressParts.contains(place.locality!)) {
             addressParts.add(place.locality!);
           }
-          
+
           if (mounted) {
             setState(() {
-              _address = addressParts.isNotEmpty 
+              _address = addressParts.isNotEmpty
                   ? addressParts.join(', ')
                   : '${widget.lat}, ${widget.lon}';
             });
