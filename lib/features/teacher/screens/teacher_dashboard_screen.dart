@@ -130,7 +130,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           foregroundColor: Colors.white,
           iconTheme: IconThemeData(color: Colors.white70),
           actions: [
-            const NotificationIconButton(),
+            NotificationIconButton(color: AppColors.primaryTeacher),
             IconButton(
               icon: const Icon(Icons.account_circle_outlined),
               onPressed: () {
@@ -1109,11 +1109,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         user.lat!,
         user.lon!,
       );
-      print(user.radius);
-      print(user.lat);
-      print(user.lon);
-      print(position.latitude);
-      print(position.longitude);
 
       if (distanceInMeters <= user.radius!) {
         // 4. Confirm before submitting (with loading button inside dialog)
