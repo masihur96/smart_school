@@ -17,7 +17,8 @@ class StudentAttendanceManagementScreen extends StatefulWidget {
 
 class _StudentAttendanceManagementScreenState
     extends State<StudentAttendanceManagementScreen> {
-  DateTime? _selectedDate;
+  DateTime? _startDate;
+  DateTime? _endDate;
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -46,7 +47,8 @@ class _StudentAttendanceManagementScreenState
       if (!provider.isLoading && provider.page < provider.totalPages) {
         provider.fetchStudentAttendance(
           name: _searchController.text,
-          date: _selectedDate,
+          startDate: _startDate,
+          endDate: _endDate,
           classId: _selectedClassId,
           sectionId: _selectedSectionId,
           subjectId: _selectedSubjectId,
@@ -67,7 +69,8 @@ class _StudentAttendanceManagementScreenState
   void _fetchData({int page = 1}) {
     context.read<AttendanceManagementProvider>().fetchStudentAttendance(
       name: _searchController.text,
-      date: _selectedDate,
+      startDate: _startDate,
+      endDate: _endDate,
       classId: _selectedClassId,
       sectionId: _selectedSectionId,
       subjectId: _selectedSubjectId,
@@ -76,15 +79,21 @@ class _StudentAttendanceManagementScreenState
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+    final DateTimeRange? picked = await showDateRangePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
+      initialDateRange: (_startDate != null && _endDate != null)
+          ? DateTimeRange(start: _startDate!, end: _endDate!)
+          : null,
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(data: Theme.of(context), child: child!);
+      },
     );
-    if (picked != null && picked != _selectedDate) {
+    if (picked != null) {
       setState(() {
-        _selectedDate = picked;
+        _startDate = picked.start;
+        _endDate = picked.end;
       });
       _fetchData();
     }
@@ -150,24 +159,25 @@ class _StudentAttendanceManagementScreenState
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: _selectedDate != null
+                          color: (_startDate != null && _endDate != null)
                               ? AppColors.primaryAdmin
                               : AppColors.primaryAdmin.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
                           Icons.calendar_today,
-                          color: _selectedDate != null
+                          color: (_startDate != null && _endDate != null)
                               ? Colors.white
                               : AppColors.primaryAdmin,
                         ),
                       ),
                     ),
-                    if (_selectedDate != null)
+                    if (_startDate != null && _endDate != null)
                       IconButton(
                         onPressed: () {
                           setState(() {
-                            _selectedDate = null;
+                            _startDate = null;
+                            _endDate = null;
                           });
                           _fetchData();
                         },
@@ -231,9 +241,9 @@ class _StudentAttendanceManagementScreenState
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      _selectedDate == null
+                      (_startDate == null || _endDate == null)
                           ? "All Dates"
-                          : "Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate!)}",
+                          : "${DateFormat('MMM dd, yyyy').format(_startDate!)} - ${DateFormat('MMM dd, yyyy').format(_endDate!)}",
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.grey,

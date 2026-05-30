@@ -31,7 +31,8 @@ class AttendanceManagementProvider extends ChangeNotifier {
 
   Future<void> fetchStudentAttendance({
     String? name,
-    DateTime? date,
+    DateTime? startDate,
+    DateTime? endDate,
     String? classId,
     String? sectionId,
     String? subjectId,
@@ -47,16 +48,18 @@ class AttendanceManagementProvider extends ChangeNotifier {
 
     try {
       final token = await StorageService.getToken();
-      final dateStr = date != null
-          ? "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}"
-          : null;
-
       final query = <String, dynamic>{
         'page': page.toString(),
         'limit': limit.toString(),
       };
       if (name != null && name.isNotEmpty) query['studentName'] = name;
-      if (dateStr != null) query['date'] = dateStr;
+      
+      if (startDate != null) {
+        query['startDate'] = "${startDate.year}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}";
+      }
+      if (endDate != null) {
+        query['endDate'] = "${endDate.year}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}";
+      }
       if (classId != null && classId.isNotEmpty) query['classId'] = classId;
       if (sectionId != null && sectionId.isNotEmpty) {
         query['sectionId'] = sectionId;

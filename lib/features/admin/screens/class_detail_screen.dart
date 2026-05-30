@@ -88,7 +88,8 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
     await context.read<AttendanceManagementProvider>().fetchStudentAttendance(
       classId: widget.classRoom.id,
       sectionId: widget.sectionId,
-      date: _selectedDate,
+      startDate: _selectedDate,
+      endDate: _selectedDate,
     );
 
     if (mounted) {
