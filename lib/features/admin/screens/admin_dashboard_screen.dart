@@ -383,6 +383,22 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+  List<_AdminClassStats> _getGroupedStats(
+    List<StudentAttendanceRecord> records,
+  ) {
+    final Map<String, _AdminClassStats> map = {};
+    for (var r in records) {
+      if (!map.containsKey(r.className)) {
+        map[r.className] = _AdminClassStats(
+          className: r.className,
+          records: [],
+        );
+      }
+      map[r.className]!.records.add(r);
+    }
+    return map.values.toList();
+  }
+
   Widget _buildStudentAttendanceCard(AttendStudent data) {
     const color = Colors.blue;
     final total = data.totalStudents;
@@ -392,8 +408,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
     return InkWell(
       onTap: () {
-        print(data.data.length);
-
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -505,13 +519,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   child: Row(
                     children: [
                       const Icon(
-                        Icons.access_time_rounded,
+                        Icons.class_outlined,
                         size: 13,
                         color: Colors.purple,
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        "Today's Records",
+                        "Class Wise Records",
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -522,61 +536,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                 ),
                 SizedBox(
-                  height: 80,
+                  height: 280,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.only(bottom: 8),
-                    itemCount: data.data.length,
+                    itemCount: _getGroupedStats(data.data).length,
                     itemBuilder: (context, index) {
-                      final r = data.data[index];
-                      final statusColor = _studentStatusColor(r.status);
-                      final statusIcon = _studentStatusIcon(r.status);
-                      final initial = r.studentName.isNotEmpty
-                          ? r.studentName[0].toUpperCase()
-                          : '?';
-                      return Container(
-                        width: 100,
-                        margin: const EdgeInsets.only(right: 10),
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.06),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: statusColor.withValues(alpha: 0.25),
-                            width: 1,
+                      final stats = _getGroupedStats(data.data)[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 12.0),
+                        child: SizedBox(
+                          width: screenSize(context, 0.88),
+                          child: _AdminClassPerformanceCardWithSubjectDropdown(
+                            stats: stats,
                           ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              r.studentName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 11,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Roll: ${r.rollNumber}',
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              r.className,
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: Colors.grey[500],
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
                         ),
                       );
                     },
@@ -773,10 +747,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           (r.endTime != null && r.endTime!.length >= 5)
                           ? r.endTime!.substring(0, 5)
                           : '--:--';
-                      final lat =
-                          double.tryParse(r.lat)?.toStringAsFixed(3) ?? r.lat;
-                      final lon =
-                          double.tryParse(r.lon)?.toStringAsFixed(3) ?? r.lon;
 
                       return Container(
                         width: 148,
@@ -1840,6 +1810,398 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             const SizedBox(height: 24),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _AdminClassStats {
+  final String className;
+  final List<StudentAttendanceRecord> records;
+
+  int get present =>
+      records.where((r) => r.status.toLowerCase() == 'present').length;
+  int get absent =>
+      records.where((r) => r.status.toLowerCase() == 'absent').length;
+  int get leave =>
+      records.where((r) => r.status.toLowerCase() == 'leave').length;
+  int get late => records.where((r) => r.status.toLowerCase() == 'late').length;
+  int get total => present + absent + leave + late;
+  double get attendanceRate => total == 0 ? 0 : (present / total) * 100;
+
+  _AdminClassStats({required this.className, required this.records});
+}
+
+class _AdminClassPerformanceCardWithSubjectDropdown extends StatefulWidget {
+  final _AdminClassStats stats;
+  const _AdminClassPerformanceCardWithSubjectDropdown({required this.stats});
+
+  @override
+  State<_AdminClassPerformanceCardWithSubjectDropdown> createState() =>
+      _AdminClassPerformanceCardWithSubjectDropdownState();
+}
+
+class _AdminClassPerformanceCardWithSubjectDropdownState
+    extends State<_AdminClassPerformanceCardWithSubjectDropdown> {
+  // null means "All subjects"
+  String? _selectedSubjectId;
+
+  /// Collects unique subjects from all records in this class.
+  /// Uses subjectName when available, falls back to subjectId as label.
+  List<Map<String, String>> _getUniqueSubjects() {
+    final Map<String, String> subjectsMap = {};
+    for (final r in widget.stats.records) {
+      if (r.subjectId != null) {
+        subjectsMap[r.subjectId!] = r.subjectName ?? r.subjectId!;
+      }
+    }
+    return subjectsMap.entries
+        .map((e) => {'id': e.key, 'name': e.value})
+        .toList();
+  }
+
+  List<StudentAttendanceRecord> _getFilteredRecords() {
+    // null = All subjects — deduplicate by studentId keeping most recent
+    final source = _selectedSubjectId == null
+        ? widget.stats.records
+        : widget.stats.records
+              .where((r) => r.subjectId == _selectedSubjectId)
+              .toList();
+
+    final Map<String, StudentAttendanceRecord> seen = {};
+    final sorted = [...source]..sort((a, b) => b.date.compareTo(a.date));
+    for (final r in sorted) {
+      seen.putIfAbsent(r.studentId, () => r);
+    }
+    return seen.values.toList();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Start with "All" (null) so all students are shown immediately
+    _selectedSubjectId = null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final stats = widget.stats;
+    final statusColor = stats.attendanceRate >= 75
+        ? Colors.green
+        : (stats.attendanceRate >= 50 ? Colors.orange : Colors.red);
+
+    final subjects = _getUniqueSubjects();
+    final displayRecords = _getFilteredRecords();
+
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {},
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          width: 65,
+                          height: 65,
+                          child: CircularProgressIndicator(
+                            value: stats.attendanceRate / 100,
+                            strokeWidth: 6,
+                            backgroundColor: statusColor.withOpacity(0.1),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              statusColor,
+                            ),
+                            strokeCap: StrokeCap.round,
+                          ),
+                        ),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${stats.attendanceRate.toInt()}%',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: statusColor,
+                              ),
+                            ),
+                            Text(
+                              'RATE',
+                              style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade500,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  stats.className,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (subjects.isNotEmpty) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  height: 32,
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 140,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String?>(
+                                      value: _selectedSubjectId,
+                                      isExpanded: true,
+                                      icon: const Icon(
+                                        Icons.keyboard_arrow_down,
+                                        size: 16,
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey.shade800,
+                                      ),
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          _selectedSubjectId = newValue;
+                                        });
+                                      },
+                                      items: [
+                                        DropdownMenuItem<String?>(
+                                          value: null,
+                                          child: Text(
+                                            'All',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey.shade700,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        ...subjects
+                                            .map<DropdownMenuItem<String?>>(
+                                              (subject) =>
+                                                  DropdownMenuItem<String?>(
+                                                    value: subject['id'],
+                                                    child: Text(
+                                                      subject['name'] ?? '',
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                      ),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                            ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildStatItem(
+                                'Total',
+                                '${stats.total}',
+                                Colors.grey.shade800,
+                              ),
+                              _buildStatItem(
+                                'Present',
+                                '${stats.present}',
+                                Colors.green,
+                              ),
+                              _buildStatItem(
+                                'Absent',
+                                '${stats.absent}',
+                                Colors.red,
+                              ),
+                              _buildStatItem(
+                                'Leave',
+                                '${stats.leave}',
+                                Colors.blue,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 8,
+                    ),
+                    child: displayRecords.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.people_outline,
+                                  size: 24,
+                                  color: Colors.grey.shade400,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'No records',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade500,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: displayRecords.length,
+                            itemBuilder: (context, index) {
+                              return _buildStudentAvatarCard(
+                                displayRecords[index],
+                              );
+                            },
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, String value, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            color: color,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.grey.shade500,
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStudentAvatarCard(StudentAttendanceRecord record) {
+    Color getStatusColor() {
+      switch (record.status.toLowerCase()) {
+        case 'present':
+          return Colors.green;
+        case 'absent':
+          return Colors.red;
+        case 'late':
+          return Colors.orange;
+        case 'leave':
+          return Colors.blue;
+        default:
+          return Colors.grey;
+      }
+    }
+
+    final color = getStatusColor();
+    final firstLetter = record.studentName.isNotEmpty
+        ? record.studentName[0]
+        : '?';
+
+    return Container(
+      width: 65,
+      margin: const EdgeInsets.only(right: 12),
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              CircleAvatar(
+                radius: 25,
+                backgroundColor: color.withOpacity(0.1),
+                child: Text(
+                  firstLetter.toUpperCase(),
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            record.studentName,
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
