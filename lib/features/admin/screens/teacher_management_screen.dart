@@ -8,6 +8,7 @@ import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.da
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/school_models.dart' hide Teacher;
 import 'package:smart_school/models/teacher_model.dart';
+import 'package:smart_school/services/notification_service.dart';
 
 import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
@@ -316,6 +317,8 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                                 onSelected: (value) async {
                                   if (value == 'view') {
                                     _showTeacherDetails(context, teacher);
+                                  } else if (value == 'notify') {
+                                    _showNotificationDialog(context, teacher);
                                   } else if (value == 'edit') {
                                     Navigator.push(
                                       context,
@@ -374,6 +377,19 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                                         ),
                                         const SizedBox(width: 8),
                                         const Text('View Profile'),
+                                      ],
+                                    ),
+                                  ),
+                                  const PopupMenuItem(
+                                    value: 'notify',
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.notifications_active_outlined,
+                                          color: Colors.purple,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        const Text('Send Notification'),
                                       ],
                                     ),
                                   ),
@@ -681,6 +697,104 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  void _showNotificationDialog(BuildContext context, Teacher teacher) {
+    final titleController = TextEditingController();
+    final messageController = TextEditingController();
+    bool isSending = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text('Notify ${teacher.user?.name ?? 'Teacher'}'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Title',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: messageController,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'Message',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: isSending ? null : () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: isSending
+                    ? null
+                    : () async {
+                        if (titleController.text.trim().isEmpty ||
+                            messageController.text.trim().isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please enter title and message'),
+                            ),
+                          );
+                          return;
+                        }
+
+                        setState(() {
+                          isSending = true;
+                        });
+
+                        try {
+                          await NotificationService().sendNotification(
+                            receiverUuid: teacher.userId,
+                            title: titleController.text.trim(),
+                            message: messageController.text.trim(),
+                          );
+                          if (context.mounted) {
+                            Navigator.pop(ctx);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Notification sent successfully'),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          setState(() {
+                            isSending = false;
+                          });
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Failed to send notification'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                child: isSending
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Send'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
