@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/teacher_provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/teacher/providers/teacher_attendance_provider.dart';
@@ -220,7 +222,7 @@ class _TeacherSelfAttendanceDetailScreenState
   }
 
   Widget _buildAttendanceCard(TeacherSelfAttendance attendance) {
-    final isPresent = attendance.status.toLowerCase() == 'present';
+    final isPresent = attendance.status.toLowerCase() == 'clock-in';
     final teacherName = attendance.teacher?.name ?? 'Teacher';
 
     return Card(
@@ -229,6 +231,9 @@ class _TeacherSelfAttendanceDetailScreenState
       child: Column(
         children: [
           ListTile(
+            onTap: () {
+              print(attendance.status.toLowerCase());
+            },
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 8,
@@ -238,8 +243,8 @@ class _TeacherSelfAttendanceDetailScreenState
                   ? Colors.green.shade50
                   : Colors.red.shade50,
               child: Icon(
-                isPresent ? Icons.check_circle : Icons.cancel,
-                color: isPresent ? Colors.green : Colors.red,
+                isPresent ? Icons.login_outlined : Icons.check_circle,
+                color: isPresent ? Colors.green : AppColors.primaryTeacher,
               ),
             ),
             title: Text(
@@ -250,23 +255,14 @@ class _TeacherSelfAttendanceDetailScreenState
             trailing: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: isPresent ? Colors.green.shade50 : Colors.red.shade50,
+                color: isPresent
+                    ? Colors.green.shade50
+                    : AppColors.primaryTeacher,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isPresent
-                      ? Colors.green.shade200
-                      : Colors.red.shade200,
-                ),
               ),
               child: Text(
                 attendance.status.toUpperCase(),
-                style: TextStyle(
-                  color: isPresent
-                      ? Colors.green.shade700
-                      : Colors.red.shade700,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -279,9 +275,9 @@ class _TeacherSelfAttendanceDetailScreenState
                   Icons.location_on,
                   'Dist: ${attendance.distanceFromCenter.toStringAsFixed(1)}m',
                 ),
-                _buildMiniInfo(
-                  Icons.my_location,
-                  '${attendance.lat}, ${attendance.lon}',
+                _LocationAddressWidget(
+                  lat: attendance.lat,
+                  lon: attendance.lon,
                   flex: 2,
                 ),
               ],
@@ -360,6 +356,102 @@ class _TeacherSelfAttendanceDetailScreenState
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _LocationAddressWidget extends StatefulWidget {
+  final String lat;
+  final String lon;
+  final int flex;
+
+  const _LocationAddressWidget({
+    required this.lat,
+    required this.lon,
+    this.flex = 1,
+  });
+
+  @override
+  State<_LocationAddressWidget> createState() => _LocationAddressWidgetState();
+}
+
+class _LocationAddressWidgetState extends State<_LocationAddressWidget> {
+  String _address = 'Fetching location...';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAddress();
+  }
+
+  Future<void> _fetchAddress() async {
+    try {
+      final lat = double.tryParse(widget.lat);
+      final lon = double.tryParse(widget.lon);
+      if (lat != null && lon != null) {
+        final placemarks = await placemarkFromCoordinates(lat, lon);
+        if (placemarks.isNotEmpty) {
+          final place = placemarks.first;
+          final addressParts = <String>[];
+          if (place.name != null && place.name!.isNotEmpty) {
+            addressParts.add(place.name!);
+          }
+          if (place.subLocality != null && place.subLocality!.isNotEmpty) {
+            addressParts.add(place.subLocality!);
+          }
+          if (place.locality != null &&
+              place.locality!.isNotEmpty &&
+              !addressParts.contains(place.locality!)) {
+            addressParts.add(place.locality!);
+          }
+
+          if (mounted) {
+            setState(() {
+              _address = addressParts.isNotEmpty
+                  ? addressParts.join(', ')
+                  : '${widget.lat}, ${widget.lon}';
+            });
+          }
+        } else {
+          if (mounted) {
+            setState(() {
+              _address = '${widget.lat}, ${widget.lon}';
+            });
+          }
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _address = 'Invalid coordinates';
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _address = '${widget.lat}, ${widget.lon}';
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      flex: widget.flex,
+      child: Row(
+        children: [
+          const Icon(Icons.my_location, size: 14, color: Colors.grey),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              _address,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }
