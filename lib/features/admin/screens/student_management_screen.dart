@@ -7,6 +7,8 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart';
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
 import 'package:smart_school/features/admin/screens/student_detail_screen.dart';
+import 'package:smart_school/models/student_model.dart';
+import 'package:smart_school/services/notification_service.dart';
 
 import '../../../models/school_models.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -371,6 +373,8 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                           ),
                                         ),
                                       ).then((_) => _applyFilters());
+                                    } else if (value == 'notify') {
+                                      _showNotificationDialog(context, student);
                                     } else if (value == 'edit') {
                                       Navigator.push(
                                         context,
@@ -436,6 +440,20 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                               ),
                                               SizedBox(width: 8),
                                               Text('View Details'),
+                                            ],
+                                          ),
+                                        ),
+                                        const PopupMenuItem<String>(
+                                          value: 'notify',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons
+                                                    .notifications_active_outlined,
+                                                color: Colors.purple,
+                                              ),
+                                              SizedBox(width: 8),
+                                              Text('Send Notification'),
                                             ],
                                           ),
                                         ),
@@ -584,6 +602,104 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
 
         backgroundColor: Colors.purple,
         child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+
+  void _showNotificationDialog(BuildContext context, Student student) {
+    final titleController = TextEditingController();
+    final messageController = TextEditingController();
+    bool isSending = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text('Notify ${student.user?.name ?? 'Student'}'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Title',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: messageController,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'Message',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: isSending ? null : () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: isSending
+                    ? null
+                    : () async {
+                        if (titleController.text.trim().isEmpty ||
+                            messageController.text.trim().isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please enter title and message'),
+                            ),
+                          );
+                          return;
+                        }
+
+                        setState(() {
+                          isSending = true;
+                        });
+
+                        try {
+                          await NotificationService().sendNotification(
+                            receiverUuid: student.userId,
+                            title: titleController.text.trim(),
+                            message: messageController.text.trim(),
+                          );
+                          if (context.mounted) {
+                            Navigator.pop(ctx);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Notification sent successfully'),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          setState(() {
+                            isSending = false;
+                          });
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Failed to send notification'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                child: isSending
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Send'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
