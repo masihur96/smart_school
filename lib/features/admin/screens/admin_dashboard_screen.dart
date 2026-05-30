@@ -536,11 +536,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                 ),
                 SizedBox(
-                  height: 280,
+                  height: 250,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.only(bottom: 8),
+
                     itemCount: _getGroupedStats(data.data).length,
                     itemBuilder: (context, index) {
                       final stats = _getGroupedStats(data.data)[index];
