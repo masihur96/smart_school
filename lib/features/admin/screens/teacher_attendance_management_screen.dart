@@ -208,13 +208,14 @@ class _TeacherAttendanceManagementScreenState
                                   _buildDetailItem(
                                     Icons.login,
                                     "In Time",
-                                    inTime,
+                                    formatDate(inTime),
                                     Colors.green,
                                   ),
                                   _buildDetailItem(
                                     Icons.logout,
                                     "Out Time",
-                                    outTime,
+                                    formatDate(outTime),
+
                                     Colors.blue,
                                   ),
                                   _buildDetailItem(
@@ -223,16 +224,6 @@ class _TeacherAttendanceManagementScreenState
                                     record['lat'] != null ? "View" : "N/A",
                                     Colors.orange,
                                   ),
-                                  if (record['distanceFromCenter'] != null)
-                                    _buildDetailItem(
-                                      Icons.straighten,
-                                      "Distance",
-                                      (record['distanceFromCenter'] as num) >
-                                              1000
-                                          ? "${((record['distanceFromCenter'] as num) / 1000).toStringAsFixed(2)}km"
-                                          : "${(record['distanceFromCenter'] as num).toStringAsFixed(1)}m",
-                                      Colors.purple,
-                                    ),
                                 ],
                               ),
                             ],
@@ -245,6 +236,16 @@ class _TeacherAttendanceManagementScreenState
         ],
       ),
     );
+  }
+
+  String formatDate(String? utcDate) {
+    if (utcDate == null || utcDate.isEmpty) {
+      return '--';
+    }
+
+    final localDate = DateTime.parse(utcDate).toLocal();
+
+    return DateFormat('hh:mm a').format(localDate);
   }
 
   Widget _buildDetailItem(
