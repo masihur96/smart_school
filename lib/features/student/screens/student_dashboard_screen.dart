@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/marquee_notice.dart';
@@ -124,7 +124,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           foregroundColor: Colors.white,
           iconTheme: IconThemeData(color: Colors.white),
           actions: [
-            const NotificationIconButton(),
+            NotificationIconButton(color: AppColors.primaryStudent),
             IconButton(
               icon: const Icon(Icons.account_circle_outlined),
               onPressed: () {
@@ -421,13 +421,13 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     AppLocalizations l10n,
   ) {
     final records = data?.todayAttendanceStatus?.records ?? [];
-    
+
     String status = 'not-marked';
     if (records.isNotEmpty) {
       bool anyAbsent = records.any((r) => r.status == 'absent');
       bool anyLate = records.any((r) => r.status == 'late');
       bool anyLeave = records.any((r) => r.status == 'leave');
-      
+
       if (anyAbsent) {
         status = 'absent';
       } else if (anyLeave) {
@@ -572,7 +572,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                     final isPresent = record.status == 'present';
                     final isLeave = record.status == 'leave';
                     final isLate = record.status == 'late';
-                    
+
                     Color recordColor = Colors.red;
                     IconData recordIcon = Icons.cancel;
                     if (isPresent) {
@@ -1028,23 +1028,31 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     );
   }
 
-  Widget _buildShimmerLoading(BuildContext context, User? user, AppLocalizations l10n) {
+  Widget _buildShimmerLoading(
+    BuildContext context,
+    User? user,
+    AppLocalizations l10n,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     // Shimmer sweep colors
-    final Color shimBase = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
-    final Color shimHighlight = isDark ? const Color(0xFF3D3D3D) : const Color(0xFFF5F5F5);
+    final Color shimBase = isDark
+        ? const Color(0xFF2A2A2A)
+        : const Color(0xFFE0E0E0);
+    final Color shimHighlight = isDark
+        ? const Color(0xFF3D3D3D)
+        : const Color(0xFFF5F5F5);
     // Block fill color
     final Color blockColor = isDark ? const Color(0xFF3A3A3A) : Colors.white;
 
     Widget sBox(double w, double h, {double r = 6}) => Container(
-          width: w,
-          height: h,
-          decoration: BoxDecoration(
-            color: blockColor,
-            borderRadius: BorderRadius.circular(r),
-          ),
-        );
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        color: blockColor,
+        borderRadius: BorderRadius.circular(r),
+      ),
+    );
 
     return Shimmer.fromColors(
       baseColor: shimBase,
@@ -1058,7 +1066,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
             Container(
               width: double.infinity,
               decoration: const BoxDecoration(
-                color: Colors.black, // Just to give the shimmer base a background shape
+                color: Colors
+                    .black, // Just to give the shimmer base a background shape
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(32),
                   bottomRight: Radius.circular(32),
@@ -1082,7 +1091,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 ],
               ),
             ),
-            
+
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Column(
@@ -1091,13 +1100,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                   // My Attendance Header Mock
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      sBox(140, 22),
-                      sBox(60, 16),
-                    ],
+                    children: [sBox(140, 22), sBox(60, 16)],
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Attendance Section Mock
                   Card(
                     margin: const EdgeInsets.all(0.0),
@@ -1127,10 +1133,38 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [sBox(40, 18), const SizedBox(height: 6), sBox(50, 10)]),
-                              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [sBox(40, 18), const SizedBox(height: 6), sBox(50, 10)]),
-                              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [sBox(40, 18), const SizedBox(height: 6), sBox(50, 10)]),
-                              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [sBox(40, 18), const SizedBox(height: 6), sBox(50, 10)]),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  sBox(40, 18),
+                                  const SizedBox(height: 6),
+                                  sBox(50, 10),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  sBox(40, 18),
+                                  const SizedBox(height: 6),
+                                  sBox(50, 10),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  sBox(40, 18),
+                                  const SizedBox(height: 6),
+                                  sBox(50, 10),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  sBox(40, 18),
+                                  const SizedBox(height: 6),
+                                  sBox(50, 10),
+                                ],
+                              ),
                             ],
                           ),
                           const SizedBox(height: 16),
@@ -1177,14 +1211,11 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Exams Header Mock
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      sBox(100, 22),
-                      sBox(60, 16),
-                    ],
+                    children: [sBox(100, 22), sBox(60, 16)],
                   ),
                   const SizedBox(height: 12),
                   SizedBox(
@@ -1232,14 +1263,11 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Homework Header Mock
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      sBox(140, 22),
-                      sBox(60, 16),
-                    ],
+                    children: [sBox(140, 22), sBox(60, 16)],
                   ),
                   const SizedBox(height: 12),
                   SizedBox(
@@ -1261,11 +1289,9 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  sBox(80, 14),
-                                  sBox(50, 20),
-                                ],
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [sBox(80, 14), sBox(50, 20)],
                               ),
                               const SizedBox(height: 12),
                               sBox(160, 16),
