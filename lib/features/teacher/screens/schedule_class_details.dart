@@ -465,51 +465,47 @@ class _AttendanceSummaryBar extends StatelessWidget {
         .length;
     final unmarked = total - attendanceMap.length;
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 10, 16, 4),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFEDE9F8), Color(0xFFF4F2FB)],
-        ),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFF7C3AED).withOpacity(0.12)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _SummaryChip(
-            label: 'Present',
-            count: present,
-            color: Colors.green,
-            icon: Icons.check_circle_rounded,
-          ),
-          _SummaryChip(
-            label: 'Absent',
-            count: absent,
-            color: Colors.red,
-            icon: Icons.cancel_rounded,
-          ),
-          _SummaryChip(
-            label: 'Late',
-            count: late,
-            color: Colors.blue,
-            icon: Icons.access_time_rounded,
-          ),
-          _SummaryChip(
-            label: 'Leave',
-            count: leave,
-            color: Colors.orange,
-            icon: Icons.event_busy_rounded,
-          ),
-          if (unmarked > 0)
+    return Card(
+      margin: const EdgeInsets.all(10),
+
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
             _SummaryChip(
-              label: 'Unmarked',
-              count: unmarked,
-              color: Colors.grey,
-              icon: Icons.help_outline_rounded,
+              label: 'Present',
+              count: present,
+              color: Colors.green,
+              icon: Icons.check_circle_rounded,
             ),
-        ],
+            _SummaryChip(
+              label: 'Absent',
+              count: absent,
+              color: Colors.red,
+              icon: Icons.cancel_rounded,
+            ),
+            _SummaryChip(
+              label: 'Late',
+              count: late,
+              color: Colors.blue,
+              icon: Icons.access_time_rounded,
+            ),
+            _SummaryChip(
+              label: 'Leave',
+              count: leave,
+              color: Colors.orange,
+              icon: Icons.event_busy_rounded,
+            ),
+            if (unmarked > 0)
+              _SummaryChip(
+                label: 'Unmarked',
+                count: unmarked,
+                color: Colors.grey,
+                icon: Icons.help_outline_rounded,
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -628,7 +624,6 @@ class _StudentAttendanceCard extends StatelessWidget {
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
-                      color: Color(0xFF1E1B4B),
                     ),
                   ),
                   const SizedBox(height: 2),
