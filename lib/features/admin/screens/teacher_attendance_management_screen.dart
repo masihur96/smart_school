@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
@@ -202,27 +203,31 @@ class _TeacherAttendanceManagementScreenState
                               ),
                               const Divider(),
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
                                 children: [
-                                  _buildDetailItem(
-                                    Icons.login,
-                                    "In Time",
-                                    formatDate(inTime),
-                                    Colors.green,
+                                  Expanded(
+                                    child: _buildDetailItem(
+                                      Icons.login,
+                                      "In Time",
+                                      formatDate(inTime),
+                                      Colors.green,
+                                    ),
                                   ),
-                                  _buildDetailItem(
-                                    Icons.logout,
-                                    "Out Time",
-                                    formatDate(outTime),
-
-                                    Colors.blue,
+                                  Expanded(
+                                    child: _buildDetailItem(
+                                      Icons.logout,
+                                      "Out Time",
+                                      formatDate(outTime),
+                                      Colors.blue,
+                                    ),
                                   ),
-                                  _buildDetailItem(
-                                    Icons.location_on,
-                                    "Location",
-                                    record['lat'] != null ? "View" : "N/A",
-                                    Colors.orange,
+                                  Expanded(
+                                    child: _buildLocationDetailItem(
+                                      Icons.location_on,
+                                      "Location",
+                                      record['lat']?.toString(),
+                                      record['lon']?.toString(),
+                                      Colors.orange,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -257,6 +262,7 @@ class _TeacherAttendanceManagementScreenState
     return Column(
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 14, color: color),
             const SizedBox(width: 4),
@@ -270,7 +276,46 @@ class _TeacherAttendanceManagementScreenState
         Text(
           value,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
         ),
+      ],
+    );
+  }
+
+  Widget _buildLocationDetailItem(
+    IconData icon,
+    String label,
+    String? lat,
+    String? lon,
+    Color color,
+  ) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 10, color: Colors.grey),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        if (lat != null && lon != null)
+          _LocationAddressText(
+            lat: lat,
+            lon: lon,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          )
+        else
+          const Text(
+            "N/A",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            textAlign: TextAlign.center,
+          ),
       ],
     );
   }
@@ -289,5 +334,89 @@ class _TeacherAttendanceManagementScreenState
       default:
         return Colors.grey;
     }
+  }
+}
+
+class _LocationAddressText extends StatefulWidget {
+  final String lat;
+  final String lon;
+  final TextStyle style;
+
+  const _LocationAddressText({
+    required this.lat,
+    required this.lon,
+    required this.style,
+  });
+
+  @override
+  State<_LocationAddressText> createState() => _LocationAddressTextState();
+}
+
+class _LocationAddressTextState extends State<_LocationAddressText> {
+  String _address = 'Fetching...';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAddress();
+  }
+
+  Future<void> _fetchAddress() async {
+    try {
+      final lat = double.tryParse(widget.lat);
+      final lon = double.tryParse(widget.lon);
+      if (lat != null && lon != null) {
+        final placemarks = await placemarkFromCoordinates(lat, lon);
+        if (placemarks.isNotEmpty) {
+          final place = placemarks.first;
+          final addressParts = <String>[];
+          if (place.name != null && place.name!.isNotEmpty) {
+            addressParts.add(place.name!);
+          }
+          if (place.subLocality != null && place.subLocality!.isNotEmpty) {
+            addressParts.add(place.subLocality!);
+          }
+          if (place.locality != null && place.locality!.isNotEmpty && !addressParts.contains(place.locality!)) {
+            addressParts.add(place.locality!);
+          }
+          
+          if (mounted) {
+            setState(() {
+              _address = addressParts.isNotEmpty 
+                  ? addressParts.join(', ')
+                  : '${widget.lat}, ${widget.lon}';
+            });
+          }
+        } else {
+          if (mounted) {
+            setState(() {
+              _address = '${widget.lat}, ${widget.lon}';
+            });
+          }
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _address = 'Invalid coords';
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _address = '${widget.lat}, ${widget.lon}';
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      _address,
+      style: widget.style,
+      textAlign: TextAlign.center,
+      overflow: TextOverflow.ellipsis,
+    );
   }
 }
