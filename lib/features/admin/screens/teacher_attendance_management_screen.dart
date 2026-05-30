@@ -16,7 +16,7 @@ class TeacherAttendanceManagementScreen extends StatefulWidget {
 
 class _TeacherAttendanceManagementScreenState
     extends State<TeacherAttendanceManagementScreen> {
-  DateTime _selectedDate = DateTime.now();
+  DateTimeRange? _selectedDateRange;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -29,21 +29,22 @@ class _TeacherAttendanceManagementScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AttendanceManagementProvider>().fetchTeacherAttendance(
         name: _searchController.text,
-        date: _selectedDate,
+        startDate: _selectedDateRange?.start,
+        endDate: _selectedDateRange?.end,
       );
     });
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+    final DateTimeRange? picked = await showDateRangePicker(
       context: context,
-      initialDate: _selectedDate,
+      initialDateRange: _selectedDateRange,
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
-    if (picked != null && picked != _selectedDate) {
+    if (picked != null && picked != _selectedDateRange) {
       setState(() {
-        _selectedDate = picked;
+        _selectedDateRange = picked;
       });
       _fetchData();
     }
@@ -103,7 +104,9 @@ class _TeacherAttendanceManagementScreenState
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}",
+                      _selectedDateRange != null
+                          ? "Date: ${DateFormat('yyyy-MM-dd').format(_selectedDateRange!.start)} to ${DateFormat('yyyy-MM-dd').format(_selectedDateRange!.end)}"
+                          : "Date: All Time",
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.grey,

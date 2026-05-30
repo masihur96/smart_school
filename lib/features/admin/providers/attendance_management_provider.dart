@@ -100,20 +100,26 @@ class AttendanceManagementProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchTeacherAttendance({String? name, DateTime? date}) async {
+  Future<void> fetchTeacherAttendance({
+    String? name,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
       final token = await StorageService.getToken();
-      final dateStr = date != null
-          ? "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}"
-          : null;
-
       final query = <String, dynamic>{};
       if (name != null && name.isNotEmpty) query['name'] = name;
-      if (dateStr != null) query['date'] = dateStr;
+      
+      if (startDate != null) {
+        query['startDate'] = "${startDate.year}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}";
+      }
+      if (endDate != null) {
+        query['endDate'] = "${endDate.year}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}";
+      }
 
       final response = await DataProvider().performRequest(
         'GET',
