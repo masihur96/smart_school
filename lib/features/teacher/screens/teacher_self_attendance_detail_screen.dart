@@ -246,7 +246,7 @@ class _TeacherSelfAttendanceDetailScreenState
               teacherName,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            subtitle: Text('${attendance.date} at ${attendance.time}'),
+            subtitle: Text(formatDate(attendance.time)),
             trailing: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
@@ -290,6 +290,16 @@ class _TeacherSelfAttendanceDetailScreenState
         ],
       ),
     );
+  }
+
+  String formatDate(String? utcDate) {
+    if (utcDate == null || utcDate.isEmpty) {
+      return '--';
+    }
+
+    final localDate = DateTime.parse(utcDate).toLocal();
+
+    return DateFormat('dd MMM yyyy, hh:mm a').format(localDate);
   }
 
   Widget _buildMiniInfo(IconData icon, String text, {int flex = 1}) {
