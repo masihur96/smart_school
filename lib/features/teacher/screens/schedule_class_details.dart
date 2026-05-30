@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
@@ -994,7 +995,7 @@ class _HomeworkCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Due: $due',
+                        'Due: ${formatDate(due)}',
                         style: TextStyle(
                           fontSize: 11,
                           color: isPast ? Colors.red[400] : Colors.grey[500],
@@ -1055,6 +1056,20 @@ class _HomeworkCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String formatDate(String? date) {
+    if (date == null || date.isEmpty) {
+      return '--';
+    }
+
+    try {
+      final parsedDate = DateFormat('dd/MM/yyyy').parse(date);
+
+      return DateFormat('dd MMM yyyy').format(parsedDate);
+    } catch (e) {
+      return '--';
+    }
   }
 }
 
