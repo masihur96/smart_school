@@ -15,7 +15,7 @@ class AddEditMarqueeScreen extends StatefulWidget {
 class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
   final _formKey = GlobalKey<FormState>();
   final _textController = TextEditingController();
-  
+
   String _selectedType = 'TEACHER';
   final List<String> _marqueeTypes = ['TEACHER', 'STUDENT'];
 
@@ -37,13 +37,19 @@ class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
     if (mounted) {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Marquee updated successfully'), backgroundColor: Colors.green),
+          const SnackBar(
+            content: Text('Marquee updated successfully'),
+            backgroundColor: Colors.green,
+          ),
         );
         Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.read<MarqueeProvider>().error ?? 'Failed to update marquee'),
+            content: Text(
+              context.read<MarqueeProvider>().error ??
+                  'Failed to update marquee',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -80,10 +86,7 @@ class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
                   prefixIcon: Icon(Icons.group),
                 ),
                 items: _marqueeTypes.map((type) {
-                  return DropdownMenuItem(
-                    value: type,
-                    child: Text(type),
-                  );
+                  return DropdownMenuItem(value: type, child: Text(type));
                 }).toList(),
                 onChanged: (val) {
                   if (val != null) {
@@ -112,13 +115,14 @@ class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
                 },
               ),
               const SizedBox(height: 32),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: isLoading ? null : _submitForm,
                   style: ElevatedButton.styleFrom(
-
                     foregroundColor: Colors.white,
+                    backgroundColor: AppColors.primaryAdmin,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: isLoading
@@ -132,7 +136,10 @@ class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
                         )
                       : const Text(
                           'Save Marquee',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                 ),
               ),
