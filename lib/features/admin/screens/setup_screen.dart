@@ -773,7 +773,7 @@ Future<void> _showStyledDialog({
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
-              gradient: LinearGradient(colors: gradientColors),
+              color: AppColors.primaryAdmin,
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(24),
               ),
@@ -1261,7 +1261,6 @@ class _DetailRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -1276,17 +1275,8 @@ class _DetailRow extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: icon == Icons.key
-                  ? Colors.orange.withOpacity(0.1)
-                  : _kPrimary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: icon == Icons.key ? Colors.orange : _kPrimary,
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
+            child: Icon(icon, size: 20),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -1296,7 +1286,6 @@ class _DetailRow extends StatelessWidget {
                 Text(
                   label.toUpperCase(),
                   style: TextStyle(
-                    color: _kTextMid.withOpacity(0.7),
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.8,
@@ -1306,7 +1295,6 @@ class _DetailRow extends StatelessWidget {
                 Text(
                   value,
                   style: const TextStyle(
-                    color: _kTextDark,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
