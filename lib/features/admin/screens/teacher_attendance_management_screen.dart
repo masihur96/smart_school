@@ -219,7 +219,9 @@ class _TeacherAttendanceManagementScreenState
                                     child: _buildDetailItem(
                                       Icons.logout,
                                       "Out Time",
-                                      formatDate(outTime),
+                                      outTime == null || outTime == "--:--"
+                                          ? "N/A"
+                                          : formatDate(outTime),
                                       Colors.blue,
                                     ),
                                   ),
