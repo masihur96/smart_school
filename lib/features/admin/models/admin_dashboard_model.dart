@@ -112,6 +112,8 @@ class StudentAttendanceRecord {
   final String status;
   final String date;
   final String className;
+  final String? subjectId;
+  final String? subjectName;
 
   StudentAttendanceRecord({
     required this.id,
@@ -122,6 +124,8 @@ class StudentAttendanceRecord {
     required this.status,
     required this.date,
     required this.className,
+    this.subjectId,
+    this.subjectName,
   });
 
   factory StudentAttendanceRecord.fromJson(Map<String, dynamic> json) {
@@ -134,6 +138,8 @@ class StudentAttendanceRecord {
       status: json['status'] ?? '',
       date: json['date'] ?? '',
       className: json['class']?['name'] ?? '',
+      subjectId: json['subjectId'],
+      subjectName: json['subject']?['name'],
     );
   }
 }
