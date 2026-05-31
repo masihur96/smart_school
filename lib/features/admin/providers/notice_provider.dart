@@ -76,7 +76,13 @@ class NoticesNotifier extends ChangeNotifier {
   }
 
   // ─── Create ───────────────────────────────────────────────────────────────
-  Future<void> addNoticeToAPI(Notice notice) async {
+  /// [receiverUuids] — list of user UUIDs who should receive an individual
+  /// push notification. Pass teacher IDs, student IDs, or both depending on
+  /// the notice's target audience. Leave empty to skip individual sends.
+  Future<void> addNoticeToAPI(
+    Notice notice, {
+    List<String> receiverUuids = const [],
+  }) async {
     _isLoading = true;
     notifyListeners();
 
@@ -106,7 +112,7 @@ class NoticesNotifier extends ChangeNotifier {
         _dbService.notices.add(saved);
         _notices = [..._dbService.notices];
 
-        // Trigger notification
+        // Legacy topic-based notifications (FCM topic subscribers)
         final schoolId = notice.schoolId ?? "all";
         NotificationService().triggerNotification(
           title: 'New Notice: ${notice.title}',
@@ -120,6 +126,16 @@ class NoticesNotifier extends ChangeNotifier {
           topic: 'notice',
           data: {'type': 'notice', 'id': saved.id},
         );
+
+        // Individual push notifications based on target audience
+        if (receiverUuids.isNotEmpty) {
+          NotificationService().sendBulkNotification(
+            receiverUuids: receiverUuids,
+            title: '📢 New Notice: ${notice.title}',
+            message: notice.content,
+            additionalData: {'type': 'notice', 'id': saved.id},
+          );
+        }
       } else {
         throw Exception('Failed to create notice: ${response?.data}');
       }
