@@ -283,7 +283,12 @@ class ExamsNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> updatePublishStatus(String examId, bool isPublished) async {
+  Future<void> updatePublishStatus(
+    String examId,
+    bool isPublished, {
+    String? examName,
+    List<String> receiverUuids = const [],
+  }) async {
     try {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
@@ -297,6 +302,26 @@ class ExamsNotifier extends ChangeNotifier {
 
       if (response != null && response.statusCode == 200) {
         await _load();
+
+        if (isPublished && examName != null) {
+          // Legacy topic-based notification
+          NotificationService().triggerNotification(
+            title: '🎉 Exam Results Published',
+            body: 'Results for "$examName" are now available.',
+            topic: 'exam',
+            data: {'type': 'exam_result', 'id': examId},
+          );
+
+          // Individual notifications to all teachers & students
+          if (receiverUuids.isNotEmpty) {
+            NotificationService().sendBulkNotification(
+              receiverUuids: receiverUuids,
+              title: '🎉 Exam Results Published',
+              message: 'Results for "$examName" are now available.',
+              additionalData: {'type': 'exam_result', 'id': examId},
+            );
+          }
+        }
       } else {
         log('Error updating publish status: ${response?.data}');
       }
