@@ -536,7 +536,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                 ),
                 SizedBox(
-                  height: 250,
+                  height: 255,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
@@ -1966,72 +1966,6 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              if (subjects.isNotEmpty) ...[
-                                const SizedBox(width: 8),
-                                Container(
-                                  height: 32,
-                                  constraints: const BoxConstraints(
-                                    maxWidth: 140,
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: Colors.grey.shade300,
-                                    ),
-                                  ),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String?>(
-                                      value: _selectedSubjectId,
-                                      isExpanded: true,
-                                      icon: const Icon(
-                                        Icons.keyboard_arrow_down,
-                                        size: 16,
-                                      ),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.grey.shade800,
-                                      ),
-                                      onChanged: (String? newValue) {
-                                        setState(() {
-                                          _selectedSubjectId = newValue;
-                                        });
-                                      },
-                                      items: [
-                                        DropdownMenuItem<String?>(
-                                          value: null,
-                                          child: Text(
-                                            'All',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey.shade700,
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        ...subjects
-                                            .map<DropdownMenuItem<String?>>(
-                                              (subject) =>
-                                                  DropdownMenuItem<String?>(
-                                                    value: subject['id'],
-                                                    child: Text(
-                                                      subject['name'] ?? '',
-                                                      style: const TextStyle(
-                                                        fontSize: 12,
-                                                      ),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                  ),
-                                            ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -2065,11 +1999,65 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
+                if (subjects.isNotEmpty) ...[
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Container(
+                      height: 32,
+                      constraints: const BoxConstraints(maxWidth: 140),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String?>(
+                          value: _selectedSubjectId,
+                          isExpanded: true,
+                          icon: const Icon(Icons.keyboard_arrow_down, size: 16),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade800,
+                          ),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedSubjectId = newValue;
+                            });
+                          },
+                          items: [
+                            DropdownMenuItem<String?>(
+                              value: null,
+                              child: Text(
+                                'All',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade700,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            ...subjects.map<DropdownMenuItem<String?>>(
+                              (subject) => DropdownMenuItem<String?>(
+                                value: subject['id'],
+                                child: Text(
+                                  subject['name'] ?? '',
+                                  style: const TextStyle(fontSize: 12),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      vertical: 12,
+                      vertical: 8,
                       horizontal: 8,
                     ),
                     child: displayRecords.isEmpty
