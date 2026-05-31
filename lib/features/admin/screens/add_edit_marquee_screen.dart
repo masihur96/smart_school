@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 
 import '../providers/marquee_provider.dart';
+import '../providers/student_provider.dart';
+import '../providers/teacher_provider.dart';
 
 class AddEditMarqueeScreen extends StatefulWidget {
   final String schoolId;
@@ -20,6 +22,15 @@ class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
   final List<String> _marqueeTypes = ['TEACHER', 'STUDENT'];
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TeachersNotifier>().fetchTeachers();
+      context.read<StudentsNotifier>().fetchStudents();
+    });
+  }
+
+  @override
   void dispose() {
     _textController.dispose();
     super.dispose();
@@ -28,10 +39,28 @@ class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
+    List<String> receiverUuids = [];
+    if (_selectedType == 'TEACHER') {
+      receiverUuids = context
+          .read<TeachersNotifier>()
+          .teachers
+          .map((t) => t.userId)
+          .where((id) => id.isNotEmpty)
+          .toList();
+    } else if (_selectedType == 'STUDENT') {
+      receiverUuids = context
+          .read<StudentsNotifier>()
+          .students
+          .map((s) => s.userId)
+          .where((id) => id.isNotEmpty)
+          .toList();
+    }
+
     final success = await context.read<MarqueeProvider>().addOrUpdateMarquee(
       _textController.text.trim(),
       _selectedType,
       widget.schoolId,
+      receiverUuids: receiverUuids,
     );
 
     if (mounted) {
