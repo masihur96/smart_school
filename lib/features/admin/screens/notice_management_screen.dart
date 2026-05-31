@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../../models/school_models.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/notice_provider.dart';
+import '../providers/student_provider.dart';
+import '../providers/teacher_provider.dart';
 
 class NoticeManagementScreen extends StatefulWidget {
   final bool hideAppBar;
@@ -23,6 +25,8 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
       if (user?.schoolId != null) {
         context.read<NoticesNotifier>().fetchNoticesFromAPI();
       }
+      context.read<TeachersNotifier>().fetchTeachers();
+      context.read<StudentsNotifier>().fetchStudents();
     });
   }
 
@@ -181,7 +185,34 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
       initialPostedBy: user?.name ?? '',
       schoolId: user?.schoolId ?? '',
       onSubmit: (notice) async {
-        await context.read<NoticesNotifier>().addNoticeToAPI(notice);
+        List<String> receiverUuids = [];
+        final audience = notice.targetAudience ?? 'All';
+
+        final teacherIds = context
+            .read<TeachersNotifier>()
+            .teachers
+            .map((t) => t.userId)
+            .where((id) => id.isNotEmpty)
+            .toList();
+        final studentIds = context
+            .read<StudentsNotifier>()
+            .students
+            .map((s) => s.userId)
+            .where((id) => id.isNotEmpty)
+            .toList();
+
+        if (audience == 'Students') {
+          receiverUuids = studentIds;
+        } else if (audience == 'Teachers') {
+          receiverUuids = teacherIds;
+        } else if (audience == 'All') {
+          receiverUuids = [...teacherIds, ...studentIds];
+        }
+
+        await context.read<NoticesNotifier>().addNoticeToAPI(
+          notice,
+          receiverUuids: receiverUuids,
+        );
       },
       submitLabel: 'Post',
     );
