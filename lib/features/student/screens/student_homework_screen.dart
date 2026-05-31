@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 
 import '../../../models/school_models.dart';
@@ -316,7 +317,15 @@ class _HomeworkDetailSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final hw = sh.homework!;
 
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(10),
+          topRight: Radius.circular(10),
+        ),
+        color: Colors.transparent,
+      ),
+      width: screenSize(context, 2),
       child: Padding(
         padding: const EdgeInsets.all(18.0),
         child: Column(
