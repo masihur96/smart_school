@@ -7,6 +7,7 @@ import 'package:smart_school/models/teacher_model.dart';
 import '../../../models/school_models.dart' hide Teacher;
 import '../providers/exam_provider.dart';
 import '../providers/setup_provider.dart';
+import '../providers/student_provider.dart';
 import '../providers/teacher_provider.dart';
 import 'add_edit_exam_screen.dart';
 import 'exam_view_screen.dart';
@@ -23,6 +24,15 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
   String? _selectedClass;
   String? _selectedSubject;
   String _selectedStatus = 'All';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TeachersNotifier>().fetchTeachers();
+      context.read<StudentsNotifier>().fetchStudents();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -632,9 +642,28 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
+              List<String> receiverUuids = [];
+              if (newStatus) {
+                final teacherIds = context
+                    .read<TeachersNotifier>()
+                    .teachers
+                    .map((t) => t.userId)
+                    .where((id) => id.isNotEmpty)
+                    .toList();
+                final studentIds = context
+                    .read<StudentsNotifier>()
+                    .students
+                    .map((s) => s.userId)
+                    .where((id) => id.isNotEmpty)
+                    .toList();
+                receiverUuids = [...teacherIds, ...studentIds];
+              }
+
               await context.read<ExamsNotifier>().updatePublishStatus(
                 exam.id,
                 newStatus,
+                examName: exam.name,
+                receiverUuids: receiverUuids,
               );
               if (context.mounted) {
                 Navigator.pop(context);
