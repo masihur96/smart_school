@@ -143,18 +143,27 @@ class _NotificationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(notification.isRead);
     return Card(
       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 16),
       color: notification.isRead ? null : Colors.blue.withOpacity(0.05),
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: notification.isRead
-              ? Colors.grey[200]
-              : Colors.blue[100],
-          child: Icon(
-            Icons.notifications,
-            color: notification.isRead ? Colors.grey[600] : Colors.blue[700],
-          ),
+        leading: Column(
+          children: [
+            CircleAvatar(
+              backgroundColor: notification.isRead
+                  ? Colors.grey[200]
+                  : Colors.blue[100],
+              child: Icon(
+                Icons.notifications,
+                color: notification.isRead
+                    ? Colors.grey[600]
+                    : Colors.blue[700],
+              ),
+            ),
+            Spacer(),
+            CircleAvatar(radius: 5, backgroundColor: Colors.blue),
+          ],
         ),
         title: Text(
           notification.title,
@@ -187,23 +196,31 @@ class _NotificationItem extends StatelessWidget {
           context.read<NotificationNotifier>().markAsRead(notification.id);
 
           if (notification.data != null && notification.data!.isNotEmpty) {
-            _showDataDialog(context, notification.data!);
+            _showDataDialog(context, notification);
           }
         },
       ),
     );
   }
 
-  void _showDataDialog(BuildContext context, Map<String, dynamic> data) {
+  void _showDataDialog(
+    BuildContext context,
+    NotificationModel notificationModel,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Notification Details'),
         content: SingleChildScrollView(
           child: ListBody(
-            children: data.entries
-                .map((e) => Text('${e.key}: ${e.value}'))
-                .toList(),
+            children: [
+              Text(
+                notificationModel.title,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Text(notificationModel.body),
+            ],
           ),
         ),
         actions: [
