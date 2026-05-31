@@ -100,12 +100,16 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
     return SliverAppBar(
       expandedHeight: 60,
       pinned: true,
+      backgroundColor: AppColors.primaryStudent,
 
       flexibleSpace: FlexibleSpaceBar(
         centerTitle: true,
         title: Text(
           'Subscription Required',
-          style: TextStyle(fontSize: screenSize(context, .04)),
+          style: TextStyle(
+            fontSize: screenSize(context, .04),
+            color: AppColors.white,
+          ),
         ),
       ),
       actions: [
