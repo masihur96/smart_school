@@ -9,8 +9,10 @@ import 'package:smart_school/features/teacher/screens/homework_details_screen.da
 
 import '../../../models/school_models.dart';
 import '../../../models/student_model.dart';
+import '../../../services/notification_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../teacher/providers/homework_provider.dart';
+import '../../teacher/providers/teacher_dashboard_provider.dart';
 
 // ─── Colour palette (shared) ─────────────────────────────────────────────────
 const _kPrimary = Color(0xFF6C3CE1);
@@ -173,6 +175,38 @@ class _ScheduleClassDetailsState extends State<ScheduleClassDetails>
     if (!mounted) return;
 
     if (success) {
+      // Collect student userIds for the class
+      final students = context.read<StudentsNotifier>().students;
+      final studentIds = students
+          .map((s) => s.userId)
+          .where((id) => id.isNotEmpty)
+          .toList();
+
+      // Get admin userId
+      final adminInfo = context
+          .read<TeacherDashboardProvider>()
+          .dashboardData
+          ?.schoolAdminInfo;
+      final allReceivers = [
+        ...studentIds,
+        if (adminInfo != null && adminInfo.id.isNotEmpty) adminInfo.id,
+      ];
+
+      if (allReceivers.isNotEmpty) {
+        final dateStr =
+            '${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year}';
+        NotificationService().sendBulkNotification(
+          receiverUuids: allReceivers,
+          title: '✅ Attendance Saved',
+          message:
+              'Attendance for ${widget.classRoom.name} on $dateStr has been recorded.',
+          additionalData: {
+            'type': 'attendance',
+            'classId': widget.classRoom.id,
+          },
+        );
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Attendance saved successfully!'),
@@ -1174,6 +1208,38 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     if (mounted) {
       setState(() => _isLoading = false);
       if (success) {
+        // Collect student userIds for the class
+        final students = context.read<StudentsNotifier>().students;
+        final studentIds = students
+            .map((s) => s.userId)
+            .where((id) => id.isNotEmpty)
+            .toList();
+
+        // Get admin userId
+        final adminInfo = context
+            .read<TeacherDashboardProvider>()
+            .dashboardData
+            ?.schoolAdminInfo;
+        final allReceivers = [
+          ...studentIds,
+          if (adminInfo != null && adminInfo.id.isNotEmpty) adminInfo.id,
+        ];
+
+        if (allReceivers.isNotEmpty) {
+          final isNew = widget.homework == null;
+          NotificationService().sendBulkNotification(
+            receiverUuids: allReceivers,
+            title: isNew ? '📚 New Homework Assigned' : '📚 Homework Updated',
+            message: isNew
+                ? 'New homework "${_titleController.text.trim()}" has been assigned for ${widget.classRoom.name}.'
+                : 'Homework "${_titleController.text.trim()}" has been updated for ${widget.classRoom.name}.',
+            additionalData: {
+              'type': 'homework',
+              'classId': widget.classRoom.id,
+            },
+          );
+        }
+
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

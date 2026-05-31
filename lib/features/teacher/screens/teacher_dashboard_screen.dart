@@ -244,7 +244,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         ),
       );
     }
-
+    final adminInfo = provider.dashboardData?.schoolAdminInfo;
     return RefreshIndicator(
       onRefresh: () => provider.fetchTeacherDashboard(),
       child: SingleChildScrollView(
@@ -253,6 +253,13 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildModernHeader(context, name, classes.length, user, l10n),
+            _buildModernHeader(
+              context,
+              adminInfo?.name ?? "",
+              classes.length,
+              user,
+              l10n,
+            ),
             if (data?.marqueeData != null)
               MarqueeNotice(
                 customText: data!.marqueeData!.text,

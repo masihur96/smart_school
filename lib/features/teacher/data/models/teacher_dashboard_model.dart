@@ -1,4 +1,5 @@
 import '../../../../models/school_models.dart';
+import '../../../../models/user_model.dart';
 
 class TeacherDashboardData {
   final DashboardAttendanceStatus? attendanceStatus;
@@ -8,6 +9,7 @@ class TeacherDashboardData {
   final Marquee? marqueeData;
   final List<Notice> recentNotice;
   final List<Exam> recentExamList;
+  final User? schoolAdminInfo;
 
   TeacherDashboardData({
     this.attendanceStatus,
@@ -17,6 +19,7 @@ class TeacherDashboardData {
     this.marqueeData,
     this.recentNotice = const [],
     this.recentExamList = const [],
+    this.schoolAdminInfo,
   });
 
   factory TeacherDashboardData.fromJson(Map<String, dynamic> json) {
@@ -42,6 +45,9 @@ class TeacherDashboardData {
       recentExamList: (json['recentExamList'] as List? ?? [])
           .map((e) => Exam.fromJson(e))
           .toList(),
+      schoolAdminInfo: json['schoolAdminInfo'] != null
+          ? User.fromJson(json['schoolAdminInfo'])
+          : null,
     );
   }
 }
