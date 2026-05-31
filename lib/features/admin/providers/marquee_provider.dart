@@ -6,6 +6,7 @@ import 'package:smart_school/core/utils/storage_service.dart';
 import '../../../../configs/network/data_provider.dart';
 import '../../../../core/constants/api_path.dart';
 import '../../../../models/school_models.dart';
+import '../../../../services/notification_service.dart';
 
 class MarqueeProvider extends ChangeNotifier {
   bool _isLoading = false;
@@ -70,8 +71,9 @@ class MarqueeProvider extends ChangeNotifier {
   Future<bool> addOrUpdateMarquee(
     String text,
     String type,
-    String schoolId,
-  ) async {
+    String schoolId, {
+    List<String> receiverUuids = const [],
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -92,6 +94,16 @@ class MarqueeProvider extends ChangeNotifier {
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
         log('Successfully saved $type marquee');
+
+        if (receiverUuids.isNotEmpty) {
+          NotificationService().sendBulkNotification(
+            receiverUuids: receiverUuids,
+            title: '📢 New Important Update',
+            message: text,
+            additionalData: {'type': 'marquee', 'marqueeType': type},
+          );
+        }
+
         // Refresh local state if adding for the current school
         return true;
       } else {
