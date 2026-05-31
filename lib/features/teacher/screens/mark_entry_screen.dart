@@ -6,6 +6,8 @@ import 'package:smart_school/models/school_models.dart';
 
 import '../../auth/providers/auth_provider.dart';
 import '../providers/result_provider.dart';
+import '../providers/teacher_dashboard_provider.dart';
+import '../../../services/notification_service.dart';
 
 class MarkEntryScreen extends StatefulWidget {
   final bool hideAppBar;
@@ -702,6 +704,26 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
         marks: marksList,
       );
       if (mounted) {
+        // Notify admin only
+        final adminInfo = context
+            .read<TeacherDashboardProvider>()
+            .dashboardData
+            ?.schoolAdminInfo;
+        if (adminInfo != null && adminInfo.id.isNotEmpty) {
+          NotificationService().sendBulkNotification(
+            receiverUuids: [adminInfo.id],
+            title: '📊 Marks Submitted',
+            message:
+                'Marks for "${_selectedExam!.name}" – ${_selectedSubject!.name} '
+                '(${_marksControllers.length} student(s)) have been saved by ${user.name}.',
+            additionalData: {
+              'type': 'mark_entry',
+              'examId': _selectedExam!.id,
+              'subjectId': _selectedSubject!.id,
+            },
+          );
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Marks saved successfully!'),
