@@ -51,6 +51,30 @@ class NotificationModel {
     };
   }
 
+  NotificationModel copyWith({
+    String? id,
+    String? title,
+    String? body,
+    Map<String, dynamic>? data,
+    String? recipientId,
+    bool? isRead,
+    String? schoolId,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return NotificationModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      body: body ?? this.body,
+      data: data ?? this.data,
+      recipientId: recipientId ?? this.recipientId,
+      isRead: isRead ?? this.isRead,
+      schoolId: schoolId ?? this.schoolId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
   static List<NotificationModel> fromList(List<dynamic> list) {
     return list.map((item) => NotificationModel.fromJson(item)).toList();
   }

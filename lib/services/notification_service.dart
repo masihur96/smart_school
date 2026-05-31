@@ -143,6 +143,34 @@ class NotificationService {
     }
   }
 
+  Future<bool> markAsRead(String id) async {
+    try {
+      final authToken = await StorageService.getToken();
+      if (authToken == null) throw Exception('No auth token found');
+
+      final response = await DataProvider().performRequest(
+        'PATCH',
+        APIPath.markNotificationRead(id),
+        header: {
+          'Authorization': 'Bearer $authToken',
+          'accept': '*/*',
+        },
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 204)) {
+        log('Notification $id marked as read');
+        return true;
+      } else {
+        log('Failed to mark notification as read: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      log('Error marking notification as read: $e');
+      return false;
+    }
+  }
+
   Future<void> sendTestNotification({
     required String userId,
     required String title,
