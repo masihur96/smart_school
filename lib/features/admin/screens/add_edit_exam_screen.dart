@@ -301,6 +301,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
           maxChildSize: 0.92,
           minChildSize: 0.5,
           builder: (_, scrollCtr) => Card(
+            margin: EdgeInsets.zero,
             child: Column(
               children: [
                 const SizedBox(height: 8),
