@@ -247,6 +247,29 @@ class NotificationService {
     }
   }
 
+  /// Sends individual notifications to every UUID in [receiverUuids].
+  /// Errors for individual sends are logged but do not abort the others.
+  Future<void> sendBulkNotification({
+    required List<String> receiverUuids,
+    required String title,
+    required String message,
+    Map<String, dynamic>? additionalData,
+  }) async {
+    for (final uuid in receiverUuids) {
+      if (uuid.isEmpty) continue;
+      try {
+        await sendNotification(
+          receiverUuid: uuid,
+          title: title,
+          message: message,
+          additionalData: additionalData,
+        );
+      } catch (e) {
+        log('sendBulkNotification: failed for $uuid – $e');
+      }
+    }
+  }
+
   void _handleMessage(RemoteMessage message) {
     // Example of handling JSON body
     if (message.data.isNotEmpty) {
