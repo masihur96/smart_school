@@ -939,6 +939,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
       minChildSize: 0.5,
       expand: false,
       builder: (_, scrollController) => Card(
+        margin: EdgeInsets.zero,
         child: Column(
           children: [
             // Drag handle
