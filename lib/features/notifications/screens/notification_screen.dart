@@ -28,13 +28,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: widget.color,
-        title: Text(
-          'Notifications',
-          style: TextStyle(color: isDark ? AppColors.white : AppColors.black),
-        ),
-        iconTheme: IconThemeData(
-          color: isDark ? AppColors.white : AppColors.black,
-        ),
+
+        title: Text('Notifications'),
+        foregroundColor: AppColors.white,
 
         leading: BackButton(),
         actions: [
