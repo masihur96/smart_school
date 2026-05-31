@@ -74,11 +74,19 @@ class NotificationNotifier extends ChangeNotifier {
     }
   }
 
-  void markAsRead(String id) {
+  Future<void> markAsRead(String id) async {
     final index = _notifications.indexWhere((n) => n.id == id);
-    if (index != -1) {
-      // Logic to mark as read locally
-      // In a real app, you'd also call the backend
+    if (index == -1 || _notifications[index].isRead) return;
+
+    // Optimistically update UI immediately
+    _notifications[index] = _notifications[index].copyWith(isRead: true);
+    notifyListeners();
+
+    // Call backend to persist the change
+    final success = await _notificationService.markAsRead(id);
+    if (!success) {
+      // Revert if the API call failed
+      _notifications[index] = _notifications[index].copyWith(isRead: false);
       notifyListeners();
     }
   }

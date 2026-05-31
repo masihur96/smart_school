@@ -162,7 +162,8 @@ class _NotificationItem extends StatelessWidget {
               ),
             ),
             Spacer(),
-            CircleAvatar(radius: 5, backgroundColor: Colors.blue),
+            if (!notification.isRead)
+              CircleAvatar(radius: 5, backgroundColor: Colors.blue),
           ],
         ),
         title: Text(
