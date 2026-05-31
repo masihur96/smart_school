@@ -85,8 +85,11 @@ class RoutineNotifier extends ChangeNotifier {
   Future<void> addRoutineToAPI(
     String classId,
     String sectionId,
-    RoutineEntry entry,
-  ) async {
+    RoutineEntry entry, {
+    String? className,
+    String? sectionName,
+    List<String> receiverUuids = const [],
+  }) async {
     log(
       'Attempting to add routine to API: classId=$classId, sectionId=$sectionId',
     );
@@ -141,19 +144,17 @@ class RoutineNotifier extends ChangeNotifier {
         // Add locally after successful API call
         addEntry(classId, sectionId, newEntry);
 
-        // Trigger notification
-        NotificationService().triggerNotification(
-          title: 'Class Routine Updated',
-          body: 'New routine added for Class $classId Section $sectionId.',
-          topic: 'class_$classId',
-          data: {'type': 'routine', 'classId': classId, 'sectionId': sectionId},
-        );
-        NotificationService().triggerNotification(
-          title: 'Class Routine Updated',
-          body: 'New routine added for Class $classId Section $sectionId.',
-          topic: 'routine',
-          data: {'type': 'routine', 'classId': classId, 'sectionId': sectionId},
-        );
+        // Trigger individual notifications to all teachers ONLY
+        if (receiverUuids.isNotEmpty) {
+          final cName = className ?? classId;
+          final sName = sectionName ?? sectionId;
+          NotificationService().sendBulkNotification(
+            receiverUuids: receiverUuids,
+            title: '📅 Class Routine Updated',
+            message: 'New routine added for Class $cName Section $sName.',
+            additionalData: {'type': 'routine', 'classId': classId, 'sectionId': sectionId},
+          );
+        }
       } else {
         log(
           'Error creating routine: ${response?.statusCode} - ${response?.data}',
@@ -173,8 +174,11 @@ class RoutineNotifier extends ChangeNotifier {
   Future<void> updateRoutineOnAPI(
     String classId,
     String sectionId,
-    RoutineEntry entry,
-  ) async {
+    RoutineEntry entry, {
+    String? className,
+    String? sectionName,
+    List<String> receiverUuids = const [],
+  }) async {
     if (entry.id == null) throw Exception('Routine ID is required for update');
     log('Attempting to update routine in API: id=${entry.id}');
     _isLoading = true;
@@ -209,13 +213,17 @@ class RoutineNotifier extends ChangeNotifier {
           _state = {..._state, key: newEntries};
         }
 
-        // Trigger notification
-        NotificationService().triggerNotification(
-          title: 'Class Routine Updated',
-          body: 'The routine for Class $classId Section $sectionId has been updated.',
-          topic: 'class_$classId',
-          data: {'type': 'routine_update', 'classId': classId, 'sectionId': sectionId},
-        );
+        // Trigger individual notifications to all teachers ONLY
+        if (receiverUuids.isNotEmpty) {
+          final cName = className ?? classId;
+          final sName = sectionName ?? sectionId;
+          NotificationService().sendBulkNotification(
+            receiverUuids: receiverUuids,
+            title: '📅 Class Routine Updated',
+            message: 'The routine for Class $cName Section $sName has been updated.',
+            additionalData: {'type': 'routine_update', 'classId': classId, 'sectionId': sectionId},
+          );
+        }
 
         notifyListeners();
       } else {

@@ -889,12 +889,34 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
     log('Routine entry prepared: ${entry.toJson()}');
 
     try {
+      final teacherIds = context
+          .read<TeachersNotifier>()
+          .teachers
+          .map((t) => t.userId)
+          .where((id) => id.isNotEmpty)
+          .toList();
+
+      final classes = context.read<ClassSetupNotifier>().classes;
+      final sections = context.read<SectionSetupNotifier>().sections;
+
+      final className = classes
+          .firstWhere((c) => c.id == widget.classId,
+              orElse: () => ClassRoom(id: '', name: widget.classId))
+          .name;
+      final sectionName = sections
+          .firstWhere((s) => s.id == widget.sectionId,
+              orElse: () => Section(id: '', name: widget.sectionId, classId: ''))
+          .name;
+
       if (widget.existingEntry != null) {
         log('Calling updateRoutineOnAPI from UI');
         await context.read<RoutineNotifier>().updateRoutineOnAPI(
           widget.classId,
           widget.sectionId,
           entry,
+          className: className,
+          sectionName: sectionName,
+          receiverUuids: teacherIds,
         );
       } else {
         log('Calling addRoutineToAPI from UI');
@@ -902,6 +924,9 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
           widget.classId,
           widget.sectionId,
           entry,
+          className: className,
+          sectionName: sectionName,
+          receiverUuids: teacherIds,
         );
       }
       if (mounted) {
