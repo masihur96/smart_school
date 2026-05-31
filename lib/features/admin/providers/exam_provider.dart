@@ -51,6 +51,7 @@ class ExamsNotifier extends ChangeNotifier {
   }
 
   Future<void> createExamWithAssignments({
+    List<String> receiverUuids = const [],
     required String examName,
     required String description,
     required DateTime startDate,
@@ -93,19 +94,23 @@ class ExamsNotifier extends ChangeNotifier {
         }
 
         if (examId.isNotEmpty) {
-          // Trigger notification
+          // Topic-based notification (for legacy FCM topic subscribers)
           NotificationService().triggerNotification(
             title: 'New Exam Published',
             body: 'Exam schedule for "$examName" is now available.',
             topic: 'exam',
             data: {'type': 'exam', 'id': examId},
           );
-          NotificationService().triggerNotification(
-            title: 'New Exam Published',
-            body: 'Exam schedule for "$examName" is now available.',
-            topic: 'all',
-            data: {'type': 'exam', 'id': examId},
-          );
+
+          // Individual notifications to all teachers & students
+          if (receiverUuids.isNotEmpty) {
+            NotificationService().sendBulkNotification(
+              receiverUuids: receiverUuids,
+              title: '📋 New Exam Published',
+              message: 'Exam schedule for "$examName" is now available. Check the exam section for details.',
+              additionalData: {'type': 'exam', 'id': examId},
+            );
+          }
 
           for (final assign in assignments) {
             final assignData = {
@@ -139,6 +144,7 @@ class ExamsNotifier extends ChangeNotifier {
   }
 
   Future<void> updateExamOnAPI({
+    List<String> receiverUuids = const [],
     required String examId,
     required String examName,
     required String description,
@@ -182,13 +188,23 @@ class ExamsNotifier extends ChangeNotifier {
       if (response != null && response.statusCode == 200) {
         log('Exam updated successfully');
 
-        // Trigger notification
+        // Topic-based notification
         NotificationService().triggerNotification(
           title: 'Exam Schedule Updated',
           body: 'The schedule for "$examName" has been updated.',
           topic: 'exam',
           data: {'type': 'exam_update', 'id': examId},
         );
+
+        // Individual notifications to all teachers & students
+        if (receiverUuids.isNotEmpty) {
+          NotificationService().sendBulkNotification(
+            receiverUuids: receiverUuids,
+            title: '📝 Exam Schedule Updated',
+            message: 'The schedule for "$examName" has been updated. Please review the new details.',
+            additionalData: {'type': 'exam_update', 'id': examId},
+          );
+        }
 
         await _load();
       } else {

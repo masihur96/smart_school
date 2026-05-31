@@ -9,6 +9,7 @@ import '../../../models/teacher_model.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/exam_provider.dart';
 import '../providers/setup_provider.dart';
+import '../providers/student_provider.dart';
 import '../providers/teacher_provider.dart';
 
 // Local model for a single academic assignment draft
@@ -78,6 +79,8 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TeachersNotifier>().fetchTeachers();
+      // Fetch students so their UUIDs are available for bulk exam notifications
+      context.read<StudentsNotifier>().fetchStudents();
       final schoolId = context.read<AuthNotifier>().user?.schoolId;
       if (schoolId != null) {
         context.read<ClassSetupNotifier>().fetchClasses(schoolId);
@@ -502,6 +505,22 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
     }
 
     final examsNotifier = context.read<ExamsNotifier>();
+
+    // Collect all teacher & student UUIDs for bulk notification
+    final teacherIds = context
+        .read<TeachersNotifier>()
+        .teachers
+        .map((t) => t.userId)
+        .where((id) => id.isNotEmpty)
+        .toList();
+    final studentIds = context
+        .read<StudentsNotifier>()
+        .students
+        .map((s) => s.userId)
+        .where((id) => id.isNotEmpty)
+        .toList();
+    final receiverUuids = [...teacherIds, ...studentIds];
+
     try {
       final List<Map<String, dynamic>> assignmentsList = _assignments
           .where(
@@ -527,6 +546,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
 
       if (isEditing) {
         await examsNotifier.updateExamOnAPI(
+          receiverUuids: receiverUuids,
           examId: widget.exam!.id,
           examName: _nameController.text.trim(),
           description: _descController.text.trim(),
@@ -536,6 +556,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
         );
       } else {
         await examsNotifier.createExamWithAssignments(
+          receiverUuids: receiverUuids,
           examName: _nameController.text.trim(),
           description: _descController.text.trim(),
           startDate: _startDate,
