@@ -316,18 +316,31 @@ class _HomeworkDetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hw = sh.homework!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final bgColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+
+    final cardColor = isDark
+        ? const Color(0xFF2A2A2A)
+        : const Color(0xFFF3F4F6);
+
+    final primaryText = isDark ? Colors.white : const Color(0xFF111827);
+
+    final secondaryText = isDark ? Colors.grey.shade300 : Colors.grey.shade700;
+
+    final borderColor = isDark ? Colors.grey.shade800 : Colors.grey.shade200;
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(
+        color: bgColor,
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(10),
           topRight: Radius.circular(10),
         ),
-        color: Colors.transparent,
       ),
       width: screenSize(context, 2),
       child: Padding(
-        padding: const EdgeInsets.all(18.0),
+        padding: const EdgeInsets.all(18),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -337,12 +350,14 @@ class _HomeworkDetailSheet extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
+
             const SizedBox(height: 24),
+
             Row(
               children: [
                 Container(
@@ -351,7 +366,7 @@ class _HomeworkDetailSheet extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
+                    color: Colors.green.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -366,41 +381,59 @@ class _HomeworkDetailSheet extends StatelessWidget {
                 const Spacer(),
                 Text(
                   DateFormat('MMM d, yyyy').format(hw.dueDate),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: primaryText,
+                  ),
                 ),
               ],
             ),
+
             const SizedBox(height: 20),
+
             Text(
               hw.title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-
                 letterSpacing: -0.5,
+                color: primaryText,
               ),
             ),
+
             const SizedBox(height: 16),
-            const Text(
+
+            Text(
               'Description',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: primaryText,
+              ),
             ),
+
             const SizedBox(height: 8),
-            Text(hw.description, style: TextStyle(fontSize: 15, height: 1.6)),
+
+            Text(
+              hw.description,
+              style: TextStyle(fontSize: 15, height: 1.6, color: secondaryText),
+            ),
+
             if (sh.comment != null && sh.comment!.isNotEmpty) ...[
               const SizedBox(height: 24),
+
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
+                  color: cardColor,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey[200]!),
+                  border: Border.all(color: borderColor),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
-                      children: [
+                    Row(
+                      children: const [
                         Icon(
                           Icons.comment_outlined,
                           size: 16,
@@ -411,16 +444,18 @@ class _HomeworkDetailSheet extends StatelessWidget {
                           'Teacher\'s Comment',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1F2937),
+                            color: Colors.blue,
                           ),
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 8),
+
                     Text(
                       sh.comment!,
                       style: TextStyle(
-                        color: Colors.grey[700],
+                        color: secondaryText,
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -428,7 +463,9 @@ class _HomeworkDetailSheet extends StatelessWidget {
                 ),
               ),
             ],
+
             const SizedBox(height: 32),
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -436,11 +473,11 @@ class _HomeworkDetailSheet extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   foregroundColor: Colors.white,
+                  elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  elevation: 0,
                 ),
                 child: const Text(
                   'Got it',
