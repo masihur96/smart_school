@@ -820,6 +820,7 @@ class Exam {
     final dynamic assignmentsJson =
         json['assignments'] ??
         json['exam_assignments'] ??
+        json['myAssignments'] ??
         json['Assignments'] ??
         json['routines'];
     if (assignmentsJson != null && assignmentsJson is List) {

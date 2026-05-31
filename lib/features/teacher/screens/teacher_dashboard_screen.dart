@@ -340,7 +340,8 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     ),
                     const SizedBox(height: 24),
                   ],
-                  _buildExamsSection(context, l10n),
+                  if (data != null)
+                    _buildExamsSection(context, l10n, data.recentExamList),
 
                   if (data?.mySubmittedHomework.isNotEmpty ?? false) ...[
                     _buildSectionHeader(
@@ -1345,15 +1346,18 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
-  Widget _buildExamsSection(BuildContext context, AppLocalizations l10n) {
-    final provider = context.watch<TeacherDashboardProvider>();
-    final allExams = provider.exams;
-
+  Widget _buildExamsSection(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<Exam> recentExamList,
+  ) {
     // Filter exams to show only running or upcoming
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    final exams = allExams.where((exam) {
+    print(recentExamList.first.assignments);
+
+    final exams = recentExamList.where((exam) {
       if (exam.endDate != null) {
         final end = DateTime(
           exam.endDate!.year,
@@ -1372,9 +1376,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       return true; // if no dates specified, keep it
     }).toList();
 
-    if (provider.isLoading && exams.isEmpty) {
-      return const SizedBox(); // don't show while loading
-    }
     if (exams.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -1423,6 +1424,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
 
   Widget _buildExamCard(BuildContext context, Exam exam) {
     final assignmentsCount = exam.assignments.length;
+    print("Ddd: ${assignmentsCount}");
     final startDateStr = exam.startDate != null
         ? DateFormat('MMM dd, yyyy').format(exam.startDate!)
         : 'N/A';
