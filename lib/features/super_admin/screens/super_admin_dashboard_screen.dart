@@ -104,7 +104,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
           ),
 
           elevation: 0,
-          actions: [const NotificationIconButton()],
+          actions: [NotificationIconButton(color: AppColors.primary)],
         ),
         drawer: const AppDrawer(),
         body: IndexedStack(
