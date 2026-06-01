@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
@@ -130,6 +131,16 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
     );
   }
 
+  String formatDate(String? utcDate) {
+    if (utcDate == null || utcDate.isEmpty) {
+      return '--';
+    }
+
+    final localDate = DateTime.parse(utcDate).toLocal();
+
+    return DateFormat('dd MMM yyyy').format(localDate);
+  }
+
   Widget _buildStatusBanner(AuthNotifier auth) {
     final sub = auth.adminSubscription;
     final isValid = auth.isSubscriptionValid;
@@ -143,7 +154,7 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
     if (isValid && sub != null) {
       title = 'Active Subscription';
       message =
-          'Your institution is on the ${sub.pricingPlan?.name ?? 'Standard'} plan, valid until ${sub.endDate.split('T')[0]}.';
+          'Your institution is on the ${sub.pricingPlan?.name ?? 'Standard'} plan, valid until\n ${formatDate(sub.endDate)}.';
       color = Colors.green;
       icon = Icons.check_circle_rounded;
     } else if (sub != null && !isValid) {
