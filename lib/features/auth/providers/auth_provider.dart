@@ -206,7 +206,7 @@ class AuthNotifier extends ChangeNotifier {
   Future<void> logout() async {
     // Capture user to unsubscribe in background
     final userToUnsubscribe = _user;
-    
+
     // Clear state synchronously so that immediate navigations (e.g. to LoginScreen)
     // don't see a stale non-null user and auto-navigate back to the dashboard.
     _user = null;
@@ -218,7 +218,9 @@ class AuthNotifier extends ChangeNotifier {
 
     if (userToUnsubscribe != null) {
       try {
-        await NotificationService().unsubscribeFromUserTopics(userToUnsubscribe);
+        await NotificationService().unsubscribeFromUserTopics(
+          userToUnsubscribe,
+        );
       } catch (e) {
         log("Logout unsubscription error: $e");
       }
@@ -263,11 +265,7 @@ class AuthNotifier extends ChangeNotifier {
       final now = DateTime.now().toUtc();
 
       final startDate = formatIso(now);
-      final endDate = formatIso(
-        isFree
-            ? now.add(const Duration(days: 7))
-            : now.add(const Duration(days: 30)),
-      );
+      final endDate = formatIso(now.add(const Duration(days: 30)));
 
       final response = await DataProvider().performRequest(
         'POST',
