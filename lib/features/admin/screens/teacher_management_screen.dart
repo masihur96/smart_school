@@ -758,7 +758,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
 
                         try {
                           await NotificationService().sendNotification(
-                            receiverUuid: teacher.userId,
+                            receiverUuid: teacher.user?.id ?? teacher.userId,
                             title: titleController.text.trim(),
                             message: messageController.text.trim(),
                           );

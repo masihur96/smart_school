@@ -663,7 +663,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
 
                         try {
                           await NotificationService().sendNotification(
-                            receiverUuid: student.userId,
+                            receiverUuid: student.user?.id ?? student.userId,
                             title: titleController.text.trim(),
                             message: messageController.text.trim(),
                           );

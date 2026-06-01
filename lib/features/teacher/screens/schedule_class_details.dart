@@ -178,7 +178,7 @@ class _ScheduleClassDetailsState extends State<ScheduleClassDetails>
       // Collect student userIds for the class
       final students = context.read<StudentsNotifier>().students;
       final studentIds = students
-          .map((s) => s.userId)
+          .map((s) => s.user?.id ?? s.userId)
           .where((id) => id.isNotEmpty)
           .toList();
 
@@ -1211,7 +1211,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
         // Collect student userIds for the class
         final students = context.read<StudentsNotifier>().students;
         final studentIds = students
-            .map((s) => s.userId)
+            .map((s) => s.user?.id ?? s.userId)
             .where((id) => id.isNotEmpty)
             .toList();
 

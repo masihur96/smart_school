@@ -44,14 +44,14 @@ class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
       receiverUuids = context
           .read<TeachersNotifier>()
           .teachers
-          .map((t) => t.userId)
+          .map((t) => t.user?.id ?? t.userId)
           .where((id) => id.isNotEmpty)
           .toList();
     } else if (_selectedType == 'STUDENT') {
       receiverUuids = context
           .read<StudentsNotifier>()
           .students
-          .map((s) => s.userId)
+          .map((s) => s.user?.id ?? s.userId)
           .where((id) => id.isNotEmpty)
           .toList();
     }
