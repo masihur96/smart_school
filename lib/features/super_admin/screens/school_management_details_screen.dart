@@ -283,10 +283,12 @@ class _UserCard extends StatelessWidget {
   void _showSendNotificationDialog(BuildContext context) {
     final titleController = TextEditingController();
     final messageController = TextEditingController();
+    bool isLoading = false;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
         title: Row(
           children: [
             const Icon(Icons.send_rounded, color: AppColors.primary),
@@ -332,7 +334,7 @@ class _UserCard extends StatelessWidget {
             child: const Text('CANCEL'),
           ),
           ElevatedButton(
-            onPressed: () async {
+            onPressed: isLoading ? null : () async {
               if (titleController.text.isEmpty ||
                   messageController.text.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -341,20 +343,34 @@ class _UserCard extends StatelessWidget {
                 return;
               }
 
-              final notifier = context.read<NotificationNotifier>();
-              await notifier.sendNotification(
-                receiverUuid: user.id,
-                title: titleController.text,
-                message: messageController.text,
-              );
+              setState(() { isLoading = true; });
 
-              if (context.mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Notification sent successfully'),
-                  ),
+              try {
+                final notifier = context.read<NotificationNotifier>();
+                await notifier.sendNotification(
+                  receiverUuid: user.id,
+                  title: titleController.text,
+                  message: messageController.text,
                 );
+
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Notification sent successfully'),
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to send notification: $e')),
+                  );
+                }
+              } finally {
+                if (context.mounted) {
+                  setState(() { isLoading = false; });
+                }
               }
             },
             style: ElevatedButton.styleFrom(
@@ -364,9 +380,19 @@ class _UserCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text('SEND'),
+            child: isLoading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text('SEND'),
           ),
         ],
+      ),
       ),
     );
   }
