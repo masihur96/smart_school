@@ -285,9 +285,7 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                     ),
                     _buildFeature(
                       Icons.calendar_today_outlined,
-                      widget.plan.pricePerMonth == "0"
-                          ? "Weekly Billing"
-                          : 'Monthly Billing',
+                      'Monthly Billing',
                     ),
                   ],
                 ),
@@ -303,9 +301,7 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(
-                      widget.plan.pricePerMonth == "0" ? ' / week' : ' / month',
-                    ),
+                    Text(' / month'),
                   ],
                 ),
               ],
