@@ -14,10 +14,13 @@ class SchoolManagementDetailsScreen extends StatefulWidget {
   const SchoolManagementDetailsScreen({super.key, required this.school});
 
   @override
-  State<SchoolManagementDetailsScreen> createState() => _SchoolManagementDetailsScreenState();
+  State<SchoolManagementDetailsScreen> createState() =>
+      _SchoolManagementDetailsScreenState();
 }
 
-class _SchoolManagementDetailsScreenState extends State<SchoolManagementDetailsScreen> with SingleTickerProviderStateMixin {
+class _SchoolManagementDetailsScreenState
+    extends State<SchoolManagementDetailsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -31,10 +34,19 @@ class _SchoolManagementDetailsScreenState extends State<SchoolManagementDetailsS
 
   void _fetchData() {
     final schoolId = widget.school.id!;
-    context.read<SchoolManagementNotifier>().fetchSchoolMembers(schoolId: schoolId, role: 'teacher');
-    context.read<SchoolManagementNotifier>().fetchSchoolMembers(schoolId: schoolId, role: 'student');
-    context.read<SchoolManagementNotifier>().fetchSchoolMembers(schoolId: schoolId, role: 'admin');
-    
+    context.read<SchoolManagementNotifier>().fetchSchoolMembers(
+      schoolId: schoolId,
+      role: 'teacher',
+    );
+    context.read<SchoolManagementNotifier>().fetchSchoolMembers(
+      schoolId: schoolId,
+      role: 'student',
+    );
+    context.read<SchoolManagementNotifier>().fetchSchoolMembers(
+      schoolId: schoolId,
+      role: 'admin',
+    );
+
     context.read<ClassSetupNotifier>().fetchClasses(schoolId);
     context.read<SectionSetupNotifier>().fetchSections();
   }
@@ -49,6 +61,7 @@ class _SchoolManagementDetailsScreenState extends State<SchoolManagementDetailsS
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: AppColors.primarySuperAdmin,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -58,7 +71,10 @@ class _SchoolManagementDetailsScreenState extends State<SchoolManagementDetailsS
             ),
             Text(
               'School ID: ${widget.school.schoolId}',
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.normal,
+              ),
             ),
           ],
         ),
@@ -70,7 +86,11 @@ class _SchoolManagementDetailsScreenState extends State<SchoolManagementDetailsS
             Tab(text: 'Admins', icon: Icon(Icons.admin_panel_settings_rounded)),
           ],
           indicatorColor: Colors.white,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
       ),
       body: TabBarView(
@@ -92,7 +112,11 @@ class _UserListTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<SchoolManagementNotifier, ClassSetupNotifier, SectionSetupNotifier>(
+    return Consumer3<
+      SchoolManagementNotifier,
+      ClassSetupNotifier,
+      SectionSetupNotifier
+    >(
       builder: (context, notifier, classNotifier, sectionNotifier, child) {
         final List<User> users;
         final bool isLoading;
@@ -117,7 +141,11 @@ class _UserListTab extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.person_off_rounded, size: 64, color: Colors.grey.shade400),
+                Icon(
+                  Icons.person_off_rounded,
+                  size: 64,
+                  color: Colors.grey.shade400,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'No ${role}s found',
@@ -153,16 +181,32 @@ class _UserListTab extends StatelessWidget {
               final classUsers = groupedUsers[classId]!;
               final className = classId == 'unassigned'
                   ? 'Unassigned'
-                  : classNotifier.classes.firstWhere((c) => c.id == classId, orElse: () => ClassRoom(id: '', name: 'Unknown Class', schoolId: '')).name;
+                  : classNotifier.classes
+                        .firstWhere(
+                          (c) => c.id == classId,
+                          orElse: () => ClassRoom(
+                            id: '',
+                            name: 'Unknown Class',
+                            schoolId: '',
+                          ),
+                        )
+                        .name;
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8.0,
+                      horizontal: 4.0,
+                    ),
                     child: Row(
                       children: [
-                        Icon(Icons.class_outlined, size: 18, color: AppColors.primary),
+                        Icon(
+                          Icons.class_outlined,
+                          size: 18,
+                          color: AppColors.primary,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           className,
@@ -174,7 +218,10 @@ class _UserListTab extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.primary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
@@ -191,13 +238,21 @@ class _UserListTab extends StatelessWidget {
                       ],
                     ),
                   ),
-                  ...classUsers.map((user) => _UserCard(
-                    user: user,
-                    className: className,
-                    sectionName: user.sectionId != null 
-                        ? sectionNotifier.sections.firstWhere((s) => s.id == user.sectionId, orElse: () => Section(id: '', name: 'N/A', classId: '')).name
-                        : 'N/A',
-                  )),
+                  ...classUsers.map(
+                    (user) => _UserCard(
+                      user: user,
+                      className: className,
+                      sectionName: user.sectionId != null
+                          ? sectionNotifier.sections
+                                .firstWhere(
+                                  (s) => s.id == user.sectionId,
+                                  orElse: () =>
+                                      Section(id: '', name: 'N/A', classId: ''),
+                                )
+                                .name
+                          : 'N/A',
+                    ),
+                  ),
                   const SizedBox(height: 16),
                 ],
               );
@@ -223,11 +278,7 @@ class _UserCard extends StatelessWidget {
   final String? className;
   final String? sectionName;
 
-  const _UserCard({
-    required this.user,
-    this.className,
-    this.sectionName,
-  });
+  const _UserCard({required this.user, this.className, this.sectionName});
 
   void _showSendNotificationDialog(BuildContext context) {
     final titleController = TextEditingController();
@@ -246,13 +297,18 @@ class _UserCard extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Sending to: ${user.name}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            Text(
+              'Sending to: ${user.name}',
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             TextField(
               controller: titleController,
               decoration: InputDecoration(
                 labelText: 'Title',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 prefixIcon: const Icon(Icons.title_rounded),
               ),
             ),
@@ -262,7 +318,9 @@ class _UserCard extends StatelessWidget {
               maxLines: 3,
               decoration: InputDecoration(
                 labelText: 'Message',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 prefixIcon: const Icon(Icons.message_rounded),
               ),
             ),
@@ -275,7 +333,8 @@ class _UserCard extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () async {
-              if (titleController.text.isEmpty || messageController.text.isEmpty) {
+              if (titleController.text.isEmpty ||
+                  messageController.text.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Please fill all fields')),
                 );
@@ -292,14 +351,18 @@ class _UserCard extends StatelessWidget {
               if (context.mounted) {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Notification sent successfully')),
+                  const SnackBar(
+                    content: Text('Notification sent successfully'),
+                  ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: const Text('SEND'),
           ),
@@ -324,7 +387,10 @@ class _UserCard extends StatelessWidget {
               backgroundColor: AppColors.primary.withOpacity(0.1),
               child: Text(
                 user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
-                style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const SizedBox(width: 16),
@@ -334,7 +400,10 @@ class _UserCard extends StatelessWidget {
                 children: [
                   Text(
                     user.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
                   ),
                   Text(
                     user.email,
@@ -345,11 +414,17 @@ class _UserCard extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 4,
                     children: [
-                      _buildInfoTag(Icons.person_outline, user.role.name.toUpperCase()),
+                      _buildInfoTag(
+                        Icons.person_outline,
+                        user.role.name.toUpperCase(),
+                      ),
                       if (className != null && className != 'Unassigned')
                         _buildInfoTag(Icons.class_outlined, className!),
                       if (sectionName != null && sectionName != 'N/A')
-                        _buildInfoTag(Icons.grid_view_rounded, 'Section: $sectionName'),
+                        _buildInfoTag(
+                          Icons.grid_view_rounded,
+                          'Section: $sectionName',
+                        ),
                     ],
                   ),
                 ],
@@ -360,19 +435,29 @@ class _UserCard extends StatelessWidget {
               children: [
                 IconButton(
                   onPressed: () => _showSendNotificationDialog(context),
-                  icon: const Icon(Icons.notifications_active_outlined, color: AppColors.primary),
+                  icon: const Icon(
+                    Icons.notifications_active_outlined,
+                    color: AppColors.primary,
+                  ),
                   tooltip: 'Send Notification',
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: (user.isActive ?? true) ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                    color: (user.isActive ?? true)
+                        ? Colors.green.withOpacity(0.1)
+                        : Colors.red.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     (user.isActive ?? true) ? 'ACTIVE' : 'INACTIVE',
                     style: TextStyle(
-                      color: (user.isActive ?? true) ? Colors.green : Colors.red,
+                      color: (user.isActive ?? true)
+                          ? Colors.green
+                          : Colors.red,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
@@ -400,11 +485,14 @@ class _UserCard extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             text,
-            style: TextStyle(fontSize: 10, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey.shade700,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
     );
   }
 }
-

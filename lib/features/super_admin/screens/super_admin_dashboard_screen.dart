@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/widgets/app_drawer.dart';
 import 'package:smart_school/core/widgets/notification_icon_button.dart';
@@ -29,6 +28,7 @@ class SuperAdminDashboardScreen extends StatefulWidget {
 class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
   int _selectedIndex = 0;
 
+  @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -79,7 +79,6 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                 onPressed: () => Navigator.of(context).pop(true),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
-
                   foregroundColor: Colors.white,
                 ),
                 child: Text(l10n.yes),
@@ -92,19 +91,32 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         }
       },
       child: Scaffold(
-        extendBodyBehindAppBar: true,
-
         appBar: AppBar(
           title: Text(
             _getTitle(l10n),
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.white,
+              fontSize: 18,
             ),
           ),
-
           elevation: 0,
-          actions: [NotificationIconButton(color: AppColors.primary)],
+          backgroundColor: AppColors.primaryDark,
+          foregroundColor: Colors.white,
+          iconTheme: const IconThemeData(color: Colors.white),
+          actions: [
+            NotificationIconButton(color: AppColors.primaryDark),
+            IconButton(
+              icon: const Icon(Icons.account_circle_outlined),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                );
+              },
+            ),
+            const SizedBox(width: 8),
+          ],
         ),
         drawer: const AppDrawer(),
         body: IndexedStack(
@@ -121,23 +133,27 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withOpacity(0.08),
                 blurRadius: 10,
-                offset: const Offset(0, -2),
+                offset: const Offset(0, -4),
               ),
             ],
           ),
           child: BottomNavigationBar(
             currentIndex: _selectedIndex,
             onTap: _onItemTapped,
-            selectedItemColor: AppColors.primary,
-            unselectedItemColor: Colors.grey,
             type: BottomNavigationBarType.fixed,
-            // backgroundColor: Colors.white,
+            selectedItemColor: AppColors.primaryDark,
+            unselectedItemColor: Colors.grey.shade500,
             elevation: 0,
+            selectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+            unselectedLabelStyle: const TextStyle(fontSize: 12),
             items: [
               BottomNavigationBarItem(
-                icon: const Icon(Icons.dashboard_rounded),
+                icon: const Icon(Icons.dashboard_outlined),
                 activeIcon: const Icon(Icons.dashboard),
                 label: l10n.overview,
               ),
@@ -147,7 +163,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                 label: l10n.schools,
               ),
               BottomNavigationBarItem(
-                icon: const Icon(Icons.settings_suggest_rounded),
+                icon: const Icon(Icons.settings_suggest_outlined),
                 activeIcon: const Icon(Icons.settings_suggest),
                 label: l10n.config,
               ),
@@ -165,29 +181,17 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(user, l10n),
+          _buildModernHeader(user, l10n),
           Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  l10n.systemPerformance,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                _buildSectionTitle(l10n.systemPerformance),
                 const SizedBox(height: 16),
                 _buildStatGrid(l10n),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.quickActions,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle(l10n.quickActions),
                 const SizedBox(height: 16),
                 _buildQuickActionsGrid(l10n),
                 const SizedBox(height: 16),
@@ -199,81 +203,93 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
     );
   }
 
-  Widget _buildHeader(User? user, AppLocalizations l10n) {
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 0.5,
+      ),
+    );
+  }
+
+  Widget _buildModernHeader(User? user, AppLocalizations l10n) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(24, 80, 24, 40),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primaryDark, Color(0xFF3F51B5)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(36),
-          bottomRight: Radius.circular(36),
+      decoration: const BoxDecoration(
+        color: AppColors.primaryDark,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryDark.withOpacity(0.3),
+            color: Colors.black12,
             blurRadius: 20,
-            offset: const Offset(0, 10),
+            offset: Offset(0, 10),
           ),
         ],
       ),
+      padding: const EdgeInsets.fromLTRB(25, 20, 25, 30),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: screenSize(context, .07)),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${l10n.welcomeBack},\n ${user?.name ?? 'Admin'}',
-                  style: const TextStyle(
+          Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: const CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.white24,
+                  child: Icon(
+                    Icons.admin_panel_settings,
+                    size: 40,
                     color: Colors.white,
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => ProfileScreen()),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                        width: 2,
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.welcomeBack,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: 14,
                       ),
                     ),
-                    child: const CircleAvatar(
-                      radius: 24,
-                      backgroundColor: Colors.white24,
-                      child: Icon(
-                        Icons.admin_panel_settings,
+                    Text(
+                      user?.name ?? 'Super Admin',
+                      style: const TextStyle(
                         color: Colors.white,
-                        size: 28,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
                       ),
                     ),
-                  ),
+                    Text(
+                      'System Administrator',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-
+          const SizedBox(height: 20),
           GestureDetector(
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => SystemStatusScreen()),
+                MaterialPageRoute(builder: (_) => const SystemStatusScreen()),
               );
             },
             child: Container(
@@ -331,66 +347,93 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         mainAxisSpacing: 16,
         childAspectRatio: 1.3,
         children: [
-          _buildStatCard(
+          _buildGradientStatCard(
             l10n.totalSchools,
             '${data.totalSchools}',
             Icons.business,
+            const [Color(0xFF3B82F6), Color(0xFF2563EB)], // Blue
           ),
-          _buildStatCard(
+          _buildGradientStatCard(
             l10n.totalStudents,
             '${data.totalStudents}',
             Icons.people,
+            const [Color(0xFF8B5CF6), Color(0xFF6D28D9)], // Purple
           ),
-          _buildStatCard(
+          _buildGradientStatCard(
             l10n.totalTeachers,
             '${data.totalTeachers}',
             Icons.dns,
+            const [Color(0xFF10B981), Color(0xFF059669)], // Green
           ),
-          _buildStatCard(
+          _buildGradientStatCard(
             l10n.activeSubscription,
             '${data.activeSubscriptions}',
             Icons.monetization_on,
+            const [Color(0xFFF59E0B), Color(0xFFD97706)], // Orange
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white30,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, size: 22),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  label,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                ),
-              ],
-            ),
-          ],
+  Widget _buildGradientStatCard(
+    String label,
+    String value,
+    IconData icon,
+    List<Color> colors,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: colors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: colors.last.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 24, color: Colors.white),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white.withOpacity(0.9),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -402,35 +445,35 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
       child: GridView.count(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 2,
+        crossAxisCount: 3,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
-        childAspectRatio: 1.6,
+        childAspectRatio: 0.9,
         children: [
           _buildActionItem(l10n.schools, Icons.add_business_rounded, () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => SuperAdminSchoolScreen()),
             );
-          }),
+          }, Colors.blue),
           _buildActionItem(l10n.pricing, Icons.terminal_rounded, () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => PricingSchoolScreen()),
             );
-          }),
+          }, Colors.purple),
           _buildActionItem(l10n.subscription, Icons.podcasts_rounded, () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => SubscriptionScreen()),
             );
-          }),
+          }, Colors.green),
           _buildActionItem(l10n.backup, Icons.storage_rounded, () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => BackupScreen()),
             );
-          }),
+          }, Colors.orange),
           _buildActionItem('Announcement', Icons.campaign_rounded, () {
             Navigator.push(
               context,
@@ -438,25 +481,48 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                 builder: (_) => const SuperAdminNotificationSenderScreen(),
               ),
             );
-          }),
+          }, Colors.red),
         ],
       ),
     );
   }
 
-  Widget _buildActionItem(String title, IconData icon, VoidCallback onTap) {
+  Widget _buildActionItem(String title, IconData icon, VoidCallback onTap, Color iconColor) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
-      child: Card(
-        child: Row(
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 20),
-            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 28, color: iconColor),
+            ),
+            const SizedBox(height: 12),
             Text(
               title,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -467,7 +533,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
   // --- SETTINGS TAB ---
   Widget _buildSettingsTab(AppLocalizations l10n) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
       physics: const BouncingScrollPhysics(),
       children: [
         Text(

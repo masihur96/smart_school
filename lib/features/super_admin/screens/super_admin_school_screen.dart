@@ -42,6 +42,18 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
     final totalSchools = dashboardNotifier.dashboardData.totalSchools;
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: AppColors.primarySuperAdmin,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "School List",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           await context.read<SuperAdminSchoolNotifier>().fetchSchools();
@@ -50,7 +62,7 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
               .fetchDashboardData();
         },
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 130, 20, 20),
+          padding: const EdgeInsets.all(20),
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
