@@ -116,7 +116,7 @@ class _AdminHomeworkManagementScreenState
           'Homework Management',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        // backgroundColor: AppColors.primaryAdmin,
+        backgroundColor: AppColors.primaryAdmin,
         // foregroundColor: Colors.white,
         elevation: 0,
         actions: [
