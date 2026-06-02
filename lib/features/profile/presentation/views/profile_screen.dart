@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/route_generator.dart';
@@ -20,6 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isEditing = false;
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
+  File? _imageFile;
 
   @override
   void initState() {
@@ -36,11 +40,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder:
+          (context) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Gallery'),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.camera_alt),
+                  title: const Text('Camera'),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                ),
+              ],
+            ),
+          ),
+    );
+
+    if (source != null) {
+      final pickedFile = await picker.pickImage(
+        source: source,
+        imageQuality: 50,
+      );
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+        });
+      }
+    }
+  }
+
   void _handleUpdate() async {
     final auth = context.read<AuthNotifier>();
     final success = await auth.updateProfile(
       name: _nameController.text.trim(),
       phone: _phoneController.text.trim(),
+      imageFile: _imageFile,
     );
 
     if (success && mounted) {
@@ -269,13 +311,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: CircleAvatar(
                     radius: 50,
                     backgroundColor: theme.primaryColor.withOpacity(0.1),
-                    child: Icon(
-                      Icons.person,
-                      size: 60,
-                      color: theme.primaryColor,
-                    ),
+                    backgroundImage:
+                        _imageFile != null
+                            ? FileImage(_imageFile!)
+                            : (user.profileImageUrl != null
+                                    ? NetworkImage(user.profileImageUrl!)
+                                    : null)
+                                as ImageProvider?,
+                    child:
+                        (_imageFile == null && user.profileImageUrl == null)
+                            ? Icon(
+                              Icons.person,
+                              size: 60,
+                              color: theme.primaryColor,
+                            )
+                            : null,
                   ),
                 ),
+                if (user.role == UserRole.admin)
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: theme.primaryColor,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ),
                 if (isLoading)
                   const Positioned.fill(
                     child: CircularProgressIndicator(

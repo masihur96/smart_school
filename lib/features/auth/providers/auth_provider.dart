@@ -1,5 +1,7 @@
 import 'dart:developer';
+import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
 
@@ -351,6 +353,7 @@ class AuthNotifier extends ChangeNotifier {
   Future<bool> updateProfile({
     required String name,
     required String phone,
+    File? imageFile,
   }) async {
     _isLoading = true;
     _error = null;
@@ -361,14 +364,26 @@ class AuthNotifier extends ChangeNotifier {
       if (token == null) throw Exception('No authentication token found');
       if (_user == null) throw Exception('No user found');
 
+      final Map<String, dynamic> dataMap = {'name': name, 'phone': phone};
+      dynamic requestData = dataMap;
+
+      if (imageFile != null) {
+        requestData = FormData.fromMap({
+          ...dataMap,
+          'image': await MultipartFile.fromFile(
+            imageFile.path,
+            filename: imageFile.path.split('/').last,
+          ),
+        });
+      }
+
       final response = await DataProvider().performRequest(
         'PUT',
         '${APIPath.register}/${_user!.id}',
         header: {
           'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
         },
-        data: {'name': name, 'phone': phone},
+        data: requestData,
       );
 
       if (response != null && response.statusCode == 200) {
