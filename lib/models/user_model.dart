@@ -7,7 +7,7 @@ class User {
   final String name;
   final String email;
   final UserRole role;
-  final String? profileImageUrl;
+  final String? avatar;
   final String? schoolId;
   final String? classId;
   final String? sectionId;
@@ -27,7 +27,7 @@ class User {
     required this.name,
     required this.email,
     required this.role,
-    this.profileImageUrl,
+    this.avatar,
     this.schoolId,
     this.classId,
     this.sectionId,
@@ -48,11 +48,13 @@ class User {
       id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
-      role: UserRole.values.cast<UserRole?>().firstWhere(
-        (e) => e?.name == json['role'],
-        orElse: () => UserRole.student,
-      ) ?? UserRole.student,
-      profileImageUrl: json['profileImageUrl']?.toString() ?? json['avatar']?.toString(),
+      role:
+          UserRole.values.cast<UserRole?>().firstWhere(
+            (e) => e?.name == json['role'],
+            orElse: () => UserRole.student,
+          ) ??
+          UserRole.student,
+      avatar: json['avatar']?.toString() ?? "",
       schoolId: json['schoolId']?.toString(),
       classId: json['classId']?.toString(),
       sectionId: json['sectionId']?.toString(),
@@ -65,7 +67,9 @@ class User {
           : null,
       lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
       lon: json['lon'] != null ? double.tryParse(json['lon'].toString()) : null,
-      radius: json['radius'] != null ? double.tryParse(json['radius'].toString()) : null,
+      radius: json['radius'] != null
+          ? double.tryParse(json['radius'].toString())
+          : null,
       deletedAt: json['deletedAt'] != null
           ? DateTime.tryParse(json['deletedAt'].toString())
           : null,
@@ -79,8 +83,7 @@ class User {
       'name': name,
       'email': email,
       'role': role.name,
-      'profileImageUrl': profileImageUrl,
-      'avatar': profileImageUrl,
+      'avatar': avatar,
       'schoolId': schoolId,
       'classId': classId,
       'sectionId': sectionId,
