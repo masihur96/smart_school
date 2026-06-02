@@ -12,6 +12,7 @@ class UserEntity {
   final String? rollNumber;
   final String? designation;
   final bool? isActive;
+  final String? avatar;
   final String? createdAt;
   final double? lat;
   final double? lon;
@@ -30,6 +31,7 @@ class UserEntity {
     this.rollNumber,
     this.designation,
     this.isActive,
+    this.avatar,
     this.createdAt,
     this.lat,
     this.lon,

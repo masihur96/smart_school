@@ -84,6 +84,7 @@ class AuthNotifier extends ChangeNotifier {
           rollNumber: profile.rollNumber,
           designation: profile.designation,
           isActive: profile.isActive,
+          avatar: profile.avatar,
           createdAt: profile.createdAt != null
               ? DateTime.tryParse(profile.createdAt!)
               : null,
@@ -142,6 +143,7 @@ class AuthNotifier extends ChangeNotifier {
         rollNumber: profile.rollNumber,
         designation: profile.designation,
         isActive: profile.isActive,
+        avatar: profile.avatar,
         createdAt: profile.createdAt != null
             ? DateTime.tryParse(profile.createdAt!)
             : null,
