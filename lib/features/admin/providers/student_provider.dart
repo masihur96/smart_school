@@ -1,4 +1,7 @@
 import 'dart:developer';
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 
 import 'package:flutter/material.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
@@ -211,11 +214,12 @@ class StudentsNotifier extends ChangeNotifier {
     required String sectionId,
     required String rollNumber,
     required String designation,
+    File? imageFile,
   }) async {
     final token = await StorageService.getToken();
     if (token == null) throw Exception('No auth token found');
 
-    final data = {
+    final Map<String, dynamic> dataMap = {
       "name": name,
       "email": email,
       "password": password,
@@ -228,10 +232,22 @@ class StudentsNotifier extends ChangeNotifier {
       "designation": designation,
     };
 
+    dynamic requestData = dataMap;
+
+    if (imageFile != null) {
+      requestData = FormData.fromMap({
+        ...dataMap,
+        'image': await MultipartFile.fromFile(
+          imageFile.path,
+          filename: imageFile.path.split('/').last,
+        ),
+      });
+    }
+
     final response = await DataProvider().performRequest(
       'POST',
       APIPath.register,
-      data: data,
+      data: requestData,
       header: {'Authorization': 'Bearer $token'},
     );
 
@@ -256,11 +272,12 @@ class StudentsNotifier extends ChangeNotifier {
     required String sectionId,
     required String rollNumber,
     required String designation,
+    File? imageFile,
   }) async {
     final token = await StorageService.getToken();
     if (token == null) throw Exception('No auth token found');
 
-    final data = {
+    final Map<String, dynamic> dataMap = {
       "name": name,
       "email": email,
       "phone": phone,
@@ -270,13 +287,25 @@ class StudentsNotifier extends ChangeNotifier {
       "designation": designation,
     };
     if (password != null && password.isNotEmpty) {
-      data["password"] = password;
+      dataMap["password"] = password;
+    }
+
+    dynamic requestData = dataMap;
+
+    if (imageFile != null) {
+      requestData = FormData.fromMap({
+        ...dataMap,
+        'image': await MultipartFile.fromFile(
+          imageFile.path,
+          filename: imageFile.path.split('/').last,
+        ),
+      });
     }
 
     final response = await DataProvider().performRequest(
       'PUT',
       '${APIPath.register}/$userId',
-      data: data,
+      data: requestData,
       header: {'Authorization': 'Bearer $token'},
     );
 
