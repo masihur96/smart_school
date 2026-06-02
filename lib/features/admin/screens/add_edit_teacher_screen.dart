@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
@@ -31,6 +34,8 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
   String? _selectedSectionId;
   final List<AssignedSubject> _assignedSubjects = [];
   bool _obscurePassword = true;
+  File? _imageFile;
+  String? _existingImageUrl;
 
   bool get isEditing => widget.teacher != null;
 
@@ -48,6 +53,44 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
       _latController.text = teacher.lat?.toString() ?? '';
       _lonController.text = teacher.lon?.toString() ?? '';
       _radiusController.text = teacher.radius?.toString() ?? '';
+      _existingImageUrl = teacher.user?.profileImageUrl;
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder:
+          (context) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Gallery'),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.camera_alt),
+                  title: const Text('Camera'),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                ),
+              ],
+            ),
+          ),
+    );
+
+    if (source != null) {
+      final pickedFile = await picker.pickImage(
+        source: source,
+        imageQuality: 50,
+      );
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+        });
+      }
     }
   }
 
@@ -138,6 +181,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             lat: double.tryParse(_latController.text),
             lon: double.tryParse(_lonController.text),
             radius: double.tryParse(_radiusController.text),
+            imageFile: _imageFile,
           );
         } else {
           await teacherNotifier.addTeacherToAPI(
@@ -149,6 +193,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             classId: _selectedClassId!,
             sectionId: _selectedSectionId!,
             designation: _designationController.text,
+            imageFile: _imageFile,
           );
         }
 
@@ -199,6 +244,54 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
+            Center(
+              child: Stack(
+                children: [
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: CircleAvatar(
+                      radius: 60,
+                      backgroundColor: Colors.purple.withOpacity(0.1),
+                      backgroundImage:
+                          _imageFile != null
+                              ? FileImage(_imageFile!)
+                              : (_existingImageUrl != null
+                                      ? NetworkImage(_existingImageUrl!)
+                                      : null)
+                                  as ImageProvider?,
+                      child:
+                          (_imageFile == null && _existingImageUrl == null)
+                              ? const Icon(
+                                Icons.person_add_alt_1,
+                                size: 40,
+                                color: Colors.purple,
+                              )
+                              : null,
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: Colors.purple,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
             // Personal Details Section
             _buildSectionHeader(
               context,
