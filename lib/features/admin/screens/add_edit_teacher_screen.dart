@@ -53,7 +53,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
       _latController.text = teacher.lat?.toString() ?? '';
       _lonController.text = teacher.lon?.toString() ?? '';
       _radiusController.text = teacher.radius?.toString() ?? '';
-      _existingImageUrl = teacher.user?.profileImageUrl;
+      _existingImageUrl = teacher.user?.avatar;
     }
   }
 
@@ -61,24 +61,23 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
     final picker = ImagePicker();
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
-      builder:
-          (context) => SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.photo_library),
-                  title: const Text('Gallery'),
-                  onTap: () => Navigator.pop(context, ImageSource.gallery),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.camera_alt),
-                  title: const Text('Camera'),
-                  onTap: () => Navigator.pop(context, ImageSource.camera),
-                ),
-              ],
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Gallery'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
-          ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Camera'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
     );
 
     if (source != null) {
@@ -252,21 +251,19 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                     child: CircleAvatar(
                       radius: 60,
                       backgroundColor: Colors.purple.withOpacity(0.1),
-                      backgroundImage:
-                          _imageFile != null
-                              ? FileImage(_imageFile!)
-                              : (_existingImageUrl != null
-                                      ? NetworkImage(_existingImageUrl!)
-                                      : null)
-                                  as ImageProvider?,
-                      child:
-                          (_imageFile == null && _existingImageUrl == null)
-                              ? const Icon(
-                                Icons.person_add_alt_1,
-                                size: 40,
-                                color: Colors.purple,
-                              )
-                              : null,
+                      backgroundImage: _imageFile != null
+                          ? FileImage(_imageFile!)
+                          : (_existingImageUrl != null
+                                    ? NetworkImage(_existingImageUrl!)
+                                    : null)
+                                as ImageProvider?,
+                      child: (_imageFile == null && _existingImageUrl == null)
+                          ? const Icon(
+                              Icons.person_add_alt_1,
+                              size: 40,
+                              color: Colors.purple,
+                            )
+                          : null,
                     ),
                   ),
                   Positioned(

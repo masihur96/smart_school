@@ -43,7 +43,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
       _phoneController.text = s.user?.phone ?? s.guardianContact;
       _selectedClass = s.classId.isEmpty ? null : s.classId;
       _selectedSection = s.sectionId.isEmpty ? null : s.sectionId;
-      _existingImageUrl = s.user?.profileImageUrl;
+      _existingImageUrl = s.user?.avatar;
     }
   }
 
@@ -51,24 +51,23 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     final picker = ImagePicker();
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
-      builder:
-          (context) => SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.photo_library),
-                  title: const Text('Gallery'),
-                  onTap: () => Navigator.pop(context, ImageSource.gallery),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.camera_alt),
-                  title: const Text('Camera'),
-                  onTap: () => Navigator.pop(context, ImageSource.camera),
-                ),
-              ],
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Gallery'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
-          ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Camera'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
     );
 
     if (source != null) {
@@ -174,21 +173,19 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                     child: CircleAvatar(
                       radius: 60,
                       backgroundColor: Colors.purple.withOpacity(0.1),
-                      backgroundImage:
-                          _imageFile != null
-                              ? FileImage(_imageFile!)
-                              : (_existingImageUrl != null
-                                      ? NetworkImage(_existingImageUrl!)
-                                      : null)
-                                  as ImageProvider?,
-                      child:
-                          (_imageFile == null && _existingImageUrl == null)
-                              ? const Icon(
-                                Icons.person_add_alt_1,
-                                size: 40,
-                                color: Colors.purple,
-                              )
-                              : null,
+                      backgroundImage: _imageFile != null
+                          ? FileImage(_imageFile!)
+                          : (_existingImageUrl != null
+                                    ? NetworkImage(_existingImageUrl!)
+                                    : null)
+                                as ImageProvider?,
+                      child: (_imageFile == null && _existingImageUrl == null)
+                          ? const Icon(
+                              Icons.person_add_alt_1,
+                              size: 40,
+                              color: Colors.purple,
+                            )
+                          : null,
                     ),
                   ),
                   Positioned(
@@ -345,10 +342,15 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                   ? const SizedBox(
                       height: 24,
                       width: 24,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
                     )
                   : Text(
-                      widget.student != null ? 'Update Student' : 'Save Student',
+                      widget.student != null
+                          ? 'Update Student'
+                          : 'Save Student',
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
             ),

@@ -44,24 +44,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final picker = ImagePicker();
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
-      builder:
-          (context) => SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.photo_library),
-                  title: const Text('Gallery'),
-                  onTap: () => Navigator.pop(context, ImageSource.gallery),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.camera_alt),
-                  title: const Text('Camera'),
-                  onTap: () => Navigator.pop(context, ImageSource.camera),
-                ),
-              ],
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Gallery'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
-          ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Camera'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
     );
 
     if (source != null) {
@@ -73,10 +72,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           _imageFile = File(pickedFile.path);
         });
-        
+
         final auth = context.read<AuthNotifier>();
         final success = await auth.uploadProfileImage(File(pickedFile.path));
-        
+
         if (success && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -326,24 +325,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: Colors.white,
                     shape: BoxShape.circle,
                   ),
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundColor: theme.primaryColor.withOpacity(0.1),
-                    backgroundImage:
-                        _imageFile != null
-                            ? FileImage(_imageFile!)
-                            : (user.profileImageUrl != null
-                                    ? NetworkImage(user.profileImageUrl!)
+                  child: GestureDetector(
+                    onTap: () {
+                      print(user.avatar);
+                    },
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundColor: theme.primaryColor.withOpacity(0.1),
+                      backgroundImage: _imageFile != null
+                          ? FileImage(_imageFile!)
+                          : (user.avatar != null
+                                    ? NetworkImage(user.avatar!)
                                     : null)
                                 as ImageProvider?,
-                    child:
-                        (_imageFile == null && user.profileImageUrl == null)
-                            ? Icon(
+                      child: (_imageFile == null && user.avatar == null)
+                          ? Icon(
                               Icons.person,
                               size: 60,
                               color: theme.primaryColor,
                             )
-                            : null,
+                          : null,
+                    ),
                   ),
                 ),
                 if (user.role == UserRole.admin)
