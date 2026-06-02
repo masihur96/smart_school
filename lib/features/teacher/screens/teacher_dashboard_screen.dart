@@ -1356,8 +1356,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    print(recentExamList.first.assignments);
-
     final exams = recentExamList.where((exam) {
       if (exam.endDate != null) {
         final end = DateTime(
