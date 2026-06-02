@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/providers/school_provider.dart';
+import 'package:smart_school/features/admin/screens/onboarding_progress_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
-import 'package:smart_school/features/splash_screen.dart';
 
 class AdminRegisterSchoolScreen extends StatefulWidget {
   const AdminRegisterSchoolScreen({Key? key}) : super(key: key);
@@ -53,11 +53,10 @@ class _AdminRegisterSchoolScreenState extends State<AdminRegisterSchoolScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('School registered successfully!')),
       );
-      // Restart splash to re-fetch user and navigate properly
-      Navigator.pushAndRemoveUntil(
+      // Navigate to onboarding progress screen
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const SplashScreen()),
-        (route) => false,
+        MaterialPageRoute(builder: (_) => const OnboardingProgressScreen()),
       );
     } else if (mounted) {
       final error = context.read<AdminSchoolNotifier>().error;
