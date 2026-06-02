@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/features/admin/screens/register_school_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -46,15 +47,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
         schoolId: const Uuid().v4(),
         phone: phone,
       );
-
-      if (mounted) {
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
+      
+      if (mounted && success) {
+        // Auto Login
+        await context.read<AuthNotifier>().login(email, password);
+        
+        if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Registration successful! Please login.'),
+              content: Text('Registration successful! Setting up your school...'),
             ),
           );
-          Navigator.pop(context);
+          
+          // Navigate to Register School Screen
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const AdminRegisterSchoolScreen()),
+          );
         }
       }
     }

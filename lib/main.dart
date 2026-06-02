@@ -17,6 +17,7 @@ import 'features/admin/providers/setup_provider.dart';
 import 'features/admin/providers/student_provider.dart';
 import 'features/admin/providers/teacher_provider.dart';
 import 'features/admin/providers/admin_dashboard_provider.dart';
+import 'features/admin/providers/onboarding_provider.dart';
 import 'features/admin/providers/attendance_management_provider.dart';
 import 'features/auth/data/datasources/auth_remote_data_source.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
@@ -145,6 +146,23 @@ void main() async {
         ChangeNotifierProvider(create: (_) => NotificationNotifier()),
         ChangeNotifierProvider(create: (_) => MarqueeProvider()),
         ChangeNotifierProvider(create: (_) => SchoolManagementNotifier()),
+        ChangeNotifierProxyProvider4<ClassSetupNotifier, SectionSetupNotifier,
+            SubjectSetupNotifier, AuthNotifier, OnboardingNotifier>(
+          create: (context) => OnboardingNotifier(
+            classNotifier: context.read<ClassSetupNotifier>(),
+            sectionNotifier: context.read<SectionSetupNotifier>(),
+            subjectNotifier: context.read<SubjectSetupNotifier>(),
+            authNotifier: context.read<AuthNotifier>(),
+          ),
+          update: (context, classSet, sectionSet, subjectSet, auth, previous) =>
+              previous ??
+              OnboardingNotifier(
+                classNotifier: classSet,
+                sectionNotifier: sectionSet,
+                subjectNotifier: subjectSet,
+                authNotifier: auth,
+              ),
+        ),
       ],
       child: const MyApp(),
     ),
