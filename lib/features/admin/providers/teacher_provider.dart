@@ -1,4 +1,6 @@
 import 'dart:developer';
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_school/models/user_model.dart';
 import '../../../models/teacher_model.dart';
@@ -195,6 +197,7 @@ class TeachersNotifier extends ChangeNotifier {
     double? lat,
     double? lon,
     double? radius,
+    File? imageFile,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -203,7 +206,7 @@ class TeachersNotifier extends ChangeNotifier {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
 
-      final data = {
+      final Map<String, dynamic> dataMap = {
         "name": name,
         "email": email,
         "password": password,
@@ -219,10 +222,22 @@ class TeachersNotifier extends ChangeNotifier {
         if (radius != null) "radius": radius,
       };
 
+      dynamic requestData = dataMap;
+
+      if (imageFile != null) {
+        requestData = FormData.fromMap({
+          ...dataMap,
+          'image': await MultipartFile.fromFile(
+            imageFile.path,
+            filename: imageFile.path.split('/').last,
+          ),
+        });
+      }
+
       final response = await DataProvider().performRequest(
         'POST',
         APIPath.register,
-        data: data,
+        data: requestData,
         header: {'Authorization': 'Bearer $token'},
       );
 
@@ -268,6 +283,7 @@ class TeachersNotifier extends ChangeNotifier {
     double? lat,
     double? lon,
     double? radius,
+    File? imageFile,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -276,7 +292,7 @@ class TeachersNotifier extends ChangeNotifier {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
 
-      final data = {
+      final Map<String, dynamic> dataMap = {
         "name": name,
         "email": email,
         "phone": phone,
@@ -288,10 +304,22 @@ class TeachersNotifier extends ChangeNotifier {
         if (radius != null) "radius": radius,
       };
 
+      dynamic requestData = dataMap;
+
+      if (imageFile != null) {
+        requestData = FormData.fromMap({
+          ...dataMap,
+          'image': await MultipartFile.fromFile(
+            imageFile.path,
+            filename: imageFile.path.split('/').last,
+          ),
+        });
+      }
+
       final response = await DataProvider().performRequest(
         'PUT',
         '${APIPath.fetchUsers}/$userId',
-        data: data,
+        data: requestData,
         header: {'Authorization': 'Bearer $token'},
       );
 
