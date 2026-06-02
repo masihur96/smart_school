@@ -1,5 +1,7 @@
 import 'dart:developer';
+import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
 
@@ -89,6 +91,7 @@ class RoutineNotifier extends ChangeNotifier {
     String? className,
     String? sectionName,
     List<String> receiverUuids = const [],
+    File? routineFile,
   }) async {
     log(
       'Attempting to add routine to API: classId=$classId, sectionId=$sectionId',
@@ -103,15 +106,27 @@ class RoutineNotifier extends ChangeNotifier {
         throw Exception('No auth token found');
       }
 
-      final payload = entry.toJson();
+      final Map<String, dynamic> dataMap = entry.toJson();
+      dynamic requestData = dataMap;
+
+      if (routineFile != null) {
+        requestData = FormData.fromMap({
+          ...dataMap,
+          'file': await MultipartFile.fromFile(
+            routineFile.path,
+            filename: routineFile.path.split('/').last,
+          ),
+        });
+      }
+
       log(
-        'Performing POST request to ${APIPath.createRoutine} with payload: $payload',
+        'Performing POST request to ${APIPath.createRoutine} with payload: $dataMap',
       );
 
       final response = await DataProvider().performRequest(
         'POST',
         APIPath.createRoutine,
-        data: payload,
+        data: requestData,
         header: {'Authorization': 'Bearer $token'},
       );
 
@@ -178,6 +193,7 @@ class RoutineNotifier extends ChangeNotifier {
     String? className,
     String? sectionName,
     List<String> receiverUuids = const [],
+    File? routineFile,
   }) async {
     if (entry.id == null) throw Exception('Routine ID is required for update');
     log('Attempting to update routine in API: id=${entry.id}');
@@ -188,15 +204,27 @@ class RoutineNotifier extends ChangeNotifier {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
 
-      final payload = entry.toJson();
+      final Map<String, dynamic> dataMap = entry.toJson();
+      dynamic requestData = dataMap;
+
+      if (routineFile != null) {
+        requestData = FormData.fromMap({
+          ...dataMap,
+          'file': await MultipartFile.fromFile(
+            routineFile.path,
+            filename: routineFile.path.split('/').last,
+          ),
+        });
+      }
+
       log(
-        'Performing PUT request to ${APIPath.createRoutine}/${entry.id} with payload: $payload',
+        'Performing PUT request to ${APIPath.createRoutine}/${entry.id} with payload: $dataMap',
       );
 
       final response = await DataProvider().performRequest(
         'PUT',
         '${APIPath.createRoutine}/${entry.id}',
-        data: payload,
+        data: requestData,
         header: {'Authorization': 'Bearer $token'},
       );
 

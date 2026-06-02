@@ -603,6 +603,7 @@ class RoutineEntry {
   final String subjectId;
   final String teacherId;
   final String? roomNumber;
+  final String? fileUrl;
   final ClassRoom? classEntity;
   final Subject? subjectEntity;
   final Section? sectionEntity;
@@ -619,6 +620,7 @@ class RoutineEntry {
     required this.subjectId,
     required this.teacherId,
     this.roomNumber,
+    this.fileUrl,
     this.classEntity,
     this.subjectEntity,
     this.sectionEntity,
@@ -641,6 +643,7 @@ class RoutineEntry {
       subjectId: json['subjectId'] ?? '',
       teacherId: json['teacherId'] ?? '',
       roomNumber: json['roomNumber'],
+      fileUrl: json['fileUrl'] ?? json['file_url'],
       classEntity: json['classEntity'] != null
           ? ClassRoom.fromJson(json['classEntity'])
           : null,
@@ -671,6 +674,7 @@ class RoutineEntry {
       'subjectId': subjectId,
       'teacherId': teacherId,
       if (roomNumber != null) 'roomNumber': roomNumber,
+      if (fileUrl != null) 'fileUrl': fileUrl,
       'deletedAt': deletedAt?.toIso8601String(),
     };
     log('Serializing RoutineEntry to JSON: $data');
