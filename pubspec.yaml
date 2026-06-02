@@ -59,6 +59,7 @@ dependencies:
   local_auth: ^3.0.1
   shimmer: ^3.0.0
   rename_app: ^1.6.6
+  flutter_tts: ^4.2.5
 
 
 dev_dependencies:
