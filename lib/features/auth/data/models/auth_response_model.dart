@@ -12,6 +12,7 @@ class AuthResponseModel {
   final String? rollNumber;
   final String? designation;
   final bool? isActive;
+  final String? avatar;
   final String? createdAt;
   final double? lat;
   final double? lon;
@@ -30,6 +31,7 @@ class AuthResponseModel {
     this.rollNumber,
     this.designation,
     this.isActive,
+    this.avatar,
     this.createdAt,
     this.lat,
     this.lon,
@@ -50,6 +52,7 @@ class AuthResponseModel {
       rollNumber: json['rollNumber'],
       designation: json['designation'],
       isActive: json['isActive'],
+      avatar: json['avatar']?.toString() ?? json['profileImageUrl']?.toString(),
       createdAt: json['createdAt']?.toString(),
       lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
       lon: json['lon'] != null ? double.tryParse(json['lon'].toString()) : null,
@@ -71,6 +74,7 @@ class AuthResponseModel {
       'rollNumber': rollNumber,
       'designation': designation,
       'isActive': isActive,
+      'avatar': avatar,
       'createdAt': createdAt,
       'lat': lat,
       'lon': lon,
