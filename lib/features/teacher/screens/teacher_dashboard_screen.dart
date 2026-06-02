@@ -244,7 +244,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         ),
       );
     }
-    final adminInfo = provider.dashboardData?.schoolAdminInfo;
+
     return RefreshIndicator(
       onRefresh: () => provider.fetchTeacherDashboard(),
       child: SingleChildScrollView(
