@@ -61,15 +61,54 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
     super.initState();
     _tabController = TabController(length: _days.length, vsync: this);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Try to auto-select if data is already available in the provider
+    final classNotifier = context.read<ClassSetupNotifier>();
+    final sectionNotifier = context.read<SectionSetupNotifier>();
+    if (classNotifier.classes.isNotEmpty) {
+      _selectedClassId = classNotifier.classes.first.id;
+      final filteredSections = sectionNotifier.sections
+          .where((s) => s.classId == _selectedClassId)
+          .toList();
+      if (filteredSections.isNotEmpty) {
+        _selectedSectionId = filteredSections.first.id;
+      }
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final authNotifier = context.read<AuthNotifier>();
       final schoolId = authNotifier.user?.schoolId;
 
       if (schoolId != null) {
         log('Initiating data fetch for routine management: schoolId=$schoolId');
-        context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
-        context.read<TeachersNotifier>().fetchTeachers();
-        context.read<RoutineNotifier>().fetchAllRoutines(schoolId);
+
+        // Fetch classes and sections first to enable auto-selection if not already selected
+        await Future.wait([
+          classNotifier.fetchClasses(schoolId),
+          sectionNotifier.fetchSections(),
+        ]);
+
+        if (mounted &&
+            _selectedClassId == null &&
+            classNotifier.classes.isNotEmpty) {
+          setState(() {
+            _selectedClassId = classNotifier.classes.first.id;
+            final filteredSections = sectionNotifier.sections
+                .where((s) => s.classId == _selectedClassId)
+                .toList();
+            if (filteredSections.isNotEmpty) {
+              _selectedSectionId = filteredSections.first.id;
+            }
+          });
+        }
+
+        // Fetch other dependencies
+        if (mounted) {
+          Future.wait([
+            context.read<SubjectSetupNotifier>().fetchSubjects(schoolId),
+            context.read<TeachersNotifier>().fetchTeachers(),
+            context.read<RoutineNotifier>().fetchAllRoutines(schoolId),
+          ]);
+        }
       } else {
         log(
           'Warning: No schoolId found in AuthNotifier during routine management init',
