@@ -1,9 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 
+import 'package:smart_school/core/utils/teacher_attendance_pdf_helper.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/attendance_management_provider.dart';
 
 class TeacherAttendanceManagementScreen extends StatefulWidget {
@@ -59,6 +63,13 @@ class _TeacherAttendanceManagementScreenState
         title: const Text("Teacher Attendance"),
         backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            onPressed: () => _exportToPdf(context),
+            icon: const Icon(Icons.picture_as_pdf),
+            tooltip: "Export PDF",
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -256,6 +267,32 @@ class _TeacherAttendanceManagementScreenState
     final localDate = DateTime.parse(utcDate).toLocal();
 
     return DateFormat('hh:mm a').format(localDate);
+  }
+
+  Future<void> _exportToPdf(BuildContext context) async {
+    final provider = context.read<AttendanceManagementProvider>();
+    final authProvider = context.read<AuthNotifier>();
+
+    if (provider.teacherAttendance.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No attendance records to export")),
+      );
+      return;
+    }
+
+    try {
+      await TeacherAttendancePdfHelper.generateAttendancePdf(
+        attendanceList: provider.teacherAttendance,
+        schoolName: authProvider.user?.school?.name ?? "Smart School",
+        startDate: _selectedDateRange?.start,
+        endDate: _selectedDateRange?.end,
+      );
+    } catch (e, stack) {
+      log("Error generating PDF: $e\n$stack");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to generate PDF: $e")),
+      );
+    }
   }
 
   Widget _buildDetailItem(
