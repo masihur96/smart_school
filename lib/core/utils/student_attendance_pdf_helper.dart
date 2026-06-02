@@ -40,10 +40,9 @@ class StudentAttendancePdfHelper {
             ),
             pw.SizedBox(height: 20),
             _buildAttendanceTable(attendanceList),
-            pw.SizedBox(height: 20),
-            _buildFooter(context),
           ];
         },
+        footer: (pw.Context context) => _buildFooter(context),
       ),
     );
 
