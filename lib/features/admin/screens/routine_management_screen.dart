@@ -217,7 +217,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                             .map(
                               (c) => DropdownMenuItem(
                                 value: c.id,
-                                child: Text(c.name),
+                                child: Text(c.name,style: TextStyle(color: AppColors.white),),
                               ),
                             )
                             .toList(),
@@ -238,12 +238,12 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                           if (filteredSections.isNotEmpty)
                             const DropdownMenuItem(
                               value: null,
-                              child: Text('All Sections'),
+                              child: Text('All Sections',style: TextStyle(color: AppColors.white),),
                             ),
                           ...filteredSections.map(
                             (s) => DropdownMenuItem(
                               value: s.id,
-                              child: Text(s.name),
+                              child: Text(s.name,style: TextStyle(color: AppColors.white),),
                             ),
                           ),
                         ],
