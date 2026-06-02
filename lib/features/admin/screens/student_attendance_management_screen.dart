@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -416,17 +418,22 @@ class _StudentAttendanceManagementScreenState
     }
 
     final className = _selectedClassId != null
-        ? classProvider.classes.firstWhere((c) => c.id == _selectedClassId).name
+        ? classProvider.classes
+            .cast<ClassRoom?>()
+            .firstWhere((c) => c?.id == _selectedClassId, orElse: () => null)
+            ?.name
         : null;
     final sectionName = _selectedSectionId != null
         ? sectionProvider.sections
-            .firstWhere((s) => s.id == _selectedSectionId)
-            .name
+            .cast<Section?>()
+            .firstWhere((s) => s?.id == _selectedSectionId, orElse: () => null)
+            ?.name
         : null;
     final subjectName = _selectedSubjectId != null
         ? subjectProvider.subjects
-            .firstWhere((s) => s.id == _selectedSubjectId)
-            .name
+            .cast<Subject?>()
+            .firstWhere((s) => s?.id == _selectedSubjectId, orElse: () => null)
+            ?.name
         : null;
 
     try {
@@ -439,7 +446,8 @@ class _StudentAttendanceManagementScreenState
         startDate: _startDate,
         endDate: _endDate,
       );
-    } catch (e) {
+    } catch (e, stack) {
+      log("Error generating PDF: $e\n$stack");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed to generate PDF: $e")),
       );

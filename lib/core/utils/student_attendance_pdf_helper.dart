@@ -15,11 +15,19 @@ class StudentAttendancePdfHelper {
     required String schoolName,
   }) async {
     final pdf = pw.Document();
+    
+    // Use a standard font to avoid null-check issues in default font lookup
+    final font = await PdfGoogleFonts.robotoRegular();
+    final boldFont = await PdfGoogleFonts.robotoBold();
 
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
+        theme: pw.ThemeData.withFont(
+          base: font,
+          bold: boldFont,
+        ),
         build: (pw.Context context) {
           return [
             _buildHeader(
@@ -83,7 +91,9 @@ class StudentAttendancePdfHelper {
               children: [
                 pw.Text('Date: ${DateFormat('MMM dd, yyyy').format(DateTime.now())}'),
                 if (startDate != null && endDate != null)
-                  pw.Text('Period: ${DateFormat('MMM dd').format(startDate)} - ${DateFormat('MMM dd, yyyy').format(endDate)}'),
+                  pw.Text(
+                    'Period: ${DateFormat('MMM dd').format(startDate)} - ${DateFormat('MMM dd, yyyy').format(endDate)}',
+                  ),
                 pw.SizedBox(height: 4),
               ],
             ),
@@ -100,19 +110,23 @@ class StudentAttendancePdfHelper {
       headers: headers,
       data: attendanceList.map((record) {
         String formattedDate = record.date;
-        try {
-          final parsedDate = DateTime.parse(record.date).toLocal();
-          formattedDate = DateFormat('dd MMM yyyy').format(parsedDate);
-        } catch (e) {
-          // Keep as is
+        if (record.date.isNotEmpty) {
+          try {
+            final parsedDate = DateTime.parse(record.date).toLocal();
+            formattedDate = DateFormat('dd MMM yyyy').format(parsedDate);
+          } catch (e) {
+            // Keep original string if parsing fails
+          }
+        } else {
+          formattedDate = 'N/A';
         }
 
         return [
           formattedDate,
-          record.studentName,
+          record.studentName.isNotEmpty ? record.studentName : 'N/A',
           record.subjectInfo?.name ?? 'N/A',
           record.teacherInfo?.name ?? 'N/A',
-          record.status.toUpperCase(),
+          record.status.isNotEmpty ? record.status.toUpperCase() : 'N/A',
         ];
       }).toList(),
       border: pw.TableBorder.all(color: PdfColors.grey300),
