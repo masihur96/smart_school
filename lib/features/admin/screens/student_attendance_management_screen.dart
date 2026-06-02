@@ -5,6 +5,8 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/models/school_models.dart';
 
+import 'package:smart_school/core/utils/student_attendance_pdf_helper.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/attendance_management_provider.dart';
 
 class StudentAttendanceManagementScreen extends StatefulWidget {
@@ -127,6 +129,13 @@ class _StudentAttendanceManagementScreenState
         backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            onPressed: () => _exportToPdf(context),
+            icon: const Icon(Icons.picture_as_pdf),
+            tooltip: "Export PDF",
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -390,6 +399,51 @@ class _StudentAttendanceManagementScreenState
         ],
       ),
     );
+  }
+
+  Future<void> _exportToPdf(BuildContext context) async {
+    final attendanceProvider = context.read<AttendanceManagementProvider>();
+    final authProvider = context.read<AuthNotifier>();
+    final classProvider = context.read<ClassSetupNotifier>();
+    final sectionProvider = context.read<SectionSetupNotifier>();
+    final subjectProvider = context.read<SubjectSetupNotifier>();
+
+    if (attendanceProvider.studentAttendance.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No attendance records to export")),
+      );
+      return;
+    }
+
+    final className = _selectedClassId != null
+        ? classProvider.classes.firstWhere((c) => c.id == _selectedClassId).name
+        : null;
+    final sectionName = _selectedSectionId != null
+        ? sectionProvider.sections
+            .firstWhere((s) => s.id == _selectedSectionId)
+            .name
+        : null;
+    final subjectName = _selectedSubjectId != null
+        ? subjectProvider.subjects
+            .firstWhere((s) => s.id == _selectedSubjectId)
+            .name
+        : null;
+
+    try {
+      await StudentAttendancePdfHelper.generateAttendancePdf(
+        attendanceList: attendanceProvider.studentAttendance,
+        schoolName: authProvider.user?.school?.name ?? "Smart School",
+        className: className,
+        sectionName: sectionName,
+        subjectName: subjectName,
+        startDate: _startDate,
+        endDate: _endDate,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to generate PDF: $e")),
+      );
+    }
   }
 
   String formatDate(String? utcDate) {
