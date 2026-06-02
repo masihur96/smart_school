@@ -193,7 +193,7 @@ class RoutineNotifier extends ChangeNotifier {
     String? className,
     String? sectionName,
     List<String> receiverUuids = const [],
-    File? routineFile,
+
   }) async {
     if (entry.id == null) throw Exception('Routine ID is required for update');
     log('Attempting to update routine in API: id=${entry.id}');
@@ -207,15 +207,6 @@ class RoutineNotifier extends ChangeNotifier {
       final Map<String, dynamic> dataMap = entry.toJson();
       dynamic requestData = dataMap;
 
-      if (routineFile != null) {
-        requestData = FormData.fromMap({
-          ...dataMap,
-          'file': await MultipartFile.fromFile(
-            routineFile.path,
-            filename: routineFile.path.split('/').last,
-          ),
-        });
-      }
 
       log(
         'Performing PUT request to ${APIPath.createRoutine}/${entry.id} with payload: $dataMap',

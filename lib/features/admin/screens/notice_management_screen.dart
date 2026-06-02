@@ -392,51 +392,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                   const SizedBox(height: 12),
                   GestureDetector(
                     onTap: () async {
-                      final source = await showModalBottomSheet<String>(
-                        context: context,
-                        builder:
-                            (context) => SafeArea(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ListTile(
-                                    leading: const Icon(Icons.photo_library),
-                                    title: const Text('Gallery'),
-                                    onTap:
-                                        () => Navigator.pop(context, 'gallery'),
-                                  ),
-                                  ListTile(
-                                    leading: const Icon(Icons.camera_alt),
-                                    title: const Text('Camera'),
-                                    onTap:
-                                        () => Navigator.pop(context, 'camera'),
-                                  ),
-                                  ListTile(
-                                    leading: const Icon(Icons.insert_drive_file),
-                                    title: const Text('Document / Any File'),
-                                    onTap: () => Navigator.pop(context, 'file'),
-                                  ),
-                                ],
-                              ),
-                            ),
-                      );
-
-                      if (source == 'gallery' || source == 'camera') {
-                        final picker = ImagePicker();
-                        final pickedFile = await picker.pickImage(
-                          source:
-                              source == 'gallery'
-                                  ? ImageSource.gallery
-                                  : ImageSource.camera,
-                          imageQuality: 50,
-                        );
-                        if (pickedFile != null) {
-                          setState(() {
-                            attachedFile = File(pickedFile.path);
-                            attachedFileName = pickedFile.name;
-                          });
-                        }
-                      } else if (source == 'file') {
+            
                         final result = await FilePicker.pickFiles();
                         if (result != null && result.files.single.path != null) {
                           setState(() {
@@ -444,7 +400,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                             attachedFileName = result.files.single.name;
                           });
                         }
-                      }
+
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(

@@ -807,8 +807,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
   TimeOfDay _endTime = const TimeOfDay(hour: 10, minute: 0);
   final _roomController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  File? _routineFile;
-  String? _selectedFileName;
+
 
   @override
   void initState() {
@@ -820,65 +819,13 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
       _startTime = _parseTime(widget.existingEntry!.startTime);
       _endTime = _parseTime(widget.existingEntry!.endTime);
       _roomController.text = widget.existingEntry!.roomNumber ?? '';
-      _selectedFileName =
-          widget.existingEntry!.fileUrl != null
-              ? 'Existing Attachment'
-              : null;
+
     } else {
       _selectedDay = widget.initialDay;
     }
   }
 
-  Future<void> _pickFile() async {
-    final source = await showModalBottomSheet<String>(
-      context: context,
-      builder:
-          (context) => SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.photo_library),
-                  title: const Text('Gallery'),
-                  onTap: () => Navigator.pop(context, 'gallery'),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.camera_alt),
-                  title: const Text('Camera'),
-                  onTap: () => Navigator.pop(context, 'camera'),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.insert_drive_file),
-                  title: const Text('Document / Any File'),
-                  onTap: () => Navigator.pop(context, 'file'),
-                ),
-              ],
-            ),
-          ),
-    );
 
-    if (source == 'gallery' || source == 'camera') {
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(
-        source: source == 'gallery' ? ImageSource.gallery : ImageSource.camera,
-        imageQuality: 50,
-      );
-      if (pickedFile != null) {
-        setState(() {
-          _routineFile = File(pickedFile.path);
-          _selectedFileName = pickedFile.name;
-        });
-      }
-    } else if (source == 'file') {
-      final result = await FilePicker.pickFiles();
-      if (result != null && result.files.single.path != null) {
-        setState(() {
-          _routineFile = File(result.files.single.path!);
-          _selectedFileName = result.files.single.name;
-        });
-      }
-    }
-  }
 
   TimeOfDay _parseTime(String timeStr) {
     try {
@@ -1001,7 +948,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
           className: className,
           sectionName: sectionName,
           receiverUuids: teacherIds,
-          routineFile: _routineFile,
+
         );
       } else {
         log('Calling addRoutineToAPI from UI');
@@ -1012,7 +959,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
           className: className,
           sectionName: sectionName,
           receiverUuids: teacherIds,
-          routineFile: _routineFile,
+
         );
       }
       if (mounted) {
@@ -1275,78 +1222,6 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // ── Attachment ──
-                      const _SectionLabel(
-                        icon: Icons.attach_file_rounded,
-                        label: 'Attachment (Image/File)',
-                      ),
-                      const SizedBox(height: 10),
-                      InkWell(
-                        onTap: _pickFile,
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: const Color(0xFFEDE9FE)),
-                            borderRadius: BorderRadius.circular(12),
-                            color: Colors.grey[50],
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryAdmin.withOpacity(
-                                    0.1,
-                                  ),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.cloud_upload_outlined,
-                                  size: 20,
-                                  color: AppColors.primaryAdmin,
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Text(
-                                  _selectedFileName ?? 'Upload Routine File',
-                                  style: TextStyle(
-                                    color:
-                                        _selectedFileName != null
-                                            ? AppColors.primaryAdmin
-                                            : Colors.grey[600],
-                                    fontWeight:
-                                        _selectedFileName != null
-                                            ? FontWeight.w600
-                                            : FontWeight.normal,
-                                    fontSize: 14,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              if (_selectedFileName != null)
-                                IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _routineFile = null;
-                                      _selectedFileName = null;
-                                    });
-                                  },
-                                  icon: const Icon(
-                                    Icons.close,
-                                    size: 18,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-
                       // ── Save Button ──
                       SizedBox(
                         width: double.infinity,
