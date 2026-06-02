@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../../models/student_model.dart';
@@ -26,6 +29,8 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   String? _selectedSection;
   bool _obscurePassword = true;
   bool _isLoading = false;
+  File? _imageFile;
+  String? _existingImageUrl;
 
   @override
   void initState() {
@@ -38,6 +43,44 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
       _phoneController.text = s.user?.phone ?? s.guardianContact;
       _selectedClass = s.classId.isEmpty ? null : s.classId;
       _selectedSection = s.sectionId.isEmpty ? null : s.sectionId;
+      _existingImageUrl = s.user?.profileImageUrl;
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder:
+          (context) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Gallery'),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.camera_alt),
+                  title: const Text('Camera'),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                ),
+              ],
+            ),
+          ),
+    );
+
+    if (source != null) {
+      final pickedFile = await picker.pickImage(
+        source: source,
+        imageQuality: 50,
+      );
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+        });
+      }
     }
   }
 
@@ -72,6 +115,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             sectionId: _selectedSection!,
             rollNumber: _rollController.text,
             designation: _aboutController.text,
+            imageFile: _imageFile,
           );
         } else {
           await context.read<StudentsNotifier>().addStudentToAPI(
@@ -85,6 +129,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             sectionId: _selectedSection!,
             rollNumber: _rollController.text,
             designation: _aboutController.text,
+            imageFile: _imageFile,
           );
         }
 
@@ -121,6 +166,54 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
         child: ListView(
           padding: const EdgeInsets.all(24.0),
           children: [
+            Center(
+              child: Stack(
+                children: [
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: CircleAvatar(
+                      radius: 60,
+                      backgroundColor: Colors.purple.withOpacity(0.1),
+                      backgroundImage:
+                          _imageFile != null
+                              ? FileImage(_imageFile!)
+                              : (_existingImageUrl != null
+                                      ? NetworkImage(_existingImageUrl!)
+                                      : null)
+                                  as ImageProvider?,
+                      child:
+                          (_imageFile == null && _existingImageUrl == null)
+                              ? const Icon(
+                                Icons.person_add_alt_1,
+                                size: 40,
+                                color: Colors.purple,
+                              )
+                              : null,
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: Colors.purple,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
             TextFormField(
               controller: _nameController,
               decoration: const InputDecoration(
