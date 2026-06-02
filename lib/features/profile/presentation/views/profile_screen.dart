@@ -73,6 +73,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           _imageFile = File(pickedFile.path);
         });
+        
+        final auth = context.read<AuthNotifier>();
+        final success = await auth.uploadProfileImage(File(pickedFile.path));
+        
+        if (success && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Profile image updated successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(auth.error ?? 'Failed to update profile image'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }
@@ -82,7 +101,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final success = await auth.updateProfile(
       name: _nameController.text.trim(),
       phone: _phoneController.text.trim(),
-      imageFile: _imageFile,
     );
 
     if (success && mounted) {

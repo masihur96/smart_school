@@ -353,7 +353,7 @@ class AuthNotifier extends ChangeNotifier {
   Future<bool> updateProfile({
     required String name,
     required String phone,
-    File? imageFile,
+    String? profileImageUrl,
   }) async {
     _isLoading = true;
     _error = null;
@@ -365,17 +365,12 @@ class AuthNotifier extends ChangeNotifier {
       if (_user == null) throw Exception('No user found');
 
       final Map<String, dynamic> dataMap = {'name': name, 'phone': phone};
-      dynamic requestData = dataMap;
-
-      if (imageFile != null) {
-        requestData = FormData.fromMap({
-          ...dataMap,
-          'image': await MultipartFile.fromFile(
-            imageFile.path,
-            filename: imageFile.path.split('/').last,
-          ),
-        });
+      if (profileImageUrl != null) {
+        dataMap['image'] = profileImageUrl;
+        dataMap['profileImageUrl'] = profileImageUrl;
+        dataMap['avatar'] = profileImageUrl;
       }
+      dynamic requestData = dataMap;
 
       final response = await DataProvider().performRequest(
         'PUT',
@@ -399,6 +394,59 @@ class AuthNotifier extends ChangeNotifier {
     } catch (e) {
       _error = 'Error: $e';
       log('Exception updating profile: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> uploadProfileImage(File imageFile) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          imageFile.path,
+          filename: imageFile.path.split('/').last,
+        ),
+      });
+
+      final response = await DataProvider().performRequest(
+        'POST',
+        'https://smart-school-backend-production.up.railway.app/general/upload',
+        header: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'multipart/form-data',
+        },
+        data: formData,
+      );
+
+      if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
+        final url = response.data['data']['url'];
+        if (url != null) {
+          log('Image uploaded successfully: $url');
+          return await updateProfile(
+            name: _user!.name,
+            phone: _user!.phone ?? '',
+            profileImageUrl: url,
+          );
+        } else {
+          throw Exception('URL not found in response');
+        }
+      } else {
+        _error = 'Failed to upload image: ${response?.statusCode}';
+        log('Error uploading image: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error uploading image: $e';
+      log('Exception uploading image: $e');
       return false;
     } finally {
       _isLoading = false;
