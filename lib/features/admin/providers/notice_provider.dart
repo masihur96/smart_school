@@ -1,5 +1,7 @@
 import 'dart:developer';
+import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
 
@@ -82,6 +84,7 @@ class NoticesNotifier extends ChangeNotifier {
   Future<void> addNoticeToAPI(
     Notice notice, {
     List<String> receiverUuids = const [],
+    File? noticeFile,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -90,10 +93,23 @@ class NoticesNotifier extends ChangeNotifier {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
 
+      final Map<String, dynamic> dataMap = notice.toJson();
+      dynamic requestData = dataMap;
+
+      if (noticeFile != null) {
+        requestData = FormData.fromMap({
+          ...dataMap,
+          'file': await MultipartFile.fromFile(
+            noticeFile.path,
+            filename: noticeFile.path.split('/').last,
+          ),
+        });
+      }
+
       final response = await DataProvider().performRequest(
         'POST',
         APIPath.createNotice,
-        data: notice.toJson(),
+        data: requestData,
         header: {'Authorization': 'Bearer $token'},
       );
 
@@ -149,7 +165,7 @@ class NoticesNotifier extends ChangeNotifier {
   }
 
   // ─── Update ───────────────────────────────────────────────────────────────
-  Future<void> updateNoticeOnAPI(Notice updated) async {
+  Future<void> updateNoticeOnAPI(Notice updated, {File? noticeFile}) async {
     if (updated.id == null) throw Exception('Notice id is required to update');
     _isLoading = true;
     notifyListeners();
@@ -158,10 +174,23 @@ class NoticesNotifier extends ChangeNotifier {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
 
+      final Map<String, dynamic> dataMap = updated.toJson();
+      dynamic requestData = dataMap;
+
+      if (noticeFile != null) {
+        requestData = FormData.fromMap({
+          ...dataMap,
+          'file': await MultipartFile.fromFile(
+            noticeFile.path,
+            filename: noticeFile.path.split('/').last,
+          ),
+        });
+      }
+
       final response = await DataProvider().performRequest(
         'PUT',
         '${APIPath.createNotice}/${updated.id}',
-        data: updated.toJson(),
+        data: requestData,
         header: {'Authorization': 'Bearer $token'},
       );
 

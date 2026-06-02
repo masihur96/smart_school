@@ -1,5 +1,10 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../models/school_models.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -151,6 +156,27 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
               const SizedBox(height: 6),
               _infoRow(Icons.warning_amber_rounded, 'Priority', 'Important'),
             ],
+            if (notice.fileUrl != null) ...[
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final url = Uri.parse(notice.fileUrl!);
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url);
+                  }
+                },
+                icon: const Icon(Icons.attach_file, size: 16),
+                label: const Text('View Attachment'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple.withOpacity(0.1),
+                  foregroundColor: Colors.purple,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
         actions: [
@@ -184,22 +210,24 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
       context,
       initialPostedBy: user?.name ?? '',
       schoolId: user?.schoolId ?? '',
-      onSubmit: (notice) async {
+      onSubmit: (notice, file) async {
         List<String> receiverUuids = [];
         final audience = notice.targetAudience ?? 'All';
 
-        final teacherIds = context
-            .read<TeachersNotifier>()
-            .teachers
-            .map((t) => t.userId)
-            .where((id) => id.isNotEmpty)
-            .toList();
-        final studentIds = context
-            .read<StudentsNotifier>()
-            .students
-            .map((s) => s.userId)
-            .where((id) => id.isNotEmpty)
-            .toList();
+        final teacherIds =
+            context
+                .read<TeachersNotifier>()
+                .teachers
+                .map((t) => t.userId)
+                .where((id) => id.isNotEmpty)
+                .toList();
+        final studentIds =
+            context
+                .read<StudentsNotifier>()
+                .students
+                .map((s) => s.userId)
+                .where((id) => id.isNotEmpty)
+                .toList();
 
         if (audience == 'Students') {
           receiverUuids = studentIds;
@@ -212,6 +240,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
         await context.read<NoticesNotifier>().addNoticeToAPI(
           notice,
           receiverUuids: receiverUuids,
+          noticeFile: file,
         );
       },
       submitLabel: 'Post',
@@ -226,9 +255,10 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
       existing: notice,
       initialPostedBy: notice.postedBy ?? user?.name ?? '',
       schoolId: notice.schoolId ?? user?.schoolId ?? '',
-      onSubmit: (updated) async {
+      onSubmit: (updated, file) async {
         await context.read<NoticesNotifier>().updateNoticeOnAPI(
           updated.copyWith(id: notice.id),
+          noticeFile: file,
         );
       },
       submitLabel: 'Update',
@@ -241,7 +271,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
     Notice? existing,
     required String initialPostedBy,
     required String schoolId,
-    required Future<void> Function(Notice) onSubmit,
+    required Future<void> Function(Notice, File?) onSubmit,
     required String submitLabel,
   }) {
     final titleController = TextEditingController(text: existing?.title ?? '');
@@ -251,6 +281,9 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
     final postedByController = TextEditingController(text: initialPostedBy);
     String selectedAudience = existing?.targetAudience ?? 'Students';
     bool isImportant = existing?.isImportant ?? false;
+    File? attachedFile;
+    String? attachedFileName =
+        existing?.fileUrl != null ? 'Existing Attachment' : null;
 
     showDialog(
       context: context,
@@ -354,6 +387,117 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                     onChanged: (val) =>
                         setState(() => isImportant = val ?? false),
                   ),
+                  const SizedBox(height: 12),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  GestureDetector(
+                    onTap: () async {
+                      final source = await showModalBottomSheet<String>(
+                        context: context,
+                        builder:
+                            (context) => SafeArea(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ListTile(
+                                    leading: const Icon(Icons.photo_library),
+                                    title: const Text('Gallery'),
+                                    onTap:
+                                        () => Navigator.pop(context, 'gallery'),
+                                  ),
+                                  ListTile(
+                                    leading: const Icon(Icons.camera_alt),
+                                    title: const Text('Camera'),
+                                    onTap:
+                                        () => Navigator.pop(context, 'camera'),
+                                  ),
+                                  ListTile(
+                                    leading: const Icon(Icons.insert_drive_file),
+                                    title: const Text('Document / Any File'),
+                                    onTap: () => Navigator.pop(context, 'file'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                      );
+
+                      if (source == 'gallery' || source == 'camera') {
+                        final picker = ImagePicker();
+                        final pickedFile = await picker.pickImage(
+                          source:
+                              source == 'gallery'
+                                  ? ImageSource.gallery
+                                  : ImageSource.camera,
+                          imageQuality: 50,
+                        );
+                        if (pickedFile != null) {
+                          setState(() {
+                            attachedFile = File(pickedFile.path);
+                            attachedFileName = pickedFile.name;
+                          });
+                        }
+                      } else if (source == 'file') {
+                        final result = await FilePicker.pickFiles();
+                        if (result != null && result.files.single.path != null) {
+                          setState(() {
+                            attachedFile = File(result.files.single.path!);
+                            attachedFileName = result.files.single.name;
+                          });
+                        }
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.attach_file,
+                            color:
+                                attachedFileName != null
+                                    ? Colors.purple
+                                    : Colors.grey,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              attachedFileName ?? 'Attach File/Image',
+                              style: TextStyle(
+                                color:
+                                    attachedFileName != null
+                                        ? Colors.purple
+                                        : Colors.grey.shade600,
+                                fontSize: 14,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (attachedFileName != null)
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  attachedFile = null;
+                                  attachedFileName = null;
+                                });
+                              },
+                              child: const Icon(
+                                Icons.close,
+                                size: 18,
+                                color: Colors.red,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -371,19 +515,20 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              icon: context.watch<NoticesNotifier>().isLoading
-                  ? const SizedBox(
-                      height: 16,
-                      width: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
+              icon:
+                  context.watch<NoticesNotifier>().isLoading
+                      ? const SizedBox(
+                        height: 16,
+                        width: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                      : Icon(
+                        submitLabel == 'Update' ? Icons.save : Icons.send,
+                        size: 18,
                       ),
-                    )
-                  : Icon(
-                      submitLabel == 'Update' ? Icons.save : Icons.send,
-                      size: 18,
-                    ),
               label: Text(submitLabel),
               onPressed: () async {
                 if (titleController.text.isEmpty ||
@@ -405,7 +550,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                   postedBy: postedByController.text.trim(),
                 );
                 try {
-                  await onSubmit(notice);
+                  await onSubmit(notice, attachedFile);
                   if (context.mounted) {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -689,6 +834,13 @@ class _NoticeCard extends StatelessWidget {
                     icon: Icons.person_outline,
                     label: notice.postedBy!,
                     color: Colors.green,
+                  ),
+                const Spacer(),
+                if (notice.fileUrl != null)
+                  const Icon(
+                    Icons.attach_file,
+                    size: 16,
+                    color: Colors.purple,
                   ),
               ],
             ),
