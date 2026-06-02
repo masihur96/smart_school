@@ -531,6 +531,7 @@ class Notice {
   targetAudience; // API field: "Students", "Teachers", "Parents", "All"
   final String? postedBy; // Name of poster, e.g. "Principal"
   final bool isImportant;
+  final String? fileUrl;
 
   Notice({
     this.id,
@@ -541,6 +542,7 @@ class Notice {
     this.targetAudience,
     this.postedBy,
     this.isImportant = false,
+    this.fileUrl,
     this.deletedAt,
   });
 
@@ -556,6 +558,7 @@ class Notice {
     targetAudience: json['targetAudience'] ?? json['audience'],
     postedBy: json['postedBy'],
     isImportant: json['isImportant'] ?? json['isImportent'] ?? false,
+    fileUrl: json['fileUrl'] ?? json['file_url'],
     deletedAt: json['deletedAt'] != null
         ? DateTime.tryParse(json['deletedAt'].toString())
         : null,
@@ -568,6 +571,7 @@ class Notice {
     'schoolId': schoolId,
     'postedBy': postedBy,
     'isImportent': isImportant, // API uses this spelling
+    if (fileUrl != null) 'fileUrl': fileUrl,
     'deletedAt': deletedAt?.toIso8601String(),
   };
 
@@ -580,6 +584,7 @@ class Notice {
     String? targetAudience,
     String? postedBy,
     bool? isImportant,
+    String? fileUrl,
   }) => Notice(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -589,6 +594,7 @@ class Notice {
     targetAudience: targetAudience ?? this.targetAudience,
     postedBy: postedBy ?? this.postedBy,
     isImportant: isImportant ?? this.isImportant,
+    fileUrl: fileUrl ?? this.fileUrl,
   );
 }
 
