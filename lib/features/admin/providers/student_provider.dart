@@ -232,17 +232,40 @@ class StudentsNotifier extends ChangeNotifier {
       "designation": designation,
     };
 
-    dynamic requestData = dataMap;
-
     if (imageFile != null) {
-      requestData = FormData.fromMap({
-        ...dataMap,
-        'image': await MultipartFile.fromFile(
+      final uploadFormData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
           imageFile.path,
           filename: imageFile.path.split('/').last,
         ),
       });
+
+      final uploadResponse = await DataProvider().performRequest(
+        'POST',
+        'https://smart-school-backend-production.up.railway.app/general/upload',
+        header: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'multipart/form-data',
+        },
+        data: uploadFormData,
+      );
+
+      if (uploadResponse != null &&
+          (uploadResponse.statusCode == 200 || uploadResponse.statusCode == 201)) {
+        final url = uploadResponse.data['data']['url'];
+        if (url != null) {
+          dataMap['image'] = url;
+          dataMap['avatar'] = url;
+          dataMap['profileImageUrl'] = url;
+        } else {
+          throw Exception('Failed to retrieve image URL from upload response');
+        }
+      } else {
+        throw Exception('Failed to upload image: ${uploadResponse?.data}');
+      }
     }
+
+    dynamic requestData = dataMap;
 
     final response = await DataProvider().performRequest(
       'POST',
@@ -290,17 +313,40 @@ class StudentsNotifier extends ChangeNotifier {
       dataMap["password"] = password;
     }
 
-    dynamic requestData = dataMap;
-
     if (imageFile != null) {
-      requestData = FormData.fromMap({
-        ...dataMap,
-        'image': await MultipartFile.fromFile(
+      final uploadFormData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
           imageFile.path,
           filename: imageFile.path.split('/').last,
         ),
       });
+
+      final uploadResponse = await DataProvider().performRequest(
+        'POST',
+        'https://smart-school-backend-production.up.railway.app/general/upload',
+        header: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'multipart/form-data',
+        },
+        data: uploadFormData,
+      );
+
+      if (uploadResponse != null &&
+          (uploadResponse.statusCode == 200 || uploadResponse.statusCode == 201)) {
+        final url = uploadResponse.data['data']['url'];
+        if (url != null) {
+          dataMap['image'] = url;
+          dataMap['avatar'] = url;
+          dataMap['profileImageUrl'] = url;
+        } else {
+          throw Exception('Failed to retrieve image URL from upload response');
+        }
+      } else {
+        throw Exception('Failed to upload image: ${uploadResponse?.data}');
+      }
     }
+
+    dynamic requestData = dataMap;
 
     final response = await DataProvider().performRequest(
       'PUT',
