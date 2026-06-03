@@ -564,7 +564,7 @@ class Notice {
     targetAudience: json['targetAudience'] ?? json['audience'],
     postedBy: json['postedBy'],
     isImportant: json['isImportant'] ?? json['isImportent'] ?? false,
-    fileUrl: json['fileUrl'] ?? json['file_url'],
+    fileUrl: json['avatar'] ?? json['fileUrl'],
     avatar: json['avatar'],
     deletedAt: json['deletedAt'] != null
         ? DateTime.tryParse(json['deletedAt'].toString())
