@@ -402,15 +402,15 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                         fontSize: 14,
                       ),
                     ),
-                    Text(
-                      user?.name ?? 'Student',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
+                    // Text(
+                    //   user?.name ?? 'Student',
+                    //   style: const TextStyle(
+                    //     color: Colors.white,
+                    //     fontSize: 22,
+                    //     fontWeight: FontWeight.bold,
+                    //     letterSpacing: 0.5,
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
