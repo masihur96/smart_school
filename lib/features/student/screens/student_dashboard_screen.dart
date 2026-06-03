@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/core/utils/bounching_dialog.dart';
+import 'package:smart_school/features/ai_tutor/screen/ai_tutor_chat_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
@@ -411,13 +414,83 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                   ],
                 ),
               ),
+              GestureDetector(
+                onTap: () {
+                  _showAIDoctorDialog(context);
+                  // Navigate to profile screen
+                },
+                child: Lottie.asset(
+                  'assets/animation1.json',
+                  width: 80,
+                  fit: BoxFit.fill,
+                  repeat: true,
+                ),
+              ),
             ],
           ),
         ],
       ),
     );
   }
-
+  void _showAIDoctorDialog(
+      BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (context) => BounchingDialog(
+            height: screenSize(context, 1.0),
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  Text(
+                "AI Tutor",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  Image.asset(
+                    'assets/tutor.png',
+                    height: 100,
+                    width: 100,
+                    fit: BoxFit.fill,
+                  ),
+                  Text(
+                    "Ai Tutor is here to help you with your studies! Ask me anything about your subjects, homework, or exams, and I'll do my best to assist you.",
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.deepPurple,
+                        ),
+                        child: Text("Cancel"),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const AiTutorChatScreen()),
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.chat,
+                          color: Colors.white,
+                        ),
+                        label: Text("Start Chat"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            )));
+  }
   Widget _buildAttendanceSection(
     BuildContext context,
     StudentDashboardData? data,
