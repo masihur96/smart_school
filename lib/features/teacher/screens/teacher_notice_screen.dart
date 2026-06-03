@@ -154,6 +154,10 @@ class _TeacherNoticeScreenState extends State<TeacherNoticeScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      if(notice.avatar != null)
+                      Icon(Icons.attachment_outlined, size: 20, color: Colors.grey[600]),
+                      Spacer(),
+
                       Icon(Icons.access_time, size: 14),
                       const SizedBox(width: 4),
                       Text(
