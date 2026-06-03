@@ -1,5 +1,7 @@
 import 'dart:developer';
+import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_school/configs/network/data_provider.dart';
 import 'package:smart_school/core/constants/api_path.dart';
@@ -18,6 +20,7 @@ class AdminSchoolNotifier extends ChangeNotifier {
     required String address,
     required String phone,
     required String email,
+    File? logoFile,
   }) async {
     _isLoading = true;
     _error = null;
@@ -26,6 +29,31 @@ class AdminSchoolNotifier extends ChangeNotifier {
     try {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No authentication token found');
+
+      String? logoUrl;
+      if (logoFile != null) {
+        final uploadFormData = FormData.fromMap({
+          'file': await MultipartFile.fromFile(
+            logoFile.path,
+            filename: logoFile.path.split('/').last,
+          ),
+        });
+
+        final uploadResponse = await DataProvider().performRequest(
+          'POST',
+          'https://smart-school-backend-production.up.railway.app/general/upload',
+          header: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'multipart/form-data',
+          },
+          data: uploadFormData,
+        );
+
+        if (uploadResponse != null &&
+            (uploadResponse.statusCode == 200 || uploadResponse.statusCode == 201)) {
+          logoUrl = uploadResponse.data['data']['url'];
+        }
+      }
 
       final response = await DataProvider().performRequest(
         'POST',
@@ -36,6 +64,7 @@ class AdminSchoolNotifier extends ChangeNotifier {
           "address": address,
           "phone": phone,
           "email": email,
+          if (logoUrl != null) "avatar": logoUrl,
         },
         header: {'Authorization': 'Bearer $token'},
       );

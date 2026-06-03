@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/providers/school_provider.dart';
 import 'package:smart_school/features/admin/screens/onboarding_progress_screen.dart';
@@ -18,6 +21,39 @@ class _AdminRegisterSchoolScreenState extends State<AdminRegisterSchoolScreen> {
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
+  File? _logoFile;
+
+  Future<void> _pickLogo() async {
+    final ImagePicker picker = ImagePicker();
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Gallery'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Camera'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source != null) {
+      final XFile? file = await picker.pickImage(source: source);
+      if (file != null) {
+        setState(() {
+          _logoFile = File(file.path);
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -47,6 +83,7 @@ class _AdminRegisterSchoolScreenState extends State<AdminRegisterSchoolScreen> {
           address: _addressController.text.trim(),
           phone: _phoneController.text.trim(),
           email: _emailController.text.trim(),
+          logoFile: _logoFile,
         );
 
     if (success && mounted) {
@@ -86,6 +123,46 @@ class _AdminRegisterSchoolScreenState extends State<AdminRegisterSchoolScreen> {
                 'Complete your school profile',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: Stack(
+                  children: [
+                    GestureDetector(
+                      onTap: _pickLogo,
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.purple.withOpacity(0.1),
+                        backgroundImage:
+                            _logoFile != null ? FileImage(_logoFile!) : null,
+                        child: _logoFile == null
+                            ? const Icon(
+                                Icons.add_a_photo,
+                                size: 30,
+                                color: Colors.purple,
+                              )
+                            : null,
+                      ),
+                    ),
+                    if (_logoFile != null)
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.purple,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.edit,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
               const SizedBox(height: 24),
               TextFormField(

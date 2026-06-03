@@ -7,6 +7,7 @@ class School {
   final String address;
   final String phone;
   final String email;
+  final String avatar;
   final bool isActive;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -16,6 +17,7 @@ class School {
     required this.id,
     required this.schoolId,
     required this.name,
+    required this.avatar,
     required this.address,
     required this.phone,
     required this.email,
@@ -29,6 +31,7 @@ class School {
     id: json['id'] ?? '',
     schoolId: json['schoolId'] ?? '',
     name: json['name'] ?? '',
+    avatar: json['avatar'] ?? '',
     address: json['address'] ?? '',
     phone: json['phone'] ?? '',
     email: json['email'] ?? '',
@@ -48,6 +51,7 @@ class School {
     'id': id,
     'schoolId': schoolId,
     'name': name,
+    'avatar': avatar,
     'address': address,
     'phone': phone,
     'email': email,
