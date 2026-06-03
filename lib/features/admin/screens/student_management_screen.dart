@@ -309,29 +309,25 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                           child: Stack(
                             children: [
                               ListTile(
+
                                 contentPadding: const EdgeInsets.all(8),
-                                leading: Container(
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.purple.shade300,
-                                        Colors.purple.shade600,
-                                      ],
-                                    ),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Center(
-                                    child: Hero(
-                                      tag: 'student-avatar-${student.userId}',
-                                      child: Text(
-                                        student.user?.name[0] ?? '?',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                        ),
+                                leading: Hero(
+                                  tag: 'student-avatar-${student.userId}',
+                                  child: CircleAvatar(
+                                    radius: 25,
+                                    backgroundColor: Colors.purple,
+                                    backgroundImage: student.user?.avatar?.isNotEmpty == true
+                                        ? NetworkImage(student.user!.avatar!)
+                                        : null,
+                                    child: student.user?.avatar?.isNotEmpty == true
+                                        ? null
+                                        : Text(
+                                      student.user?.name.isNotEmpty == true
+                                          ? student.user!.name[0].toUpperCase()
+                                          : '?',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),

@@ -66,25 +66,22 @@ class StudentDetailScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       Spacer(),
-                      Hero(
-                        tag: 'student-avatar-${student.userId}',
-                        child: Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.white24,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 3),
-                          ),
-                          child: Center(
-                            child: Text(
-                              student.user?.name[0] ?? '?',
-                              style: const TextStyle(
-                                fontSize: 48,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                      SizedBox(height: 30),
+                      CircleAvatar(
+                        radius: 60,
+                        backgroundColor: Colors.purple,
+                        backgroundImage: student.user?.avatar?.isNotEmpty == true
+                            ? NetworkImage(student.user!.avatar!)
+                            : null,
+                        child: student.user?.avatar?.isNotEmpty == true
+                            ? null
+                            : Text(
+                          student.user?.name.isNotEmpty == true
+                              ? student.user!.name[0].toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
