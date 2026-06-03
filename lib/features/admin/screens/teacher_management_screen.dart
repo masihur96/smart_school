@@ -231,25 +231,19 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                           padding: const EdgeInsets.all(12),
                           child: Row(
                             children: [
-                              Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.purple.shade300,
-                                      Colors.purple.shade600,
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.person,
-                                  color: Colors.white,
-                                  size: 30,
-                                ),
+                              CircleAvatar(
+                                radius: 25,
+                                backgroundColor: Colors.purple.withOpacity(0.1),
+                                backgroundImage: user?.avatar != null && user!.avatar!.isNotEmpty
+                                    ? NetworkImage(user.avatar!)
+                                    : null,
+                                child: user?.avatar == null || user!.avatar!.isEmpty
+                                    ? const Icon(
+                                        Icons.person,
+                                        color: Colors.purple,
+                                        size: 30,
+                                      )
+                                    : null,
                               ),
                               const SizedBox(width: 16),
                               Expanded(
@@ -537,18 +531,19 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: const BoxDecoration(
-                      color: Colors.purple,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.person,
-                      color: Colors.white,
-                      size: 35,
-                    ),
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.purple.withOpacity(0.1),
+                    backgroundImage: user?.avatar != null && user!.avatar!.isNotEmpty
+                        ? NetworkImage(user.avatar!)
+                        : null,
+                    child: user?.avatar == null || user!.avatar!.isEmpty
+                        ? const Icon(
+                            Icons.person,
+                            color: Colors.purple,
+                            size: 35,
+                          )
+                        : null,
                   ),
                   const SizedBox(width: 16),
                   Expanded(

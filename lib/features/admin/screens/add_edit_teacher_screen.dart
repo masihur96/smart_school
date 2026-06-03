@@ -34,6 +34,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
   String? _selectedSectionId;
   final List<AssignedSubject> _assignedSubjects = [];
   bool _obscurePassword = true;
+  bool _isLoading = false;
   File? _imageFile;
   String? _existingImageUrl;
 
@@ -157,6 +158,9 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
 
   Future<void> _save() async {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
       if (_selectedClassId == null || _selectedSectionId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please select Class and Section')),
@@ -218,6 +222,12 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             ),
           );
         }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
@@ -253,11 +263,13 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                       backgroundColor: Colors.purple.withOpacity(0.1),
                       backgroundImage: _imageFile != null
                           ? FileImage(_imageFile!)
-                          : (_existingImageUrl != null
-                                    ? NetworkImage(_existingImageUrl!)
-                                    : null)
-                                as ImageProvider?,
-                      child: (_imageFile == null && _existingImageUrl == null)
+                          : (_existingImageUrl != null &&
+                                    _existingImageUrl!.isNotEmpty)
+                              ? NetworkImage(_existingImageUrl!)
+                              : null as ImageProvider?,
+                      child: (_imageFile == null &&
+                              (_existingImageUrl == null ||
+                                  _existingImageUrl!.isEmpty))
                           ? const Icon(
                               Icons.person_add_alt_1,
                               size: 40,
@@ -576,7 +588,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             SizedBox(
               height: 55,
               child: ElevatedButton(
-                onPressed: teacherNotifier.isLoading ? null : _save,
+                onPressed: _isLoading ? null : _save,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.purple,
                   shape: RoundedRectangleBorder(
@@ -584,7 +596,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                   ),
                   elevation: 2,
                 ),
-                child: teacherNotifier.isLoading
+                child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
                         isEditing ? 'Update Teacher' : 'Register Teacher',
