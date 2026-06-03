@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -1336,17 +1337,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       ),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              isValid ? Icons.star : Icons.error_outline,
-              color: Colors.white,
-              size: 32,
-            ),
+          CircleAvatar(
+            radius: 20,
+            backgroundImage:
+            (auth.user?.school?.avatar.isNotEmpty ?? false)
+                ? CachedNetworkImageProvider(
+              auth.user!.school!.avatar,
+            )
+                : null,
+            child: (auth.user?.school?.avatar.isNotEmpty ?? false)
+                ? null
+                : const Icon(Icons.school),
           ),
           const SizedBox(width: 16),
           Expanded(
