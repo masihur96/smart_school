@@ -369,18 +369,21 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         children: [
           Row(
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
-                child: CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.white24,
-                  child: const Icon(
-                    Icons.person,
-                    size: 40,
+              CircleAvatar(
+                radius: 25,
+                backgroundColor: Colors.purple,
+                backgroundImage: user?.avatar?.isNotEmpty == true
+                    ? NetworkImage(user?.avatar??"")
+                    : null,
+                child: user?.avatar?.isNotEmpty == true
+                    ? null
+                    : Text(
+                  user?.name.isNotEmpty == true
+                      ? user!.name[0].toUpperCase()
+                      : '?',
+                  style: const TextStyle(
                     color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../admin/providers/notice_provider.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -154,8 +155,24 @@ class _TeacherNoticeScreenState extends State<TeacherNoticeScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      if(notice.avatar != null)
-                      Icon(Icons.attachment_outlined, size: 20, color: Colors.grey[600]),
+                      if (notice.fileUrl != null && notice.fileUrl!.isNotEmpty)
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: () async {
+                            final url = Uri.parse(notice.fileUrl!);
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(url, mode: LaunchMode.externalApplication);
+                            } else {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Could not open attachment')),
+                                );
+                              }
+                            }
+                          },
+                          icon: Icon(Icons.attachment_outlined,
+                              size: 20, color: Colors.grey[600]),
+                        ),
                       Spacer(),
 
                       Icon(Icons.access_time, size: 14),
