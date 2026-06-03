@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/features/ai_tutor/screen/ai_tutor_chat_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/features/teacher/screens/schedule_class_details.dart';
 import 'package:smart_school/features/teacher/screens/teacher_notice_screen.dart';
@@ -18,7 +20,6 @@ import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/marquee_notice.dart';
 import '../../../core/widgets/notification_icon_button.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../student/screens/student_notice_screen.dart';
 import '../data/models/teacher_dashboard_model.dart';
 import '../providers/teacher_dashboard_provider.dart';
 import 'homework_management_screen.dart';
@@ -457,14 +458,14 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 child: user.avatar?.isNotEmpty == true
                     ? null
                     : Text(
-                  user.name.isNotEmpty == true
-                      ? user.name[0].toUpperCase()
-                      : '?',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                        user.name.isNotEmpty == true
+                            ? user.name[0].toUpperCase()
+                            : '?',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
               const SizedBox(width: 15),
               Expanded(
@@ -497,9 +498,162 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                   ],
                 ),
               ),
+              GestureDetector(
+                onTap: () {
+                  _showAIDoctorDialog(context);
+                  // Navigate to profile screen
+                },
+                child: Lottie.asset(
+                  'assets/animation1.json',
+                  width: 80,
+                  fit: BoxFit.fill,
+                  repeat: true,
+                ),
+              ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  void _showAIDoctorDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.deepPurple.withOpacity(.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Image.asset('assets/tutor.png', height: 90, width: 90),
+              ),
+
+              const SizedBox(height: 20),
+
+              const Text(
+                "AI Tutor",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+
+              const SizedBox(height: 8),
+
+              Text(
+                "Your smart learning companion",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+              ),
+
+              const SizedBox(height: 20),
+
+              const Text(
+                "Need help with homework, exam preparation, or understanding a topic? Ask questions anytime and get instant academic support.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 15, height: 1.5),
+              ),
+
+              const SizedBox(height: 20),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Column(
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          color: Colors.deepPurple,
+                          size: 18,
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(child: Text("Homework & Assignment Help")),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          color: Colors.deepPurple,
+                          size: 18,
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(child: Text("Exam & Quiz Preparation")),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          color: Colors.deepPurple,
+                          size: 18,
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(child: Text("Instant Answers & Explanations")),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                      ),
+                      child: const Text("Later"),
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  Expanded(
+                    flex: 1,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AiTutorChatScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.chat_bubble_outline),
+                      label: const Text("Start"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size.fromHeight(48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
