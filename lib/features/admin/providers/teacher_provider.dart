@@ -222,22 +222,38 @@ class TeachersNotifier extends ChangeNotifier {
         if (radius != null) "radius": radius,
       };
 
-      dynamic requestData = dataMap;
-
       if (imageFile != null) {
-        requestData = FormData.fromMap({
-          ...dataMap,
-          'image': await MultipartFile.fromFile(
+        final uploadFormData = FormData.fromMap({
+          'file': await MultipartFile.fromFile(
             imageFile.path,
             filename: imageFile.path.split('/').last,
           ),
         });
+
+        final uploadResponse = await DataProvider().performRequest(
+          'POST',
+          'https://smart-school-backend-production.up.railway.app/general/upload',
+          header: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'multipart/form-data',
+          },
+          data: uploadFormData,
+        );
+
+        if (uploadResponse != null &&
+            (uploadResponse.statusCode == 200 || uploadResponse.statusCode == 201)) {
+          final url = uploadResponse.data['data']['url'];
+          if (url != null) {
+            dataMap['image'] = url;
+            dataMap['avatar'] = url;
+          }
+        }
       }
 
       final response = await DataProvider().performRequest(
         'POST',
         APIPath.register,
-        data: requestData,
+        data: dataMap,
         header: {'Authorization': 'Bearer $token'},
       );
 
@@ -304,22 +320,38 @@ class TeachersNotifier extends ChangeNotifier {
         if (radius != null) "radius": radius,
       };
 
-      dynamic requestData = dataMap;
-
       if (imageFile != null) {
-        requestData = FormData.fromMap({
-          ...dataMap,
-          'image': await MultipartFile.fromFile(
+        final uploadFormData = FormData.fromMap({
+          'file': await MultipartFile.fromFile(
             imageFile.path,
             filename: imageFile.path.split('/').last,
           ),
         });
+
+        final uploadResponse = await DataProvider().performRequest(
+          'POST',
+          'https://smart-school-backend-production.up.railway.app/general/upload',
+          header: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'multipart/form-data',
+          },
+          data: uploadFormData,
+        );
+
+        if (uploadResponse != null &&
+            (uploadResponse.statusCode == 200 || uploadResponse.statusCode == 201)) {
+          final url = uploadResponse.data['data']['url'];
+          if (url != null) {
+            dataMap['image'] = url;
+            dataMap['avatar'] = url;
+          }
+        }
       }
 
       final response = await DataProvider().performRequest(
         'PUT',
         '${APIPath.fetchUsers}/$userId',
-        data: requestData,
+        data: dataMap,
         header: {'Authorization': 'Bearer $token'},
       );
 
@@ -328,6 +360,10 @@ class TeachersNotifier extends ChangeNotifier {
         final index = _dbService.teachers.indexWhere((t) => t.userId == userId);
         if (index != -1) {
           final oldTeacher = _dbService.teachers[index];
+
+          // Use the new avatar URL if we uploaded a new image, otherwise keep the old one
+          String? updatedAvatar = dataMap['avatar'] ?? oldTeacher.user?.avatar;
+
           final updatedTeacher = Teacher(
             userId: userId,
             designation: designation,
@@ -345,6 +381,7 @@ class TeachersNotifier extends ChangeNotifier {
               role: UserRole.teacher,
               phone: phone,
               schoolId: oldTeacher.user?.schoolId,
+              avatar: updatedAvatar,
             ),
           );
           _dbService.teachers[index] = updatedTeacher;
