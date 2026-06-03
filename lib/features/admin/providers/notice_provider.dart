@@ -94,22 +94,38 @@ class NoticesNotifier extends ChangeNotifier {
       if (token == null) throw Exception('No auth token found');
 
       final Map<String, dynamic> dataMap = notice.toJson();
-      dynamic requestData = dataMap;
-
       if (noticeFile != null) {
-        requestData = FormData.fromMap({
-          ...dataMap,
+        final uploadFormData = FormData.fromMap({
           'file': await MultipartFile.fromFile(
             noticeFile.path,
             filename: noticeFile.path.split('/').last,
           ),
         });
+
+        final uploadResponse = await DataProvider().performRequest(
+          'POST',
+          'https://smart-school-backend-production.up.railway.app/general/upload',
+          header: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'multipart/form-data',
+          },
+          data: uploadFormData,
+        );
+
+        if (uploadResponse != null &&
+            (uploadResponse.statusCode == 200 || uploadResponse.statusCode == 201)) {
+          final url = uploadResponse.data['data']['url'];
+          if (url != null) {
+            dataMap['fileUrl'] = url;
+            dataMap['avatar'] = url;
+          }
+        }
       }
 
       final response = await DataProvider().performRequest(
         'POST',
         APIPath.createNotice,
-        data: requestData,
+        data: dataMap,
         header: {'Authorization': 'Bearer $token'},
       );
 
@@ -175,22 +191,38 @@ class NoticesNotifier extends ChangeNotifier {
       if (token == null) throw Exception('No auth token found');
 
       final Map<String, dynamic> dataMap = updated.toJson();
-      dynamic requestData = dataMap;
-
       if (noticeFile != null) {
-        requestData = FormData.fromMap({
-          ...dataMap,
+        final uploadFormData = FormData.fromMap({
           'file': await MultipartFile.fromFile(
             noticeFile.path,
             filename: noticeFile.path.split('/').last,
           ),
         });
+
+        final uploadResponse = await DataProvider().performRequest(
+          'POST',
+          'https://smart-school-backend-production.up.railway.app/general/upload',
+          header: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'multipart/form-data',
+          },
+          data: uploadFormData,
+        );
+
+        if (uploadResponse != null &&
+            (uploadResponse.statusCode == 200 || uploadResponse.statusCode == 201)) {
+          final url = uploadResponse.data['data']['url'];
+          if (url != null) {
+            dataMap['fileUrl'] = url;
+            dataMap['avatar'] = url;
+          }
+        }
       }
 
       final response = await DataProvider().performRequest(
         'PUT',
         '${APIPath.createNotice}/${updated.id}',
-        data: requestData,
+        data: dataMap,
         header: {'Authorization': 'Bearer $token'},
       );
 

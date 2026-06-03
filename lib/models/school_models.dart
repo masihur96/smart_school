@@ -543,11 +543,13 @@ class Notice {
     this.postedBy,
     this.isImportant = false,
     this.fileUrl,
+    this.avatar,
     this.deletedAt,
   });
 
   bool get isDeleted => deletedAt != null;
   final DateTime? deletedAt;
+  final String? avatar;
 
   factory Notice.fromJson(Map<String, dynamic> json) => Notice(
     id: json['id'] ?? json['_id'],
@@ -559,6 +561,7 @@ class Notice {
     postedBy: json['postedBy'],
     isImportant: json['isImportant'] ?? json['isImportent'] ?? false,
     fileUrl: json['fileUrl'] ?? json['file_url'],
+    avatar: json['avatar'],
     deletedAt: json['deletedAt'] != null
         ? DateTime.tryParse(json['deletedAt'].toString())
         : null,
@@ -572,6 +575,7 @@ class Notice {
     'postedBy': postedBy,
     'isImportent': isImportant, // API uses this spelling
     if (fileUrl != null) 'fileUrl': fileUrl,
+    if (avatar != null) 'avatar': avatar,
     'deletedAt': deletedAt?.toIso8601String(),
   };
 
@@ -585,6 +589,7 @@ class Notice {
     String? postedBy,
     bool? isImportant,
     String? fileUrl,
+    String? avatar,
   }) => Notice(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -595,6 +600,7 @@ class Notice {
     postedBy: postedBy ?? this.postedBy,
     isImportant: isImportant ?? this.isImportant,
     fileUrl: fileUrl ?? this.fileUrl,
+    avatar: avatar ?? this.avatar,
   );
 }
 
