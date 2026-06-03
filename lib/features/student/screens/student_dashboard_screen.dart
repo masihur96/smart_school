@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
-import 'package:smart_school/core/utils/bounching_dialog.dart';
 import 'package:smart_school/features/ai_tutor/screen/ai_tutor_chat_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
@@ -436,52 +435,133 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
   void _showAIDoctorDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => BounchingDialog(
-        height: screenSize(context, 1.0),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.all(14),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.deepPurple.withOpacity(.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Image.asset('assets/tutor.png', height: 90, width: 90),
+              ),
+
+              const SizedBox(height: 20),
+
+              const Text(
                 "AI Tutor",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              Image.asset(
-                'assets/tutor.png',
-                height: 100,
-                width: 100,
-                fit: BoxFit.fill,
-              ),
+
+              const SizedBox(height: 8),
+
               Text(
-                "Ai Tutor is here to help you with your studies! Ask me anything about your subjects, homework, or exams, and I'll do my best to assist you.",
+                "Your smart learning companion",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
               ),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.deepPurple,
-                    ),
-                    child: Text("Cancel"),
-                  ),
-                  const SizedBox(width: 10),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AiTutorChatScreen(),
+
+              const SizedBox(height: 20),
+
+              const Text(
+                "Need help with homework, exam preparation, or understanding a topic? Ask questions anytime and get instant academic support.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 15, height: 1.5),
+              ),
+
+              const SizedBox(height: 20),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Column(
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          color: Colors.deepPurple,
+                          size: 18,
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.chat, color: Colors.white),
-                    label: Text("Start Chat"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
-                      foregroundColor: Colors.white,
+                        SizedBox(width: 8),
+                        Expanded(child: Text("Homework & Assignment Help")),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          color: Colors.deepPurple,
+                          size: 18,
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(child: Text("Exam & Quiz Preparation")),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          color: Colors.deepPurple,
+                          size: 18,
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(child: Text("Instant Answers & Explanations")),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                      ),
+                      child: const Text("Later"),
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  Expanded(
+                    flex: 1,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AiTutorChatScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.chat_bubble_outline),
+                      label: const Text("Start"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size.fromHeight(48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
                   ),
                 ],
