@@ -376,19 +376,19 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 radius: 25,
                 backgroundColor: Colors.purple,
                 backgroundImage: user?.avatar?.isNotEmpty == true
-                    ? NetworkImage(user?.avatar??"")
+                    ? NetworkImage(user?.avatar ?? "")
                     : null,
                 child: user?.avatar?.isNotEmpty == true
                     ? null
                     : Text(
-                  user?.name.isNotEmpty == true
-                      ? user!.name[0].toUpperCase()
-                      : '?',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                        user?.name.isNotEmpty == true
+                            ? user!.name[0].toUpperCase()
+                            : '?',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
               const SizedBox(width: 15),
               Expanded(
@@ -402,15 +402,15 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                         fontSize: 14,
                       ),
                     ),
-                    // Text(
-                    //   user?.name ?? 'Student',
-                    //   style: const TextStyle(
-                    //     color: Colors.white,
-                    //     fontSize: 22,
-                    //     fontWeight: FontWeight.bold,
-                    //     letterSpacing: 0.5,
-                    //   ),
-                    // ),
+                    Text(
+                      user?.name ?? 'Student',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -432,65 +432,67 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       ),
     );
   }
-  void _showAIDoctorDialog(
-      BuildContext context) {
+
+  void _showAIDoctorDialog(BuildContext context) {
     showDialog(
-        context: context,
-        builder: (context) => BounchingDialog(
-            height: screenSize(context, 1.0),
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                children: [
-                  Text(
+      context: context,
+      builder: (context) => BounchingDialog(
+        height: screenSize(context, 1.0),
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            children: [
+              Text(
                 "AI Tutor",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              Image.asset(
+                'assets/tutor.png',
+                height: 100,
+                width: 100,
+                fit: BoxFit.fill,
+              ),
+              Text(
+                "Ai Tutor is here to help you with your studies! Ask me anything about your subjects, homework, or exams, and I'll do my best to assist you.",
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.deepPurple,
+                    ),
+                    child: Text("Cancel"),
                   ),
-                  Image.asset(
-                    'assets/tutor.png',
-                    height: 100,
-                    width: 100,
-                    fit: BoxFit.fill,
-                  ),
-                  Text(
-                    "Ai Tutor is here to help you with your studies! Ask me anything about your subjects, homework, or exams, and I'll do my best to assist you.",
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.deepPurple,
+                  const SizedBox(width: 10),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AiTutorChatScreen(),
                         ),
-                        child: Text("Cancel"),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const AiTutorChatScreen()),
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.chat,
-                          color: Colors.white,
-                        ),
-                        label: Text("Start Chat"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ],
+                      );
+                    },
+                    icon: const Icon(Icons.chat, color: Colors.white),
+                    label: Text("Start Chat"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                    ),
                   ),
                 ],
               ),
-            )));
+            ],
+          ),
+        ),
+      ),
+    );
   }
+
   Widget _buildAttendanceSection(
     BuildContext context,
     StudentDashboardData? data,
