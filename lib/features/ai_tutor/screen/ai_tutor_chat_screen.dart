@@ -29,7 +29,7 @@ class _AiTutorChatScreenState extends State<AiTutorChatScreen> {
   void initState() {
     super.initState();
     _initializeSpeech();
-    createChat("Act as an assistant doctor. ${_controller.text}");
+    createChat("Act as an assistant Tutor. ${_controller.text}");
   }
 
   Future<void> _initializeSpeech() async {
@@ -129,7 +129,7 @@ $text
     if (chatBootModelData != null) {
       setState(() {
         messages.add(
-            "🤖 ডাক্তার: ${chatBootModelData.choices.first.message?.content}");
+            "🤖 Tutor: ${chatBootModelData.choices.first.message?.content}");
       });
       _scrollToBottom();
     }
@@ -317,7 +317,7 @@ $text
             if (!isUser)
               IconButton(
                 icon: const Icon(Icons.volume_up, size: 20),
-                onPressed: () => _speak(text.replaceFirst("🤖 ডাক্তার: ", "")),
+                onPressed: () => _speak(text.replaceFirst("🤖 Tutor: ", "")),
                 color: isUser ? Colors.white : Colors.blue,
               ),
           ],
