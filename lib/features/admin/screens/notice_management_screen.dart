@@ -96,6 +96,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
               itemCount: notices.length,
               itemBuilder: (context, index) {
                 final notice = notices[index];
+
                 return _NoticeCard(
                   notice: notice,
                   onView: () => _viewNoticeDialog(context, notice),
@@ -156,17 +157,22 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
               const SizedBox(height: 6),
               _infoRow(Icons.warning_amber_rounded, 'Priority', 'Important'),
             ],
-            if (notice.fileUrl != null) ...[
+            if (notice.avatar != null) ...[
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: () async {
-                  final url = Uri.parse(notice.fileUrl!);
+                  final url = Uri.parse(notice.avatar!);
                   if (await canLaunchUrl(url)) {
                     await launchUrl(url);
                   }
                 },
                 icon: const Icon(Icons.attach_file, size: 16),
-                label: const Text('View Attachment'),
+                label: Column(
+                  children: [
+                    const Text('View Attachment'),
+                    ],
+                ),
+
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.purple.withOpacity(0.1),
                   foregroundColor: Colors.purple,
@@ -177,6 +183,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                 ),
               ),
             ],
+
           ],
         ),
         actions: [
@@ -792,12 +799,14 @@ class _NoticeCard extends StatelessWidget {
                     color: Colors.green,
                   ),
                 const Spacer(),
-                if (notice.fileUrl != null)
+                if (notice.avatar != null)
                   const Icon(
                     Icons.attach_file,
                     size: 16,
                     color: Colors.purple,
                   ),
+
+                const SizedBox(width: 10),
               ],
             ),
           ],
