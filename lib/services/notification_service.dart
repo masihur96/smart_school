@@ -73,6 +73,14 @@ class NotificationService {
     // Handle background messages
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
+    // Get FCM Token to ensure instance ID is generated and APNS is registered
+    try {
+      String? token = await _fcm.getToken();
+      log('FCM Token: $token');
+    } catch (e) {
+      log('Error getting FCM token: $e');
+    }
+
     // Handle foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       log('Got a message whilst in the foreground!');
@@ -89,6 +97,33 @@ class NotificationService {
           id: notification.hashCode,
           title: notification.title,
           body: notification.body,
+          notificationDetails: NotificationDetails(
+            android: AndroidNotificationDetails(
+              _channel.id,
+              _channel.name,
+              channelDescription: _channel.description,
+              icon: '@mipmap/launcher_icon',
+              importance: Importance.max,
+              priority: Priority.high,
+              showWhen: true,
+            ),
+            iOS: const DarwinNotificationDetails(
+              presentAlert: true,
+              presentBadge: true,
+              presentSound: true,
+            ),
+          ),
+          payload: jsonEncode(message.data),
+        );
+      } else if (message.data.isNotEmpty) {
+        // Fallback for data-only messages
+        final title = message.data['title'] ?? 'New Notification';
+        final body = message.data['message'] ?? message.data['body'] ?? '';
+
+        _localNotifications.show(
+          id: message.hashCode,
+          title: title,
+          body: body,
           notificationDetails: NotificationDetails(
             android: AndroidNotificationDetails(
               _channel.id,
@@ -445,10 +480,87 @@ class NotificationService {
       log('Error unsubscribing from user topics: $e');
     }
   }
+
+  Future<void> registerTokenToBackend() async {
+    try {
+      String? token = await _fcm.getToken();
+      if (token == null) return;
+
+      final authToken = await StorageService.getToken();
+      if (authToken == null) return;
+
+      final response = await DataProvider().performRequest(
+        'POST',
+        APIPath.registerFcmToken,
+        data: {
+          "fcmToken": token,
+          "fcm_token": token,
+          "token": token,
+        },
+        header: {
+          'Authorization': 'Bearer $authToken',
+          'Content-Type': 'application/json',
+          'accept': '*/*',
+        },
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
+        log('FCM token registered to backend successfully');
+      } else {
+        log('Failed to register FCM token to backend: ${response?.data}');
+      }
+    } catch (e) {
+      log('Error registering FCM token to backend: $e');
+    }
+  }
 }
 
 // Background message handler must be a top-level function
+@pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   log("Handling a background message: ${message.messageId}");
+
+  if (message.notification == null && message.data.isNotEmpty) {
+    final title = message.data['title'] ?? 'New Notification';
+    final body = message.data['message'] ?? message.data['body'] ?? '';
+
+    final FlutterLocalNotificationsPlugin localNotifications =
+        FlutterLocalNotificationsPlugin();
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/launcher_icon');
+    const DarwinInitializationSettings initializationSettingsDarwin =
+        DarwinInitializationSettings();
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsDarwin,
+    );
+
+    await localNotifications.initialize(settings: initializationSettings);
+
+    localNotifications.show(
+      id: message.hashCode,
+      title: title,
+      body: body,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'high_importance_channel',
+          'High Importance Notifications',
+          channelDescription:
+              'This channel is used for important notifications.',
+          icon: '@mipmap/launcher_icon',
+          importance: Importance.max,
+          priority: Priority.high,
+          showWhen: true,
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+      payload: jsonEncode(message.data),
+    );
+  }
 }

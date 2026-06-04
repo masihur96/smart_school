@@ -102,6 +102,7 @@ class AuthNotifier extends ChangeNotifier {
 
         // Register FCM Token
         await NotificationService().subscribeToUserTopics(_user!);
+        await NotificationService().registerTokenToBackend();
       } else {
         _user = null;
       }
@@ -160,6 +161,7 @@ class AuthNotifier extends ChangeNotifier {
 
       // Register FCM Token
       await NotificationService().subscribeToUserTopics(_user!);
+      await NotificationService().registerTokenToBackend();
 
       _isLoading = false;
       notifyListeners();
