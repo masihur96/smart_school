@@ -108,7 +108,7 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
           _buildSectionHeader(l10n.security, theme),
           _buildSettingTile(
             icon: Icons.fingerprint,
-            title: "Biometric Login",
+            title: l10n.biometricLogin,
             theme: theme,
             trailing: Switch(
               value: settings.isBiometricEnabled,
@@ -118,14 +118,14 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
                       .isBiometricAvailable();
                   if (isAvailable) {
                     if (context.mounted) {
-                      await _showBiometricSetupDialog(context, settings);
+                      await _showBiometricSetupDialog(context, settings, l10n);
                     }
                   } else {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text(
-                            'Biometrics not available on this device.',
+                            l10n.biometricNotAvailable,
                           ),
                         ),
                       );
@@ -424,6 +424,7 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
   Future<void> _showBiometricSetupDialog(
     BuildContext context,
     SettingsProvider settings,
+    AppLocalizations l10n,
   ) async {
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
@@ -435,25 +436,25 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text("Setup Biometric Login"),
+              title: Text(l10n.setupBiometricLogin),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    "Please enter your credentials to enable biometric login.",
+                  Text(
+                    l10n.biometricSetupDescription,
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: emailController,
-                    decoration: const InputDecoration(
-                      labelText: "Email or Phone",
+                    decoration: InputDecoration(
+                      labelText: l10n.emailOrPhone,
                     ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: passwordController,
                     decoration: InputDecoration(
-                      labelText: "Password",
+                      labelText: l10n.password,
                       suffixIcon: IconButton(
                         icon: Icon(
                           isPasswordVisible
@@ -472,14 +473,14 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Cancel"),
+                  child: Text(l10n.cancel),
                 ),
                 ElevatedButton(
                   onPressed: () async {
                     if (emailController.text.trim().isEmpty ||
                         passwordController.text.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Please fill all fields")),
+                        SnackBar(content: Text(l10n.fillAllFields)),
                       );
                       return;
                     }
@@ -488,7 +489,7 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
                     await settings.setBiometricEnabled(true);
                     if (context.mounted) Navigator.pop(context);
                   },
-                  child: const Text("Enable"),
+                  child: Text(l10n.enable),
                 ),
               ],
             );

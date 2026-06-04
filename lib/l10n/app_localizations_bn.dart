@@ -33,7 +33,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get language => 'ভাষা';
 
   @override
-  String get theme => 'Theme';
+  String get theme => 'থিম';
 
   @override
   String get darkMode => 'ডার্ক মোড';
@@ -48,13 +48,13 @@ class AppLocalizationsBn extends AppLocalizations {
   String get logout => 'লগআউট';
 
   @override
-  String get oldPassword => 'পুরানো পাসওয়ার্ড';
+  String get oldPassword => 'পুরানো পাসওয়ার্ড';
 
   @override
-  String get newPassword => 'নতুন পাসওয়ার্ড';
+  String get newPassword => 'নতুন পাসওয়ার্ড';
 
   @override
-  String get confirmPassword => 'পাসওয়ার্ড নিশ্চিত করুন';
+  String get confirmPassword => 'পাসওয়ার্ড নিশ্চিত করুন';
 
   @override
   String get save => 'সংরক্ষণ করুন';
@@ -109,7 +109,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get keepSignedIn => 'সাইন ইন থাকুন';
 
   @override
-  String get confirmSignOut => 'Confirm Sign Out';
+  String get confirmSignOut => 'সাইন আউট নিশ্চিত করুন';
 
   @override
   String get dashboard => 'ড্যাশবোর্ড';
@@ -311,7 +311,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get welcomeBack => 'স্বাগতম';
 
   @override
-  String get recentHomework => 'সাম্প্রতিক বাড়ির কাজ';
+  String get recentHomework => 'সাম্প্রতিক বাড়ির কাজ';
 
   @override
   String get urgent => 'জরুরী';
@@ -332,19 +332,19 @@ class AppLocalizationsBn extends AppLocalizations {
   String get classInfoMissing => 'ক্লাসের তথ্য নেই';
 
   @override
-  String get noPendingHomework => 'কোন পেন্ডিং বাড়ির কাজ নেই';
+  String get noPendingHomework => 'কোন পেন্ডিং বাড়ির কাজ নেই';
 
   @override
-  String get homeworkDataUnavailable => 'বাড়ির কাজের তথ্য পাওয়া যায়নি';
+  String get homeworkDataUnavailable => 'বাড়ির কাজের তথ্য পাওয়া যায়নি';
 
   @override
-  String get due => 'নির্দিষ্ট সময়';
+  String get due => 'নির্দিষ্ট সময়';
 
   @override
   String get fullReport => 'সম্পূর্ণ রিপোর্ট';
 
   @override
-  String get noAttendanceRecordsFound => 'কোন উপস্থিতির রেকর্ড পাওয়া যায়নি।';
+  String get noAttendanceRecordsFound => 'কোন উপস্থিতির রেকর্ড পাওয়া যায়নি।';
 
   @override
   String get systemOverview => 'সিস্টেম ওভারভিউ';
@@ -412,4 +412,29 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get config => 'কনফিগারেশন';
+
+  @override
+  String get biometricLogin => 'বায়োমেট্রিক লগইন';
+
+  @override
+  String get setupBiometricLogin => 'বায়োমেট্রিক লগইন সেটআপ';
+
+  @override
+  String get biometricSetupDescription =>
+      'বায়োমেট্রিক লগইন সক্ষম করতে আপনার পরিচয়পত্র প্রদান করুন।';
+
+  @override
+  String get emailOrPhone => 'ইমেল বা ফোন';
+
+  @override
+  String get password => 'পাসওয়ার্ড';
+
+  @override
+  String get enable => 'সক্ষম করুন';
+
+  @override
+  String get biometricNotAvailable => 'এই ডিভাইসে বায়োমেট্রিক্স উপলব্ধ নয়।';
+
+  @override
+  String get fillAllFields => 'অনুগ্রহ করে সব ক্ষেত্র পূরণ করুন';
 }
