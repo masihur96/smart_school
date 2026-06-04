@@ -311,7 +311,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get welcomeBack => 'স্বাগতম';
 
   @override
-  String get recentHomework => 'সাম্প্রতিক বাড়ির কাজ';
+  String get recentHomework => 'সাম্প্রতিক বাড়ির কাজ';
 
   @override
   String get urgent => 'জরুরী';
@@ -510,5 +510,76 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String studentsCount(int current, int max) {
     return '$current / $max শিক্ষার্থী';
+  }
+
+  @override
+  String get studentAttendance => 'শিক্ষার্থী উপস্থিতি';
+
+  @override
+  String get teacherAttendanceLabel => 'শিক্ষক উপস্থিতি';
+
+  @override
+  String get classWiseRecords => 'শ্রেণীভিত্তিক রেকর্ড';
+
+  @override
+  String get todaysRecords => 'আজকের রেকর্ড';
+
+  @override
+  String get noRecordsForToday => 'আজকের কোনো রেকর্ড নেই';
+
+  @override
+  String get currentExams => 'চলমান পরীক্ষা';
+
+  @override
+  String get recentNotices => 'সাম্প্রতিক নোটিশ';
+
+  @override
+  String get total => 'মোট';
+
+  @override
+  String get important => 'গুরুত্বপূর্ণ';
+
+  @override
+  String get published => 'প্রকাশিত';
+
+  @override
+  String get draft => 'ড্রাফ্ট';
+
+  @override
+  String forAudience(String audience) {
+    return 'যাদের জন্য: $audience';
+  }
+
+  @override
+  String validUntil(String date) {
+    return '$date পর্যন্ত বৈধ';
+  }
+
+  @override
+  String expiredOn(String date) {
+    return '$date তারিখে মেয়াদ শেষ';
+  }
+
+  @override
+  String get noPlan => 'কোনো পরিকল্পনা নেই';
+
+  @override
+  String get unknown => 'অজ্ঞাত';
+
+  @override
+  String get rate => 'হার';
+
+  @override
+  String get all => 'সব';
+
+  @override
+  String get noRecords => 'কোনো রেকর্ড নেই';
+
+  @override
+  String get teacher => 'শিক্ষক';
+
+  @override
+  String examDateRange(String start, String end) {
+    return '$start থেকে $end';
   }
 }

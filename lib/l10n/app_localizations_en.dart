@@ -509,4 +509,75 @@ class AppLocalizationsEn extends AppLocalizations {
   String studentsCount(int current, int max) {
     return '$current / $max Students';
   }
+
+  @override
+  String get studentAttendance => 'Student Attendance';
+
+  @override
+  String get teacherAttendanceLabel => 'Teacher Attendance';
+
+  @override
+  String get classWiseRecords => 'Class Wise Records';
+
+  @override
+  String get todaysRecords => 'Today\'s Records';
+
+  @override
+  String get noRecordsForToday => 'No records for today';
+
+  @override
+  String get currentExams => 'Current Exams';
+
+  @override
+  String get recentNotices => 'Recent Notices';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String get important => 'IMPORTANT';
+
+  @override
+  String get published => 'PUBLISHED';
+
+  @override
+  String get draft => 'DRAFT';
+
+  @override
+  String forAudience(String audience) {
+    return 'For: $audience';
+  }
+
+  @override
+  String validUntil(String date) {
+    return 'Valid until $date';
+  }
+
+  @override
+  String expiredOn(String date) {
+    return 'Expired on $date';
+  }
+
+  @override
+  String get noPlan => 'No Plan';
+
+  @override
+  String get unknown => 'Unknown';
+
+  @override
+  String get rate => 'RATE';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get noRecords => 'No records';
+
+  @override
+  String get teacher => 'Teacher';
+
+  @override
+  String examDateRange(String start, String end) {
+    return '$start to $end';
+  }
 }
