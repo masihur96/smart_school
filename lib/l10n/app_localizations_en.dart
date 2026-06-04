@@ -435,4 +435,78 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fillAllFields => 'Please fill all fields';
+
+  @override
+  String get subscriptionRequired => 'Subscription Required';
+
+  @override
+  String get noPricingPlansAvailable => 'No pricing plans available';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get noActiveSubscription => 'No Active Subscription';
+
+  @override
+  String get noActiveSubscriptionDesc =>
+      'Your institution needs an active plan to access the dashboard.';
+
+  @override
+  String get subscriptionExpired => 'Subscription Expired';
+
+  @override
+  String subscriptionExpiredDesc(String date) {
+    return 'Your plan expired on $date. Please renew to continue.';
+  }
+
+  @override
+  String activeSubscriptionDesc(String planName, String validUntil) {
+    return 'Your institution is on the $planName plan, valid until\n $validUntil.';
+  }
+
+  @override
+  String get customPlan => 'CUSTOM';
+
+  @override
+  String get yourCurrentPlan => 'YOUR CURRENT PLAN';
+
+  @override
+  String get monthlyBilling => 'Monthly Billing';
+
+  @override
+  String get perMonth => '/ month';
+
+  @override
+  String get choosePlan => 'CHOOSE THIS PLAN';
+
+  @override
+  String get alreadyUsedFreePlan =>
+      'ALREADY USED THIS FREE PLAN FOR THIS ACCOUNT';
+
+  @override
+  String get failedToAssignPlan => 'Failed to assign plan';
+
+  @override
+  String get perfectChoice => 'Perfect Choice!';
+
+  @override
+  String planRegisteredDesc(String planName) {
+    return 'You have successfully registered for the $planName plan. To activate your account, a request needs to be sent to our administration team.';
+  }
+
+  @override
+  String get sendActivationRequest => 'SEND ACTIVATION REQUEST';
+
+  @override
+  String get decideLater => 'Decide Later';
+
+  @override
+  String get activationRequestSent =>
+      'Activation request sent successfully. You will receive a confirmation email within 12 hours.';
+
+  @override
+  String studentsCount(int current, int max) {
+    return '$current / $max Students';
+  }
 }

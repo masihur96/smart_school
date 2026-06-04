@@ -437,4 +437,78 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get fillAllFields => 'অনুগ্রহ করে সব ক্ষেত্র পূরণ করুন';
+
+  @override
+  String get subscriptionRequired => 'সাবস্ক্রিপশন প্রয়োজন';
+
+  @override
+  String get noPricingPlansAvailable => 'কোনো মূল্য পরিকল্পনা পাওয়া যায়নি';
+
+  @override
+  String get retry => 'পুনরায় চেষ্টা করুন';
+
+  @override
+  String get noActiveSubscription => 'কোনো সক্রিয় সাবস্ক্রিপশন নেই';
+
+  @override
+  String get noActiveSubscriptionDesc =>
+      'আপনার প্রতিষ্ঠানের ড্যাশবোর্ড অ্যাক্সেস করতে একটি সক্রিয় পরিকল্পনা প্রয়োজন।';
+
+  @override
+  String get subscriptionExpired => 'সাবস্ক্রিপশন মেয়াদোত্তীর্ণ';
+
+  @override
+  String subscriptionExpiredDesc(String date) {
+    return 'আপনার পরিকল্পনার মেয়াদ $date তারিখে শেষ হয়েছে। চালিয়ে যেতে নবায়ন করুন।';
+  }
+
+  @override
+  String activeSubscriptionDesc(String planName, String validUntil) {
+    return 'আপনার প্রতিষ্ঠান $planName পরিকল্পনায় রয়েছে, বৈধ আছে\n $validUntil পর্যন্ত।';
+  }
+
+  @override
+  String get customPlan => 'কাস্টম';
+
+  @override
+  String get yourCurrentPlan => 'আপনার বর্তমান পরিকল্পনা';
+
+  @override
+  String get monthlyBilling => 'মাসিক বিলিং';
+
+  @override
+  String get perMonth => '/ মাস';
+
+  @override
+  String get choosePlan => 'এই পরিকল্পনা বেছে নিন';
+
+  @override
+  String get alreadyUsedFreePlan =>
+      'এই অ্যাকাউন্টে ফ্রি প্ল্যান ইতিমধ্যে ব্যবহার করা হয়েছে';
+
+  @override
+  String get failedToAssignPlan => 'পরিকল্পনা নির্ধারণ করতে ব্যর্থ হয়েছে';
+
+  @override
+  String get perfectChoice => 'চমৎকার পছন্দ!';
+
+  @override
+  String planRegisteredDesc(String planName) {
+    return 'আপনি সফলভাবে $planName পরিকল্পনায় নিবন্ধিত হয়েছেন। আপনার অ্যাকাউন্ট সক্রিয় করতে আমাদের প্রশাসন দলের কাছে একটি অনুরোধ পাঠাতে হবে।';
+  }
+
+  @override
+  String get sendActivationRequest => 'সক্রিয়করণ অনুরোধ পাঠান';
+
+  @override
+  String get decideLater => 'পরে সিদ্ধান্ত নিন';
+
+  @override
+  String get activationRequestSent =>
+      'সক্রিয়করণ অনুরোধ সফলভাবে পাঠানো হয়েছে। আপনি ১২ ঘণ্টার মধ্যে একটি নিশ্চিতকরণ ইমেল পাবেন।';
+
+  @override
+  String studentsCount(int current, int max) {
+    return '$current / $max শিক্ষার্থী';
+  }
 }

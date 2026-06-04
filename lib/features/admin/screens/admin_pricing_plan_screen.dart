@@ -9,6 +9,7 @@ import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart'
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/super_admin/models/pricing_plan_model.dart';
 import 'package:smart_school/features/super_admin/providers/pricing_notifier.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../auth/presntation/views/login_screen.dart';
@@ -31,6 +32,7 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final authNotifier = context.watch<AuthNotifier>();
     final pricingNotifier = context.watch<PricingNotifier>();
     final subscription = authNotifier.adminSubscription;
@@ -38,8 +40,8 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          _buildAppBar(),
-          SliverToBoxAdapter(child: _buildStatusBanner(authNotifier)),
+          _buildAppBar(l10n),
+          SliverToBoxAdapter(child: _buildStatusBanner(authNotifier, l10n)),
           if (pricingNotifier.isLoading)
             const SliverFillRemaining(
               child: Center(child: CircularProgressIndicator()),
@@ -56,10 +58,10 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
                       color: Colors.grey,
                     ),
                     const SizedBox(height: 16),
-                    const Text('No pricing plans available'),
+                    Text(l10n.noPricingPlansAvailable),
                     TextButton(
                       onPressed: () => pricingNotifier.fetchPricingPlans(),
-                      child: const Text('Retry'),
+                      child: Text(l10n.retry),
                     ),
                   ],
                 ),
@@ -97,7 +99,7 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar(AppLocalizations l10n) {
     return SliverAppBar(
       expandedHeight: 60,
       pinned: true,
@@ -106,7 +108,7 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
       flexibleSpace: FlexibleSpaceBar(
         centerTitle: true,
         title: Text(
-          'Subscription Required',
+          l10n.subscriptionRequired,
           style: TextStyle(
             fontSize: screenSize(context, .04),
             color: AppColors.white,
@@ -141,26 +143,26 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
     return DateFormat('dd MMM yyyy').format(localDate);
   }
 
-  Widget _buildStatusBanner(AuthNotifier auth) {
+  Widget _buildStatusBanner(AuthNotifier auth, AppLocalizations l10n) {
     final sub = auth.adminSubscription;
     final isValid = auth.isSubscriptionValid;
 
-    String title = 'No Active Subscription';
-    String message =
-        'Your institution needs an active plan to access the dashboard.';
+    String title = l10n.noActiveSubscription;
+    String message = l10n.noActiveSubscriptionDesc;
     Color color = Colors.red;
     IconData icon = Icons.warning_amber_rounded;
 
     if (isValid && sub != null) {
-      title = 'Active Subscription';
-      message =
-          'Your institution is on the ${sub.pricingPlan?.name ?? 'Standard'} plan, valid until\n ${formatDate(sub.endDate)}.';
+      title = l10n.activeSubscription;
+      message = l10n.activeSubscriptionDesc(
+        sub.pricingPlan?.name ?? 'Standard',
+        formatDate(sub.endDate),
+      );
       color = AppColors.primaryAdmin;
       icon = Icons.check_circle_rounded;
     } else if (sub != null && !isValid) {
-      title = 'Subscription Expired';
-      message =
-          'Your plan expired on ${sub.endDate.split('T')[0]}. Please renew to continue.';
+      title = l10n.subscriptionExpired;
+      message = l10n.subscriptionExpiredDesc(sub.endDate.split('T')[0]);
     }
 
     return Card(
@@ -217,6 +219,8 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 20),
 
@@ -247,9 +251,9 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                           color: Colors.orange.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Text(
-                          'CUSTOM',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.customPlan,
+                          style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
@@ -279,9 +283,9 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                           size: 14,
                         ),
                         SizedBox(width: 6),
-                        const Text(
-                          'YOUR CURRENT PLAN',
-                          style: TextStyle(
+                        Text(
+                          l10n.yourCurrentPlan,
+                          style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
@@ -296,11 +300,14 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                   children: [
                     _buildFeature(
                       Icons.people_outline,
-                      '${widget.currentCount} / ${widget.plan.maxStudents} Students',
+                      l10n.studentsCount(
+                        widget.currentCount,
+                        widget.plan.maxStudents,
+                      ),
                     ),
                     _buildFeature(
                       Icons.calendar_today_outlined,
-                      'Monthly Billing',
+                      l10n.monthlyBilling,
                     ),
                   ],
                 ),
@@ -316,7 +323,7 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(' / month'),
+                    Text(l10n.perMonth),
                   ],
                 ),
               ],
@@ -363,9 +370,10 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                         _showSuccessDialog(context, auth, widget.plan);
                       }
                     } else if (context.mounted) {
+                      final l10n = AppLocalizations.of(context)!;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(auth.error ?? 'Failed to assign plan'),
+                          content: Text(auth.error ?? l10n.failedToAssignPlan),
                           backgroundColor: Colors.red,
                           behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(
@@ -401,8 +409,8 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                       )
                     : Text(
                         widget.isAlreadyUsedFreePlan
-                            ? 'ALREADY USED THIS FREE PLAN FOR THIS ACCOUNT'
-                            : 'CHOOSE THIS PLAN',
+                            ? l10n.alreadyUsedFreePlan
+                            : l10n.choosePlan,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
@@ -427,76 +435,77 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        contentPadding: const EdgeInsets.all(0),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
+      builder: (context) {
+        final dialogL10n = AppLocalizations.of(context)!;
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          contentPadding: const EdgeInsets.all(0),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: const BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.check_circle_outline,
+                    color: Colors.white,
+                    size: 64,
+                  ),
                 ),
               ),
-              child: const Center(
-                child: Icon(
-                  Icons.check_circle_outline,
-                  color: Colors.white,
-                  size: 64,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  const Text(
-                    'Perfect Choice!',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'You have successfully registered for the ${plan.name} plan. To activate your account, a request needs to be sent to our administration team.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      _sendRequestEmail(auth, plan);
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Activation request sent successfully. You will receive a confirmation email within 12 hours.',
-                          ),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    Text(
+                      dialogL10n.perfectChoice,
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
-                    child: const Text('SEND ACTIVATION REQUEST'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text('Decide Later'),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    Text(
+                      dialogL10n.planRegisteredDesc(plan.name),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () {
+                        _sendRequestEmail(auth, plan);
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(dialogL10n.activationRequestSent),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(dialogL10n.sendActivationRequest),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(dialogL10n.decideLater),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 
