@@ -409,4 +409,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get config => 'Config';
+
+  @override
+  String get biometricLogin => 'Biometric Login';
+
+  @override
+  String get setupBiometricLogin => 'Setup Biometric Login';
+
+  @override
+  String get biometricSetupDescription =>
+      'Please enter your credentials to enable biometric login.';
+
+  @override
+  String get emailOrPhone => 'Email or Phone';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get enable => 'Enable';
+
+  @override
+  String get biometricNotAvailable =>
+      'Biometrics not available on this device.';
+
+  @override
+  String get fillAllFields => 'Please fill all fields';
 }

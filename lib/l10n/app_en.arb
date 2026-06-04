@@ -133,5 +133,13 @@
   "superAdmin": "Super Admin",
   "noNewNotices": "No new notices at this time",
   "overview": "Overview",
-  "config": "Config"
+  "config": "Config",
+  "biometricLogin": "Biometric Login",
+  "setupBiometricLogin": "Setup Biometric Login",
+  "biometricSetupDescription": "Please enter your credentials to enable biometric login.",
+  "emailOrPhone": "Email or Phone",
+  "password": "Password",
+  "enable": "Enable",
+  "biometricNotAvailable": "Biometrics not available on this device.",
+  "fillAllFields": "Please fill all fields"
 }

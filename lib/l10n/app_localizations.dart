@@ -895,6 +895,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Config'**
   String get config;
+
+  /// No description provided for @biometricLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric Login'**
+  String get biometricLogin;
+
+  /// No description provided for @setupBiometricLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup Biometric Login'**
+  String get setupBiometricLogin;
+
+  /// No description provided for @biometricSetupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your credentials to enable biometric login.'**
+  String get biometricSetupDescription;
+
+  /// No description provided for @emailOrPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Email or Phone'**
+  String get emailOrPhone;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @enable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get enable;
+
+  /// No description provided for @biometricNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometrics not available on this device.'**
+  String get biometricNotAvailable;
+
+  /// No description provided for @fillAllFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill all fields'**
+  String get fillAllFields;
 }
 
 class _AppLocalizationsDelegate
