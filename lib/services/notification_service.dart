@@ -22,7 +22,8 @@ class NotificationService {
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
     'high_importance_channel', // id
     'High Importance Notifications', // title
-    description: 'This channel is used for important notifications.', // description
+    description:
+        'This channel is used for important notifications.', // description
     importance: Importance.max,
   );
 
@@ -40,10 +41,11 @@ class NotificationService {
         AndroidInitializationSettings('@mipmap/launcher_icon');
     const DarwinInitializationSettings initializationSettingsDarwin =
         DarwinInitializationSettings();
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsDarwin,
-    );
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+          android: initializationSettingsAndroid,
+          iOS: initializationSettingsDarwin,
+        );
 
     await _localNotifications.initialize(
       settings: initializationSettings,
@@ -55,7 +57,8 @@ class NotificationService {
     // Create notification channel for Android
     await _localNotifications
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(_channel);
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
@@ -80,7 +83,7 @@ class NotificationService {
 
       if (notification != null) {
         log('Message also contained a notification: ${notification.title}');
-        
+
         // Show local notification for Android/iOS in foreground
         _localNotifications.show(
           id: notification.hashCode,
@@ -151,10 +154,7 @@ class NotificationService {
       final response = await DataProvider().performRequest(
         'PATCH',
         APIPath.markNotificationRead(id),
-        header: {
-          'Authorization': 'Bearer $authToken',
-          'accept': '*/*',
-        },
+        header: {'Authorization': 'Bearer $authToken', 'accept': '*/*'},
       );
 
       if (response != null &&
@@ -217,16 +217,20 @@ class NotificationService {
       final authToken = await StorageService.getToken();
       if (authToken == null) throw Exception('No auth token found');
 
+      final data = {
+        "receiver_uuid": receiverUuid,
+        "title": title,
+        "message": message,
+        "additional_data": additionalData ?? {},
+        "image": image,
+      };
+
+      log("Notification Request Data:: $data");
+
       final response = await DataProvider().performRequest(
         'POST',
         APIPath.sendNotification,
-        data: {
-          "receiver_uuid": receiverUuid,
-          "title": title,
-          "message": message,
-          "additional_data": additionalData ?? {},
-          "image": image,
-        },
+        data: data,
         header: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
