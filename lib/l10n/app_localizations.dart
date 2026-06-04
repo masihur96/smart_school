@@ -943,6 +943,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please fill all fields'**
   String get fillAllFields;
+
+  /// No description provided for @subscriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription Required'**
+  String get subscriptionRequired;
+
+  /// No description provided for @noPricingPlansAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No pricing plans available'**
+  String get noPricingPlansAvailable;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @noActiveSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'No Active Subscription'**
+  String get noActiveSubscription;
+
+  /// No description provided for @noActiveSubscriptionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your institution needs an active plan to access the dashboard.'**
+  String get noActiveSubscriptionDesc;
+
+  /// No description provided for @subscriptionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription Expired'**
+  String get subscriptionExpired;
+
+  /// No description provided for @subscriptionExpiredDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan expired on {date}. Please renew to continue.'**
+  String subscriptionExpiredDesc(String date);
+
+  /// No description provided for @activeSubscriptionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your institution is on the {planName} plan, valid until\n {validUntil}.'**
+  String activeSubscriptionDesc(String planName, String validUntil);
+
+  /// No description provided for @customPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'CUSTOM'**
+  String get customPlan;
+
+  /// No description provided for @yourCurrentPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'YOUR CURRENT PLAN'**
+  String get yourCurrentPlan;
+
+  /// No description provided for @monthlyBilling.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Billing'**
+  String get monthlyBilling;
+
+  /// No description provided for @perMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'/ month'**
+  String get perMonth;
+
+  /// No description provided for @choosePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'CHOOSE THIS PLAN'**
+  String get choosePlan;
+
+  /// No description provided for @alreadyUsedFreePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'ALREADY USED THIS FREE PLAN FOR THIS ACCOUNT'**
+  String get alreadyUsedFreePlan;
+
+  /// No description provided for @failedToAssignPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to assign plan'**
+  String get failedToAssignPlan;
+
+  /// No description provided for @perfectChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect Choice!'**
+  String get perfectChoice;
+
+  /// No description provided for @planRegisteredDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You have successfully registered for the {planName} plan. To activate your account, a request needs to be sent to our administration team.'**
+  String planRegisteredDesc(String planName);
+
+  /// No description provided for @sendActivationRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'SEND ACTIVATION REQUEST'**
+  String get sendActivationRequest;
+
+  /// No description provided for @decideLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Decide Later'**
+  String get decideLater;
+
+  /// No description provided for @activationRequestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Activation request sent successfully. You will receive a confirmation email within 12 hours.'**
+  String get activationRequestSent;
+
+  /// No description provided for @studentsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} / {max} Students'**
+  String studentsCount(int current, int max);
 }
 
 class _AppLocalizationsDelegate
