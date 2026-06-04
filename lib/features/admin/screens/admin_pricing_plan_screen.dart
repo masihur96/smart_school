@@ -101,7 +101,7 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
     return SliverAppBar(
       expandedHeight: 60,
       pinned: true,
-      backgroundColor: AppColors.primaryStudent,
+      backgroundColor: AppColors.primaryAdmin,
 
       flexibleSpace: FlexibleSpaceBar(
         centerTitle: true,
@@ -155,7 +155,7 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
       title = 'Active Subscription';
       message =
           'Your institution is on the ${sub.pricingPlan?.name ?? 'Standard'} plan, valid until\n ${formatDate(sub.endDate)}.';
-      color = Colors.green;
+      color = AppColors.primaryAdmin;
       icon = Icons.check_circle_rounded;
     } else if (sub != null && !isValid) {
       title = 'Subscription Expired';
@@ -270,12 +270,16 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: Colors.green.withOpacity(0.3)),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_circle, color: Colors.green, size: 14),
+                        Icon(
+                          Icons.check_circle,
+                          color: AppColors.primaryAdmin,
+                          size: 14,
+                        ),
                         SizedBox(width: 6),
-                        Text(
+                        const Text(
                           'YOUR CURRENT PLAN',
                           style: TextStyle(
                             fontSize: 10,
@@ -377,7 +381,7 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
               decoration: BoxDecoration(
                 color: widget.isAlreadyUsedFreePlan
                     ? Colors.grey
-                    : AppColors.primary,
+                    : AppColors.primaryAdmin,
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(24),
                   bottomRight: Radius.circular(24),
