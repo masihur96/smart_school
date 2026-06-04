@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
@@ -1315,92 +1316,100 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ? DateFormat('MMM dd, yyyy').format(expiryDate)
         : 'Unknown';
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 24),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isValid
-              ? [Colors.purple.shade700, Colors.purple.shade400]
-              : [Colors.red.shade700, Colors.red.shade400],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AdminPricingPlanScreen()),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 24),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: isValid
+                ? [Colors.purple.shade700, Colors.purple.shade400]
+                : [Colors.red.shade700, Colors.red.shade400],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: (isValid ? Colors.purple : Colors.red).withOpacity(0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: (isValid ? Colors.purple : Colors.red).withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundImage:
-            (auth.user?.school?.avatar.isNotEmpty ?? false)
-                ? CachedNetworkImageProvider(
-              auth.user!.school!.avatar,
-            )
-                : null,
-            child: (auth.user?.school?.avatar.isNotEmpty ?? false)
-                ? null
-                : const Icon(Icons.school),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  planName,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 20,
+              backgroundImage: (auth.user?.school?.avatar.isNotEmpty ?? false)
+                  ? CachedNetworkImageProvider(auth.user!.school!.avatar)
+                  : null,
+              child: (auth.user?.school?.avatar.isNotEmpty ?? false)
+                  ? null
+                  : const Icon(Icons.school),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    planName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${sub.lastStudentCount} / ${sub.pricingPlan?.maxStudents ?? '∞'} ${l10n.studentsLabel}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                  const SizedBox(height: 4),
+                  Text(
+                    '${sub.lastStudentCount} / ${sub.pricingPlan?.maxStudents ?? '∞'} ${l10n.studentsLabel}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isValid
+                        ? 'Valid until $formattedDate'
+                        : 'Expired on $formattedDate',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isValid)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  isValid
-                      ? 'Valid until $formattedDate'
-                      : 'Expired on $formattedDate',
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  l10n.active,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.purple.shade700,
+                    fontWeight: FontWeight.bold,
                     fontSize: 12,
                   ),
                 ),
-              ],
-            ),
-          ),
-          if (isValid)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
               ),
-              child: Text(
-                l10n.active,
-                style: TextStyle(
-                  color: Colors.purple.shade700,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
