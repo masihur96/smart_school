@@ -323,11 +323,11 @@ class NotificationService {
 
       // Role-specific ID topics
       if (user.role == UserRole.superadmin || user.role == UserRole.admin) {
-        await subscribeToTopic('admin_${user.id}');
+        await subscribeToTopic(user.id);
       } else if (user.role == UserRole.teacher) {
-        await subscribeToTopic('teacher_${user.id}');
+        await subscribeToTopic(user.id);
       } else if (user.role == UserRole.student) {
-        await subscribeToTopic('student_${user.id}');
+        await subscribeToTopic(user.id);
       }
 
       // Legacy ID support (keep for compatibility if needed, or remove if strictly following new structure)
@@ -335,17 +335,17 @@ class NotificationService {
 
       // School specific topic
       if (user.schoolId != null && user.schoolId!.isNotEmpty) {
-        await subscribeToTopic('school_${user.schoolId}');
+        await subscribeToTopic(user.schoolId ?? "");
       }
 
       // Class specific topic
       if (user.classId != null && user.classId!.isNotEmpty) {
-        await subscribeToTopic('class_${user.classId}');
+        await subscribeToTopic(user.classId ?? "");
       }
 
       // Section specific topic
       if (user.sectionId != null && user.sectionId!.isNotEmpty) {
-        await subscribeToTopic('section_${user.sectionId}');
+        await subscribeToTopic(user.sectionId ?? "");
       }
 
       // Functional topics based on role
@@ -390,25 +390,25 @@ class NotificationService {
       await unsubscribeFromTopic('all');
 
       if (user.role == UserRole.superadmin || user.role == UserRole.admin) {
-        await unsubscribeFromTopic('admin_${user.id}');
+        await unsubscribeFromTopic(user.id);
       } else if (user.role == UserRole.teacher) {
-        await unsubscribeFromTopic('teacher_${user.id}');
+        await unsubscribeFromTopic(user.id);
       } else if (user.role == UserRole.student) {
-        await unsubscribeFromTopic('student_${user.id}');
+        await unsubscribeFromTopic(user.id);
       }
 
       await unsubscribeFromTopic(user.id);
 
       if (user.schoolId != null && user.schoolId!.isNotEmpty) {
-        await unsubscribeFromTopic('school_${user.schoolId}');
+        await unsubscribeFromTopic(user.schoolId ?? "");
       }
 
       if (user.classId != null && user.classId!.isNotEmpty) {
-        await unsubscribeFromTopic('class_${user.classId}');
+        await unsubscribeFromTopic(user.classId ?? "");
       }
 
       if (user.sectionId != null && user.sectionId!.isNotEmpty) {
-        await unsubscribeFromTopic('section_${user.sectionId}');
+        await unsubscribeFromTopic(user.sectionId ?? "");
       }
 
       // Functional topics
