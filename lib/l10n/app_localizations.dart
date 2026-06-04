@@ -1069,6 +1069,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{current} / {max} Students'**
   String studentsCount(int current, int max);
+
+  /// No description provided for @studentAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Attendance'**
+  String get studentAttendance;
+
+  /// No description provided for @teacherAttendanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Attendance'**
+  String get teacherAttendanceLabel;
+
+  /// No description provided for @classWiseRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Class Wise Records'**
+  String get classWiseRecords;
+
+  /// No description provided for @todaysRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Records'**
+  String get todaysRecords;
+
+  /// No description provided for @noRecordsForToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No records for today'**
+  String get noRecordsForToday;
+
+  /// No description provided for @currentExams.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Exams'**
+  String get currentExams;
+
+  /// No description provided for @recentNotices.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Notices'**
+  String get recentNotices;
+
+  /// No description provided for @total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get total;
+
+  /// No description provided for @important.
+  ///
+  /// In en, this message translates to:
+  /// **'IMPORTANT'**
+  String get important;
+
+  /// No description provided for @published.
+  ///
+  /// In en, this message translates to:
+  /// **'PUBLISHED'**
+  String get published;
+
+  /// No description provided for @draft.
+  ///
+  /// In en, this message translates to:
+  /// **'DRAFT'**
+  String get draft;
+
+  /// No description provided for @forAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'For: {audience}'**
+  String forAudience(String audience);
+
+  /// No description provided for @validUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until {date}'**
+  String validUntil(String date);
+
+  /// No description provided for @expiredOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired on {date}'**
+  String expiredOn(String date);
+
+  /// No description provided for @noPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'No Plan'**
+  String get noPlan;
+
+  /// No description provided for @unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknown;
+
+  /// No description provided for @rate.
+  ///
+  /// In en, this message translates to:
+  /// **'RATE'**
+  String get rate;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @noRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'No records'**
+  String get noRecords;
+
+  /// No description provided for @teacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher'**
+  String get teacher;
+
+  /// No description provided for @examDateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} to {end}'**
+  String examDateRange(String start, String end);
 }
 
 class _AppLocalizationsDelegate

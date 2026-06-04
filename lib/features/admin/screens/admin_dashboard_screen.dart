@@ -185,7 +185,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     backgroundColor: Colors.purple,
                     foregroundColor: Colors.white,
                   ),
-                  child: Text('Retry'),
+                  child: Text(l10n.retry),
                 ),
               ],
             ),
@@ -216,7 +216,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 const SizedBox(height: 24),
                 if (data.recentHomework.isNotEmpty) ...[
                   _buildSectionTitle(
-                    'Recent Homework',
+                    l10n.recentHomework,
                     TextButton(
                       onPressed: () {
                         Navigator.push(
@@ -227,7 +227,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           ),
                         );
                       },
-                      child: const Text("View All"),
+                      child: Text(l10n.viewAll),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -236,7 +236,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ],
                 if (data.currentExam.isNotEmpty) ...[
                   _buildSectionTitle(
-                    'Current Exams',
+                    l10n.currentExams,
                     TextButton(
                       onPressed: () {
                         Navigator.push(
@@ -246,7 +246,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           ),
                         );
                       },
-                      child: const Text("View All"),
+                      child: Text(l10n.viewAll),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -255,7 +255,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ],
                 if (data.recentNotice.isNotEmpty) ...[
                   _buildSectionTitle(
-                    'Recent Notices',
+                    l10n.recentNotices,
                     TextButton(
                       onPressed: () {
                         Navigator.push(
@@ -266,7 +266,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           ),
                         );
                       },
-                      child: const Text("View All"),
+                      child: Text(l10n.viewAll),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -402,6 +402,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildStudentAttendanceCard(AttendStudent data) {
+    final l10n = AppLocalizations.of(context)!;
     const color = Colors.blue;
     final total = data.totalStudents;
     final present = data.present;
@@ -438,9 +439,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Student Attendance',
-                          style: TextStyle(
+                        Text(
+                          l10n.studentAttendance,
+                          style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
                           ),
@@ -474,25 +475,25 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildStatPill(
-                    'Total',
+                    l10n.total,
                     total.toString(),
                     Colors.grey[700]!,
                     Icons.groups_rounded,
                   ),
                   _buildStatPill(
-                    'Present',
+                    l10n.present,
                     present.toString(),
                     Colors.green,
                     Icons.how_to_reg_rounded,
                   ),
                   _buildStatPill(
-                    'Absent',
+                    l10n.absent,
                     absent.toString(),
                     Colors.red,
                     Icons.unpublished_rounded,
                   ),
                   _buildStatPill(
-                    'Leave',
+                    l10n.leave,
                     data.leave.toString(),
                     Colors.orange,
                     Icons.time_to_leave_outlined,
@@ -527,7 +528,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        "Class Wise Records",
+                        l10n.classWiseRecords,
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -563,7 +564,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   padding: const EdgeInsets.fromLTRB(0, 14, 0, 8),
                   child: Center(
                     child: Text(
-                      'No records for today',
+                      l10n.noRecordsForToday,
                       style: TextStyle(color: Colors.grey[400], fontSize: 12),
                     ),
                   ),
@@ -577,6 +578,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildTeacherAttendanceCard(AttendTeacher data) {
+    final l10n = AppLocalizations.of(context)!;
     final total = data.totalTeachers;
     final present = data.present;
     final absent = data.absent;
@@ -622,9 +624,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Teacher Attendance',
-                            style: TextStyle(
+                          Text(
+                            l10n.teacherAttendanceLabel,
+                            style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
                             ),
@@ -667,21 +669,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 child: Row(
                   children: [
                     _buildStatPill(
-                      'Total',
+                      l10n.total,
                       total.toString(),
                       const Color(0xFF6B7280),
                       Icons.groups_rounded,
                     ),
                     const SizedBox(width: 8),
                     _buildStatPill(
-                      'Present',
+                      l10n.present,
                       present.toString(),
                       const Color(0xFF10B981),
                       Icons.check_circle_outline,
                     ),
                     const SizedBox(width: 8),
                     _buildStatPill(
-                      'Absent',
+                      l10n.absent,
                       absent.toString(),
                       const Color(0xFFEF4444),
                       Icons.cancel_outlined,
@@ -717,7 +719,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        "Today's Records",
+                        l10n.todaysRecords,
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -824,7 +826,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                     Text(
                                       r.designation.isNotEmpty
                                           ? r.designation
-                                          : 'Teacher',
+                                          : l10n.teacher,
                                       style: TextStyle(
                                         fontWeight: FontWeight.w400,
                                         fontSize: 10,
@@ -1107,6 +1109,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildCurrentExams(List<CurrentExam> exams) {
+    final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       height: 140,
       child: ListView.builder(
@@ -1140,7 +1143,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            exam.isPublished ? "PUBLISHED" : "DRAFT",
+                            exam.isPublished ? l10n.published : l10n.draft,
                             style: TextStyle(
                               color: exam.isPublished
                                   ? Colors.green
@@ -1174,7 +1177,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${formatDate(exam.startDate)} to ${formatDate(exam.endDate)}',
+                      l10n.examDateRange(
+                        formatDate(exam.startDate),
+                        formatDate(exam.endDate),
+                      ),
                       style: TextStyle(fontSize: 12),
                     ),
                   ],
@@ -1198,6 +1204,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildRecentNotices(List<RecentNotice> notices) {
+    final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       height: 160,
       child: ListView.builder(
@@ -1245,8 +1252,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               color: Colors.red.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Text(
-                              "IMPORTANT",
+                            child: Text(
+                              l10n.important,
                               style: TextStyle(
                                 color: Colors.red,
                                 fontSize: 10,
@@ -1278,7 +1285,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'For: ${notice.targetAudience}',
+                          l10n.forAudience(notice.targetAudience),
                           style: const TextStyle(
                             fontSize: 11,
                             color: Colors.blueGrey,
@@ -1310,11 +1317,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     if (sub == null) return const SizedBox.shrink();
 
     final isValid = auth.isSubscriptionValid;
-    final planName = sub.pricingPlan?.name ?? 'No Plan';
+    final planName = sub.pricingPlan?.name ?? l10n.noPlan;
     final expiryDate = DateTime.tryParse(sub.endDate);
     final formattedDate = expiryDate != null
         ? DateFormat('MMM dd, yyyy').format(expiryDate)
-        : 'Unknown';
+        : l10n.unknown;
 
     return GestureDetector(
       onTap: () {
@@ -1379,8 +1386,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   const SizedBox(height: 4),
                   Text(
                     isValid
-                        ? 'Valid until $formattedDate'
-                        : 'Expired on $formattedDate',
+                        ? l10n.validUntil(formattedDate)
+                        : l10n.expiredOn(formattedDate),
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.9),
                       fontSize: 12,
@@ -1945,7 +1952,7 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                               ),
                             ),
                             Text(
-                              'RATE',
+                              AppLocalizations.of(context)!.rate,
                               style: TextStyle(
                                 fontSize: 8,
                                 fontWeight: FontWeight.w600,
@@ -1983,22 +1990,22 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               _buildStatItem(
-                                'Total',
+                                AppLocalizations.of(context)!.total,
                                 '${stats.total}',
                                 Colors.grey.shade800,
                               ),
                               _buildStatItem(
-                                'Present',
+                                AppLocalizations.of(context)!.present,
                                 '${stats.present}',
                                 Colors.green,
                               ),
                               _buildStatItem(
-                                'Absent',
+                                AppLocalizations.of(context)!.absent,
                                 '${stats.absent}',
                                 Colors.red,
                               ),
                               _buildStatItem(
-                                'Leave',
+                                AppLocalizations.of(context)!.leave,
                                 '${stats.leave}',
                                 Colors.blue,
                               ),
@@ -2040,7 +2047,7 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                             DropdownMenuItem<String?>(
                               value: null,
                               child: Text(
-                                'All',
+                                AppLocalizations.of(context)!.all,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey.shade700,
@@ -2082,7 +2089,7 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'No records',
+                                  AppLocalizations.of(context)!.noRecords,
                                   style: TextStyle(
                                     color: Colors.grey.shade500,
                                     fontSize: 12,
