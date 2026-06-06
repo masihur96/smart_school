@@ -491,5 +491,18 @@
   "failedToUpdateMarquee": "মার্কি আপডেট করতে ব্যর্থ হয়েছে",
   "marqueeTarget": "মার্কি টার্গেট",
   "marqueeText": "মার্কি টেক্সট",
-  "resetFilters": "ফিল্টার রিসেট করুন"
+  "resetFilters": "ফিল্টার রিসেট করুন",
+  "searchByName": "নাম দিয়ে খুঁজুন",
+  "status": "স্ট্যাটাস",
+  "titleLabel": "শিরোনাম",
+  "messageLabel": "বার্তা",
+  "limitReached": "সীমা অতিক্রম করেছে",
+  "studentLimitReached": "আপনি আপনার শিক্ষার্থীর সীমায় পৌঁছে গেছেন ({count} / {max})।\n\nআরও শিক্ষার্থী যোগ করতে আপনার প্ল্যান আপগ্রেড করুন।",
+  "upgradePlan": "প্ল্যান আপগ্রেড করুন",
+  "publishStatus": "প্রকাশের অবস্থা",
+  "publishedOption": "প্রকাশিত",
+  "unpublishedOption": "অপ্রকাশিত",
+  "noExamsFound": "কোন পরীক্ষা পাওয়া যায়নি",
+  "assignmentCountLabel": "{count} টি অ্যাসাইনমেন্ট",
+  "egLabel": "যেমন"
 }

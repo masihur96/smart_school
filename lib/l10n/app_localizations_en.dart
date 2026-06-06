@@ -1111,4 +1111,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetFilters => 'Reset Filters';
+
+  @override
+  String get searchByName => 'Search by name';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get titleLabel => 'Title';
+
+  @override
+  String get messageLabel => 'Message';
+
+  @override
+  String get limitReached => 'Limit Reached';
+
+  @override
+  String studentLimitReached(int count, int max) {
+    return 'You have reached your student limit ($count / $max).\n\nUpgrade your plan to add more students.';
+  }
+
+  @override
+  String get upgradePlan => 'Upgrade Plan';
+
+  @override
+  String get publishStatus => 'Publish Status';
+
+  @override
+  String get publishedOption => 'Published';
+
+  @override
+  String get unpublishedOption => 'Unpublished';
+
+  @override
+  String get noExamsFound => 'No exams found';
+
+  @override
+  String assignmentCountLabel(int count) {
+    return '$count Assignment(s)';
+  }
+
+  @override
+  String get egLabel => 'e.g.';
 }

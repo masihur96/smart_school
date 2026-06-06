@@ -87,16 +87,18 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
               children: [
                 DropdownButtonFormField<String>(
                   decoration: InputDecoration(
-                    labelText: 'Publish Status',
+                    labelText: AppLocalizations.of(context)!.publishStatus,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   value: _selectedStatus,
-                  items: ['All', 'Published', 'Unpublished']
-                      .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                      .toList(),
+                  items: [
+                    DropdownMenuItem(value: 'All', child: Text(AppLocalizations.of(context)!.all)),
+                    DropdownMenuItem(value: 'Published', child: Text(AppLocalizations.of(context)!.publishedOption)),
+                    DropdownMenuItem(value: 'Unpublished', child: Text(AppLocalizations.of(context)!.unpublishedOption)),
+                  ],
                   onChanged: (val) => setState(() => _selectedStatus = val!),
                 ),
               ],
@@ -121,7 +123,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'No exams found',
+                          AppLocalizations.of(context)!.noExamsFound,
                           style: TextStyle(
                             color: Colors.grey.shade600,
                             fontSize: 16,
@@ -137,7 +139,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                       final exam = exams[index];
                       final assignmentsCount = exam.assignments.length;
                       String subtitleText =
-                          '$assignmentsCount Assignment${assignmentsCount == 1 ? '' : 's'}';
+                          AppLocalizations.of(context)!.assignmentCountLabel(assignmentsCount);
                       if (assignmentsCount > 0) {
                         final firstClass = classes
                             .firstWhere(
@@ -152,7 +154,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                             )
                             .name;
                         if (firstClass.isNotEmpty && firstSubj.isNotEmpty) {
-                          subtitleText += ' • e.g. $firstClass - $firstSubj';
+                          subtitleText += ' • ${AppLocalizations.of(context)!.egLabel} $firstClass - $firstSubj';
                         }
                       }
 
@@ -194,8 +196,8 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                                       SizedBox(height: 10),
                                       Text(
                                         exam.isPublished
-                                            ? 'Published'
-                                            : 'Draft',
+                                            ? AppLocalizations.of(context)!.publishedOption
+                                            : AppLocalizations.of(context)!.draft,
                                         style: TextStyle(
                                           color: exam.isPublished
                                               ? Colors.green

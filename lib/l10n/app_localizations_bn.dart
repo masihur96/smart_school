@@ -1123,4 +1123,47 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get resetFilters => 'ফিল্টার রিসেট করুন';
+
+  @override
+  String get searchByName => 'নাম দিয়ে খুঁজুন';
+
+  @override
+  String get status => 'স্ট্যাটাস';
+
+  @override
+  String get titleLabel => 'শিরোনাম';
+
+  @override
+  String get messageLabel => 'বার্তা';
+
+  @override
+  String get limitReached => 'সীমা অতিক্রম করেছে';
+
+  @override
+  String studentLimitReached(int count, int max) {
+    return 'আপনি আপনার শিক্ষার্থীর সীমায় পৌঁছে গেছেন ($count / $max)।\n\nআরও শিক্ষার্থী যোগ করতে আপনার প্ল্যান আপগ্রেড করুন।';
+  }
+
+  @override
+  String get upgradePlan => 'প্ল্যান আপগ্রেড করুন';
+
+  @override
+  String get publishStatus => 'প্রকাশের অবস্থা';
+
+  @override
+  String get publishedOption => 'প্রকাশিত';
+
+  @override
+  String get unpublishedOption => 'অপ্রকাশিত';
+
+  @override
+  String get noExamsFound => 'কোন পরীক্ষা পাওয়া যায়নি';
+
+  @override
+  String assignmentCountLabel(int count) {
+    return '$count টি অ্যাসাইনমেন্ট';
+  }
+
+  @override
+  String get egLabel => 'যেমন';
 }
