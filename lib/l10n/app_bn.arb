@@ -2,7 +2,7 @@
   "settingManagement": "সেটিং ম্যানেজমেন্ট",
   "accountInfo": "অ্যাকাউন্ট তথ্য",
   "name": "নাম",
-  "email": "ইমেল",
+  "email": "ইমেইল",
   "role": "ভূমিকা",
   "security": "নিরাপত্তা",
   "changePassword": "পাসওয়ার্ড পরিবর্তন করুন",
@@ -98,7 +98,7 @@
   "upcomingExams": "আসন্ন পরীক্ষা",
   "viewAll": "সব দেখুন",
   "welcomeBack": "স্বাগতম",
-  "recentHomework": "সাম্প্রতিক বাড়ির কাজ",
+  "recentHomework": "সাম্প্রতিক বাড়ির কাজ",
   "urgent": "জরুরী",
   "myRoutine": "আমার রুটিন",
   "examResults": "পরীক্ষার ফলাফল",
@@ -147,9 +147,24 @@
   "noActiveSubscriptionDesc": "আপনার প্রতিষ্ঠানের ড্যাশবোর্ড অ্যাক্সেস করতে একটি সক্রিয় পরিকল্পনা প্রয়োজন।",
   "subscriptionExpired": "সাবস্ক্রিপশন মেয়াদোত্তীর্ণ",
   "subscriptionExpiredDesc": "আপনার পরিকল্পনার মেয়াদ {date} তারিখে শেষ হয়েছে। চালিয়ে যেতে নবায়ন করুন।",
-  "@subscriptionExpiredDesc": { "placeholders": { "date": { "type": "String" } } },
+  "@subscriptionExpiredDesc": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "activeSubscriptionDesc": "আপনার প্রতিষ্ঠান {planName} পরিকল্পনায় রয়েছে, বৈধ আছে\n {validUntil} পর্যন্ত।",
-  "@activeSubscriptionDesc": { "placeholders": { "planName": { "type": "String" }, "validUntil": { "type": "String" } } },
+  "@activeSubscriptionDesc": {
+    "placeholders": {
+      "planName": {
+        "type": "String"
+      },
+      "validUntil": {
+        "type": "String"
+      }
+    }
+  },
   "customPlan": "কাস্টম",
   "yourCurrentPlan": "আপনার বর্তমান পরিকল্পনা",
   "monthlyBilling": "মাসিক বিলিং",
@@ -159,18 +174,32 @@
   "failedToAssignPlan": "পরিকল্পনা নির্ধারণ করতে ব্যর্থ হয়েছে",
   "perfectChoice": "চমৎকার পছন্দ!",
   "planRegisteredDesc": "আপনি সফলভাবে {planName} পরিকল্পনায় নিবন্ধিত হয়েছেন। আপনার অ্যাকাউন্ট সক্রিয় করতে আমাদের প্রশাসন দলের কাছে একটি অনুরোধ পাঠাতে হবে।",
-  "@planRegisteredDesc": { "placeholders": { "planName": { "type": "String" } } },
+  "@planRegisteredDesc": {
+    "placeholders": {
+      "planName": {
+        "type": "String"
+      }
+    }
+  },
   "sendActivationRequest": "সক্রিয়করণ অনুরোধ পাঠান",
   "decideLater": "পরে সিদ্ধান্ত নিন",
   "activationRequestSent": "সক্রিয়করণ অনুরোধ সফলভাবে পাঠানো হয়েছে। আপনি ১২ ঘণ্টার মধ্যে একটি নিশ্চিতকরণ ইমেল পাবেন।",
   "studentsCount": "{current} / {max} শিক্ষার্থী",
-  "@studentsCount": { "placeholders": { "current": { "type": "int" }, "max": { "type": "int" } } },
+  "@studentsCount": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "studentAttendance": "শিক্ষার্থী উপস্থিতি",
   "teacherAttendanceLabel": "শিক্ষক উপস্থিতি",
   "classWiseRecords": "শ্রেণীভিত্তিক রেকর্ড",
   "todaysRecords": "আজকের রেকর্ড",
   "noRecordsForToday": "আজকের কোনো রেকর্ড নেই",
-  "recentHomework": "সাম্প্রতিক বাড়ির কাজ",
   "currentExams": "চলমান পরীক্ষা",
   "recentNotices": "সাম্প্রতিক নোটিশ",
   "total": "মোট",
@@ -178,11 +207,29 @@
   "published": "প্রকাশিত",
   "draft": "ড্রাফ্ট",
   "forAudience": "যাদের জন্য: {audience}",
-  "@forAudience": { "placeholders": { "audience": { "type": "String" } } },
+  "@forAudience": {
+    "placeholders": {
+      "audience": {
+        "type": "String"
+      }
+    }
+  },
   "validUntil": "{date} পর্যন্ত বৈধ",
-  "@validUntil": { "placeholders": { "date": { "type": "String" } } },
+  "@validUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "expiredOn": "{date} তারিখে মেয়াদ শেষ",
-  "@expiredOn": { "placeholders": { "date": { "type": "String" } } },
+  "@expiredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "noPlan": "কোনো পরিকল্পনা নেই",
   "unknown": "অজ্ঞাত",
   "rate": "হার",
@@ -190,5 +237,259 @@
   "noRecords": "কোনো রেকর্ড নেই",
   "teacher": "শিক্ষক",
   "examDateRange": "{start} থেকে {end}",
-  "@examDateRange": { "placeholders": { "start": { "type": "String" }, "end": { "type": "String" } } }
+  "@examDateRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "notLoggedIn": "লগইন করা হয়নি",
+  "classInfoNotAvailable": "ক্লাসের তথ্য পাওয়া যাচ্ছে না",
+  "noHomeworkAssigned": "আপনার ক্লাসে এখনো কোনো হোমওয়ার্ক দেওয়া হয়নি।",
+  "allSubjects": "সকল বিষয়",
+  "examinerLabel": "পরীক্ষক: {name}",
+  "@examinerLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "examsAndResults": "পরীক্ষা ও ফলাফল",
+  "classInfoNotFound": "শিক্ষার্থীর ক্লাসের তথ্য পাওয়া যায়নি।",
+  "teacherManagementTitle": "শিক্ষক ব্যবস্থাপনা",
+  "deleteTeacher": "শিক্ষক মুছুন",
+  "viewProfile": "প্রোফাইল দেখুন",
+  "sendNotification": "বিজ্ঞপ্তি পাঠান",
+  "editTeacher": "শিক্ষক সম্পাদনা",
+  "delete": "মুছুন",
+  "notifyTeacher": "{name}কে বিজ্ঞপ্তি দিন",
+  "@notifyTeacher": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseEnterTitleAndMessage": "অনুগ্রহ করে শিরোনাম ও বার্তা লিখুন",
+  "notificationSentSuccessfully": "বিজ্ঞপ্তি সফলভাবে পাঠানো হয়েছে",
+  "failedToSendNotification": "বিজ্ঞপ্তি পাঠাতে ব্যর্থ হয়েছে",
+  "send": "পাঠান",
+  "allSections": "সকল শাখা",
+  "allStatus": "সকল অবস্থা",
+  "activeOnly": "শুধু সক্রিয়",
+  "inactiveOnly": "শুধু নিষ্ক্রিয়",
+  "noStudentsFound": "কোনো শিক্ষার্থী পাওয়া যায়নি।",
+  "rollLabel": "রোল: {roll}",
+  "@rollLabel": {
+    "placeholders": {
+      "roll": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteStudent": "শিক্ষার্থী মুছুন",
+  "viewDetails": "বিস্তারিত দেখুন",
+  "edit": "সম্পাদনা",
+  "notifyStudent": "{name}কে বিজ্ঞপ্তি দিন",
+  "@notifyStudent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "viewDetailsOption": "বিস্তারিত দেখুন",
+  "editExam": "পরীক্ষা সম্পাদনা",
+  "publishResult": "ফলাফল প্রকাশ করুন",
+  "unpublishResult": "ফলাফল প্রত্যাহার করুন",
+  "duplicateExam": "পরীক্ষার কপি তৈরি করুন",
+  "deleteExam": "পরীক্ষা মুছুন",
+  "newNotice": "নতুন নোটিশ",
+  "viewAttachment": "সংযুক্তি দেখুন",
+  "close": "বন্ধ করুন",
+  "studentsAudience": "শিক্ষার্থীরা",
+  "teachersAudience": "শিক্ষকরা",
+  "parentsAudience": "অভিভাবকরা",
+  "markAsImportant": "গুরুত্বপূর্ণ হিসেবে চিহ্নিত করুন",
+  "titleAndContentRequired": "শিরোনাম ও বিষয়বস্তু আবশ্যক।",
+  "deleteNotice": "নোটিশ মুছুন",
+  "noticeDeleted": "নোটিশ মুছে ফেলা হয়েছে",
+  "routineDetails": "রুটিনের বিবরণ",
+  "deleteEntry": "এন্ট্রি মুছুন",
+  "allSectionsOption": "সকল শাখা",
+  "pleaseSelectSubjectAndTeacher": "অনুগ্রহ করে বিষয় ও শিক্ষক নির্বাচন করুন।",
+  "routineEntryAdded": "রুটিন এন্ট্রি সফলভাবে যোগ করা হয়েছে",
+  "errorLabel": "ত্রুটি: {error}",
+  "@errorLabel": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "view": "দেখুন",
+  "deleteHomework": "হোমওয়ার্ক মুছুন",
+  "deleteHomeworkConfirm": "আপনি কি এই হোমওয়ার্কটি মুছতে চান?",
+  "failedToDeleteHomework": "হোমওয়ার্ক মুছতে ব্যর্থ হয়েছে",
+  "errorNoActiveUser": "ত্রুটি: কোনো সক্রিয় ব্যবহারকারী পাওয়া যায়নি।",
+  "attendanceSavedSuccessfully": "উপস্থিতি সফলভাবে সংরক্ষিত হয়েছে!",
+  "failedToSaveAttendance": "উপস্থিতি সংরক্ষণ করতে ব্যর্থ হয়েছে।",
+  "saveAttendance": "উপস্থিতি সংরক্ষণ করুন",
+  "pleaseLogin": "অনুগ্রহ করে লগইন করুন",
+  "noStudentsForSelection": "এই নির্বাচনের জন্য কোনো শিক্ষার্থী পাওয়া যায়নি",
+  "rollNumber": "রোল: {roll}",
+  "@rollNumber": {
+    "placeholders": {
+      "roll": {
+        "type": "String"
+      }
+    }
+  },
+  "marksEnteredRequired": "অনুগ্রহ করে কমপক্ষে একজন শিক্ষার্থীর নম্বর লিখুন",
+  "marksSavedSuccessfully": "নম্বর সফলভাবে সংরক্ষিত হয়েছে!",
+  "failedToSaveMarks": "নম্বর সংরক্ষণ করতে ব্যর্থ হয়েছে: {error}",
+  "@failedToSaveMarks": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeworkDetails": "হোমওয়ার্কের বিবরণ",
+  "homeworkNotFound": "হোমওয়ার্ক পাওয়া যায়নি",
+  "bulkUpdate": "একসাথে আপডেট",
+  "noStudentsAssigned": "এই হোমওয়ার্কে কোনো শিক্ষার্থী নির্ধারিত নেই",
+  "updateStatusAndComment": "অবস্থা ও মন্তব্য আপডেট করুন",
+  "pendingStatus": "অপেক্ষমান",
+  "doneStatus": "সম্পন্ন",
+  "failedToUpdateStatus": "অবস্থা আপডেট করতে ব্যর্থ হয়েছে",
+  "attendanceRecordsTitle": "উপস্থিতির রেকর্ড",
+  "myClassRoutine": "আমার ক্লাস রুটিন",
+  "noRoutinesAssigned": "এই পরীক্ষার জন্য কোনো রুটিন নির্ধারিত নেই।",
+  "noRoutinesYet": "এখনো কোনো রুটিন নির্ধারিত নেই।",
+  "confirmAttendanceTitle": "উপস্থিতি নিশ্চিত করুন",
+  "confirm": "নিশ্চিত করুন",
+  "anErrorOccurred": "একটি ত্রুটি হয়েছে: {error}",
+  "@anErrorOccurred": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "galleryOption": "গ্যালারি",
+  "cameraOption": "ক্যামেরা",
+  "profileImageUpdated": "প্রোফাইল ছবি সফলভাবে আপডেট হয়েছে",
+  "profileUpdated": "প্রোফাইল সফলভাবে আপডেট হয়েছে",
+  "copiedToClipboard": "{label} ক্লিপবোর্ডে কপি করা হয়েছে",
+  "@copiedToClipboard": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsTitle": "বিজ্ঞপ্তিসমূহ",
+  "notificationDetails": "বিজ্ঞপ্তির বিবরণ",
+  "deleteInstitution": "প্রতিষ্ঠান মুছবেন?",
+  "deleteSubscription": "সদস্যতা মুছুন",
+  "schoolUuidCopied": "স্কুল UUID ক্লিপবোর্ডে কপি করা হয়েছে",
+  "restore": "পুনরুদ্ধার করুন",
+  "sendNotificationTitle": "বিজ্ঞপ্তি পাঠান",
+  "registrationSuccessful": "নিবন্ধন সফল! আপনার স্কুল সেটআপ হচ্ছে...",
+  "loginButton": "লগইন",
+  "ok": "ঠিক আছে",
+  "deletePricingPlan": "মূল্য পরিকল্পনা মুছবেন?",
+  "editPlan": "পরিকল্পনা সম্পাদনা",
+  "editDetails": "বিস্তারিত সম্পাদনা",
+  "sendNotificationAction": "বিজ্ঞপ্তি পাঠান",
+  "fillAllFieldsAction": "অনুগ্রহ করে সব ঘর পূরণ করুন",
+  "sendAction": "পাঠান",
+  "cancelAction": "বাতিল",
+  "deleteAction": "মুছুন",
+  "noRoutinesForClass": "কোনো ক্লাস রুটিন পাওয়া যায়নি।",
+  "locationFetchedSuccessfully": "অবস্থান সফলভাবে আনা হয়েছে",
+  "errorGettingLocation": "অবস্থান পেতে ত্রুটি",
+  "pleaseSelectClassAndSection": "অনুগ্রহ করে ক্লাস এবং শাখা নির্বাচন করুন",
+  "teacherUpdatedSuccessfully": "শিক্ষক সফলভাবে আপডেট হয়েছে",
+  "teacherRegisteredSuccessfully": "শিক্ষক সফলভাবে নিবন্ধিত হয়েছে",
+  "updateFailed": "আপডেট ব্যর্থ হয়েছে",
+  "registrationFailed": "নিবন্ধন ব্যর্থ হয়েছে",
+  "updateTeacher": "শিক্ষক আপডেট করুন",
+  "registerTeacher": "শিক্ষক নিবন্ধন করুন",
+  "editStudent": "শিক্ষার্থী সম্পাদনা",
+  "updateStudent": "শিক্ষার্থী আপডেট করুন",
+  "saveStudent": "শিক্ষার্থী সংরক্ষণ করুন",
+  "addAtLeastOneAssignment": "অন্তত একটি একাডেমিক অ্যাসাইনমেন্ট যোগ করুন।",
+  "createExam": "পরীক্ষা তৈরি করুন",
+  "add": "যোগ করুন",
+  "details": "বিস্তারিত",
+  "nameAndDates": "নাম এবং তারিখ",
+  "assignments": "অ্যাসাইনমেন্ট",
+  "addedCount": "{count} টি যোগ করা হয়েছে",
+  "@addedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "back": "ফিরে যান",
+  "remove": "সরান",
+  "nextAddAssignments": "পরবর্তী: অ্যাসাইনমেন্ট যোগ করুন",
+  "saveChanges": "পরিবর্তন সংরক্ষণ করুন",
+  "addAssignment": "অ্যাসাইনমেন্ট যোগ করুন",
+  "editAssignment": "অ্যাসাইনমেন্ট সম্পাদনা করুন",
+  "examSavedSuccessfully": "\"{examName}\" পরীক্ষা সফলভাবে সংরক্ষিত হয়েছে।",
+  "@examSavedSuccessfully": {
+    "placeholders": {
+      "examName": {
+        "type": "String"
+      }
+    }
+  },
+  "errorNoSchoolIdAssigned": "ত্রুটি: ব্যবহারকারীর কোনো স্কুলআইডি বরাদ্দ নেই।",
+  "schoolRegisteredSuccessfully": "স্কুল সফলভাবে নিবন্ধিত হয়েছে!",
+  "failedToRegisterSchool": "স্কুল নিবন্ধন করতে ব্যর্থ হয়েছে।",
+  "registerSchool": "স্কুল নিবন্ধন করুন",
+  "schoolLogo": "স্কুলের লোগো",
+  "registerSchoolAction": "স্কুল নিবন্ধন করুন",
+  "completeYourSchoolProfile": "আপনার স্কুলের প্রোফাইল সম্পূর্ণ করুন",
+  "schoolName": "স্কুলের নাম",
+  "address": "ঠিকানা",
+  "phone": "ফোন",
+  "requiredField": "প্রয়োজনীয় ক্ষেত্র",
+  "enterValidEmail": "একটি বৈধ ইমেইল লিখুন",
+  "homeworkManagement": "হোমওয়ার্ক ব্যবস্থাপনা",
+  "assignHomework": "হোমওয়ার্ক নির্ধারণ করুন",
+  "classLabel": "শ্রেণী",
+  "section": "শাখা",
+  "subject": "বিষয়",
+  "selectDate": "তারিখ নির্বাচন করুন",
+  "noHomeworkFound": "কোনো হোমওয়ার্ক পাওয়া যায়নি",
+  "tryAdjustingFilters": "আপনার ফিল্টারগুলি সামঞ্জস্য করার চেষ্টা করুন",
+  "homeworkDeleted": "হোমওয়ার্ক মুছে ফেলা হয়েছে",
+  "teacherPrefix": "শিক্ষক: ",
+  "overdue": "মেয়াদোত্তীর্ণ",
+  "duePrefix": "শেষ তারিখ: ",
+  "createdPrefix": "তৈরি হয়েছে: ",
+  "homeworkAssignedSuccessfully": "সফলভাবে হোমওয়ার্ক দেওয়া হয়েছে!",
+  "homeworkUpdatedSuccessfully": "সফলভাবে হোমওয়ার্ক আপডেট করা হয়েছে!",
+  "pleaseSelectClassSubjectTeacher": "অনুগ্রহ করে শ্রেণী, বিষয় এবং শিক্ষক নির্বাচন করুন",
+  "failedToSaveHomework": "হোমওয়ার্ক সংরক্ষণ করতে ব্যর্থ হয়েছে",
+  "addHomework": "হোমওয়ার্ক যোগ করুন",
+  "marqueeUpdatedSuccessfully": "মার্কি সফলভাবে আপডেট করা হয়েছে",
+  "addEditMarquee": "মার্কি যোগ/সম্পাদনা করুন",
+  "scrollType": "স্ক্রলের ধরন",
+  "speedPixelsFrame": "গতি (পিক্সেল/ফ্রেম)",
+  "saveMarquee": "মার্কি সংরক্ষণ করুন",
+  "failedToUpdateMarquee": "মার্কি আপডেট করতে ব্যর্থ হয়েছে",
+  "marqueeTarget": "মার্কি টার্গেট",
+  "marqueeText": "মার্কি টেক্সট",
+  "resetFilters": "ফিল্টার রিসেট করুন"
 }

@@ -309,7 +309,7 @@ class TeacherExamRoutineView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (exam.assignments.isEmpty) {
-      return const Center(child: Text('No routines assigned for this exam.'));
+      return Center(child: Text(AppLocalizations.of(context)!.noRoutinesAssigned));
     }
 
     final grouped = <String, List<ExamAssignment>>{};

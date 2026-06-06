@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../admin/providers/notice_provider.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -25,11 +26,12 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final noticeNotifier = context.watch<NoticesNotifier>();
     final currentUser = context.watch<AuthNotifier>().user;
 
     if (currentUser == null) {
-      return const Scaffold(body: Center(child: Text('Not logged in')));
+      return Scaffold(body: Center(child: Text(l10n.notLoggedIn)));
     }
 
     final notices = noticeNotifier.notices
@@ -41,7 +43,7 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
     return Scaffold(
       appBar: widget.isFromDrawer
           ? AppBar(
-              title: const Text('School Notices'),
+              title: Text(l10n.schoolNotices),
               backgroundColor:  AppColors.primaryTeacher,
               foregroundColor: Colors.white,
               elevation: 0,
@@ -126,9 +128,9 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
                             color: Colors.red,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
-                            'URGENT',
-                            style: TextStyle(
+                          child: Text(
+                            AppLocalizations.of(context)!.urgent,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,

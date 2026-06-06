@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/school_models.dart';
 import '../../admin/providers/setup_provider.dart';
@@ -31,14 +32,15 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final currentUser = context.watch<AuthNotifier>().user;
     if (currentUser == null) {
-      return const Scaffold(body: Center(child: Text('Not logged in')));
+      return Scaffold(body: Center(child: Text(l10n.notLoggedIn)));
     }
 
     if (currentUser.classId == null) {
-      return const Scaffold(
-        body: Center(child: Text('Class info not available')),
+      return Scaffold(
+        body: Center(child: Text(l10n.classInfoNotAvailable)),
       );
     }
 
@@ -50,9 +52,9 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> {
       appBar: widget.hideAppBar
           ? null
           : AppBar(
-              title: const Text(
-                'My Homework',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              title: Text(
+                l10n.homework,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               backgroundColor: AppColors.primaryStudent,
               foregroundColor: Colors.white,
@@ -102,6 +104,7 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> {
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -124,7 +127,7 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          Text('No homework assigned to your class yet.'),
+          Text(l10n.noHomeworkAssigned),
         ],
       ),
     );
@@ -249,9 +252,9 @@ class _HomeworkCard extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  const Text(
-                    'View Details',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  Text(
+                    AppLocalizations.of(context)!.viewDetailsOption,
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(width: 4),
                   const Icon(

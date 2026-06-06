@@ -18,7 +18,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get name => 'নাম';
 
   @override
-  String get email => 'ইমেল';
+  String get email => 'ইমেইল';
 
   @override
   String get role => 'ভূমিকা';
@@ -201,6 +201,15 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get addStudent => 'ছাত্র যোগ করুন';
+
+  @override
+  String get editStudent => 'শিক্ষার্থী সম্পাদনা';
+
+  @override
+  String get updateStudent => 'শিক্ষার্থী আপডেট করুন';
+
+  @override
+  String get saveStudent => 'শিক্ষার্থী সংরক্ষণ করুন';
 
   @override
   String get addTeacher => 'শিক্ষক যোগ করুন';
@@ -582,4 +591,536 @@ class AppLocalizationsBn extends AppLocalizations {
   String examDateRange(String start, String end) {
     return '$start থেকে $end';
   }
+
+  @override
+  String get notLoggedIn => 'লগইন করা হয়নি';
+
+  @override
+  String get classInfoNotAvailable => 'ক্লাসের তথ্য পাওয়া যাচ্ছে না';
+
+  @override
+  String get noHomeworkAssigned =>
+      'আপনার ক্লাসে এখনো কোনো হোমওয়ার্ক দেওয়া হয়নি।';
+
+  @override
+  String get allSubjects => 'সকল বিষয়';
+
+  @override
+  String examinerLabel(String name) {
+    return 'পরীক্ষক: $name';
+  }
+
+  @override
+  String get examsAndResults => 'পরীক্ষা ও ফলাফল';
+
+  @override
+  String get classInfoNotFound => 'শিক্ষার্থীর ক্লাসের তথ্য পাওয়া যায়নি।';
+
+  @override
+  String get teacherManagementTitle => 'শিক্ষক ব্যবস্থাপনা';
+
+  @override
+  String get deleteTeacher => 'শিক্ষক মুছুন';
+
+  @override
+  String get viewProfile => 'প্রোফাইল দেখুন';
+
+  @override
+  String get sendNotification => 'বিজ্ঞপ্তি পাঠান';
+
+  @override
+  String get editTeacher => 'শিক্ষক সম্পাদনা';
+
+  @override
+  String get teacherUpdatedSuccessfully => 'শিক্ষক সফলভাবে আপডেট হয়েছে';
+
+  @override
+  String get teacherRegisteredSuccessfully => 'শিক্ষক সফলভাবে নিবন্ধিত হয়েছে';
+
+  @override
+  String get updateFailed => 'আপডেট ব্যর্থ হয়েছে';
+
+  @override
+  String get registrationFailed => 'নিবন্ধন ব্যর্থ হয়েছে';
+
+  @override
+  String get updateTeacher => 'শিক্ষক আপডেট করুন';
+
+  @override
+  String get registerTeacher => 'শিক্ষক নিবন্ধন করুন';
+
+  @override
+  String get delete => 'মুছুন';
+
+  @override
+  String notifyTeacher(String name) {
+    return '$nameকে বিজ্ঞপ্তি দিন';
+  }
+
+  @override
+  String get pleaseEnterTitleAndMessage => 'অনুগ্রহ করে শিরোনাম ও বার্তা লিখুন';
+
+  @override
+  String get notificationSentSuccessfully => 'বিজ্ঞপ্তি সফলভাবে পাঠানো হয়েছে';
+
+  @override
+  String get failedToSendNotification => 'বিজ্ঞপ্তি পাঠাতে ব্যর্থ হয়েছে';
+
+  @override
+  String get send => 'পাঠান';
+
+  @override
+  String get allSections => 'সকল শাখা';
+
+  @override
+  String get allStatus => 'সকল অবস্থা';
+
+  @override
+  String get activeOnly => 'শুধু সক্রিয়';
+
+  @override
+  String get inactiveOnly => 'শুধু নিষ্ক্রিয়';
+
+  @override
+  String get noStudentsFound => 'কোনো শিক্ষার্থী পাওয়া যায়নি।';
+
+  @override
+  String rollLabel(String roll) {
+    return 'রোল: $roll';
+  }
+
+  @override
+  String get deleteStudent => 'শিক্ষার্থী মুছুন';
+
+  @override
+  String get viewDetails => 'বিস্তারিত দেখুন';
+
+  @override
+  String get edit => 'সম্পাদনা';
+
+  @override
+  String notifyStudent(String name) {
+    return '$nameকে বিজ্ঞপ্তি দিন';
+  }
+
+  @override
+  String get viewDetailsOption => 'বিস্তারিত দেখুন';
+
+  @override
+  String get editExam => 'পরীক্ষা সম্পাদনা';
+
+  @override
+  String get publishResult => 'ফলাফল প্রকাশ করুন';
+
+  @override
+  String get unpublishResult => 'ফলাফল প্রত্যাহার করুন';
+
+  @override
+  String get duplicateExam => 'পরীক্ষার কপি তৈরি করুন';
+
+  @override
+  String get deleteExam => 'পরীক্ষা মুছুন';
+
+  @override
+  String get newNotice => 'নতুন নোটিশ';
+
+  @override
+  String get viewAttachment => 'সংযুক্তি দেখুন';
+
+  @override
+  String get close => 'বন্ধ করুন';
+
+  @override
+  String get studentsAudience => 'শিক্ষার্থীরা';
+
+  @override
+  String get teachersAudience => 'শিক্ষকরা';
+
+  @override
+  String get parentsAudience => 'অভিভাবকরা';
+
+  @override
+  String get markAsImportant => 'গুরুত্বপূর্ণ হিসেবে চিহ্নিত করুন';
+
+  @override
+  String get titleAndContentRequired => 'শিরোনাম ও বিষয়বস্তু আবশ্যক।';
+
+  @override
+  String get deleteNotice => 'নোটিশ মুছুন';
+
+  @override
+  String get noticeDeleted => 'নোটিশ মুছে ফেলা হয়েছে';
+
+  @override
+  String get routineDetails => 'রুটিনের বিবরণ';
+
+  @override
+  String get deleteEntry => 'এন্ট্রি মুছুন';
+
+  @override
+  String get allSectionsOption => 'সকল শাখা';
+
+  @override
+  String get pleaseSelectSubjectAndTeacher =>
+      'অনুগ্রহ করে বিষয় ও শিক্ষক নির্বাচন করুন।';
+
+  @override
+  String get routineEntryAdded => 'রুটিন এন্ট্রি সফলভাবে যোগ করা হয়েছে';
+
+  @override
+  String errorLabel(String error) {
+    return 'ত্রুটি: $error';
+  }
+
+  @override
+  String get view => 'দেখুন';
+
+  @override
+  String get deleteHomework => 'হোমওয়ার্ক মুছুন';
+
+  @override
+  String get deleteHomeworkConfirm => 'আপনি কি এই হোমওয়ার্কটি মুছতে চান?';
+
+  @override
+  String get failedToDeleteHomework => 'হোমওয়ার্ক মুছতে ব্যর্থ হয়েছে';
+
+  @override
+  String get errorNoActiveUser =>
+      'ত্রুটি: কোনো সক্রিয় ব্যবহারকারী পাওয়া যায়নি।';
+
+  @override
+  String get attendanceSavedSuccessfully => 'উপস্থিতি সফলভাবে সংরক্ষিত হয়েছে!';
+
+  @override
+  String get failedToSaveAttendance => 'উপস্থিতি সংরক্ষণ করতে ব্যর্থ হয়েছে।';
+
+  @override
+  String get saveAttendance => 'উপস্থিতি সংরক্ষণ করুন';
+
+  @override
+  String get pleaseLogin => 'অনুগ্রহ করে লগইন করুন';
+
+  @override
+  String get noStudentsForSelection =>
+      'এই নির্বাচনের জন্য কোনো শিক্ষার্থী পাওয়া যায়নি';
+
+  @override
+  String rollNumber(String roll) {
+    return 'রোল: $roll';
+  }
+
+  @override
+  String get marksEnteredRequired =>
+      'অনুগ্রহ করে কমপক্ষে একজন শিক্ষার্থীর নম্বর লিখুন';
+
+  @override
+  String get marksSavedSuccessfully => 'নম্বর সফলভাবে সংরক্ষিত হয়েছে!';
+
+  @override
+  String failedToSaveMarks(String error) {
+    return 'নম্বর সংরক্ষণ করতে ব্যর্থ হয়েছে: $error';
+  }
+
+  @override
+  String get homeworkDetails => 'হোমওয়ার্কের বিবরণ';
+
+  @override
+  String get homeworkNotFound => 'হোমওয়ার্ক পাওয়া যায়নি';
+
+  @override
+  String get bulkUpdate => 'একসাথে আপডেট';
+
+  @override
+  String get noStudentsAssigned =>
+      'এই হোমওয়ার্কে কোনো শিক্ষার্থী নির্ধারিত নেই';
+
+  @override
+  String get updateStatusAndComment => 'অবস্থা ও মন্তব্য আপডেট করুন';
+
+  @override
+  String get pendingStatus => 'অপেক্ষমান';
+
+  @override
+  String get doneStatus => 'সম্পন্ন';
+
+  @override
+  String get failedToUpdateStatus => 'অবস্থা আপডেট করতে ব্যর্থ হয়েছে';
+
+  @override
+  String get attendanceRecordsTitle => 'উপস্থিতির রেকর্ড';
+
+  @override
+  String get myClassRoutine => 'আমার ক্লাস রুটিন';
+
+  @override
+  String get noRoutinesAssigned => 'এই পরীক্ষার জন্য কোনো রুটিন নির্ধারিত নেই।';
+
+  @override
+  String get noRoutinesYet => 'এখনো কোনো রুটিন নির্ধারিত নেই।';
+
+  @override
+  String get confirmAttendanceTitle => 'উপস্থিতি নিশ্চিত করুন';
+
+  @override
+  String get confirm => 'নিশ্চিত করুন';
+
+  @override
+  String anErrorOccurred(String error) {
+    return 'একটি ত্রুটি হয়েছে: $error';
+  }
+
+  @override
+  String get galleryOption => 'গ্যালারি';
+
+  @override
+  String get cameraOption => 'ক্যামেরা';
+
+  @override
+  String get locationFetchedSuccessfully => 'অবস্থান সফলভাবে আনা হয়েছে';
+
+  @override
+  String get errorGettingLocation => 'অবস্থান পেতে ত্রুটি';
+
+  @override
+  String get pleaseSelectClassAndSection =>
+      'অনুগ্রহ করে ক্লাস এবং শাখা নির্বাচন করুন';
+
+  @override
+  String get profileImageUpdated => 'প্রোফাইল ছবি সফলভাবে আপডেট হয়েছে';
+
+  @override
+  String get profileUpdated => 'প্রোফাইল সফলভাবে আপডেট হয়েছে';
+
+  @override
+  String copiedToClipboard(String label) {
+    return '$label ক্লিপবোর্ডে কপি করা হয়েছে';
+  }
+
+  @override
+  String get notificationsTitle => 'বিজ্ঞপ্তিসমূহ';
+
+  @override
+  String get notificationDetails => 'বিজ্ঞপ্তির বিবরণ';
+
+  @override
+  String get deleteInstitution => 'প্রতিষ্ঠান মুছবেন?';
+
+  @override
+  String get deleteSubscription => 'সদস্যতা মুছুন';
+
+  @override
+  String get schoolUuidCopied => 'স্কুল UUID ক্লিপবোর্ডে কপি করা হয়েছে';
+
+  @override
+  String get restore => 'পুনরুদ্ধার করুন';
+
+  @override
+  String get sendNotificationTitle => 'বিজ্ঞপ্তি পাঠান';
+
+  @override
+  String get registrationSuccessful =>
+      'নিবন্ধন সফল! আপনার স্কুল সেটআপ হচ্ছে...';
+
+  @override
+  String get loginButton => 'লগইন';
+
+  @override
+  String get ok => 'ঠিক আছে';
+
+  @override
+  String get deletePricingPlan => 'মূল্য পরিকল্পনা মুছবেন?';
+
+  @override
+  String get editPlan => 'পরিকল্পনা সম্পাদনা';
+
+  @override
+  String get editDetails => 'বিস্তারিত সম্পাদনা';
+
+  @override
+  String get sendNotificationAction => 'বিজ্ঞপ্তি পাঠান';
+
+  @override
+  String get fillAllFieldsAction => 'অনুগ্রহ করে সব ঘর পূরণ করুন';
+
+  @override
+  String get sendAction => 'পাঠান';
+
+  @override
+  String get cancelAction => 'বাতিল';
+
+  @override
+  String get deleteAction => 'মুছুন';
+
+  @override
+  String get noRoutinesForClass => 'কোনো ক্লাস রুটিন পাওয়া যায়নি।';
+
+  @override
+  String get addAtLeastOneAssignment =>
+      'অন্তত একটি একাডেমিক অ্যাসাইনমেন্ট যোগ করুন।';
+
+  @override
+  String get createExam => 'পরীক্ষা তৈরি করুন';
+
+  @override
+  String get add => 'যোগ করুন';
+
+  @override
+  String get details => 'বিস্তারিত';
+
+  @override
+  String get nameAndDates => 'নাম এবং তারিখ';
+
+  @override
+  String get assignments => 'অ্যাসাইনমেন্ট';
+
+  @override
+  String addedCount(int count) {
+    return '$count টি যোগ করা হয়েছে';
+  }
+
+  @override
+  String get back => 'ফিরে যান';
+
+  @override
+  String get remove => 'সরান';
+
+  @override
+  String get nextAddAssignments => 'পরবর্তী: অ্যাসাইনমেন্ট যোগ করুন';
+
+  @override
+  String get saveChanges => 'পরিবর্তন সংরক্ষণ করুন';
+
+  @override
+  String get addAssignment => 'অ্যাসাইনমেন্ট যোগ করুন';
+
+  @override
+  String get editAssignment => 'অ্যাসাইনমেন্ট সম্পাদনা করুন';
+
+  @override
+  String examSavedSuccessfully(String examName) {
+    return '\"$examName\" পরীক্ষা সফলভাবে সংরক্ষিত হয়েছে।';
+  }
+
+  @override
+  String get errorNoSchoolIdAssigned =>
+      'ত্রুটি: ব্যবহারকারীর কোনো স্কুলআইডি বরাদ্দ নেই।';
+
+  @override
+  String get schoolRegisteredSuccessfully => 'স্কুল সফলভাবে নিবন্ধিত হয়েছে!';
+
+  @override
+  String get failedToRegisterSchool => 'স্কুল নিবন্ধন করতে ব্যর্থ হয়েছে।';
+
+  @override
+  String get registerSchool => 'স্কুল নিবন্ধন করুন';
+
+  @override
+  String get schoolLogo => 'স্কুলের লোগো';
+
+  @override
+  String get registerSchoolAction => 'স্কুল নিবন্ধন করুন';
+
+  @override
+  String get completeYourSchoolProfile =>
+      'আপনার স্কুলের প্রোফাইল সম্পূর্ণ করুন';
+
+  @override
+  String get schoolName => 'স্কুলের নাম';
+
+  @override
+  String get address => 'ঠিকানা';
+
+  @override
+  String get phone => 'ফোন';
+
+  @override
+  String get requiredField => 'প্রয়োজনীয় ক্ষেত্র';
+
+  @override
+  String get enterValidEmail => 'একটি বৈধ ইমেইল লিখুন';
+
+  @override
+  String get homeworkManagement => 'হোমওয়ার্ক ব্যবস্থাপনা';
+
+  @override
+  String get assignHomework => 'হোমওয়ার্ক নির্ধারণ করুন';
+
+  @override
+  String get classLabel => 'শ্রেণী';
+
+  @override
+  String get section => 'শাখা';
+
+  @override
+  String get subject => 'বিষয়';
+
+  @override
+  String get selectDate => 'তারিখ নির্বাচন করুন';
+
+  @override
+  String get noHomeworkFound => 'কোনো হোমওয়ার্ক পাওয়া যায়নি';
+
+  @override
+  String get tryAdjustingFilters =>
+      'আপনার ফিল্টারগুলি সামঞ্জস্য করার চেষ্টা করুন';
+
+  @override
+  String get homeworkDeleted => 'হোমওয়ার্ক মুছে ফেলা হয়েছে';
+
+  @override
+  String get teacherPrefix => 'শিক্ষক: ';
+
+  @override
+  String get overdue => 'মেয়াদোত্তীর্ণ';
+
+  @override
+  String get duePrefix => 'শেষ তারিখ: ';
+
+  @override
+  String get createdPrefix => 'তৈরি হয়েছে: ';
+
+  @override
+  String get homeworkAssignedSuccessfully =>
+      'সফলভাবে হোমওয়ার্ক দেওয়া হয়েছে!';
+
+  @override
+  String get homeworkUpdatedSuccessfully =>
+      'সফলভাবে হোমওয়ার্ক আপডেট করা হয়েছে!';
+
+  @override
+  String get pleaseSelectClassSubjectTeacher =>
+      'অনুগ্রহ করে শ্রেণী, বিষয় এবং শিক্ষক নির্বাচন করুন';
+
+  @override
+  String get failedToSaveHomework => 'হোমওয়ার্ক সংরক্ষণ করতে ব্যর্থ হয়েছে';
+
+  @override
+  String get addHomework => 'হোমওয়ার্ক যোগ করুন';
+
+  @override
+  String get marqueeUpdatedSuccessfully => 'মার্কি সফলভাবে আপডেট করা হয়েছে';
+
+  @override
+  String get addEditMarquee => 'মার্কি যোগ/সম্পাদনা করুন';
+
+  @override
+  String get scrollType => 'স্ক্রলের ধরন';
+
+  @override
+  String get speedPixelsFrame => 'গতি (পিক্সেল/ফ্রেম)';
+
+  @override
+  String get saveMarquee => 'মার্কি সংরক্ষণ করুন';
+
+  @override
+  String get failedToUpdateMarquee => 'মার্কি আপডেট করতে ব্যর্থ হয়েছে';
+
+  @override
+  String get marqueeTarget => 'মার্কি টার্গেট';
+
+  @override
+  String get marqueeText => 'মার্কি টেক্সট';
+
+  @override
+  String get resetFilters => 'ফিল্টার রিসেট করুন';
 }

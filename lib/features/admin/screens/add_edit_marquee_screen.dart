@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../providers/marquee_provider.dart';
 import '../providers/student_provider.dart';
@@ -66,8 +67,8 @@ class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
     if (mounted) {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Marquee updated successfully'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.marqueeUpdatedSuccessfully),
             backgroundColor: Colors.green,
           ),
         );
@@ -77,7 +78,7 @@ class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
           SnackBar(
             content: Text(
               context.read<MarqueeProvider>().error ??
-                  'Failed to update marquee',
+                  AppLocalizations.of(context)!.failedToUpdateMarquee,
             ),
             backgroundColor: Colors.red,
           ),
@@ -92,7 +93,7 @@ class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add/Edit Marquee'),
+        title: Text(AppLocalizations.of(context)!.addEditMarquee),
         backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
       ),
@@ -103,9 +104,9 @@ class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Marquee Target',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              Text(
+                AppLocalizations.of(context)!.marqueeTarget,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
@@ -124,9 +125,9 @@ class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Marquee Text',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              Text(
+                AppLocalizations.of(context)!.marqueeText,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 8),
               TextFormField(
@@ -163,8 +164,8 @@ class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text(
-                          'Save Marquee',
+                      : Text(
+                          AppLocalizations.of(context)!.saveMarquee,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

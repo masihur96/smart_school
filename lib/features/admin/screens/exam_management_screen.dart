@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/teacher_model.dart';
 
 import '../../../models/school_models.dart' hide Teacher;
@@ -60,7 +61,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
       appBar: widget.hideAppBar
           ? null
           : AppBar(
-              title: const Text('Exam Management'),
+              title: Text(AppLocalizations.of(context)!.examManagement),
               elevation: 0,
               backgroundColor: AppColors.primaryAdmin,
               foregroundColor: AppColors.white,
@@ -285,88 +286,91 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                                         _confirmDelete(context, exam);
                                       }
                                     },
-                                    itemBuilder: (context) => [
-                                      const PopupMenuItem(
-                                        value: 'view',
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.visibility_outlined,
-                                              color: Colors.green,
-                                            ),
-                                            SizedBox(width: 8),
-                                            Text('View Details'),
-                                          ],
-                                        ),
-                                      ),
-                                      const PopupMenuItem(
-                                        value: 'edit',
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.edit_outlined,
-                                              color: Colors.orange,
-                                            ),
-                                            SizedBox(width: 8),
-                                            Text('Edit Exam'),
-                                          ],
-                                        ),
-                                      ),
-                                      if (!exam.isPublished)
-                                        const PopupMenuItem(
-                                          value: 'publish',
+                                    itemBuilder: (context) {
+                                      final l10n = AppLocalizations.of(context)!;
+                                      return [
+                                        PopupMenuItem(
+                                          value: 'view',
                                           child: Row(
                                             children: [
-                                              Icon(
-                                                Icons.publish,
-                                                color: Colors.blue,
+                                              const Icon(
+                                                Icons.visibility_outlined,
+                                                color: Colors.green,
                                               ),
-                                              SizedBox(width: 8),
-                                              Text('Publish Result'),
+                                              const SizedBox(width: 8),
+                                              Text(l10n.viewDetails),
                                             ],
                                           ),
                                         ),
-                                      if (exam.isPublished)
-                                        const PopupMenuItem(
-                                          value: 'unpublish',
+                                        PopupMenuItem(
+                                          value: 'edit',
                                           child: Row(
                                             children: [
-                                              Icon(
-                                                Icons.unpublished_outlined,
-                                                color: Colors.grey,
+                                              const Icon(
+                                                Icons.edit_outlined,
+                                                color: Colors.orange,
                                               ),
-                                              SizedBox(width: 8),
-                                              Text('Unpublish Result'),
+                                              const SizedBox(width: 8),
+                                              Text(l10n.editExam),
                                             ],
                                           ),
                                         ),
-                                      const PopupMenuItem(
-                                        value: 'duplicate',
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.copy_outlined,
-                                              color: Colors.indigo,
+                                        if (!exam.isPublished)
+                                          PopupMenuItem(
+                                            value: 'publish',
+                                            child: Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.publish,
+                                                  color: Colors.blue,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(l10n.publishResult),
+                                              ],
                                             ),
-                                            SizedBox(width: 8),
-                                            Text('Duplicate Exam'),
-                                          ],
-                                        ),
-                                      ),
-                                      const PopupMenuItem(
-                                        value: 'delete',
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.delete_outline,
-                                              color: Colors.red,
+                                          ),
+                                        if (exam.isPublished)
+                                          PopupMenuItem(
+                                            value: 'unpublish',
+                                            child: Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.unpublished_outlined,
+                                                  color: Colors.grey,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(l10n.unpublishResult),
+                                              ],
                                             ),
-                                            SizedBox(width: 8),
-                                            Text('Delete Exam'),
-                                          ],
+                                          ),
+                                        PopupMenuItem(
+                                          value: 'duplicate',
+                                          child: Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.copy_outlined,
+                                                color: Colors.indigo,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(l10n.duplicateExam),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                        PopupMenuItem(
+                                          value: 'delete',
+                                          child: Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.delete_outline,
+                                                color: Colors.red,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(l10n.deleteExam),
+                                            ],
+                                          ),
+                                        ),
+                                      ];
+                                    },
                                   ),
                                 ],
                               ),
@@ -638,7 +642,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -692,18 +696,18 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Duplicate Exam'),
+        title: Text(AppLocalizations.of(context)!.duplicateExam),
         content: Text(
           'Are you sure you want to duplicate "${exam.name}"? A new copy will be created.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           ElevatedButton.icon(
             icon: const Icon(Icons.copy_outlined, size: 16),
-            label: const Text('Duplicate'),
+            label: Text(AppLocalizations.of(context)!.duplicateExam),
             onPressed: () async {
               Navigator.pop(context);
               final success = await context
@@ -742,14 +746,14 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
 
         return StatefulBuilder(
           builder: (context, setState) => AlertDialog(
-            title: const Text('Delete Exam'),
+            title: Text(AppLocalizations.of(context)!.deleteExam),
             content: Text(
               'Are you sure you want to delete "${exam.name}"? This action cannot be undone.',
             ),
             actions: [
               TextButton(
                 onPressed: isDeleting ? null : () => Navigator.pop(dialogContext),
-                child: const Text('Cancel'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -790,7 +794,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                           strokeWidth: 2.5,
                         ),
                       )
-                    : const Text('Delete'),
+                    : Text(AppLocalizations.of(context)!.delete),
               ),
             ],
           ),

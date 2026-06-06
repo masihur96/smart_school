@@ -204,13 +204,13 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
                     }
                   },
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit_outlined, size: 20),
-                          SizedBox(width: 8),
-                          Text('Edit Details'),
+                          const Icon(Icons.edit_outlined, size: 20),
+                          const SizedBox(width: 8),
+                          Text(AppLocalizations.of(context)!.editDetails),
                         ],
                       ),
                     ),
@@ -285,14 +285,14 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Institution?'),
+        title: Text(AppLocalizations.of(context)!.deleteInstitution),
         content: Text(
           'Are you sure you want to delete ${school.name}? This action cannot be undone.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('CANCEL'),
+            child: Text(AppLocalizations.of(context)!.cancelAction),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -310,7 +310,7 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('DELETE'),
+            child: Text(AppLocalizations.of(context)!.deleteAction),
           ),
         ],
       ),
@@ -377,7 +377,7 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
                   Text(notifier.error!),
                   ElevatedButton(
                     onPressed: () => notifier.fetchSchools(),
-                    child: const Text('Retry'),
+                    child: Text(AppLocalizations.of(context)!.retry),
                   ),
                 ],
               ),
@@ -554,13 +554,13 @@ class SchoolCard extends StatelessWidget {
                   }
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'edit',
                     child: Row(
                       children: [
-                        Icon(Icons.edit_outlined, size: 20),
-                        SizedBox(width: 8),
-                        Text('Edit Details'),
+                        const Icon(Icons.edit_outlined, size: 20),
+                        const SizedBox(width: 8),
+                        Text(AppLocalizations.of(context)!.editDetails),
                       ],
                     ),
                   ),
@@ -619,14 +619,14 @@ class SchoolCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Institution?'),
+        title: Text(AppLocalizations.of(context)!.deleteInstitution),
         content: Text(
           'Are you sure you want to delete ${school.name}? This action cannot be undone.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('CANCEL'),
+            child: Text(AppLocalizations.of(context)!.cancelAction),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -644,7 +644,7 @@ class SchoolCard extends StatelessWidget {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('DELETE'),
+            child: Text(AppLocalizations.of(context)!.deleteAction),
           ),
         ],
       ),

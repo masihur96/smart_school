@@ -6,6 +6,7 @@ import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/features/admin/providers/student_provider.dart';
 import 'package:smart_school/features/teacher/providers/attendance_provider.dart';
 import 'package:smart_school/features/teacher/screens/homework_details_screen.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/school_models.dart';
 import '../../../models/student_model.dart';
@@ -137,7 +138,7 @@ class _ScheduleClassDetailsState extends State<ScheduleClassDetails>
     final teacherId = authNotifier.user?.id;
     if (teacherId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: No active user found.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.errorNoActiveUser)),
       );
       return;
     }
@@ -208,16 +209,16 @@ class _ScheduleClassDetailsState extends State<ScheduleClassDetails>
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Attendance saved successfully!'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.attendanceSavedSuccessfully),
           backgroundColor: AppColors.primaryTeacher,
           behavior: SnackBarBehavior.floating,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to save attendance.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.failedToSaveAttendance),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
@@ -448,7 +449,7 @@ class _AttendanceTab extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: onSave,
                   icon: const Icon(Icons.save_alt_rounded),
-                  label: const Text('Save Attendance'),
+                  label: Text(AppLocalizations.of(context)!.saveAttendance),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryTeacher,
                     foregroundColor: Colors.white,
@@ -913,12 +914,12 @@ class _HomeworkTab extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Homework'),
-        content: const Text('Are you sure you want to delete this homework?'),
+        title: Text(AppLocalizations.of(context)!.deleteHomework),
+        content: Text(AppLocalizations.of(context)!.deleteHomeworkConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -929,12 +930,12 @@ class _HomeworkTab extends StatelessWidget {
                 Navigator.pop(ctx);
                 if (!success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Failed to delete homework')),
+                    SnackBar(content: Text(AppLocalizations.of(context)!.failedToDeleteHomework)),
                   );
                 }
               }
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -1048,38 +1049,41 @@ class _HomeworkCard extends StatelessWidget {
                   onDelete();
                 }
               },
-              itemBuilder: (_) => const [
-                PopupMenuItem(
-                  value: 'view',
-                  child: Row(
-                    children: [
-                      Icon(Icons.visibility_outlined, size: 18),
-                      SizedBox(width: 8),
-                      Text('View'),
-                    ],
+              itemBuilder: (_) {
+                final l10n = AppLocalizations.of(context)!;
+                return [
+                  PopupMenuItem(
+                    value: 'view',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.visibility_outlined, size: 18),
+                        const SizedBox(width: 8),
+                        Text(l10n.view),
+                      ],
+                    ),
                   ),
-                ),
-                PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit_outlined, size: 18),
-                      SizedBox(width: 8),
-                      Text('Edit'),
-                    ],
+                  PopupMenuItem(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.edit_outlined, size: 18),
+                        const SizedBox(width: 8),
+                        Text(l10n.edit),
+                      ],
+                    ),
                   ),
-                ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete_outline, color: Colors.red, size: 18),
-                      SizedBox(width: 8),
-                      Text('Delete', style: TextStyle(color: Colors.red)),
-                    ],
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                        const SizedBox(width: 8),
+                        Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ];
+              },
             ),
           ],
         ),
@@ -1174,7 +1178,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     final user = authNotifier.user;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: No active user found.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.errorNoActiveUser)),
       );
       return;
     }

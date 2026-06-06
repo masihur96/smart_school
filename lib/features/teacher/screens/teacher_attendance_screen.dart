@@ -5,6 +5,7 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/teacher/providers/attendance_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/period_attendance_model.dart';
 
 class TeacherAttendanceScreen extends StatefulWidget {
@@ -75,11 +76,12 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: widget.hideAppBar
           ? null
           : AppBar(
-              title: const Text('Attendance Records'),
+              title: Text(l10n.attendanceRecordsTitle),
               backgroundColor: AppColors.primaryTeacher,
               foregroundColor: Colors.white,
               elevation: 0,

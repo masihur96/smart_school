@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../providers/trash_restore_provider.dart';
@@ -608,12 +609,12 @@ class _BackupScreenState extends State<BackupScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           ElevatedButton.icon(
             onPressed: () => Navigator.of(dialogCtx).pop(true),
             icon: const Icon(Icons.restore_rounded, size: 16),
-            label: const Text('Restore'),
+            label: Text(AppLocalizations.of(context)!.restore),
             style: ElevatedButton.styleFrom(
               backgroundColor: color,
               foregroundColor: Colors.white,

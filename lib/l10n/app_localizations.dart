@@ -482,6 +482,24 @@ abstract class AppLocalizations {
   /// **'Add Student'**
   String get addStudent;
 
+  /// No description provided for @editStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Student'**
+  String get editStudent;
+
+  /// No description provided for @updateStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Student'**
+  String get updateStudent;
+
+  /// No description provided for @saveStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Student'**
+  String get saveStudent;
+
   /// No description provided for @addTeacher.
   ///
   /// In en, this message translates to:
@@ -563,7 +581,7 @@ abstract class AppLocalizations {
   /// No description provided for @active.
   ///
   /// In en, this message translates to:
-  /// **'ACTIVE'**
+  /// **'Active'**
   String get active;
 
   /// No description provided for @invalid.
@@ -1195,6 +1213,996 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{start} to {end}'**
   String examDateRange(String start, String end);
+
+  /// No description provided for @notLoggedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not logged in'**
+  String get notLoggedIn;
+
+  /// No description provided for @classInfoNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Class info not available'**
+  String get classInfoNotAvailable;
+
+  /// No description provided for @noHomeworkAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'No homework assigned to your class yet.'**
+  String get noHomeworkAssigned;
+
+  /// No description provided for @allSubjects.
+  ///
+  /// In en, this message translates to:
+  /// **'All Subjects'**
+  String get allSubjects;
+
+  /// No description provided for @examinerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Examiner: {name}'**
+  String examinerLabel(String name);
+
+  /// No description provided for @examsAndResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Exams & Results'**
+  String get examsAndResults;
+
+  /// No description provided for @classInfoNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Class information not found for student.'**
+  String get classInfoNotFound;
+
+  /// No description provided for @teacherManagementTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Management'**
+  String get teacherManagementTitle;
+
+  /// No description provided for @deleteTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Teacher'**
+  String get deleteTeacher;
+
+  /// No description provided for @viewProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'View Profile'**
+  String get viewProfile;
+
+  /// No description provided for @sendNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Notification'**
+  String get sendNotification;
+
+  /// No description provided for @editTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Teacher'**
+  String get editTeacher;
+
+  /// No description provided for @teacherUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher updated successfully'**
+  String get teacherUpdatedSuccessfully;
+
+  /// No description provided for @teacherRegisteredSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher registered successfully'**
+  String get teacherRegisteredSuccessfully;
+
+  /// No description provided for @updateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Update failed'**
+  String get updateFailed;
+
+  /// No description provided for @registrationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration failed'**
+  String get registrationFailed;
+
+  /// No description provided for @updateTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Teacher'**
+  String get updateTeacher;
+
+  /// No description provided for @registerTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Register Teacher'**
+  String get registerTeacher;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @notifyTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify {name}'**
+  String notifyTeacher(String name);
+
+  /// No description provided for @pleaseEnterTitleAndMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter title and message'**
+  String get pleaseEnterTitleAndMessage;
+
+  /// No description provided for @notificationSentSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification sent successfully'**
+  String get notificationSentSuccessfully;
+
+  /// No description provided for @failedToSendNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send notification'**
+  String get failedToSendNotification;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @allSections.
+  ///
+  /// In en, this message translates to:
+  /// **'All Sections'**
+  String get allSections;
+
+  /// No description provided for @allStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'All Status'**
+  String get allStatus;
+
+  /// No description provided for @activeOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Only'**
+  String get activeOnly;
+
+  /// No description provided for @inactiveOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive Only'**
+  String get inactiveOnly;
+
+  /// No description provided for @noStudentsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No students found.'**
+  String get noStudentsFound;
+
+  /// No description provided for @rollLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Roll: {roll}'**
+  String rollLabel(String roll);
+
+  /// No description provided for @deleteStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Student'**
+  String get deleteStudent;
+
+  /// No description provided for @viewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View Details'**
+  String get viewDetails;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @notifyStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify {name}'**
+  String notifyStudent(String name);
+
+  /// No description provided for @viewDetailsOption.
+  ///
+  /// In en, this message translates to:
+  /// **'View Details'**
+  String get viewDetailsOption;
+
+  /// No description provided for @editExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Exam'**
+  String get editExam;
+
+  /// No description provided for @publishResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish Result'**
+  String get publishResult;
+
+  /// No description provided for @unpublishResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpublish Result'**
+  String get unpublishResult;
+
+  /// No description provided for @duplicateExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate Exam'**
+  String get duplicateExam;
+
+  /// No description provided for @deleteExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Exam'**
+  String get deleteExam;
+
+  /// No description provided for @newNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'New Notice'**
+  String get newNotice;
+
+  /// No description provided for @viewAttachment.
+  ///
+  /// In en, this message translates to:
+  /// **'View Attachment'**
+  String get viewAttachment;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @studentsAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'Students'**
+  String get studentsAudience;
+
+  /// No description provided for @teachersAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'Teachers'**
+  String get teachersAudience;
+
+  /// No description provided for @parentsAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'Parents'**
+  String get parentsAudience;
+
+  /// No description provided for @markAsImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Important'**
+  String get markAsImportant;
+
+  /// No description provided for @titleAndContentRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title and content are required.'**
+  String get titleAndContentRequired;
+
+  /// No description provided for @deleteNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Notice'**
+  String get deleteNotice;
+
+  /// No description provided for @noticeDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Notice deleted'**
+  String get noticeDeleted;
+
+  /// No description provided for @routineDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Routine Details'**
+  String get routineDetails;
+
+  /// No description provided for @deleteEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Entry'**
+  String get deleteEntry;
+
+  /// No description provided for @allSectionsOption.
+  ///
+  /// In en, this message translates to:
+  /// **'All Sections'**
+  String get allSectionsOption;
+
+  /// No description provided for @pleaseSelectSubjectAndTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select subject and teacher.'**
+  String get pleaseSelectSubjectAndTeacher;
+
+  /// No description provided for @routineEntryAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Routine entry added successfully'**
+  String get routineEntryAdded;
+
+  /// No description provided for @errorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String errorLabel(String error);
+
+  /// No description provided for @view.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get view;
+
+  /// No description provided for @deleteHomework.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Homework'**
+  String get deleteHomework;
+
+  /// No description provided for @deleteHomeworkConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this homework?'**
+  String get deleteHomeworkConfirm;
+
+  /// No description provided for @failedToDeleteHomework.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete homework'**
+  String get failedToDeleteHomework;
+
+  /// No description provided for @errorNoActiveUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: No active user found.'**
+  String get errorNoActiveUser;
+
+  /// No description provided for @attendanceSavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance saved successfully!'**
+  String get attendanceSavedSuccessfully;
+
+  /// No description provided for @failedToSaveAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save attendance.'**
+  String get failedToSaveAttendance;
+
+  /// No description provided for @saveAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Attendance'**
+  String get saveAttendance;
+
+  /// No description provided for @pleaseLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Please login'**
+  String get pleaseLogin;
+
+  /// No description provided for @noStudentsForSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'No students found for this selection'**
+  String get noStudentsForSelection;
+
+  /// No description provided for @rollNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Roll: {roll}'**
+  String rollNumber(String roll);
+
+  /// No description provided for @marksEnteredRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter marks for at least one student'**
+  String get marksEnteredRequired;
+
+  /// No description provided for @marksSavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Marks saved successfully!'**
+  String get marksSavedSuccessfully;
+
+  /// No description provided for @failedToSaveMarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save marks: {error}'**
+  String failedToSaveMarks(String error);
+
+  /// No description provided for @homeworkDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework Details'**
+  String get homeworkDetails;
+
+  /// No description provided for @homeworkNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework not found'**
+  String get homeworkNotFound;
+
+  /// No description provided for @bulkUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk Update'**
+  String get bulkUpdate;
+
+  /// No description provided for @noStudentsAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'No students assigned to this homework'**
+  String get noStudentsAssigned;
+
+  /// No description provided for @updateStatusAndComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Status & Comment'**
+  String get updateStatusAndComment;
+
+  /// No description provided for @pendingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get pendingStatus;
+
+  /// No description provided for @doneStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get doneStatus;
+
+  /// No description provided for @failedToUpdateStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update status'**
+  String get failedToUpdateStatus;
+
+  /// No description provided for @attendanceRecordsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance Records'**
+  String get attendanceRecordsTitle;
+
+  /// No description provided for @myClassRoutine.
+  ///
+  /// In en, this message translates to:
+  /// **'My Class Routine'**
+  String get myClassRoutine;
+
+  /// No description provided for @noRoutinesAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'No routines assigned for this exam.'**
+  String get noRoutinesAssigned;
+
+  /// No description provided for @noRoutinesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No routines assigned yet.'**
+  String get noRoutinesYet;
+
+  /// No description provided for @confirmAttendanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Attendance'**
+  String get confirmAttendanceTitle;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @anErrorOccurred.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred: {error}'**
+  String anErrorOccurred(String error);
+
+  /// No description provided for @galleryOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get galleryOption;
+
+  /// No description provided for @cameraOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get cameraOption;
+
+  /// No description provided for @locationFetchedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Location fetched successfully'**
+  String get locationFetchedSuccessfully;
+
+  /// No description provided for @errorGettingLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Error getting location'**
+  String get errorGettingLocation;
+
+  /// No description provided for @pleaseSelectClassAndSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select Class and Section'**
+  String get pleaseSelectClassAndSection;
+
+  /// No description provided for @profileImageUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile image updated successfully'**
+  String get profileImageUpdated;
+
+  /// No description provided for @profileUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated successfully'**
+  String get profileUpdated;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} copied to clipboard'**
+  String copiedToClipboard(String label);
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Details'**
+  String get notificationDetails;
+
+  /// No description provided for @deleteInstitution.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Institution?'**
+  String get deleteInstitution;
+
+  /// No description provided for @deleteSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Subscription'**
+  String get deleteSubscription;
+
+  /// No description provided for @schoolUuidCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'School UUID copied to clipboard'**
+  String get schoolUuidCopied;
+
+  /// No description provided for @restore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get restore;
+
+  /// No description provided for @sendNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Notification'**
+  String get sendNotificationTitle;
+
+  /// No description provided for @registrationSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration successful! Setting up your school...'**
+  String get registrationSuccessful;
+
+  /// No description provided for @loginButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get loginButton;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @deletePricingPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Pricing Plan?'**
+  String get deletePricingPlan;
+
+  /// No description provided for @editPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Plan'**
+  String get editPlan;
+
+  /// No description provided for @editDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Details'**
+  String get editDetails;
+
+  /// No description provided for @sendNotificationAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Notification'**
+  String get sendNotificationAction;
+
+  /// No description provided for @fillAllFieldsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill all fields'**
+  String get fillAllFieldsAction;
+
+  /// No description provided for @sendAction.
+  ///
+  /// In en, this message translates to:
+  /// **'SEND'**
+  String get sendAction;
+
+  /// No description provided for @cancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'CANCEL'**
+  String get cancelAction;
+
+  /// No description provided for @deleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'DELETE'**
+  String get deleteAction;
+
+  /// No description provided for @noRoutinesForClass.
+  ///
+  /// In en, this message translates to:
+  /// **'No class routine found.'**
+  String get noRoutinesForClass;
+
+  /// No description provided for @addAtLeastOneAssignment.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one academic assignment.'**
+  String get addAtLeastOneAssignment;
+
+  /// No description provided for @createExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Exam'**
+  String get createExam;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get details;
+
+  /// No description provided for @nameAndDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Name & dates'**
+  String get nameAndDates;
+
+  /// No description provided for @assignments.
+  ///
+  /// In en, this message translates to:
+  /// **'Assignments'**
+  String get assignments;
+
+  /// No description provided for @addedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} added'**
+  String addedCount(int count);
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @nextAddAssignments.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: Add Assignments'**
+  String get nextAddAssignments;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @addAssignment.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Assignment'**
+  String get addAssignment;
+
+  /// No description provided for @editAssignment.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Assignment'**
+  String get editAssignment;
+
+  /// No description provided for @examSavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam \"{examName}\" saved successfully.'**
+  String examSavedSuccessfully(String examName);
+
+  /// No description provided for @errorNoSchoolIdAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: User has no schoolId assigned.'**
+  String get errorNoSchoolIdAssigned;
+
+  /// No description provided for @schoolRegisteredSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'School registered successfully!'**
+  String get schoolRegisteredSuccessfully;
+
+  /// No description provided for @failedToRegisterSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to register school.'**
+  String get failedToRegisterSchool;
+
+  /// No description provided for @registerSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'Register School'**
+  String get registerSchool;
+
+  /// No description provided for @schoolLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'School Logo'**
+  String get schoolLogo;
+
+  /// No description provided for @registerSchoolAction.
+  ///
+  /// In en, this message translates to:
+  /// **'REGISTER SCHOOL'**
+  String get registerSchoolAction;
+
+  /// No description provided for @completeYourSchoolProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your school profile'**
+  String get completeYourSchoolProfile;
+
+  /// No description provided for @schoolName.
+  ///
+  /// In en, this message translates to:
+  /// **'School Name'**
+  String get schoolName;
+
+  /// No description provided for @address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get address;
+
+  /// No description provided for @phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get phone;
+
+  /// No description provided for @requiredField.
+  ///
+  /// In en, this message translates to:
+  /// **'Required field'**
+  String get requiredField;
+
+  /// No description provided for @enterValidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get enterValidEmail;
+
+  /// No description provided for @homeworkManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework Management'**
+  String get homeworkManagement;
+
+  /// No description provided for @assignHomework.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Homework'**
+  String get assignHomework;
+
+  /// No description provided for @classLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get classLabel;
+
+  /// No description provided for @section.
+  ///
+  /// In en, this message translates to:
+  /// **'Section'**
+  String get section;
+
+  /// No description provided for @subject.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get subject;
+
+  /// No description provided for @selectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date'**
+  String get selectDate;
+
+  /// No description provided for @noHomeworkFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No homework found'**
+  String get noHomeworkFound;
+
+  /// No description provided for @tryAdjustingFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Try adjusting your filters'**
+  String get tryAdjustingFilters;
+
+  /// No description provided for @homeworkDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework deleted'**
+  String get homeworkDeleted;
+
+  /// No description provided for @teacherPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher: '**
+  String get teacherPrefix;
+
+  /// No description provided for @overdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get overdue;
+
+  /// No description provided for @duePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Due: '**
+  String get duePrefix;
+
+  /// No description provided for @createdPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Created: '**
+  String get createdPrefix;
+
+  /// No description provided for @homeworkAssignedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework assigned successfully!'**
+  String get homeworkAssignedSuccessfully;
+
+  /// No description provided for @homeworkUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework updated successfully!'**
+  String get homeworkUpdatedSuccessfully;
+
+  /// No description provided for @pleaseSelectClassSubjectTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select class, subject and teacher'**
+  String get pleaseSelectClassSubjectTeacher;
+
+  /// No description provided for @failedToSaveHomework.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save homework'**
+  String get failedToSaveHomework;
+
+  /// No description provided for @addHomework.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Homework'**
+  String get addHomework;
+
+  /// No description provided for @marqueeUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Marquee updated successfully'**
+  String get marqueeUpdatedSuccessfully;
+
+  /// No description provided for @addEditMarquee.
+  ///
+  /// In en, this message translates to:
+  /// **'Add/Edit Marquee'**
+  String get addEditMarquee;
+
+  /// No description provided for @scrollType.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll Type'**
+  String get scrollType;
+
+  /// No description provided for @speedPixelsFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'Speed (pixels/frame)'**
+  String get speedPixelsFrame;
+
+  /// No description provided for @saveMarquee.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Marquee'**
+  String get saveMarquee;
+
+  /// No description provided for @failedToUpdateMarquee.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update marquee'**
+  String get failedToUpdateMarquee;
+
+  /// No description provided for @marqueeTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Marquee Target'**
+  String get marqueeTarget;
+
+  /// No description provided for @marqueeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Marquee Text'**
+  String get marqueeText;
+
+  /// No description provided for @resetFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Filters'**
+  String get resetFilters;
 }
 
 class _AppLocalizationsDelegate

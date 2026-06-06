@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/screens/register_school_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -54,8 +55,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         
         if (mounted) {
            ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Registration successful! Setting up your school...'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.registrationSuccessful),
             ),
           );
           

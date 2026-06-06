@@ -11,6 +11,7 @@ import '../providers/exam_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
 import '../providers/teacher_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 // Local model for a single academic assignment draft
 class _AssignmentDraft {
@@ -227,7 +228,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
             TextButton.icon(
               onPressed: _addAssignmentSheet,
               icon: const Icon(Icons.add_circle_outline, size: 18),
-              label: const Text('Add'),
+              label: Text(AppLocalizations.of(context)!.add),
               style: TextButton.styleFrom(foregroundColor: Colors.purple),
             ),
           ],
@@ -323,7 +324,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        editing ? 'Edit Assignment' : 'Add Assignment',
+                        editing ? AppLocalizations.of(context)!.editAssignment : AppLocalizations.of(context)!.addAssignment,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -462,7 +463,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                             ),
                           ),
                           child: Text(
-                            editing ? 'Save Changes' : 'Add Assignment',
+                            editing ? AppLocalizations.of(context)!.saveChanges : AppLocalizations.of(context)!.addAssignment,
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -497,8 +498,8 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
   Future<void> _submit() async {
     if (_assignments.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Add at least one academic assignment.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.addAtLeastOneAssignment),
           backgroundColor: Colors.orange,
         ),
       );
@@ -569,7 +570,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Exam "${_nameController.text.trim()}" saved successfully.',
+              AppLocalizations.of(context)!.examSavedSuccessfully(_nameController.text.trim()),
             ),
             backgroundColor: Colors.green,
           ),
@@ -580,7 +581,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
       log('Error saving exam: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorLabel(e.toString())), backgroundColor: Colors.red),
         );
       }
     }
@@ -592,7 +593,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'Edit Exam' : 'Create Exam'),
+        title: Text(isEditing ? AppLocalizations.of(context)!.editExam : AppLocalizations.of(context)!.createExam),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -642,9 +643,9 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
-                          'Next: Add Assignments',
-                          style: TextStyle(
+                        child: Text(
+                          AppLocalizations.of(context)!.nextAddAssignments,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -663,7 +664,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                           side: const BorderSide(color: Colors.purple),
                           foregroundColor: Colors.purple,
                         ),
-                        child: const Text('Back'),
+                        child: Text(AppLocalizations.of(context)!.back),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -704,15 +705,15 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
           },
           steps: [
             Step(
-              title: const Text('Details'),
-              subtitle: const Text('Name & dates'),
+              title: Text(AppLocalizations.of(context)!.details),
+              subtitle: Text(AppLocalizations.of(context)!.nameAndDates),
               isActive: _currentStep >= 0,
               state: _currentStep > 0 ? StepState.complete : StepState.indexed,
               content: _buildStep1(),
             ),
             Step(
-              title: const Text('Assignments'),
-              subtitle: Text('${_assignments.length} added'),
+              title: Text(AppLocalizations.of(context)!.assignments),
+              subtitle: Text(AppLocalizations.of(context)!.addedCount(_assignments.length)),
               isActive: _currentStep >= 1,
               state: _currentStep > 1 ? StepState.complete : StepState.indexed,
               content: _buildStep2(),
@@ -876,14 +877,14 @@ class _AssignmentCard extends StatelessWidget {
             if (v == 'edit') onEdit();
             if (v == 'delete') onDelete();
           },
-          itemBuilder: (_) => const [
+          itemBuilder: (_) => [
             PopupMenuItem(
               value: 'edit',
               child: Row(
                 children: [
-                  Icon(Icons.edit_outlined, size: 18, color: Colors.orange),
-                  SizedBox(width: 8),
-                  Text('Edit'),
+                  const Icon(Icons.edit_outlined, size: 18, color: Colors.orange),
+                  const SizedBox(width: 8),
+                  Text(AppLocalizations.of(context)!.edit),
                 ],
               ),
             ),
@@ -891,9 +892,9 @@ class _AssignmentCard extends StatelessWidget {
               value: 'delete',
               child: Row(
                 children: [
-                  Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('Remove', style: TextStyle(color: Colors.red)),
+                  const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                  const SizedBox(width: 8),
+                  Text(AppLocalizations.of(context)!.remove, style: const TextStyle(color: Colors.red)),
                 ],
               ),
             ),

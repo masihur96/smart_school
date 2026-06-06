@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/screens/class_detail_screen.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/teacher_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -238,7 +239,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                           if (filteredSections.isNotEmpty)
                             const DropdownMenuItem(
                               value: null,
-                              child: Text('All Sections',style: TextStyle(color: AppColors.white),),
+                              child: Text('All Sections', style: TextStyle(color: AppColors.white)),
                             ),
                           ...filteredSections.map(
                             (s) => DropdownMenuItem(
@@ -474,7 +475,7 @@ class _DayRoutineTab extends StatelessWidget {
           children: [
             Icon(Icons.info_outline_rounded, color: color),
             const SizedBox(width: 10),
-            const Text('Routine Details'),
+            Text(AppLocalizations.of(context)!.routineDetails),
           ],
         ),
         content: Column(
@@ -505,7 +506,7 @@ class _DayRoutineTab extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(context)!.close),
           ),
         ],
       ),
@@ -559,17 +560,18 @@ class _DayRoutineTab extends StatelessWidget {
     String sectionId,
     RoutineEntry entry,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Entry'),
+        title: Text(l10n.deleteEntry),
         content: const Text(
           'Are you sure you want to delete this routine entry?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -586,7 +588,7 @@ class _DayRoutineTab extends StatelessWidget {
                 // but usually all will have IDs now.
               }
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -785,38 +787,41 @@ class _RoutineEntryCard extends StatelessWidget {
         if (val == 'edit') onEdit();
         if (val == 'delete') onDelete();
       },
-      itemBuilder: (ctx) => [
-        const PopupMenuItem(
-          value: 'view',
-          child: Row(
-            children: [
-              Icon(Icons.visibility_outlined, size: 18, color: Colors.blue),
-              SizedBox(width: 10),
-              Text('View Details'),
-            ],
+      itemBuilder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return [
+          PopupMenuItem(
+            value: 'view',
+            child: Row(
+              children: [
+                const Icon(Icons.visibility_outlined, size: 18, color: Colors.blue),
+                const SizedBox(width: 10),
+                Text(l10n.viewDetails),
+              ],
+            ),
           ),
-        ),
-        const PopupMenuItem(
-          value: 'edit',
-          child: Row(
-            children: [
-              Icon(Icons.edit_outlined, size: 18, color: Colors.orange),
-              SizedBox(width: 10),
-              Text('Edit Entry'),
-            ],
+          PopupMenuItem(
+            value: 'edit',
+            child: Row(
+              children: [
+                const Icon(Icons.edit_outlined, size: 18, color: Colors.orange),
+                const SizedBox(width: 10),
+                Text(l10n.edit),
+              ],
+            ),
           ),
-        ),
-        const PopupMenuItem(
-          value: 'delete',
-          child: Row(
-            children: [
-              Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
-              SizedBox(width: 10),
-              Text('Delete', style: TextStyle(color: Colors.red)),
-            ],
+          PopupMenuItem(
+            value: 'delete',
+            child: Row(
+              children: [
+                const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+                const SizedBox(width: 10),
+                Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+              ],
+            ),
           ),
-        ),
-      ],
+        ];
+      },
     );
   }
 }
@@ -929,8 +934,8 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
     if (_subjectId == null || _teacherId == null) {
       log('Validation failed: subject or teacher not selected');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select subject and teacher.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.pleaseSelectSubjectAndTeacher),
           backgroundColor: Colors.red,
         ),
       );
@@ -1005,8 +1010,8 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
         log('Routine added successfully, closing sheet');
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Routine entry added successfully'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.routineEntryAdded),
             backgroundColor: Colors.green,
           ),
         );
@@ -1016,7 +1021,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text(AppLocalizations.of(context)!.errorLabel(e.toString())),
             backgroundColor: Colors.red,
           ),
         );

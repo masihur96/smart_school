@@ -9,6 +9,7 @@ import '../../admin/providers/setup_provider.dart';
 import '../../admin/providers/teacher_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../teacher/providers/homework_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 class AdminHomeworkManagementScreen extends StatefulWidget {
   const AdminHomeworkManagementScreen({super.key});
@@ -38,10 +39,14 @@ class _AdminHomeworkManagementScreenState
     setState(() => _isLoading = true);
     final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
     if (schoolId.isNotEmpty) {
-      await context.read<ClassSetupNotifier>().fetchSchoolData();
-      await context.read<SectionSetupNotifier>().fetchSchoolData();
-      await context.read<SubjectSetupNotifier>().fetchSchoolData();
-      await context.read<TeachersNotifier>().fetchTeachers();
+      final classSetup = context.read<ClassSetupNotifier>();
+      final sectionSetup = context.read<SectionSetupNotifier>();
+      final subjectSetup = context.read<SubjectSetupNotifier>();
+      final teachersSetup = context.read<TeachersNotifier>();
+      await classSetup.fetchSchoolData();
+      await sectionSetup.fetchSchoolData();
+      await subjectSetup.fetchSchoolData();
+      await teachersSetup.fetchTeachers();
       await _onFetchHomework();
     }
     if (mounted) setState(() => _isLoading = false);
@@ -112,9 +117,9 @@ class _AdminHomeworkManagementScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Homework Management',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          AppLocalizations.of(context)!.homeworkManagement,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.primaryAdmin,
         // foregroundColor: Colors.white,
@@ -179,9 +184,9 @@ class _AdminHomeworkManagementScreenState
                 label: 'Class',
                 value: _selectedClass,
                 items: [
-                  const DropdownMenuItem(
+                  DropdownMenuItem(
                     value: null,
-                    child: Text('All Classes'),
+                    child: Text(AppLocalizations.of(context)!.allClasses),
                   ),
                   ...classes.map(
                     (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
@@ -203,9 +208,9 @@ class _AdminHomeworkManagementScreenState
                 label: 'Section',
                 value: _selectedSection,
                 items: [
-                  const DropdownMenuItem(
+                  DropdownMenuItem(
                     value: null,
-                    child: Text('All Sections'),
+                    child: Text(AppLocalizations.of(context)!.allSections),
                   ),
                   ...sections.map(
                     (s) => DropdownMenuItem(value: s.id, child: Text(s.name)),
@@ -227,9 +232,9 @@ class _AdminHomeworkManagementScreenState
                 label: 'Subject',
                 value: _selectedSubject,
                 items: [
-                  const DropdownMenuItem(
+                  DropdownMenuItem(
                     value: null,
-                    child: Text('All Subjects'),
+                    child: Text(AppLocalizations.of(context)!.allSubjects),
                   ),
                   ...subjects.map(
                     (s) => DropdownMenuItem(value: s.id, child: Text(s.name)),
@@ -377,7 +382,7 @@ class _AdminHomeworkManagementScreenState
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text('Reset Filters'),
+            child: Text(AppLocalizations.of(context)!.resetFilters),
           ),
         ],
       ),
@@ -397,42 +402,40 @@ class _AdminHomeworkManagementScreenState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Homework'),
-        content: const Text('Are you sure you want to delete this homework?'),
+        title: Text(AppLocalizations.of(context)!.deleteHomework),
+        content: Text(AppLocalizations.of(context)!.deleteHomeworkConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
 
     if (confirmed == true) {
+      if (!mounted) return;
       setState(() => _isLoading = true);
       try {
-        final success = await context
-            .read<HomeworkNotifier>()
-            .removeAdminHomework(id);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                success ? 'Homework deleted' : 'Failed to delete homework',
-              ),
+        final homeworkNotifier = context.read<HomeworkNotifier>();
+        final success = await homeworkNotifier.removeAdminHomework(id);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success ? AppLocalizations.of(context)!.homeworkDeleted : AppLocalizations.of(context)!.failedToSaveHomework,
             ),
-          );
-        }
+          ),
+        );
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error: $e')));
-        }
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
@@ -528,27 +531,27 @@ class _HomeworkCard extends StatelessWidget {
                       }
                     },
                     itemBuilder: (ctx) => [
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.edit_outlined, size: 20),
-                            SizedBox(width: 8),
-                            Text('Edit'),
+                            const Icon(Icons.edit_outlined, size: 20),
+                            const SizedBox(width: 8),
+                            Text(AppLocalizations.of(context)!.edit),
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.delete_outline,
                               size: 20,
                               color: Colors.red,
                             ),
-                            SizedBox(width: 8),
-                            Text('Delete', style: TextStyle(color: Colors.red)),
+                            const SizedBox(width: 8),
+                            Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
                           ],
                         ),
                       ),
@@ -721,8 +724,8 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
         _selectedSubjectId == null ||
         _selectedTeacherId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select class, subject and teacher'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.pleaseSelectClassSubjectTeacher),
         ),
       );
       return;
@@ -744,9 +747,10 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
       createdAt: widget.homework?.createdAt ?? DateTime.now(),
     );
 
+    final homeworkNotifier = context.read<HomeworkNotifier>();
     final success = widget.homework == null
-        ? await context.read<HomeworkNotifier>().submitAdminHomework(homework)
-        : await context.read<HomeworkNotifier>().updateAdminHomework(homework);
+        ? await homeworkNotifier.submitAdminHomework(homework)
+        : await homeworkNotifier.updateAdminHomework(homework);
 
     if (mounted) {
       if (success) {
@@ -762,7 +766,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to save homework')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.failedToSaveHomework)),
         );
       }
     }

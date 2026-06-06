@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/services/notification_service.dart';
 
+import 'package:smart_school/l10n/app_localizations.dart';
+
 import '../models/subscription_model.dart';
 import '../providers/subscription_provider.dart';
 
@@ -134,7 +136,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   const SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: () => notifier.fetchSubscriptions(),
-                    child: const Text('Retry'),
+                    child: Text(AppLocalizations.of(context)!.retry),
                   ),
                 ],
               ),
@@ -269,8 +271,8 @@ class SubscriptionCard extends StatelessWidget {
                             ClipboardData(text: subscription.schoolId),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('School UUID copied to clipboard'),
+                            SnackBar(
+                              content: Text(AppLocalizations.of(context)!.schoolUuidCopied),
                               behavior: SnackBarBehavior.floating,
                               duration: Duration(seconds: 2),
                             ),
@@ -417,7 +419,7 @@ class SubscriptionCard extends StatelessWidget {
                               final confirm = await showDialog<bool>(
                                 context: context,
                                 builder: (context) => AlertDialog(
-                                  title: const Text('Delete Subscription'),
+                                  title: Text(AppLocalizations.of(context)!.deleteSubscription),
                                   content: const Text(
                                     'Are you sure you want to delete this subscription? This action cannot be undone.',
                                   ),
@@ -425,7 +427,7 @@ class SubscriptionCard extends StatelessWidget {
                                     TextButton(
                                       onPressed: () =>
                                           Navigator.pop(context, false),
-                                      child: const Text('Cancel'),
+                                      child: Text(AppLocalizations.of(context)!.cancel),
                                     ),
                                     TextButton(
                                       onPressed: () =>
@@ -433,7 +435,7 @@ class SubscriptionCard extends StatelessWidget {
                                       style: TextButton.styleFrom(
                                         foregroundColor: Colors.red,
                                       ),
-                                      child: const Text('Delete'),
+                                      child: Text(AppLocalizations.of(context)!.delete),
                                     ),
                                   ],
                                 ),
@@ -595,7 +597,7 @@ class SubscriptionCard extends StatelessWidget {
                               final confirm = await showDialog<bool>(
                                 context: context,
                                 builder: (context) => AlertDialog(
-                                  title: const Text('Delete Subscription'),
+                                  title: Text(AppLocalizations.of(context)!.deleteSubscription),
                                   content: const Text(
                                     'Are you sure you want to delete this subscription? This action cannot be undone.',
                                   ),
@@ -603,7 +605,7 @@ class SubscriptionCard extends StatelessWidget {
                                     TextButton(
                                       onPressed: () =>
                                           Navigator.pop(context, false),
-                                      child: const Text('Cancel'),
+                                      child: Text(AppLocalizations.of(context)!.cancel),
                                     ),
                                     TextButton(
                                       onPressed: () =>
@@ -611,7 +613,7 @@ class SubscriptionCard extends StatelessWidget {
                                       style: TextButton.styleFrom(
                                         foregroundColor: Colors.red,
                                       ),
-                                      child: const Text('Delete'),
+                                      child: Text(AppLocalizations.of(context)!.delete),
                                     ),
                                   ],
                                 ),

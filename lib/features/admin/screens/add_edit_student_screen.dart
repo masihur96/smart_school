@@ -7,7 +7,8 @@ import 'package:provider/provider.dart';
 import '../../../models/student_model.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
-import '../providers/student_provider.dart';
+import 'package:smart_school/features/admin/providers/student_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 class AddEditStudentScreen extends StatefulWidget {
   final Student? student;
@@ -57,12 +58,12 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
+              title: Text(AppLocalizations.of(context)!.galleryOption),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Camera'),
+              title: Text(AppLocalizations.of(context)!.cameraOption),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
           ],
@@ -137,7 +138,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('Error: $e')));
+          ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.errorLabel(e.toString()))));
         }
       } finally {
         if (mounted) {
@@ -156,7 +157,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.student != null ? 'Edit Student' : 'Add Student'),
+        title: Text(widget.student != null ? AppLocalizations.of(context)!.editStudent : AppLocalizations.of(context)!.addStudent),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
       ),
@@ -349,8 +350,8 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                     )
                   : Text(
                       widget.student != null
-                          ? 'Update Student'
-                          : 'Save Student',
+                          ? AppLocalizations.of(context)!.updateStudent
+                          : AppLocalizations.of(context)!.saveStudent,
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
             ),

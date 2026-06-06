@@ -50,12 +50,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
+              title: Text(AppLocalizations.of(context)!.galleryOption),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Camera'),
+              title: Text(AppLocalizations.of(context)!.cameraOption),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
           ],
@@ -78,8 +78,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         if (success && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Profile image updated successfully'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.profileImageUpdated),
               backgroundColor: Colors.green,
             ),
           );
@@ -105,8 +105,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (success && mounted) {
       setState(() => _isEditing = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profile updated successfully'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.profileUpdated),
           backgroundColor: Colors.green,
         ),
       );
@@ -480,7 +480,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Clipboard.setData(ClipboardData(text: value));
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('$label copied to clipboard'),
+                    content: Text(AppLocalizations.of(context)!.copiedToClipboard(label)),
                     duration: const Duration(seconds: 1),
                   ),
                 );
