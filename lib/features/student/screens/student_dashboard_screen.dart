@@ -24,6 +24,7 @@ import 'student_homework_screen.dart';
 import 'student_notice_screen.dart';
 import 'student_result_screen.dart';
 import 'student_routine_screen.dart';
+import '../../notifications/providers/notification_provider.dart';
 
 class StudentDashboardScreen extends StatefulWidget {
   const StudentDashboardScreen({super.key});
@@ -40,6 +41,9 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<StudentDashboardProvider>().fetchStudentDashboard();
+      if (mounted) {
+        context.read<NotificationNotifier>().fetchNotifications();
+      }
     });
   }
 

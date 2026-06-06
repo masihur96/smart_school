@@ -22,6 +22,7 @@ import 'notice_management_screen.dart';
 import 'student_attendance_management_screen.dart';
 import 'student_management_screen.dart';
 import 'teacher_attendance_management_screen.dart';
+import '../../notifications/providers/notification_provider.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -39,6 +40,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<AdminDashboardProvider>().fetchDashboardData();
+        context.read<NotificationNotifier>().fetchNotifications();
       }
     });
   }

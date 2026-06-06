@@ -27,6 +27,7 @@ import 'mark_entry_screen.dart';
 import 'teacher_attendance_screen.dart';
 import 'teacher_exam_screen.dart';
 import 'teacher_routine_screen.dart';
+import '../../notifications/providers/notification_provider.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
   const TeacherDashboardScreen({super.key});
@@ -48,6 +49,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       final apiDateStr = DateFormat('yyyy-MM-dd').format(now);
       context.read<TeacherDashboardProvider>().fetchTeacherDashboard();
       context.read<TeacherDashboardProvider>().fetchTodayClasses(dayName);
+      if (mounted) {
+        context.read<NotificationNotifier>().fetchNotifications();
+      }
     });
   }
 
