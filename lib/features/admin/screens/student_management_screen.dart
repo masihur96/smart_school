@@ -120,7 +120,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    labelText: 'Search by name',
+                    labelText: AppLocalizations.of(context)!.searchByName,
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
@@ -155,7 +155,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         decoration: InputDecoration(
-                          labelText: 'Class',
+                          labelText: AppLocalizations.of(context)!.classLabel,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -190,7 +190,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         decoration: InputDecoration(
-                          labelText: 'Section',
+                          labelText: AppLocalizations.of(context)!.section,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -229,7 +229,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                     Expanded(
                       child: DropdownButtonFormField<bool?>(
                         decoration: InputDecoration(
-                          labelText: 'Status',
+                          labelText: AppLocalizations.of(context)!.status,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -263,9 +263,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
-                          'Total',
-                          style: TextStyle(
+                        Text(
+                          AppLocalizations.of(context)!.total,
+                          style: const TextStyle(
                             fontSize: 12,
 
                             fontWeight: FontWeight.bold,
@@ -559,16 +559,14 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
-                title: const Text("Limit Reached"),
+                title: Text(AppLocalizations.of(context)!.limitReached),
                 content: Text(
-                  "You have reached your student limit "
-                  "($studentCount / $maxStudents).\n\n"
-                  "Upgrade your plan to add more students.",
+                  AppLocalizations.of(context)!.studentLimitReached(studentCount, maxStudents),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text("Cancel"),
+                    child: Text(AppLocalizations.of(context)!.cancel),
                   ),
 
                   ElevatedButton(
@@ -582,7 +580,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                         ),
                       );
                     },
-                    child: const Text("Upgrade Plan"),
+                    child: Text(AppLocalizations.of(context)!.upgradePlan),
                   ),
                 ],
               ),
@@ -622,18 +620,18 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
               children: [
                 TextField(
                   controller: titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Title',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.titleLabel,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: messageController,
                   maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Message',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.messageLabel,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
               ],

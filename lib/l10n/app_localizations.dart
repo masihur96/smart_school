@@ -2203,6 +2203,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset Filters'**
   String get resetFilters;
+
+  /// No description provided for @searchByName.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name'**
+  String get searchByName;
+
+  /// No description provided for @status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
+
+  /// No description provided for @titleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get titleLabel;
+
+  /// No description provided for @messageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get messageLabel;
+
+  /// No description provided for @limitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit Reached'**
+  String get limitReached;
+
+  /// No description provided for @studentLimitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'You have reached your student limit ({count} / {max}).\n\nUpgrade your plan to add more students.'**
+  String studentLimitReached(int count, int max);
+
+  /// No description provided for @upgradePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade Plan'**
+  String get upgradePlan;
+
+  /// No description provided for @publishStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish Status'**
+  String get publishStatus;
+
+  /// No description provided for @publishedOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get publishedOption;
+
+  /// No description provided for @unpublishedOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpublished'**
+  String get unpublishedOption;
+
+  /// No description provided for @noExamsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No exams found'**
+  String get noExamsFound;
+
+  /// No description provided for @assignmentCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Assignment(s)'**
+  String assignmentCountLabel(int count);
+
+  /// No description provided for @egLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g.'**
+  String get egLabel;
 }
 
 class _AppLocalizationsDelegate
