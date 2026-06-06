@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../models/school_models.dart';
@@ -44,7 +45,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
       appBar: widget.hideAppBar
           ? null
           : AppBar(
-              title: const Text('School Notices'),
+              title: Text(AppLocalizations.of(context)!.schoolNotices),
               backgroundColor: Colors.purple,
               foregroundColor: Colors.white,
               actions: [
@@ -109,7 +110,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
         onPressed: () => _addNoticeDialog(context),
         backgroundColor: Colors.purple,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('New Notice', style: TextStyle(color: Colors.white)),
+        label: Text(AppLocalizations.of(context)!.newNotice, style: const TextStyle(color: Colors.white)),
       ),
     );
   }
@@ -189,7 +190,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(context)!.close),
           ),
         ],
       ),
@@ -363,19 +364,19 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                       ),
                     ),
                     value: selectedAudience,
-                    items: const [
-                      DropdownMenuItem(value: 'All', child: Text('All')),
+                    items: [
+                      DropdownMenuItem(value: 'All', child: Text(AppLocalizations.of(context)!.all)),
                       DropdownMenuItem(
                         value: 'Students',
-                        child: Text('Students'),
+                        child: Text(AppLocalizations.of(context)!.studentsAudience),
                       ),
                       DropdownMenuItem(
                         value: 'Teachers',
-                        child: Text('Teachers'),
+                        child: Text(AppLocalizations.of(context)!.teachersAudience),
                       ),
                       DropdownMenuItem(
                         value: 'Parents',
-                        child: Text('Parents'),
+                        child: Text(AppLocalizations.of(context)!.parentsAudience),
                       ),
                     ],
                     onChanged: (val) =>
@@ -384,7 +385,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                   const SizedBox(height: 8),
                   CheckboxListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Mark as Important'),
+                    title: Text(AppLocalizations.of(context)!.markAsImportant),
                     secondary: Icon(
                       Icons.priority_high,
                       color: isImportant ? Colors.red : Colors.grey,
@@ -468,7 +469,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(AppLocalizations.of(context)!.cancel),
             ),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
@@ -497,8 +498,8 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                 if (titleController.text.isEmpty ||
                     contentController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Title and content are required.'),
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context)!.titleAndContentRequired),
                       backgroundColor: Colors.orange,
                     ),
                   );
@@ -531,7 +532,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Error: $e'),
+                        content: Text(AppLocalizations.of(context)!.errorLabel(e.toString())),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -551,11 +552,11 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.delete_forever, color: Colors.red),
-            SizedBox(width: 8),
-            Text('Delete Notice'),
+            const Icon(Icons.delete_forever, color: Colors.red),
+            const SizedBox(width: 8),
+            Text(AppLocalizations.of(context)!.deleteNotice),
           ],
         ),
         content: Text(
@@ -575,7 +576,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
               ),
             ),
             icon: const Icon(Icons.delete, size: 18),
-            label: const Text('Delete'),
+            label: Text(AppLocalizations.of(context)!.delete),
             onPressed: () async {
               Navigator.pop(context);
               try {
@@ -588,8 +589,8 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                 }
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Notice deleted'),
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context)!.noticeDeleted),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -598,7 +599,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Error: $e'),
+                      content: Text(AppLocalizations.of(context)!.errorLabel(e.toString())),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -734,50 +735,53 @@ class _NoticeCard extends StatelessWidget {
                     if (value == 'edit') onEdit();
                     if (value == 'delete') onDelete();
                   },
-                  itemBuilder: (_) => [
-                    const PopupMenuItem(
-                      value: 'view',
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.remove_red_eye_outlined,
-                            size: 18,
-                            color: Colors.blue,
-                          ),
-                          SizedBox(width: 10),
-                          Text('View'),
-                        ],
+                  itemBuilder: (context) {
+                    final l10n = AppLocalizations.of(context)!;
+                    return [
+                      PopupMenuItem(
+                        value: 'view',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.remove_red_eye_outlined,
+                              size: 18,
+                              color: Colors.blue,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(l10n.view),
+                          ],
+                        ),
                       ),
-                    ),
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.edit_outlined,
-                            size: 18,
-                            color: Colors.orange,
-                          ),
-                          SizedBox(width: 10),
-                          Text('Edit'),
-                        ],
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.edit_outlined,
+                              size: 18,
+                              color: Colors.orange,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(l10n.edit),
+                          ],
+                        ),
                       ),
-                    ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.delete_outline,
-                            size: 18,
-                            color: Colors.red,
-                          ),
-                          SizedBox(width: 10),
-                          Text('Delete', style: TextStyle(color: Colors.red)),
-                        ],
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.delete_outline,
+                              size: 18,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ];
+                  },
                 ),
               ],
             ),

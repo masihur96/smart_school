@@ -227,7 +227,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                 backgroundColor: AppColors.primaryStudent,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Retry'),
+              child: Text(l10n.retry),
             ),
           ],
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/school_models.dart';
 import '../providers/student_exam_provider.dart';
@@ -164,7 +165,7 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Examiner: ${a.examinerName}'),
+              Text(AppLocalizations.of(context)!.examinerLabel(a.examinerName)),
               Text('Date: ${DateFormat('EEEE, MMM dd, yyyy').format(a.date)}'),
             ],
           ),

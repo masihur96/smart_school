@@ -6,6 +6,7 @@ import 'package:smart_school/features/admin/providers/student_provider.dart';
 import 'package:smart_school/features/admin/screens/add_edit_teacher_screen.dart';
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart' hide Teacher;
 import 'package:smart_school/models/teacher_model.dart';
 import 'package:smart_school/services/notification_service.dart';
@@ -81,9 +82,10 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
     final isLoading = context.watch<TeachersNotifier>().isLoading;
     final isLoadingMore = context.watch<TeachersNotifier>().isLoadingMore;
 
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Teacher Management'),
+        title: Text(l10n.teacherManagementTitle),
         backgroundColor: AppColors.primaryAdmin,
       ),
       body: Column(
@@ -327,25 +329,26 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                                         .read<TeachersNotifier>()
                                         .toggleTeacherStatus(teacher.userId);
                                   } else if (value == 'delete') {
+                                    final l10n = AppLocalizations.of(context)!;
                                     final confirm = await showDialog<bool>(
                                       context: context,
                                       builder: (ctx) => AlertDialog(
-                                        title: const Text('Delete Teacher'),
-                                        content: const Text(
+                                        title: Text(l10n.deleteTeacher),
+                                        content: Text(
                                           'Are you sure you want to delete this teacher?',
                                         ),
                                         actions: [
                                           TextButton(
                                             onPressed: () =>
                                                 Navigator.pop(ctx, false),
-                                            child: const Text('Cancel'),
+                                            child: Text(l10n.cancel),
                                           ),
                                           TextButton(
                                             onPressed: () =>
                                                 Navigator.pop(ctx, true),
-                                            child: const Text(
-                                              'Delete',
-                                              style: TextStyle(
+                                            child: Text(
+                                              l10n.delete,
+                                              style: const TextStyle(
                                                 color: Colors.red,
                                               ),
                                             ),
@@ -360,77 +363,80 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                                     }
                                   }
                                 },
-                                itemBuilder: (context) => [
-                                  const PopupMenuItem(
-                                    value: 'view',
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.visibility_outlined,
-                                          color: Colors.green,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        const Text('View Profile'),
-                                      ],
+                                itemBuilder: (context) {
+                                  final l10n = AppLocalizations.of(context)!;
+                                  return [
+                                    PopupMenuItem(
+                                      value: 'view',
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.visibility_outlined,
+                                            color: Colors.green,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(l10n.viewProfile),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: 'notify',
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.notifications_active_outlined,
-                                          color: Colors.purple,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        const Text('Send Notification'),
-                                      ],
+                                    PopupMenuItem(
+                                      value: 'notify',
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.notifications_active_outlined,
+                                            color: Colors.purple,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(l10n.sendNotification),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: 'edit',
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.edit_outlined,
-                                          color: Colors.orange,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        const Text('Edit Teacher'),
-                                      ],
+                                    PopupMenuItem(
+                                      value: 'edit',
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.edit_outlined,
+                                            color: Colors.orange,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(l10n.editTeacher),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  PopupMenuItem(
-                                    value: 'status',
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          isActive
-                                              ? Icons.toggle_off
-                                              : Icons.toggle_on,
-                                          color: Colors.blue,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          isActive ? 'Deactivate' : 'Activate',
-                                        ),
-                                      ],
+                                    PopupMenuItem(
+                                      value: 'status',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            isActive
+                                                ? Icons.toggle_off
+                                                : Icons.toggle_on,
+                                            color: Colors.blue,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            isActive ? 'Deactivate' : 'Activate',
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: 'delete',
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.delete_outline,
-                                          color: Colors.red,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text('Delete'),
-                                      ],
+                                    PopupMenuItem(
+                                      value: 'delete',
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.delete_outline,
+                                            color: Colors.red,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(l10n.delete),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ];
+                                },
                               ),
                             ],
                           ),
@@ -705,8 +711,9 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setState) {
+          final l10n = AppLocalizations.of(context)!;
           return AlertDialog(
-            title: Text('Notify ${teacher.user?.name ?? 'Teacher'}'),
+            title: Text(l10n.notifyTeacher(teacher.user?.name ?? l10n.teacher)),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -731,7 +738,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
             actions: [
               TextButton(
                 onPressed: isSending ? null : () => Navigator.pop(ctx),
-                child: const Text('Cancel'),
+                child: Text(l10n.cancel),
               ),
               ElevatedButton(
                 onPressed: isSending
@@ -740,8 +747,8 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                         if (titleController.text.trim().isEmpty ||
                             messageController.text.trim().isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please enter title and message'),
+                            SnackBar(
+                              content: Text(l10n.pleaseEnterTitleAndMessage),
                             ),
                           );
                           return;
@@ -760,8 +767,8 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                           if (context.mounted) {
                             Navigator.pop(ctx);
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Notification sent successfully'),
+                              SnackBar(
+                                content: Text(l10n.notificationSentSuccessfully),
                               ),
                             );
                           }
@@ -771,8 +778,8 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                           });
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Failed to send notification'),
+                              SnackBar(
+                                content: Text(l10n.failedToSendNotification),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -785,7 +792,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Send'),
+                    : Text(l10n.send),
               ),
             ],
           );

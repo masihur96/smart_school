@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/services/notification_service.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 class SuperAdminNotificationSenderScreen extends StatefulWidget {
   const SuperAdminNotificationSenderScreen({super.key});
@@ -79,8 +80,8 @@ class _SuperAdminNotificationSenderScreenState
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Notification sent successfully!'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.notificationSentSuccessfully),
             backgroundColor: Colors.green,
           ),
         );
@@ -90,7 +91,7 @@ class _SuperAdminNotificationSenderScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to send notification: $e'),
+            content: Text('${AppLocalizations.of(context)!.failedToSendNotification}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -103,7 +104,7 @@ class _SuperAdminNotificationSenderScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Send Notification'), elevation: 0),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.sendNotificationTitle), elevation: 0),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(

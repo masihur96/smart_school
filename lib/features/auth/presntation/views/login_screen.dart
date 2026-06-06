@@ -9,6 +9,7 @@ import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/student/screens/student_dashboard_screen.dart';
 import 'package:smart_school/features/super_admin/screens/super_admin_dashboard_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/user_model.dart';
 
 import 'register_screen.dart';
@@ -144,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(AppLocalizations.of(context)!.ok),
           ),
         ],
       ),
@@ -300,7 +301,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: authNotifier.isLoading ? null : _login,
                       child: (authNotifier.isLoading && !_isBiometricLoading)
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Login', style: TextStyle(fontSize: 18)),
+                          : Text(AppLocalizations.of(context)!.loginButton, style: const TextStyle(fontSize: 18)),
                     ),
                   ),
                   if (_canUseBiometrics) ...[

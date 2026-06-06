@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/teacher_model.dart';
 import '../providers/setup_provider.dart';
@@ -68,12 +69,12 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
+              title: Text(AppLocalizations.of(context)!.galleryOption),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Camera'),
+              title: Text(AppLocalizations.of(context)!.cameraOption),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
           ],
@@ -138,14 +139,14 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
           _lonController.text = position.longitude.toString();
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location fetched successfully')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.locationFetchedSuccessfully)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error getting location: $e')));
+        ).showSnackBar(SnackBar(content: Text('${AppLocalizations.of(context)!.errorGettingLocation}: $e')));
       }
     } finally {
       if (mounted) {
@@ -163,7 +164,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
       });
       if (_selectedClassId == null || _selectedSectionId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select Class and Section')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.pleaseSelectClassAndSection)),
         );
         return;
       }
@@ -205,8 +206,8 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             SnackBar(
               content: Text(
                 isEditing
-                    ? 'Teacher updated successfully'
-                    : 'Teacher registered successfully',
+                    ? AppLocalizations.of(context)!.teacherUpdatedSuccessfully
+                    : AppLocalizations.of(context)!.teacherRegisteredSuccessfully,
               ),
             ),
           );
@@ -217,7 +218,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                '${isEditing ? 'Update' : 'Registration'} failed: $e',
+                '${isEditing ? AppLocalizations.of(context)!.updateFailed : AppLocalizations.of(context)!.registrationFailed}: $e',
               ),
             ),
           );
@@ -241,7 +242,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          isEditing ? 'Edit Teacher' : 'Register Teacher',
+          isEditing ? AppLocalizations.of(context)!.editTeacher : AppLocalizations.of(context)!.registerTeacher,
           style: TextStyle(color: AppColors.white),
         ),
         backgroundColor: Colors.purple,
@@ -599,7 +600,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        isEditing ? 'Update Teacher' : 'Register Teacher',
+                        isEditing ? AppLocalizations.of(context)!.updateTeacher : AppLocalizations.of(context)!.registerTeacher,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,

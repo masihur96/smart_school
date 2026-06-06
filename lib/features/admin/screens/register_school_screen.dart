@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/providers/school_provider.dart';
 import 'package:smart_school/features/admin/screens/onboarding_progress_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 class AdminRegisterSchoolScreen extends StatefulWidget {
   const AdminRegisterSchoolScreen({Key? key}) : super(key: key);
@@ -32,12 +33,12 @@ class _AdminRegisterSchoolScreenState extends State<AdminRegisterSchoolScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
+              title: Text(AppLocalizations.of(context)!.galleryOption),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Camera'),
+              title: Text(AppLocalizations.of(context)!.cameraOption),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
           ],
@@ -71,9 +72,11 @@ class _AdminRegisterSchoolScreenState extends State<AdminRegisterSchoolScreen> {
     final schoolId = authNotifier.user?.schoolId;
 
     if (schoolId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: User has no schoolId assigned.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorNoSchoolIdAssigned)),
+        );
+      }
       return;
     }
 
@@ -88,7 +91,7 @@ class _AdminRegisterSchoolScreenState extends State<AdminRegisterSchoolScreen> {
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('School registered successfully!')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.schoolRegisteredSuccessfully)),
       );
       // Navigate to onboarding progress screen
       Navigator.pushReplacement(
@@ -98,7 +101,7 @@ class _AdminRegisterSchoolScreenState extends State<AdminRegisterSchoolScreen> {
     } else if (mounted) {
       final error = context.read<AdminSchoolNotifier>().error;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error ?? 'Failed to register school.')),
+        SnackBar(content: Text(error ?? AppLocalizations.of(context)!.failedToRegisterSchool)),
       );
     }
   }
@@ -109,8 +112,9 @@ class _AdminRegisterSchoolScreenState extends State<AdminRegisterSchoolScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Register School'),
+        title: Text(AppLocalizations.of(context)!.registerSchool),
         centerTitle: true,
+        backgroundColor: Colors.purple,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -119,9 +123,9 @@ class _AdminRegisterSchoolScreenState extends State<AdminRegisterSchoolScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Complete your school profile',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Text(
+                AppLocalizations.of(context)!.completeYourSchoolProfile,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -167,49 +171,49 @@ class _AdminRegisterSchoolScreenState extends State<AdminRegisterSchoolScreen> {
               const SizedBox(height: 24),
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'School Name',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.school),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.schoolName,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.school),
                 ),
                 validator: (v) =>
-                    v == null || v.isEmpty ? 'Required field' : null,
+                    v == null || v.isEmpty ? AppLocalizations.of(context)!.requiredField : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _addressController,
-                decoration: const InputDecoration(
-                  labelText: 'Address',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.location_on),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.address,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.location_on),
                 ),
                 validator: (v) =>
-                    v == null || v.isEmpty ? 'Required field' : null,
+                    v == null || v.isEmpty ? AppLocalizations.of(context)!.requiredField : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Phone',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.phone),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.phone,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.phone),
                 ),
                 validator: (v) =>
-                    v == null || v.isEmpty ? 'Required field' : null,
+                    v == null || v.isEmpty ? AppLocalizations.of(context)!.requiredField : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.email,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.email),
                 ),
                 validator: (v) {
-                  if (v == null || v.isEmpty) return 'Required field';
-                  if (!v.contains('@')) return 'Enter a valid email';
+                  if (v == null || v.isEmpty) return AppLocalizations.of(context)!.requiredField;
+                  if (!v.contains('@')) return AppLocalizations.of(context)!.enterValidEmail;
                   return null;
                 },
               ),
@@ -220,10 +224,14 @@ class _AdminRegisterSchoolScreenState extends State<AdminRegisterSchoolScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: isLoading
-                    ? const CircularProgressIndicator()
-                    : const Text(
-                        'Register School',
-                        style: TextStyle(fontSize: 16),
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        AppLocalizations.of(context)!.registerSchoolAction,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
                       ),
               ),
             ],

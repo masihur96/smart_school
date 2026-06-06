@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/teacher/screens/homework_details_screen.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/school_models.dart';
 import '../../admin/providers/setup_provider.dart';
@@ -59,9 +60,10 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final currentUser = context.watch<AuthNotifier>().user;
     if (currentUser == null) {
-      return const Scaffold(body: Center(child: Text('Please login')));
+      return Scaffold(body: Center(child: Text(l10n.pleaseLogin)));
     }
 
     final homeworkNotifier = context.watch<HomeworkNotifier>();
@@ -111,9 +113,9 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
                         decoration: _inputDeco('Class'),
                         value: _selectedClass,
                         items: [
-                          const DropdownMenuItem(
+                          DropdownMenuItem(
                             value: null,
-                            child: Text('All Classes'),
+                            child: Text(l10n.allClasses),
                           ),
                           ...classes.map(
                             (c) => DropdownMenuItem(
@@ -138,9 +140,9 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
                         decoration: _inputDeco('Section'),
                         value: _selectedSection,
                         items: [
-                          const DropdownMenuItem(
+                          DropdownMenuItem(
                             value: null,
-                            child: Text('All Sections'),
+                            child: Text(l10n.allSections),
                           ),
                           ...context
                               .read<SectionSetupNotifier>()
@@ -169,9 +171,9 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
                   value: _selectedSubject,
                   isExpanded: true,
                   items: [
-                    const DropdownMenuItem(
+                    DropdownMenuItem(
                       value: null,
-                      child: Text('All Subjects'),
+                      child: Text(l10n.allSubjects),
                     ),
                     ...filteredSubjects.map(
                       (s) => DropdownMenuItem(value: s.id, child: Text(s.name)),
@@ -280,15 +282,16 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
   }
 
   void _confirmDelete(BuildContext context, String id) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Homework'),
-        content: const Text('Are you sure you want to delete this homework?'),
+        title: Text(l10n.deleteHomework),
+        content: Text(l10n.deleteHomeworkConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -299,12 +302,12 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
                 Navigator.pop(ctx);
                 if (!success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Failed to delete homework')),
+                    SnackBar(content: Text(l10n.failedToDeleteHomework)),
                   );
                 }
               }
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -437,38 +440,41 @@ class _HomeworkCard extends StatelessWidget {
                   onDelete();
                 }
               },
-              itemBuilder: (_) => const [
-                PopupMenuItem(
-                  value: 'view',
-                  child: Row(
-                    children: [
-                      Icon(Icons.visibility_outlined, size: 18),
-                      SizedBox(width: 8),
-                      Text('View'),
-                    ],
+              itemBuilder: (_) {
+                final l10n = AppLocalizations.of(context)!;
+                return [
+                  PopupMenuItem(
+                    value: 'view',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.visibility_outlined, size: 18),
+                        const SizedBox(width: 8),
+                        Text(l10n.view),
+                      ],
+                    ),
                   ),
-                ),
-                PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit_outlined, size: 18),
-                      SizedBox(width: 8),
-                      Text('Edit'),
-                    ],
+                  PopupMenuItem(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.edit_outlined, size: 18),
+                        const SizedBox(width: 8),
+                        Text(l10n.edit),
+                      ],
+                    ),
                   ),
-                ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete_outline, color: Colors.red, size: 18),
-                      SizedBox(width: 8),
-                      Text('Delete', style: TextStyle(color: Colors.red)),
-                    ],
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                        const SizedBox(width: 8),
+                        Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ];
+              },
             ),
           ],
         ),

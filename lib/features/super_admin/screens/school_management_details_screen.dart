@@ -7,6 +7,7 @@ import 'package:smart_school/features/super_admin/models/school_model.dart';
 import 'package:smart_school/features/super_admin/providers/school_management_provider.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 class SchoolManagementDetailsScreen extends StatefulWidget {
   final SuperAdminSchool school;
@@ -293,7 +294,7 @@ class _UserCard extends StatelessWidget {
           children: [
             const Icon(Icons.send_rounded, color: AppColors.primary),
             const SizedBox(width: 8),
-            const Text('Send Notification'),
+            Text(AppLocalizations.of(context)!.sendNotification),
           ],
         ),
         content: Column(
@@ -331,14 +332,14 @@ class _UserCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('CANCEL'),
+            child: Text(AppLocalizations.of(context)!.cancelAction),
           ),
           ElevatedButton(
             onPressed: isLoading ? null : () async {
               if (titleController.text.isEmpty ||
                   messageController.text.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Please fill all fields')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.fillAllFieldsAction)),
                 );
                 return;
               }
@@ -356,15 +357,15 @@ class _UserCard extends StatelessWidget {
                 if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Notification sent successfully'),
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context)!.notificationSentSuccessfully),
                     ),
                   );
                 }
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to send notification: $e')),
+                    SnackBar(content: Text('${AppLocalizations.of(context)!.failedToSendNotification}: $e')),
                   );
                 }
               } finally {
@@ -389,7 +390,7 @@ class _UserCard extends StatelessWidget {
                       strokeWidth: 2,
                     ),
                   )
-                : const Text('SEND'),
+                : Text(AppLocalizations.of(context)!.sendAction),
           ),
         ],
       ),

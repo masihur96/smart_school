@@ -5,6 +5,7 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import '../../../models/school_models.dart';
 import '../../admin/providers/routine_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 class TeacherRoutineScreen extends StatefulWidget {
   const TeacherRoutineScreen({super.key});
@@ -76,6 +77,7 @@ class _TeacherRoutineScreenState extends State<TeacherRoutineScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final user = context.watch<AuthNotifier>().user;
     final routineNotifier = context.watch<RoutineNotifier>();
     final teacherRoutine = routineNotifier.teacherRoutine
@@ -84,7 +86,7 @@ class _TeacherRoutineScreenState extends State<TeacherRoutineScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Class Routine'),
+        title: Text(l10n.myClassRoutine),
         backgroundColor: AppColors.primaryTeacher,
         foregroundColor: Colors.white,
         bottom: TabBar(

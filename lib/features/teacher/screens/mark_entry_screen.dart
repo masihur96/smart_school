@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 
 import '../../auth/providers/auth_provider.dart';
@@ -426,7 +427,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                 color: Colors.grey[300],
               ),
               const SizedBox(height: 16),
-              const Text('No students found for this selection'),
+              Text(AppLocalizations.of(context)!.noStudentsForSelection),
             ],
           ),
         ),
@@ -482,7 +483,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                   student.name,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                subtitle: Text('Roll: ${student.rollNumber}'),
+                subtitle: Text(AppLocalizations.of(context)!.rollNumber(student.rollNumber.toString())),
                 trailing: isEntered
                     ? Container(
                         padding: const EdgeInsets.symmetric(
@@ -689,8 +690,8 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
 
     if (marksList.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter marks for at least one student'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.marksEnteredRequired),
         ),
       );
       return;
@@ -725,8 +726,8 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Marks saved successfully!'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.marksSavedSuccessfully),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
@@ -736,7 +737,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save marks: $e'),
+            content: Text(AppLocalizations.of(context)!.failedToSaveMarks(e.toString())),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),

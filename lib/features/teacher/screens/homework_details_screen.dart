@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/teacher/providers/homework_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 
 class HomeworkDetailsScreen extends StatefulWidget {
@@ -26,7 +27,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Homework Details'),
+        title: Text(AppLocalizations.of(context)!.homeworkDetails),
         backgroundColor: AppColors.primaryTeacher,
         elevation: 0,
         actions: [
@@ -52,7 +53,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
 
           final homework = provider.selectedHomework;
           if (homework == null) {
-            return const Center(child: Text('Homework not found'));
+            return Center(child: Text(AppLocalizations.of(context)!.homeworkNotFound));
           }
 
           final sortedStudentHomeworks = List.of(homework.studentHomeworks);
@@ -94,16 +95,16 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                       onPressed: () =>
                           _showUpdateStatusDialog(homeworkId: homework.id),
                       icon: const Icon(Icons.edit_note, size: 18),
-                      label: const Text('Bulk Update'),
+                      label: Text(AppLocalizations.of(context)!.bulkUpdate),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
                 if (sortedStudentHomeworks.isEmpty)
-                  const Center(
+                  Center(
                     child: Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: Text('No students assigned to this homework'),
+                      padding: const EdgeInsets.all(20.0),
+                      child: Text(AppLocalizations.of(context)!.noStudentsAssigned),
                     ),
                   )
                 else
@@ -310,7 +311,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                   );
                 },
                 icon: const Icon(Icons.edit_note, size: 18),
-                label: const Text('Update Status & Comment'),
+                label: Text(AppLocalizations.of(context)!.updateStatusAndComment),
                 style: OutlinedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -399,12 +400,12 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                       labelText: 'Status',
                       border: OutlineInputBorder(),
                     ),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: 'pending',
-                        child: Text('Pending'),
+                        child: Text(AppLocalizations.of(context)!.pendingStatus),
                       ),
-                      DropdownMenuItem(value: 'done', child: Text('Done')),
+                      DropdownMenuItem(value: 'done', child: Text(AppLocalizations.of(context)!.doneStatus)),
                     ],
                     onChanged: isUpdating
                         ? null
@@ -430,7 +431,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
               actions: [
                 TextButton(
                   onPressed: isUpdating ? null : () => Navigator.pop(context),
-                  child: const Text('Cancel'),
+                  child: Text(AppLocalizations.of(context)!.cancel),
                 ),
                 ElevatedButton(
                   onPressed: isUpdating
@@ -477,8 +478,8 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                               isUpdating = false;
                             });
                             scaffoldMessenger.showSnackBar(
-                              const SnackBar(
-                                content: Text('Failed to update status'),
+                              SnackBar(
+                                content: Text(AppLocalizations.of(context)!.failedToUpdateStatus),
                               ),
                             );
                           }

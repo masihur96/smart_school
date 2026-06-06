@@ -7,6 +7,7 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart';
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
 import 'package:smart_school/features/admin/screens/student_detail_screen.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/student_model.dart';
 import 'package:smart_school/services/notification_service.dart';
 
@@ -99,7 +100,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
       appBar: widget.hideAppBar
           ? null
           : AppBar(
-              title: const Text('Student Management'),
+              title: Text(AppLocalizations.of(context)!.studentManagement),
               backgroundColor: AppColors.primaryAdmin,
               foregroundColor: Colors.white,
               actions: [
@@ -164,9 +165,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                           ),
                         ),
                         items: [
-                          const DropdownMenuItem<String>(
+                          DropdownMenuItem<String>(
                             value: null,
-                            child: Text('All Classes'),
+                            child: Text(AppLocalizations.of(context)!.allClasses),
                           ),
                           ...classes.map(
                             (c) => DropdownMenuItem(
@@ -199,9 +200,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                           ),
                         ),
                         items: [
-                          const DropdownMenuItem<String>(
+                          DropdownMenuItem<String>(
                             value: null,
-                            child: Text('All Sections'),
+                            child: Text(AppLocalizations.of(context)!.allSections),
                           ),
                           ...sections
                               .where((s) => s.classId == _selectedClassId)
@@ -237,18 +238,18 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                             vertical: 8,
                           ),
                         ),
-                        items: const [
+                        items: [
                           DropdownMenuItem<bool?>(
                             value: null,
-                            child: Text('All Status'),
+                            child: Text(AppLocalizations.of(context)!.allStatus),
                           ),
                           DropdownMenuItem<bool?>(
                             value: true,
-                            child: Text('Active Only'),
+                            child: Text(AppLocalizations.of(context)!.activeOnly),
                           ),
                           DropdownMenuItem<bool?>(
                             value: false,
-                            child: Text('Inactive Only'),
+                            child: Text(AppLocalizations.of(context)!.inactiveOnly),
                           ),
                         ],
                         value: _selectedStatus,
@@ -288,7 +289,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
               child: studentsNotifier.isLoading && students.isEmpty
                   ? const Center(child: CircularProgressIndicator())
                   : students.isEmpty
-                  ? const Center(child: Text('No students found.'))
+                  ? Center(child: Text(AppLocalizations.of(context)!.noStudentsFound))
                   : ListView.builder(
                       controller: _scrollController,
                       itemCount:
@@ -386,11 +387,12 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                       context
                                           .read<StudentsNotifier>()
                                           .toggleStudentStatus(student.userId);
-                                    } else if (value == 'delete') {
+                                     } else if (value == 'delete') {
+                                      final l10n = AppLocalizations.of(context)!;
                                       showDialog(
                                         context: context,
                                         builder: (ctx) => AlertDialog(
-                                          title: const Text('Delete Student'),
+                                          title: Text(l10n.deleteStudent),
                                           content: const Text(
                                             'Are you sure you want to delete this student?',
                                           ),
@@ -398,7 +400,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                             TextButton(
                                               onPressed: () =>
                                                   Navigator.pop(ctx),
-                                              child: const Text('Cancel'),
+                                              child: Text(l10n.cancel),
                                             ),
                                             ElevatedButton(
                                               onPressed: () {
@@ -412,9 +414,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: Colors.red,
                                               ),
-                                              child: const Text(
-                                                'Delete',
-                                                style: TextStyle(
+                                              child: Text(
+                                                l10n.delete,
+                                                style: const TextStyle(
                                                   color: Colors.white,
                                                 ),
                                               ),
@@ -424,88 +426,89 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                       );
                                     }
                                   },
-                                  itemBuilder: (BuildContext context) =>
-                                      <PopupMenuEntry<String>>[
-                                        const PopupMenuItem<String>(
-                                          value: 'view',
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                Icons.visibility,
-                                                color: Colors.purple,
-                                              ),
-                                              SizedBox(width: 8),
-                                              Text('View Details'),
-                                            ],
-                                          ),
+                                  itemBuilder: (BuildContext context) {
+                                    final l10n = AppLocalizations.of(context)!;
+                                    return <PopupMenuEntry<String>>[
+                                      PopupMenuItem<String>(
+                                        value: 'view',
+                                        child: Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.visibility,
+                                              color: Colors.purple,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(l10n.viewDetails),
+                                          ],
                                         ),
-                                        const PopupMenuItem<String>(
-                                          value: 'notify',
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                Icons
-                                                    .notifications_active_outlined,
-                                                color: Colors.purple,
-                                              ),
-                                              SizedBox(width: 8),
-                                              Text('Send Notification'),
-                                            ],
-                                          ),
+                                      ),
+                                      PopupMenuItem<String>(
+                                        value: 'notify',
+                                        child: Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.notifications_active_outlined,
+                                              color: Colors.purple,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(l10n.sendNotification),
+                                          ],
                                         ),
-                                        const PopupMenuItem<String>(
-                                          value: 'edit',
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                Icons.edit,
-                                                color: Colors.blue,
-                                              ),
-                                              SizedBox(width: 8),
-                                              Text('Edit'),
-                                            ],
-                                          ),
+                                      ),
+                                      PopupMenuItem<String>(
+                                        value: 'edit',
+                                        child: Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.edit,
+                                              color: Colors.blue,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(l10n.edit),
+                                          ],
                                         ),
-                                        PopupMenuItem<String>(
-                                          value: 'status',
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                student.isActive
-                                                    ? Icons.block
-                                                    : Icons.check_circle,
-                                                color: student.isActive
-                                                    ? Colors.orange
-                                                    : Colors.green,
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                student.isActive
-                                                    ? 'Deactivate'
-                                                    : 'Activate',
-                                              ),
-                                            ],
-                                          ),
+                                      ),
+                                      PopupMenuItem<String>(
+                                        value: 'status',
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              student.isActive
+                                                  ? Icons.block
+                                                  : Icons.check_circle,
+                                              color: student.isActive
+                                                  ? Colors.orange
+                                                  : Colors.green,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              student.isActive
+                                                  ? 'Deactivate'
+                                                  : 'Activate',
+                                            ),
+                                          ],
                                         ),
-                                        const PopupMenuItem<String>(
-                                          value: 'delete',
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                Icons.delete,
+                                      ),
+                                      PopupMenuItem<String>(
+                                        value: 'delete',
+                                        child: Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.delete,
+                                              color: Colors.red,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              l10n.delete,
+                                              style: const TextStyle(
                                                 color: Colors.red,
                                               ),
-                                              SizedBox(width: 8),
-                                              Text(
-                                                'Delete',
-                                                style: TextStyle(
-                                                  color: Colors.red,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
+                                      ),
+                                    ];
+                                  },
                                 ),
                               ),
                               Positioned(
@@ -611,8 +614,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setState) {
+          final l10n = AppLocalizations.of(context)!;
           return AlertDialog(
-            title: Text('Notify ${student.user?.name ?? 'Student'}'),
+            title: Text(l10n.notifyStudent(student.user?.name ?? l10n.students)),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -637,7 +641,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
             actions: [
               TextButton(
                 onPressed: isSending ? null : () => Navigator.pop(ctx),
-                child: const Text('Cancel'),
+                child: Text(l10n.cancel),
               ),
               ElevatedButton(
                 onPressed: isSending
@@ -646,8 +650,8 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                         if (titleController.text.trim().isEmpty ||
                             messageController.text.trim().isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please enter title and message'),
+                            SnackBar(
+                              content: Text(l10n.pleaseEnterTitleAndMessage),
                             ),
                           );
                           return;
@@ -666,8 +670,8 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                           if (context.mounted) {
                             Navigator.pop(ctx);
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Notification sent successfully'),
+                              SnackBar(
+                                content: Text(l10n.notificationSentSuccessfully),
                               ),
                             );
                           }
@@ -677,8 +681,8 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                           });
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Failed to send notification'),
+                              SnackBar(
+                                content: Text(l10n.failedToSendNotification),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -691,7 +695,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Send'),
+                    : Text(l10n.send),
               ),
             ],
           );

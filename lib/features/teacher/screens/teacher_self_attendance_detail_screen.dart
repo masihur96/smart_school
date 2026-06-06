@@ -6,6 +6,7 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/teacher_provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/teacher/providers/teacher_attendance_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
 
@@ -72,9 +73,9 @@ class _TeacherSelfAttendanceDetailScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Teacher Attendance',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          AppLocalizations.of(context)!.teacherAttendanceLabel,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.green.shade600,
         foregroundColor: Colors.white,
@@ -124,9 +125,9 @@ class _TeacherSelfAttendanceDetailScreenState
               ),
               value: _selectedTeacherId,
               items: [
-                const DropdownMenuItem(
+                DropdownMenuItem(
                   value: null,
-                  child: Text('All Teachers'),
+                  child: Text(AppLocalizations.of(context)!.teachers),
                 ),
                 ...teachers.map(
                   (t) => DropdownMenuItem(
@@ -329,7 +330,7 @@ class _TeacherSelfAttendanceDetailScreenState
             style: TextStyle(color: Colors.grey, fontSize: 16),
           ),
           const SizedBox(height: 8),
-          ElevatedButton(onPressed: _fetchData, child: const Text('Refresh')),
+          ElevatedButton(onPressed: _fetchData, child: Text(AppLocalizations.of(context)!.retry)),
         ],
       ),
     );
@@ -352,7 +353,7 @@ class _TeacherSelfAttendanceDetailScreenState
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: _fetchData,
-              child: const Text('Try Again'),
+              child: Text(AppLocalizations.of(context)!.retry),
             ),
           ],
         ),

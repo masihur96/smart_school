@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../models/pricing_plan_model.dart';
 import '../providers/pricing_notifier.dart';
@@ -146,7 +147,7 @@ class _PricingSchoolScreenState extends State<PricingSchoolScreen> {
                   Text(notifier.error!),
                   ElevatedButton(
                     onPressed: () => notifier.fetchPricingPlans(),
-                    child: const Text('Retry'),
+                    child: Text(AppLocalizations.of(context)!.retry),
                   ),
                 ],
               ),
@@ -272,13 +273,13 @@ class PricingPlanCard extends StatelessWidget {
                         }
                       },
                       itemBuilder: (context) => [
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'edit',
                           child: Row(
                             children: [
-                              Icon(Icons.edit_outlined, size: 20),
-                              SizedBox(width: 8),
-                              Text('Edit Plan'),
+                              const Icon(Icons.edit_outlined, size: 20),
+                              const SizedBox(width: 8),
+                              Text(AppLocalizations.of(context)!.editPlan),
                             ],
                           ),
                         ),
@@ -341,7 +342,10 @@ class PricingPlanCard extends StatelessWidget {
                 style: const TextStyle(),
               ),
               const Spacer(),
-              TextButton(onPressed: () {}, child: const Text('View Details')),
+              TextButton(
+                onPressed: () {},
+                child: Text(AppLocalizations.of(context)!.viewDetailsOption),
+              ),
             ],
           ),
         ],
@@ -380,14 +384,14 @@ class PricingPlanCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Pricing Plan?'),
+        title: Text(AppLocalizations.of(context)!.deletePricingPlan),
         content: Text(
           'Are you sure you want to delete "${plan.name}"? This action cannot be undone.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('CANCEL'),
+            child: Text(AppLocalizations.of(context)!.cancelAction),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -405,7 +409,7 @@ class PricingPlanCard extends StatelessWidget {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('DELETE'),
+            child: Text(AppLocalizations.of(context)!.deleteAction),
           ),
         ],
       ),

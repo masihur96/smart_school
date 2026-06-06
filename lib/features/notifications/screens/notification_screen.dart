@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/notifications/providers/notification_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/notification_model.dart';
 
 class NotificationScreen extends StatefulWidget {
@@ -29,7 +30,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       appBar: AppBar(
         backgroundColor: widget.color,
 
-        title: Text('Notifications'),
+        title: Text(AppLocalizations.of(context)!.notificationsTitle),
         foregroundColor: AppColors.white,
 
         leading: BackButton(),
@@ -55,11 +56,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 children: [
                   const Icon(Icons.error_outline, size: 60, color: Colors.red),
                   const SizedBox(height: 16),
-                  Text('Error: ${notifier.error}'),
+                  Text(AppLocalizations.of(context)!.errorLabel(notifier.error ?? '')),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => notifier.fetchNotifications(),
-                    child: const Text('Retry'),
+                    child: Text(AppLocalizations.of(context)!.retry),
                   ),
                 ],
               ),
@@ -211,7 +212,7 @@ class _NotificationItem extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Notification Details'),
+        title: Text(AppLocalizations.of(context)!.notificationDetails),
         content: SingleChildScrollView(
           child: ListBody(
             children: [
@@ -227,7 +228,7 @@ class _NotificationItem extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(context)!.close),
           ),
         ],
       ),

@@ -1221,7 +1221,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       if (!serviceEnabled) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location services are disabled.')),
+            SnackBar(content: Text(l10n.locationServicesDisabled)),
           );
         }
         return;
@@ -1233,7 +1233,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         if (permission == LocationPermission.denied) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Location permissions are denied.')),
+              SnackBar(content: Text(l10n.locationPermissionsDenied)),
             );
           }
           return;
@@ -1243,8 +1243,8 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       if (permission == LocationPermission.deniedForever) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Location permissions are permanently denied.'),
+            SnackBar(
+              content: Text(l10n.locationPermissionsPermanentlyDenied),
             ),
           );
         }
@@ -1254,7 +1254,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       // 2. Get current position
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Fetching current location...')),
+          SnackBar(content: Text(l10n.fetchingCurrentLocation)),
         );
       }
 
@@ -1281,7 +1281,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               return StatefulBuilder(
                 builder: (ctx, setDialogState) {
                   return AlertDialog(
-                    title: const Text('Confirm Attendance'),
+                    title: Text(l10n.confirmAttendanceTitle),
                     content: Text(
                       'Are you sure you want to submit your attendance?\n\n'
                       'Distance from center: ${distanceInMeters.toStringAsFixed(0)}m\n'
@@ -1355,7 +1355,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text('Confirm'),
+                            : Text(l10n.confirm),
                       ),
                     ],
                   );
@@ -1380,7 +1380,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('An error occurred: $e')));
+        ).showSnackBar(SnackBar(content: Text(l10n.anErrorOccurred(e.toString()))));
       }
     }
   }
@@ -2216,9 +2216,11 @@ class ExamRoutinesDialog extends StatelessWidget {
     if (exam.assignments.isEmpty) {
       return Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: const Padding(
-          padding: EdgeInsets.all(24.0),
-          child: Text('No routines assigned yet.'),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Text(AppLocalizations.of(context)!.noRoutinesYet),
+          ),
         ),
       );
     }

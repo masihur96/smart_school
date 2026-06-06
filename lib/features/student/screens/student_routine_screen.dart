@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/school_models.dart' hide Teacher;
 import '../../auth/providers/auth_provider.dart';
@@ -38,9 +39,10 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final currentUser = context.watch<AuthNotifier>().user;
     if (currentUser == null) {
-      return const Scaffold(body: Center(child: Text('Not logged in')));
+      return Scaffold(body: Center(child: Text(l10n.notLoggedIn)));
     }
 
     final routineNotifier = context.watch<StudentRoutineNotifier>();
@@ -52,8 +54,8 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
 
     final classId = currentUser.classId;
     if (classId == null) {
-      return const Scaffold(
-        body: Center(child: Text('Class information not found for student.')),
+      return Scaffold(
+        body: Center(child: Text(l10n.classInfoNotFound)),
       );
     }
 

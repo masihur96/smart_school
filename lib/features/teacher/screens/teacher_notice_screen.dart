@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../admin/providers/notice_provider.dart';
@@ -27,10 +28,11 @@ class _TeacherNoticeScreenState extends State<TeacherNoticeScreen> {
   @override
   Widget build(BuildContext context) {
     final noticeNotifier = context.watch<NoticesNotifier>();
+    final l10n = AppLocalizations.of(context)!;
     final currentUser = context.watch<AuthNotifier>().user;
 
     if (currentUser == null) {
-      return const Scaffold(body: Center(child: Text('Not logged in')));
+      return Scaffold(body: Center(child: Text(l10n.notLoggedIn)));
     }
 
     final notices = noticeNotifier.notices
@@ -42,8 +44,8 @@ class _TeacherNoticeScreenState extends State<TeacherNoticeScreen> {
     return Scaffold(
       appBar: widget.isFromDrawer
           ? AppBar(
-              title: const Text('School Notices'),
-              backgroundColor:  AppColors.primaryTeacher,
+              title: Text(l10n.schoolNotices),
+              backgroundColor: AppColors.primaryTeacher,
               foregroundColor: Colors.white,
               elevation: 0,
               centerTitle: true,

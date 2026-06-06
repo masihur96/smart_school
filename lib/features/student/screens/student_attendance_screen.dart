@@ -4,6 +4,7 @@ import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/models/school_models.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../auth/providers/auth_provider.dart';
 import '../providers/student_attendance_provider.dart';
@@ -45,9 +46,10 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final currentUser = context.watch<AuthNotifier>().user;
     if (currentUser == null) {
-      return const Scaffold(body: Center(child: Text('Not logged in')));
+      return Scaffold(body: Center(child: Text(l10n.notLoggedIn)));
     }
 
     final attendanceNotifier = context.watch<StudentAttendanceNotifier>();
@@ -155,21 +157,21 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildStatItem(
-                                'Total Classes',
+                                l10n.totalClasses,
                                 totalDays.toString(),
                               ),
                               _buildStatItem(
-                                'Present',
+                                l10n.present,
                                 presentDays.toString(),
                                 color: AppColors.primaryStudent,
                               ),
                               _buildStatItem(
-                                'Leave',
+                                l10n.leave,
                                 leaveDays.toString(),
                                 color: Colors.orange,
                               ),
                               _buildStatItem(
-                                'Absent',
+                                l10n.absent,
                                 absentDays.toString(),
                                 color: Colors.red,
                               ),
@@ -261,11 +263,11 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                                     child: DropdownButton<String>(
                                       isExpanded: true,
                                       value: _selectedSubjectId,
-                                      hint: const Text('All Subjects'),
+                                      hint: Text(l10n.allSubjects),
                                       items: [
-                                        const DropdownMenuItem(
+                                        DropdownMenuItem(
                                           value: 'all',
-                                          child: Text('All Subjects'),
+                                          child: Text(l10n.allSubjects),
                                         ),
                                         ...subjects.entries.map((e) {
                                           return DropdownMenuItem(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/school_models.dart';
 import '../providers/student_exam_provider.dart';
@@ -27,6 +28,7 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final examNotifier = context.watch<StudentExamNotifier>();
     final exams = examNotifier.exams;
 
@@ -34,7 +36,7 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
       appBar: widget.hideAppBar
           ? null
           : AppBar(
-              title: const Text('Exams & Results'),
+              title: Text(l10n.examsAndResults),
               backgroundColor: AppColors.primaryStudent,
               foregroundColor: Colors.white,
               elevation: 0,

@@ -63,6 +63,9 @@
   "attendanceOverview": "Attendance Overview",
   "quickActions": "Quick Actions",
   "addStudent": "Add Student",
+  "editStudent": "Edit Student",
+  "updateStudent": "Update Student",
+  "saveStudent": "Save Student",
   "addTeacher": "Add Teacher",
   "postNotice": "Post Notice",
   "manageRoutine": "Manage Routine",
@@ -76,7 +79,7 @@
   "leave": "Leave",
   "classBreakdown": "Class Breakdown",
   "studentsLabel": "Students",
-  "active": "ACTIVE",
+  "active": "Active",
   "invalid": "INVALID",
   "expired": "EXPIRED",
   "teacherDashboard": "Teacher Dashboard",
@@ -147,9 +150,24 @@
   "noActiveSubscriptionDesc": "Your institution needs an active plan to access the dashboard.",
   "subscriptionExpired": "Subscription Expired",
   "subscriptionExpiredDesc": "Your plan expired on {date}. Please renew to continue.",
-  "@subscriptionExpiredDesc": { "placeholders": { "date": { "type": "String" } } },
+  "@subscriptionExpiredDesc": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "activeSubscriptionDesc": "Your institution is on the {planName} plan, valid until\n {validUntil}.",
-  "@activeSubscriptionDesc": { "placeholders": { "planName": { "type": "String" }, "validUntil": { "type": "String" } } },
+  "@activeSubscriptionDesc": {
+    "placeholders": {
+      "planName": {
+        "type": "String"
+      },
+      "validUntil": {
+        "type": "String"
+      }
+    }
+  },
   "customPlan": "CUSTOM",
   "yourCurrentPlan": "YOUR CURRENT PLAN",
   "monthlyBilling": "Monthly Billing",
@@ -159,18 +177,32 @@
   "failedToAssignPlan": "Failed to assign plan",
   "perfectChoice": "Perfect Choice!",
   "planRegisteredDesc": "You have successfully registered for the {planName} plan. To activate your account, a request needs to be sent to our administration team.",
-  "@planRegisteredDesc": { "placeholders": { "planName": { "type": "String" } } },
+  "@planRegisteredDesc": {
+    "placeholders": {
+      "planName": {
+        "type": "String"
+      }
+    }
+  },
   "sendActivationRequest": "SEND ACTIVATION REQUEST",
   "decideLater": "Decide Later",
   "activationRequestSent": "Activation request sent successfully. You will receive a confirmation email within 12 hours.",
   "studentsCount": "{current} / {max} Students",
-  "@studentsCount": { "placeholders": { "current": { "type": "int" }, "max": { "type": "int" } } },
+  "@studentsCount": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "studentAttendance": "Student Attendance",
   "teacherAttendanceLabel": "Teacher Attendance",
   "classWiseRecords": "Class Wise Records",
   "todaysRecords": "Today's Records",
   "noRecordsForToday": "No records for today",
-  "recentHomework": "Recent Homework",
   "currentExams": "Current Exams",
   "recentNotices": "Recent Notices",
   "total": "Total",
@@ -178,11 +210,29 @@
   "published": "PUBLISHED",
   "draft": "DRAFT",
   "forAudience": "For: {audience}",
-  "@forAudience": { "placeholders": { "audience": { "type": "String" } } },
+  "@forAudience": {
+    "placeholders": {
+      "audience": {
+        "type": "String"
+      }
+    }
+  },
   "validUntil": "Valid until {date}",
-  "@validUntil": { "placeholders": { "date": { "type": "String" } } },
+  "@validUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "expiredOn": "Expired on {date}",
-  "@expiredOn": { "placeholders": { "date": { "type": "String" } } },
+  "@expiredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "noPlan": "No Plan",
   "unknown": "Unknown",
   "rate": "RATE",
@@ -190,5 +240,256 @@
   "noRecords": "No records",
   "teacher": "Teacher",
   "examDateRange": "{start} to {end}",
-  "@examDateRange": { "placeholders": { "start": { "type": "String" }, "end": { "type": "String" } } }
+  "@examDateRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "notLoggedIn": "Not logged in",
+  "classInfoNotAvailable": "Class info not available",
+  "noHomeworkAssigned": "No homework assigned to your class yet.",
+  "allSubjects": "All Subjects",
+  "examinerLabel": "Examiner: {name}",
+  "@examinerLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "examsAndResults": "Exams & Results",
+  "classInfoNotFound": "Class information not found for student.",
+  "teacherManagementTitle": "Teacher Management",
+  "deleteTeacher": "Delete Teacher",
+  "viewProfile": "View Profile",
+  "sendNotification": "Send Notification",
+  "editTeacher": "Edit Teacher",
+  "teacherUpdatedSuccessfully": "Teacher updated successfully",
+  "teacherRegisteredSuccessfully": "Teacher registered successfully",
+  "updateFailed": "Update failed",
+  "registrationFailed": "Registration failed",
+  "updateTeacher": "Update Teacher",
+  "registerTeacher": "Register Teacher",
+  "delete": "Delete",
+  "notifyTeacher": "Notify {name}",
+  "@notifyTeacher": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseEnterTitleAndMessage": "Please enter title and message",
+  "notificationSentSuccessfully": "Notification sent successfully",
+  "failedToSendNotification": "Failed to send notification",
+  "send": "Send",
+  "allSections": "All Sections",
+  "allStatus": "All Status",
+  "activeOnly": "Active Only",
+  "inactiveOnly": "Inactive Only",
+  "noStudentsFound": "No students found.",
+  "rollLabel": "Roll: {roll}",
+  "@rollLabel": {
+    "placeholders": {
+      "roll": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteStudent": "Delete Student",
+  "viewDetails": "View Details",
+  "edit": "Edit",
+  "notifyStudent": "Notify {name}",
+  "@notifyStudent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "viewDetailsOption": "View Details",
+  "editExam": "Edit Exam",
+  "publishResult": "Publish Result",
+  "unpublishResult": "Unpublish Result",
+  "duplicateExam": "Duplicate Exam",
+  "deleteExam": "Delete Exam",
+  "newNotice": "New Notice",
+  "viewAttachment": "View Attachment",
+  "close": "Close",
+  "studentsAudience": "Students",
+  "teachersAudience": "Teachers",
+  "parentsAudience": "Parents",
+  "markAsImportant": "Mark as Important",
+  "titleAndContentRequired": "Title and content are required.",
+  "deleteNotice": "Delete Notice",
+  "noticeDeleted": "Notice deleted",
+  "routineDetails": "Routine Details",
+  "deleteEntry": "Delete Entry",
+  "allSectionsOption": "All Sections",
+  "pleaseSelectSubjectAndTeacher": "Please select subject and teacher.",
+  "routineEntryAdded": "Routine entry added successfully",
+  "errorLabel": "Error: {error}",
+  "@errorLabel": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "view": "View",
+  "deleteHomework": "Delete Homework",
+  "deleteHomeworkConfirm": "Are you sure you want to delete this homework?",
+  "failedToDeleteHomework": "Failed to delete homework",
+  "errorNoActiveUser": "Error: No active user found.",
+  "attendanceSavedSuccessfully": "Attendance saved successfully!",
+  "failedToSaveAttendance": "Failed to save attendance.",
+  "saveAttendance": "Save Attendance",
+  "pleaseLogin": "Please login",
+  "noStudentsForSelection": "No students found for this selection",
+  "rollNumber": "Roll: {roll}",
+  "@rollNumber": {
+    "placeholders": {
+      "roll": {
+        "type": "String"
+      }
+    }
+  },
+  "marksEnteredRequired": "Please enter marks for at least one student",
+  "marksSavedSuccessfully": "Marks saved successfully!",
+  "failedToSaveMarks": "Failed to save marks: {error}",
+  "@failedToSaveMarks": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeworkDetails": "Homework Details",
+  "homeworkNotFound": "Homework not found",
+  "bulkUpdate": "Bulk Update",
+  "noStudentsAssigned": "No students assigned to this homework",
+  "updateStatusAndComment": "Update Status & Comment",
+  "pendingStatus": "Pending",
+  "doneStatus": "Done",
+  "failedToUpdateStatus": "Failed to update status",
+  "attendanceRecordsTitle": "Attendance Records",
+  "myClassRoutine": "My Class Routine",
+  "noRoutinesAssigned": "No routines assigned for this exam.",
+  "noRoutinesYet": "No routines assigned yet.",
+  "confirmAttendanceTitle": "Confirm Attendance",
+  "confirm": "Confirm",
+  "anErrorOccurred": "An error occurred: {error}",
+  "@anErrorOccurred": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "galleryOption": "Gallery",
+  "cameraOption": "Camera",
+  "locationFetchedSuccessfully": "Location fetched successfully",
+  "errorGettingLocation": "Error getting location",
+  "pleaseSelectClassAndSection": "Please select Class and Section",
+  "profileImageUpdated": "Profile image updated successfully",
+  "profileUpdated": "Profile updated successfully",
+  "copiedToClipboard": "{label} copied to clipboard",
+  "@copiedToClipboard": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsTitle": "Notifications",
+  "notificationDetails": "Notification Details",
+  "deleteInstitution": "Delete Institution?",
+  "deleteSubscription": "Delete Subscription",
+  "schoolUuidCopied": "School UUID copied to clipboard",
+  "restore": "Restore",
+  "sendNotificationTitle": "Send Notification",
+  "registrationSuccessful": "Registration successful! Setting up your school...",
+  "loginButton": "Login",
+  "ok": "OK",
+  "deletePricingPlan": "Delete Pricing Plan?",
+  "editPlan": "Edit Plan",
+  "editDetails": "Edit Details",
+  "sendNotificationAction": "Send Notification",
+  "fillAllFieldsAction": "Please fill all fields",
+  "sendAction": "SEND",
+  "cancelAction": "CANCEL",
+  "deleteAction": "DELETE",
+  "noRoutinesForClass": "No class routine found.",
+  "addAtLeastOneAssignment": "Add at least one academic assignment.",
+  "createExam": "Create Exam",
+  "add": "Add",
+  "details": "Details",
+  "nameAndDates": "Name & dates",
+  "assignments": "Assignments",
+  "addedCount": "{count} added",
+  "@addedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "back": "Back",
+  "remove": "Remove",
+  "nextAddAssignments": "Next: Add Assignments",
+  "saveChanges": "Save Changes",
+  "addAssignment": "Add Assignment",
+  "editAssignment": "Edit Assignment",
+  "examSavedSuccessfully": "Exam \"{examName}\" saved successfully.",
+  "@examSavedSuccessfully": {
+    "placeholders": {
+      "examName": {
+        "type": "String"
+      }
+    }
+  },
+  "errorNoSchoolIdAssigned": "Error: User has no schoolId assigned.",
+  "schoolRegisteredSuccessfully": "School registered successfully!",
+  "failedToRegisterSchool": "Failed to register school.",
+  "registerSchool": "Register School",
+  "schoolLogo": "School Logo",
+  "registerSchoolAction": "REGISTER SCHOOL",
+  "completeYourSchoolProfile": "Complete your school profile",
+  "schoolName": "School Name",
+  "address": "Address",
+  "phone": "Phone",
+  "requiredField": "Required field",
+  "enterValidEmail": "Enter a valid email",
+  "homeworkManagement": "Homework Management",
+  "assignHomework": "Assign Homework",
+  "classLabel": "Class",
+  "section": "Section",
+  "subject": "Subject",
+  "selectDate": "Select Date",
+  "noHomeworkFound": "No homework found",
+  "tryAdjustingFilters": "Try adjusting your filters",
+  "homeworkDeleted": "Homework deleted",
+  "teacherPrefix": "Teacher: ",
+  "overdue": "Overdue",
+  "duePrefix": "Due: ",
+  "createdPrefix": "Created: ",
+  "homeworkAssignedSuccessfully": "Homework assigned successfully!",
+  "homeworkUpdatedSuccessfully": "Homework updated successfully!",
+  "pleaseSelectClassSubjectTeacher": "Please select class, subject and teacher",
+  "failedToSaveHomework": "Failed to save homework",
+  "addHomework": "Add Homework",
+  "marqueeUpdatedSuccessfully": "Marquee updated successfully",
+  "addEditMarquee": "Add/Edit Marquee",
+  "scrollType": "Scroll Type",
+  "speedPixelsFrame": "Speed (pixels/frame)",
+  "saveMarquee": "Save Marquee",
+  "failedToUpdateMarquee": "Failed to update marquee",
+  "marqueeTarget": "Marquee Target",
+  "marqueeText": "Marquee Text",
+  "resetFilters": "Reset Filters"
 }

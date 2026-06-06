@@ -202,6 +202,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addStudent => 'Add Student';
 
   @override
+  String get editStudent => 'Edit Student';
+
+  @override
+  String get updateStudent => 'Update Student';
+
+  @override
+  String get saveStudent => 'Save Student';
+
+  @override
   String get addTeacher => 'Add Teacher';
 
   @override
@@ -241,7 +250,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentsLabel => 'Students';
 
   @override
-  String get active => 'ACTIVE';
+  String get active => 'Active';
 
   @override
   String get invalid => 'INVALID';
@@ -580,4 +589,526 @@ class AppLocalizationsEn extends AppLocalizations {
   String examDateRange(String start, String end) {
     return '$start to $end';
   }
+
+  @override
+  String get notLoggedIn => 'Not logged in';
+
+  @override
+  String get classInfoNotAvailable => 'Class info not available';
+
+  @override
+  String get noHomeworkAssigned => 'No homework assigned to your class yet.';
+
+  @override
+  String get allSubjects => 'All Subjects';
+
+  @override
+  String examinerLabel(String name) {
+    return 'Examiner: $name';
+  }
+
+  @override
+  String get examsAndResults => 'Exams & Results';
+
+  @override
+  String get classInfoNotFound => 'Class information not found for student.';
+
+  @override
+  String get teacherManagementTitle => 'Teacher Management';
+
+  @override
+  String get deleteTeacher => 'Delete Teacher';
+
+  @override
+  String get viewProfile => 'View Profile';
+
+  @override
+  String get sendNotification => 'Send Notification';
+
+  @override
+  String get editTeacher => 'Edit Teacher';
+
+  @override
+  String get teacherUpdatedSuccessfully => 'Teacher updated successfully';
+
+  @override
+  String get teacherRegisteredSuccessfully => 'Teacher registered successfully';
+
+  @override
+  String get updateFailed => 'Update failed';
+
+  @override
+  String get registrationFailed => 'Registration failed';
+
+  @override
+  String get updateTeacher => 'Update Teacher';
+
+  @override
+  String get registerTeacher => 'Register Teacher';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String notifyTeacher(String name) {
+    return 'Notify $name';
+  }
+
+  @override
+  String get pleaseEnterTitleAndMessage => 'Please enter title and message';
+
+  @override
+  String get notificationSentSuccessfully => 'Notification sent successfully';
+
+  @override
+  String get failedToSendNotification => 'Failed to send notification';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get allSections => 'All Sections';
+
+  @override
+  String get allStatus => 'All Status';
+
+  @override
+  String get activeOnly => 'Active Only';
+
+  @override
+  String get inactiveOnly => 'Inactive Only';
+
+  @override
+  String get noStudentsFound => 'No students found.';
+
+  @override
+  String rollLabel(String roll) {
+    return 'Roll: $roll';
+  }
+
+  @override
+  String get deleteStudent => 'Delete Student';
+
+  @override
+  String get viewDetails => 'View Details';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String notifyStudent(String name) {
+    return 'Notify $name';
+  }
+
+  @override
+  String get viewDetailsOption => 'View Details';
+
+  @override
+  String get editExam => 'Edit Exam';
+
+  @override
+  String get publishResult => 'Publish Result';
+
+  @override
+  String get unpublishResult => 'Unpublish Result';
+
+  @override
+  String get duplicateExam => 'Duplicate Exam';
+
+  @override
+  String get deleteExam => 'Delete Exam';
+
+  @override
+  String get newNotice => 'New Notice';
+
+  @override
+  String get viewAttachment => 'View Attachment';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get studentsAudience => 'Students';
+
+  @override
+  String get teachersAudience => 'Teachers';
+
+  @override
+  String get parentsAudience => 'Parents';
+
+  @override
+  String get markAsImportant => 'Mark as Important';
+
+  @override
+  String get titleAndContentRequired => 'Title and content are required.';
+
+  @override
+  String get deleteNotice => 'Delete Notice';
+
+  @override
+  String get noticeDeleted => 'Notice deleted';
+
+  @override
+  String get routineDetails => 'Routine Details';
+
+  @override
+  String get deleteEntry => 'Delete Entry';
+
+  @override
+  String get allSectionsOption => 'All Sections';
+
+  @override
+  String get pleaseSelectSubjectAndTeacher =>
+      'Please select subject and teacher.';
+
+  @override
+  String get routineEntryAdded => 'Routine entry added successfully';
+
+  @override
+  String errorLabel(String error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get view => 'View';
+
+  @override
+  String get deleteHomework => 'Delete Homework';
+
+  @override
+  String get deleteHomeworkConfirm =>
+      'Are you sure you want to delete this homework?';
+
+  @override
+  String get failedToDeleteHomework => 'Failed to delete homework';
+
+  @override
+  String get errorNoActiveUser => 'Error: No active user found.';
+
+  @override
+  String get attendanceSavedSuccessfully => 'Attendance saved successfully!';
+
+  @override
+  String get failedToSaveAttendance => 'Failed to save attendance.';
+
+  @override
+  String get saveAttendance => 'Save Attendance';
+
+  @override
+  String get pleaseLogin => 'Please login';
+
+  @override
+  String get noStudentsForSelection => 'No students found for this selection';
+
+  @override
+  String rollNumber(String roll) {
+    return 'Roll: $roll';
+  }
+
+  @override
+  String get marksEnteredRequired =>
+      'Please enter marks for at least one student';
+
+  @override
+  String get marksSavedSuccessfully => 'Marks saved successfully!';
+
+  @override
+  String failedToSaveMarks(String error) {
+    return 'Failed to save marks: $error';
+  }
+
+  @override
+  String get homeworkDetails => 'Homework Details';
+
+  @override
+  String get homeworkNotFound => 'Homework not found';
+
+  @override
+  String get bulkUpdate => 'Bulk Update';
+
+  @override
+  String get noStudentsAssigned => 'No students assigned to this homework';
+
+  @override
+  String get updateStatusAndComment => 'Update Status & Comment';
+
+  @override
+  String get pendingStatus => 'Pending';
+
+  @override
+  String get doneStatus => 'Done';
+
+  @override
+  String get failedToUpdateStatus => 'Failed to update status';
+
+  @override
+  String get attendanceRecordsTitle => 'Attendance Records';
+
+  @override
+  String get myClassRoutine => 'My Class Routine';
+
+  @override
+  String get noRoutinesAssigned => 'No routines assigned for this exam.';
+
+  @override
+  String get noRoutinesYet => 'No routines assigned yet.';
+
+  @override
+  String get confirmAttendanceTitle => 'Confirm Attendance';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String anErrorOccurred(String error) {
+    return 'An error occurred: $error';
+  }
+
+  @override
+  String get galleryOption => 'Gallery';
+
+  @override
+  String get cameraOption => 'Camera';
+
+  @override
+  String get locationFetchedSuccessfully => 'Location fetched successfully';
+
+  @override
+  String get errorGettingLocation => 'Error getting location';
+
+  @override
+  String get pleaseSelectClassAndSection => 'Please select Class and Section';
+
+  @override
+  String get profileImageUpdated => 'Profile image updated successfully';
+
+  @override
+  String get profileUpdated => 'Profile updated successfully';
+
+  @override
+  String copiedToClipboard(String label) {
+    return '$label copied to clipboard';
+  }
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get notificationDetails => 'Notification Details';
+
+  @override
+  String get deleteInstitution => 'Delete Institution?';
+
+  @override
+  String get deleteSubscription => 'Delete Subscription';
+
+  @override
+  String get schoolUuidCopied => 'School UUID copied to clipboard';
+
+  @override
+  String get restore => 'Restore';
+
+  @override
+  String get sendNotificationTitle => 'Send Notification';
+
+  @override
+  String get registrationSuccessful =>
+      'Registration successful! Setting up your school...';
+
+  @override
+  String get loginButton => 'Login';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get deletePricingPlan => 'Delete Pricing Plan?';
+
+  @override
+  String get editPlan => 'Edit Plan';
+
+  @override
+  String get editDetails => 'Edit Details';
+
+  @override
+  String get sendNotificationAction => 'Send Notification';
+
+  @override
+  String get fillAllFieldsAction => 'Please fill all fields';
+
+  @override
+  String get sendAction => 'SEND';
+
+  @override
+  String get cancelAction => 'CANCEL';
+
+  @override
+  String get deleteAction => 'DELETE';
+
+  @override
+  String get noRoutinesForClass => 'No class routine found.';
+
+  @override
+  String get addAtLeastOneAssignment => 'Add at least one academic assignment.';
+
+  @override
+  String get createExam => 'Create Exam';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get details => 'Details';
+
+  @override
+  String get nameAndDates => 'Name & dates';
+
+  @override
+  String get assignments => 'Assignments';
+
+  @override
+  String addedCount(int count) {
+    return '$count added';
+  }
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get nextAddAssignments => 'Next: Add Assignments';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get addAssignment => 'Add Assignment';
+
+  @override
+  String get editAssignment => 'Edit Assignment';
+
+  @override
+  String examSavedSuccessfully(String examName) {
+    return 'Exam \"$examName\" saved successfully.';
+  }
+
+  @override
+  String get errorNoSchoolIdAssigned => 'Error: User has no schoolId assigned.';
+
+  @override
+  String get schoolRegisteredSuccessfully => 'School registered successfully!';
+
+  @override
+  String get failedToRegisterSchool => 'Failed to register school.';
+
+  @override
+  String get registerSchool => 'Register School';
+
+  @override
+  String get schoolLogo => 'School Logo';
+
+  @override
+  String get registerSchoolAction => 'REGISTER SCHOOL';
+
+  @override
+  String get completeYourSchoolProfile => 'Complete your school profile';
+
+  @override
+  String get schoolName => 'School Name';
+
+  @override
+  String get address => 'Address';
+
+  @override
+  String get phone => 'Phone';
+
+  @override
+  String get requiredField => 'Required field';
+
+  @override
+  String get enterValidEmail => 'Enter a valid email';
+
+  @override
+  String get homeworkManagement => 'Homework Management';
+
+  @override
+  String get assignHomework => 'Assign Homework';
+
+  @override
+  String get classLabel => 'Class';
+
+  @override
+  String get section => 'Section';
+
+  @override
+  String get subject => 'Subject';
+
+  @override
+  String get selectDate => 'Select Date';
+
+  @override
+  String get noHomeworkFound => 'No homework found';
+
+  @override
+  String get tryAdjustingFilters => 'Try adjusting your filters';
+
+  @override
+  String get homeworkDeleted => 'Homework deleted';
+
+  @override
+  String get teacherPrefix => 'Teacher: ';
+
+  @override
+  String get overdue => 'Overdue';
+
+  @override
+  String get duePrefix => 'Due: ';
+
+  @override
+  String get createdPrefix => 'Created: ';
+
+  @override
+  String get homeworkAssignedSuccessfully => 'Homework assigned successfully!';
+
+  @override
+  String get homeworkUpdatedSuccessfully => 'Homework updated successfully!';
+
+  @override
+  String get pleaseSelectClassSubjectTeacher =>
+      'Please select class, subject and teacher';
+
+  @override
+  String get failedToSaveHomework => 'Failed to save homework';
+
+  @override
+  String get addHomework => 'Add Homework';
+
+  @override
+  String get marqueeUpdatedSuccessfully => 'Marquee updated successfully';
+
+  @override
+  String get addEditMarquee => 'Add/Edit Marquee';
+
+  @override
+  String get scrollType => 'Scroll Type';
+
+  @override
+  String get speedPixelsFrame => 'Speed (pixels/frame)';
+
+  @override
+  String get saveMarquee => 'Save Marquee';
+
+  @override
+  String get failedToUpdateMarquee => 'Failed to update marquee';
+
+  @override
+  String get marqueeTarget => 'Marquee Target';
+
+  @override
+  String get marqueeText => 'Marquee Text';
+
+  @override
+  String get resetFilters => 'Reset Filters';
 }
