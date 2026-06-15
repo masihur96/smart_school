@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/custom_size.dart';
@@ -1299,20 +1300,11 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                         label: 'Subject',
                       ),
                       const SizedBox(height: 10),
-                      _StyledDropdown<String>(
-                        hint: 'Choose a subject',
-                        value: _subjectId,
-                        items: {
-                              for (final s in subjects) s.name: s,
-                            }
-                            .values
-                            .map(
-                              (s) => DropdownMenuItem(
-                                value: s.id,
-                                child: Text(s.name),
-                              ),
-                            )
-                            .toList(),
+                      _SearchableSubjectDropdown(
+                        subjects: {
+                          for (final s in subjects) s.name: s,
+                        }.values.toList(),
+                        selectedId: _subjectId,
                         onChanged: (val) => setState(() => _subjectId = val),
                       ),
                       const SizedBox(height: 16),
@@ -1493,6 +1485,124 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper Widgets
 // ─────────────────────────────────────────────────────────────────────────────
+
+/// A searchable subject picker backed by [DropdownSearch].
+class _SearchableSubjectDropdown extends StatelessWidget {
+  final List<dynamic> subjects; // list of Subject objects
+  final String? selectedId;
+  final ValueChanged<String?> onChanged;
+
+  const _SearchableSubjectDropdown({
+    required this.subjects,
+    required this.selectedId,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Find the currently selected subject object (if any)
+    final selectedSubject = subjects.cast<dynamic>().firstWhere(
+      (s) => s.id == selectedId,
+      orElse: () => null,
+    );
+
+    return DropdownSearch<dynamic>(
+      items: (filter, _) => subjects
+          .where((s) => s.name.toLowerCase().contains(filter.toLowerCase()))
+          .toList(),
+      selectedItem: selectedSubject,
+      compareFn: (a, b) => a?.id == b?.id,
+      itemAsString: (s) => s.name as String,
+      onSelected: (s) => onChanged(s?.id as String?),
+      decoratorProps: DropDownDecoratorProps(
+        decoration: InputDecoration(
+          hintText: 'Choose a subject',
+          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFFEDE9FE)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: selectedId != null
+                  ? const Color(0xFF7C3AED).withOpacity(0.4)
+                  : const Color(0xFFEDE9FE),
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
+          ),
+          suffixIcon: const Icon(
+            Icons.keyboard_arrow_down,
+            color: Color(0xFF7C3AED),
+          ),
+        ),
+      ),
+      popupProps: PopupProps.menu(
+        showSearchBox: true,
+        searchDelay: Duration.zero,
+        constraints: const BoxConstraints(maxHeight: 300),
+        searchFieldProps: TextFieldProps(
+          decoration: InputDecoration(
+            hintText: 'Search subject...',
+            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13),
+            prefixIcon: const Icon(
+              Icons.search_rounded,
+              color: Color(0xFF7C3AED),
+              size: 20,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
+            filled: true,
+            fillColor: const Color(0xFFF5F3FF),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+        menuProps: MenuProps(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          elevation: 6,
+          shadowColor: const Color(0xFF7C3AED).withOpacity(0.15),
+        ),
+        itemBuilder: (context, item, isSelected, isHighlighted) => ListTile(
+          dense: true,
+          title: Text(
+            item.name as String,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              color: isSelected
+                  ? const Color(0xFF7C3AED)
+                  : const Color(0xFF1E1B4B),
+            ),
+          ),
+          trailing: isSelected
+              ? const Icon(
+                  Icons.check_circle_rounded,
+                  color: Color(0xFF7C3AED),
+                  size: 18,
+                )
+              : null,
+          tileColor: isSelected
+              ? const Color(0xFF7C3AED).withOpacity(0.06)
+              : null,
+        ),
+      ),
+    );
+  }
+}
 
 class _FilterDropdown extends StatelessWidget {
   final String hint;
