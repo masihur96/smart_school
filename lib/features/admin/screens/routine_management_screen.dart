@@ -850,7 +850,8 @@ class _AddRoutineEntrySheet extends StatefulWidget {
 }
 
 class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
-  late String _selectedDay;
+  // For add mode we support multiple days; for edit mode only one day.
+  late Set<String> _selectedDays;
   String? _subjectId;
   String? _teacherId;
   TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
@@ -858,18 +859,20 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
   final _roomController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  bool get _isEditMode => widget.existingEntry != null;
+
   @override
   void initState() {
     super.initState();
     if (widget.existingEntry != null) {
-      _selectedDay = widget.existingEntry!.day;
+      _selectedDays = {widget.existingEntry!.day};
       _subjectId = widget.existingEntry!.subjectId;
       _teacherId = widget.existingEntry!.teacherId;
       _startTime = _parseTime(widget.existingEntry!.startTime);
       _endTime = _parseTime(widget.existingEntry!.endTime);
       _roomController.text = widget.existingEntry!.roomNumber ?? '';
     } else {
-      _selectedDay = widget.initialDay;
+      _selectedDays = {widget.initialDay};
     }
   }
 
@@ -946,26 +949,19 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
       return;
     }
 
+    if (_selectedDays.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select at least one day.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     final authNotifier = context.read<AuthNotifier>();
     final schoolId =
         authNotifier.user?.schoolId ?? '3b1e7e8f-6e4c-4c0e-9c2a-6d8f4c1b7a91';
-
-    final entry = RoutineEntry(
-      id: widget.existingEntry?.id,
-      classId: widget.classId,
-      schoolId: schoolId,
-      day: _selectedDay,
-      startTime: _formatTime(_startTime),
-      endTime: _formatTime(_endTime),
-      subjectId: _subjectId!,
-      teacherId: _teacherId!,
-      sectionId: widget.sectionId,
-      roomNumber: _roomController.text.trim().isEmpty
-          ? null
-          : _roomController.text.trim(),
-    );
-
-    log('Routine entry prepared: ${entry.toJson()}');
 
     try {
       final teacherIds = context
@@ -991,7 +987,22 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
           )
           .name;
 
-      if (widget.existingEntry != null) {
+      if (_isEditMode) {
+        // Edit: only one day is relevant
+        final entry = RoutineEntry(
+          id: widget.existingEntry!.id,
+          classId: widget.classId,
+          schoolId: schoolId,
+          day: _selectedDays.first,
+          startTime: _formatTime(_startTime),
+          endTime: _formatTime(_endTime),
+          subjectId: _subjectId!,
+          teacherId: _teacherId!,
+          sectionId: widget.sectionId,
+          roomNumber: _roomController.text.trim().isEmpty
+              ? null
+              : _roomController.text.trim(),
+        );
         log('Calling updateRoutineOnAPI from UI');
         await context.read<RoutineNotifier>().updateRoutineOnAPI(
           widget.classId,
@@ -1002,28 +1013,53 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
           receiverUuids: teacherIds,
         );
       } else {
-        log('Calling addRoutineToAPI from UI');
-        await context.read<RoutineNotifier>().addRoutineToAPI(
-          widget.classId,
-          widget.sectionId,
-          entry,
-          className: className,
-          sectionName: sectionName,
-          receiverUuids: teacherIds,
-        );
+        // Add: create one entry per selected day
+        // Sort days in calendar order for consistent processing
+        final orderedSelectedDays = _days
+            .where((d) => _selectedDays.contains(d))
+            .toList();
+
+        for (final day in orderedSelectedDays) {
+          final entry = RoutineEntry(
+            classId: widget.classId,
+            schoolId: schoolId,
+            day: day,
+            startTime: _formatTime(_startTime),
+            endTime: _formatTime(_endTime),
+            subjectId: _subjectId!,
+            teacherId: _teacherId!,
+            sectionId: widget.sectionId,
+            roomNumber: _roomController.text.trim().isEmpty
+                ? null
+                : _roomController.text.trim(),
+          );
+          log('Calling addRoutineToAPI for day: $day');
+          await context.read<RoutineNotifier>().addRoutineToAPI(
+            widget.classId,
+            widget.sectionId,
+            entry,
+            className: className,
+            sectionName: sectionName,
+            receiverUuids: teacherIds,
+          );
+        }
       }
+
       if (mounted) {
-        log('Routine added successfully, closing sheet');
+        log('Routine saved successfully, closing sheet');
         Navigator.pop(context);
+        final count = _selectedDays.length;
+        final msg = _isEditMode
+            ? AppLocalizations.of(context)!.routineEntryAdded
+            : (count == 1
+                ? AppLocalizations.of(context)!.routineEntryAdded
+                : '$count routine entries saved successfully!');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.routineEntryAdded),
-            backgroundColor: Colors.green,
-          ),
+          SnackBar(content: Text(msg), backgroundColor: Colors.green),
         );
       }
     } catch (e) {
-      log('Error adding routine entry: $e');
+      log('Error saving routine entry: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1075,22 +1111,29 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                       color: const Color(0xFF7C3AED).withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.add_alarm_rounded, size: 22),
+                    child: Icon(
+                      _isEditMode
+                          ? Icons.edit_calendar_rounded
+                          : Icons.add_alarm_rounded,
+                      size: 22,
+                    ),
                   ),
                   const SizedBox(width: 14),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Add Routine Entry',
-                        style: TextStyle(
+                        _isEditMode ? 'Edit Routine Entry' : 'Add Routine Entry',
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        'Fill in the details below',
-                        style: TextStyle(fontSize: 12),
+                        _isEditMode
+                            ? 'Update the details below'
+                            : 'Select days & fill in the details',
+                        style: const TextStyle(fontSize: 12),
                       ),
                     ],
                   ),
@@ -1109,9 +1152,36 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // ── Day Selector ──
-                      const _SectionLabel(
-                        icon: Icons.calendar_today_outlined,
-                        label: 'Select Day',
+                      Row(
+                        children: [
+                          const _SectionLabel(
+                            icon: Icons.calendar_today_outlined,
+                            label: 'Select Day',
+                          ),
+                          if (!_isEditMode) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF7C3AED).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                _selectedDays.isEmpty
+                                    ? 'None selected'
+                                    : '${_selectedDays.length} selected',
+                                style: const TextStyle(
+                                  color: Color(0xFF7C3AED),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       const SizedBox(height: 10),
                       SizedBox(
@@ -1122,10 +1192,24 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                           separatorBuilder: (_, __) => const SizedBox(width: 8),
                           itemBuilder: (_, i) {
                             final d = _days[i];
-                            final isSelected = d == _selectedDay;
+                            final isSelected = _selectedDays.contains(d);
                             final color = _dayColors[i];
                             return GestureDetector(
-                              onTap: () => setState(() => _selectedDay = d),
+                              onTap: () => setState(() {
+                                if (_isEditMode) {
+                                  // Edit mode: single selection
+                                  _selectedDays = {d};
+                                } else {
+                                  // Add mode: toggle multi-selection
+                                  if (isSelected && _selectedDays.length > 1) {
+                                    _selectedDays = Set.from(_selectedDays)
+                                      ..remove(d);
+                                  } else if (!isSelected) {
+                                    _selectedDays = Set.from(_selectedDays)
+                                      ..add(d);
+                                  }
+                                }
+                              }),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
                                 padding: const EdgeInsets.symmetric(
@@ -1143,19 +1227,67 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                                         : color.withOpacity(0.2),
                                   ),
                                 ),
-                                child: Text(
-                                  _dayAbbr[i],
-                                  style: TextStyle(
-                                    color: isSelected ? Colors.white : color,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 13,
-                                  ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (isSelected && !_isEditMode) ...[
+                                      Icon(
+                                        Icons.check_rounded,
+                                        size: 13,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 4),
+                                    ],
+                                    Text(
+                                      _dayAbbr[i],
+                                      style: TextStyle(
+                                        color:
+                                            isSelected ? Colors.white : color,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             );
                           },
                         ),
                       ),
+                      if (!_isEditMode) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            GestureDetector(
+                              onTap: () => setState(
+                                () => _selectedDays = Set.from(_days),
+                              ),
+                              child: const Text(
+                                'Select All',
+                                style: TextStyle(
+                                  color: Color(0xFF7C3AED),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => setState(
+                                () => _selectedDays = {widget.initialDay},
+                              ),
+                              child: Text(
+                                'Reset',
+                                style: TextStyle(
+                                  color: Colors.grey[500],
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 24),
 
                       // ── Subject ──
@@ -1315,17 +1447,21 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                                       color: Colors.white,
                                     ),
                                   )
-                                : const Row(
+                                : Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.check_circle_outline_rounded,
                                         color: Colors.white,
                                       ),
-                                      SizedBox(width: 8),
+                                      const SizedBox(width: 8),
                                       Text(
-                                        'Save Entry',
-                                        style: TextStyle(
+                                        _isEditMode
+                                            ? 'Update Entry'
+                                            : (_selectedDays.length > 1
+                                                ? 'Save ${_selectedDays.length} Entries'
+                                                : 'Save Entry'),
+                                        style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.w700,
                                           fontSize: 16,
