@@ -1052,8 +1052,8 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
         final msg = _isEditMode
             ? AppLocalizations.of(context)!.routineEntryAdded
             : (count == 1
-                ? AppLocalizations.of(context)!.routineEntryAdded
-                : '$count routine entries saved successfully!');
+                  ? AppLocalizations.of(context)!.routineEntryAdded
+                  : '$count routine entries saved successfully!');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(msg), backgroundColor: Colors.green),
         );
@@ -1123,7 +1123,9 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _isEditMode ? 'Edit Routine Entry' : 'Add Routine Entry',
+                        _isEditMode
+                            ? 'Edit Routine Entry'
+                            : 'Add Routine Entry',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -1241,8 +1243,9 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                                     Text(
                                       _dayAbbr[i],
                                       style: TextStyle(
-                                        color:
-                                            isSelected ? Colors.white : color,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : color,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 13,
                                       ),
@@ -1299,7 +1302,10 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                       _StyledDropdown<String>(
                         hint: 'Choose a subject',
                         value: _subjectId,
-                        items: subjects
+                        items: {
+                              for (final s in subjects) s.name: s,
+                            }
+                            .values
                             .map(
                               (s) => DropdownMenuItem(
                                 value: s.id,
@@ -1459,8 +1465,8 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                                         _isEditMode
                                             ? 'Update Entry'
                                             : (_selectedDays.length > 1
-                                                ? 'Save ${_selectedDays.length} Entries'
-                                                : 'Save Entry'),
+                                                  ? 'Save ${_selectedDays.length} Entries'
+                                                  : 'Save Entry'),
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.w700,
