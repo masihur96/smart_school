@@ -1,9 +1,6 @@
 import 'dart:developer';
-import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
@@ -213,12 +210,13 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                     Expanded(
                       child: _FilterDropdown(
                         hint: 'Select Class',
+
                         value: _selectedClassId,
                         items: classes
                             .map(
                               (c) => DropdownMenuItem(
                                 value: c.id,
-                                child: Text(c.name,style: TextStyle(color: AppColors.white),),
+                                child: Text(c.name),
                               ),
                             )
                             .toList(),
@@ -239,12 +237,12 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                           if (filteredSections.isNotEmpty)
                             const DropdownMenuItem(
                               value: null,
-                              child: Text('All Sections', style: TextStyle(color: AppColors.white)),
+                              child: Text('All Sections'),
                             ),
                           ...filteredSections.map(
                             (s) => DropdownMenuItem(
                               value: s.id,
-                              child: Text(s.name,style: TextStyle(color: AppColors.white),),
+                              child: Text(s.name),
                             ),
                           ),
                         ],
@@ -794,7 +792,11 @@ class _RoutineEntryCard extends StatelessWidget {
             value: 'view',
             child: Row(
               children: [
-                const Icon(Icons.visibility_outlined, size: 18, color: Colors.blue),
+                const Icon(
+                  Icons.visibility_outlined,
+                  size: 18,
+                  color: Colors.blue,
+                ),
                 const SizedBox(width: 10),
                 Text(l10n.viewDetails),
               ],
@@ -814,7 +816,11 @@ class _RoutineEntryCard extends StatelessWidget {
             value: 'delete',
             child: Row(
               children: [
-                const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+                const Icon(
+                  Icons.delete_outline_rounded,
+                  size: 18,
+                  color: Colors.red,
+                ),
                 const SizedBox(width: 10),
                 Text(l10n.delete, style: const TextStyle(color: Colors.red)),
               ],
@@ -852,7 +858,6 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
   final _roomController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-
   @override
   void initState() {
     super.initState();
@@ -863,13 +868,10 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
       _startTime = _parseTime(widget.existingEntry!.startTime);
       _endTime = _parseTime(widget.existingEntry!.endTime);
       _roomController.text = widget.existingEntry!.roomNumber ?? '';
-
     } else {
       _selectedDay = widget.initialDay;
     }
   }
-
-
 
   TimeOfDay _parseTime(String timeStr) {
     try {
@@ -935,7 +937,9 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
       log('Validation failed: subject or teacher not selected');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.pleaseSelectSubjectAndTeacher),
+          content: Text(
+            AppLocalizations.of(context)!.pleaseSelectSubjectAndTeacher,
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -975,12 +979,16 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
       final sections = context.read<SectionSetupNotifier>().sections;
 
       final className = classes
-          .firstWhere((c) => c.id == widget.classId,
-              orElse: () => ClassRoom(id: '', name: widget.classId))
+          .firstWhere(
+            (c) => c.id == widget.classId,
+            orElse: () => ClassRoom(id: '', name: widget.classId),
+          )
           .name;
       final sectionName = sections
-          .firstWhere((s) => s.id == widget.sectionId,
-              orElse: () => Section(id: '', name: widget.sectionId, classId: ''))
+          .firstWhere(
+            (s) => s.id == widget.sectionId,
+            orElse: () => Section(id: '', name: widget.sectionId, classId: ''),
+          )
           .name;
 
       if (widget.existingEntry != null) {
@@ -992,7 +1000,6 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
           className: className,
           sectionName: sectionName,
           receiverUuids: teacherIds,
-
         );
       } else {
         log('Calling addRoutineToAPI from UI');
@@ -1003,7 +1010,6 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
           className: className,
           sectionName: sectionName,
           receiverUuids: teacherIds,
-
         );
       }
       if (mounted) {
@@ -1021,7 +1027,9 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.errorLabel(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.errorLabel(e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -1363,7 +1371,7 @@ class _FilterDropdown extends StatelessWidget {
       height: 44,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        // color: Colors.white.withOpacity(0.15),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.white.withOpacity(0.3)),
       ),
@@ -1372,17 +1380,11 @@ class _FilterDropdown extends StatelessWidget {
           value: value,
           isExpanded: true,
           // dropdownColor: const Color(0xFF4F46E5),
-          // style: const TextStyle(color: Colors.white, fontSize: 13),
-          hint: Text(
-            hint,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 12,
-            ),
-          ),
+          // style: TextStyle(color: Colors.white, fontSize: 13),
+          hint: Text(hint),
           icon: const Icon(
             Icons.keyboard_arrow_down,
-            color: Colors.white,
+            color: Colors.black,
             size: 18,
           ),
           items: items,
