@@ -1315,17 +1315,9 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                         label: 'Teacher',
                       ),
                       const SizedBox(height: 10),
-                      _StyledDropdown<String>(
-                        hint: 'Assign a teacher',
-                        value: _teacherId,
-                        items: teachers
-                            .map(
-                              (t) => DropdownMenuItem(
-                                value: t.userId,
-                                child: Text(t.user?.name ?? 'Unknown'),
-                              ),
-                            )
-                            .toList(),
+                      _SearchableTeacherDropdown(
+                        teachers: teachers,
+                        selectedId: _teacherId,
                         onChanged: (val) => setState(() => _teacherId = val),
                       ),
                       const SizedBox(height: 24),
@@ -1600,6 +1592,233 @@ class _SearchableSubjectDropdown extends StatelessWidget {
               : null,
         ),
       ),
+    );
+  }
+}
+
+/// A searchable teacher picker with avatar + name + designation per item.
+class _SearchableTeacherDropdown extends StatelessWidget {
+  final List<dynamic> teachers;
+  final String? selectedId;
+  final ValueChanged<String?> onChanged;
+
+  const _SearchableTeacherDropdown({
+    required this.teachers,
+    required this.selectedId,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedTeacher = teachers.cast<dynamic>().firstWhere(
+      (t) => t.userId == selectedId,
+      orElse: () => null,
+    );
+
+    return DropdownSearch<dynamic>(
+      items: (filter, _) => teachers
+          .where(
+            (t) => (t.user?.name ?? 'Unknown').toLowerCase().contains(
+              filter.toLowerCase(),
+            ),
+          )
+          .toList(),
+      selectedItem: selectedTeacher,
+      compareFn: (a, b) => a?.userId == b?.userId,
+      itemAsString: (t) => t.user?.name as String? ?? 'Unknown',
+      onSelected: (t) => onChanged(t?.userId as String?),
+      decoratorProps: DropDownDecoratorProps(
+        decoration: InputDecoration(
+          hintText: 'Assign a teacher',
+          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFFEDE9FE)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: selectedId != null
+                  ? const Color(0xFF7C3AED).withOpacity(0.4)
+                  : const Color(0xFFEDE9FE),
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
+          ),
+          suffixIcon: const Icon(
+            Icons.keyboard_arrow_down,
+            color: Color(0xFF7C3AED),
+          ),
+        ),
+      ),
+      dropdownBuilder: (context, selectedItem) {
+        if (selectedItem == null) return const SizedBox.shrink();
+        final name = selectedItem.user?.name as String? ?? 'Unknown';
+        final avatar = selectedItem.user?.avatar as String?;
+        final designation = selectedItem.designation as String? ?? '';
+        return Row(
+          children: [
+            _TeacherAvatar(avatar: avatar, name: name, size: 28),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1E1B4B),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (designation.isNotEmpty)
+                    Text(
+                      designation,
+                      style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+      popupProps: PopupProps.menu(
+        showSearchBox: true,
+        searchDelay: Duration.zero,
+        constraints: const BoxConstraints(maxHeight: 320),
+        searchFieldProps: TextFieldProps(
+          decoration: InputDecoration(
+            hintText: 'Search teacher...',
+            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13),
+            prefixIcon: const Icon(
+              Icons.search_rounded,
+              color: Color(0xFF7C3AED),
+              size: 20,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
+            filled: true,
+            fillColor: const Color(0xFFF5F3FF),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+        menuProps: MenuProps(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          elevation: 6,
+          shadowColor: const Color(0xFF7C3AED).withOpacity(0.15),
+        ),
+        itemBuilder: (context, item, isSelected, isHighlighted) {
+          final name = item.user?.name as String? ?? 'Unknown';
+          final avatar = item.user?.avatar as String?;
+          final designation = item.designation as String? ?? '';
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            color: isSelected
+                ? const Color(0xFF7C3AED).withOpacity(0.06)
+                : null,
+            child: Row(
+              children: [
+                _TeacherAvatar(avatar: avatar, name: name, size: 36),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                          color: isSelected
+                              ? const Color(0xFF7C3AED)
+                              : const Color(0xFF1E1B4B),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (designation.isNotEmpty)
+                        Text(
+                          designation,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[500],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
+                if (isSelected)
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: Color(0xFF7C3AED),
+                    size: 18,
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Circular avatar with network image + graceful fallback initials.
+class _TeacherAvatar extends StatelessWidget {
+  final String? avatar;
+  final String name;
+  final double size;
+
+  const _TeacherAvatar({
+    required this.avatar,
+    required this.name,
+    required this.size,
+  });
+
+  String get _initials {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return name.isNotEmpty ? name[0].toUpperCase() : '?';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hasAvatar = avatar != null && avatar!.isNotEmpty;
+    return CircleAvatar(
+      radius: size / 2,
+      backgroundColor: const Color(0xFF7C3AED).withOpacity(0.12),
+      backgroundImage: hasAvatar ? NetworkImage(avatar!) : null,
+      onBackgroundImageError: hasAvatar ? (_, __) {} : null,
+      child: hasAvatar
+          ? null
+          : Text(
+              _initials,
+              style: TextStyle(
+                fontSize: size * 0.35,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF7C3AED),
+              ),
+            ),
     );
   }
 }
