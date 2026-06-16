@@ -40,7 +40,7 @@ class SettingsProvider extends ChangeNotifier {
     _isHomeworkNotifyEnabled = await StorageService.getHomeworkNotify();
     _isAttendanceNotifyEnabled = await StorageService.getAttendanceNotify();
     _isBiometricEnabled = await StorageService.getBiometricEnabled();
-    
+
     notifyListeners();
   }
 
@@ -69,8 +69,10 @@ class SettingsProvider extends ChangeNotifier {
     // Sync user-specific topics if user is provided
     if (user != null) {
       // To receive class notifications
-      if (user.classId != null && user.classId!.isNotEmpty) {
-        ns.subscribeToTopic('class_${user.classId}');
+      if (user.classIds.isNotEmpty) {
+        for (var id in user.classIds) {
+          ns.subscribeToTopic(id);
+        }
       }
 
       // To receive school notifications

@@ -1,4 +1,5 @@
 import 'dart:developer';
+
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
@@ -20,8 +21,8 @@ class AuthRepositoryImpl implements AuthRepository {
       email: result.email,
       role: result.role,
       schoolId: result.schoolId,
-      classId: result.classId,
-      sectionId: result.sectionId,
+      classIds: result.classIds,
+      sectionIds: result.sectionIds,
       phone: result.phone,
       rollNumber: result.rollNumber,
       designation: result.designation,
@@ -44,8 +45,8 @@ class AuthRepositoryImpl implements AuthRepository {
       email: result.email,
       role: result.role,
       schoolId: result.schoolId,
-      classId: result.classId,
-      sectionId: result.sectionId,
+      classIds: result.classIds,
+      sectionIds: result.sectionIds,
       phone: result.phone,
       rollNumber: result.rollNumber,
       designation: result.designation,

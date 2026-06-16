@@ -36,7 +36,9 @@ class _TeacherNoticeScreenState extends State<TeacherNoticeScreen> {
     }
 
     final notices = noticeNotifier.notices
-        .where((n) => n.classId == null || n.classId == currentUser.classId)
+        .where(
+          (n) => n.classId == null || n.classId == currentUser.classIds.first,
+        )
         .toList()
         .reversed
         .toList();
@@ -163,17 +165,25 @@ class _TeacherNoticeScreenState extends State<TeacherNoticeScreen> {
                           onPressed: () async {
                             final url = Uri.parse(notice.fileUrl!);
                             if (await canLaunchUrl(url)) {
-                              await launchUrl(url, mode: LaunchMode.externalApplication);
+                              await launchUrl(
+                                url,
+                                mode: LaunchMode.externalApplication,
+                              );
                             } else {
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Could not open attachment')),
+                                  const SnackBar(
+                                    content: Text('Could not open attachment'),
+                                  ),
                                 );
                               }
                             }
                           },
-                          icon: Icon(Icons.attachment_outlined,
-                              size: 20, color: Colors.grey[600]),
+                          icon: Icon(
+                            Icons.attachment_outlined,
+                            size: 20,
+                            color: Colors.grey[600],
+                          ),
                         ),
                       Spacer(),
 

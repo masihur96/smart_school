@@ -5,9 +5,9 @@ import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/features/notifications/providers/notification_provider.dart';
 import 'package:smart_school/features/super_admin/models/school_model.dart';
 import 'package:smart_school/features/super_admin/providers/school_management_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
-import 'package:smart_school/l10n/app_localizations.dart';
 
 class SchoolManagementDetailsScreen extends StatefulWidget {
   final SuperAdminSchool school;
@@ -160,7 +160,7 @@ class _UserListTab extends StatelessWidget {
         if (role == 'teacher' || role == 'student') {
           final Map<String, List<User>> groupedUsers = {};
           for (var user in users) {
-            final classId = user.classId ?? 'unassigned';
+            final classId = user.classIds.first ?? 'unassigned';
             if (!groupedUsers.containsKey(classId)) {
               groupedUsers[classId] = [];
             }
@@ -243,10 +243,10 @@ class _UserListTab extends StatelessWidget {
                     (user) => _UserCard(
                       user: user,
                       className: className,
-                      sectionName: user.sectionId != null
+                      sectionName: user.sectionIds.first.isNotEmpty
                           ? sectionNotifier.sections
                                 .firstWhere(
-                                  (s) => s.id == user.sectionId,
+                                  (s) => s.id == user.sectionIds.first,
                                   orElse: () =>
                                       Section(id: '', name: 'N/A', classId: ''),
                                 )
@@ -290,110 +290,131 @@ class _UserCard extends StatelessWidget {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.send_rounded, color: AppColors.primary),
-            const SizedBox(width: 8),
-            Text(AppLocalizations.of(context)!.sendNotification),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Sending to: ${user.name}',
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          title: Row(
+            children: [
+              const Icon(Icons.send_rounded, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.sendNotification),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Sending to: ${user.name}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: titleController,
+                decoration: InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  prefixIcon: const Icon(Icons.title_rounded),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: messageController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  labelText: 'Message',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  prefixIcon: const Icon(Icons.message_rounded),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancelAction),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: titleController,
-              decoration: InputDecoration(
-                labelText: 'Title',
-                border: OutlineInputBorder(
+            ElevatedButton(
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      if (titleController.text.isEmpty ||
+                          messageController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              AppLocalizations.of(context)!.fillAllFieldsAction,
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+
+                      setState(() {
+                        isLoading = true;
+                      });
+
+                      try {
+                        final notifier = context.read<NotificationNotifier>();
+                        await notifier.sendNotification(
+                          receiverUuid: user.id,
+                          title: titleController.text,
+                          message: messageController.text,
+                        );
+
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                AppLocalizations.of(
+                                  context,
+                                )!.notificationSentSuccessfully,
+                              ),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                '${AppLocalizations.of(context)!.failedToSendNotification}: $e',
+                              ),
+                            ),
+                          );
+                        }
+                      } finally {
+                        if (context.mounted) {
+                          setState(() {
+                            isLoading = false;
+                          });
+                        }
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                prefixIcon: const Icon(Icons.title_rounded),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: messageController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                labelText: 'Message',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                prefixIcon: const Icon(Icons.message_rounded),
-              ),
+              child: isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Text(AppLocalizations.of(context)!.sendAction),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)!.cancelAction),
-          ),
-          ElevatedButton(
-            onPressed: isLoading ? null : () async {
-              if (titleController.text.isEmpty ||
-                  messageController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.fillAllFieldsAction)),
-                );
-                return;
-              }
-
-              setState(() { isLoading = true; });
-
-              try {
-                final notifier = context.read<NotificationNotifier>();
-                await notifier.sendNotification(
-                  receiverUuid: user.id,
-                  title: titleController.text,
-                  message: messageController.text,
-                );
-
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(AppLocalizations.of(context)!.notificationSentSuccessfully),
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('${AppLocalizations.of(context)!.failedToSendNotification}: $e')),
-                  );
-                }
-              } finally {
-                if (context.mounted) {
-                  setState(() { isLoading = false; });
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                : Text(AppLocalizations.of(context)!.sendAction),
-          ),
-        ],
-      ),
       ),
     );
   }

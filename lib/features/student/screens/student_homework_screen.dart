@@ -24,8 +24,10 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final user = context.read<AuthNotifier>().user;
-      if (user?.classId != null) {
-        context.read<StudentHomeworkNotifier>().fetchHomework(user!.classId!);
+      if (user?.classIds != null) {
+        context.read<StudentHomeworkNotifier>().fetchHomework(
+          user!.classIds.first,
+        );
       }
     });
   }
@@ -38,10 +40,8 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> {
       return Scaffold(body: Center(child: Text(l10n.notLoggedIn)));
     }
 
-    if (currentUser.classId == null) {
-      return Scaffold(
-        body: Center(child: Text(l10n.classInfoNotAvailable)),
-      );
+    if (currentUser.classIds.isEmpty) {
+      return Scaffold(body: Center(child: Text(l10n.classInfoNotAvailable)));
     }
 
     final homeworkNotifier = context.watch<StudentHomeworkNotifier>();
@@ -64,9 +64,9 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> {
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: () async {
-                if (currentUser.classId != null) {
+                if (currentUser.classIds.isNotEmpty) {
                   await context.read<StudentHomeworkNotifier>().fetchHomework(
-                    currentUser.classId!,
+                    currentUser.classIds.first,
                   );
                 }
               },
@@ -254,7 +254,10 @@ class _HomeworkCard extends StatelessWidget {
                   const Spacer(),
                   Text(
                     AppLocalizations.of(context)!.viewDetailsOption,
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(width: 4),
                   const Icon(

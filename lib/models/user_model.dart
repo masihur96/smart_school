@@ -9,8 +9,8 @@ class User {
   final UserRole role;
   final String? avatar;
   final String? schoolId;
-  final String? classId;
-  final String? sectionId;
+  final List<String> classIds;
+  final List<String> sectionIds;
   final String? phone;
   final String? rollNumber;
   final String? designation;
@@ -29,8 +29,8 @@ class User {
     required this.role,
     this.avatar,
     this.schoolId,
-    this.classId,
-    this.sectionId,
+    this.classIds = const [],
+    this.sectionIds = const [],
     this.phone,
     this.rollNumber,
     this.designation,
@@ -56,8 +56,13 @@ class User {
           UserRole.student,
       avatar: json['avatar']?.toString() ?? "",
       schoolId: json['schoolId']?.toString(),
-      classId: json['classId']?.toString(),
-      sectionId: json['sectionId']?.toString(),
+      classIds: json['classIds'] != null
+          ? List<String>.from(json['classIds'])
+          : [],
+
+      sectionIds: json['sectionIds'] != null
+          ? List<String>.from(json['sectionIds'])
+          : [],
       phone: json['phone']?.toString(),
       rollNumber: json['rollNumber']?.toString(),
       designation: json['designation']?.toString(),
@@ -85,8 +90,9 @@ class User {
       'role': role.name,
       'avatar': avatar,
       'schoolId': schoolId,
-      'classId': classId,
-      'sectionId': sectionId,
+      'classIds': classIds,
+
+      'sectionIds': sectionIds,
       'phone': phone,
       'rollNumber': rollNumber,
       'designation': designation,
