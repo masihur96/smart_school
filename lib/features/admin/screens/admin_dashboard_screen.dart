@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -6,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
-import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
@@ -14,6 +12,7 @@ import '../../../core/services/geocoding_service.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/notification_icon_button.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../notifications/providers/notification_provider.dart';
 import '../models/admin_dashboard_model.dart';
 import '../providers/admin_dashboard_provider.dart';
 import 'admin_homework_management_screen.dart';
@@ -22,7 +21,6 @@ import 'notice_management_screen.dart';
 import 'student_attendance_management_screen.dart';
 import 'student_management_screen.dart';
 import 'teacher_attendance_management_screen.dart';
-import '../../notifications/providers/notification_provider.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -205,15 +203,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSubscriptionCard(authNotifier, l10n),
-                // _buildSectionTitle(l10n.schoolOverview),
-                // const SizedBox(height: 16),
-                // _buildStatsOverview(data),
-                // const SizedBox(height: 24),
-                // _buildSectionTitle(l10n.attendanceOverview,TextButton(onPressed: (){
-                //   Navigator.push(context, MaterialPageRoute(builder: (context) => const StudentAttendanceManagementScreen()));
-                // }, child: const Text("View All"))),
-                // const SizedBox(height: 16),
+                _buildSectionTitle(l10n.schoolOverview, SizedBox()),
+                const SizedBox(height: 16),
+                _buildStatsOverview(data),
+
                 _buildAttendanceCards(data),
                 const SizedBox(height: 24),
                 if (data.recentHomework.isNotEmpty) ...[
@@ -1310,115 +1303,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildSubscriptionCard(AuthNotifier auth, AppLocalizations l10n) {
-    final sub = auth.adminSubscription;
-    if (sub == null) return const SizedBox.shrink();
-
-    final isValid = auth.isSubscriptionValid;
-    final planName = sub.pricingPlan?.name ?? l10n.noPlan;
-    final expiryDate = DateTime.tryParse(sub.endDate);
-    final formattedDate = expiryDate != null
-        ? DateFormat('MMM dd, yyyy').format(expiryDate)
-        : l10n.unknown;
-
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => AdminPricingPlanScreen()),
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 24),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isValid
-                ? [Colors.purple.shade700, Colors.purple.shade400]
-                : [Colors.red.shade700, Colors.red.shade400],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: (isValid ? Colors.purple : Colors.red).withOpacity(0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundImage: (auth.user?.school?.avatar.isNotEmpty ?? false)
-                  ? CachedNetworkImageProvider(auth.user!.school!.avatar)
-                  : null,
-              child: (auth.user?.school?.avatar.isNotEmpty ?? false)
-                  ? null
-                  : const Icon(Icons.school),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    planName,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${sub.lastStudentCount} / ${sub.pricingPlan?.maxStudents ?? '∞'} ${l10n.studentsLabel}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    isValid
-                        ? l10n.validUntil(formattedDate)
-                        : l10n.expiredOn(formattedDate),
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (isValid)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  l10n.active,
-                  style: TextStyle(
-                    color: Colors.purple.shade700,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-          ],
-        ),
       ),
     );
   }
