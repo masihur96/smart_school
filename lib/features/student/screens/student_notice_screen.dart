@@ -35,7 +35,9 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
     }
 
     final notices = noticeNotifier.notices
-        .where((n) => n.classId == null || n.classId == currentUser.classId)
+        .where(
+          (n) => n.classId == null || n.classId == currentUser.classIds.first,
+        )
         .toList()
         .reversed
         .toList();
@@ -44,7 +46,7 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
       appBar: widget.isFromDrawer
           ? AppBar(
               title: Text(l10n.schoolNotices),
-              backgroundColor:  AppColors.primaryTeacher,
+              backgroundColor: AppColors.primaryTeacher,
               foregroundColor: Colors.white,
               elevation: 0,
               centerTitle: true,

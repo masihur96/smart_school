@@ -8,10 +8,10 @@ import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
 import 'package:smart_school/features/admin/screens/student_detail_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
+import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/student_model.dart';
 import 'package:smart_school/services/notification_service.dart';
 
-import '../../../models/school_models.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
@@ -167,7 +167,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                         items: [
                           DropdownMenuItem<String>(
                             value: null,
-                            child: Text(AppLocalizations.of(context)!.allClasses),
+                            child: Text(
+                              AppLocalizations.of(context)!.allClasses,
+                            ),
                           ),
                           ...classes.map(
                             (c) => DropdownMenuItem(
@@ -202,7 +204,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                         items: [
                           DropdownMenuItem<String>(
                             value: null,
-                            child: Text(AppLocalizations.of(context)!.allSections),
+                            child: Text(
+                              AppLocalizations.of(context)!.allSections,
+                            ),
                           ),
                           ...sections
                               .where((s) => s.classId == _selectedClassId)
@@ -241,15 +245,21 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                         items: [
                           DropdownMenuItem<bool?>(
                             value: null,
-                            child: Text(AppLocalizations.of(context)!.allStatus),
+                            child: Text(
+                              AppLocalizations.of(context)!.allStatus,
+                            ),
                           ),
                           DropdownMenuItem<bool?>(
                             value: true,
-                            child: Text(AppLocalizations.of(context)!.activeOnly),
+                            child: Text(
+                              AppLocalizations.of(context)!.activeOnly,
+                            ),
                           ),
                           DropdownMenuItem<bool?>(
                             value: false,
-                            child: Text(AppLocalizations.of(context)!.inactiveOnly),
+                            child: Text(
+                              AppLocalizations.of(context)!.inactiveOnly,
+                            ),
                           ),
                         ],
                         value: _selectedStatus,
@@ -289,7 +299,11 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
               child: studentsNotifier.isLoading && students.isEmpty
                   ? const Center(child: CircularProgressIndicator())
                   : students.isEmpty
-                  ? Center(child: Text(AppLocalizations.of(context)!.noStudentsFound))
+                  ? Center(
+                      child: Text(
+                        AppLocalizations.of(context)!.noStudentsFound,
+                      ),
+                    )
                   : ListView.builder(
                       controller: _scrollController,
                       itemCount:
@@ -310,27 +324,30 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                           child: Stack(
                             children: [
                               ListTile(
-
                                 contentPadding: const EdgeInsets.all(8),
                                 leading: Hero(
                                   tag: 'student-avatar-${student.userId}',
                                   child: CircleAvatar(
                                     radius: 25,
                                     backgroundColor: Colors.purple,
-                                    backgroundImage: student.user?.avatar?.isNotEmpty == true
+                                    backgroundImage:
+                                        student.user?.avatar?.isNotEmpty == true
                                         ? NetworkImage(student.user!.avatar!)
                                         : null,
-                                    child: student.user?.avatar?.isNotEmpty == true
+                                    child:
+                                        student.user?.avatar?.isNotEmpty == true
                                         ? null
                                         : Text(
-                                      student.user?.name.isNotEmpty == true
-                                          ? student.user!.name[0].toUpperCase()
-                                          : '?',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                                            student.user?.name.isNotEmpty ==
+                                                    true
+                                                ? student.user!.name[0]
+                                                      .toUpperCase()
+                                                : '?',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
                                   ),
                                 ),
                                 title: Text(
@@ -355,6 +372,17 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                           )
                                           .name,
                                     ),
+                                    // Text(
+                                    //   classes
+                                    //       .firstWhere(
+                                    //         (c) => c.id == student.classId,
+                                    //         orElse: () => ClassRoom(
+                                    //           id: '',
+                                    //           name: 'Unknown',
+                                    //         ),
+                                    //       )
+                                    //       .name,
+                                    // ),
                                   ],
                                 ),
 
@@ -387,8 +415,10 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                       context
                                           .read<StudentsNotifier>()
                                           .toggleStudentStatus(student.userId);
-                                     } else if (value == 'delete') {
-                                      final l10n = AppLocalizations.of(context)!;
+                                    } else if (value == 'delete') {
+                                      final l10n = AppLocalizations.of(
+                                        context,
+                                      )!;
                                       showDialog(
                                         context: context,
                                         builder: (ctx) => AlertDialog(
@@ -447,7 +477,8 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                         child: Row(
                                           children: [
                                             const Icon(
-                                              Icons.notifications_active_outlined,
+                                              Icons
+                                                  .notifications_active_outlined,
                                               color: Colors.purple,
                                             ),
                                             const SizedBox(width: 8),
@@ -561,7 +592,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
               builder: (context) => AlertDialog(
                 title: Text(AppLocalizations.of(context)!.limitReached),
                 content: Text(
-                  AppLocalizations.of(context)!.studentLimitReached(studentCount, maxStudents),
+                  AppLocalizations.of(
+                    context,
+                  )!.studentLimitReached(studentCount, maxStudents),
                 ),
                 actions: [
                   TextButton(
@@ -614,7 +647,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
         builder: (context, setState) {
           final l10n = AppLocalizations.of(context)!;
           return AlertDialog(
-            title: Text(l10n.notifyStudent(student.user?.name ?? l10n.students)),
+            title: Text(
+              l10n.notifyStudent(student.user?.name ?? l10n.students),
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -669,7 +704,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                             Navigator.pop(ctx);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(l10n.notificationSentSuccessfully),
+                                content: Text(
+                                  l10n.notificationSentSuccessfully,
+                                ),
                               ),
                             );
                           }

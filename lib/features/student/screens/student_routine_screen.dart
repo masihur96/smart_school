@@ -27,12 +27,14 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
 
   Future<void> _fetchData() async {
     final currentUser = context.read<AuthNotifier>().user;
-    if (currentUser == null || currentUser.classId == null) return;
+    if (currentUser == null || currentUser.classIds.isEmpty) return;
 
     if (mounted) {
-      context.read<StudentRoutineNotifier>().fetchRoutine(currentUser.classId!);
+      context.read<StudentRoutineNotifier>().fetchRoutine(
+        currentUser.classIds.first,
+      );
       context.read<StudentHomeworkNotifier>().fetchHomework(
-        currentUser.classId!,
+        currentUser.classIds.first,
       );
     }
   }
@@ -52,11 +54,9 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final classId = currentUser.classId;
-    if (classId == null) {
-      return Scaffold(
-        body: Center(child: Text(l10n.classInfoNotFound)),
-      );
+    final classId = currentUser.classIds.first;
+    if (classId.isEmpty) {
+      return Scaffold(body: Center(child: Text(l10n.classInfoNotFound)));
     }
 
     final entries = routineNotifier.routineEntries;
@@ -79,7 +79,7 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
             'Academic Schedule',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          backgroundColor:  AppColors.primaryTeacher,
+          backgroundColor: AppColors.primaryTeacher,
           foregroundColor: Colors.white,
           elevation: 0,
           bottom: PreferredSize(
@@ -97,7 +97,7 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
-                labelColor:  AppColors.primaryTeacher,
+                labelColor: AppColors.primaryTeacher,
                 unselectedLabelColor: Colors.white,
                 labelStyle: TextStyle(fontWeight: FontWeight.bold),
                 tabs: [
@@ -304,7 +304,7 @@ class _RoutineCard extends StatelessWidget {
             Container(
               width: 5,
               decoration: const BoxDecoration(
-                color:  AppColors.primaryTeacher,
+                color: AppColors.primaryTeacher,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(16),
                   bottomLeft: Radius.circular(16),

@@ -6,8 +6,8 @@ class UserEntity {
   final String email;
   final String role;
   final String? schoolId;
-  final String? classId;
-  final String? sectionId;
+  final List<String> classIds;
+  final List<String> sectionIds;
   final String? phone;
   final String? rollNumber;
   final String? designation;
@@ -25,8 +25,8 @@ class UserEntity {
     required this.email,
     required this.role,
     this.schoolId,
-    this.classId,
-    this.sectionId,
+    this.classIds = const [],
+    this.sectionIds = const [],
     this.phone,
     this.rollNumber,
     this.designation,

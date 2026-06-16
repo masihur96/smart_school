@@ -374,13 +374,17 @@ class NotificationService {
       }
 
       // Class specific topic
-      if (user.classId != null && user.classId!.isNotEmpty) {
-        await subscribeToTopic(user.classId ?? "");
+      if (user.classIds.isNotEmpty) {
+        for (var claId in user.classIds) {
+          await subscribeToTopic(claId);
+        }
       }
 
       // Section specific topic
-      if (user.sectionId != null && user.sectionId!.isNotEmpty) {
-        await subscribeToTopic(user.sectionId ?? "");
+      if (user.sectionIds.isNotEmpty) {
+        for (var secId in user.sectionIds) {
+          await subscribeToTopic(secId);
+        }
       }
 
       // Functional topics based on role
@@ -438,12 +442,18 @@ class NotificationService {
         await unsubscribeFromTopic(user.schoolId ?? "");
       }
 
-      if (user.classId != null && user.classId!.isNotEmpty) {
-        await unsubscribeFromTopic(user.classId ?? "");
+      // Class specific topic
+      if (user.classIds.isNotEmpty) {
+        for (var claId in user.classIds) {
+          await unsubscribeFromTopic(claId);
+        }
       }
 
-      if (user.sectionId != null && user.sectionId!.isNotEmpty) {
-        await unsubscribeFromTopic(user.sectionId ?? "");
+      // Section specific topic
+      if (user.sectionIds.isNotEmpty) {
+        for (var secId in user.sectionIds) {
+          await unsubscribeFromTopic(secId);
+        }
       }
 
       // Functional topics
@@ -492,11 +502,7 @@ class NotificationService {
       final response = await DataProvider().performRequest(
         'POST',
         APIPath.registerFcmToken,
-        data: {
-          "fcmToken": token,
-          "fcm_token": token,
-          "token": token,
-        },
+        data: {"fcmToken": token, "fcm_token": token, "token": token},
         header: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
@@ -532,10 +538,11 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         AndroidInitializationSettings('@mipmap/launcher_icon');
     const DarwinInitializationSettings initializationSettingsDarwin =
         DarwinInitializationSettings();
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsDarwin,
-    );
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+          android: initializationSettingsAndroid,
+          iOS: initializationSettingsDarwin,
+        );
 
     await localNotifications.initialize(settings: initializationSettings);
 

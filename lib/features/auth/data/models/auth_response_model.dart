@@ -6,8 +6,8 @@ class AuthResponseModel {
   final String email;
   final String role;
   final String? schoolId;
-  final String? classId;
-  final String? sectionId;
+  final List<String> classIds;
+  final List<String> sectionIds;
   final String? phone;
   final String? rollNumber;
   final String? designation;
@@ -25,8 +25,8 @@ class AuthResponseModel {
     required this.email,
     required this.role,
     this.schoolId,
-    this.classId,
-    this.sectionId,
+    this.classIds = const [],
+    this.sectionIds = const [],
     this.phone,
     this.rollNumber,
     this.designation,
@@ -46,8 +46,13 @@ class AuthResponseModel {
       email: json['email'] ?? "",
       role: json['role'] ?? "",
       schoolId: json['schoolId'],
-      classId: json['classId'],
-      sectionId: json['sectionId'],
+      classIds: json['classIds'] != null
+          ? List<String>.from(json['classIds'])
+          : [],
+
+      sectionIds: json['sectionIds'] != null
+          ? List<String>.from(json['sectionIds'])
+          : [],
       phone: json['phone'],
       rollNumber: json['rollNumber'],
       designation: json['designation'],
@@ -56,7 +61,9 @@ class AuthResponseModel {
       createdAt: json['createdAt']?.toString(),
       lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
       lon: json['lon'] != null ? double.tryParse(json['lon'].toString()) : null,
-      radius: json['radius'] != null ? double.tryParse(json['radius'].toString()) : null,
+      radius: json['radius'] != null
+          ? double.tryParse(json['radius'].toString())
+          : null,
       school: json['school'] != null ? School.fromJson(json['school']) : null,
     );
   }
@@ -68,8 +75,9 @@ class AuthResponseModel {
       'email': email,
       'role': role,
       'schoolId': schoolId,
-      'classId': classId,
-      'sectionId': sectionId,
+      'classIds': classIds,
+      'sectionIds': sectionIds,
+
       'phone': phone,
       'rollNumber': rollNumber,
       'designation': designation,

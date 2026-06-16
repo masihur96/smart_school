@@ -78,8 +78,8 @@ class AuthNotifier extends ChangeNotifier {
             orElse: () => UserRole.student,
           ),
           schoolId: profile.schoolId,
-          classId: profile.classId,
-          sectionId: profile.sectionId,
+          classIds: profile.classIds,
+          sectionIds: profile.sectionIds,
           phone: profile.phone,
           rollNumber: profile.rollNumber,
           designation: profile.designation,
@@ -127,7 +127,7 @@ class AuthNotifier extends ChangeNotifier {
       // Fetch full profile after login
       final profile = await getProfileUseCase();
 
-      print("profile.classId:: ${profile.classId}");
+      print("profile.classId:: ${profile.classIds}");
 
       _user = User(
         id: profile.id,
@@ -138,8 +138,8 @@ class AuthNotifier extends ChangeNotifier {
           orElse: () => UserRole.student,
         ),
         schoolId: profile.schoolId,
-        classId: profile.classId,
-        sectionId: profile.sectionId,
+        classIds: profile.classIds,
+        sectionIds: profile.sectionIds,
         phone: profile.phone,
         rollNumber: profile.rollNumber,
         designation: profile.designation,
@@ -379,9 +379,7 @@ class AuthNotifier extends ChangeNotifier {
       final response = await DataProvider().performRequest(
         'PUT',
         '${APIPath.register}/${_user!.id}',
-        header: {
-          'Authorization': 'Bearer $token',
-        },
+        header: {'Authorization': 'Bearer $token'},
         data: requestData,
       );
 
@@ -431,7 +429,8 @@ class AuthNotifier extends ChangeNotifier {
         data: formData,
       );
 
-      if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
         final url = response.data['data']['url'];
         if (url != null) {
           log('Image uploaded successfully: $url');
