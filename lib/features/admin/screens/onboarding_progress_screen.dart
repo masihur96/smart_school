@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/onboarding_provider.dart';
 import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
-import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 
 class OnboardingProgressScreen extends StatefulWidget {
@@ -26,26 +25,36 @@ class _OnboardingProgressScreenState extends State<OnboardingProgressScreen> {
     });
   }
 
+  bool _freePlanAssigning = false;
+
   @override
   Widget build(BuildContext context) {
     final onboarding = context.watch<OnboardingNotifier>();
     final auth = context.read<AuthNotifier>();
 
     // Use post-frame callback for navigation to avoid build issues
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (onboarding.isCompleted && !onboarding.isLoading) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (onboarding.isCompleted && !onboarding.isLoading && !_freePlanAssigning) {
         if (auth.isSubscriptionValid) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
-            (route) => false,
-          );
+          // Already has a valid subscription — go to dashboard
+          if (mounted) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
+              (route) => false,
+            );
+          }
         } else {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => const AdminPricingPlanScreen()),
-            (route) => false,
-          );
+          // Auto-assign free plan then navigate to dashboard
+          _freePlanAssigning = true;
+          await auth.autoAssignFreePlan();
+          if (mounted) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
+              (route) => false,
+            );
+          }
         }
       }
     });

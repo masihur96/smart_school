@@ -310,6 +310,59 @@ class AuthNotifier extends ChangeNotifier {
     }
   }
 
+  /// Fetches all available pricing plans, finds the first free plan, and
+  /// auto-assigns it to the current school. Returns true on success.
+  Future<bool> autoAssignFreePlan() async {
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      // Fetch all plans
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.pricingPlans,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response == null || response.statusCode != 200) {
+        log('Failed to fetch pricing plans: ${response?.statusCode}');
+        return false;
+      }
+
+      final dynamic rawData = response.data;
+      final List dataList = rawData is List
+          ? rawData
+          : (rawData is Map ? (rawData['data'] ?? []) : []);
+
+      // Find the free plan
+      final freePlanJson = dataList.firstWhere(
+        (json) {
+          final price = json['pricePerMonth']?.toString() ?? '0';
+          final name = (json['name'] ?? '').toString().toLowerCase();
+          return price == '0' || name.contains('free');
+        },
+        orElse: () => null,
+      );
+
+      if (freePlanJson == null) {
+        log('No free pricing plan found');
+        return false;
+      }
+
+      final freePlanId = freePlanJson['id']?.toString();
+      if (freePlanId == null) {
+        log('Free plan has no ID');
+        return false;
+      }
+
+      log('Auto-assigning free plan: $freePlanId');
+      return await assignPricingPlan(freePlanId, true);
+    } catch (e) {
+      log('Exception in autoAssignFreePlan: $e');
+      return false;
+    }
+  }
+
   String formatIso(DateTime date) {
     final iso = date.toUtc().toIso8601String();
     return iso.contains('.') ? iso.split('.').first + '.000Z' : iso + '.000Z';
