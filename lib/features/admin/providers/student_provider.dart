@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-
 import 'package:flutter/material.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
 
@@ -210,9 +209,6 @@ class StudentsNotifier extends ChangeNotifier {
     required String role,
     required String schoolId,
     required String phone,
-    required String classId,
-    required String sectionId,
-    required String rollNumber,
     required String designation,
     File? imageFile,
   }) async {
@@ -226,9 +222,6 @@ class StudentsNotifier extends ChangeNotifier {
       "role": role,
       "schoolId": schoolId,
       "phone": phone,
-      "classId": classId,
-      "sectionId": sectionId,
-      "rollNumber": rollNumber,
       "designation": designation,
     };
 
@@ -251,7 +244,8 @@ class StudentsNotifier extends ChangeNotifier {
       );
 
       if (uploadResponse != null &&
-          (uploadResponse.statusCode == 200 || uploadResponse.statusCode == 201)) {
+          (uploadResponse.statusCode == 200 ||
+              uploadResponse.statusCode == 201)) {
         final url = uploadResponse.data['data']['url'];
         if (url != null) {
           dataMap['image'] = url;
@@ -291,9 +285,7 @@ class StudentsNotifier extends ChangeNotifier {
     required String email,
     String? password, // optional for update
     required String phone,
-    required String classId,
-    required String sectionId,
-    required String rollNumber,
+
     required String designation,
     File? imageFile,
   }) async {
@@ -304,9 +296,6 @@ class StudentsNotifier extends ChangeNotifier {
       "name": name,
       "email": email,
       "phone": phone,
-      "classId": classId,
-      "sectionId": sectionId,
-      "rollNumber": rollNumber,
       "designation": designation,
     };
     if (password != null && password.isNotEmpty) {
@@ -332,7 +321,8 @@ class StudentsNotifier extends ChangeNotifier {
       );
 
       if (uploadResponse != null &&
-          (uploadResponse.statusCode == 200 || uploadResponse.statusCode == 201)) {
+          (uploadResponse.statusCode == 200 ||
+              uploadResponse.statusCode == 201)) {
         final url = uploadResponse.data['data']['url'];
         if (url != null) {
           dataMap['image'] = url;
