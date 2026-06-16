@@ -361,28 +361,38 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                   children: [
                                     const SizedBox(height: 4),
                                     Text('Roll: ${student.rollId}'),
-                                    Text(
-                                      classes
-                                          .firstWhere(
-                                            (c) => c.id == student.classId,
-                                            orElse: () => ClassRoom(
-                                              id: '',
-                                              name: 'Unknown',
-                                            ),
-                                          )
-                                          .name,
-                                    ),
-                                    // Text(
-                                    //   classes
-                                    //       .firstWhere(
-                                    //         (c) => c.id == student.classId,
-                                    //         orElse: () => ClassRoom(
-                                    //           id: '',
-                                    //           name: 'Unknown',
-                                    //         ),
-                                    //       )
-                                    //       .name,
-                                    // ),
+                                    if (student.className != null)
+                                      Text(
+                                        student.className!,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                        ),
+                                      )
+                                    else
+                                      Text(
+                                        classes
+                                            .firstWhere(
+                                              (c) => c.id == student.classId,
+                                              orElse: () => ClassRoom(
+                                                id: '',
+                                                name: 'Unknown',
+                                              ),
+                                            )
+                                            .name,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    if (student.sectionName != null)
+                                      Text(
+                                        'Section: ${student.sectionName}',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
                                   ],
                                 ),
 

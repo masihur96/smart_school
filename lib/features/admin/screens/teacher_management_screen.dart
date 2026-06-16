@@ -299,12 +299,49 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                                       children: [
                                         Icon(Icons.email_outlined, size: 14),
                                         const SizedBox(width: 4),
-                                        Text(
-                                          user?.email ?? '',
-                                          style: TextStyle(fontSize: 12),
+                                        Expanded(
+                                          child: Text(
+                                            user?.email ?? '',
+                                            style: TextStyle(fontSize: 12),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
                                       ],
                                     ),
+                                    if (teacher.embeddedClasses.isNotEmpty) ...
+                                      [
+                                        const SizedBox(height: 2),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.class_outlined, size: 14, color: Colors.purple.shade300),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                teacher.embeddedClasses.map((c) => c.name).join(', '),
+                                                style: TextStyle(fontSize: 12, color: Colors.purple.shade400),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    if (teacher.embeddedSections.isNotEmpty) ...
+                                      [
+                                        const SizedBox(height: 2),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.groups_outlined, size: 14, color: Colors.teal.shade300),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                teacher.embeddedSections.map((s) => s.name).join(', '),
+                                                style: TextStyle(fontSize: 12, color: Colors.teal.shade400),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                   ],
                                 ),
                               ),
@@ -509,21 +546,29 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
 
   void _showTeacherDetails(BuildContext context, Teacher teacher) {
     final user = teacher.user;
-    final classes = context.read<ClassSetupNotifier>().classes;
-    final sections = context.read<SectionSetupNotifier>().sections;
 
-    final className = classes
-        .firstWhere(
-          (c) => c.id == teacher.classId,
-          orElse: () => ClassRoom(id: '', name: 'N/A', schoolId: ''),
-        )
-        .name;
-    final sectionName = sections
-        .firstWhere(
-          (s) => s.id == teacher.sectionId,
-          orElse: () => Section(id: '', name: 'N/A', classId: ''),
-        )
-        .name;
+    // Use embedded classes/sections from the API response first;
+    // fall back to provider lookups if not available.
+    final localClasses = context.read<ClassSetupNotifier>().classes;
+    final localSections = context.read<SectionSetupNotifier>().sections;
+
+    final classNames = teacher.embeddedClasses.isNotEmpty
+        ? teacher.embeddedClasses.map((c) => c.name).join(', ')
+        : localClasses
+              .firstWhere(
+                (c) => c.id == teacher.classId,
+                orElse: () => ClassRoom(id: '', name: 'N/A', schoolId: ''),
+              )
+              .name;
+
+    final sectionNames = teacher.embeddedSections.isNotEmpty
+        ? teacher.embeddedSections.map((s) => s.name).join(', ')
+        : localSections
+              .firstWhere(
+                (s) => s.id == teacher.sectionId,
+                orElse: () => Section(id: '', name: 'N/A', classId: ''),
+              )
+              .name;
 
     showDialog(
       context: context,
@@ -608,12 +653,12 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
               _buildDetailItem(
                 Icons.class_outlined,
                 'Assigned Class',
-                className,
+                classNames,
               ),
               _buildDetailItem(
                 Icons.groups_outlined,
                 'Assigned Section',
-                sectionName,
+                sectionNames,
               ),
               const SizedBox(height: 24),
               SizedBox(

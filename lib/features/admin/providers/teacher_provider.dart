@@ -142,6 +142,8 @@ class TeachersNotifier extends ChangeNotifier {
             isActive: newStatus,
             assignedSubjects: teacher.assignedSubjects,
             user: teacher.user,
+            embeddedClasses: teacher.embeddedClasses,
+            embeddedSections: teacher.embeddedSections,
           );
           _dbService.teachers[index] = updatedTeacher;
           _teachers = [..._dbService.teachers];

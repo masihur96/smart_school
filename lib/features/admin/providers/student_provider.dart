@@ -404,6 +404,8 @@ class StudentsNotifier extends ChangeNotifier {
             guardianContact: student.guardianContact,
             isActive: newStatus,
             user: student.user,
+            embeddedClasses: student.embeddedClasses,
+            embeddedSections: student.embeddedSections,
           );
           _dbService.students[index] = updatedStudent;
           _students = [..._dbService.students];
