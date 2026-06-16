@@ -39,11 +39,6 @@ class OnboardingNotifier extends ChangeNotifier {
     'Class 3',
     'Class 4',
     'Class 5',
-    'Class 6',
-    'Class 7',
-    'Class 8',
-    'Class 9',
-    'Class 10',
   ];
 
   final List<String> defaultSubjects = [
