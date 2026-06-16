@@ -5,6 +5,7 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import '../../../models/school_models.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
+import 'class_students_screen.dart';
 
 // ─── Colour palette (shared) ─────────────────────────────────────────────────
 const _kPrimary = Color(0xFF6C3CE1);
@@ -244,7 +245,13 @@ class _ClassCard extends StatelessWidget {
                       icon: Icons.visibility_outlined,
                       label: 'View',
                       color: _kPrimary,
-                      onTap: () => _showViewClassDialog(context, classRoom),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              ClassStudentsScreen(classRoom: classRoom),
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     // Edit
