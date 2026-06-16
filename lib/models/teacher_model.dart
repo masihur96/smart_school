@@ -1,4 +1,6 @@
+import 'package:smart_school/models/school_models.dart';
 import 'user_model.dart';
+
 
 class Teacher {
   final String userId;
@@ -13,6 +15,8 @@ class Teacher {
   final double? lon;
   final double? radius;
   final DateTime? deletedAt;
+  final List<ClassRoom> embeddedClasses; // Embedded from API response
+  final List<Section> embeddedSections; // Embedded from API response
 
   Teacher({
     required this.userId, 
@@ -26,16 +30,36 @@ class Teacher {
     this.lon,
     this.radius,
     this.deletedAt,
+    this.embeddedClasses = const [],
+    this.embeddedSections = const [],
   });
 
   bool get isDeleted => deletedAt != null;
 
   factory Teacher.fromJson(Map<String, dynamic> json) {
+    // Parse embedded classes array (present in flat API response)
+    final List<ClassRoom> classes = (json['classes'] as List<dynamic>? ?? [])
+        .map((c) => ClassRoom.fromJson(c as Map<String, dynamic>))
+        .toList();
+
+    // Parse embedded sections array (present in flat API response)
+    final List<Section> sections = (json['sections'] as List<dynamic>? ?? [])
+        .map((s) => Section.fromJson(s as Map<String, dynamic>))
+        .toList();
+
+    // Derive classId / sectionId from arrays when not set as a scalar
+    final classIds = json['classIds'] as List<dynamic>?;
+    final sectionIds = json['sectionIds'] as List<dynamic>?;
+
     return Teacher(
       userId: json['userId'] ?? json['id'] ?? json['_id'] ?? '',
       designation: json['designation'] ?? '',
-      classId: json['classId'],
-      sectionId: json['sectionId'],
+      classId: json['classId'] ??
+          (classIds?.isNotEmpty == true ? classIds!.first.toString() : null) ??
+          (classes.isNotEmpty ? classes.first.id : null),
+      sectionId: json['sectionId'] ??
+          (sectionIds?.isNotEmpty == true ? sectionIds!.first.toString() : null) ??
+          (sections.isNotEmpty ? sections.first.id : null),
       isActive: json['isActive'] ?? true,
       assignedSubjects: json['assignedSubjects'] != null 
           ? (json['assignedSubjects'] as List).map((e) => AssignedSubject.fromJson(e)).toList()
@@ -45,6 +69,8 @@ class Teacher {
       lon: json['lon'] != null ? double.tryParse(json['lon'].toString()) : null,
       radius: json['radius'] != null ? double.tryParse(json['radius'].toString()) : null,
       deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt'].toString()) : null,
+      embeddedClasses: classes,
+      embeddedSections: sections,
     );
   }
 
