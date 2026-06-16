@@ -31,8 +31,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
   final _latController = TextEditingController();
   final _lonController = TextEditingController();
   final _radiusController = TextEditingController();
-  String? _selectedClassId;
-  String? _selectedSectionId;
+
   final List<AssignedSubject> _assignedSubjects = [];
   bool _obscurePassword = true;
   bool _isLoading = false;
@@ -50,8 +49,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
       _emailController.text = teacher.user?.email ?? '';
       _phoneController.text = teacher.user?.phone ?? '';
       _designationController.text = teacher.designation;
-      _selectedClassId = teacher.classId;
-      _selectedSectionId = teacher.sectionId;
+
       _latController.text = teacher.lat?.toString() ?? '';
       _lonController.text = teacher.lon?.toString() ?? '';
       _radiusController.text = teacher.radius?.toString() ?? '';
@@ -139,14 +137,22 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
           _lonController.text = position.longitude.toString();
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.locationFetchedSuccessfully)),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.locationFetchedSuccessfully,
+            ),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('${AppLocalizations.of(context)!.errorGettingLocation}: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${AppLocalizations.of(context)!.errorGettingLocation}: $e',
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -162,12 +168,6 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
       setState(() {
         _isLoading = true;
       });
-      if (_selectedClassId == null || _selectedSectionId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.pleaseSelectClassAndSection)),
-        );
-        return;
-      }
 
       final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
       final teacherNotifier = context.read<TeachersNotifier>();
@@ -179,8 +179,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             name: _nameController.text,
             email: _emailController.text,
             phone: _phoneController.text,
-            classId: _selectedClassId!,
-            sectionId: _selectedSectionId!,
+
             designation: _designationController.text,
             lat: double.tryParse(_latController.text),
             lon: double.tryParse(_lonController.text),
@@ -194,9 +193,11 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             password: _passwordController.text,
             schoolId: schoolId,
             phone: _phoneController.text,
-            classId: _selectedClassId!,
-            sectionId: _selectedSectionId!,
+
             designation: _designationController.text,
+            lat: double.tryParse(_latController.text),
+            lon: double.tryParse(_lonController.text),
+            radius: double.tryParse(_radiusController.text),
             imageFile: _imageFile,
           );
         }
@@ -207,7 +208,9 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
               content: Text(
                 isEditing
                     ? AppLocalizations.of(context)!.teacherUpdatedSuccessfully
-                    : AppLocalizations.of(context)!.teacherRegisteredSuccessfully,
+                    : AppLocalizations.of(
+                        context,
+                      )!.teacherRegisteredSuccessfully,
               ),
             ),
           );
@@ -242,7 +245,9 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          isEditing ? AppLocalizations.of(context)!.editTeacher : AppLocalizations.of(context)!.registerTeacher,
+          isEditing
+              ? AppLocalizations.of(context)!.editTeacher
+              : AppLocalizations.of(context)!.registerTeacher,
           style: TextStyle(color: AppColors.white),
         ),
         backgroundColor: Colors.purple,
@@ -265,10 +270,11 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                       backgroundImage: _imageFile != null
                           ? FileImage(_imageFile!)
                           : (_existingImageUrl != null &&
-                                    _existingImageUrl!.isNotEmpty)
-                              ? NetworkImage(_existingImageUrl!)
-                              : null as ImageProvider?,
-                      child: (_imageFile == null &&
+                                _existingImageUrl!.isNotEmpty)
+                          ? NetworkImage(_existingImageUrl!)
+                          : null as ImageProvider?,
+                      child:
+                          (_imageFile == null &&
                               (_existingImageUrl == null ||
                                   _existingImageUrl!.isEmpty))
                           ? const Icon(
@@ -430,160 +436,95 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                           val!.isEmpty ? 'Please enter designation' : null,
                     ),
                     const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      decoration: InputDecoration(
-                        labelText: 'Assigned Class',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        prefixIcon: const Icon(Icons.class_outlined),
-                      ),
-                      items: classes
-                          .map(
-                            (c) => DropdownMenuItem(
-                              value: c.id,
-                              child: Text(c.name),
-                            ),
-                          )
-                          .toList(),
-                      value: classes.any((c) => c.id == _selectedClassId)
-                          ? _selectedClassId
-                          : null,
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedClassId = val;
-                          _selectedSectionId = null;
-                        });
-                      },
-                      validator: (val) =>
-                          val == null ? 'Please select class' : null,
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      decoration: InputDecoration(
-                        labelText: 'Assigned Section',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        prefixIcon: const Icon(Icons.groups_outlined),
-                      ),
-                      items: sections
-                          .where((s) => s.classId == _selectedClassId)
-                          .map(
-                            (s) => DropdownMenuItem(
-                              value: s.id,
-                              child: Text(s.name),
-                            ),
-                          )
-                          .toList(),
-                      value:
-                          sections.any(
-                            (s) =>
-                                s.id == _selectedSectionId &&
-                                s.classId == _selectedClassId,
-                          )
-                          ? _selectedSectionId
-                          : null,
-                      onChanged: (val) =>
-                          setState(() => _selectedSectionId = val),
-                      validator: (val) =>
-                          val == null ? 'Please select section' : null,
-                    ),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 24),
 
-            // Location Settings Section
-            isEditing
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildSectionHeader(
-                        context,
-                        'Arrival Settings',
-                        Icons.location_on_outlined,
-                      ),
-                      _isFetchingLocation
-                          ? const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.purple,
-                                ),
-                              ),
-                            )
-                          : IconButton(
-                              onPressed: _getCurrentLocation,
-                              icon: const Icon(Icons.location_on_outlined),
-                            ),
-                    ],
-                  )
-                : SizedBox(),
-            isEditing
-                ? Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _latController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    labelText: 'Latitude',
-                                    prefixIcon: const Icon(Icons.map_outlined),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _lonController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    labelText: 'Longitude',
-                                    prefixIcon: const Icon(
-                                      Icons.explore_outlined,
-                                    ),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildSectionHeader(
+                  context,
+                  'Arrival Settings',
+                  Icons.location_on_outlined,
+                ),
+                _isFetchingLocation
+                    ? const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.purple,
                           ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _radiusController,
+                        ),
+                      )
+                    : IconButton(
+                        onPressed: _getCurrentLocation,
+                        icon: const Icon(Icons.location_on_outlined),
+                      ),
+              ],
+            ),
+
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _latController,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
-                              labelText: 'Allowed Radius (meters)',
-                              prefixIcon: const Icon(Icons.radar_outlined),
+                              labelText: 'Latitude',
+                              prefixIcon: const Icon(Icons.map_outlined),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              helperText: 'Radius in meters for arrival check',
                             ),
                           ),
-                        ],
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _lonController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Longitude',
+                              prefixIcon: const Icon(Icons.explore_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _radiusController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Allowed Radius (meters)',
+                        prefixIcon: const Icon(Icons.radar_outlined),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        helperText: 'Radius in meters for arrival check',
                       ),
                     ),
-                  )
-                : SizedBox(),
+                  ],
+                ),
+              ),
+            ),
 
             const SizedBox(height: 32),
             SizedBox(
@@ -600,7 +541,9 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        isEditing ? AppLocalizations.of(context)!.updateTeacher : AppLocalizations.of(context)!.registerTeacher,
+                        isEditing
+                            ? AppLocalizations.of(context)!.updateTeacher
+                            : AppLocalizations.of(context)!.registerTeacher,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,

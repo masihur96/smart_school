@@ -1,13 +1,15 @@
 import 'dart:developer';
 import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_school/models/user_model.dart';
-import '../../../models/teacher_model.dart';
-import '../../../services/database_service.dart';
-import '../../../core/utils/storage_service.dart';
+
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
+import '../../../core/utils/storage_service.dart';
+import '../../../models/teacher_model.dart';
+import '../../../services/database_service.dart';
 
 class TeachersNotifier extends ChangeNotifier {
   final DatabaseService _dbService;
@@ -29,10 +31,10 @@ class TeachersNotifier extends ChangeNotifier {
   int get totalCount => _totalCount;
 
   Future<void> fetchTeachers({
-    String? classId, 
-    String? sectionId, 
+    String? classId,
+    String? sectionId,
     bool? isActive,
-    bool loadMore = false
+    bool loadMore = false,
   }) async {
     if (loadMore) {
       if (_isLoadingMore || !_hasMore) return;
@@ -55,7 +57,8 @@ class TeachersNotifier extends ChangeNotifier {
         'limit': '10',
       };
       if (classId != null && classId.isNotEmpty) query['classId'] = classId;
-      if (sectionId != null && sectionId.isNotEmpty) query['sectionId'] = sectionId;
+      if (sectionId != null && sectionId.isNotEmpty)
+        query['sectionId'] = sectionId;
       if (isActive != null) query['isActive'] = isActive.toString();
 
       final response = await DataProvider().performRequest(
@@ -70,14 +73,15 @@ class TeachersNotifier extends ChangeNotifier {
         final List<dynamic> data = rawData is List
             ? rawData
             : (rawData is Map ? (rawData['data'] ?? []) : []);
-        
-        final responseTotal = rawData is Map && rawData['total'] != null 
-            ? int.tryParse(rawData['total'].toString()) ?? 0 
+
+        final responseTotal = rawData is Map && rawData['total'] != null
+            ? int.tryParse(rawData['total'].toString()) ?? 0
             : data.length;
-        
+
         _totalCount = responseTotal;
 
-        if (data.length < 10 || (loadMore && _teachers.length + data.length >= responseTotal)) {
+        if (data.length < 10 ||
+            (loadMore && _teachers.length + data.length >= responseTotal)) {
           _hasMore = false;
         }
 
@@ -87,12 +91,12 @@ class TeachersNotifier extends ChangeNotifier {
 
         for (var item in data) {
           try {
-             final teacher = Teacher.fromJson(item);
-             if (!teacher.isDeleted) {
-               _dbService.teachers.add(teacher);
-             }
-          } catch(e) {
-             log("Error parsing teacher: $e");
+            final teacher = Teacher.fromJson(item);
+            if (!teacher.isDeleted) {
+              _dbService.teachers.add(teacher);
+            }
+          } catch (e) {
+            log("Error parsing teacher: $e");
           }
         }
         _teachers = [..._dbService.teachers];
@@ -173,7 +177,8 @@ class TeachersNotifier extends ChangeNotifier {
         header: {'Authorization': 'Bearer $token'},
       );
 
-      if (response != null && (response.statusCode == 200 || response.statusCode == 204)) {
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 204)) {
         _dbService.teachers.removeWhere((t) => t.userId == userId);
         _teachers = [..._dbService.teachers];
       } else {
@@ -193,8 +198,7 @@ class TeachersNotifier extends ChangeNotifier {
     required String password,
     required String schoolId,
     required String phone,
-    required String classId,
-    required String sectionId,
+
     required String designation,
     double? lat,
     double? lon,
@@ -215,8 +219,6 @@ class TeachersNotifier extends ChangeNotifier {
         "role": "teacher",
         "schoolId": schoolId,
         "phone": phone,
-        "classId": classId,
-        "sectionId": sectionId,
         "designation": designation,
         "isActive": true,
         if (lat != null) "lat": lat,
@@ -243,7 +245,8 @@ class TeachersNotifier extends ChangeNotifier {
         );
 
         if (uploadResponse != null &&
-            (uploadResponse.statusCode == 200 || uploadResponse.statusCode == 201)) {
+            (uploadResponse.statusCode == 200 ||
+                uploadResponse.statusCode == 201)) {
           final url = uploadResponse.data['data']['url'];
           if (url != null) {
             dataMap['image'] = url;
@@ -259,7 +262,8 @@ class TeachersNotifier extends ChangeNotifier {
         header: {'Authorization': 'Bearer $token'},
       );
 
-      if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
         log('Successfully created teacher');
       } else {
         log('Error creating teacher: ${response?.data}');
@@ -290,13 +294,12 @@ class TeachersNotifier extends ChangeNotifier {
     _teachers = [..._dbService.teachers];
     notifyListeners();
   }
+
   Future<void> updateTeacherOnAPI({
     required String userId,
     required String name,
     required String email,
     required String phone,
-    required String classId,
-    required String sectionId,
     required String designation,
     double? lat,
     double? lon,
@@ -314,8 +317,6 @@ class TeachersNotifier extends ChangeNotifier {
         "name": name,
         "email": email,
         "phone": phone,
-        "classId": classId,
-        "sectionId": sectionId,
         "designation": designation,
         if (lat != null) "lat": lat,
         if (lon != null) "lon": lon,
@@ -341,7 +342,8 @@ class TeachersNotifier extends ChangeNotifier {
         );
 
         if (uploadResponse != null &&
-            (uploadResponse.statusCode == 200 || uploadResponse.statusCode == 201)) {
+            (uploadResponse.statusCode == 200 ||
+                uploadResponse.statusCode == 201)) {
           final url = uploadResponse.data['data']['url'];
           if (url != null) {
             dataMap['image'] = url;
@@ -369,8 +371,6 @@ class TeachersNotifier extends ChangeNotifier {
           final updatedTeacher = Teacher(
             userId: userId,
             designation: designation,
-            classId: classId,
-            sectionId: sectionId,
             isActive: oldTeacher.isActive,
             assignedSubjects: oldTeacher.assignedSubjects,
             lat: lat,
