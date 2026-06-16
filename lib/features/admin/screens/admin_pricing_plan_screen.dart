@@ -89,7 +89,7 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
                     plan: plan,
                     currentCount: subscription?.lastStudentCount ?? 0,
                     isActive: subscription?.pricingPlan?.id == plan.id,
-                    isAlreadyUsedFreePlan: false,
+                    isAlreadyUsedFreePlan: isPlanFree ? true : false,
                   );
                 }, childCount: pricingNotifier.plans.length),
               ),
@@ -438,7 +438,9 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
       builder: (context) {
         final dialogL10n = AppLocalizations.of(context)!;
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           contentPadding: const EdgeInsets.all(0),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -466,7 +468,10 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                   children: [
                     Text(
                       dialogL10n.perfectChoice,
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Text(
