@@ -6,6 +6,7 @@ import '../../../models/school_models.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
 import 'class_students_screen.dart';
+import 'section_students_screen.dart';
 
 // ─── Colour palette (shared) ─────────────────────────────────────────────────
 const _kPrimary = Color(0xFF6C3CE1);
@@ -377,12 +378,11 @@ class _SectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final classes = context.watch<ClassSetupNotifier>().classes;
-    final className = classes
-        .firstWhere(
-          (c) => c.id == section.classId,
-          orElse: () => ClassRoom(id: '', name: 'Unknown'),
-        )
-        .name;
+    final classObj = classes.firstWhere(
+      (c) => c.id == section.classId,
+      orElse: () => ClassRoom(id: '', name: 'Unknown'),
+    );
+    final className = classObj.name;
 
     return Card(
       child: Column(
@@ -452,8 +452,21 @@ class _SectionCard extends StatelessWidget {
                       icon: Icons.visibility_outlined,
                       label: 'View',
                       color: const Color(0xFF0EA5E9),
-                      onTap: () =>
-                          _showViewSectionDialog(context, section, className),
+                      onTap: () {
+                        if (classObj.id.isNotEmpty) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => SectionStudentsScreen(
+                                classRoom: classObj,
+                                section: section,
+                              ),
+                            ),
+                          );
+                        } else {
+                          _showViewSectionDialog(context, section, className);
+                        }
+                      },
                     ),
                     const SizedBox(width: 8),
                     _ActionChip(
