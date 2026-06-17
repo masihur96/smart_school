@@ -152,7 +152,7 @@ class _ClassTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final notifier = context.watch<ClassSetupNotifier>();
     final classes = notifier.classes;
-
+    final user = context.read<AuthNotifier>().user;
     return Scaffold(
       body: notifier.isLoading
           ? const _LoadingView()
@@ -161,7 +161,13 @@ class _ClassTab extends StatelessWidget {
           : ListView.builder(
               // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               itemCount: classes.length,
-              itemBuilder: (ctx, i) => _ClassCard(classRoom: classes[i]),
+              itemBuilder: (ctx, i) {
+                if (user?.schoolId == classes[i].schoolId) {
+                  return _ClassCard(classRoom: classes[i]);
+                } else {
+                  return SizedBox();
+                }
+              },
             ),
       floatingActionButton: _AddFab(
         gradientColors: _kClassGrad,
@@ -314,7 +320,9 @@ class _SectionTab extends StatelessWidget {
           : ListView.builder(
               // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               itemCount: sections.length,
-              itemBuilder: (ctx, i) => _SectionCard(section: sections[i]),
+              itemBuilder: (ctx, i) {
+                return _SectionCard(section: sections[i]);
+              },
             ),
       floatingActionButton: _AddFab(
         gradientColors: _kSectionGrad,
@@ -451,7 +459,7 @@ class _SubjectTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final notifier = context.watch<SubjectSetupNotifier>();
     final subjects = notifier.subjects;
-
+    final user = context.read<AuthNotifier>().user;
     return Scaffold(
       body: notifier.isLoading
           ? const _LoadingView()
@@ -460,7 +468,13 @@ class _SubjectTab extends StatelessWidget {
           : ListView.builder(
               // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               itemCount: subjects.length,
-              itemBuilder: (ctx, i) => _SubjectCard(subject: subjects[i]),
+              itemBuilder: (ctx, i) {
+                if (user?.schoolId == subjects[i].schoolId) {
+                  return _SubjectCard(subject: subjects[i]);
+                } else {
+                  return SizedBox();
+                }
+              },
             ),
       floatingActionButton: _AddFab(
         gradientColors: _kSubjectGrad,
