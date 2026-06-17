@@ -9,6 +9,7 @@ import 'package:smart_school/core/utils/storage_service.dart';
 import '../../../configs/network/data_provider.dart';
 import '../../../models/school_models.dart';
 import '../../../models/student_model.dart';
+import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
 
 // ─── Colour palette ───────────────────────────────────────────────────────────
@@ -608,6 +609,7 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
   bool _isLoading = true;
   bool _isAssigning = false;
   String _searchQuery = '';
+  String? _selectedFilterClassId;
 
   // Multi-select
   bool _multiSelectMode = false;
@@ -669,8 +671,18 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
   }
 
   List<Student> get _filtered {
-    if (_searchQuery.isEmpty) return _unassigned;
-    return _unassigned.where((s) {
+    List<Student> list = _unassigned;
+    
+    if (_selectedFilterClassId != null) {
+      if (_selectedFilterClassId!.isEmpty) {
+        list = list.where((s) => s.classId.isEmpty).toList();
+      } else {
+        list = list.where((s) => s.classId == _selectedFilterClassId).toList();
+      }
+    }
+
+    if (_searchQuery.isEmpty) return list;
+    return list.where((s) {
       final name = (s.user?.name ?? '').toLowerCase();
       final roll = s.rollId.toLowerCase();
       final q = _searchQuery.toLowerCase();
@@ -838,29 +850,83 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
 
           const Divider(height: 1, color: Color(0xFFEDE9F8)),
 
-          // ── Search ────────────────────────────────────────────────────────
+          // ── Search & Filter ────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFF4F2FB),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFEDE9F8)),
-              ),
-              child: TextField(
-                onChanged: (v) => setState(() => _searchQuery = v),
-                decoration: InputDecoration(
-                  hintText: 'Search unassigned students…',
-                  hintStyle: TextStyle(color: _kTextMid, fontSize: 13),
-                  prefixIcon: const Icon(
-                    Icons.search,
-                    color: _kPrimary,
-                    size: 20,
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF4F2FB),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFEDE9F8)),
+                    ),
+                    child: TextField(
+                      onChanged: (v) => setState(() => _searchQuery = v),
+                      decoration: InputDecoration(
+                        hintText: 'Search name/roll…',
+                        hintStyle: TextStyle(color: _kTextMid, fontSize: 13),
+                        prefixIcon: const Icon(
+                          Icons.search,
+                          color: _kPrimary,
+                          size: 20,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
                   ),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-              ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFEDE9F8)),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String?>(
+                        isExpanded: true,
+                        value: _selectedFilterClassId,
+                        icon: const Icon(Icons.filter_list, color: _kPrimary, size: 20),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        onChanged: (val) {
+                          setState(() {
+                            _selectedFilterClassId = val;
+                            _selectedIds.clear();
+                          });
+                        },
+                        items: [
+                          const DropdownMenuItem(
+                            value: null,
+                            child: Text('All'),
+                          ),
+                          const DropdownMenuItem(
+                            value: '',
+                            child: Text('No Class'),
+                          ),
+                          ...context.watch<ClassSetupNotifier>().classes
+                              .where((c) => c.id != widget.classRoom.id)
+                              .map((c) => DropdownMenuItem(
+                                    value: c.id,
+                                    child: Text(c.name, overflow: TextOverflow.ellipsis),
+                                  )),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
