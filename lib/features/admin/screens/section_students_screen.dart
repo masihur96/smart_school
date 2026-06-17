@@ -23,20 +23,20 @@ const _kGrad = [Color(0xFF6C3CE1), Color(0xFF9B6DFF)];
 // ClassStudentsScreen
 // ─────────────────────────────────────────────────────────────────────────────
 
-class ClassStudentsScreen extends StatefulWidget {
+class SectionStudentsScreen extends StatefulWidget {
   final ClassRoom classRoom;
+  final Section section;
 
-  const ClassStudentsScreen({super.key, required this.classRoom});
+  const SectionStudentsScreen({super.key, required this.classRoom, required this.section});
 
   @override
-  State<ClassStudentsScreen> createState() => _ClassStudentsScreenState();
+  State<SectionStudentsScreen> createState() => _SectionStudentsScreenState();
 }
 
-class _ClassStudentsScreenState extends State<ClassStudentsScreen>
+class _SectionStudentsScreenState extends State<SectionStudentsScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _fabAnim;
   String _searchQuery = '';
-  String? _selectedSectionId;
 
   bool _multiSelectMode = false;
   final Set<String> _selectedIds = {};
@@ -53,6 +53,7 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<StudentsNotifier>().fetchStudentsBySection(
         classId: widget.classRoom.id,
+        sectionId: widget.section.id,
       );
     });
   }
@@ -71,7 +72,7 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
       builder: (ctx) => AlertDialog(
         title: const Text('Unassign Student'),
         content: Text(
-          'Remove ${student.user?.name ?? 'this student'} from ${widget.classRoom.name}?',
+          'Remove ${student.user?.name ?? 'this student'} from Section ${widget.section.name}?',
         ),
         actions: [
           TextButton(
@@ -101,7 +102,7 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
       builder: (ctx) => AlertDialog(
         title: const Text('Unassign Students'),
         content: Text(
-          'Remove ${_selectedIds.length} selected students from ${widget.classRoom.name}?',
+          'Remove ${_selectedIds.length} selected students from Section ${widget.section.name}?',
         ),
         actions: [
           TextButton(
@@ -131,7 +132,7 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
         final resp = await DataProvider().performRequest(
           'PUT',
           '${APIPath.register}/$uid',
-          data: {'classId': ''}, // unassign
+          data: {'sectionId': ''}, // unassign from section
           header: {'Authorization': 'Bearer $token'},
         );
         if (resp != null && resp.statusCode == 200) successCount++;
@@ -173,6 +174,7 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
         _multiSelectMode = false;
         context.read<StudentsNotifier>().fetchStudentsBySection(
           classId: widget.classRoom.id,
+          sectionId: widget.section.id,
         );
       }
     } catch (e) {
@@ -197,12 +199,13 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _AssignStudentsSheet(classRoom: widget.classRoom),
+      builder: (_) => _AssignSectionStudentsSheet(classRoom: widget.classRoom, section: widget.section),
     );
     // Refresh after assignment
     if (mounted) {
       context.read<StudentsNotifier>().fetchStudentsBySection(
         classId: widget.classRoom.id,
+        sectionId: widget.section.id,
       );
     }
   }
@@ -212,22 +215,18 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
     final notifier = context.watch<StudentsNotifier>();
     final all = notifier.students;
 
-    // Filter by search and section
-    final filtered = all.where((s) {
-      if (_selectedSectionId != null && _selectedSectionId!.isNotEmpty) {
-        if (s.sectionId != _selectedSectionId) return false;
-      } else if (_selectedSectionId == '') {
-        if (s.sectionId != null && s.sectionId!.isNotEmpty) return false;
-      }
-      
-      if (_searchQuery.isNotEmpty) {
-        final q = _searchQuery.toLowerCase();
-        final name = (s.user?.name ?? '').toLowerCase();
-        final roll = s.rollId.toLowerCase();
-        if (!name.contains(q) && !roll.contains(q)) return false;
-      }
-      return true;
-    }).toList();
+    // Filter by search
+    final filtered = _searchQuery.isEmpty
+        ? all
+        : all
+              .where(
+                (s) =>
+                    (s.user?.name ?? '').toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ) ||
+                    s.rollId.toLowerCase().contains(_searchQuery.toLowerCase()),
+              )
+              .toList();
 
     return Scaffold(
       backgroundColor: _kBg,
@@ -256,7 +255,7 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.classRoom.name,
+                          'Section ${widget.section.name}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -264,18 +263,16 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
                             letterSpacing: -0.3,
                           ),
                         ),
-                        if (widget.classRoom.description.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            widget.classRoom.description,
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.8),
-                              fontSize: 13,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.classRoom.name,
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 13,
                           ),
-                        ],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
                     ),
                   ),
@@ -284,87 +281,32 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
             ),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(52),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 5,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: TextField(
-                          onChanged: (v) => setState(() => _searchQuery = v),
-                          decoration: InputDecoration(
-                            hintText: 'Search by name or roll…',
-                            hintStyle: TextStyle(color: _kTextMid, fontSize: 13),
-                            prefixIcon: const Icon(
-                              Icons.search,
-                              color: _kPrimary,
-                              size: 20,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      flex: 4,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String?>(
-                            isExpanded: true,
-                            value: _selectedSectionId,
-                            hint: const Text('Section', style: TextStyle(fontSize: 13)),
-                            icon: const Icon(Icons.filter_list, color: _kPrimary, size: 20),
-                            style: const TextStyle(fontSize: 13, color: Colors.black87, fontWeight: FontWeight.w500),
-                            onChanged: (val) {
-                              setState(() {
-                                _selectedSectionId = val;
-                                _selectedIds.clear();
-                              });
-                            },
-                            items: [
-                              const DropdownMenuItem(value: null, child: Text('All Sections')),
-                              const DropdownMenuItem(value: '', child: Text('No Section')),
-                              ...context
-                                  .watch<SectionSetupNotifier>()
-                                  .sections
-                                  .where((s) => s.classId == widget.classRoom.id)
-                                  .map((s) => DropdownMenuItem(
-                                        value: s.id,
-                                        child: Text(s.name, overflow: TextOverflow.ellipsis),
-                                      )),
-                            ],
-                          ),
-                        ),
-                      ),
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
                     ),
                   ],
+                ),
+                child: TextField(
+                  onChanged: (v) => setState(() => _searchQuery = v),
+                  decoration: InputDecoration(
+                    hintText: 'Search by name or roll…',
+                    hintStyle: TextStyle(color: _kTextMid, fontSize: 13),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: _kPrimary,
+                      size: 20,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
                 ),
               ),
             ),
@@ -379,7 +321,7 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
             : filtered.isEmpty
             ? _EmptyState(
                 hasSearch: _searchQuery.isNotEmpty,
-                className: widget.classRoom.name,
+                className: 'Section ${widget.section.name}',
               )
             : Column(
                 children: [
@@ -925,21 +867,22 @@ class _EmptyState extends StatelessWidget {
 // Supports single-tap assign AND multi-select bulk assign
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _AssignStudentsSheet extends StatefulWidget {
+class _AssignSectionStudentsSheet extends StatefulWidget {
   final ClassRoom classRoom;
+  final Section section;
 
-  const _AssignStudentsSheet({required this.classRoom});
+  const _AssignSectionStudentsSheet({required this.classRoom, required this.section});
 
   @override
-  State<_AssignStudentsSheet> createState() => _AssignStudentsSheetState();
+  State<_AssignSectionStudentsSheet> createState() => _AssignSectionStudentsSheetState();
 }
 
-class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
+class _AssignSectionStudentsSheetState extends State<_AssignSectionStudentsSheet> {
   List<Student> _unassigned = [];
   bool _isLoading = true;
   bool _isAssigning = false;
   String _searchQuery = '';
-  String? _selectedFilterClassId;
+  String? _selectedFilterSectionId;
 
   // Multi-select
   bool _multiSelectMode = false;
@@ -986,7 +929,7 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
             .toList();
 
         final unassigned = all
-            .where((s) => s.classId != widget.classRoom.id)
+            .where((s) => s.classId == widget.classRoom.id && s.sectionId != widget.section.id)
             .toList();
 
         setState(() {
@@ -1003,11 +946,11 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
   List<Student> get _filtered {
     List<Student> list = _unassigned;
 
-    if (_selectedFilterClassId != null) {
-      if (_selectedFilterClassId!.isEmpty) {
-        list = list.where((s) => s.classId.isEmpty).toList();
+    if (_selectedFilterSectionId != null) {
+      if (_selectedFilterSectionId!.isEmpty) {
+        list = list.where((s) => s.sectionId == null || s.sectionId!.isEmpty).toList();
       } else {
-        list = list.where((s) => s.classId == _selectedFilterClassId).toList();
+        list = list.where((s) => s.sectionId == _selectedFilterSectionId).toList();
       }
     }
 
@@ -1044,7 +987,7 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
         final resp = await DataProvider().performRequest(
           'PUT',
           '${APIPath.register}/$uid',
-          data: {'classId': widget.classRoom.id},
+          data: {'classId': widget.classRoom.id, 'sectionId': widget.section.id},
           header: {'Authorization': 'Bearer $token'},
         );
         if (resp != null && resp.statusCode == 200) successCount++;
@@ -1052,7 +995,7 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
 
       if (mounted) {
         final msg = successCount == userIds.length
-            ? '$successCount student${successCount > 1 ? 's' : ''} assigned to ${widget.classRoom.name}'
+            ? '$successCount student${successCount > 1 ? 's' : ''} assigned to Section ${widget.section.name}'
             : '$successCount of ${userIds.length} students assigned';
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1157,7 +1100,7 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
                         ),
                       ),
                       Text(
-                        'to ${widget.classRoom.name}',
+                        'to Section ${widget.section.name}',
                         style: TextStyle(fontSize: 12, color: _kTextMid),
                       ),
                     ],
@@ -1225,7 +1168,7 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String?>(
                         isExpanded: true,
-                        value: _selectedFilterClassId,
+                        value: _selectedFilterSectionId,
                         icon: const Icon(
                           Icons.filter_list,
                           color: _kPrimary,
@@ -1238,18 +1181,18 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
                         ),
                         onChanged: (val) {
                           setState(() {
-                            _selectedFilterClassId = val;
+                            _selectedFilterSectionId = val;
                             _selectedIds.clear();
                           });
                         },
                         items: [
                           const DropdownMenuItem(
                             value: null,
-                            child: Text('All'),
+                            child: Text('All Sections'),
                           ),
                           const DropdownMenuItem(
                             value: '',
-                            child: Text('No Class'),
+                            child: Text('No Section'),
                           ),
                           ...context
                               .watch<ClassSetupNotifier>()
