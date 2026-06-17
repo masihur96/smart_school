@@ -27,7 +27,11 @@ class SectionStudentsScreen extends StatefulWidget {
   final ClassRoom classRoom;
   final Section section;
 
-  const SectionStudentsScreen({super.key, required this.classRoom, required this.section});
+  const SectionStudentsScreen({
+    super.key,
+    required this.classRoom,
+    required this.section,
+  });
 
   @override
   State<SectionStudentsScreen> createState() => _SectionStudentsScreenState();
@@ -199,7 +203,10 @@ class _SectionStudentsScreenState extends State<SectionStudentsScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _AssignSectionStudentsSheet(classRoom: widget.classRoom, section: widget.section),
+      builder: (_) => _AssignSectionStudentsSheet(
+        classRoom: widget.classRoom,
+        section: widget.section,
+      ),
     );
     // Refresh after assignment
     if (mounted) {
@@ -241,13 +248,7 @@ class _SectionStudentsScreenState extends State<SectionStudentsScreen>
             elevation: 0,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: _kGrad,
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
+                decoration: BoxDecoration(color: AppColors.primaryAdmin),
                 child: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(72, 16, 16, 60),
@@ -871,13 +872,18 @@ class _AssignSectionStudentsSheet extends StatefulWidget {
   final ClassRoom classRoom;
   final Section section;
 
-  const _AssignSectionStudentsSheet({required this.classRoom, required this.section});
+  const _AssignSectionStudentsSheet({
+    required this.classRoom,
+    required this.section,
+  });
 
   @override
-  State<_AssignSectionStudentsSheet> createState() => _AssignSectionStudentsSheetState();
+  State<_AssignSectionStudentsSheet> createState() =>
+      _AssignSectionStudentsSheetState();
 }
 
-class _AssignSectionStudentsSheetState extends State<_AssignSectionStudentsSheet> {
+class _AssignSectionStudentsSheetState
+    extends State<_AssignSectionStudentsSheet> {
   List<Student> _unassigned = [];
   bool _isLoading = true;
   bool _isAssigning = false;
@@ -929,7 +935,11 @@ class _AssignSectionStudentsSheetState extends State<_AssignSectionStudentsSheet
             .toList();
 
         final unassigned = all
-            .where((s) => s.classId == widget.classRoom.id && s.sectionId != widget.section.id)
+            .where(
+              (s) =>
+                  s.classId == widget.classRoom.id &&
+                  s.sectionId != widget.section.id,
+            )
             .toList();
 
         setState(() {
@@ -948,9 +958,13 @@ class _AssignSectionStudentsSheetState extends State<_AssignSectionStudentsSheet
 
     if (_selectedFilterSectionId != null) {
       if (_selectedFilterSectionId!.isEmpty) {
-        list = list.where((s) => s.sectionId == null || s.sectionId!.isEmpty).toList();
+        list = list
+            .where((s) => s.sectionId == null || s.sectionId!.isEmpty)
+            .toList();
       } else {
-        list = list.where((s) => s.sectionId == _selectedFilterSectionId).toList();
+        list = list
+            .where((s) => s.sectionId == _selectedFilterSectionId)
+            .toList();
       }
     }
 
@@ -987,7 +1001,10 @@ class _AssignSectionStudentsSheetState extends State<_AssignSectionStudentsSheet
         final resp = await DataProvider().performRequest(
           'PUT',
           '${APIPath.register}/$uid',
-          data: {'classId': widget.classRoom.id, 'sectionId': widget.section.id},
+          data: {
+            'classId': widget.classRoom.id,
+            'sectionId': widget.section.id,
+          },
           header: {'Authorization': 'Bearer $token'},
         );
         if (resp != null && resp.statusCode == 200) successCount++;

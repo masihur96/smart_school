@@ -242,13 +242,7 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
             elevation: 0,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: _kGrad,
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
+                decoration: BoxDecoration(color: AppColors.primaryAdmin),
                 child: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(72, 16, 16, 60),
