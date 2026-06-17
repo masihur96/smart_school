@@ -917,7 +917,7 @@ class _AssignSectionStudentsSheetState
       final response = await DataProvider().performRequest(
         'GET',
         APIPath.fetchUsers,
-        query: {'role': 'student', 'limit': '200'},
+        query: {'role': 'student'},
         header: {'Authorization': 'Bearer $token'},
       );
 
@@ -925,6 +925,8 @@ class _AssignSectionStudentsSheetState
         final inner = response.data is Map
             ? response.data['data']
             : response.data;
+
+        log("UUUUD inner:: ${inner}");
         final List<dynamic> data = inner is List
             ? inner
             : (inner is Map ? (inner['data'] as List<dynamic>? ?? []) : []);
@@ -940,14 +942,13 @@ class _AssignSectionStudentsSheetState
             .whereType<Student>()
             .where((s) => !s.isDeleted)
             .toList();
+        print("UUUUD all:: ${all}");
+        final unassigned = all.where((s) {
+          final sectionIds = s.user?.sectionIds ?? [];
+          return !sectionIds.contains(widget.section.id);
+        }).toList();
 
-        final unassigned = all
-            .where(
-              (s) =>
-                  s.classId == widget.classRoom.id &&
-                  s.sectionId != widget.section.id,
-            )
-            .toList();
+        print("UUUUD${unassigned.length}");
 
         setState(() {
           _unassigned = unassigned;
