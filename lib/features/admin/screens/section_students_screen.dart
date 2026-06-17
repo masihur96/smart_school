@@ -131,12 +131,23 @@ class _SectionStudentsScreenState extends State<SectionStudentsScreen>
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token');
 
+      final allStudents = context.read<StudentsNotifier>().students;
+
       int successCount = 0;
       for (final uid in userIds) {
+        final student = allStudents.firstWhere((s) => s.userId == uid);
+        final currentClassIds = student.user?.classIds.toList() ?? [];
+        final currentSectionIds = student.user?.sectionIds.toList() ?? [];
+
+        currentSectionIds.remove(widget.section.id);
+
         final resp = await DataProvider().performRequest(
           'PUT',
-          '${APIPath.register}/$uid',
-          data: {'sectionId': ''}, // unassign from section
+          '${APIPath.fetchUsers}/$uid',
+          data: {
+            'classIds': currentClassIds,
+            'sectionIds': currentSectionIds,
+          },
           header: {'Authorization': 'Bearer $token'},
         );
         if (resp != null && resp.statusCode == 200) successCount++;
@@ -998,12 +1009,23 @@ class _AssignSectionStudentsSheetState
 
       int successCount = 0;
       for (final uid in userIds) {
+        final student = _unassigned.firstWhere((s) => s.userId == uid);
+        final currentClassIds = student.user?.classIds.toList() ?? [];
+        final currentSectionIds = student.user?.sectionIds.toList() ?? [];
+
+        if (!currentClassIds.contains(widget.classRoom.id)) {
+          currentClassIds.add(widget.classRoom.id);
+        }
+        if (!currentSectionIds.contains(widget.section.id)) {
+          currentSectionIds.add(widget.section.id);
+        }
+
         final resp = await DataProvider().performRequest(
           'PUT',
-          '${APIPath.register}/$uid',
+          '${APIPath.fetchUsers}/$uid',
           data: {
-            'classId': widget.classRoom.id,
-            'sectionId': widget.section.id,
+            'classIds': currentClassIds,
+            'sectionIds': currentSectionIds,
           },
           header: {'Authorization': 'Bearer $token'},
         );
