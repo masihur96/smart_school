@@ -85,9 +85,9 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
         : all
               .where(
                 (s) =>
-                    (s.user?.name ?? '')
-                        .toLowerCase()
-                        .contains(_searchQuery.toLowerCase()) ||
+                    (s.user?.name ?? '').toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ) ||
                     s.rollId.toLowerCase().contains(_searchQuery.toLowerCase()),
               )
               .toList();
@@ -97,7 +97,7 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
       body: NestedScrollView(
         headerSliverBuilder: (ctx, _) => [
           SliverAppBar(
-            expandedHeight: 130,
+            expandedHeight: 150,
             floating: false,
             pinned: true,
             backgroundColor: AppColors.primaryAdmin,
@@ -165,8 +165,11 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
                   decoration: InputDecoration(
                     hintText: 'Search by name or roll…',
                     hintStyle: TextStyle(color: _kTextMid, fontSize: 13),
-                    prefixIcon:
-                        const Icon(Icons.search, color: _kPrimary, size: 20),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: _kPrimary,
+                      size: 20,
+                    ),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(vertical: 14),
                   ),
@@ -300,10 +303,7 @@ class _StatChip extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: color),
         const SizedBox(width: 4),
-        Text(
-          '$label: ',
-          style: TextStyle(fontSize: 12, color: _kTextMid),
-        ),
+        Text('$label: ', style: TextStyle(fontSize: 12, color: _kTextMid)),
         Text(
           value,
           style: TextStyle(
@@ -572,10 +572,7 @@ class _EmptyState extends StatelessWidget {
                   ? 'No students match your search'
                   : 'No students assigned to $className',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
@@ -855,8 +852,11 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
                 decoration: InputDecoration(
                   hintText: 'Search unassigned students…',
                   hintStyle: TextStyle(color: _kTextMid, fontSize: 13),
-                  prefixIcon:
-                      const Icon(Icons.search, color: _kPrimary, size: 20),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: _kPrimary,
+                    size: 20,
+                  ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 ),
@@ -898,8 +898,7 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
                     separatorBuilder: (_, __) => const SizedBox(height: 6),
                     itemBuilder: (ctx, i) {
                       final student = filtered[i];
-                      final isSelected =
-                          _selectedIds.contains(student.userId);
+                      final isSelected = _selectedIds.contains(student.userId);
                       return _AssignStudentTile(
                         student: student,
                         index: i,
@@ -997,7 +996,9 @@ class _MultiSelectToggleBtn extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              active ? (selectedCount > 0 ? '$selectedCount' : 'Multi') : 'Multi',
+              active
+                  ? (selectedCount > 0 ? '$selectedCount' : 'Multi')
+                  : 'Multi',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -1167,9 +1168,7 @@ class _AssignStudentTile extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected
-              ? _kPrimary.withOpacity(0.06)
-              : Colors.white,
+          color: isSelected ? _kPrimary.withOpacity(0.06) : Colors.white,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected
@@ -1203,11 +1202,7 @@ class _AssignStudentTile extends StatelessWidget {
                   ),
                 ),
                 child: isSelected
-                    ? const Icon(
-                        Icons.check,
-                        size: 16,
-                        color: Colors.white,
-                      )
+                    ? const Icon(Icons.check, size: 16, color: Colors.white)
                     : null,
               )
             else
@@ -1281,11 +1276,7 @@ class _AssignStudentTile extends StatelessWidget {
                   gradient: const LinearGradient(colors: _kGrad),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
-                  Icons.add,
-                  size: 16,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.add, size: 16, color: Colors.white),
               ),
           ],
         ),
