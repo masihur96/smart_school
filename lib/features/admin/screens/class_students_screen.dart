@@ -219,7 +219,7 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
       } else if (_selectedSectionId == '') {
         if (s.sectionId != null && s.sectionId!.isNotEmpty) return false;
       }
-      
+
       if (_searchQuery.isNotEmpty) {
         final q = _searchQuery.toLowerCase();
         final name = (s.user?.name ?? '').toLowerCase();
@@ -306,14 +306,19 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
                           onChanged: (v) => setState(() => _searchQuery = v),
                           decoration: InputDecoration(
                             hintText: 'Search by name or roll…',
-                            hintStyle: TextStyle(color: _kTextMid, fontSize: 13),
+                            hintStyle: TextStyle(
+                              color: _kTextMid,
+                              fontSize: 13,
+                            ),
                             prefixIcon: const Icon(
                               Icons.search,
                               color: _kPrimary,
                               size: 20,
                             ),
                             border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 14,
+                            ),
                           ),
                         ),
                       ),
@@ -339,9 +344,20 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
                           child: DropdownButton<String?>(
                             isExpanded: true,
                             value: _selectedSectionId,
-                            hint: const Text('Section', style: TextStyle(fontSize: 13)),
-                            icon: const Icon(Icons.filter_list, color: _kPrimary, size: 20),
-                            style: const TextStyle(fontSize: 13, color: Colors.black87, fontWeight: FontWeight.w500),
+                            hint: const Text(
+                              'Section',
+                              style: TextStyle(fontSize: 13),
+                            ),
+                            icon: const Icon(
+                              Icons.filter_list,
+                              color: _kPrimary,
+                              size: 20,
+                            ),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
                             onChanged: (val) {
                               setState(() {
                                 _selectedSectionId = val;
@@ -349,16 +365,29 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
                               });
                             },
                             items: [
-                              const DropdownMenuItem(value: null, child: Text('All Sections')),
-                              const DropdownMenuItem(value: '', child: Text('No Section')),
+                              const DropdownMenuItem(
+                                value: null,
+                                child: Text('All Sections'),
+                              ),
+                              const DropdownMenuItem(
+                                value: '',
+                                child: Text('No Section'),
+                              ),
                               ...context
                                   .watch<SectionSetupNotifier>()
                                   .sections
-                                  .where((s) => s.classId == widget.classRoom.id)
-                                  .map((s) => DropdownMenuItem(
-                                        value: s.id,
-                                        child: Text(s.name, overflow: TextOverflow.ellipsis),
-                                      )),
+                                  .where(
+                                    (s) => s.classId == widget.classRoom.id,
+                                  )
+                                  .map(
+                                    (s) => DropdownMenuItem(
+                                      value: s.id,
+                                      child: Text(
+                                        s.name,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ),
                             ],
                           ),
                         ),
@@ -457,10 +486,10 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
                 ],
               ),
       ),
-      floatingActionButton: ScaleTransition(
-        scale: _fabAnim,
-        child: _AssignFab(onTap: _openAssignDialog),
-      ),
+      // floatingActionButton: ScaleTransition(
+      //   scale: _fabAnim,
+      //   child: _AssignFab(onTap: _openAssignDialog),
+      // ),
     );
   }
 }
@@ -515,13 +544,6 @@ class _StatsBar extends StatelessWidget {
               value: '$shown',
               color: const Color(0xFF0EA5E9),
             ),
-          const Spacer(),
-          _MultiSelectToggleBtn(
-            active: multiSelectMode,
-            selectedCount: selectedCount,
-            onToggle: onToggleMultiSelect,
-            color: Colors.red,
-          ),
         ],
       ),
     );
@@ -761,18 +783,6 @@ class _StudentTile extends StatelessWidget {
                               : Colors.red,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.person_remove_outlined,
-                        color: Colors.red,
-                        size: 20,
-                      ),
-                      onPressed: isUnassigning ? null : onUnassign,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      splashRadius: 20,
                     ),
                   ],
                 ),
