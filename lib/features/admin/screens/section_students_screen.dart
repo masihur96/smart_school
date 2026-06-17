@@ -9,7 +9,6 @@ import 'package:smart_school/core/utils/storage_service.dart';
 import '../../../configs/network/data_provider.dart';
 import '../../../models/school_models.dart';
 import '../../../models/student_model.dart';
-import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
 
 // ─── Colour palette ───────────────────────────────────────────────────────────
@@ -144,10 +143,7 @@ class _SectionStudentsScreenState extends State<SectionStudentsScreen>
         final resp = await DataProvider().performRequest(
           'PUT',
           '${APIPath.fetchUsers}/$uid',
-          data: {
-            'classIds': currentClassIds,
-            'sectionIds': currentSectionIds,
-          },
+          data: {'classIds': currentClassIds, 'sectionIds': currentSectionIds},
           header: {'Authorization': 'Bearer $token'},
         );
         if (resp != null && resp.statusCode == 200) successCount++;
@@ -1023,10 +1019,7 @@ class _AssignSectionStudentsSheetState
         final resp = await DataProvider().performRequest(
           'PUT',
           '${APIPath.fetchUsers}/$uid',
-          data: {
-            'classIds': currentClassIds,
-            'sectionIds': currentSectionIds,
-          },
+          data: {'classIds': currentClassIds, 'sectionIds': currentSectionIds},
           header: {'Authorization': 'Bearer $token'},
         );
         if (resp != null && resp.statusCode == 200) successCount++;
@@ -1189,64 +1182,6 @@ class _AssignSectionStudentsSheetState
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: 12,
                         ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  flex: 2,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFEDE9F8)),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String?>(
-                        isExpanded: true,
-                        value: _selectedFilterSectionId,
-                        icon: const Icon(
-                          Icons.filter_list,
-                          color: _kPrimary,
-                          size: 20,
-                        ),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        onChanged: (val) {
-                          setState(() {
-                            _selectedFilterSectionId = val;
-                            _selectedIds.clear();
-                          });
-                        },
-                        items: [
-                          const DropdownMenuItem(
-                            value: null,
-                            child: Text('All Sections'),
-                          ),
-                          const DropdownMenuItem(
-                            value: '',
-                            child: Text('No Section'),
-                          ),
-                          ...context
-                              .watch<ClassSetupNotifier>()
-                              .classes
-                              .where((c) => c.id != widget.classRoom.id)
-                              .map(
-                                (c) => DropdownMenuItem(
-                                  value: c.id,
-                                  child: Text(
-                                    c.name,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ),
-                        ],
                       ),
                     ),
                   ),
