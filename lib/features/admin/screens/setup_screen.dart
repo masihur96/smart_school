@@ -304,25 +304,63 @@ class _ClassCard extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════
 //  Sections Tab
 // ═══════════════════════════════════════════════════════════
-class _SectionTab extends StatelessWidget {
+class _SectionTab extends StatefulWidget {
   const _SectionTab();
+
+  @override
+  State<_SectionTab> createState() => _SectionTabState();
+}
+
+class _SectionTabState extends State<_SectionTab> {
+  String? _selectedClassId; // null = All
 
   @override
   Widget build(BuildContext context) {
     final notifier = context.watch<SectionSetupNotifier>();
-    final sections = notifier.sections;
+    final classes = context.watch<ClassSetupNotifier>().classes;
+    final user = context.read<AuthNotifier>().user;
+
+    // Filter sections by school first, then by selected class
+    final sections = notifier.sections.where((s) {
+      final classObj = classes.firstWhere(
+        (c) => c.id == s.classId,
+        orElse: () => ClassRoom(id: '', name: ''),
+      );
+      final belongsToSchool =
+          user == null || classObj.schoolId == user.schoolId;
+      final matchesClass =
+          _selectedClassId == null || s.classId == _selectedClassId;
+      return belongsToSchool && matchesClass;
+    }).toList();
+
+    // Only show classes that belong to this school
+    final schoolClasses = classes
+        .where((c) => user == null || c.schoolId == user.schoolId)
+        .toList();
 
     return Scaffold(
       body: notifier.isLoading
           ? const _LoadingView()
-          : sections.isEmpty
-          ? const _EmptyView(label: 'No sections yet')
-          : ListView.builder(
-              // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              itemCount: sections.length,
-              itemBuilder: (ctx, i) {
-                return _SectionCard(section: sections[i]);
-              },
+          : Column(
+              children: [
+                // ── Class filter chips ──
+                _ClassFilterBar(
+                  classes: schoolClasses,
+                  selectedClassId: _selectedClassId,
+                  accentColor: _kSectionGrad.first,
+                  onSelected: (id) =>
+                      setState(() => _selectedClassId = id),
+                ),
+                Expanded(
+                  child: sections.isEmpty
+                      ? const _EmptyView(label: 'No sections yet')
+                      : ListView.builder(
+                          itemCount: sections.length,
+                          itemBuilder: (ctx, i) =>
+                              _SectionCard(section: sections[i]),
+                        ),
+                ),
+              ],
             ),
       floatingActionButton: _AddFab(
         gradientColors: _kSectionGrad,
@@ -452,29 +490,59 @@ class _SectionCard extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════
 //  Subjects Tab
 // ═══════════════════════════════════════════════════════════
-class _SubjectTab extends StatelessWidget {
+class _SubjectTab extends StatefulWidget {
   const _SubjectTab();
+
+  @override
+  State<_SubjectTab> createState() => _SubjectTabState();
+}
+
+class _SubjectTabState extends State<_SubjectTab> {
+  String? _selectedClassId; // null = All
 
   @override
   Widget build(BuildContext context) {
     final notifier = context.watch<SubjectSetupNotifier>();
-    final subjects = notifier.subjects;
+    final classes = context.watch<ClassSetupNotifier>().classes;
     final user = context.read<AuthNotifier>().user;
+
+    // Filter by school then by selected class
+    final subjects = notifier.subjects.where((s) {
+      final belongsToSchool =
+          user == null || s.schoolId == user.schoolId;
+      final matchesClass =
+          _selectedClassId == null || s.classId == _selectedClassId;
+      return belongsToSchool && matchesClass;
+    }).toList();
+
+    // Only show classes that belong to this school
+    final schoolClasses = classes
+        .where((c) => user == null || c.schoolId == user.schoolId)
+        .toList();
+
     return Scaffold(
       body: notifier.isLoading
           ? const _LoadingView()
-          : subjects.isEmpty
-          ? const _EmptyView(label: 'No subjects yet')
-          : ListView.builder(
-              // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              itemCount: subjects.length,
-              itemBuilder: (ctx, i) {
-                if (user?.schoolId == subjects[i].schoolId) {
-                  return _SubjectCard(subject: subjects[i]);
-                } else {
-                  return SizedBox();
-                }
-              },
+          : Column(
+              children: [
+                // ── Class filter chips ──
+                _ClassFilterBar(
+                  classes: schoolClasses,
+                  selectedClassId: _selectedClassId,
+                  accentColor: _kSubjectGrad.first,
+                  onSelected: (id) =>
+                      setState(() => _selectedClassId = id),
+                ),
+                Expanded(
+                  child: subjects.isEmpty
+                      ? const _EmptyView(label: 'No subjects yet')
+                      : ListView.builder(
+                          itemCount: subjects.length,
+                          itemBuilder: (ctx, i) =>
+                              _SubjectCard(subject: subjects[i]),
+                        ),
+                ),
+              ],
             ),
       floatingActionButton: _AddFab(
         gradientColors: _kSubjectGrad,
@@ -606,6 +674,111 @@ class _SubjectCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Class Filter Bar
+// ═══════════════════════════════════════════════════════════
+class _ClassFilterBar extends StatelessWidget {
+  final List<ClassRoom> classes;
+  final String? selectedClassId;
+  final Color accentColor;
+  final ValueChanged<String?> onSelected;
+
+  const _ClassFilterBar({
+    required this.classes,
+    required this.selectedClassId,
+    required this.accentColor,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: _kBg,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _FilterChip(
+              label: 'All',
+              isSelected: selectedClassId == null,
+              accentColor: accentColor,
+              onTap: () => onSelected(null),
+            ),
+            ...classes.map(
+              (c) => Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: _FilterChip(
+                  label: c.name,
+                  isSelected: selectedClassId == c.id,
+                  accentColor: accentColor,
+                  onTap: () => onSelected(
+                    selectedClassId == c.id ? null : c.id,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final Color accentColor;
+  final VoidCallback onTap;
+
+  const _FilterChip({
+    required this.label,
+    required this.isSelected,
+    required this.accentColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        decoration: BoxDecoration(
+          color: isSelected ? accentColor : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? accentColor
+                : _kDivider,
+            width: 1.5,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: accentColor.withOpacity(0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : [],
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight:
+                isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected ? Colors.white : _kTextMid,
+          ),
+        ),
       ),
     );
   }
