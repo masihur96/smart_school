@@ -990,7 +990,10 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
             .toList();
 
         final unassigned = all
-            .where((s) => s.classId != widget.classRoom.id)
+            .where((s) {
+              final classIds = s.user?.classIds ?? [];
+              return !classIds.contains(widget.classRoom.id);
+            })
             .toList();
 
         setState(() {
