@@ -513,9 +513,7 @@ class _SectionCard extends StatelessWidget {
                   ],
                 ),
                 const Divider(color: _kDivider, height: 24),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                Row(
                   children: [
                     _ActionChip(
                       icon: Icons.visibility_outlined,
@@ -537,6 +535,7 @@ class _SectionCard extends StatelessWidget {
                         }
                       },
                     ),
+                    const SizedBox(width: 8),
                     _ActionChip(
                       icon: Icons.edit_outlined,
                       label: 'Edit',
@@ -544,6 +543,7 @@ class _SectionCard extends StatelessWidget {
                       onTap: () =>
                           _showAddEditSectionDialog(context, existing: section),
                     ),
+                    const SizedBox(width: 8),
                     _ActionChip(
                       icon: Icons.delete_outline,
                       label: 'Delete',
