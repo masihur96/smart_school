@@ -1,6 +1,8 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
+
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
 import '../models/admin_dashboard_model.dart';
@@ -8,6 +10,10 @@ import '../models/admin_dashboard_model.dart';
 class AdminDashboardProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+
+  MonthlyAttendanceOverview? _monthlyAttendanceOverview;
+  MonthlyAttendanceOverview? get monthlyAttendanceOverview =>
+      _monthlyAttendanceOverview;
 
   AdminDashboardData? _dashboardData;
   AdminDashboardData? get dashboardData => _dashboardData;
@@ -30,6 +36,13 @@ class AdminDashboardProvider extends ChangeNotifier {
         header: {'Authorization': 'Bearer $token'},
       );
 
+      final currentYear = DateTime.now().year;
+      final monthlyResponse = await DataProvider().performRequest(
+        'GET',
+        '${APIPath.baseUrl}/admin/attendance/monthly-overview?year=$currentYear',
+        header: {'Authorization': 'Bearer $token'},
+      );
+
       if (response != null && response.statusCode == 200) {
         final data = response.data['data'];
         _dashboardData = AdminDashboardData.fromJson(data);
@@ -37,6 +50,16 @@ class AdminDashboardProvider extends ChangeNotifier {
       } else {
         _error = 'Failed to load dashboard data';
         log('Failed to fetch dashboard: ${response?.data}');
+      }
+
+      if (monthlyResponse != null && monthlyResponse.statusCode == 200) {
+        final monthlyData = monthlyResponse.data['data'];
+        _monthlyAttendanceOverview = MonthlyAttendanceOverview.fromJson(
+          monthlyData,
+        );
+        log('Fetched Admin Monthly Overview successfully.');
+      } else {
+        log('Failed to fetch monthly overview: ${monthlyResponse?.data}');
       }
     } catch (e) {
       _error = 'Error loading dashboard: $e';
