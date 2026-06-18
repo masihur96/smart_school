@@ -1732,131 +1732,132 @@ class _AssignSectionTeachersSheetState extends State<_AssignSectionTeachersSheet
   Widget build(BuildContext context) {
     final teachers = context.watch<TeachersNotifier>().teachers;
 
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
-        color: _kBg,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        children: [
-          // Handle
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 8),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
+      child: Card(
+        child: Column(
+          children: [
+            // Handle
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Assign Teachers to ${widget.section.name}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                TextButton(
-                  onPressed: _isSaving ? null : () => Navigator.pop(context),
-                  child: const Text('Cancel', style: TextStyle(color: _kTextMid)),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: teachers.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
-              itemBuilder: (ctx, i) {
-                final teacher = teachers[i];
-                final name = teacher.user?.name ?? 'Unknown';
-                final isSelected = _selectedIds.contains(teacher.userId);
-                final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
-
-                return InkWell(
-                  onTap: _isSaving
-                      ? null
-                      : () {
-                          setState(() {
-                            if (isSelected) {
-                              _selectedIds.remove(teacher.userId);
-                            } else {
-                              _selectedIds.add(teacher.userId);
-                            }
-                          });
-                        },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: isSelected ? _kPrimary.withOpacity(0.05) : Colors.white,
-                      border: Border.all(
-                        color: isSelected ? _kPrimary.withOpacity(0.3) : _kDivider,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: _kPrimary.withOpacity(0.1),
-                          foregroundColor: _kPrimary,
-                          child: Text(initial, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                              if (teacher.designation.isNotEmpty)
-                                Text(
-                                  teacher.designation,
-                                  style: const TextStyle(fontSize: 12, color: _kTextMid),
-                                ),
-                            ],
-                          ),
-                        ),
-                        if (isSelected)
-                          const Icon(Icons.check_circle, color: _kPrimary)
-                        else
-                          const Icon(Icons.radio_button_unchecked, color: Colors.grey),
-                      ],
-                    ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Assign Teachers to ${widget.section.name}',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: ElevatedButton(
-              onPressed: _isSaving ? null : _save,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _kPrimary,
-                foregroundColor: Colors.white,
-
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                  TextButton(
+                    onPressed: _isSaving ? null : () => Navigator.pop(context),
+                    child: const Text('Cancel', style: TextStyle(color: _kTextMid)),
+                  ),
+                ],
               ),
-              child: _isSaving
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                    )
-                  : const Text('Save Assignments', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
-          ),
-        ],
+            const Divider(height: 1),
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: teachers.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (ctx, i) {
+                  final teacher = teachers[i];
+                  final name = teacher.user?.name ?? 'Unknown';
+                  final isSelected = _selectedIds.contains(teacher.userId);
+                  final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+        
+                  return InkWell(
+                    onTap: _isSaving
+                        ? null
+                        : () {
+                            setState(() {
+                              if (isSelected) {
+                                _selectedIds.remove(teacher.userId);
+                              } else {
+                                _selectedIds.add(teacher.userId);
+                              }
+                            });
+                          },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: isSelected ? _kPrimary.withOpacity(0.05) : Colors.transparent,
+                        border: Border.all(
+                          color: isSelected ? _kPrimary.withOpacity(0.3) : _kDivider,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: _kPrimary.withOpacity(0.1),
+                            foregroundColor: _kPrimary,
+                            child: Text(initial, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                                if (teacher.designation.isNotEmpty)
+                                  Text(
+                                    teacher.designation,
+                                    style: const TextStyle(fontSize: 12, color: _kTextMid),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          if (isSelected)
+                            const Icon(Icons.check_circle, color: _kPrimary)
+                          else
+                            const Icon(Icons.radio_button_unchecked, color: Colors.grey),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: ElevatedButton(
+                onPressed: _isSaving ? null : _save,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _kPrimary,
+                  foregroundColor: Colors.white,
+        
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: _isSaving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: const Text('Save Assignments', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
