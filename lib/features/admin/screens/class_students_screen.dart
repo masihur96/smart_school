@@ -230,7 +230,7 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
     }).toList();
 
     return Scaffold(
-      backgroundColor: _kBg,
+
       body: NestedScrollView(
         headerSliverBuilder: (ctx, _) => [
           SliverAppBar(
@@ -299,6 +299,8 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
                         child: TextField(
                           onChanged: (v) => setState(() => _searchQuery = v),
                           decoration: InputDecoration(
+                            fillColor: Colors.transparent,
+
                             hintText: 'Search by name or roll…',
                             hintStyle: TextStyle(
                               color: _kTextMid,
@@ -335,8 +337,10 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
                           ],
                         ),
                         child: DropdownButtonHideUnderline(
+
                           child: DropdownButton<String?>(
                             isExpanded: true,
+                            dropdownColor: Colors.white,
                             value: _selectedSectionId,
                             hint: const Text(
                               'Section',
@@ -511,7 +515,7 @@ class _StatsBar extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        // color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: _kDivider),
         boxShadow: [
@@ -562,15 +566,15 @@ class _StatChip extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: color),
+        Icon(icon, size: 16, ),
         const SizedBox(width: 4),
-        Text('$label: ', style: TextStyle(fontSize: 12, color: _kTextMid)),
+        Text('$label: ', style: TextStyle(fontSize: 12)),
         Text(
           value,
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,
-            color: color,
+
           ),
         ),
       ],
@@ -626,7 +630,7 @@ class _StudentTile extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.red.withOpacity(0.06) : Colors.white,
+          color: isSelected ? Colors.red.withOpacity(0.06) : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? Colors.red.withOpacity(0.4) : _kDivider,
@@ -680,7 +684,7 @@ class _StudentTile extends StatelessWidget {
                     child: Text(
                       initial,
                       style: TextStyle(
-                        color: _avatarColor,
+
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
@@ -810,13 +814,13 @@ class _MiniChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 10, color: color),
+          Icon(icon, size: 10),
           const SizedBox(width: 3),
           Text(
             label,
             style: TextStyle(
               fontSize: 10,
-              color: color,
+
               fontWeight: FontWeight.w600,
             ),
           ),
