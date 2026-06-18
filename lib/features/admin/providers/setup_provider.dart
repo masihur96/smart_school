@@ -285,12 +285,13 @@ class SectionSetupNotifier extends ChangeNotifier {
     }
   }
 
-  Future<bool> addSection(String classId, String name) async {
+  Future<bool> addSection(String classId, String name, {String? teacherId, Teacher? teacherInfo}) async {
     try {
       final token = await StorageService.getToken();
       if (token == null) return false;
 
       final Map<String, dynamic> data = {"name": name, "classId": classId};
+      if (teacherId != null) data['teacherId'] = teacherId;
 
       final response = await DataProvider().performRequest(
         'POST',
@@ -309,6 +310,8 @@ class SectionSetupNotifier extends ChangeNotifier {
             id: newId,
             classId: classId,
             name: name,
+            teacherId: teacherId,
+            teacherInfo: teacherInfo,
           ),
         );
         _sections = [..._dbService.sections];
@@ -322,15 +325,18 @@ class SectionSetupNotifier extends ChangeNotifier {
     }
   }
 
-  Future<bool> updateSection(String id, String classId, String name) async {
+  Future<bool> updateSection(String id, String classId, String name, {String? teacherId, Teacher? teacherInfo}) async {
     try {
       final token = await StorageService.getToken();
       if (token == null) return false;
 
+      final Map<String, dynamic> data = {'classId': classId, 'name': name};
+      if (teacherId != null) data['teacherId'] = teacherId;
+
       final response = await DataProvider().performRequest(
         'PUT',
         APIPath.updateSection(id),
-        data: {'classId': classId, 'name': name},
+        data: data,
         header: {'Authorization': 'Bearer $token'},
       );
 
@@ -342,6 +348,8 @@ class SectionSetupNotifier extends ChangeNotifier {
             id: id,
             classId: classId,
             name: name,
+            teacherId: teacherId,
+            teacherInfo: teacherInfo,
           );
           _sections = [..._dbService.sections];
           notifyListeners();

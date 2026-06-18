@@ -5,6 +5,7 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import '../../../models/school_models.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
+import '../providers/teacher_provider.dart';
 import 'class_students_screen.dart';
 import 'section_students_screen.dart';
 
@@ -43,6 +44,7 @@ class _SetupScreenState extends State<SetupScreen>
         context.read<ClassSetupNotifier>().fetchClasses(user.schoolId ?? '');
         context.read<SectionSetupNotifier>().fetchSections();
         context.read<SubjectSetupNotifier>().fetchSubjects(user.schoolId ?? '');
+        context.read<TeachersNotifier>().fetchTeachers();
       }
     });
   }
@@ -445,8 +447,16 @@ class _SectionCard extends StatelessWidget {
                   label: 'Class',
                   value: className,
                 ),
+                const SizedBox(height: 8),
+                _InfoRow(
+                  icon: Icons.person_outline,
+                  label: 'Teacher',
+                  value: section.teacherInfo?.name ?? 'Not Assigned',
+                ),
                 const Divider(color: _kDivider, height: 24),
-                Row(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
                     _ActionChip(
                       icon: Icons.visibility_outlined,
@@ -468,7 +478,12 @@ class _SectionCard extends StatelessWidget {
                         }
                       },
                     ),
-                    const SizedBox(width: 8),
+                    _ActionChip(
+                      icon: Icons.person_add_alt_1_outlined,
+                      label: 'Assign',
+                      color: const Color(0xFFF59E0B),
+                      onTap: () => _showAssignTeacherDialog(context, section),
+                    ),
                     _ActionChip(
                       icon: Icons.edit_outlined,
                       label: 'Edit',
@@ -476,7 +491,6 @@ class _SectionCard extends StatelessWidget {
                       onTap: () =>
                           _showAddEditSectionDialog(context, existing: section),
                     ),
-                    const SizedBox(width: 8),
                     _ActionChip(
                       icon: Icons.delete_outline,
                       label: 'Delete',
@@ -1579,5 +1593,68 @@ void _confirmDelete(
         ),
       ],
     ),
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Dialog: Assign Teacher to Section
+// ═══════════════════════════════════════════════════════════
+void _showAssignTeacherDialog(BuildContext context, Section section) {
+  final teachers = context.read<TeachersNotifier>().teachers;
+  String? selectedTeacherId = section.teacherId;
+
+  if (selectedTeacherId != null && !teachers.any((t) => t.userId == selectedTeacherId)) {
+    selectedTeacherId = null;
+  }
+
+  _showStyledDialog(
+    context: context,
+    title: 'Assign Teacher',
+    gradientColors: _kSectionGrad,
+    confirmLabel: 'Assign',
+    body: StatefulBuilder(
+      builder: (ctx, setState) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          DropdownButtonFormField<String>(
+            value: selectedTeacherId,
+            decoration: _inputDec('Select Teacher', icon: Icons.person_outline),
+            items: teachers
+                .map((t) => DropdownMenuItem(value: t.userId, child: Text(t.user?.name ?? 'Unknown')))
+                .toList(),
+            onChanged: (v) => setState(() => selectedTeacherId = v),
+          ),
+        ],
+      ),
+    ),
+    onConfirm: () async {
+      if (selectedTeacherId != null) {
+        final teacher = teachers.firstWhere((t) => t.userId == selectedTeacherId);
+        
+        final mappedTeacher = Teacher(
+          id: teacher.userId,
+          name: teacher.user?.name ?? 'Unknown',
+          email: teacher.user?.email,
+          phone: teacher.user?.phone,
+          designation: teacher.designation,
+        );
+
+        final success = await context.read<SectionSetupNotifier>().updateSection(
+          section.id,
+          section.classId,
+          section.name,
+          teacherId: selectedTeacherId,
+          teacherInfo: mappedTeacher,
+        );
+
+        if (context.mounted) {
+          if (success) {
+            _showSuccessSnackBar(context, 'Teacher assigned successfully');
+          } else {
+            _showErrorSnackBar(context, 'Failed to assign teacher');
+          }
+        }
+      }
+    },
   );
 }
