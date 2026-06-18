@@ -102,12 +102,16 @@ class Section {
   final String id;
   final String classId;
   final String name; // e.g., "A"
+  final String? teacherId;
+  final Teacher? teacherInfo;
   final DateTime? deletedAt;
 
   Section({
     required this.id,
     required this.classId,
     required this.name,
+    this.teacherId,
+    this.teacherInfo,
     this.deletedAt,
   });
 
@@ -117,6 +121,10 @@ class Section {
     id: json['uuid'] ?? json['id'] ?? json['_id'] ?? '',
     classId: json['classId'] ?? json['class_id'] ?? '',
     name: json['name'] ?? '',
+    teacherId: json['teacherId'] ?? json['teacher_id'],
+    teacherInfo: json['teacherInfo'] != null
+        ? Teacher.fromJson(json['teacherInfo'])
+        : (json['teacher'] != null ? Teacher.fromJson(json['teacher']) : null),
     deletedAt: json['deletedAt'] != null
         ? DateTime.tryParse(json['deletedAt'].toString())
         : null,
@@ -126,6 +134,8 @@ class Section {
     'id': id,
     'classId': classId,
     'name': name,
+    if (teacherId != null) 'teacherId': teacherId,
+    if (teacherInfo != null) 'teacherInfo': teacherInfo!.toJson(),
     'deletedAt': deletedAt?.toIso8601String(),
   };
 }
