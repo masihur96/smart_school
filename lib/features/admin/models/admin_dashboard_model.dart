@@ -277,3 +277,52 @@ class TeacherRecentRecord {
     );
   }
 }
+
+class MonthlyAttendanceOverview {
+  final int year;
+  final List<MonthlyAttendanceData> data;
+
+  MonthlyAttendanceOverview({
+    required this.year,
+    required this.data,
+  });
+
+  factory MonthlyAttendanceOverview.fromJson(Map<String, dynamic> json) {
+    return MonthlyAttendanceOverview(
+      year: json['year'] ?? 0,
+      data: (json['data'] as List<dynamic>?)
+              ?.map((e) => MonthlyAttendanceData.fromJson(e))
+              .toList() ??
+          [],
+    );
+  }
+}
+
+class MonthlyAttendanceData {
+  final int month;
+  final int totalPresent;
+  final int totalAbsent;
+  final int totalLeave;
+  final int totalLate;
+  final double attendancePercentage;
+
+  MonthlyAttendanceData({
+    required this.month,
+    required this.totalPresent,
+    required this.totalAbsent,
+    required this.totalLeave,
+    required this.totalLate,
+    required this.attendancePercentage,
+  });
+
+  factory MonthlyAttendanceData.fromJson(Map<String, dynamic> json) {
+    return MonthlyAttendanceData(
+      month: json['month'] ?? 0,
+      totalPresent: json['totalPresent'] ?? 0,
+      totalAbsent: json['totalAbsent'] ?? 0,
+      totalLeave: json['totalLeave'] ?? 0,
+      totalLate: json['totalLate'] ?? 0,
+      attendancePercentage: (json['attendancePercentage'] ?? 0).toDouble(),
+    );
+  }
+}
