@@ -1,8 +1,8 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
@@ -204,12 +204,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionTitle(l10n.schoolOverview, SizedBox()),
-                const SizedBox(height: 16),
-                _buildStatsOverview(data),
                 const SizedBox(height: 24),
                 if (provider.monthlyAttendanceOverview != null) ...[
-                  _buildMonthlyAttendanceChart(provider.monthlyAttendanceOverview!),
+                  _buildMonthlyAttendanceChart(
+                    provider.monthlyAttendanceOverview!,
+                  ),
                   const SizedBox(height: 24),
                 ],
                 _buildAttendanceCards(data),
@@ -325,175 +324,210 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildMonthlyAttendanceChart(MonthlyAttendanceOverview data) {
     List<FlSpot> spots = [];
     for (int i = 0; i < data.data.length; i++) {
-      spots.add(FlSpot(
-        data.data[i].month.toDouble(),
-        data.data[i].attendancePercentage,
-      ));
+      spots.add(
+        FlSpot(
+          data.data[i].month.toDouble(),
+          data.data[i].attendancePercentage,
+        ),
+      );
     }
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.purple.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.bar_chart, color: Colors.purple, size: 24),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Monthly Attendance Overview',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  Text(
-                    'Year ${data.year}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
+                  child: const Icon(
+                    Icons.bar_chart,
+                    color: Colors.purple,
+                    size: 24,
                   ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            height: 200,
-            child: LineChart(
-              LineChartData(
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  horizontalInterval: 25,
-                  getDrawingHorizontalLine: (value) {
-                    return FlLine(
-                      color: Colors.grey.withOpacity(0.15),
-                      strokeWidth: 1,
-                      dashArray: [5, 5],
-                    );
-                  },
                 ),
-                titlesData: FlTitlesData(
-                  show: true,
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 30,
-                      interval: 1,
-                      getTitlesWidget: (value, meta) {
-                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        if (value.toInt() >= 1 && value.toInt() <= 12) {
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              months[value.toInt() - 1],
-                              style: TextStyle(color: Colors.grey[600], fontSize: 10, fontWeight: FontWeight.w600),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Monthly Attendance Overview',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text('Year ${data.year}', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              height: 200,
+              child: LineChart(
+                LineChartData(
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    horizontalInterval: 25,
+                    getDrawingHorizontalLine: (value) {
+                      return FlLine(
+                        color: Colors.grey.withOpacity(0.15),
+                        strokeWidth: 1,
+                        dashArray: [5, 5],
+                      );
+                    },
+                  ),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 30,
+                        interval: 1,
+                        getTitlesWidget: (value, meta) {
+                          const months = [
+                            'Jan',
+                            'Feb',
+                            'Mar',
+                            'Apr',
+                            'May',
+                            'Jun',
+                            'Jul',
+                            'Aug',
+                            'Sep',
+                            'Oct',
+                            'Nov',
+                            'Dec',
+                          ];
+                          if (value.toInt() >= 1 && value.toInt() <= 12) {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                months[value.toInt() - 1],
+                                style: TextStyle(
+                                  // color: Colors.grey[600],
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            );
+                          }
+                          return const Text('');
+                        },
+                      ),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        interval: 25,
+                        reservedSize: 35,
+                        getTitlesWidget: (value, meta) {
+                          return Text(
+                            '${value.toInt()}%',
+                            style: TextStyle(
+                              // color: Colors.grey[600],
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
                             ),
                           );
-                        }
-                        return const Text('');
-                      },
-                    ),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      interval: 25,
-                      reservedSize: 35,
-                      getTitlesWidget: (value, meta) {
-                        return Text(
-                          '${value.toInt()}%',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 10, fontWeight: FontWeight.w600),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                borderData: FlBorderData(show: false),
-                minX: 1,
-                maxX: 12,
-                minY: 0,
-                maxY: 100,
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: spots,
-                    isCurved: true,
-                    color: Colors.purple,
-                    barWidth: 3,
-                    isStrokeCapRound: true,
-                    dotData: FlDotData(
-                      show: true,
-                      getDotPainter: (spot, percent, barData, index) {
-                        return FlDotCirclePainter(
-                          radius: 4,
-                          color: Colors.white,
-                          strokeWidth: 2,
-                          strokeColor: Colors.purple,
-                        );
-                      },
-                    ),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.purple.withOpacity(0.3),
-                          Colors.purple.withOpacity(0.0),
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
+                        },
                       ),
                     ),
                   ),
-                ],
-                lineTouchData: LineTouchData(
-                  touchTooltipData: LineTouchTooltipData(
-                    getTooltipItems: (touchedSpots) {
-                      return touchedSpots.map((LineBarSpot touchedSpot) {
-                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        final monthStr = months[touchedSpot.x.toInt() - 1];
-                        return LineTooltipItem(
-                          '$monthStr\n',
-                          const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                          children: [
-                            TextSpan(
-                              text: '${touchedSpot.y.toStringAsFixed(1)}%',
-                              style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.normal),
-                            ),
+                  borderData: FlBorderData(show: false),
+                  minX: 1,
+                  maxX: 12,
+                  minY: 0,
+                  maxY: 100,
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: spots,
+                      isCurved: true,
+                      color: Colors.purple,
+                      barWidth: 3,
+                      isStrokeCapRound: true,
+                      dotData: FlDotData(
+                        show: true,
+                        getDotPainter: (spot, percent, barData, index) {
+                          return FlDotCirclePainter(
+                            radius: 4,
+                            color: Colors.white,
+                            strokeWidth: 2,
+                            strokeColor: Colors.purple,
+                          );
+                        },
+                      ),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.purple.withOpacity(0.3),
+                            Colors.purple.withOpacity(0.0),
                           ],
-                        );
-                      }).toList();
-                    },
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                    ),
+                  ],
+                  lineTouchData: LineTouchData(
+                    touchTooltipData: LineTouchTooltipData(
+                      getTooltipItems: (touchedSpots) {
+                        return touchedSpots.map((LineBarSpot touchedSpot) {
+                          const months = [
+                            'Jan',
+                            'Feb',
+                            'Mar',
+                            'Apr',
+                            'May',
+                            'Jun',
+                            'Jul',
+                            'Aug',
+                            'Sep',
+                            'Oct',
+                            'Nov',
+                            'Dec',
+                          ];
+                          final monthStr = months[touchedSpot.x.toInt() - 1];
+                          return LineTooltipItem(
+                            '$monthStr\n',
+                            const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: '${touchedSpot.y.toStringAsFixed(1)}%',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          );
+                        }).toList();
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
