@@ -894,15 +894,9 @@ class _AddFab extends StatelessWidget {
         width: 56,
         height: 56,
         decoration: BoxDecoration(
-          gradient: LinearGradient(colors: gradientColors),
+         color: AppColors.primaryAdmin,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: gradientColors.last.withOpacity(0.4),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+
         ),
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
