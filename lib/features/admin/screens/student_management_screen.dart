@@ -8,7 +8,6 @@ import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
 import 'package:smart_school/features/admin/screens/student_detail_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
-import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/student_model.dart';
 import 'package:smart_school/services/notification_service.dart';
 
@@ -361,33 +360,17 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                   children: [
                                     const SizedBox(height: 4),
                                     Text('Roll: ${student.rollId}'),
-                                    if (student.className != null)
+                                    if (student.embeddedClasses.isNotEmpty)
                                       Text(
-                                        student.className!,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                        ),
-                                      )
-                                    else
-                                      Text(
-                                        classes
-                                            .firstWhere(
-                                              (c) => c.id == student.classId,
-                                              orElse: () => ClassRoom(
-                                                id: '',
-                                                name: 'Unknown',
-                                              ),
-                                            )
-                                            .name,
+                                        student.embeddedClasses.map((c) => c.name).join(", "),
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: Colors.grey,
                                         ),
                                       ),
-                                    if (student.sectionName != null)
+                                    if (student.embeddedSections.isNotEmpty)
                                       Text(
-                                        'Section: ${student.sectionName}',
+                                        'Section: ${student.embeddedSections.map((s) => s.name).join(", ")}',
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: Colors.grey,

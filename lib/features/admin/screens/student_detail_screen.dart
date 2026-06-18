@@ -17,18 +17,18 @@ class StudentDetailScreen extends StatelessWidget {
     final classes = context.watch<ClassSetupNotifier>().classes;
     final sections = context.watch<SectionSetupNotifier>().sections;
 
-    final className = classes
-        .firstWhere(
-          (c) => c.id == student.classId,
-          orElse: () => ClassRoom(id: '', name: 'Unknown'),
-        )
-        .name;
-    final sectionName = sections
-        .firstWhere(
-          (s) => s.id == student.sectionId,
-          orElse: () => Section(id: '', name: 'Unknown', classId: ''),
-        )
-        .name;
+    final className = student.embeddedClasses.isNotEmpty
+        ? student.embeddedClasses.map((c) => c.name).join(', ')
+        : classes.firstWhere(
+              (c) => c.id == student.classId,
+              orElse: () => ClassRoom(id: '', name: 'Unknown'),
+            ).name;
+    final sectionName = student.embeddedSections.isNotEmpty
+        ? student.embeddedSections.map((s) => s.name).join(', ')
+        : sections.firstWhere(
+              (s) => s.id == student.sectionId,
+              orElse: () => Section(id: '', name: 'Unknown', classId: ''),
+            ).name;
 
     return Scaffold(
       body: CustomScrollView(
