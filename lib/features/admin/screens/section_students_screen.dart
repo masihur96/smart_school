@@ -243,7 +243,7 @@ class _SectionStudentsScreenState extends State<SectionStudentsScreen>
               .toList();
 
     return Scaffold(
-      backgroundColor: _kBg,
+
       body: NestedScrollView(
         headerSliverBuilder: (ctx, _) => [
           SliverAppBar(
@@ -305,6 +305,7 @@ class _SectionStudentsScreenState extends State<SectionStudentsScreen>
                 child: TextField(
                   onChanged: (v) => setState(() => _searchQuery = v),
                   decoration: InputDecoration(
+                    fillColor: Colors.white,
                     hintText: 'Search by name or roll…',
                     hintStyle: TextStyle(color: _kTextMid, fontSize: 13),
                     prefixIcon: const Icon(
@@ -438,7 +439,7 @@ class _StatsBar extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: _kDivider),
         boxShadow: [
@@ -496,15 +497,14 @@ class _StatChip extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: color),
+        Icon(icon, size: 16),
         const SizedBox(width: 4),
-        Text('$label: ', style: TextStyle(fontSize: 12, color: _kTextMid)),
+        Text('$label: ', style: TextStyle(fontSize: 12,)),
         Text(
           value,
           style: TextStyle(
             fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: color,
+            fontWeight: FontWeight.bold
           ),
         ),
       ],
@@ -560,7 +560,7 @@ class _StudentTile extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.red.withOpacity(0.06) : Colors.white,
+          color: isSelected ? Colors.red.withOpacity(0.06) : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? Colors.red.withOpacity(0.4) : _kDivider,
@@ -756,13 +756,13 @@ class _MiniChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 10, color: color),
+          Icon(icon, size: 10),
           const SizedBox(width: 3),
           Text(
             label,
             style: TextStyle(
               fontSize: 10,
-              color: color,
+
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -1082,12 +1082,8 @@ class _AssignSectionStudentsSheetState
   Widget build(BuildContext context) {
     final filtered = _filtered;
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
+    return Card(
+
       child: Column(
         children: [
           // ── Handle ────────────────────────────────────────────────────────
@@ -1602,7 +1598,7 @@ class _AssignStudentTile extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? _kPrimary.withOpacity(0.06) : Colors.white,
+          color: isSelected ? _kPrimary.withOpacity(0.06) : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected
