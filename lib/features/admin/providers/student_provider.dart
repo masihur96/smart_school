@@ -19,9 +19,22 @@ class StudentsNotifier extends ChangeNotifier {
   bool _isLoadingMore = false;
   int _totalCount = 0;
 
+  List<Student> _unassignedStudents = [];
+  bool _isUnassignedLoading = false;
+  int _unassignedCurrentPage = 1;
+  bool _unassignedHasMore = true;
+  bool _isUnassignedLoadingMore = false;
+  int _unassignedTotalCount = 0;
+
   StudentsNotifier(this._dbService) {
     _students = [..._dbService.students];
   }
+
+  List<Student> get unassignedStudents => _unassignedStudents;
+  bool get isUnassignedLoading => _isUnassignedLoading;
+  bool get unassignedHasMore => _unassignedHasMore;
+  bool get isUnassignedLoadingMore => _isUnassignedLoadingMore;
+  int get unassignedTotalCount => _unassignedTotalCount;
 
   List<Student> get students => _students;
   bool get isLoading => _isLoading;
@@ -192,6 +205,90 @@ class StudentsNotifier extends ChangeNotifier {
       log('fetchStudentsBySection exception: $e');
     } finally {
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchUnassignedStudents({
+    required String sectionId,
+    String? search,
+    bool loadMore = false,
+  }) async {
+    if (loadMore) {
+      if (_isUnassignedLoadingMore || !_unassignedHasMore) return;
+      _isUnassignedLoadingMore = true;
+      _unassignedCurrentPage++;
+    } else {
+      _isUnassignedLoading = true;
+      _unassignedCurrentPage = 1;
+      _unassignedHasMore = true;
+      _unassignedStudents.clear();
+    }
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final Map<String, dynamic> query = {
+        'role': 'student',
+        'page': _unassignedCurrentPage.toString(),
+        'limit': '15',
+      };
+      if (search != null && search.isNotEmpty) query['search'] = search;
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.fetchUsers,
+        query: query,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final inner = response.data is Map
+            ? response.data['data']
+            : response.data;
+        final List<dynamic> data = inner is List
+            ? inner
+            : (inner is Map ? (inner['data'] as List<dynamic>? ?? []) : []);
+
+        final responseTotal = (inner is Map && inner['total'] != null)
+            ? int.tryParse(inner['total'].toString()) ?? 0
+            : data.length;
+
+        _unassignedTotalCount = responseTotal;
+
+        if (data.length < 15 ||
+            (loadMore && _unassignedStudents.length + data.length >= responseTotal)) {
+          _unassignedHasMore = false;
+        }
+
+        for (var item in data) {
+          try {
+            final parsedStudent = Student.fromJson(item);
+            if (parsedStudent.isDeleted) continue;
+            // Only add if not assigned to this section
+            final sectionIds = parsedStudent.user?.sectionIds ?? [];
+            if (!sectionIds.contains(sectionId)) {
+              _unassignedStudents.add(parsedStudent);
+            }
+          } catch (e) {
+            log('Error parsing unassigned student: $e');
+          }
+        }
+      } else {
+        log('Error fetching unassigned students: ${response?.data}');
+        _unassignedHasMore = false;
+      }
+    } catch (e) {
+      log('Error fetching unassigned students: $e');
+      _unassignedHasMore = false;
+    } finally {
+      if (loadMore) {
+        _isUnassignedLoadingMore = false;
+      } else {
+        _isUnassignedLoading = false;
+      }
       notifyListeners();
     }
   }

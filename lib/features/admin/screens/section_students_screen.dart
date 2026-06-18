@@ -1,7 +1,8 @@
-import 'dart:developer';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/constants/api_path.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
@@ -243,7 +244,6 @@ class _SectionStudentsScreenState extends State<SectionStudentsScreen>
               .toList();
 
     return Scaffold(
-
       body: NestedScrollView(
         headerSliverBuilder: (ctx, _) => [
           SliverAppBar(
@@ -439,7 +439,6 @@ class _StatsBar extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: _kDivider),
         boxShadow: [
@@ -499,13 +498,10 @@ class _StatChip extends StatelessWidget {
       children: [
         Icon(icon, size: 16),
         const SizedBox(width: 4),
-        Text('$label: ', style: TextStyle(fontSize: 12,)),
+        Text('$label: ', style: TextStyle(fontSize: 12)),
         Text(
           value,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold
-          ),
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -760,11 +756,7 @@ class _MiniChip extends StatelessWidget {
           const SizedBox(width: 3),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 10,
-
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -891,11 +883,10 @@ class _AssignSectionStudentsSheet extends StatefulWidget {
 
 class _AssignSectionStudentsSheetState
     extends State<_AssignSectionStudentsSheet> {
-  List<Student> _unassigned = [];
-  bool _isLoading = true;
   bool _isAssigning = false;
   String _searchQuery = '';
-  String? _selectedFilterSectionId;
+  Timer? _debounce;
+  final ScrollController _scrollController = ScrollController();
 
   // Multi-select
   bool _multiSelectMode = false;
@@ -904,85 +895,33 @@ class _AssignSectionStudentsSheetState
   @override
   void initState() {
     super.initState();
-    _loadUnassignedStudents();
-  }
-
-  Future<void> _loadUnassignedStudents() async {
-    setState(() => _isLoading = true);
-    try {
-      final token = await StorageService.getToken();
-      if (token == null) throw Exception('No auth token');
-
-      // Fetch ALL students (no class filter)
-      final response = await DataProvider().performRequest(
-        'GET',
-        APIPath.fetchUsers,
-        query: {'role': 'student'},
-        header: {'Authorization': 'Bearer $token'},
+    _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<StudentsNotifier>().fetchUnassignedStudents(
+        sectionId: widget.section.id,
       );
-
-      if (response != null && response.statusCode == 200) {
-        final inner = response.data is Map
-            ? response.data['data']
-            : response.data;
-
-        log("UUUUD inner:: ${inner}");
-        final List<dynamic> data = inner is List
-            ? inner
-            : (inner is Map ? (inner['data'] as List<dynamic>? ?? []) : []);
-
-        final all = data
-            .map((e) {
-              try {
-                return Student.fromJson(e as Map<String, dynamic>);
-              } catch (_) {
-                return null;
-              }
-            })
-            .whereType<Student>()
-            .where((s) => !s.isDeleted)
-            .toList();
-        print("UUUUD all:: ${all}");
-        final unassigned = all.where((s) {
-          final sectionIds = s.user?.sectionIds ?? [];
-          return !sectionIds.contains(widget.section.id);
-        }).toList();
-
-        print("UUUUD${unassigned.length}");
-
-        setState(() {
-          _unassigned = unassigned;
-        });
-      }
-    } catch (e) {
-      log('_loadUnassignedStudents error: $e');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
+    });
   }
 
-  List<Student> get _filtered {
-    List<Student> list = _unassigned;
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
-    if (_selectedFilterSectionId != null) {
-      if (_selectedFilterSectionId!.isEmpty) {
-        list = list
-            .where((s) => s.sectionId == null || s.sectionId!.isEmpty)
-            .toList();
-      } else {
-        list = list
-            .where((s) => s.sectionId == _selectedFilterSectionId)
-            .toList();
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      final notifier = context.read<StudentsNotifier>();
+      if (!notifier.isUnassignedLoadingMore && notifier.unassignedHasMore) {
+        notifier.fetchUnassignedStudents(
+          sectionId: widget.section.id,
+          search: _searchQuery,
+          loadMore: true,
+        );
       }
     }
-
-    if (_searchQuery.isEmpty) return list;
-    return list.where((s) {
-      final name = (s.user?.name ?? '').toLowerCase();
-      final roll = s.rollId.toLowerCase();
-      final q = _searchQuery.toLowerCase();
-      return name.contains(q) || roll.contains(q);
-    }).toList();
   }
 
   // ── Assign single student ────────────────────────────────────────────────────
@@ -1004,9 +943,12 @@ class _AssignSectionStudentsSheetState
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token');
 
+      final notifier = context.read<StudentsNotifier>();
+      final unassigned = notifier.unassignedStudents;
+
       int successCount = 0;
       for (final uid in userIds) {
-        final student = _unassigned.firstWhere((s) => s.userId == uid);
+        final student = unassigned.firstWhere((s) => s.userId == uid);
         final currentClassIds = student.user?.classIds.toList() ?? [];
         final currentSectionIds = student.user?.sectionIds.toList() ?? [];
 
@@ -1061,7 +1003,10 @@ class _AssignSectionStudentsSheetState
         // Reload unassigned list
         _selectedIds.clear();
         _multiSelectMode = false;
-        await _loadUnassignedStudents();
+        await notifier.fetchUnassignedStudents(
+          sectionId: widget.section.id,
+          search: _searchQuery,
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -1080,206 +1025,238 @@ class _AssignSectionStudentsSheetState
 
   @override
   Widget build(BuildContext context) {
-    final filtered = _filtered;
+    final notifier = context.watch<StudentsNotifier>();
+    final filtered = notifier.unassignedStudents;
 
-    return Card(
-
-      child: Column(
-        children: [
-          // ── Handle ────────────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 4),
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
+    return SizedBox(
+      height: screenSize(context, 1.7),
+      child: Card(
+        child: Column(
+          children: [
+            // ── Handle ────────────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.only(top: 12, bottom: 4),
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
 
-          // ── Header ────────────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 16, 12),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: _kGrad),
-                    borderRadius: BorderRadius.circular(12),
+            // ── Header ────────────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 16, 12),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(colors: _kGrad),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.person_add_alt_1,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.person_add_alt_1,
-                    color: Colors.white,
-                    size: 20,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Assign Students',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'to Section ${widget.section.name}',
+                          style: TextStyle(fontSize: 12, color: _kTextMid),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Assign Students',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                  // Multi-select toggle
+                  _MultiSelectToggleBtn(
+                    active: _multiSelectMode,
+                    selectedCount: _selectedIds.length,
+                    onToggle: () {
+                      setState(() {
+                        _multiSelectMode = !_multiSelectMode;
+                        if (!_multiSelectMode) _selectedIds.clear();
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            const Divider(height: 1, color: Color(0xFFEDE9F8)),
+
+            // ── Search & Filter ────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF4F2FB),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFEDE9F8)),
+                      ),
+                      child: TextField(
+                        onChanged: (v) {
+                          _searchQuery = v;
+                          if (_debounce?.isActive ?? false) _debounce?.cancel();
+                          _debounce = Timer(
+                            const Duration(milliseconds: 500),
+                            () {
+                              context
+                                  .read<StudentsNotifier>()
+                                  .fetchUnassignedStudents(
+                                    sectionId: widget.section.id,
+                                    search: _searchQuery,
+                                  );
+                            },
+                          );
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Search name/roll…',
+                          hintStyle: TextStyle(color: _kTextMid, fontSize: 13),
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            color: _kPrimary,
+                            size: 20,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                          ),
                         ),
                       ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Multi-select action bar ────────────────────────────────────────
+            if (_multiSelectMode)
+              _MultiSelectActionBar(
+                selectedCount: _selectedIds.length,
+                totalCount: filtered.length,
+                isAssigning: _isAssigning,
+                onSelectAll: () {
+                  setState(() {
+                    if (_selectedIds.length == filtered.length) {
+                      _selectedIds.clear();
+                    } else {
+                      _selectedIds.addAll(filtered.map((s) => s.userId));
+                    }
+                  });
+                },
+                onAssign: _selectedIds.isEmpty ? null : _assignSelected,
+              ),
+
+            // ── List ──────────────────────────────────────────────────────────
+            Expanded(
+              child: notifier.isUnassignedLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation(_kPrimary),
+                      ),
+                    )
+                  : filtered.isEmpty
+                  ? _SheetEmptyState(hasSearch: _searchQuery.isNotEmpty)
+                  : ListView.separated(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                      itemCount:
+                          filtered.length +
+                          (notifier.unassignedHasMore ? 1 : 0),
+                      separatorBuilder: (_, __) => const SizedBox(height: 6),
+                      itemBuilder: (ctx, i) {
+                        if (i == filtered.length) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+                        final student = filtered[i];
+                        final isSelected = _selectedIds.contains(
+                          student.userId,
+                        );
+                        return _AssignStudentTile(
+                          student: student,
+                          index: i,
+                          isMultiSelectMode: _multiSelectMode,
+                          isSelected: isSelected,
+                          isAssigning: _isAssigning,
+                          onTap: () {
+                            if (_multiSelectMode) {
+                              setState(() {
+                                if (isSelected) {
+                                  _selectedIds.remove(student.userId);
+                                } else {
+                                  _selectedIds.add(student.userId);
+                                }
+                              });
+                            } else {
+                              _assignSingle(student);
+                            }
+                          },
+                          onLongPress: () {
+                            if (!_multiSelectMode) {
+                              setState(() {
+                                _multiSelectMode = true;
+                                _selectedIds.add(student.userId);
+                              });
+                            }
+                          },
+                        );
+                      },
+                    ),
+            ),
+
+            // ── Bottom hint ───────────────────────────────────────────────────
+            if (!notifier.isUnassignedLoading &&
+                !_multiSelectMode &&
+                filtered.isNotEmpty)
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.touch_app_outlined,
+                        size: 14,
+                        color: _kTextMid.withOpacity(0.7),
+                      ),
+                      const SizedBox(width: 6),
                       Text(
-                        'to Section ${widget.section.name}',
-                        style: TextStyle(fontSize: 12, color: _kTextMid),
+                        'Tap to assign one · Long-press for multi-select',
+                        style: TextStyle(
+                          color: _kTextMid.withOpacity(0.7),
+                          fontSize: 11,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                // Multi-select toggle
-                _MultiSelectToggleBtn(
-                  active: _multiSelectMode,
-                  selectedCount: _selectedIds.length,
-                  onToggle: () {
-                    setState(() {
-                      _multiSelectMode = !_multiSelectMode;
-                      if (!_multiSelectMode) _selectedIds.clear();
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
-
-          const Divider(height: 1, color: Color(0xFFEDE9F8)),
-
-          // ── Search & Filter ────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF4F2FB),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFEDE9F8)),
-                    ),
-                    child: TextField(
-                      onChanged: (v) => setState(() => _searchQuery = v),
-                      decoration: InputDecoration(
-                        hintText: 'Search name/roll…',
-                        hintStyle: TextStyle(color: _kTextMid, fontSize: 13),
-                        prefixIcon: const Icon(
-                          Icons.search,
-                          color: _kPrimary,
-                          size: 20,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // ── Multi-select action bar ────────────────────────────────────────
-          if (_multiSelectMode)
-            _MultiSelectActionBar(
-              selectedCount: _selectedIds.length,
-              totalCount: filtered.length,
-              isAssigning: _isAssigning,
-              onSelectAll: () {
-                setState(() {
-                  if (_selectedIds.length == filtered.length) {
-                    _selectedIds.clear();
-                  } else {
-                    _selectedIds.addAll(filtered.map((s) => s.userId));
-                  }
-                });
-              },
-              onAssign: _selectedIds.isEmpty ? null : _assignSelected,
-            ),
-
-          // ── List ──────────────────────────────────────────────────────────
-          Expanded(
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation(_kPrimary),
-                    ),
-                  )
-                : filtered.isEmpty
-                ? _SheetEmptyState(hasSearch: _searchQuery.isNotEmpty)
-                : ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                    itemCount: filtered.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 6),
-                    itemBuilder: (ctx, i) {
-                      final student = filtered[i];
-                      final isSelected = _selectedIds.contains(student.userId);
-                      return _AssignStudentTile(
-                        student: student,
-                        index: i,
-                        isMultiSelectMode: _multiSelectMode,
-                        isSelected: isSelected,
-                        isAssigning: _isAssigning,
-                        onTap: () {
-                          if (_multiSelectMode) {
-                            setState(() {
-                              if (isSelected) {
-                                _selectedIds.remove(student.userId);
-                              } else {
-                                _selectedIds.add(student.userId);
-                              }
-                            });
-                          } else {
-                            _assignSingle(student);
-                          }
-                        },
-                        onLongPress: () {
-                          if (!_multiSelectMode) {
-                            setState(() {
-                              _multiSelectMode = true;
-                              _selectedIds.add(student.userId);
-                            });
-                          }
-                        },
-                      );
-                    },
-                  ),
-          ),
-
-          // ── Bottom hint ───────────────────────────────────────────────────
-          if (!_isLoading && !_multiSelectMode && filtered.isNotEmpty)
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.touch_app_outlined,
-                      size: 14,
-                      color: _kTextMid.withOpacity(0.7),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Tap to assign one · Long-press for multi-select',
-                      style: TextStyle(
-                        color: _kTextMid.withOpacity(0.7),
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
