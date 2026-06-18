@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_school/core/theme/app_colors.dart';
-
-import '../../../configs/network/data_provider.dart';
 import 'package:smart_school/core/constants/api_path.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
 
+import '../../../configs/network/data_provider.dart';
 import '../../../models/school_models.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
@@ -355,8 +354,7 @@ class _SectionTabState extends State<_SectionTab> {
                   classes: schoolClasses,
                   selectedClassId: _selectedClassId,
                   accentColor: _kSectionGrad.first,
-                  onSelected: (id) =>
-                      setState(() => _selectedClassId = id),
+                  onSelected: (id) => setState(() => _selectedClassId = id),
                 ),
                 Expanded(
                   child: sections.isEmpty
@@ -390,7 +388,9 @@ class _SectionCard extends StatelessWidget {
     );
     final className = classObj.name;
     final teachers = context.watch<TeachersNotifier>().teachers;
-    final assignedTeachers = teachers.where((t) => t.user?.sectionIds.contains(section.id) == true).toList();
+    final assignedTeachers = teachers
+        .where((t) => t.user?.sectionIds.contains(section.id) == true)
+        .toList();
 
     return Card(
       child: Column(
@@ -456,27 +456,36 @@ class _SectionCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    const Icon(Icons.person_outline, size: 18, color: _kTextMid),
+                    const Icon(
+                      Icons.person_outline,
+                      size: 18,
+                      color: _kTextMid,
+                    ),
                     const SizedBox(width: 8),
-                    const Text('Teachers: ', style: TextStyle(fontSize: 13, color: _kTextMid)),
+
                     Expanded(
                       child: assignedTeachers.isEmpty
-                          ? const Text('None assigned', style: TextStyle(fontSize: 13, fontStyle: FontStyle.italic, color: _kTextMid))
+                          ? const Text(
+                              'None assigned',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontStyle: FontStyle.italic,
+                                color: _kTextMid,
+                              ),
+                            )
                           : SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
                                 children: assignedTeachers.map((t) {
                                   final name = t.user?.name ?? '?';
-                                  final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+
                                   return Padding(
                                     padding: const EdgeInsets.only(right: 6),
-                                    child: Tooltip(
-                                      message: name,
-                                      child: CircleAvatar(
-                                        radius: 12,
-                                        backgroundColor: _kPrimary.withOpacity(0.15),
-                                        foregroundColor: _kPrimary,
-                                        child: Text(initial, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                                    child: Text(
+                                      name,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   );
@@ -490,12 +499,16 @@ class _SectionCard extends StatelessWidget {
                           context: context,
                           isScrollControlled: true,
                           backgroundColor: Colors.transparent,
-                          builder: (_) => _AssignSectionTeachersSheet(section: section),
+                          builder: (_) =>
+                              _AssignSectionTeachersSheet(section: section),
                         );
                       },
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: _kPrimary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
@@ -503,9 +516,20 @@ class _SectionCard extends StatelessWidget {
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.manage_accounts, size: 14, color: _kPrimary),
+                            Icon(
+                              Icons.manage_accounts,
+                              size: 14,
+                              color: _kPrimary,
+                            ),
                             SizedBox(width: 4),
-                            Text('Manage', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: _kPrimary)),
+                            Text(
+                              'Manage',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: _kPrimary,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -588,8 +612,7 @@ class _SubjectTabState extends State<_SubjectTab> {
 
     // Filter by school then by selected class
     final subjects = notifier.subjects.where((s) {
-      final belongsToSchool =
-          user == null || s.schoolId == user.schoolId;
+      final belongsToSchool = user == null || s.schoolId == user.schoolId;
       final matchesClass =
           _selectedClassId == null || s.classId == _selectedClassId;
       return belongsToSchool && matchesClass;
@@ -610,8 +633,7 @@ class _SubjectTabState extends State<_SubjectTab> {
                   classes: schoolClasses,
                   selectedClassId: _selectedClassId,
                   accentColor: _kSubjectGrad.first,
-                  onSelected: (id) =>
-                      setState(() => _selectedClassId = id),
+                  onSelected: (id) => setState(() => _selectedClassId = id),
                 ),
                 Expanded(
                   child: subjects.isEmpty
@@ -797,9 +819,8 @@ class _ClassFilterBar extends StatelessWidget {
                   label: c.name,
                   isSelected: selectedClassId == c.id,
                   accentColor: accentColor,
-                  onTap: () => onSelected(
-                    selectedClassId == c.id ? null : c.id,
-                  ),
+                  onTap: () =>
+                      onSelected(selectedClassId == c.id ? null : c.id),
                 ),
               ),
             ),
@@ -829,15 +850,12 @@ class _FilterChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
           color: isSelected ? accentColor : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected
-                ? accentColor
-                : _kDivider,
+            color: isSelected ? accentColor : _kDivider,
             width: 1.5,
           ),
           boxShadow: isSelected
@@ -854,8 +872,7 @@ class _FilterChip extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 13,
-            fontWeight:
-                isSelected ? FontWeight.w700 : FontWeight.w500,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             color: isSelected ? Colors.white : _kTextMid,
           ),
         ),
@@ -931,10 +948,7 @@ class _InfoRow extends StatelessWidget {
       children: [
         Icon(icon, size: 16),
         const SizedBox(width: 8),
-        Text(
-          '$label: ',
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-        ),
+
         Expanded(
           child: Text(
             value,
@@ -961,9 +975,8 @@ class _AddFab extends StatelessWidget {
         width: 56,
         height: 56,
         decoration: BoxDecoration(
-         color: AppColors.primaryAdmin,
+          color: AppColors.primaryAdmin,
           borderRadius: BorderRadius.circular(16),
-
         ),
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
@@ -1659,10 +1672,12 @@ class _AssignSectionTeachersSheet extends StatefulWidget {
   const _AssignSectionTeachersSheet({required this.section});
 
   @override
-  State<_AssignSectionTeachersSheet> createState() => _AssignSectionTeachersSheetState();
+  State<_AssignSectionTeachersSheet> createState() =>
+      _AssignSectionTeachersSheetState();
 }
 
-class _AssignSectionTeachersSheetState extends State<_AssignSectionTeachersSheet> {
+class _AssignSectionTeachersSheetState
+    extends State<_AssignSectionTeachersSheet> {
   final Set<String> _selectedIds = {};
   bool _isSaving = false;
 
@@ -1688,7 +1703,8 @@ class _AssignSectionTeachersSheetState extends State<_AssignSectionTeachersSheet
 
       for (final teacher in teachers) {
         final uid = teacher.userId;
-        final wasAssigned = teacher.user?.sectionIds.contains(widget.section.id) == true;
+        final wasAssigned =
+            teacher.user?.sectionIds.contains(widget.section.id) == true;
         final isAssignedNow = _selectedIds.contains(uid);
 
         if (wasAssigned != isAssignedNow) {
@@ -1708,7 +1724,10 @@ class _AssignSectionTeachersSheetState extends State<_AssignSectionTeachersSheet
           final resp = await DataProvider().performRequest(
             'PUT',
             '${APIPath.fetchUsers}/$uid',
-            data: {'classIds': currentClassIds, 'sectionIds': currentSectionIds},
+            data: {
+              'classIds': currentClassIds,
+              'sectionIds': currentSectionIds,
+            },
             header: {'Authorization': 'Bearer $token'},
           );
         }
@@ -1716,7 +1735,10 @@ class _AssignSectionTeachersSheetState extends State<_AssignSectionTeachersSheet
 
       if (mounted) {
         Navigator.pop(context);
-        _showSuccessSnackBar(context, 'Updated teachers for Section ${widget.section.name}');
+        _showSuccessSnackBar(
+          context,
+          'Updated teachers for Section ${widget.section.name}',
+        );
         teachersNotifier.fetchTeachers();
       }
     } catch (e) {
@@ -1756,11 +1778,17 @@ class _AssignSectionTeachersSheetState extends State<_AssignSectionTeachersSheet
                 children: [
                   Text(
                     'Assign Teachers to ${widget.section.name}',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   TextButton(
                     onPressed: _isSaving ? null : () => Navigator.pop(context),
-                    child: const Text('Cancel', style: TextStyle(color: _kTextMid)),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: _kTextMid),
+                    ),
                   ),
                 ],
               ),
@@ -1776,7 +1804,7 @@ class _AssignSectionTeachersSheetState extends State<_AssignSectionTeachersSheet
                   final name = teacher.user?.name ?? 'Unknown';
                   final isSelected = _selectedIds.contains(teacher.userId);
                   final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
-        
+
                   return InkWell(
                     onTap: _isSaving
                         ? null
@@ -1791,11 +1819,18 @@ class _AssignSectionTeachersSheetState extends State<_AssignSectionTeachersSheet
                           },
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
-                        color: isSelected ? _kPrimary.withOpacity(0.05) : Colors.transparent,
+                        color: isSelected
+                            ? _kPrimary.withOpacity(0.05)
+                            : Colors.transparent,
                         border: Border.all(
-                          color: isSelected ? _kPrimary.withOpacity(0.3) : _kDivider,
+                          color: isSelected
+                              ? _kPrimary.withOpacity(0.3)
+                              : _kDivider,
                         ),
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -1804,18 +1839,31 @@ class _AssignSectionTeachersSheetState extends State<_AssignSectionTeachersSheet
                           CircleAvatar(
                             backgroundColor: _kPrimary.withOpacity(0.1),
                             foregroundColor: _kPrimary,
-                            child: Text(initial, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            child: Text(
+                              initial,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                                Text(
+                                  name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 if (teacher.designation.isNotEmpty)
                                   Text(
                                     teacher.designation,
-                                    style: const TextStyle(fontSize: 12, color: _kTextMid),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: _kTextMid,
+                                    ),
                                   ),
                               ],
                             ),
@@ -1823,7 +1871,10 @@ class _AssignSectionTeachersSheetState extends State<_AssignSectionTeachersSheet
                           if (isSelected)
                             const Icon(Icons.check_circle, color: _kPrimary)
                           else
-                            const Icon(Icons.radio_button_unchecked, color: Colors.grey),
+                            const Icon(
+                              Icons.radio_button_unchecked,
+                              color: Colors.grey,
+                            ),
                         ],
                       ),
                     ),
@@ -1838,7 +1889,7 @@ class _AssignSectionTeachersSheetState extends State<_AssignSectionTeachersSheet
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _kPrimary,
                   foregroundColor: Colors.white,
-        
+
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -1848,12 +1899,21 @@ class _AssignSectionTeachersSheetState extends State<_AssignSectionTeachersSheet
                     ? const SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
                       )
                     : Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: const Text('Save Assignments', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    ),
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: const Text(
+                          'Save Assignments',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
               ),
             ),
           ],
