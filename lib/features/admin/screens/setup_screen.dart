@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 
+import '../../../configs/network/data_provider.dart';
+import 'package:smart_school/core/constants/api_path.dart';
+import 'package:smart_school/core/utils/storage_service.dart';
+
 import '../../../models/school_models.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
@@ -385,6 +389,8 @@ class _SectionCard extends StatelessWidget {
       orElse: () => ClassRoom(id: '', name: 'Unknown'),
     );
     final className = classObj.name;
+    final teachers = context.watch<TeachersNotifier>().teachers;
+    final assignedTeachers = teachers.where((t) => t.user?.sectionIds.contains(section.id) == true).toList();
 
     return Card(
       child: Column(
@@ -447,11 +453,64 @@ class _SectionCard extends StatelessWidget {
                   label: 'Class',
                   value: className,
                 ),
-                const SizedBox(height: 8),
-                _InfoRow(
-                  icon: Icons.person_outline,
-                  label: 'Teacher',
-                  value: section.teacherInfo?.name ?? 'Not Assigned',
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Icon(Icons.person_outline, size: 18, color: _kTextMid),
+                    const SizedBox(width: 8),
+                    const Text('Teachers: ', style: TextStyle(fontSize: 13, color: _kTextMid)),
+                    Expanded(
+                      child: assignedTeachers.isEmpty
+                          ? const Text('None assigned', style: TextStyle(fontSize: 13, fontStyle: FontStyle.italic, color: _kTextMid))
+                          : SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: assignedTeachers.map((t) {
+                                  final name = t.user?.name ?? '?';
+                                  final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 6),
+                                    child: Tooltip(
+                                      message: name,
+                                      child: CircleAvatar(
+                                        radius: 12,
+                                        backgroundColor: _kPrimary.withOpacity(0.15),
+                                        foregroundColor: _kPrimary,
+                                        child: Text(initial, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => _AssignSectionTeachersSheet(section: section),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: _kPrimary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.manage_accounts, size: 14, color: _kPrimary),
+                            SizedBox(width: 4),
+                            Text('Manage', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: _kPrimary)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const Divider(color: _kDivider, height: 24),
                 Wrap(
@@ -477,12 +536,6 @@ class _SectionCard extends StatelessWidget {
                           _showViewSectionDialog(context, section, className);
                         }
                       },
-                    ),
-                    _ActionChip(
-                      icon: Icons.person_add_alt_1_outlined,
-                      label: 'Assign',
-                      color: const Color(0xFFF59E0B),
-                      onTap: () => _showAssignTeacherDialog(context, section),
                     ),
                     _ActionChip(
                       icon: Icons.edit_outlined,
@@ -1597,64 +1650,214 @@ void _confirmDelete(
 }
 
 // ═══════════════════════════════════════════════════════════
-//  Dialog: Assign Teacher to Section
+//  Bottom Sheet: Assign Teachers to Section
 // ═══════════════════════════════════════════════════════════
-void _showAssignTeacherDialog(BuildContext context, Section section) {
-  final teachers = context.read<TeachersNotifier>().teachers;
-  String? selectedTeacherId = section.teacherId;
 
-  if (selectedTeacherId != null && !teachers.any((t) => t.userId == selectedTeacherId)) {
-    selectedTeacherId = null;
+class _AssignSectionTeachersSheet extends StatefulWidget {
+  final Section section;
+
+  const _AssignSectionTeachersSheet({required this.section});
+
+  @override
+  State<_AssignSectionTeachersSheet> createState() => _AssignSectionTeachersSheetState();
+}
+
+class _AssignSectionTeachersSheetState extends State<_AssignSectionTeachersSheet> {
+  final Set<String> _selectedIds = {};
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final teachers = context.read<TeachersNotifier>().teachers;
+    for (final t in teachers) {
+      if (t.user?.sectionIds.contains(widget.section.id) == true) {
+        _selectedIds.add(t.userId);
+      }
+    }
   }
 
-  _showStyledDialog(
-    context: context,
-    title: 'Assign Teacher',
-    gradientColors: _kSectionGrad,
-    confirmLabel: 'Assign',
-    body: StatefulBuilder(
-      builder: (ctx, setState) => Column(
-        mainAxisSize: MainAxisSize.min,
+  Future<void> _save() async {
+    final teachersNotifier = context.read<TeachersNotifier>();
+    setState(() => _isSaving = true);
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token');
+
+      final teachers = teachersNotifier.teachers;
+
+      for (final teacher in teachers) {
+        final uid = teacher.userId;
+        final wasAssigned = teacher.user?.sectionIds.contains(widget.section.id) == true;
+        final isAssignedNow = _selectedIds.contains(uid);
+
+        if (wasAssigned != isAssignedNow) {
+          final currentClassIds = teacher.user?.classIds.toList() ?? [];
+          final currentSectionIds = teacher.user?.sectionIds.toList() ?? [];
+
+          if (isAssignedNow) {
+            currentSectionIds.add(widget.section.id);
+            if (!currentClassIds.contains(widget.section.classId)) {
+              currentClassIds.add(widget.section.classId);
+            }
+          } else {
+            currentSectionIds.remove(widget.section.id);
+            // Leaving classId intact as it might be used for other sections of the same class
+          }
+
+          final resp = await DataProvider().performRequest(
+            'PUT',
+            '${APIPath.fetchUsers}/$uid',
+            data: {'classIds': currentClassIds, 'sectionIds': currentSectionIds},
+            header: {'Authorization': 'Bearer $token'},
+          );
+        }
+      }
+
+      if (mounted) {
+        Navigator.pop(context);
+        _showSuccessSnackBar(context, 'Updated teachers for Section ${widget.section.name}');
+        teachersNotifier.fetchTeachers();
+      }
+    } catch (e) {
+      if (mounted) {
+        _showErrorSnackBar(context, 'Error saving assignments: $e');
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final teachers = context.watch<TeachersNotifier>().teachers;
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.85,
+      decoration: const BoxDecoration(
+        color: _kBg,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
         children: [
-          DropdownButtonFormField<String>(
-            value: selectedTeacherId,
-            decoration: _inputDec('Select Teacher', icon: Icons.person_outline),
-            items: teachers
-                .map((t) => DropdownMenuItem(value: t.userId, child: Text(t.user?.name ?? 'Unknown')))
-                .toList(),
-            onChanged: (v) => setState(() => selectedTeacherId = v),
+          // Handle
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Assign Teachers to ${widget.section.name}',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                TextButton(
+                  onPressed: _isSaving ? null : () => Navigator.pop(context),
+                  child: const Text('Cancel', style: TextStyle(color: _kTextMid)),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: teachers.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              itemBuilder: (ctx, i) {
+                final teacher = teachers[i];
+                final name = teacher.user?.name ?? 'Unknown';
+                final isSelected = _selectedIds.contains(teacher.userId);
+                final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+
+                return InkWell(
+                  onTap: _isSaving
+                      ? null
+                      : () {
+                          setState(() {
+                            if (isSelected) {
+                              _selectedIds.remove(teacher.userId);
+                            } else {
+                              _selectedIds.add(teacher.userId);
+                            }
+                          });
+                        },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isSelected ? _kPrimary.withOpacity(0.05) : Colors.white,
+                      border: Border.all(
+                        color: isSelected ? _kPrimary.withOpacity(0.3) : _kDivider,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: _kPrimary.withOpacity(0.1),
+                          foregroundColor: _kPrimary,
+                          child: Text(initial, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                              if (teacher.designation.isNotEmpty)
+                                Text(
+                                  teacher.designation,
+                                  style: const TextStyle(fontSize: 12, color: _kTextMid),
+                                ),
+                            ],
+                          ),
+                        ),
+                        if (isSelected)
+                          const Icon(Icons.check_circle, color: _kPrimary)
+                        else
+                          const Icon(Icons.radio_button_unchecked, color: Colors.grey),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: ElevatedButton(
+              onPressed: _isSaving ? null : _save,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _kPrimary,
+                foregroundColor: Colors.white,
+
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Text('Save Assignments', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ),
           ),
         ],
       ),
-    ),
-    onConfirm: () async {
-      if (selectedTeacherId != null) {
-        final teacher = teachers.firstWhere((t) => t.userId == selectedTeacherId);
-        
-        final mappedTeacher = Teacher(
-          id: teacher.userId,
-          name: teacher.user?.name ?? 'Unknown',
-          email: teacher.user?.email,
-          phone: teacher.user?.phone,
-          designation: teacher.designation,
-        );
-
-        final success = await context.read<SectionSetupNotifier>().updateSection(
-          section.id,
-          section.classId,
-          section.name,
-          teacherId: selectedTeacherId,
-          teacherInfo: mappedTeacher,
-        );
-
-        if (context.mounted) {
-          if (success) {
-            _showSuccessSnackBar(context, 'Teacher assigned successfully');
-          } else {
-            _showErrorSnackBar(context, 'Failed to assign teacher');
-          }
-        }
-      }
-    },
-  );
+    );
+  }
 }
