@@ -97,9 +97,9 @@ class _SchoolManagementDetailsScreenState
       body: TabBarView(
         controller: _tabController,
         children: [
-          _UserListTab(role: 'teacher'),
-          _UserListTab(role: 'student'),
-          _UserListTab(role: 'admin'),
+          _UserListTab(role: 'teacher', schoolId: widget.school.schoolId),
+          _UserListTab(role: 'student', schoolId: widget.school.schoolId),
+          _UserListTab(role: 'admin', schoolId: widget.school.schoolId),
         ],
       ),
     );
@@ -108,8 +108,9 @@ class _SchoolManagementDetailsScreenState
 
 class _UserListTab extends StatelessWidget {
   final String role;
+  final String schoolId;
 
-  const _UserListTab({required this.role});
+  const _UserListTab({required this.role, required this.schoolId});
 
   @override
   Widget build(BuildContext context) {
@@ -120,16 +121,26 @@ class _UserListTab extends StatelessWidget {
     >(
       builder: (context, notifier, classNotifier, sectionNotifier, child) {
         final List<User> users;
+
         final bool isLoading;
 
         if (role == 'teacher') {
-          users = notifier.teachers;
+          users = notifier.teachers
+              .where((user) => user.schoolId == schoolId)
+              .toList();
+
           isLoading = notifier.isLoadingTeachers;
         } else if (role == 'student') {
-          users = notifier.students;
+          users = notifier.students
+              .where((user) => user.schoolId == schoolId)
+              .toList();
+
           isLoading = notifier.isLoadingStudents;
         } else {
-          users = notifier.admins;
+          users = notifier.admins
+              .where((user) => user.schoolId == schoolId)
+              .toList();
+
           isLoading = notifier.isLoadingAdmins;
         }
 
@@ -160,7 +171,9 @@ class _UserListTab extends StatelessWidget {
         if (role == 'teacher' || role == 'student') {
           final Map<String, List<User>> groupedUsers = {};
           for (var user in users) {
-            final classId = user.classIds.isNotEmpty ? user.classIds.first : 'unassigned';
+            final classId = user.classIds.isNotEmpty
+                ? user.classIds.first
+                : 'unassigned';
             if (!groupedUsers.containsKey(classId)) {
               groupedUsers[classId] = [];
             }
@@ -243,7 +256,7 @@ class _UserListTab extends StatelessWidget {
                     (user) => _UserCard(
                       user: user,
                       className: className,
-                      sectionName: user.sectionIds.first.isNotEmpty
+                      sectionName: user.sectionIds.isNotEmpty && user.sectionIds.first.isNotEmpty
                           ? sectionNotifier.sections
                                 .firstWhere(
                                   (s) => s.id == user.sectionIds.first,
