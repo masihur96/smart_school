@@ -891,6 +891,7 @@ class _AssignSectionStudentsSheetState
   // Multi-select
   bool _multiSelectMode = false;
   final Set<String> _selectedIds = {};
+  final Map<String, String> _rollNumbers = {};
 
   @override
   void initState() {
@@ -951,6 +952,7 @@ class _AssignSectionStudentsSheetState
         final student = unassigned.firstWhere((s) => s.userId == uid);
         final currentClassIds = student.user?.classIds.toList() ?? [];
         final currentSectionIds = student.user?.sectionIds.toList() ?? [];
+        final assignedRoll = _rollNumbers[uid] ?? student.rollId;
 
         if (!currentClassIds.contains(widget.classRoom.id)) {
           currentClassIds.add(widget.classRoom.id);
@@ -962,7 +964,14 @@ class _AssignSectionStudentsSheetState
         final resp = await DataProvider().performRequest(
           'PUT',
           '${APIPath.fetchUsers}/$uid',
-          data: {'classIds': currentClassIds, 'sectionIds': currentSectionIds},
+          data: {
+            'classIds': currentClassIds,
+            'sectionIds': currentSectionIds,
+            if (assignedRoll.isNotEmpty) ...{
+              'rollId': assignedRoll,
+              'rollNumber': assignedRoll,
+            },
+          },
           header: {'Authorization': 'Bearer $token'},
         );
         if (resp != null && resp.statusCode == 200) successCount++;
@@ -1202,6 +1211,10 @@ class _AssignSectionStudentsSheetState
                           isMultiSelectMode: _multiSelectMode,
                           isSelected: isSelected,
                           isAssigning: _isAssigning,
+                          initialRoll: _rollNumbers[student.userId],
+                          onRollChanged: (val) {
+                            _rollNumbers[student.userId] = val;
+                          },
                           onTap: () {
                             if (_multiSelectMode) {
                               setState(() {
@@ -1531,7 +1544,7 @@ class _MultiSelectActionBar extends StatelessWidget {
 
 // ─── Assign student tile ──────────────────────────────────────────────────────
 
-class _AssignStudentTile extends StatelessWidget {
+class _AssignStudentTile extends StatefulWidget {
   final Student student;
   final int index;
   final bool isMultiSelectMode;
@@ -1539,6 +1552,8 @@ class _AssignStudentTile extends StatelessWidget {
   final bool isAssigning;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
+  final String? initialRoll;
+  final ValueChanged<String>? onRollChanged;
 
   const _AssignStudentTile({
     required this.student,
@@ -1548,7 +1563,40 @@ class _AssignStudentTile extends StatelessWidget {
     required this.isAssigning,
     required this.onTap,
     required this.onLongPress,
+    this.initialRoll,
+    this.onRollChanged,
   });
+
+  @override
+  State<_AssignStudentTile> createState() => _AssignStudentTileState();
+}
+
+class _AssignStudentTileState extends State<_AssignStudentTile> {
+  late final TextEditingController _rollCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _rollCtrl = TextEditingController(
+      text: widget.initialRoll ?? widget.student.rollId,
+    );
+  }
+
+  @override
+  void didUpdateWidget(_AssignStudentTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialRoll != oldWidget.initialRoll) {
+      if (widget.initialRoll != _rollCtrl.text) {
+        _rollCtrl.text = widget.initialRoll ?? widget.student.rollId;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _rollCtrl.dispose();
+    super.dispose();
+  }
 
   Color get _color {
     const colors = [
@@ -1558,30 +1606,34 @@ class _AssignStudentTile extends StatelessWidget {
       Color(0xFFF59E0B),
       Color(0xFFEF4444),
     ];
-    return colors[index % colors.length];
+    return colors[widget.index % colors.length];
   }
 
   @override
   Widget build(BuildContext context) {
-    final name = student.user?.name ?? 'Unknown';
+    final name = widget.student.user?.name ?? 'Unknown';
     final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
-    final currentClass = student.className;
-    final currentSection = student.sectionName;
+    final currentClass = widget.student.className;
+    final currentSection = widget.student.sectionName;
 
     return GestureDetector(
-      onTap: isAssigning ? null : onTap,
-      onLongPress: isAssigning ? null : onLongPress,
+      onTap: widget.isAssigning ? null : widget.onTap,
+      onLongPress: widget.isAssigning ? null : widget.onLongPress,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? _kPrimary.withOpacity(0.06) : Colors.transparent,
+          color:
+              widget.isSelected
+                  ? _kPrimary.withOpacity(0.06)
+                  : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected
-                ? _kPrimary.withOpacity(0.4)
-                : const Color(0xFFEDE9F8),
-            width: isSelected ? 1.5 : 1,
+            color:
+                widget.isSelected
+                    ? _kPrimary.withOpacity(0.4)
+                    : const Color(0xFFEDE9F8),
+            width: widget.isSelected ? 1.5 : 1,
           ),
           boxShadow: [
             BoxShadow(
@@ -1594,23 +1646,25 @@ class _AssignStudentTile extends StatelessWidget {
         child: Row(
           children: [
             // Checkbox or Avatar
-            if (isMultiSelectMode)
+            if (widget.isMultiSelectMode)
               AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
                 width: 24,
                 height: 24,
                 margin: const EdgeInsets.only(right: 10),
                 decoration: BoxDecoration(
-                  color: isSelected ? _kPrimary : Colors.transparent,
+                  color: widget.isSelected ? _kPrimary : Colors.transparent,
                   borderRadius: BorderRadius.circular(7),
                   border: Border.all(
-                    color: isSelected ? _kPrimary : Colors.grey.shade400,
+                    color:
+                        widget.isSelected ? _kPrimary : Colors.grey.shade400,
                     width: 1.5,
                   ),
                 ),
-                child: isSelected
-                    ? const Icon(Icons.check, size: 16, color: Colors.white)
-                    : null,
+                child:
+                    widget.isSelected
+                        ? const Icon(Icons.check, size: 16, color: Colors.white)
+                        : null,
               )
             else
               Container(
@@ -1644,39 +1698,72 @@ class _AssignStudentTile extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       fontSize: 13.5,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 3),
-                  Row(
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
                     children: [
-                      _MiniChip(
-                        icon: Icons.tag,
-                        label: 'Roll: ${student.rollId}',
-                        color: _kPrimary,
-                      ),
-                      if (currentClass != null) ...[
-                        const SizedBox(width: 5),
+                      if (currentClass != null)
                         _MiniChip(
                           icon: Icons.class_outlined,
                           label: currentClass,
                           color: const Color(0xFF0EA5E9),
                         ),
-                      ],
-                      if (currentSection != null) ...[
-                        const SizedBox(width: 5),
+                      if (currentSection != null)
                         _MiniChip(
                           icon: Icons.tab_outlined,
                           label: 'Sec: $currentSection',
                           color: const Color(0xFF10B981),
                         ),
-                      ],
                     ],
                   ),
                 ],
               ),
             ),
 
+            // Roll number field
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 70,
+              height: 36,
+              child: TextField(
+                controller: _rollCtrl,
+                enabled: !widget.isAssigning,
+                onChanged: widget.onRollChanged,
+                decoration: InputDecoration(
+                  hintText: 'Roll No',
+                  hintStyle: const TextStyle(fontSize: 11, color: Colors.grey),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 0,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFFEDE9F8)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFFEDE9F8)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFF6C3CE1)),
+                  ),
+                ),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+                keyboardType: TextInputType.text,
+              ),
+            ),
+            const SizedBox(width: 10),
+
             // Action
-            if (!isMultiSelectMode)
+            if (!widget.isMultiSelectMode)
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
