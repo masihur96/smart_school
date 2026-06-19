@@ -163,8 +163,25 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
               ElevatedButton.icon(
                 onPressed: () async {
                   final url = Uri.parse(notice.avatar!);
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url);
+                  try {
+                    bool launched = await launchUrl(
+                      url,
+                      mode: LaunchMode.externalApplication,
+                    );
+                    if (!launched) {
+                      launched = await launchUrl(url, mode: LaunchMode.platformDefault);
+                    }
+                    if (!launched && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Could not open attachment')),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Could not open attachment')),
+                      );
+                    }
                   }
                 },
                 icon: const Icon(Icons.attach_file, size: 16),
@@ -804,14 +821,36 @@ class _NoticeCard extends StatelessWidget {
                   ),
                 const Spacer(),
                 if (notice.avatar != null)
-    GestureDetector(
-    onTap: (){},
-    child: Icon(
-    Icons.attach_file,
-    size: 16,
-    color: Colors.purple,
-    ),
-    ),
+                  GestureDetector(
+                    onTap: () async {
+                      final url = Uri.parse(notice.avatar!);
+                      try {
+                        bool launched = await launchUrl(
+                          url,
+                          mode: LaunchMode.externalApplication,
+                        );
+                        if (!launched) {
+                          launched = await launchUrl(url, mode: LaunchMode.platformDefault);
+                        }
+                        if (!launched && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Could not open attachment')),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Could not open attachment')),
+                          );
+                        }
+                      }
+                    },
+                    child: const Icon(
+                      Icons.attach_file,
+                      size: 16,
+                      color: Colors.purple,
+                    ),
+                  ),
 
 
                 const SizedBox(width: 10),
