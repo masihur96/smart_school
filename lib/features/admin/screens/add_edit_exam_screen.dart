@@ -276,7 +276,8 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
 
   // ── Add/Edit assignment bottom sheet ────────────────────────────────────
   void _addAssignmentSheet({int? index}) {
-    final classes = context.read<ClassSetupNotifier>().classes;
+    final user = context.read<AuthNotifier>().user;
+    final classes = context.read<ClassSetupNotifier>().classes.where((c) => c.schoolId == user?.schoolId).toList();
     final allSubjects = context.read<SubjectSetupNotifier>().subjects;
     final teachers = context.read<TeachersNotifier>().teachers;
 
