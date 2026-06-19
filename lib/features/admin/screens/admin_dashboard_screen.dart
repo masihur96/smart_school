@@ -51,9 +51,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   String _getTitle(AppLocalizations l10n) {
+    final authNotifier = context.watch<AuthNotifier>();
     switch (_selectedIndex) {
       case 0:
-        return l10n.adminDashboard;
+        return authNotifier.user?.school?.name??l10n.studentManagement;
       case 1:
         return l10n.studentManagement;
       case 2:
@@ -100,6 +101,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
+          leadingWidth: screenSize(context, .07),
           title: Text(
             _getTitle(l10n),
             style: TextStyle(color: AppColors.white),
