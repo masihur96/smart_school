@@ -303,7 +303,7 @@ $text
           children: [
             CircleAvatar(
               backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-              child: Icon(Icons.school),
+              child: Icon(Icons.school, color: AppColors.white),
             ),
             const SizedBox(width: 12),
             Expanded(
