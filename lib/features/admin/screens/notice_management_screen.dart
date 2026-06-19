@@ -804,11 +804,15 @@ class _NoticeCard extends StatelessWidget {
                   ),
                 const Spacer(),
                 if (notice.avatar != null)
-                  const Icon(
-                    Icons.attach_file,
-                    size: 16,
-                    color: Colors.purple,
-                  ),
+    GestureDetector(
+    onTap: (){},
+    child: Icon(
+    Icons.attach_file,
+    size: 16,
+    color: Colors.purple,
+    ),
+    ),
+
 
                 const SizedBox(width: 10),
               ],
