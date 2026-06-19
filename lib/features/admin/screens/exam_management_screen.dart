@@ -636,61 +636,81 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
   void _updatePublishStatus(BuildContext context, Exam exam, bool newStatus) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(newStatus ? 'Publish Result' : 'Unpublish Result'),
-        content: Text(
-          'Are you sure you want to ${newStatus ? 'publish' : 'unpublish'} the results for ${exam.name}?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)!.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              List<String> receiverUuids = [];
-              if (newStatus) {
-                final teacherIds = context
-                    .read<TeachersNotifier>()
-                    .teachers
-                    .map((t) => t.userId)
-                    .where((id) => id.isNotEmpty)
-                    .toList();
-                final studentIds = context
-                    .read<StudentsNotifier>()
-                    .students
-                    .map((s) => s.userId)
-                    .where((id) => id.isNotEmpty)
-                    .toList();
-                receiverUuids = [...teacherIds, ...studentIds];
-              }
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        bool isPublishing = false;
 
-              await context.read<ExamsNotifier>().updatePublishStatus(
-                exam.id,
-                newStatus,
-                examName: exam.name,
-                receiverUuids: receiverUuids,
-              );
-              if (context.mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Results ${newStatus ? 'published' : 'unpublished'} successfully!',
-                    ),
-                    backgroundColor: newStatus ? Colors.green : Colors.grey,
-                  ),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: newStatus ? Colors.purple : Colors.grey.shade700,
-              foregroundColor: Colors.white,
+        return StatefulBuilder(
+          builder: (stateContext, setState) => AlertDialog(
+            title: Text(newStatus ? 'Publish Result' : 'Unpublish Result'),
+            content: Text(
+              'Are you sure you want to ${newStatus ? 'publish' : 'unpublish'} the results for ${exam.name}?',
             ),
-            child: Text(newStatus ? 'Publish' : 'Unpublish'),
+            actions: [
+              TextButton(
+                onPressed: isPublishing ? null : () => Navigator.pop(dialogContext),
+                child: Text(AppLocalizations.of(context)!.cancel),
+              ),
+              ElevatedButton(
+                onPressed: isPublishing
+                    ? null
+                    : () async {
+                        setState(() => isPublishing = true);
+                        List<String> receiverUuids = [];
+                        if (newStatus) {
+                          final teacherIds = context
+                              .read<TeachersNotifier>()
+                              .teachers
+                              .map((t) => t.userId)
+                              .where((id) => id.isNotEmpty)
+                              .toList();
+                          final studentIds = context
+                              .read<StudentsNotifier>()
+                              .students
+                              .map((s) => s.userId)
+                              .where((id) => id.isNotEmpty)
+                              .toList();
+                          receiverUuids = [...teacherIds, ...studentIds];
+                        }
+
+                        await context.read<ExamsNotifier>().updatePublishStatus(
+                          exam.id,
+                          newStatus,
+                          examName: exam.name,
+                          receiverUuids: receiverUuids,
+                        );
+                        if (dialogContext.mounted) {
+                          Navigator.pop(dialogContext);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Results ${newStatus ? 'published' : 'unpublished'} successfully!',
+                              ),
+                              backgroundColor: newStatus ? Colors.green : Colors.grey,
+                            ),
+                          );
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: newStatus ? Colors.purple : Colors.grey.shade700,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(110, 38),
+                ),
+                child: isPublishing
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
+                      )
+                    : Text(newStatus ? 'Publish' : 'Unpublish'),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
