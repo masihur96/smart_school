@@ -126,7 +126,12 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
 
   @override
   Widget build(BuildContext context) {
-    final classes = context.watch<ClassSetupNotifier>().classes;
+
+    final user = context.read<AuthNotifier>().user;
+
+    // final classes = classNotifier.classes.where((c) => c.schoolId == user?.schoolId).toList();
+
+    final classes = context.watch<ClassSetupNotifier>().classes.where((c) => c.schoolId == user?.schoolId).toList();
     final sections = context.watch<SectionSetupNotifier>().sections;
     final filteredSections = sections
         .where((s) => s.classId == _selectedClassId)
