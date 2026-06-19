@@ -110,6 +110,10 @@ class _StudentAttendanceManagementScreenState
     final sectionProvider = context.watch<SectionSetupNotifier>();
     final subjectProvider = context.watch<SubjectSetupNotifier>();
 
+    final user = context.read<AuthNotifier>().user;
+
+
+
     final filteredSections = _selectedClassId == null
         ? sectionProvider.sections
         : sectionProvider.sections
@@ -197,6 +201,7 @@ class _StudentAttendanceManagementScreenState
                   ],
                 ),
                 const SizedBox(height: 12),
+
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -204,7 +209,7 @@ class _StudentAttendanceManagementScreenState
                       _buildFilterDropdown<ClassRoom>(
                         hint: "Class",
                         value: _selectedClassId,
-                        items: classProvider.classes,
+                        items: classProvider.classes.where((c) => c.schoolId == user?.schoolId).toList(),
                         itemLabel: (item) => item.name,
                         itemValue: (item) => item.id,
                         onChanged: (value) {
@@ -416,6 +421,8 @@ class _StudentAttendanceManagementScreenState
       );
       return;
     }
+
+
 
     final className = _selectedClassId != null
         ? classProvider.classes
