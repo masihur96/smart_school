@@ -164,17 +164,23 @@ class _TeacherNoticeScreenState extends State<TeacherNoticeScreen> {
                           padding: EdgeInsets.zero,
                           onPressed: () async {
                             final url = Uri.parse(notice.fileUrl!);
-                            if (await canLaunchUrl(url)) {
-                              await launchUrl(
+                            try {
+                              bool launched = await launchUrl(
                                 url,
                                 mode: LaunchMode.externalApplication,
                               );
-                            } else {
+                              if (!launched) {
+                                launched = await launchUrl(url, mode: LaunchMode.platformDefault);
+                              }
+                              if (!launched && context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Could not open attachment')),
+                                );
+                              }
+                            } catch (e) {
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Could not open attachment'),
-                                  ),
+                                  const SnackBar(content: Text('Could not open attachment')),
                                 );
                               }
                             }
