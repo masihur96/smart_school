@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/ai_tutor/model/chat_model.dart';
 import 'package:smart_school/features/ai_tutor/service/chat_repository.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
@@ -292,17 +293,17 @@ $text
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F9), // Light professional background
       appBar: AppBar(
         elevation: 0,
-        // backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        leading: BackButton(color: Theme.of(context).primaryColor),
+
+        backgroundColor: AppColors.primaryTeacher,
+        foregroundColor: AppColors.white,
+        leading: BackButton(color: AppColors.white),
         title: Row(
           children: [
             CircleAvatar(
               backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-              child: Icon(Icons.school, color: Theme.of(context).primaryColor),
+              child: Icon(Icons.school),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -314,16 +315,13 @@ $text
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
-                      color: Theme.of(context).primaryColor,
+                      color: AppColors.white,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     "Online",
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: AppColors.white, fontSize: 12),
                   ),
                 ],
               ),
@@ -336,9 +334,7 @@ $text
               Icon(
                 _autoSpeak ? Icons.volume_up : Icons.volume_off,
                 size: 20,
-                color: _autoSpeak
-                    ? Theme.of(context).primaryColor
-                    : Colors.grey,
+                color: _autoSpeak ? AppColors.white : Colors.grey,
               ),
               Switch(
                 value: _autoSpeak,
@@ -348,7 +344,7 @@ $text
                   });
                   if (!value) _stopSpeaking();
                 },
-                activeColor: Theme.of(context).primaryColor,
+                activeColor: AppColors.white,
               ),
             ],
           ),
@@ -356,7 +352,7 @@ $text
             icon: const Icon(Icons.refresh),
             onPressed: _isLoading ? null : _retryLastMessage,
             tooltip: 'Retry last message',
-            color: Theme.of(context).primaryColor,
+            color: AppColors.white,
           ),
         ],
       ),
@@ -427,7 +423,6 @@ $text
   Widget _buildMessageInput() {
     return Container(
       decoration: const BoxDecoration(
-        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
