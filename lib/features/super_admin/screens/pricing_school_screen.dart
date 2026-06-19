@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
@@ -333,20 +334,18 @@ class PricingPlanCard extends StatelessWidget {
             ),
           ),
           Divider(),
-          Row(
-            children: [
-              const Icon(Icons.info_outline_rounded, size: 16),
-              const SizedBox(width: 8),
-              Text(
-                'Created: ${plan.createdAt?.split('T')[0] ?? 'N/A'}',
-                style: const TextStyle(),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: () {},
-                child: Text(AppLocalizations.of(context)!.viewDetailsOption),
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, bottom: 8),
+            child: Row(
+              children: [
+                const Icon(Icons.info_outline_rounded, size: 16),
+                const SizedBox(width: 8),
+                Text(
+                  'Created: ${plan.createdAt != null ? DateFormat.yMMMMd().format(DateTime.parse(plan.createdAt!)) : 'N/A'}',
+                  style: const TextStyle(),
+                ),
+              ],
+            ),
           ),
         ],
       ),
