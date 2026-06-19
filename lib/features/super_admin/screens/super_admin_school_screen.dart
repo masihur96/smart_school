@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/super_admin/providers/super_admin_dashboard_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../models/school_model.dart';
 import '../providers/super_admin_school_provider.dart';
@@ -22,15 +24,6 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SuperAdminSchoolNotifier>().fetchSchools();
     });
-  }
-
-  void _showAddEditSchoolSheet({SuperAdminSchool? school}) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => AddEditSchoolBottomSheet(school: school),
-    );
   }
 
   @override
@@ -53,6 +46,13 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
             ),
           ],
         ),
+        actions: [
+          Text(
+            "Total School $totalSchools",
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(width: 10),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -99,20 +99,6 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
               ...schools.map((school) => _buildSchoolCard(school, l10n)),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddEditSchoolSheet(),
-        backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.add_business_rounded, color: Colors.white),
-        label: const Text(
-          'Add New School',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
-          ),
-        ),
-        elevation: 4,
       ),
     );
   }
@@ -165,16 +151,60 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                _buildSmallInfo(Icons.badge_rounded, 'ID: ${school.schoolId}'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildSmallInfo(
+                        Icons.code_outlined,
+                        school.schoolId,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        await Clipboard.setData(ClipboardData(text: school.schoolId));
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('ID copied to clipboard')),
+                          );
+                        }
+                      },
+                      child: const Icon(Icons.copy_outlined, size: 15),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 16),
-                _buildSmallInfo(
-                  Icons.phone_rounded,
-                  school.phone.isNotEmpty ? school.phone : 'No phone',
+                _buildSmallInfo(Icons.location_on_outlined, school.address),
+                const SizedBox(height: 16),
+                GestureDetector(
+                  onTap: school.phone.isNotEmpty ? () async {
+                    final Uri launchUri = Uri(
+                      scheme: 'tel',
+                      path: school.phone,
+                    );
+                    if (await canLaunchUrl(launchUri)) {
+                      await launchUrl(launchUri);
+                    }
+                  } : null,
+                  child: _buildSmallInfo(
+                    Icons.phone_rounded,
+                    school.phone.isNotEmpty ? school.phone : 'No phone',
+                  ),
                 ),
                 const SizedBox(height: 8),
-                _buildSmallInfo(
-                  Icons.email_rounded,
-                  school.email.isNotEmpty ? school.email : 'No email',
+                GestureDetector(
+                  onTap: school.email.isNotEmpty ? () async {
+                    final Uri launchUri = Uri(
+                      scheme: 'mailto',
+                      path: school.email,
+                    );
+                    if (await canLaunchUrl(launchUri)) {
+                      await launchUrl(launchUri);
+                    }
+                  } : null,
+                  child: _buildSmallInfo(
+                    Icons.email_rounded,
+                    school.email.isNotEmpty ? school.email : 'No email',
+                  ),
                 ),
               ],
             ),
@@ -191,29 +221,11 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
                     color: AppColors.textSecondary,
                   ),
                   onSelected: (value) {
-                    if (value == 'edit') {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) =>
-                            AddEditSchoolBottomSheet(school: school),
-                      );
-                    } else if (value == 'delete') {
+                    if (value == 'delete') {
                       _showDeleteConfirmation(context, school);
                     }
                   },
                   itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.edit_outlined, size: 20),
-                          const SizedBox(width: 8),
-                          Text(AppLocalizations.of(context)!.editDetails),
-                        ],
-                      ),
-                    ),
                     const PopupMenuItem(
                       value: 'delete',
                       child: Row(
@@ -276,7 +288,7 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen> {
       children: [
         Icon(icon, size: 14),
         const SizedBox(width: 4),
-        Text(text, style: TextStyle(fontSize: 12)),
+        Expanded(child: Text(text, style: TextStyle(fontSize: 12))),
       ],
     );
   }
@@ -541,29 +553,11 @@ class SchoolCard extends StatelessWidget {
                   color: AppColors.textSecondary,
                 ),
                 onSelected: (value) {
-                  if (value == 'edit') {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (context) =>
-                          AddEditSchoolBottomSheet(school: school),
-                    );
-                  } else if (value == 'delete') {
+                  if (value == 'delete') {
                     _showDeleteConfirmation(context);
                   }
                 },
                 itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'edit',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.edit_outlined, size: 20),
-                        const SizedBox(width: 8),
-                        Text(AppLocalizations.of(context)!.editDetails),
-                      ],
-                    ),
-                  ),
                   const PopupMenuItem(
                     value: 'delete',
                     child: Row(
@@ -665,269 +659,6 @@ class SchoolCard extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class AddEditSchoolBottomSheet extends StatefulWidget {
-  final SuperAdminSchool? school;
-  const AddEditSchoolBottomSheet({super.key, this.school});
-
-  @override
-  State<AddEditSchoolBottomSheet> createState() =>
-      _AddEditSchoolBottomSheetState();
-}
-
-class _AddEditSchoolBottomSheetState extends State<AddEditSchoolBottomSheet> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _idController;
-  late TextEditingController _nameController;
-  late TextEditingController _addressController;
-  late TextEditingController _phoneController;
-  late TextEditingController _emailController;
-  bool _isActive = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _idController = TextEditingController(text: widget.school?.schoolId);
-    _nameController = TextEditingController(text: widget.school?.name);
-    _addressController = TextEditingController(text: widget.school?.address);
-    _phoneController = TextEditingController(text: widget.school?.phone);
-    _emailController = TextEditingController(text: widget.school?.email);
-    _isActive = widget.school?.isActive ?? true;
-  }
-
-  Future<void> _submit() async {
-    if (_formKey.currentState!.validate()) {
-      final notifier = context.read<SuperAdminSchoolNotifier>();
-      final isEditing = widget.school != null;
-
-      final schoolData = SuperAdminSchool(
-        id: widget.school?.id,
-        schoolId: _idController.text,
-        name: _nameController.text,
-        address: _addressController.text,
-        phone: _phoneController.text,
-        email: _emailController.text,
-        isActive: _isActive,
-      );
-
-      bool success;
-      if (isEditing) {
-        success = await notifier.updateSchool(widget.school!.id!, schoolData);
-      } else {
-        success = await notifier.createSchool(schoolData);
-      }
-
-      if (success && mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(isEditing ? 'School updated!' : 'School created!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isEditing = widget.school != null;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  isEditing ? 'Update Institution' : 'Register New School',
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  isEditing
-                      ? 'Modify institutional details below'
-                      : 'Enter the institutional details below',
-                  style: TextStyle(fontSize: 14),
-                ),
-                if (isEditing) ...[
-                  const SizedBox(height: 24),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.backgroundLight,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Institution Status',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                            Text(
-                              'Set whether this school is currently active',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Switch.adaptive(
-                          value: _isActive,
-                          activeColor: AppColors.primary,
-                          onChanged: (val) {
-                            setState(() {
-                              _isActive = val;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 24),
-                _buildTextField(
-                  'School ID',
-                  _idController,
-                  Icons.vpn_key_outlined,
-                  enabled: !isEditing,
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  'Institution Name',
-                  _nameController,
-                  Icons.school_outlined,
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  'Address',
-                  _addressController,
-                  Icons.location_on_outlined,
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildTextField(
-                        'Phone',
-                        _phoneController,
-                        Icons.phone_outlined,
-                        keyboardType: TextInputType.phone,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildTextField(
-                        'Email',
-                        _emailController,
-                        Icons.email_outlined,
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                Consumer<SuperAdminSchoolNotifier>(
-                  builder: (context, notifier, child) {
-                    return ElevatedButton(
-                      onPressed: notifier.isLoading ? null : _submit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(double.infinity, 56),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: notifier.isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : Text(
-                              isEditing
-                                  ? 'UPDATE INSTITUTION'
-                                  : 'REGISTER INSTITUTION',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1,
-                              ),
-                            ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(
-    String label,
-    TextEditingController controller,
-    IconData icon, {
-    TextInputType? keyboardType,
-    bool enabled = true,
-  }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      enabled: enabled,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, color: AppColors.primary),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Colors.grey.shade100),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
-        ),
-        filled: true,
-      ),
-      validator: (value) => value == null || value.isEmpty ? 'Required' : null,
     );
   }
 }
