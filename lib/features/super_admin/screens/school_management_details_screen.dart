@@ -160,7 +160,7 @@ class _UserListTab extends StatelessWidget {
         if (role == 'teacher' || role == 'student') {
           final Map<String, List<User>> groupedUsers = {};
           for (var user in users) {
-            final classId = user.classIds.first ?? 'unassigned';
+            final classId = user.classIds.isNotEmpty ? user.classIds.first : 'unassigned';
             if (!groupedUsers.containsKey(classId)) {
               groupedUsers[classId] = [];
             }
