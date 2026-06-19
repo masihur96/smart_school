@@ -71,7 +71,7 @@ class _SchoolManagementDetailsScreenState
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Text(
-              'School ID: ${widget.school.schoolId}',
+              widget.school.address,
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.normal,
