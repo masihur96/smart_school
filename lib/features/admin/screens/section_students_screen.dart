@@ -6,6 +6,7 @@ import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/constants/api_path.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
+import 'package:smart_school/features/auth/providers/auth_provider.dart';
 
 import '../../../configs/network/data_provider.dart';
 import '../../../models/school_models.dart';
@@ -1043,8 +1044,10 @@ class _AssignSectionStudentsSheetState
     final classNotifier = context.watch<ClassSetupNotifier>();
     final sectionNotifier = context.watch<SectionSetupNotifier>();
     final filtered = notifier.unassignedStudents;
+    final user = context.read<AuthNotifier>().user;
 
-    final classes = classNotifier.classes;
+    final classes = classNotifier.classes.where((c) => c.schoolId == user?.schoolId).toList();
+    
     final availableSections = _filterClassId == null
         ? <Section>[]
         : sectionNotifier.sections.where((s) => s.classId == _filterClassId).toList();
