@@ -10,6 +10,7 @@ import 'package:smart_school/core/utils/storage_service.dart';
 import '../../../configs/network/data_provider.dart';
 import '../../../models/school_models.dart';
 import '../../../models/student_model.dart';
+import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
 
 // ─── Colour palette ───────────────────────────────────────────────────────────
@@ -893,14 +894,25 @@ class _AssignSectionStudentsSheetState
   final Set<String> _selectedIds = {};
   final Map<String, String> _rollNumbers = {};
 
+  String? _filterClassId;
+  String? _filterSectionId;
+
+  Future<void> _fetchFiltered({bool loadMore = false}) async {
+    await context.read<StudentsNotifier>().fetchUnassignedStudents(
+      sectionId: widget.section.id,
+      search: _searchQuery,
+      filterClassId: _filterClassId,
+      filterSectionId: _filterSectionId,
+      loadMore: loadMore,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<StudentsNotifier>().fetchUnassignedStudents(
-        sectionId: widget.section.id,
-      );
+      _fetchFiltered();
     });
   }
 
@@ -916,11 +928,7 @@ class _AssignSectionStudentsSheetState
         _scrollController.position.maxScrollExtent - 200) {
       final notifier = context.read<StudentsNotifier>();
       if (!notifier.isUnassignedLoadingMore && notifier.unassignedHasMore) {
-        notifier.fetchUnassignedStudents(
-          sectionId: widget.section.id,
-          search: _searchQuery,
-          loadMore: true,
-        );
+        _fetchFiltered(loadMore: true);
       }
     }
   }
@@ -1012,10 +1020,7 @@ class _AssignSectionStudentsSheetState
         // Reload unassigned list
         _selectedIds.clear();
         _multiSelectMode = false;
-        await notifier.fetchUnassignedStudents(
-          sectionId: widget.section.id,
-          search: _searchQuery,
-        );
+        await _fetchFiltered();
       }
     } catch (e) {
       if (mounted) {
@@ -1035,7 +1040,14 @@ class _AssignSectionStudentsSheetState
   @override
   Widget build(BuildContext context) {
     final notifier = context.watch<StudentsNotifier>();
+    final classNotifier = context.watch<ClassSetupNotifier>();
+    final sectionNotifier = context.watch<SectionSetupNotifier>();
     final filtered = notifier.unassignedStudents;
+
+    final classes = classNotifier.classes;
+    final availableSections = _filterClassId == null
+        ? <Section>[]
+        : sectionNotifier.sections.where((s) => s.classId == _filterClassId).toList();
 
     return SizedBox(
       height: screenSize(context, 1.7),
@@ -1128,12 +1140,7 @@ class _AssignSectionStudentsSheetState
                           _debounce = Timer(
                             const Duration(milliseconds: 500),
                             () {
-                              context
-                                  .read<StudentsNotifier>()
-                                  .fetchUnassignedStudents(
-                                    sectionId: widget.section.id,
-                                    search: _searchQuery,
-                                  );
+                              _fetchFiltered();
                             },
                           );
                         },
@@ -1149,6 +1156,85 @@ class _AssignSectionStudentsSheetState
                           contentPadding: const EdgeInsets.symmetric(
                             vertical: 12,
                           ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Class/Section Dropdowns ─────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF4F2FB),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFEDE9F8)),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          isExpanded: true,
+                          hint: Text('All Classes', style: TextStyle(color: _kTextMid, fontSize: 13)),
+                          value: _filterClassId,
+                          icon: const Icon(Icons.arrow_drop_down, color: _kPrimary),
+                          onChanged: (val) {
+                            setState(() {
+                              _filterClassId = val;
+                              _filterSectionId = null;
+                            });
+                            _fetchFiltered();
+                          },
+                          items: [
+                            DropdownMenuItem<String>(
+                              value: null,
+                              child: const Text('All Classes', style: TextStyle(fontSize: 13)),
+                            ),
+                            ...classes.map((c) => DropdownMenuItem(
+                              value: c.id,
+                              child: Text(c.name, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis),
+                            )),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF4F2FB),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFEDE9F8)),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          isExpanded: true,
+                          hint: Text('All Sections', style: TextStyle(color: _kTextMid, fontSize: 13)),
+                          value: _filterSectionId,
+                          icon: const Icon(Icons.arrow_drop_down, color: _kPrimary),
+                          onChanged: _filterClassId == null ? null : (val) {
+                            setState(() {
+                              _filterSectionId = val;
+                            });
+                            _fetchFiltered();
+                          },
+                          items: [
+                            DropdownMenuItem<String>(
+                              value: null,
+                              child: const Text('All Sections', style: TextStyle(fontSize: 13)),
+                            ),
+                            ...availableSections.map((s) => DropdownMenuItem(
+                              value: s.id,
+                              child: Text(s.name, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis),
+                            )),
+                          ],
                         ),
                       ),
                     ),

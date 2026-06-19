@@ -211,6 +211,8 @@ class StudentsNotifier extends ChangeNotifier {
 
   Future<void> fetchUnassignedStudents({
     required String sectionId,
+    String? filterClassId,
+    String? filterSectionId,
     String? search,
     bool loadMore = false,
   }) async {
@@ -236,6 +238,8 @@ class StudentsNotifier extends ChangeNotifier {
         'limit': '15',
       };
       if (search != null && search.isNotEmpty) query['search'] = search;
+      if (filterClassId != null && filterClassId.isNotEmpty) query['classId'] = filterClassId;
+      if (filterSectionId != null && filterSectionId.isNotEmpty) query['sectionId'] = filterSectionId;
 
       final response = await DataProvider().performRequest(
         'GET',
