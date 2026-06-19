@@ -129,15 +129,36 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
 
     final user = context.read<AuthNotifier>().user;
 
-    // final classes = classNotifier.classes.where((c) => c.schoolId == user?.schoolId).toList();
+    final rawClasses = context.watch<ClassSetupNotifier>().classes.where((c) => c.schoolId == user?.schoolId).toList();
+    final classes = rawClasses.fold<Map<String, ClassRoom>>({}, (map, c) {
+      map[c.id] = c;
+      return map;
+    }).values.toList();
 
-    final classes = context.watch<ClassSetupNotifier>().classes.where((c) => c.schoolId == user?.schoolId).toList();
     final sections = context.watch<SectionSetupNotifier>().sections;
     final filteredSections = sections
         .where((s) => s.classId == _selectedClassId)
-        .toList();
+        .fold<Map<String, Section>>({}, (map, s) {
+          map[s.id] = s;
+          return map;
+        }).values.toList();
 
-    final bool isFiltered = _selectedClassId != null;
+    if (_selectedClassId != null && !classes.any((c) => c.id == _selectedClassId)) {
+      // Defer state update until after build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _selectedClassId = null);
+      });
+    }
+    if (_selectedSectionId != null && !filteredSections.any((s) => s.id == _selectedSectionId)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _selectedSectionId = null);
+      });
+    }
+
+    final validClassId = classes.any((c) => c.id == _selectedClassId) ? _selectedClassId : null;
+    final validSectionId = filteredSections.any((s) => s.id == _selectedSectionId) ? _selectedSectionId : null;
+
+    final bool isFiltered = validClassId != null;
 
     return Scaffold(
       body: NestedScrollView(
@@ -171,6 +192,9 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
     List<Section> filteredSections,
   ) {
     final user = context.read<AuthNotifier>().user;
+    
+    final validClassId = classes.any((c) => c.id == _selectedClassId) ? _selectedClassId : null;
+    final validSectionId = filteredSections.any((s) => s.id == _selectedSectionId) ? _selectedSectionId : null;
 
     return SliverAppBar(
       expandedHeight: 160,
@@ -204,68 +228,64 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
         ],
       ),
       flexibleSpace: FlexibleSpaceBar(
-        background: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: screenSize(context, .12)),
-                // Filter row
-                Row(
-                  children: [
-                    Expanded(
-                      child: _FilterDropdown(
-                        hint: 'Select Class',
-
-                        value: _selectedClassId,
-                        items: classes
-                            .map(
-                              (c) => DropdownMenuItem(
-                                value: c.id,
-                                child: Text(c.name),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (val) => setState(() {
-                          _selectedClassId = val;
-                          _selectedSectionId = null;
-                        }),
-                      ),
+        background: Stack(
+          children: [
+            Positioned(
+              left: 20,
+              right: 20,
+              bottom: 60,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _FilterDropdown(
+                      hint: 'Select Class',
+                      value: validClassId,
+                      items: classes
+                          .map(
+                            (c) => DropdownMenuItem(
+                              value: c.id,
+                              child: Text(c.name),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (val) => setState(() {
+                        _selectedClassId = val;
+                        _selectedSectionId = null;
+                      }),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _FilterDropdown(
-                        hint: filteredSections.isEmpty
-                            ? 'No Sections'
-                            : 'All Sections',
-                        value: _selectedSectionId,
-                        items: [
-                          if (filteredSections.isNotEmpty)
-                            const DropdownMenuItem(
-                              value: null,
-                              child: Text('All Sections'),
-                            ),
-                          ...filteredSections.map(
-                            (s) => DropdownMenuItem(
-                              value: s.id,
-                              child: Text(s.name),
-                            ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _FilterDropdown(
+                      hint: filteredSections.isEmpty
+                          ? 'No Sections'
+                          : 'All Sections',
+                      value: validSectionId,
+                      items: [
+                        if (filteredSections.isNotEmpty)
+                          const DropdownMenuItem(
+                            value: null,
+                            child: Text('All Sections'),
                           ),
-                        ],
-                        onChanged: filteredSections.isEmpty
-                            ? null
-                            : (val) => setState(() => _selectedSectionId = val),
-                      ),
+                        ...filteredSections.map(
+                          (s) => DropdownMenuItem(
+                            value: s.id,
+                            child: Text(s.name),
+                          ),
+                        ),
+                      ],
+                      onChanged: filteredSections.isEmpty
+                          ? null
+                          : (val) => setState(() => _selectedSectionId = val),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
-      bottom: (_selectedClassId != null)
+      bottom: (validClassId != null)
           ? TabBar(
               controller: _tabController,
               isScrollable: true,
