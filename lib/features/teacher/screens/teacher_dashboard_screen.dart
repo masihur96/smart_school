@@ -20,6 +20,7 @@ import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/marquee_notice.dart';
 import '../../../core/widgets/notification_icon_button.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../notifications/providers/notification_provider.dart';
 import '../data/models/teacher_dashboard_model.dart';
 import '../providers/teacher_dashboard_provider.dart';
 import 'homework_management_screen.dart';
@@ -27,7 +28,6 @@ import 'mark_entry_screen.dart';
 import 'teacher_attendance_screen.dart';
 import 'teacher_exam_screen.dart';
 import 'teacher_routine_screen.dart';
-import '../../notifications/providers/notification_provider.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
   const TeacherDashboardScreen({super.key});
@@ -565,51 +565,50 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
 
               const SizedBox(height: 20),
 
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Column(
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          color: Colors.deepPurple,
-                          size: 18,
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(child: Text("Homework & Assignment Help")),
-                      ],
-                    ),
-                    SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          color: Colors.deepPurple,
-                          size: 18,
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(child: Text("Exam & Quiz Preparation")),
-                      ],
-                    ),
-                    SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          color: Colors.deepPurple,
-                          size: 18,
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(child: Text("Instant Answers & Explanations")),
-                      ],
-                    ),
-                  ],
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: const Column(
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.deepPurple,
+                            size: 18,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(child: Text("Homework & Assignment Help")),
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.deepPurple,
+                            size: 18,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(child: Text("Exam & Quiz Preparation")),
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.deepPurple,
+                            size: 18,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text("Instant Answers & Explanations"),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
@@ -1247,9 +1246,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       if (permission == LocationPermission.deniedForever) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.locationPermissionsPermanentlyDenied),
-            ),
+            SnackBar(content: Text(l10n.locationPermissionsPermanentlyDenied)),
           );
         }
         return;
@@ -1257,9 +1254,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
 
       // 2. Get current position
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.fetchingCurrentLocation)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.fetchingCurrentLocation)));
       }
 
       Position position = await Geolocator.getCurrentPosition(
@@ -1382,9 +1379,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.anErrorOccurred(e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.anErrorOccurred(e.toString()))),
+        );
       }
     }
   }
