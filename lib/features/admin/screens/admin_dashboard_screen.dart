@@ -54,7 +54,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final authNotifier = context.watch<AuthNotifier>();
     switch (_selectedIndex) {
       case 0:
-        return authNotifier.user?.school?.name??l10n.studentManagement;
+        return authNotifier.user?.school?.name ?? l10n.studentManagement;
       case 1:
         return l10n.studentManagement;
       case 2:
@@ -789,6 +789,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+  String formatTime(String? dateTime) {
+    if (dateTime == null) return '--:--';
+
+    final date = DateTime.parse(dateTime).toLocal();
+
+    final hour = date.hour > 12 ? date.hour - 12 : date.hour;
+    final minute = date.minute.toString().padLeft(2, '0');
+    final period = date.hour >= 12 ? 'PM' : 'AM';
+
+    return '${hour == 0 ? 12 : hour}:$minute $period';
+  }
+
   Widget _buildTeacherAttendanceCard(AttendTeacher data) {
     final l10n = AppLocalizations.of(context)!;
     final total = data.totalTeachers;
@@ -956,13 +968,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       final initial = r.teacherName.isNotEmpty
                           ? r.teacherName[0].toUpperCase()
                           : '?';
-                      final inTime = r.startTime.length >= 5
-                          ? r.startTime.substring(0, 5)
-                          : r.startTime;
-                      final outTime =
-                          (r.endTime != null && r.endTime!.length >= 5)
-                          ? r.endTime!.substring(0, 5)
-                          : '--:--';
+
+                      print(r.startTime);
+                      final inTime = formatTime(r.startTime);
+                      final outTime = formatTime(r.endTime);
 
                       return Container(
                         width: 148,
