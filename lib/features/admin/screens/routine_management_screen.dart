@@ -166,6 +166,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
     List<Section> filteredSections,
   ) {
     final user = context.read<AuthNotifier>().user;
+
     return SliverAppBar(
       expandedHeight: 160,
       floating: false,
