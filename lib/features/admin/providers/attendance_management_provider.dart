@@ -143,4 +143,52 @@ class AttendanceManagementProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> createTeacherAttendance({
+    required String teacherId,
+    required String date,
+    required String status,
+    required String startTime,
+    required String endTime,
+    required String time,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      final body = {
+        "teacherId": teacherId,
+        "date": date,
+        "status": status,
+        "startTime": startTime,
+        "endTime": endTime,
+        "time": time,
+      };
+
+      log("Creating teacher attendance with body: $body");
+
+      final response = await DataProvider().performRequest(
+        'POST',
+        APIPath.adminTeacherAttendance,
+        data: body,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
+        log("Successfully created teacher attendance");
+        // Optionally fetch the latest data after creating
+        fetchTeacherAttendance();
+      } else {
+        _error = "Failed to create teacher attendance";
+      }
+    } catch (e) {
+      _error = e.toString();
+      log("Error creating teacher attendance: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }
