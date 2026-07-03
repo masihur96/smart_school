@@ -5,10 +5,12 @@ import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
-
 import 'package:smart_school/core/utils/teacher_attendance_pdf_helper.dart';
+
 import '../../auth/providers/auth_provider.dart';
 import '../providers/attendance_management_provider.dart';
+import '../providers/teacher_provider.dart';
+import '../../../models/teacher_model.dart';
 
 class TeacherAttendanceManagementScreen extends StatefulWidget {
   const TeacherAttendanceManagementScreen({super.key});
@@ -256,6 +258,22 @@ class _TeacherAttendanceManagementScreenState
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showCreateAttendanceBottomSheet(context),
+        backgroundColor: AppColors.primaryAdmin,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add),
+        label: const Text("Create Attendance"),
+      ),
+    );
+  }
+
+  void _showCreateAttendanceBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const _CreateAttendanceBottomSheet(),
     );
   }
 
@@ -289,9 +307,9 @@ class _TeacherAttendanceManagementScreenState
       );
     } catch (e, stack) {
       log("Error generating PDF: $e\n$stack");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to generate PDF: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Failed to generate PDF: $e")));
     }
   }
 
@@ -461,6 +479,310 @@ class _LocationAddressTextState extends State<_LocationAddressText> {
       style: widget.style,
       textAlign: TextAlign.center,
       overflow: TextOverflow.ellipsis,
+    );
+  }
+}
+
+class _CreateAttendanceBottomSheet extends StatefulWidget {
+  const _CreateAttendanceBottomSheet();
+
+  @override
+  State<_CreateAttendanceBottomSheet> createState() =>
+      _CreateAttendanceBottomSheetState();
+}
+
+class _CreateAttendanceBottomSheetState
+    extends State<_CreateAttendanceBottomSheet> {
+  Teacher? _selectedTeacher;
+  DateTime _selectedDate = DateTime.now();
+  TimeOfDay _startTime = const TimeOfDay(hour: 8, minute: 0);
+  TimeOfDay _endTime = const TimeOfDay(hour: 14, minute: 0);
+  String _selectedStatus = 'clock-in';
+
+  final List<String> _statuses = [
+    'clock-in',
+    'clock-out',
+    'present',
+    'absent',
+    'leave'
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TeachersNotifier>().fetchTeachers();
+    });
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  Future<void> _selectTime(BuildContext context, bool isStart) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: isStart ? _startTime : _endTime,
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          _startTime = picked;
+        } else {
+          _endTime = picked;
+        }
+      });
+    }
+  }
+
+  void _submit() async {
+    if (_selectedTeacher == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select a teacher")),
+      );
+      return;
+    }
+
+    // Format date as YYYY-MM-DD
+    final formattedDate =
+        DateFormat('yyyy-MM-dd').format(_selectedDate);
+
+    // Format startTime and endTime as ISO strings
+    final startDateTime = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      _startTime.hour,
+      _startTime.minute,
+    );
+    final endDateTime = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      _endTime.hour,
+      _endTime.minute,
+    );
+
+    final startIsoString = startDateTime.toUtc().toIso8601String();
+    final endIsoString = endDateTime.toUtc().toIso8601String();
+
+    await context.read<AttendanceManagementProvider>().createTeacherAttendance(
+          teacherId: _selectedTeacher!.userId,
+          date: formattedDate,
+          status: _selectedStatus,
+          startTime: startIsoString,
+          endTime: endIsoString,
+          time: startIsoString,
+        );
+
+    if (mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Attendance created successfully")),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final teachersProvider = context.watch<TeachersNotifier>();
+    final isCreating = context.watch<AttendanceManagementProvider>().isLoading;
+
+    return Container(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Create Attendance",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              if (teachersProvider.isLoading)
+                const Center(child: CircularProgressIndicator())
+              else
+                DropdownButtonFormField<Teacher>(
+                  decoration: InputDecoration(
+                    labelText: "Select Teacher",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                  ),
+                  value: _selectedTeacher,
+                  items: teachersProvider.teachers.map((Teacher teacher) {
+                    return DropdownMenuItem<Teacher>(
+                      value: teacher,
+                      child: Text(teacher.user?.name ?? "Unknown"),
+                    );
+                  }).toList(),
+                  onChanged: (Teacher? newValue) {
+                    setState(() {
+                      _selectedTeacher = newValue;
+                    });
+                  },
+                ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  labelText: "Status",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                ),
+                value: _selectedStatus,
+                items: _statuses.map((String status) {
+                  return DropdownMenuItem<String>(
+                    value: status,
+                    child: Text(status.toUpperCase()),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _selectedStatus = newValue;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+              InkWell(
+                onTap: () => _selectDate(context),
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: "Date",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(DateFormat('yyyy-MM-dd').format(_selectedDate)),
+                      const Icon(Icons.calendar_today, size: 20),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => _selectTime(context, true),
+                      child: InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: "Start Time",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[50],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(_startTime.format(context)),
+                            const Icon(Icons.access_time, size: 20),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => _selectTime(context, false),
+                      child: InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: "End Time",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[50],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(_endTime.format(context)),
+                            const Icon(Icons.access_time, size: 20),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: isCreating ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryAdmin,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: isCreating
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        "Submit",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
