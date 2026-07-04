@@ -21,6 +21,9 @@ class AdminDashboardProvider extends ChangeNotifier {
   List<TeacherPerformance>? _teacherPerformances;
   List<TeacherPerformance>? get teacherPerformances => _teacherPerformances;
 
+  List<StudentPerformance>? _studentPerformances;
+  List<StudentPerformance>? get studentPerformances => _studentPerformances;
+
   String? _error;
   String? get error => _error;
 
@@ -81,6 +84,24 @@ class AdminDashboardProvider extends ChangeNotifier {
         }
       } else {
         log('Failed to fetch teacher performances: ${performanceResponse?.data}');
+      }
+
+      final studentPerformanceResponse = await DataProvider().performRequest(
+        'GET',
+        APIPath.studentPerformance,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (studentPerformanceResponse != null && studentPerformanceResponse.statusCode == 200) {
+        final data = studentPerformanceResponse.data['data'] as List<dynamic>?;
+        if (data != null) {
+          _studentPerformances = data
+              .map((e) => StudentPerformance.fromJson(e))
+              .toList();
+          log('Fetched Student Performances successfully.');
+        }
+      } else {
+        log('Failed to fetch student performances: ${studentPerformanceResponse?.data}');
       }
     } catch (e) {
       _error = 'Error loading dashboard: $e';

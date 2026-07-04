@@ -392,3 +392,106 @@ class PerformanceHomework {
     );
   }
 }
+
+class StudentPerformance {
+  final String studentId;
+  final String name;
+  final String? rollNumber;
+  final PerformanceClass? classInfo;
+  final PerformanceSection? section;
+  final PerformanceAttendance attendance;
+  final StudentPerformanceHomework homework;
+  final StudentPerformanceExams exams;
+
+  StudentPerformance({
+    required this.studentId,
+    required this.name,
+    this.rollNumber,
+    this.classInfo,
+    this.section,
+    required this.attendance,
+    required this.homework,
+    required this.exams,
+  });
+
+  factory StudentPerformance.fromJson(Map<String, dynamic> json) {
+    return StudentPerformance(
+      studentId: json['studentId'] ?? '',
+      name: json['name'] ?? '',
+      rollNumber: json['rollNumber'],
+      classInfo: json['class'] != null ? PerformanceClass.fromJson(json['class']) : null,
+      section: json['section'] != null ? PerformanceSection.fromJson(json['section']) : null,
+      attendance: PerformanceAttendance.fromJson(json['attendance'] ?? {}),
+      homework: StudentPerformanceHomework.fromJson(json['homework'] ?? {}),
+      exams: StudentPerformanceExams.fromJson(json['exams'] ?? {}),
+    );
+  }
+}
+
+class PerformanceClass {
+  final String id;
+  final String name;
+
+  PerformanceClass({required this.id, required this.name});
+
+  factory PerformanceClass.fromJson(Map<String, dynamic> json) {
+    return PerformanceClass(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+    );
+  }
+}
+
+class PerformanceSection {
+  final String id;
+  final String name;
+
+  PerformanceSection({required this.id, required this.name});
+
+  factory PerformanceSection.fromJson(Map<String, dynamic> json) {
+    return PerformanceSection(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+    );
+  }
+}
+
+class StudentPerformanceHomework {
+  final int totalAssigned;
+  final int totalDone;
+  final double percentage;
+
+  StudentPerformanceHomework({
+    required this.totalAssigned,
+    required this.totalDone,
+    required this.percentage,
+  });
+
+  factory StudentPerformanceHomework.fromJson(Map<String, dynamic> json) {
+    return StudentPerformanceHomework(
+      totalAssigned: json['totalAssigned'] ?? 0,
+      totalDone: json['totalDone'] ?? 0,
+      percentage: (json['percentage'] ?? 0).toDouble(),
+    );
+  }
+}
+
+class StudentPerformanceExams {
+  final num totalMarksObtained;
+  final num totalMaximumMarks;
+  final double percentage;
+
+  StudentPerformanceExams({
+    required this.totalMarksObtained,
+    required this.totalMaximumMarks,
+    required this.percentage,
+  });
+
+  factory StudentPerformanceExams.fromJson(Map<String, dynamic> json) {
+    return StudentPerformanceExams(
+      totalMarksObtained: json['totalMarksObtained'] ?? 0,
+      totalMaximumMarks: json['totalMaximumMarks'] ?? 0,
+      percentage: (json['percentage'] ?? 0).toDouble(),
+    );
+  }
+}
