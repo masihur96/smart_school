@@ -274,6 +274,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   _buildRecentNotices(data.recentNotice),
                   const SizedBox(height: 24),
                 ],
+                if (provider.teacherPerformances != null && provider.teacherPerformances!.isNotEmpty) ...[
+                  _buildSectionTitle(
+                    'Teacher Performance',
+                    const SizedBox.shrink(),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildTeacherPerformances(provider.teacherPerformances!),
+                  const SizedBox(height: 24),
+                ],
               ],
             ),
           ),
@@ -1530,6 +1539,115 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildTeacherPerformances(List<TeacherPerformance> performances) {
+    return SizedBox(
+      height: 160,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: performances.length,
+        itemBuilder: (context, index) {
+          final perf = performances[index];
+          return Card(
+            margin: const EdgeInsets.only(right: 16),
+            child: SizedBox(
+              width: screenSize(context, .85),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.purple.withOpacity(0.1),
+                          child: Text(
+                            perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
+                            style: const TextStyle(
+                              color: Colors.purple,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                perf.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                perf.designation,
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildPerformanceStat(
+                          'Attendance',
+                          '${perf.attendance.percentage.toStringAsFixed(1)}%',
+                          Icons.how_to_reg,
+                          Colors.green,
+                        ),
+                        _buildPerformanceStat(
+                          'Homework',
+                          '${perf.homework.percentage.toStringAsFixed(1)}%',
+                          Icons.assignment,
+                          Colors.blue,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildPerformanceStat(String label, String value, IconData icon, Color color) {
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 24),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 10,
+          ),
+        ),
+      ],
     );
   }
 

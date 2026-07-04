@@ -326,3 +326,69 @@ class MonthlyAttendanceData {
     );
   }
 }
+
+class TeacherPerformance {
+  final String teacherId;
+  final String name;
+  final String designation;
+  final PerformanceAttendance attendance;
+  final PerformanceHomework homework;
+
+  TeacherPerformance({
+    required this.teacherId,
+    required this.name,
+    required this.designation,
+    required this.attendance,
+    required this.homework,
+  });
+
+  factory TeacherPerformance.fromJson(Map<String, dynamic> json) {
+    return TeacherPerformance(
+      teacherId: json['teacherId'] ?? '',
+      name: json['name'] ?? '',
+      designation: json['designation'] ?? '',
+      attendance: PerformanceAttendance.fromJson(json['attendance'] ?? {}),
+      homework: PerformanceHomework.fromJson(json['homework'] ?? {}),
+    );
+  }
+}
+
+class PerformanceAttendance {
+  final int totalWorkingDays;
+  final int presentDays;
+  final double percentage;
+
+  PerformanceAttendance({
+    required this.totalWorkingDays,
+    required this.presentDays,
+    required this.percentage,
+  });
+
+  factory PerformanceAttendance.fromJson(Map<String, dynamic> json) {
+    return PerformanceAttendance(
+      totalWorkingDays: json['totalWorkingDays'] ?? 0,
+      presentDays: json['presentDays'] ?? 0,
+      percentage: (json['percentage'] ?? 0).toDouble(),
+    );
+  }
+}
+
+class PerformanceHomework {
+  final int totalProvided;
+  final int target;
+  final double percentage;
+
+  PerformanceHomework({
+    required this.totalProvided,
+    required this.target,
+    required this.percentage,
+  });
+
+  factory PerformanceHomework.fromJson(Map<String, dynamic> json) {
+    return PerformanceHomework(
+      totalProvided: json['totalProvided'] ?? 0,
+      target: json['target'] ?? 0,
+      percentage: (json['percentage'] ?? 0).toDouble(),
+    );
+  }
+}
