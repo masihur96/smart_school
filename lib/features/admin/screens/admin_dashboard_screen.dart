@@ -283,6 +283,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   _buildTeacherPerformances(provider.teacherPerformances!),
                   const SizedBox(height: 24),
                 ],
+                if (provider.studentPerformances != null && provider.studentPerformances!.isNotEmpty) ...[
+                  _buildSectionTitle(
+                    'Student Performance',
+                    const SizedBox.shrink(),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildStudentPerformances(provider.studentPerformances!),
+                  const SizedBox(height: 24),
+                ],
               ],
             ),
           ),
@@ -1648,6 +1657,101 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildStudentPerformances(List<StudentPerformance> performances) {
+    return SizedBox(
+      height: 160,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: performances.length,
+        itemBuilder: (context, index) {
+          final perf = performances[index];
+          String subtitle = 'Class: ${perf.classInfo?.name ?? 'N/A'}, Section: ${perf.section?.name ?? 'N/A'}';
+          if (perf.rollNumber != null && perf.rollNumber!.isNotEmpty) {
+            subtitle += ' • Roll: ${perf.rollNumber}';
+          }
+          return Card(
+            margin: const EdgeInsets.only(right: 16),
+            child: SizedBox(
+              width: screenSize(context, .85),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.blue.withOpacity(0.1),
+                          child: Text(
+                            perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
+                            style: const TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                perf.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                subtitle,
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 11,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildPerformanceStat(
+                          'Attendance',
+                          '${perf.attendance.percentage.toStringAsFixed(1)}%',
+                          Icons.how_to_reg,
+                          Colors.green,
+                        ),
+                        _buildPerformanceStat(
+                          'Homework',
+                          '${perf.homework.percentage.toStringAsFixed(1)}%',
+                          Icons.assignment,
+                          Colors.orange,
+                        ),
+                        _buildPerformanceStat(
+                          'Exams',
+                          '${perf.exams.percentage.toStringAsFixed(1)}%',
+                          Icons.assessment,
+                          Colors.red,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
