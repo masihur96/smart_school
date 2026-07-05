@@ -7,10 +7,10 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/utils/teacher_attendance_pdf_helper.dart';
 
+import '../../../models/teacher_model.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/attendance_management_provider.dart';
 import '../providers/teacher_provider.dart';
-import '../../../models/teacher_model.dart';
 
 class TeacherAttendanceManagementScreen extends StatefulWidget {
   const TeacherAttendanceManagementScreen({super.key});
@@ -154,6 +154,17 @@ class _TeacherAttendanceManagementScreenState
                       final inTime = record['startTime'] ?? "--:--";
                       final outTime = record['endTime'] ?? "--:--";
 
+                      String dateStr = record['date']?.toString() ?? "N/A";
+                      if (dateStr != "N/A") {
+                        try {
+                          dateStr = DateFormat('MMM dd, yyyy').format(DateTime.parse(dateStr));
+                        } catch (_) {}
+                      } else if (record['startTime'] != null) {
+                        try {
+                          dateStr = DateFormat('MMM dd, yyyy').format(DateTime.parse(record['startTime']).toLocal());
+                        } catch (_) {}
+                      }
+
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12),
                         shape: RoundedRectangleBorder(
@@ -188,10 +199,26 @@ class _TeacherAttendanceManagementScreenState
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                subtitle: Text(
-                                  record['teacher']?['designation'] ??
-                                      record['designation'] ??
-                                      "Teacher",
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      record['teacher']?['designation'] ??
+                                          record['designation'] ??
+                                          "Teacher",
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.calendar_today, size: 12, color: Colors.grey),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          dateStr,
+                                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                                 trailing: Container(
                                   padding: const EdgeInsets.symmetric(
@@ -504,7 +531,7 @@ class _CreateAttendanceBottomSheetState
     'clock-out',
     'present',
     'absent',
-    'leave'
+    'leave',
   ];
 
   @override
@@ -547,15 +574,14 @@ class _CreateAttendanceBottomSheetState
 
   void _submit() async {
     if (_selectedTeacher == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select a teacher")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please select a teacher")));
       return;
     }
 
     // Format date as YYYY-MM-DD
-    final formattedDate =
-        DateFormat('yyyy-MM-dd').format(_selectedDate);
+    final formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
 
     // Format startTime and endTime as ISO strings
     final startDateTime = DateTime(
@@ -577,13 +603,13 @@ class _CreateAttendanceBottomSheetState
     final endIsoString = endDateTime.toUtc().toIso8601String();
 
     await context.read<AttendanceManagementProvider>().createTeacherAttendance(
-          teacherId: _selectedTeacher!.userId,
-          date: formattedDate,
-          status: _selectedStatus,
-          startTime: startIsoString,
-          endTime: endIsoString,
-          time: startIsoString,
-        );
+      teacherId: _selectedTeacher!.userId,
+      date: formattedDate,
+      status: _selectedStatus,
+      startTime: startIsoString,
+      endTime: endIsoString,
+      time: startIsoString,
+    );
 
     if (mounted) {
       Navigator.pop(context);
@@ -618,10 +644,7 @@ class _CreateAttendanceBottomSheetState
                 children: [
                   const Text(
                     "Create Attendance",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
