@@ -21,7 +21,9 @@ import 'exam_management_screen.dart';
 import 'notice_management_screen.dart';
 import 'student_attendance_management_screen.dart';
 import 'student_management_screen.dart';
+import 'student_performance_screen.dart';
 import 'teacher_attendance_management_screen.dart';
+import '../providers/student_performance_provider.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -283,15 +285,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   _buildTeacherPerformances(provider.teacherPerformances!),
                   const SizedBox(height: 24),
                 ],
-                if (provider.studentPerformances != null && provider.studentPerformances!.isNotEmpty) ...[
-                  _buildSectionTitle(
-                    'Student Performance',
-                    const SizedBox.shrink(),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildStudentPerformances(provider.studentPerformances!),
-                  const SizedBox(height: 24),
-                ],
+                _buildStudentPerformancePreview(context),
+                const SizedBox(height: 24),
               ],
             ),
           ),
@@ -1751,6 +1746,409 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildStudentPerformancePreview(BuildContext context) {
+    return Consumer<StudentPerformanceProvider>(
+      builder: (context, perfProvider, _) {
+        // Trigger fetch on first load
+        if (perfProvider.allPerformances.isEmpty &&
+            !perfProvider.isLoading &&
+            perfProvider.error == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            perfProvider.fetchPerformances();
+          });
+        }
+
+        final topStudents = perfProvider.topPerformers.take(3).toList();
+        final monthNames = [
+          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+        ];
+
+        return Column(
+          children: [
+            _buildSectionTitle(
+              'Student Performance',
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const StudentPerformanceScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.open_in_new, size: 14),
+                label: const Text('View All'),
+              ),
+            ),
+            const SizedBox(height: 4),
+            // Month indicator
+            Row(
+              children: [
+                Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey.shade400),
+                const SizedBox(width: 5),
+                Text(
+                  '${monthNames[perfProvider.selectedMonth - 1]} ${perfProvider.selectedYear}',
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            if (perfProvider.isLoading) ...[
+              _buildPerformanceShimmer(),
+            ] else if (perfProvider.error != null &&
+                perfProvider.allPerformances.isEmpty) ...[
+              _buildPerformanceError(perfProvider),
+            ] else if (topStudents.isEmpty) ...[
+              _buildPerformanceEmpty(context),
+            ] else ...[
+              _buildTopStudentCards(topStudents, perfProvider),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildTopStudentCards(
+    List<StudentPerformance> students,
+    StudentPerformanceProvider provider,
+  ) {
+    return Column(
+      children: students.asMap().entries.map((entry) {
+        final idx = entry.key;
+        final perf = entry.value;
+        final score = (perf.attendance.percentage +
+                perf.homework.percentage +
+                perf.exams.percentage) /
+            3;
+
+        final rankColors = [
+          const Color(0xFFFFD700), // Gold
+          const Color(0xFFC0C0C0), // Silver
+          const Color(0xFFCD7F32), // Bronze
+        ];
+        final rankEmojis = ['🥇', '🥈', '🥉'];
+        final gradeColor = score >= 80
+            ? const Color(0xFF10B981)
+            : score >= 60
+            ? const Color(0xFF3B82F6)
+            : score >= 40
+            ? const Color(0xFFF59E0B)
+            : const Color(0xFFEF4444);
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: rankColors[idx].withOpacity(0.35),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: rankColors[idx].withOpacity(0.12),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                // Rank + avatar
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            gradeColor.withOpacity(0.2),
+                            gradeColor.withOpacity(0.05),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        border: Border.all(
+                          color: gradeColor.withOpacity(0.3),
+                          width: 2,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          perf.name.isNotEmpty
+                              ? perf.name[0].toUpperCase()
+                              : '?',
+                          style: TextStyle(
+                            color: gradeColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      right: -2,
+                      bottom: -2,
+                      child: Text(
+                        rankEmojis[idx],
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 14),
+                // Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        perf.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3),
+                      Row(
+                        children: [
+                          if (perf.classInfo != null) ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.purple.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                perf.classInfo!.name,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.purple,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                          ],
+                          if (perf.section != null)
+                            Text(
+                              perf.section!.name,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      // Mini metric bars
+                      Row(
+                        children: [
+                          _buildMiniMetricBar(
+                            'Att',
+                            perf.attendance.percentage,
+                            const Color(0xFF10B981),
+                          ),
+                          const SizedBox(width: 6),
+                          _buildMiniMetricBar(
+                            'HW',
+                            perf.homework.percentage,
+                            const Color(0xFF3B82F6),
+                          ),
+                          const SizedBox(width: 6),
+                          _buildMiniMetricBar(
+                            'Exam',
+                            perf.exams.percentage,
+                            const Color(0xFFEF4444),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                // Score ring
+                const SizedBox(width: 10),
+                SizedBox(
+                  width: 56,
+                  height: 56,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        value: score / 100,
+                        strokeWidth: 5,
+                        backgroundColor: gradeColor.withOpacity(0.1),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(gradeColor),
+                        strokeCap: StrokeCap.round,
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${score.toStringAsFixed(0)}%',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: gradeColor,
+                            ),
+                          ),
+                          Text(
+                            'score',
+                            style: TextStyle(
+                              fontSize: 7,
+                              color: Colors.grey.shade400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildMiniMetricBar(String label, double value, Color color) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 9,
+                  color: Colors.grey.shade400,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${value.toStringAsFixed(0)}%',
+                style: TextStyle(
+                  fontSize: 9,
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: value / 100,
+              minHeight: 4,
+              backgroundColor: color.withOpacity(0.1),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPerformanceShimmer() {
+    return Column(
+      children: List.generate(3, (i) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          height: 100,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Center(
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildPerformanceError(StudentPerformanceProvider provider) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: Colors.red, size: 20),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Text(
+              'Failed to load performance',
+              style: TextStyle(color: Colors.red, fontSize: 12),
+            ),
+          ),
+          TextButton(
+            onPressed: () => provider.fetchPerformances(),
+            child: const Text('Retry', style: TextStyle(fontSize: 12)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPerformanceEmpty(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.bar_chart, size: 36, color: Colors.grey.shade300),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'No performance data',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Tap "View All" to see the full report',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
