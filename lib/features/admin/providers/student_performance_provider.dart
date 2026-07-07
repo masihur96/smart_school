@@ -20,47 +20,31 @@ class StudentPerformanceProvider extends ChangeNotifier {
   int _selectedYear = DateTime.now().year;
   int get selectedYear => _selectedYear;
 
+  // All raw performances loaded from API
   List<StudentPerformance> _allPerformances = [];
   List<StudentPerformance> get allPerformances => _allPerformances;
 
-  /// Top performing students sorted by combined score descending
-  List<StudentPerformance> get topPerformers {
-    final sorted = [..._allPerformances];
-    sorted.sort((a, b) {
-      final scoreA = (a.attendance.percentage +
-              a.homework.percentage +
-              a.exams.percentage) /
-          3;
-      final scoreB = (b.attendance.percentage +
-              b.homework.percentage +
-              b.exams.percentage) /
-          3;
-      return scoreB.compareTo(scoreA);
-    });
-    return sorted.take(5).toList();
-  }
-
+  // UI-only filters (do NOT re-fetch from API)
   String _filterSearch = '';
   String get filterSearch => _filterSearch;
 
   String? _filterClass;
   String? get filterClass => _filterClass;
 
-  List<StudentPerformance> get filteredPerformances {
-    var list = [..._allPerformances];
+  // Selected student for individual detail view
+  StudentPerformance? _selectedStudent;
+  StudentPerformance? get selectedStudent => _selectedStudent;
 
-    // Sort by combined score
-    list.sort((a, b) {
-      final scoreA = (a.attendance.percentage +
-              a.homework.percentage +
-              a.exams.percentage) /
-          3;
-      final scoreB = (b.attendance.percentage +
-              b.homework.percentage +
-              b.exams.percentage) /
-          3;
-      return scoreB.compareTo(scoreA);
-    });
+  // Performances sorted best→worst (descending score)
+  List<StudentPerformance> get sortedByBest {
+    final sorted = [..._allPerformances];
+    sorted.sort((a, b) => _score(b).compareTo(_score(a)));
+    return sorted;
+  }
+
+  // Filtered + sorted list used in the full screen
+  List<StudentPerformance> get filteredPerformances {
+    var list = sortedByBest;
 
     if (_filterSearch.isNotEmpty) {
       list = list
@@ -70,9 +54,7 @@ class StudentPerformanceProvider extends ChangeNotifier {
     }
 
     if (_filterClass != null && _filterClass!.isNotEmpty) {
-      list = list
-          .where((p) => p.classInfo?.name == _filterClass)
-          .toList();
+      list = list.where((p) => p.classInfo?.name == _filterClass).toList();
     }
 
     return list;
@@ -86,15 +68,15 @@ class StudentPerformanceProvider extends ChangeNotifier {
     return classes.toList()..sort();
   }
 
-  void setMonth(int month) {
-    _selectedMonth = month;
-    notifyListeners();
-  }
+  // All student names for dropdown search
+  List<String> get studentNames =>
+      _allPerformances.map((p) => p.name).toList()..sort();
 
-  void setYear(int year) {
-    _selectedYear = year;
-    notifyListeners();
-  }
+  double _score(StudentPerformance p) =>
+      (p.attendance.percentage + p.homework.percentage + p.exams.percentage) /
+      3;
+
+  // ── UI filter setters (no re-fetch) ────────────────────────────────────
 
   void setSearch(String value) {
     _filterSearch = value;
@@ -106,11 +88,36 @@ class StudentPerformanceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void applyDateFilter() {
-    fetchPerformances(month: _selectedMonth, year: _selectedYear);
+  void selectStudentByName(String? name) {
+    if (name == null) {
+      _selectedStudent = null;
+    } else {
+      _selectedStudent = _allPerformances.firstWhere(
+        (p) => p.name == name,
+        orElse: () => _allPerformances.first,
+      );
+    }
+    notifyListeners();
   }
 
-  Future<void> fetchPerformances({int? month, int? year}) async {
+  void clearSelectedStudent() {
+    _selectedStudent = null;
+    notifyListeners();
+  }
+
+  // ── API fetch triggered by month/year change ────────────────────────────
+
+  /// Fetch with new month & year — updates provider state then re-fetches.
+  Future<void> fetchForMonth(int month, int year) async {
+    _selectedMonth = month;
+    _selectedYear = year;
+    _selectedStudent = null; // reset individual selection on date change
+    _filterSearch = '';
+    _filterClass = null;
+    await fetchPerformances();
+  }
+
+  Future<void> fetchPerformances() async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -119,78 +126,32 @@ class StudentPerformanceProvider extends ChangeNotifier {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
 
-      final m = month ?? _selectedMonth;
-      final y = year ?? _selectedYear;
+      final m = _selectedMonth;
+      final y = _selectedYear;
 
-      // First, fetch all students
-      final studentsResponse = await DataProvider().performRequest(
+      // Fetch all student performances in one call by omitting studentId
+      final response = await DataProvider().performRequest(
         'GET',
-        APIPath.fetchUsers,
-        query: {
-          'role': 'student',
-          'limit': '200',
-          'page': '1',
-        },
+        '${APIPath.baseUrl}/performance/student?month=$m&year=$y',
         header: {'Authorization': 'Bearer $token'},
       );
 
-      if (studentsResponse == null || studentsResponse.statusCode != 200) {
-        _error = 'Failed to load student list';
+      if (response == null || response.statusCode != 200) {
+        _error = 'Failed to load performance data';
         _isLoading = false;
         notifyListeners();
         return;
       }
 
-      final inner = studentsResponse.data is Map
-          ? studentsResponse.data['data']
-          : studentsResponse.data;
-
-      final List<dynamic> studentData = inner is List
-          ? inner
-          : (inner is Map ? (inner['data'] as List<dynamic>? ?? []) : []);
-
-      log('Fetched ${studentData.length} students for performance.');
-
-      // For each student, fetch their performance
-      final List<StudentPerformance> performances = [];
-
-      // Parallel fetches in chunks of 5
-      const chunkSize = 5;
-      for (int i = 0; i < studentData.length; i += chunkSize) {
-        final chunk = studentData.skip(i).take(chunkSize).toList();
-        final futures = chunk.map((s) async {
-          final sid = s['userId']?.toString() ?? s['id']?.toString() ?? '';
-          if (sid.isEmpty) return null;
-
-          try {
-            final perfResponse = await DataProvider().performRequest(
-              'GET',
-              '${APIPath.baseUrl}/performance/student?studentId=$sid&month=$m&year=$y',
-              header: {'Authorization': 'Bearer $token'},
-            );
-
-            if (perfResponse != null && perfResponse.statusCode == 200) {
-              final data = perfResponse.data['data'];
-              if (data != null) {
-                return StudentPerformance.fromJson(data);
-              }
-            }
-          } catch (e) {
-            log('Error fetching performance for student $sid: $e');
-          }
-          return null;
-        });
-
-        final results = await Future.wait(futures);
-        for (final r in results) {
-          if (r != null) performances.add(r);
-        }
+      final data = response.data['data'];
+      if (data is List) {
+        _allPerformances = data
+            .map((d) => StudentPerformance.fromJson(d as Map<String, dynamic>))
+            .toList();
+        log('Fetched performance for ${_allPerformances.length} students in bulk.');
+      } else {
+        _allPerformances = [];
       }
-
-      _allPerformances = performances;
-      _selectedMonth = m;
-      _selectedYear = y;
-      log('Fetched performance for ${performances.length} students.');
     } catch (e) {
       _error = 'Error loading student performance: $e';
       log('Error: $e');

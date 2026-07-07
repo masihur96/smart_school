@@ -1753,22 +1753,32 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildStudentPerformancePreview(BuildContext context) {
     return Consumer<StudentPerformanceProvider>(
       builder: (context, perfProvider, _) {
-        // Trigger fetch on first load
+        // Trigger fetch only for current month/year on first load
         if (perfProvider.allPerformances.isEmpty &&
             !perfProvider.isLoading &&
             perfProvider.error == null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            perfProvider.fetchPerformances();
+            // Ensure we always use current month/year on dashboard
+            final now = DateTime.now();
+            if (perfProvider.selectedMonth != now.month ||
+                perfProvider.selectedYear != now.year) {
+              perfProvider.fetchForMonth(now.month, now.year);
+            } else {
+              perfProvider.fetchPerformances();
+            }
           });
         }
 
-        final topStudents = perfProvider.topPerformers.take(3).toList();
+        // Sorted best → worst (descending score)
+        final sorted = perfProvider.sortedByBest;
         final monthNames = [
           'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
         ];
+        final now = DateTime.now();
 
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSectionTitle(
               'Student Performance',
@@ -1792,7 +1802,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey.shade400),
                 const SizedBox(width: 5),
                 Text(
-                  '${monthNames[perfProvider.selectedMonth - 1]} ${perfProvider.selectedYear}',
+                  '${monthNames[now.month - 1]} ${now.year} • Best performers',
                   style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
                 ),
               ],
@@ -1804,10 +1814,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ] else if (perfProvider.error != null &&
                 perfProvider.allPerformances.isEmpty) ...[
               _buildPerformanceError(perfProvider),
-            ] else if (topStudents.isEmpty) ...[
+            ] else if (sorted.isEmpty) ...[
               _buildPerformanceEmpty(context),
             ] else ...[
-              _buildTopStudentCards(topStudents, perfProvider),
+              // Horizontal scrollable cards — best score first
+              SizedBox(
+                height: 170,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: sorted.length,
+                  itemBuilder: (context, idx) {
+                    return _buildDashboardPerfCard(
+                      context, sorted[idx], idx + 1,
+                    );
+                  },
+                ),
+              ),
             ],
           ],
         );
@@ -1815,218 +1838,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildTopStudentCards(
-    List<StudentPerformance> students,
-    StudentPerformanceProvider provider,
-  ) {
-    return Column(
-      children: students.asMap().entries.map((entry) {
-        final idx = entry.key;
-        final perf = entry.value;
-        final score = (perf.attendance.percentage +
-                perf.homework.percentage +
-                perf.exams.percentage) /
-            3;
 
-        final rankColors = [
-          const Color(0xFFFFD700), // Gold
-          const Color(0xFFC0C0C0), // Silver
-          const Color(0xFFCD7F32), // Bronze
-        ];
-        final rankEmojis = ['🥇', '🥈', '🥉'];
-        final gradeColor = score >= 80
-            ? const Color(0xFF10B981)
-            : score >= 60
-            ? const Color(0xFF3B82F6)
-            : score >= 40
-            ? const Color(0xFFF59E0B)
-            : const Color(0xFFEF4444);
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: rankColors[idx].withOpacity(0.35),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: rankColors[idx].withOpacity(0.12),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              children: [
-                // Rank + avatar
-                Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [
-                            gradeColor.withOpacity(0.2),
-                            gradeColor.withOpacity(0.05),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        border: Border.all(
-                          color: gradeColor.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          perf.name.isNotEmpty
-                              ? perf.name[0].toUpperCase()
-                              : '?',
-                          style: TextStyle(
-                            color: gradeColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      right: -2,
-                      bottom: -2,
-                      child: Text(
-                        rankEmojis[idx],
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 14),
-                // Info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        perf.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 3),
-                      Row(
-                        children: [
-                          if (perf.classInfo != null) ...[
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 7, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.purple.withOpacity(0.08),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                perf.classInfo!.name,
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.purple,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 5),
-                          ],
-                          if (perf.section != null)
-                            Text(
-                              perf.section!.name,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey.shade500,
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      // Mini metric bars
-                      Row(
-                        children: [
-                          _buildMiniMetricBar(
-                            'Att',
-                            perf.attendance.percentage,
-                            const Color(0xFF10B981),
-                          ),
-                          const SizedBox(width: 6),
-                          _buildMiniMetricBar(
-                            'HW',
-                            perf.homework.percentage,
-                            const Color(0xFF3B82F6),
-                          ),
-                          const SizedBox(width: 6),
-                          _buildMiniMetricBar(
-                            'Exam',
-                            perf.exams.percentage,
-                            const Color(0xFFEF4444),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                // Score ring
-                const SizedBox(width: 10),
-                SizedBox(
-                  width: 56,
-                  height: 56,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      CircularProgressIndicator(
-                        value: score / 100,
-                        strokeWidth: 5,
-                        backgroundColor: gradeColor.withOpacity(0.1),
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(gradeColor),
-                        strokeCap: StrokeCap.round,
-                      ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '${score.toStringAsFixed(0)}%',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: gradeColor,
-                            ),
-                          ),
-                          Text(
-                            'score',
-                            style: TextStyle(
-                              fontSize: 7,
-                              color: Colors.grey.shade400,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
 
   Widget _buildMiniMetricBar(String label, double value, Color color) {
     return Expanded(
@@ -2069,27 +1881,241 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildPerformanceShimmer() {
+  /// Compact vertical card for horizontal dashboard scroll
+  Widget _buildDashboardPerfCard(
+    BuildContext context,
+    StudentPerformance perf,
+    int rank,
+  ) {
+    final score = (perf.attendance.percentage +
+            perf.homework.percentage +
+            perf.exams.percentage) /
+        3;
+
+    Color gradeColor;
+    if (score >= 80) {
+      gradeColor = const Color(0xFF10B981);
+    } else if (score >= 60) {
+      gradeColor = const Color(0xFF3B82F6);
+    } else if (score >= 40) {
+      gradeColor = const Color(0xFFF59E0B);
+    } else {
+      gradeColor = const Color(0xFFEF4444);
+    }
+
+    final medalColors = {
+      1: const Color(0xFFFFD700),
+      2: const Color(0xFFC0C0C0),
+      3: const Color(0xFFCD7F32),
+    };
+    final rankEmojis = {1: '🥇', 2: '🥈', 3: '🥉'};
+    final isTop3 = rank <= 3;
+    final borderColor = isTop3
+        ? medalColors[rank]!.withOpacity(0.5)
+        : Colors.grey.shade200;
+
+    return GestureDetector(
+      onTap: () {
+        // Pre-select student, then open full performance screen
+        context
+            .read<StudentPerformanceProvider>()
+            .selectStudentByName(perf.name);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const StudentPerformanceScreen(),
+          ),
+        );
+      },
+      child: Container(
+        width: 130,
+        margin: EdgeInsets.only(
+          left: rank == 1 ? 0 : 0,
+          right: 10,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor, width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: isTop3
+                  ? medalColors[rank]!.withOpacity(0.1)
+                  : Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Rank indicator
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (isTop3)
+                    Text(rankEmojis[rank]!,
+                        style: const TextStyle(fontSize: 16))
+                  else
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '#$rank',
+                        style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade500),
+                      ),
+                    ),
+                  // Score ring (small)
+                  SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          value: score / 100,
+                          strokeWidth: 3.5,
+                          backgroundColor:
+                              gradeColor.withOpacity(0.1),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(gradeColor),
+                          strokeCap: StrokeCap.round,
+                        ),
+                        Text(
+                          '${score.toStringAsFixed(0)}%',
+                          style: TextStyle(
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                              color: gradeColor),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              // Avatar
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: gradeColor.withOpacity(0.12),
+                child: Text(
+                  perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
+                  style: TextStyle(
+                      color: gradeColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                ),
+              ),
+              // Name
+              Text(
+                perf.name.split(' ').first,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 12),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+              // Class chip
+              if (perf.classInfo != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    perf.classInfo!.name,
+                    style: const TextStyle(
+                        fontSize: 9,
+                        color: Colors.purple,
+                        fontWeight: FontWeight.w700),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                )
+              else
+                const SizedBox(height: 14),
+              // Mini metric strip
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _metricDot(
+                      perf.attendance.percentage, const Color(0xFF10B981)),
+                  _metricDot(
+                      perf.homework.percentage, const Color(0xFF3B82F6)),
+                  _metricDot(
+                      perf.exams.percentage, const Color(0xFFEF4444)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _metricDot(double value, Color color) {
     return Column(
-      children: List.generate(3, (i) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          height: 100,
+      children: [
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color.withOpacity(0.1),
+          ),
+          child: Center(
+            child: Text(
+              '${value.toStringAsFixed(0)}%',
+              style: TextStyle(
+                  fontSize: 7,
+                  fontWeight: FontWeight.bold,
+                  color: color),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPerformanceShimmer() {
+    return SizedBox(
+      height: 170,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 5,
+        itemBuilder: (_, i) => Container(
+          width: 130,
+          margin: const EdgeInsets.only(right: 10),
           decoration: BoxDecoration(
             color: Colors.grey.shade200,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Center(
-            child: SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          ),
-        );
-      }),
+          child: i == 0
+              ? const Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              : null,
+        ),
+      ),
     );
   }
+
 
   Widget _buildPerformanceError(StudentPerformanceProvider provider) {
     return Container(
