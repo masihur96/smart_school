@@ -7,43 +7,43 @@ import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
 import '../models/admin_dashboard_model.dart';
 
-class StudentPerformanceProvider extends ChangeNotifier {
+class TeacherPerformanceProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
   String? _error;
   String? get error => _error;
 
-  int _selectedMonth = 2;
+  int _selectedMonth = 1;
   int get selectedMonth => _selectedMonth;
 
   int _selectedYear = 2026;
   int get selectedYear => _selectedYear;
 
   // All raw performances loaded from API
-  List<StudentPerformance> _allPerformances = [];
-  List<StudentPerformance> get allPerformances => _allPerformances;
+  List<TeacherPerformance> _allPerformances = [];
+  List<TeacherPerformance> get allPerformances => _allPerformances;
 
   // UI-only filters (do NOT re-fetch from API)
   String _filterSearch = '';
   String get filterSearch => _filterSearch;
 
-  String? _filterClass;
-  String? get filterClass => _filterClass;
+  String? _filterDesignation;
+  String? get filterDesignation => _filterDesignation;
 
-  // Selected student for individual detail view
-  StudentPerformance? _selectedStudent;
-  StudentPerformance? get selectedStudent => _selectedStudent;
+  // Selected teacher for individual detail view
+  TeacherPerformance? _selectedTeacher;
+  TeacherPerformance? get selectedTeacher => _selectedTeacher;
 
   // Performances sorted best→worst (descending score)
-  List<StudentPerformance> get sortedByBest {
+  List<TeacherPerformance> get sortedByBest {
     final sorted = [..._allPerformances];
     sorted.sort((a, b) => _score(b).compareTo(_score(a)));
     return sorted;
   }
 
   // Filtered + sorted list used in the full screen
-  List<StudentPerformance> get filteredPerformances {
+  List<TeacherPerformance> get filteredPerformances {
     var list = sortedByBest;
 
     if (_filterSearch.isNotEmpty) {
@@ -53,28 +53,27 @@ class StudentPerformanceProvider extends ChangeNotifier {
           .toList();
     }
 
-    if (_filterClass != null && _filterClass!.isNotEmpty) {
-      list = list.where((p) => p.classInfo?.name == _filterClass).toList();
+    if (_filterDesignation != null && _filterDesignation!.isNotEmpty) {
+      list = list.where((p) => p.designation == _filterDesignation).toList();
     }
 
     return list;
   }
 
-  List<String> get availableClasses {
-    final classes = <String>{};
+  List<String> get availableDesignations {
+    final designations = <String>{};
     for (final p in _allPerformances) {
-      if (p.classInfo?.name != null) classes.add(p.classInfo!.name);
+      if (p.designation.isNotEmpty) designations.add(p.designation);
     }
-    return classes.toList()..sort();
+    return designations.toList()..sort();
   }
 
-  // All student names for dropdown search
-  List<String> get studentNames =>
+  // All teacher names for dropdown search
+  List<String> get teacherNames =>
       _allPerformances.map((p) => p.name).toList()..sort();
 
-  double _score(StudentPerformance p) =>
-      (p.attendance.percentage + p.homework.percentage + p.exams.percentage) /
-      3;
+  double _score(TeacherPerformance p) =>
+      (p.attendance.percentage + p.homework.percentage) / 2;
 
   // ── UI filter setters (no re-fetch) ────────────────────────────────────
 
@@ -83,16 +82,16 @@ class StudentPerformanceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setClassFilter(String? className) {
-    _filterClass = className;
+  void setDesignationFilter(String? designation) {
+    _filterDesignation = designation;
     notifyListeners();
   }
 
-  void selectStudentByName(String? name) {
+  void selectTeacherByName(String? name) {
     if (name == null) {
-      _selectedStudent = null;
+      _selectedTeacher = null;
     } else {
-      _selectedStudent = _allPerformances.firstWhere(
+      _selectedTeacher = _allPerformances.firstWhere(
         (p) => p.name == name,
         orElse: () => _allPerformances.first,
       );
@@ -100,8 +99,8 @@ class StudentPerformanceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void clearSelectedStudent() {
-    _selectedStudent = null;
+  void clearSelectedTeacher() {
+    _selectedTeacher = null;
     notifyListeners();
   }
 
@@ -111,9 +110,9 @@ class StudentPerformanceProvider extends ChangeNotifier {
   Future<void> fetchForMonth(int month, int year) async {
     _selectedMonth = month;
     _selectedYear = year;
-    _selectedStudent = null; // reset individual selection on date change
+    _selectedTeacher = null; // reset individual selection on date change
     _filterSearch = '';
-    _filterClass = null;
+    _filterDesignation = null;
     await fetchPerformances();
   }
 
@@ -129,10 +128,11 @@ class StudentPerformanceProvider extends ChangeNotifier {
       final m = _selectedMonth;
       final y = _selectedYear;
 
-      // Fetch all student performances in one call by omitting studentId
+      // Fetch all teacher performances in one call by omitting teacherId
+      // Notice using api path: APIPath.baseUrl + /performance/teacher
       final response = await DataProvider().performRequest(
         'GET',
-        '${APIPath.baseUrl}/performance/student?month=$m&year=$y',
+        '${APIPath.baseUrl}/performance/teacher?month=$m&year=$y',
         header: {'Authorization': 'Bearer $token'},
       );
 
@@ -146,14 +146,14 @@ class StudentPerformanceProvider extends ChangeNotifier {
       final data = response.data['data'];
       if (data is List) {
         _allPerformances = data
-            .map((d) => StudentPerformance.fromJson(d as Map<String, dynamic>))
+            .map((d) => TeacherPerformance.fromJson(d as Map<String, dynamic>))
             .toList();
-        log('Fetched performance for ${_allPerformances.length} students in bulk.');
+        log('Fetched performance for ${_allPerformances.length} teachers in bulk.');
       } else {
         _allPerformances = [];
       }
     } catch (e) {
-      _error = 'Error loading student performance: $e';
+      _error = 'Error loading teacher performance: $e';
       log('Error: $e');
     } finally {
       _isLoading = false;
