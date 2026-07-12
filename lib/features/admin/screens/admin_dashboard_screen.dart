@@ -58,6 +58,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       if (mounted) {
         context.read<AdminDashboardProvider>().fetchDashboardData();
         context.read<NotificationNotifier>().fetchNotifications();
+        final now = DateTime.now();
+        context
+            .read<TeacherPerformanceProvider>()
+            .fetchForMonth(now.month, now.year);
       }
     });
   }
