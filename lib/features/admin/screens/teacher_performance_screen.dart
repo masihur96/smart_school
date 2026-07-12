@@ -21,8 +21,18 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
   String _teacherQuery = '';
 
   static const _months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   @override
@@ -90,7 +100,11 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.calendar_month, size: 18, color: Colors.purple),
+                  const Icon(
+                    Icons.calendar_month,
+                    size: 18,
+                    color: Colors.purple,
+                  ),
                   const SizedBox(width: 8),
                   const Text(
                     'Select Month',
@@ -100,9 +114,10 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                   Text(
                     '${provider.selectedYear}',
                     style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade500,
-                        fontWeight: FontWeight.w600),
+                      fontSize: 13,
+                      color: Colors.grey.shade500,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -121,7 +136,9 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 150),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 9),
+                        horizontal: 16,
+                        vertical: 9,
+                      ),
                       decoration: BoxDecoration(
                         gradient: isSelected
                             ? LinearGradient(
@@ -136,11 +153,12 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                  color:
-                                      AppColors.primaryAdmin.withValues(alpha: 0.3),
+                                  color: AppColors.primaryAdmin.withValues(
+                                    alpha: 0.3,
+                                  ),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
-                                )
+                                ),
                               ]
                             : null,
                       ),
@@ -173,18 +191,91 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
         setState(() => _showTeacherDropdown = false);
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFF4F6FB),
+        appBar: AppBar(
+          backgroundColor: AppColors.primaryAdmin,
+          title: Consumer<TeacherPerformanceProvider>(
+            builder: (context, provider, _) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Teacher Performance", style: TextStyle(fontSize: 16)),
+                  SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.calendar_today_outlined,
+                              size: 11,
+                              color: Colors.white70,
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              '${_months[provider.selectedMonth - 1]} ${provider.selectedYear}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      if (!provider.isLoading)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '${provider.allPerformances.length} teachers',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+
+          actions: [
+            Consumer<TeacherPerformanceProvider>(
+              builder: (context, provider, _) {
+                return IconButton(
+                  icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+                  onPressed: () => provider.fetchPerformances(),
+                  tooltip: 'Refresh',
+                );
+              },
+            ),
+          ],
+        ),
         body: Consumer<TeacherPerformanceProvider>(
           builder: (context, provider, _) {
             return CustomScrollView(
               slivers: [
-                // ── App Bar ───────────────────────────────────────────
-                _buildSliverAppBar(provider),
-
                 // ── Filter bar ────────────────────────────────────────
-                SliverToBoxAdapter(
-                  child: _buildFilterBar(provider),
-                ),
+                SliverToBoxAdapter(child: _buildFilterBar(provider)),
 
                 // ── Teacher dropdown search ───────────────────────────
                 SliverToBoxAdapter(
@@ -201,7 +292,9 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                   // Individual teacher detail
                   SliverToBoxAdapter(
                     child: _buildIndividualDetail(
-                        provider.selectedTeacher!, provider),
+                      provider.selectedTeacher!,
+                      provider,
+                    ),
                   )
                 else
                   // Full ranked list
@@ -228,10 +321,7 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
         background: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                const Color(0xFF6A1B9A),
-                AppColors.primaryAdmin,
-              ],
+              colors: [const Color(0xFF6A1B9A), AppColors.primaryAdmin],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -245,15 +335,19 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.co_present_rounded,
-                          color: Colors.white70, size: 20),
+                      const Icon(
+                        Icons.co_present_rounded,
+                        color: Colors.white70,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       const Text(
                         'Teacher Performance',
                         style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold),
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -262,7 +356,9 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(20),
@@ -270,15 +366,19 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.calendar_today_outlined,
-                                size: 11, color: Colors.white70),
+                            const Icon(
+                              Icons.calendar_today_outlined,
+                              size: 11,
+                              color: Colors.white70,
+                            ),
                             const SizedBox(width: 5),
                             Text(
                               '${_months[provider.selectedMonth - 1]} ${provider.selectedYear}',
                               style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600),
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
@@ -287,7 +387,9 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                       if (!provider.isLoading)
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(20),
@@ -295,9 +397,10 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                           child: Text(
                             '${provider.allPerformances.length} teachers',
                             style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600),
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                     ],
@@ -373,9 +476,12 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                 value: provider.filterDesignation,
                 items: [
                   const DropdownMenuItem<String?>(
-                      value: null, child: Text('All Designations')),
-                  ...designations
-                      .map((d) => DropdownMenuItem(value: d, child: Text(d))),
+                    value: null,
+                    child: Text('All Designations'),
+                  ),
+                  ...designations.map(
+                    (d) => DropdownMenuItem(value: d, child: Text(d)),
+                  ),
                 ],
                 onChanged: provider.setDesignationFilter,
               ),
@@ -407,11 +513,14 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
           children: [
             Icon(icon, size: 13, color: color),
             const SizedBox(width: 5),
-            Text(label,
-                style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: color)),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
             if (trailing != null) ...[
               const SizedBox(width: 3),
               Icon(trailing, size: 13, color: color),
@@ -447,16 +556,25 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
               value: value,
               isDense: true,
               hint: hint != null
-                  ? Text(hint,
+                  ? Text(
+                      hint,
                       style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: color))
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: color,
+                      ),
+                    )
                   : null,
-              icon:
-                  Icon(Icons.keyboard_arrow_down_rounded, size: 13, color: color),
+              icon: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 13,
+                color: color,
+              ),
               style: TextStyle(
-                  fontSize: 12, fontWeight: FontWeight.w600, color: color),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
               items: items,
               onChanged: onChanged,
             ),
@@ -472,9 +590,10 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
     final filtered = _teacherQuery.isEmpty
         ? allNames
         : allNames
-            .where((n) =>
-                n.toLowerCase().contains(_teacherQuery.toLowerCase()))
-            .toList();
+              .where(
+                (n) => n.toLowerCase().contains(_teacherQuery.toLowerCase()),
+              )
+              .toList();
 
     return Container(
       color: Colors.white,
@@ -491,7 +610,8 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
               border: _showTeacherDropdown
                   ? Border.all(
                       color: AppColors.primaryAdmin.withValues(alpha: 0.5),
-                      width: 1.5)
+                      width: 1.5,
+                    )
                   : null,
             ),
             child: Row(
@@ -535,8 +655,7 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                         fontSize: 13,
                       ),
                       border: InputBorder.none,
-                      contentPadding:
-                          const EdgeInsets.symmetric(vertical: 13),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 13),
                     ),
                     style: const TextStyle(fontSize: 13),
                   ),
@@ -570,8 +689,7 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(14),
-                border:
-                    Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: Colors.grey.shade200),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.08),
@@ -586,7 +704,9 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                       child: Text(
                         'No teacher found',
                         style: TextStyle(
-                            color: Colors.grey.shade400, fontSize: 13),
+                          color: Colors.grey.shade400,
+                          fontSize: 13,
+                        ),
                       ),
                     )
                   : ListView.separated(
@@ -606,16 +726,16 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                           dense: true,
                           leading: CircleAvatar(
                             radius: 16,
-                            backgroundColor:
-                                AppColors.primaryAdmin.withValues(alpha: 0.1),
+                            backgroundColor: AppColors.primaryAdmin.withValues(
+                              alpha: 0.1,
+                            ),
                             child: Text(
-                              name.isNotEmpty
-                                  ? name[0].toUpperCase()
-                                  : '?',
+                              name.isNotEmpty ? name[0].toUpperCase() : '?',
                               style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primaryAdmin),
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryAdmin,
+                              ),
                             ),
                           ),
                           title: Text(
@@ -631,8 +751,11 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                             ),
                           ),
                           trailing: isSelected
-                              ? Icon(Icons.check_circle_rounded,
-                                  size: 16, color: AppColors.primaryAdmin)
+                              ? Icon(
+                                  Icons.check_circle_rounded,
+                                  size: 16,
+                                  color: AppColors.primaryAdmin,
+                                )
                               : null,
                           onTap: () {
                             _teacherSearchController.text = name;
@@ -654,7 +777,9 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
 
   // ── Individual Teacher Detail ────────────────────────────────────────────
   Widget _buildIndividualDetail(
-      TeacherPerformance perf, TeacherPerformanceProvider provider) {
+    TeacherPerformance perf,
+    TeacherPerformanceProvider provider,
+  ) {
     final score = _score(perf);
     final color = _gradeColor(score);
     final label = _gradeLabel(score);
@@ -669,12 +794,18 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [color.withValues(alpha: 0.15), color.withValues(alpha: 0.04)],
+                colors: [
+                  color.withValues(alpha: 0.15),
+                  color.withValues(alpha: 0.04),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
+              border: Border.all(
+                color: color.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
             ),
             child: Column(
               children: [
@@ -719,7 +850,9 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                           Text(
                             perf.name,
                             style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 17),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           if (perf.designation.isNotEmpty)
@@ -745,9 +878,10 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                             Text(
                               label,
                               style: TextStyle(
-                                  fontSize: 10,
-                                  color: color,
-                                  fontWeight: FontWeight.w600),
+                                fontSize: 10,
+                                color: color,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
@@ -802,13 +936,15 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline_rounded,
-                    size: 16, color: Colors.grey.shade400),
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 16,
+                  color: Colors.grey.shade400,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Showing data for ${_months[provider.selectedMonth - 1]} ${provider.selectedYear}',
-                  style: TextStyle(
-                      fontSize: 12, color: Colors.grey.shade500),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                 ),
               ],
             ),
@@ -850,9 +986,10 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
               Text(
                 '${percentage.toStringAsFixed(0)}%',
                 style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: color),
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
             ],
           ),
@@ -860,9 +997,10 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
           Text(
             label,
             style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87),
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
           ),
           const SizedBox(height: 6),
           ClipRRect(
@@ -875,14 +1013,18 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
             ),
           ),
           const SizedBox(height: 6),
-          Text(detail1,
-              style: TextStyle(
-                  fontSize: 9,
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w500)),
-          Text(detail2,
-              style: TextStyle(
-                  fontSize: 9, color: Colors.grey.shade400)),
+          Text(
+            detail1,
+            style: TextStyle(
+              fontSize: 9,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Text(
+            detail2,
+            style: TextStyle(fontSize: 9, color: Colors.grey.shade400),
+          ),
         ],
       ),
     );
@@ -898,7 +1040,10 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
       child: Text(
         text,
         style: TextStyle(
-            fontSize: 10, color: color, fontWeight: FontWeight.w700),
+          fontSize: 10,
+          color: color,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
@@ -916,21 +1061,24 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.people_outline,
-                      size: 60, color: Colors.grey.shade300),
+                  Icon(
+                    Icons.people_outline,
+                    size: 60,
+                    color: Colors.grey.shade300,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'No teachers found',
                     style: TextStyle(
-                        color: Colors.grey.shade500,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600),
+                      color: Colors.grey.shade500,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Try adjusting the month or year filter',
-                    style: TextStyle(
-                        color: Colors.grey.shade400, fontSize: 13),
+                    style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
                   ),
                 ],
               ),
@@ -941,36 +1089,37 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
     }
 
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          if (index == 0) {
-            // Section header
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: Row(
-                children: [
-                  const Icon(Icons.emoji_events_rounded,
-                      size: 16, color: Color(0xFFF59E0B)),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Ranked by Overall Score — ${list.length} teachers',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade600),
-                  ),
-                ],
-              ),
-            );
-          }
-          final i = index - 1;
+      delegate: SliverChildBuilderDelegate((context, index) {
+        if (index == 0) {
+          // Section header
           return Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-            child: _buildRankedCard(list[i], rank: i + 1),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.emoji_events_rounded,
+                  size: 16,
+                  color: Color(0xFFF59E0B),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Ranked by Overall Score — ${list.length} teachers',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
           );
-        },
-        childCount: list.length + 1,
-      ),
+        }
+        final i = index - 1;
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+          child: _buildRankedCard(list[i], rank: i + 1),
+        );
+      }, childCount: list.length + 1),
     );
   }
 
@@ -996,7 +1145,9 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
           _teacherQuery = '';
           _showTeacherDropdown = false;
         });
-        context.read<TeacherPerformanceProvider>().selectTeacherByName(perf.name);
+        context.read<TeacherPerformanceProvider>().selectTeacherByName(
+          perf.name,
+        );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -1025,8 +1176,10 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                 child: Column(
                   children: [
                     if (isTop3)
-                      Text(rankEmojis[rank]!,
-                          style: const TextStyle(fontSize: 20))
+                      Text(
+                        rankEmojis[rank]!,
+                        style: const TextStyle(fontSize: 20),
+                      )
                     else
                       Container(
                         width: 28,
@@ -1039,9 +1192,10 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                           child: Text(
                             '#$rank',
                             style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey.shade500),
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey.shade500,
+                            ),
                           ),
                         ),
                       ),
@@ -1071,7 +1225,9 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                     Text(
                       perf.name,
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 14),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1080,7 +1236,9 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                       Text(
                         perf.designation,
                         style: TextStyle(
-                            fontSize: 11, color: Colors.grey.shade500),
+                          fontSize: 11,
+                          color: Colors.grey.shade500,
+                        ),
                       ),
                     const SizedBox(height: 8),
                     // Mini metric bars row
@@ -1088,16 +1246,18 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                       children: [
                         Expanded(
                           child: _miniBar(
-                              'Attendance',
-                              perf.attendance.percentage,
-                              const Color(0xFF10B981)),
+                            'Attendance',
+                            perf.attendance.percentage,
+                            const Color(0xFF10B981),
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _miniBar(
-                              'Homework',
-                              perf.homework.percentage,
-                              const Color(0xFF3B82F6)),
+                            'Homework',
+                            perf.homework.percentage,
+                            const Color(0xFF3B82F6),
+                          ),
                         ),
                       ],
                     ),
@@ -1125,14 +1285,17 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                         Text(
                           '${score.toStringAsFixed(0)}%',
                           style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: color),
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: color,
+                          ),
                         ),
                         Text(
                           label.split(' ').first,
                           style: TextStyle(
-                              fontSize: 7, color: Colors.grey.shade400),
+                            fontSize: 7,
+                            color: Colors.grey.shade400,
+                          ),
                         ),
                       ],
                     ),
@@ -1140,8 +1303,11 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                 ),
               ),
               const SizedBox(width: 6),
-              Icon(Icons.chevron_right_rounded,
-                  size: 16, color: Colors.grey.shade300),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 16,
+                color: Colors.grey.shade300,
+              ),
             ],
           ),
         ),
@@ -1155,17 +1321,23 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
       children: [
         Row(
           children: [
-            Text(label,
-                style: TextStyle(
-                    fontSize: 9,
-                    color: Colors.grey.shade400,
-                    fontWeight: FontWeight.w600)),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 9,
+                color: Colors.grey.shade400,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const Spacer(),
-            Text('${value.toStringAsFixed(0)}%',
-                style: TextStyle(
-                    fontSize: 9,
-                    color: color,
-                    fontWeight: FontWeight.bold)),
+            Text(
+              '${value.toStringAsFixed(0)}%',
+              style: TextStyle(
+                fontSize: 9,
+                color: color,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 2),
@@ -1229,7 +1401,8 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
               backgroundColor: AppColors.primaryAdmin,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
         ],
