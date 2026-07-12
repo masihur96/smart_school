@@ -6,10 +6,10 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
-import 'package:smart_school/features/admin/providers/teacher_performance_provider.dart';
 import 'package:smart_school/features/admin/providers/student_performance_provider.dart';
-import 'package:smart_school/features/admin/screens/teacher_performance_screen.dart';
+import 'package:smart_school/features/admin/providers/teacher_performance_provider.dart';
 import 'package:smart_school/features/admin/screens/student_performance_screen.dart';
+import 'package:smart_school/features/admin/screens/teacher_performance_screen.dart';
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
@@ -25,9 +25,7 @@ import 'exam_management_screen.dart';
 import 'notice_management_screen.dart';
 import 'student_attendance_management_screen.dart';
 import 'student_management_screen.dart';
-import 'student_performance_screen.dart';
 import 'teacher_attendance_management_screen.dart';
-import '../providers/student_performance_provider.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -39,7 +37,18 @@ class AdminDashboardScreen extends StatefulWidget {
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   int _selectedIndex = 0;
   final List<String> _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
 
   @override
@@ -1550,11 +1559,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildTeacherPerformancePreview(BuildContext context) {
     return Consumer<TeacherPerformanceProvider>(
       builder: (context, provider, _) {
+        print(provider.allPerformances.isEmpty);
         if (provider.isLoading && provider.allPerformances.isEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionTitle('Teacher Performance', const SizedBox.shrink()),
+              _buildSectionTitle(
+                'Teacher Performance',
+                const SizedBox.shrink(),
+              ),
               const SizedBox(height: 12),
               SizedBox(
                 height: 130,
@@ -1588,7 +1601,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (_) => const TeacherPerformanceScreen()),
+                      builder: (_) => const TeacherPerformanceScreen(),
+                    ),
                   );
                 },
                 child: Text(
@@ -1610,7 +1624,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 clipBehavior: Clip.none,
                 separatorBuilder: (_, __) => const SizedBox(width: 12),
                 itemBuilder: (context, index) {
-                  return _buildDashboardTeacherPerfCard(list[index], index + 1, context);
+                  return _buildDashboardTeacherPerfCard(
+                    list[index],
+                    index + 1,
+                    context,
+                  );
                 },
               ),
             ),
@@ -1620,7 +1638,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildDashboardTeacherPerfCard(TeacherPerformance perf, int rank, BuildContext context) {
+  Widget _buildDashboardTeacherPerfCard(
+    TeacherPerformance perf,
+    int rank,
+    BuildContext context,
+  ) {
     final provider = context.read<TeacherPerformanceProvider>();
     // Calculate total score (average of the 2 percentages)
     final score = (perf.attendance.percentage + perf.homework.percentage) / 2;
@@ -1656,10 +1678,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-              color: rank <= 3
-                  ? badgeColor.withValues(alpha: 0.5)
-                  : Colors.grey.shade100,
-              width: rank <= 3 ? 1.5 : 1),
+            color: rank <= 3
+                ? badgeColor.withValues(alpha: 0.5)
+                : Colors.grey.shade100,
+            width: rank <= 3 ? 1.5 : 1,
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.03),
@@ -1676,8 +1699,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: badgeColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
@@ -1707,8 +1732,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               children: [
                 CircleAvatar(
                   radius: 16,
-                  backgroundColor:
-                      AppColors.primaryAdmin.withValues(alpha: 0.1),
+                  backgroundColor: AppColors.primaryAdmin.withValues(
+                    alpha: 0.1,
+                  ),
                   child: Text(
                     perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
                     style: TextStyle(
@@ -1733,7 +1759,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        perf.designation.isNotEmpty ? perf.designation : 'Teacher',
+                        perf.designation.isNotEmpty
+                            ? perf.designation
+                            : 'Teacher',
                         style: TextStyle(
                           fontSize: 10,
                           color: Colors.grey.shade500,
@@ -1752,12 +1780,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               children: [
                 Expanded(
                   child: _miniProgressBar(
-                      'Att', perf.attendance.percentage, Colors.green),
+                    'Att',
+                    perf.attendance.percentage,
+                    Colors.green,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: _miniProgressBar(
-                      'HW', perf.homework.percentage, Colors.blue),
+                    'HW',
+                    perf.homework.percentage,
+                    Colors.blue,
+                  ),
                 ),
               ],
             ),
@@ -1766,23 +1800,30 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       ),
     );
   }
+
   Widget _miniProgressBar(String label, double percentage, Color color) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Text(label,
-                style: TextStyle(
-                    fontSize: 9,
-                    color: Colors.grey.shade400,
-                    fontWeight: FontWeight.w600)),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 9,
+                color: Colors.grey.shade400,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const Spacer(),
-            Text('${percentage.toStringAsFixed(0)}%',
-                style: TextStyle(
-                    fontSize: 9,
-                    color: color,
-                    fontWeight: FontWeight.bold)),
+            Text(
+              '${percentage.toStringAsFixed(0)}%',
+              style: TextStyle(
+                fontSize: 9,
+                color: color,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 2),
@@ -1798,7 +1839,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       ],
     );
   }
-
 
   Widget _buildStudentPerformancePreview(BuildContext context) {
     return Consumer<StudentPerformanceProvider>(
@@ -1822,8 +1862,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         // Sorted best → worst (descending score)
         final sorted = perfProvider.sortedByBest;
         final monthNames = [
-          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
         ];
         final now = DateTime.now();
 
@@ -1849,7 +1899,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             // Month indicator
             Row(
               children: [
-                Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey.shade400),
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 12,
+                  color: Colors.grey.shade400,
+                ),
                 const SizedBox(width: 5),
                 Text(
                   '${monthNames[now.month - 1]} ${now.year} • Best performers',
@@ -1876,7 +1930,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   itemCount: sorted.length,
                   itemBuilder: (context, idx) {
                     return _buildDashboardPerfCard(
-                      context, sorted[idx], idx + 1,
+                      context,
+                      sorted[idx],
+                      idx + 1,
                     );
                   },
                 ),
@@ -1887,8 +1943,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       },
     );
   }
-
-
 
   Widget _buildMiniMetricBar(String label, double value, Color color) {
     return Expanded(
@@ -1937,7 +1991,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     StudentPerformance perf,
     int rank,
   ) {
-    final score = (perf.attendance.percentage +
+    final score =
+        (perf.attendance.percentage +
             perf.homework.percentage +
             perf.exams.percentage) /
         3;
@@ -1967,22 +2022,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return GestureDetector(
       onTap: () {
         // Pre-select student, then open full performance screen
-        context
-            .read<StudentPerformanceProvider>()
-            .selectStudentByName(perf.name);
+        context.read<StudentPerformanceProvider>().selectStudentByName(
+          perf.name,
+        );
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => const StudentPerformanceScreen(),
-          ),
+          MaterialPageRoute(builder: (_) => const StudentPerformanceScreen()),
         );
       },
       child: Container(
         width: 130,
-        margin: EdgeInsets.only(
-          left: rank == 1 ? 0 : 0,
-          right: 10,
-        ),
+        margin: EdgeInsets.only(left: rank == 1 ? 0 : 0, right: 10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -2007,12 +2057,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   if (isTop3)
-                    Text(rankEmojis[rank]!,
-                        style: const TextStyle(fontSize: 16))
+                    Text(
+                      rankEmojis[rank]!,
+                      style: const TextStyle(fontSize: 16),
+                    )
                   else
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(8),
@@ -2020,9 +2074,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       child: Text(
                         '#$rank',
                         style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey.shade500),
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade500,
+                        ),
                       ),
                     ),
                   // Score ring (small)
@@ -2035,18 +2090,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         CircularProgressIndicator(
                           value: score / 100,
                           strokeWidth: 3.5,
-                          backgroundColor:
-                              gradeColor.withOpacity(0.1),
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(gradeColor),
+                          backgroundColor: gradeColor.withOpacity(0.1),
+                          valueColor: AlwaysStoppedAnimation<Color>(gradeColor),
                           strokeCap: StrokeCap.round,
                         ),
                         Text(
                           '${score.toStringAsFixed(0)}%',
                           style: TextStyle(
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold,
-                              color: gradeColor),
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                            color: gradeColor,
+                          ),
                         ),
                       ],
                     ),
@@ -2060,16 +2114,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 child: Text(
                   perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
                   style: TextStyle(
-                      color: gradeColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16),
+                    color: gradeColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               // Name
               Text(
                 perf.name.split(' ').first,
                 style: const TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 12),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
@@ -2078,7 +2135,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               if (perf.classInfo != null)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 6, vertical: 2),
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.purple.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(8),
@@ -2086,9 +2145,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   child: Text(
                     perf.classInfo!.name,
                     style: const TextStyle(
-                        fontSize: 9,
-                        color: Colors.purple,
-                        fontWeight: FontWeight.w700),
+                      fontSize: 9,
+                      color: Colors.purple,
+                      fontWeight: FontWeight.w700,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -2100,11 +2160,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _metricDot(
-                      perf.attendance.percentage, const Color(0xFF10B981)),
-                  _metricDot(
-                      perf.homework.percentage, const Color(0xFF3B82F6)),
-                  _metricDot(
-                      perf.exams.percentage, const Color(0xFFEF4444)),
+                    perf.attendance.percentage,
+                    const Color(0xFF10B981),
+                  ),
+                  _metricDot(perf.homework.percentage, const Color(0xFF3B82F6)),
+                  _metricDot(perf.exams.percentage, const Color(0xFFEF4444)),
                 ],
               ),
             ],
@@ -2128,9 +2188,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             child: Text(
               '${value.toStringAsFixed(0)}%',
               style: TextStyle(
-                  fontSize: 7,
-                  fontWeight: FontWeight.bold,
-                  color: color),
+                fontSize: 7,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
           ),
         ),
@@ -2165,7 +2226,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       ),
     );
   }
-
 
   Widget _buildPerformanceError(StudentPerformanceProvider provider) {
     return Container(
