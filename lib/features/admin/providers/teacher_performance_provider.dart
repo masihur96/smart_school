@@ -14,10 +14,10 @@ class TeacherPerformanceProvider extends ChangeNotifier {
   String? _error;
   String? get error => _error;
 
-  int _selectedMonth = 1;
+  int _selectedMonth = DateTime.now().month;
   int get selectedMonth => _selectedMonth;
 
-  int _selectedYear = 2026;
+  int _selectedYear = DateTime.now().year;
   int get selectedYear => _selectedYear;
 
   // All raw performances loaded from API
