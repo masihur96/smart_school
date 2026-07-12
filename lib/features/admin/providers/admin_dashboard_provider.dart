@@ -68,14 +68,18 @@ class AdminDashboardProvider extends ChangeNotifier {
         log('Failed to fetch monthly overview: ${monthlyResponse?.data}');
       }
 
+      print("APIPath.teacherPerformance:: ${APIPath.teacherPerformance}");
       final performanceResponse = await DataProvider().performRequest(
         'GET',
         APIPath.teacherPerformance,
         header: {'Authorization': 'Bearer $token'},
       );
-
-      if (performanceResponse != null && performanceResponse.statusCode == 200) {
-        final performanceData = performanceResponse.data['data'] as List<dynamic>?;
+      print("APIPath.teacherPerformance:: ${token}");
+      print("APIPath.teacherPerformance:: ${performanceResponse!.data}");
+      if (performanceResponse != null &&
+          performanceResponse.statusCode == 200) {
+        final performanceData =
+            performanceResponse.data['data'] as List<dynamic>?;
         if (performanceData != null) {
           _teacherPerformances = performanceData
               .map((e) => TeacherPerformance.fromJson(e))
@@ -83,7 +87,9 @@ class AdminDashboardProvider extends ChangeNotifier {
           log('Fetched Teacher Performances successfully.');
         }
       } else {
-        log('Failed to fetch teacher performances: ${performanceResponse?.data}');
+        log(
+          'Failed to fetch teacher performances: ${performanceResponse?.data}',
+        );
       }
 
       final studentPerformanceResponse = await DataProvider().performRequest(
@@ -92,7 +98,8 @@ class AdminDashboardProvider extends ChangeNotifier {
         header: {'Authorization': 'Bearer $token'},
       );
 
-      if (studentPerformanceResponse != null && studentPerformanceResponse.statusCode == 200) {
+      if (studentPerformanceResponse != null &&
+          studentPerformanceResponse.statusCode == 200) {
         final data = studentPerformanceResponse.data['data'] as List<dynamic>?;
         if (data != null) {
           _studentPerformances = data
@@ -101,7 +108,9 @@ class AdminDashboardProvider extends ChangeNotifier {
           log('Fetched Student Performances successfully.');
         }
       } else {
-        log('Failed to fetch student performances: ${studentPerformanceResponse?.data}');
+        log(
+          'Failed to fetch student performances: ${studentPerformanceResponse?.data}',
+        );
       }
     } catch (e) {
       _error = 'Error loading dashboard: $e';
