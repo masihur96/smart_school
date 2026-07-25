@@ -1,4 +1,4 @@
-package com.example.smart_school
+package com.schoolcare.app
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 
