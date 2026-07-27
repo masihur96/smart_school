@@ -50,6 +50,22 @@
       <string>location</string>
     </array>
     <key>NSFaceIDUsageDescription</key>
-    <string>Why is my app authenticating using face id?</string>
+    <string>We use Face ID to securely authenticate you into your SchoolCare account.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>SchoolCare uses the camera to capture student, teacher, and profile photos.</string>
+
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>SchoolCare allows you to select images from your photo library for profiles and school records.</string>
+
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>SchoolCare uses your location to record attendance and verify your check-in location.</string>
+
+<key>NSMicrophoneUsageDescription</key>
+<string>SchoolCare uses the microphone for voice input and speech features.</string>
+
+
+<key>NSSpeechRecognitionUsageDescription</key>
+<string>SchoolCare uses speech recognition to convert your voice into text.</string>
+
   </dict>
 </plist>
