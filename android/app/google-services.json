@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:2512295449:android:e0a8b58e4d3a343c237c88",
+        "mobilesdk_app_id": "1:2512295449:android:5322dbf0ecbad594237c88",
         "android_client_info": {
-          "package_name": "com.example.smart_school"
+          "package_name": "com.schoolcare.app"
         }
       },
       "oauth_client": [],
