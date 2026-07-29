@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:teacher_app/core/theme.dart';
-import 'package:teacher_app/features/attendance/presentation/screens/student_attendance_screen.dart';
-import 'package:teacher_app/features/coursework/presentation/screens/coursework_list_screen.dart';
-import 'package:teacher_app/features/dashboard/presentation/screens/dashboard_screen.dart';
-import 'package:teacher_app/features/profile/presentation/screens/profile_screen.dart';
+import 'package:smart_school/features/attendance/presentation/screens/student_attendance_screen.dart';
+import 'package:smart_school/features/coursework/presentation/screens/coursework_list_screen.dart';
+import 'package:smart_school/features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -26,10 +25,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _selectedIndex, children: _screens),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (int index) {

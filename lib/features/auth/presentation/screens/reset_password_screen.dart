@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:teacher_app/core/theme.dart';
+import 'package:smart_school/core/theme.dart';
 
 class ResetPasswordScreen extends StatelessWidget {
   const ResetPasswordScreen({super.key});
@@ -42,12 +42,15 @@ class ResetPasswordScreen extends StatelessWidget {
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content: Text('Password reset link sent to your email')),
+                    content: Text('Password reset link sent to your email'),
+                  ),
                 );
                 Navigator.pop(context);
               },
-              child: const Text('Send Reset Link',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Send Reset Link',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),

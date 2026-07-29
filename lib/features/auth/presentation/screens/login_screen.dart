@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:teacher_app/core/theme.dart';
-import 'package:teacher_app/features/auth/presentation/screens/reset_password_screen.dart';
-import 'package:teacher_app/features/dashboard/presentation/screens/dashboard_screen.dart';
-import 'package:teacher_app/features/navigation/presentation/screens/main_navigation_screen.dart';
+import 'package:smart_school/core/theme.dart';
+import 'package:smart_school/features/auth/presentation/screens/reset_password_screen.dart';
+import 'package:smart_school/features/navigation/presentation/screens/main_navigation_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -23,10 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.primary.withOpacity(0.05),
-              AppColors.background,
-            ],
+            colors: [AppColors.primary.withOpacity(0.05), AppColors.background],
           ),
         ),
         child: SafeArea(
@@ -63,7 +59,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty) return 'Please enter email';
+                        if (value == null || value.isEmpty)
+                          return 'Please enter email';
                         return null;
                       },
                     ),
@@ -74,12 +71,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         labelText: 'Password',
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
-                          icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                          onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
                         ),
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty) return 'Please enter password';
+                        if (value == null || value.isEmpty)
+                          return 'Please enter password';
                         return null;
                       },
                     ),
@@ -90,7 +94,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const ResetPasswordScreen()),
+                            MaterialPageRoute(
+                              builder: (context) => const ResetPasswordScreen(),
+                            ),
                           );
                         },
                         child: const Text('Forgot Password?'),
@@ -102,11 +108,20 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (_formKey.currentState!.validate()) {
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const MainNavigationScreen(),
+                            ),
                           );
                         }
                       },
-                      child: const Text('Login', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        'Login',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ],
                 ),

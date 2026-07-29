@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:teacher_app/core/theme.dart';
+import 'package:smart_school/core/theme.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -13,7 +13,7 @@ class ProfileScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             onPressed: () {},
-          )
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -76,17 +76,32 @@ class ProfileScreen extends StatelessWidget {
       children: [
         _buildSettingsItem(context, 'Account Settings', Icons.person_outline),
         _buildSettingsItem(context, 'Notifications', Icons.notifications_none),
-        _buildSettingsItem(context, 'Attendance Reports', Icons.insert_chart_outlined_rounded),
+        _buildSettingsItem(
+          context,
+          'Attendance Reports',
+          Icons.insert_chart_outlined_rounded,
+        ),
         _buildSettingsItem(context, 'Help & Support', Icons.help_outline),
         _buildSettingsItem(context, 'Logout', Icons.logout, color: Colors.red),
       ],
     );
   }
 
-  Widget _buildSettingsItem(BuildContext context, String title, IconData icon, {Color? color}) {
+  Widget _buildSettingsItem(
+    BuildContext context,
+    String title,
+    IconData icon, {
+    Color? color,
+  }) {
     return ListTile(
       leading: Icon(icon, color: color ?? AppColors.textPrimary),
-      title: Text(title, style: TextStyle(color: color ?? AppColors.textPrimary, fontWeight: FontWeight.w500)),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: color ?? AppColors.textPrimary,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
       trailing: const Icon(Icons.chevron_right, size: 20),
       onTap: () {},
     );

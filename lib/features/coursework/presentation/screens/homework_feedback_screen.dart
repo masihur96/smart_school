@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:teacher_app/core/theme.dart';
-import 'package:teacher_app/data/mock_data/mock_data.dart';
+import 'package:smart_school/core/theme.dart';
+import 'package:smart_school/data/mock_data/mock_data.dart';
 
 class HomeworkFeedbackScreen extends StatefulWidget {
   final String homeworkTitle;
@@ -34,9 +34,7 @@ class _HomeworkFeedbackScreenState extends State<HomeworkFeedbackScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Homework Feedback'),
-      ),
+      appBar: AppBar(title: const Text('Homework Feedback')),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -45,8 +43,14 @@ class _HomeworkFeedbackScreenState extends State<HomeworkFeedbackScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.homeworkTitle, style: Theme.of(context).textTheme.titleLarge),
-                const Text('Provide feedback for each student below.', style: TextStyle(color: AppColors.textSecondary)),
+                Text(
+                  widget.homeworkTitle,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const Text(
+                  'Provide feedback for each student below.',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
               ],
             ),
           ),
@@ -66,13 +70,33 @@ class _HomeworkFeedbackScreenState extends State<HomeworkFeedbackScreen> {
                         Row(
                           children: [
                             CircleAvatar(
-                              backgroundColor: AppColors.primary.withOpacity(0.1),
-                              child: Text(student['name'][0], style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                              backgroundColor: AppColors.primary.withOpacity(
+                                0.1,
+                              ),
+                              child: Text(
+                                student['name'][0],
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                             const SizedBox(width: 12),
-                            Text(student['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Text(
+                              student['name'],
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             const Spacer(),
-                            const Text('Submitted', style: TextStyle(color: AppColors.success, fontSize: 12, fontWeight: FontWeight.w600)),
+                            const Text(
+                              'Submitted',
+                              style: TextStyle(
+                                color: AppColors.success,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 16),

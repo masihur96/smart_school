@@ -1,25 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:teacher_app/core/theme.dart';
-import 'package:teacher_app/data/mock_data/mock_data.dart';
-import 'package:teacher_app/features/coursework/presentation/screens/coursework_form_screen.dart';
-import 'package:teacher_app/features/coursework/presentation/screens/homework_feedback_screen.dart';
+import 'package:smart_school/core/theme.dart';
+import 'package:smart_school/data/mock_data/mock_data.dart';
+import 'package:smart_school/features/coursework/presentation/screens/coursework_form_screen.dart';
+import 'package:smart_school/features/coursework/presentation/screens/homework_feedback_screen.dart';
 
 class CourseworkListScreen extends StatefulWidget {
   final int initialIndex;
   final bool isTab;
-  const CourseworkListScreen({super.key, this.initialIndex = 0, this.isTab = false});
+  const CourseworkListScreen({
+    super.key,
+    this.initialIndex = 0,
+    this.isTab = false,
+  });
 
   @override
   State<CourseworkListScreen> createState() => _CourseworkListScreenState();
 }
 
-class _CourseworkListScreenState extends State<CourseworkListScreen> with SingleTickerProviderStateMixin {
+class _CourseworkListScreenState extends State<CourseworkListScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this, initialIndex: widget.initialIndex);
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialIndex,
+    );
   }
 
   @override
@@ -37,10 +46,7 @@ class _CourseworkListScreenState extends State<CourseworkListScreen> with Single
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildList('Classwork'),
-          _buildList('Homework'),
-        ],
+        children: [_buildList('Classwork'), _buildList('Homework')],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -60,7 +66,9 @@ class _CourseworkListScreenState extends State<CourseworkListScreen> with Single
   }
 
   Widget _buildList(String type) {
-    final items = MockData.coursework.where((item) => item['type'] == type).toList();
+    final items = MockData.coursework
+        .where((item) => item['type'] == type)
+        .toList();
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -71,35 +79,57 @@ class _CourseworkListScreenState extends State<CourseworkListScreen> with Single
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
-            title: Text(item['title'], style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(
+              item['title'],
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 4),
-                Text(item['description'], maxLines: 2, overflow: TextOverflow.ellipsis),
+                Text(
+                  item['description'],
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.calendar_month, size: 14, color: AppColors.textSecondary),
+                    const Icon(
+                      Icons.calendar_month,
+                      size: 14,
+                      color: AppColors.textSecondary,
+                    ),
                     const SizedBox(width: 4),
-                    Text('Due: ${item['dueDate']}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    Text(
+                      'Due: ${item['dueDate']}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                   ],
                 ),
               ],
             ),
-            trailing: type == 'Homework' 
-              ? IconButton(
-                  icon: const Icon(Icons.comment_outlined, color: AppColors.primary),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomeworkFeedbackScreen(homeworkTitle: item['title']),
-                      ),
-                    );
-                  },
-                )
-              : const Icon(Icons.chevron_right),
+            trailing: type == 'Homework'
+                ? IconButton(
+                    icon: const Icon(
+                      Icons.comment_outlined,
+                      color: AppColors.primary,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomeworkFeedbackScreen(
+                            homeworkTitle: item['title'],
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                : const Icon(Icons.chevron_right),
             onTap: () {
               // Edit logic could go here
             },

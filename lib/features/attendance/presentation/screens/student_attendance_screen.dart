@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:teacher_app/core/theme.dart';
-import 'package:teacher_app/data/mock_data/mock_data.dart';
+import 'package:smart_school/core/theme.dart';
+import 'package:smart_school/data/mock_data/mock_data.dart';
 
 class StudentAttendanceScreen extends StatefulWidget {
   final bool isTab;
   const StudentAttendanceScreen({super.key, this.isTab = false});
 
   @override
-  State<StudentAttendanceScreen> createState() => _StudentAttendanceScreenState();
+  State<StudentAttendanceScreen> createState() =>
+      _StudentAttendanceScreenState();
 }
 
 class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
   DateTime _selectedDate = DateTime.now();
   late Map<String, String> _currentAttendance;
-  
+
   @override
   void initState() {
     super.initState();
@@ -24,17 +25,20 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
   void _loadAttendance() {
     final dateKey = DateFormat('yyyy-MM-dd').format(_selectedDate);
     final existingData = MockData.studentAttendance[dateKey];
-    
+
     _currentAttendance = {
       for (var student in MockData.students)
-        student['id']: existingData?.firstWhere(
+        student['id']:
+            existingData?.firstWhere(
               (a) => a['studentId'] == student['id'],
               orElse: () => {'status': 'Present'},
-            )['status'] ?? 'Present'
+            )['status'] ??
+            'Present',
     };
   }
 
-  bool get _isToday => DateFormat('yyyy-MM-dd').format(_selectedDate) == MockData.today;
+  bool get _isToday =>
+      DateFormat('yyyy-MM-dd').format(_selectedDate) == MockData.today;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +62,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                 });
               }
             },
-          )
+          ),
         ],
       ),
       body: Column(
@@ -74,12 +78,19 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                   children: [
                     Text(
                       DateFormat('EEEE, MMM dd').format(_selectedDate),
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
                     ),
                     Text(
-                      _isToday ? 'You can mark/update today' : 'History Mode (Read-Only)',
+                      _isToday
+                          ? 'You can mark/update today'
+                          : 'History Mode (Read-Only)',
                       style: TextStyle(
-                        color: _isToday ? AppColors.success : AppColors.textSecondary,
+                        color: _isToday
+                            ? AppColors.success
+                            : AppColors.textSecondary,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -90,11 +101,16 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                   ElevatedButton(
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Attendance submitted successfully')),
+                        const SnackBar(
+                          content: Text('Attendance submitted successfully'),
+                        ),
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 0,
+                      ),
                     ),
                     child: const Text('Submit Attendance'),
                   ),
@@ -108,7 +124,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
               itemBuilder: (context, index) {
                 final student = MockData.students[index];
                 final status = _currentAttendance[student['id']]!;
-                
+
                 return Card(
                   elevation: 0,
                   margin: const EdgeInsets.only(bottom: 8),
@@ -117,42 +133,53 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                     side: BorderSide(color: Colors.grey.shade100),
                   ),
                   child: ListTile(
-                    title: Text(student['name'], style: const TextStyle(fontWeight: FontWeight.w600)),
+                    title: Text(
+                      student['name'],
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
                     subtitle: Text('Roll: ${student['roll']}'),
-                    trailing: _isToday 
-                      ? SegmentedButton<String>(
-                          segments: const [
-                            ButtonSegment(value: 'Present', label: Text('P')),
-                            ButtonSegment(value: 'Absent', label: Text('A')),
-                          ],
-                          selected: {status},
-                          onSelectionChanged: (newSelection) {
-                            setState(() {
-                              _currentAttendance[student['id']] = newSelection.first;
-                            });
-                          },
-                          showSelectedIcon: false,
-                          style: SegmentedButton.styleFrom(
-                            selectedBackgroundColor: status == 'Present' ? AppColors.success : AppColors.error,
-                            selectedForegroundColor: Colors.white,
-                          ),
-                        )
-                      : Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: status == 'Present' 
-                                ? AppColors.success.withOpacity(0.1) 
-                                : AppColors.error.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            status,
-                            style: TextStyle(
-                              color: status == 'Present' ? AppColors.success : AppColors.error,
-                              fontWeight: FontWeight.bold,
+                    trailing: _isToday
+                        ? SegmentedButton<String>(
+                            segments: const [
+                              ButtonSegment(value: 'Present', label: Text('P')),
+                              ButtonSegment(value: 'Absent', label: Text('A')),
+                            ],
+                            selected: {status},
+                            onSelectionChanged: (newSelection) {
+                              setState(() {
+                                _currentAttendance[student['id']] =
+                                    newSelection.first;
+                              });
+                            },
+                            showSelectedIcon: false,
+                            style: SegmentedButton.styleFrom(
+                              selectedBackgroundColor: status == 'Present'
+                                  ? AppColors.success
+                                  : AppColors.error,
+                              selectedForegroundColor: Colors.white,
+                            ),
+                          )
+                        : Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: status == 'Present'
+                                  ? AppColors.success.withOpacity(0.1)
+                                  : AppColors.error.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              status,
+                              style: TextStyle(
+                                color: status == 'Present'
+                                    ? AppColors.success
+                                    : AppColors.error,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
                   ),
                 );
               },

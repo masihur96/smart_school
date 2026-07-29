@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:teacher_app/core/theme.dart';
-import 'package:teacher_app/data/mock_data/mock_data.dart';
+import 'package:smart_school/core/theme.dart';
+import 'package:smart_school/data/mock_data/mock_data.dart';
 
 class MarkAttendanceScreen extends StatefulWidget {
   const MarkAttendanceScreen({super.key});
@@ -16,20 +16,19 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
 
   Future<void> _authenticateWithFingerprint() async {
     bool authenticated = false;
+
     try {
       setState(() {
         _isAuthenticating = true;
       });
-      // Simulate/Attempt biometric auth
+
       authenticated = await auth.authenticate(
         localizedReason: 'Scan your fingerprint to mark attendance',
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: true,
-        ),
+        biometricOnly: true,
+        persistAcrossBackgrounding: true,
       );
     } catch (e) {
-      // If biometrics fail or not available, we show a professional simulation for this demo
+      // If biometrics fail or are unavailable, show the simulation prompt.
       _showSimulationPrompt('Fingerprint');
       return;
     } finally {
@@ -52,7 +51,9 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('A verification code has been sent to your registered email.'),
+            const Text(
+              'A verification code has been sent to your registered email.',
+            ),
             const SizedBox(height: 16),
             TextField(
               decoration: const InputDecoration(
@@ -65,7 +66,10 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
@@ -83,9 +87,14 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('$method Simulation'),
-        content: Text('In a real device, this would trigger the $method hardware. For this demo, would you like to proceed?'),
+        content: Text(
+          'In a real device, this would trigger the $method hardware. For this demo, would you like to proceed?',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
@@ -118,7 +127,11 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Icon(Icons.verified_user_rounded, size: 100, color: AppColors.primary),
+            const Icon(
+              Icons.verified_user_rounded,
+              size: 100,
+              color: AppColors.primary,
+            ),
             const SizedBox(height: 32),
             Text(
               'Identity Verification',
@@ -161,7 +174,14 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
     );
   }
 
-  Widget _buildAuthOption(BuildContext context, String title, String subtitle, IconData icon, Color color, VoidCallback onTap) {
+  Widget _buildAuthOption(
+    BuildContext context,
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+  ) {
     return InkWell(
       onTap: _isAuthenticating ? null : onTap,
       borderRadius: BorderRadius.circular(16),
@@ -186,8 +206,20 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text(subtitle, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ),
             ),
