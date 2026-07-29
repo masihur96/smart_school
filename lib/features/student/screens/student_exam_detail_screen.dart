@@ -131,7 +131,7 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
   Widget _buildResultsTab() {
     return Consumer<StudentExamNotifier>(
       builder: (context, p, child) {
-        print(p.exams.first.isPublished);
+
         if (p.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }

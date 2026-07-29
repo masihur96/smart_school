@@ -53,7 +53,7 @@ class DataProvider {
       Duration diff = endTime.difference(startTime);
 
       if (kDebugMode) {
-        print("$url: ${diff.inMilliseconds} Milliseconds");
+        log("$url: ${diff.inMilliseconds} Milliseconds");
       }
 
       return response;

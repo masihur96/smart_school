@@ -34,7 +34,7 @@ class MarqueeProvider extends ChangeNotifier {
 
       final response = await DataProvider().performRequest('GET', url);
 
-      print("Marque Response : $response");
+      log("Marque Response : $response");
 
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {

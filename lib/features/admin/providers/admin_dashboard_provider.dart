@@ -68,14 +68,14 @@ class AdminDashboardProvider extends ChangeNotifier {
         log('Failed to fetch monthly overview: ${monthlyResponse?.data}');
       }
 
-      print("APIPath.teacherPerformance:: ${APIPath.teacherPerformance}");
+      log("APIPath.teacherPerformance:: ${APIPath.teacherPerformance}");
       final performanceResponse = await DataProvider().performRequest(
         'GET',
         APIPath.teacherPerformance,
         header: {'Authorization': 'Bearer $token'},
       );
-      print("APIPath.teacherPerformance:: ${token}");
-      print("APIPath.teacherPerformance:: ${performanceResponse!.data}");
+      log("APIPath.teacherPerformance:: ${token}");
+      log("APIPath.teacherPerformance:: ${performanceResponse!.data}");
       if (performanceResponse != null &&
           performanceResponse.statusCode == 200) {
         final performanceData =

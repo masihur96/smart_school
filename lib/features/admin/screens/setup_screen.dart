@@ -274,7 +274,7 @@ class _ClassCard extends StatelessWidget {
                       onTap: () {
                         final user = context.read<AuthNotifier>().user;
 
-                        print("classRoom.id::${classRoom.name}");
+
                         _showAddEditClassDialog(
                           context,
                           schoolId: user?.schoolId ?? '',
@@ -1231,7 +1231,7 @@ void _showAddEditClassDialog(
       if (nameCtrl.text.isNotEmpty) {
         bool success;
         if (isEdit) {
-          print("existing.id::${existing.id}");
+
           success = await context.read<ClassSetupNotifier>().updateClass(
             existing.id,
             nameCtrl.text.trim(),

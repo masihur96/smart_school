@@ -300,8 +300,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: () {
-                  print(studentHomework.studentId);
-                  print(studentHomework.id);
+
 
                   _showUpdateStatusDialog(
                     homeworkId: studentHomework.studentId,

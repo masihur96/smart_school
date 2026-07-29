@@ -233,7 +233,7 @@ class _TeacherSelfAttendanceDetailScreenState
         children: [
           ListTile(
             onTap: () {
-              print(attendance.status.toLowerCase());
+
             },
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,

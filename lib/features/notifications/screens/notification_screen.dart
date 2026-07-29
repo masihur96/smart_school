@@ -144,8 +144,7 @@ class _NotificationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(notification.isRead);
-    return Card(
+      return Card(
       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 16),
       color: notification.isRead ? null : Colors.blue.withOpacity(0.05),
       child: ListTile(

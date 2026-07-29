@@ -91,7 +91,6 @@ class StudentsNotifier extends ChangeNotifier {
             ? inner
             : (inner is Map ? (inner['data'] as List<dynamic>? ?? []) : []);
 
-        print("Extracted Data Length: ${data.length}");
 
         final responseTotal = (inner is Map && inner['total'] != null)
             ? int.tryParse(inner['total'].toString()) ?? 0
@@ -116,12 +115,12 @@ class StudentsNotifier extends ChangeNotifier {
 
             _dbService.students.add(parsedStudent);
           } catch (e, stacktrace) {
-            print("Error parsing student: $e");
-            print("Stacktrace: $stacktrace");
+            log("Error parsing student: $e");
+
           }
         }
         _students = [..._dbService.students];
-        print(
+        log(
           "Total students in notifier: ${_students.length}. Provided classId: $classId",
         );
       } else {

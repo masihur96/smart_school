@@ -1019,7 +1019,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
       return;
     }
 
-    print("Add Homework Subject ID:: ${widget.subjectId}");
+
 
     final homework = Homework(
       id: widget.homework?.id ?? '',

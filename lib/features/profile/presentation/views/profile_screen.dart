@@ -297,7 +297,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildSliverAppBar(BuildContext context, User user, bool isLoading) {
-    print(user.role.name.toLowerCase());
     final theme = Theme.of(context);
     return SliverAppBar(
       expandedHeight: 240,
@@ -327,7 +326,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   child: GestureDetector(
                     onTap: () {
-                      print(user.avatar);
+
                     },
                     child: CircleAvatar(
                       radius: 50,

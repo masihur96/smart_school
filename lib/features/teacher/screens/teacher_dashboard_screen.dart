@@ -1582,7 +1582,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
 
   Widget _buildExamCard(BuildContext context, Exam exam) {
     final assignmentsCount = exam.assignments.length;
-    print("Ddd: ${assignmentsCount}");
+
     final startDateStr = exam.startDate != null
         ? DateFormat('MMM dd, yyyy').format(exam.startDate!)
         : 'N/A';

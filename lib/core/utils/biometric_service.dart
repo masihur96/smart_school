@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter/services.dart';
 
@@ -15,7 +17,7 @@ class BiometricService {
       final List<BiometricType> available = await _auth.getAvailableBiometrics();
       return available.isNotEmpty;
     } on PlatformException catch (e) {
-      print('[BiometricService] isBiometricAvailable error: $e');
+      log('[BiometricService] isBiometricAvailable error: $e');
       return false;
     }
   }
@@ -24,7 +26,7 @@ class BiometricService {
     try {
       return await _auth.getAvailableBiometrics();
     } on PlatformException catch (e) {
-      print('[BiometricService] getAvailableBiometrics error: $e');
+      log('[BiometricService] getAvailableBiometrics error: $e');
       return [];
     }
   }
@@ -44,7 +46,7 @@ class BiometricService {
         persistAcrossBackgrounding: true,
       );
     } on PlatformException catch (e) {
-      print('[BiometricService] authenticate error: $e');
+      log('[BiometricService] authenticate error: $e');
       return false;
     }
   }

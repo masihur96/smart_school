@@ -36,16 +36,14 @@ class ChatRepository {
         var data = response.data;
         chatBootModel = ChatBootModel.fromJson(data);
 
-        print(
-          "Successfully Created: ${chatBootModel.choices.first.message!.content}",
-        );
+
       } else {
-        print("Failed to create notice: ${response.statusMessage}");
+        log("Failed to create notice: ${response.statusMessage}");
       }
     } catch (exception, stackTrace) {
       // Log exception and capture it using Sentry for error monitoring
 
-      print("Exception: $exception");
+      log("Exception: $exception");
       return data;
     }
 

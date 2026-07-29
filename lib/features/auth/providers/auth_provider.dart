@@ -44,14 +44,10 @@ class AuthNotifier extends ChangeNotifier {
     if (_adminSubscription == null) return false;
     if (!_adminSubscription!.isActive) return false;
 
-    print("_adminSubscription:: ${_adminSubscription!.endDate}");
-    print("_adminSubscription:: ${_adminSubscription!.lastStudentCount}");
-    print(
-      "_adminSubscription:: ${_adminSubscription!.pricingPlan?.maxStudents ?? 0}",
-    );
+
     try {
       final endDate = DateTime.parse(_adminSubscription!.endDate);
-      print("_adminSubscription:: ${endDate.isAfter(DateTime.now())}");
+      log("_adminSubscription:: ${endDate.isAfter(DateTime.now())}");
       return endDate.isAfter(DateTime.now());
     } catch (e) {
       return false;
@@ -126,8 +122,6 @@ class AuthNotifier extends ChangeNotifier {
 
       // Fetch full profile after login
       final profile = await getProfileUseCase();
-
-      print("profile.classId:: ${profile.classIds}");
 
       _user = User(
         id: profile.id,

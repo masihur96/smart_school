@@ -146,8 +146,7 @@ class ClassSetupNotifier extends ChangeNotifier {
       final token = await StorageService.getToken();
       if (token == null) return false;
 
-      print("DDDDD:: $id");
-      print("DDDDD:: ${APIPath.updateClass(id)}");
+
 
       final response = await DataProvider().performRequest(
         'PUT',

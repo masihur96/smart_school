@@ -995,7 +995,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           ? r.teacherName[0].toUpperCase()
                           : '?';
 
-                      print(r.startTime);
+
                       final inTime = formatTime(r.startTime);
                       final outTime = formatTime(r.endTime);
 
@@ -1563,7 +1563,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildTeacherPerformancePreview(BuildContext context) {
     return Consumer<TeacherPerformanceProvider>(
       builder: (context, provider, _) {
-        print(provider.allPerformances.isEmpty);
+
         if (provider.isLoading && provider.allPerformances.isEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,

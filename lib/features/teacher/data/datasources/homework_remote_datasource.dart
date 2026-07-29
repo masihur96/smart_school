@@ -177,9 +177,7 @@ class HomeworkRemoteDataSource {
   }) async {
     final token = await StorageService.getToken();
     if (token == null) throw Exception('No authentication token found');
-    print("Fetch Homework query classId:: $classId");
-    print("Fetch Homework query sectionId:: $sectionId");
-    print("Fetch Homework query subjectId:: $subjectId");
+
     final query = <String, dynamic>{};
     if (classId != null && classId.isNotEmpty) query['classId'] = classId;
     if (sectionId != null && sectionId.isNotEmpty)
@@ -187,7 +185,7 @@ class HomeworkRemoteDataSource {
     if (subjectId != null && subjectId.isNotEmpty)
       query['subjectId'] = subjectId;
 
-    print("Fetch Homework query:: $query");
+
 
     final response = await _dataProvider.performRequest(
       'GET',
