@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_school/core/theme.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebviewScreen extends StatefulWidget {
@@ -47,6 +48,8 @@ class _WebviewScreenState extends State<WebviewScreen> {
             Navigator.pop(context);
           },
         ),
+
+        backgroundColor: AppColors.textPrimary,
       ),
       body: Stack(
         children: [

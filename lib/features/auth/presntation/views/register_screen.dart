@@ -238,7 +238,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => const WebviewScreen(
-                                        url: 'https://school-care-web-git-masihurdev-masihurwork-9836s-projects.vercel.app/terms',
+                                        url: 'https://school-care-web.vercel.app/terms',
                                         title: 'Terms & Conditions',
                                       ),
                                     ),
@@ -258,7 +258,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => const WebviewScreen(
-                                        url: 'https://school-care-web-git-masihurdev-masihurwork-9836s-projects.vercel.app/privacy',
+                                        url: 'https://school-care-web.vercel.app/privacy',
                                         title: 'Privacy Policy',
                                       ),
                                     ),
