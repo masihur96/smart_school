@@ -110,8 +110,6 @@ class _SplashScreenState extends State<SplashScreen>
             (Route<dynamic> route) => false,
           );
           break;
-          // TODO: Handle this case.
-          throw UnimplementedError();
       }
     } else {
       Navigator.pushAndRemoveUntil(

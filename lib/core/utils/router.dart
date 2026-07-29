@@ -58,8 +58,7 @@ GoRouter getRouter(AuthNotifier authNotifier) {
           case UserRole.student:
             return '/student';
           case UserRole.superadmin:
-            // TODO: Handle this case.
-            throw UnimplementedError();
+            return '/superadmin';
         }
       }
 
