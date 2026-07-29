@@ -168,6 +168,13 @@ class Subject {
     'schoolId': schoolId,
     'deletedAt': deletedAt?.toIso8601String(),
   };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is Subject && other.id == id);
+
+  @override
+  int get hashCode => id.hashCode;
 }
 
 enum AttendanceStatus { present, absent, late, leave }
