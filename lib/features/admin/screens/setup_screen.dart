@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/constants/api_path.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
@@ -44,10 +45,19 @@ class _SetupScreenState extends State<SetupScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final user = context.read<AuthNotifier>().user;
       if (user != null) {
-        context.read<ClassSetupNotifier>().fetchClasses(user.schoolId ?? '');
-        context.read<SectionSetupNotifier>().fetchSections();
-        context.read<SubjectSetupNotifier>().fetchSubjects(user.schoolId ?? '');
-        context.read<TeachersNotifier>().fetchTeachers();
+        final schoolId = user.schoolId ?? '';
+        if (context.read<ClassSetupNotifier>().classes.isEmpty) {
+          context.read<ClassSetupNotifier>().fetchClasses(schoolId);
+        }
+        if (context.read<SectionSetupNotifier>().sections.isEmpty) {
+          context.read<SectionSetupNotifier>().fetchSections();
+        }
+        if (context.read<SubjectSetupNotifier>().subjects.isEmpty) {
+          context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
+        }
+        if (context.read<TeachersNotifier>().teachers.isEmpty) {
+          context.read<TeachersNotifier>().fetchTeachers();
+        }
       }
     });
   }
@@ -989,10 +999,81 @@ class _LoadingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation(_kPrimary),
-      ),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+
+    return ListView.builder(
+      itemCount: 6,
+      itemBuilder: (context, _) {
+        return Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Card(
+            child: Column(
+              children: [
+                // Header strip
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        height: 16,
+                        width: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Body
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 12,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Divider(color: Colors.white, height: 1),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Container(width: 60, height: 28, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20))),
+                          const SizedBox(width: 8),
+                          Container(width: 60, height: 28, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20))),
+                          const SizedBox(width: 8),
+                          Container(width: 60, height: 28, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20))),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
