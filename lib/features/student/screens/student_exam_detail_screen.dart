@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
@@ -69,7 +70,7 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
     return Consumer<StudentExamNotifier>(
       builder: (context, p, child) {
         if (p.isLoading)
-          return const Center(child: CircularProgressIndicator());
+          return _buildRoutineShimmer();
         if (p.routine.isEmpty) return _buildEmptyState('No routine available.');
 
         return ListView.builder(
@@ -88,7 +89,7 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
     return Consumer<StudentExamNotifier>(
       builder: (context, p, child) {
         if (p.isLoading)
-          return const Center(child: CircularProgressIndicator());
+          return _buildSyllabusShimmer();
         final syllabusItems = p.syllabus
             .where((a) => a.syllabus != null && a.syllabus!.isNotEmpty)
             .toList();
@@ -133,7 +134,7 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
       builder: (context, p, child) {
 
         if (p.isLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return _buildResultsShimmer();
         }
         if (p.results.isEmpty || !widget.exam.isPublished)
           return _buildEmptyState('Results not published yet.');
@@ -200,47 +201,44 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
   Widget _buildSummaryCard(double obtained, double max, double percentage) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 38),
-        child: Column(
+        padding: const EdgeInsets.all(18),
+        child: Row(
           children: [
-            const Text(
-              'Total Performance',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              '${percentage.toStringAsFixed(1)}%',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                letterSpacing: -1,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: Colors.white.withOpacity(0.2)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+            Expanded(
+              child: Column(
                 children: [
-                  const Icon(Icons.stars, color: Colors.amber, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Marks: ${obtained.toStringAsFixed(obtained.truncateToDouble() == obtained ? 0 : 2)} / ${max.toStringAsFixed(max.truncateToDouble() == max ? 0 : 2)}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
+                  const Text(
+                    'Total Performance',
+                    style: TextStyle(
+              
                       fontSize: 16,
+                      fontWeight: FontWeight.w500,
                     ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '${percentage.toStringAsFixed(1)}%',
+                    style: const TextStyle(
+              
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.stars, color: Colors.amber, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Marks: ${obtained.toStringAsFixed(obtained.truncateToDouble() == obtained ? 0 : 2)} / ${max.toStringAsFixed(max.truncateToDouble() == max ? 0 : 2)}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -398,6 +396,234 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildRoutineShimmer() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 4,
+      itemBuilder: (context, index) {
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: ListTile(
+              leading: Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+              title: Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Container(width: 150, height: 16, color: Colors.white),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                        width: 100, height: 12, color: Colors.white),
+                  ),
+                  const SizedBox(height: 4),
+                  Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                        width: 120, height: 12, color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSyllabusShimmer() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 3,
+      itemBuilder: (context, index) {
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(width: 120, height: 16, color: Colors.white),
+                ),
+                const Divider(),
+                Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                      width: double.infinity, height: 14, color: Colors.white),
+                ),
+                const SizedBox(height: 4),
+                Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(width: 200, height: 14, color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildResultsShimmer() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        children: [
+          Card(
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 18.0, horizontal: 38),
+              child: Column(
+                children: [
+                  Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child:
+                        Container(width: 150, height: 16, color: Colors.white),
+                  ),
+                  const SizedBox(height: 12),
+                  Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child:
+                        Container(width: 100, height: 32, color: Colors.white),
+                  ),
+                  const SizedBox(height: 16),
+                  Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      width: 180,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          ...List.generate(
+            3,
+            (index) => Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            width: 54,
+                            height: 54,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: Container(
+                                    width: 120,
+                                    height: 18,
+                                    color: Colors.white),
+                              ),
+                              const SizedBox(height: 6),
+                              Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: Container(
+                                    width: 100,
+                                    height: 14,
+                                    color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            width: 60,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Shimmer.fromColors(
+                            baseColor: Colors.grey[300]!,
+                            highlightColor: Colors.grey[100]!,
+                            child: Container(
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                              width: 40, height: 14, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
