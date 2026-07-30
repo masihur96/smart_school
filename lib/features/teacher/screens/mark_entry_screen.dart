@@ -34,8 +34,14 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ResultsNotifier>().loadExams();
-      context.read<SectionSetupNotifier>().fetchSections();
+      final resultsNotifier = context.read<ResultsNotifier>();
+      if (resultsNotifier.exams.isEmpty) {
+        resultsNotifier.loadExams();
+      }
+      final sectionNotifier = context.read<SectionSetupNotifier>();
+      if (sectionNotifier.sections.isEmpty) {
+        sectionNotifier.fetchSections();
+      }
     });
   }
 

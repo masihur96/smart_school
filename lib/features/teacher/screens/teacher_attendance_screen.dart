@@ -32,7 +32,10 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchInitialData();
-      _fetchData();
+      final provider = context.read<AttendanceNotifier>();
+      if (provider.periodAttendanceRecords.isEmpty) {
+        _fetchData();
+      }
     });
   }
 
@@ -49,9 +52,14 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
   Future<void> _fetchInitialData() async {
     final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
     if (schoolId.isNotEmpty) {
-      context.read<ClassSetupNotifier>().fetchSchoolData();
-      context.read<SectionSetupNotifier>().fetchSchoolData();
-      context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
+      final classProvider = context.read<ClassSetupNotifier>();
+      if (classProvider.classes.isEmpty) classProvider.fetchSchoolData();
+      
+      final sectionProvider = context.read<SectionSetupNotifier>();
+      if (sectionProvider.sections.isEmpty) sectionProvider.fetchSchoolData();
+      
+      final subjectProvider = context.read<SubjectSetupNotifier>();
+      if (subjectProvider.subjects.isEmpty) subjectProvider.fetchSubjects(schoolId);
     }
   }
 

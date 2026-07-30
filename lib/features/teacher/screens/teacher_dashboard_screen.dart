@@ -38,6 +38,7 @@ class TeacherDashboardScreen extends StatefulWidget {
 
 class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   int _selectedIndex = 0;
+  final List<bool> _visitedTabs = [true, false, false, false];
 
   @override
   void initState() {
@@ -46,11 +47,19 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       final user = context.read<AuthNotifier>().user;
       final now = DateTime.now();
       final dayName = DateFormat('EEEE').format(now);
-      final apiDateStr = DateFormat('yyyy-MM-dd').format(now);
-      context.read<TeacherDashboardProvider>().fetchTeacherDashboard();
-      context.read<TeacherDashboardProvider>().fetchTodayClasses(dayName);
+      
+      final provider = context.read<TeacherDashboardProvider>();
+      if (provider.dashboardData == null) {
+        provider.fetchTeacherDashboard();
+      }
+      if (provider.todayClasses.isEmpty) {
+        provider.fetchTodayClasses(dayName);
+      }
       if (mounted) {
-        context.read<NotificationNotifier>().fetchNotifications();
+        final notifProvider = context.read<NotificationNotifier>();
+        if (notifProvider.notifications.isEmpty) {
+          notifProvider.fetchNotifications();
+        }
       }
     });
   }
@@ -58,6 +67,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      _visitedTabs[index] = true;
     });
   }
 
@@ -156,9 +166,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             user == null
                 ? SizedBox()
                 : _buildDashboardOverview(context, user.name, user, l10n),
-            const TeacherAttendanceScreen(hideAppBar: true),
-            const MarkEntryScreen(hideAppBar: true),
-            const HomeworkManagementScreen(hideAppBar: true),
+            _visitedTabs[1] ? const TeacherAttendanceScreen(hideAppBar: true) : const SizedBox(),
+            _visitedTabs[2] ? const MarkEntryScreen(hideAppBar: true) : const SizedBox(),
+            _visitedTabs[3] ? const HomeworkManagementScreen(hideAppBar: true) : const SizedBox(),
           ],
         ),
         bottomNavigationBar: Container(

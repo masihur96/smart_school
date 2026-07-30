@@ -42,7 +42,10 @@ class _TeacherRoutineScreenState extends State<TeacherRoutineScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final user = context.read<AuthNotifier>().user;
       if (user != null) {
-        context.read<RoutineNotifier>().fetchTeacherRoutine(user.id);
+        final routineNotifier = context.read<RoutineNotifier>();
+        if (routineNotifier.teacherRoutine.isEmpty) {
+          routineNotifier.fetchTeacherRoutine(user.id);
+        }
       }
     });
   }
