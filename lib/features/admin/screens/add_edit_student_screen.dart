@@ -9,6 +9,7 @@ import 'package:smart_school/l10n/app_localizations.dart';
 import '../../../models/student_model.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
+import 'admin_pricing_plan_screen.dart';
 
 class AddEditStudentScreen extends StatefulWidget {
   final Student? student;
@@ -102,8 +103,54 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     super.dispose();
   }
 
+  void _showLimitReachedDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Limit Reached'),
+        content: const Text(
+          'You have reached the maximum limit of your current pricing plan. Please upgrade to add more.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AdminPricingPlanScreen(),
+                ),
+              );
+            },
+            child: const Text('Upgrade', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _save() async {
     if (_formKey.currentState!.validate()) {
+      if (widget.student == null) {
+        final authNotifier = context.read<AuthNotifier>();
+        final adminSubscription = authNotifier.adminSubscription;
+        final studentNotifier = context.read<StudentsNotifier>();
+
+        if (adminSubscription != null &&
+            adminSubscription.pricingPlan != null) {
+          final maxStudents = adminSubscription.pricingPlan!.maxStudents;
+          if (studentNotifier.totalCount >= maxStudents) {
+            _showLimitReachedDialog();
+            return;
+          }
+        }
+      }
+
       setState(() {
         _isLoading = true;
       });

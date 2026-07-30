@@ -5,12 +5,14 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/features/admin/providers/student_provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/teacher_model.dart';
 import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
+import 'admin_pricing_plan_screen.dart';
 
 class AddEditTeacherScreen extends StatefulWidget {
   final Teacher? teacher;
@@ -163,8 +165,62 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
     }
   }
 
+  void _showLimitReachedDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Limit Reached'),
+        content: const Text(
+          'You have reached the maximum limit of your current pricing plan. Please upgrade to add more.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AdminPricingPlanScreen(),
+                ),
+              );
+            },
+            child: const Text('Upgrade', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _save() async {
     if (_formKey.currentState!.validate()) {
+      if (!isEditing) {
+        final authNotifier = context.read<AuthNotifier>();
+        final adminSubscription = authNotifier.adminSubscription;
+        final teacherNotifier = context.read<TeachersNotifier>();
+        final studentNotifier = context.read<StudentsNotifier>();
+
+        if (adminSubscription != null &&
+            adminSubscription.pricingPlan != null) {
+          final maxStudents = adminSubscription.pricingPlan!.maxStudents;
+          print(maxStudents);
+          print(teacherNotifier.totalCount);
+          print(studentNotifier.totalCount);
+
+          int totalUser = teacherNotifier.totalCount+ studentNotifier.totalCount;
+          print(totalUser);
+
+          if (totalUser >= maxStudents) {
+            _showLimitReachedDialog();
+            return;
+          }
+        }
+      }
+
       setState(() {
         _isLoading = true;
       });
@@ -173,34 +229,34 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
       final teacherNotifier = context.read<TeachersNotifier>();
 
       try {
-        if (isEditing) {
-          await teacherNotifier.updateTeacherOnAPI(
-            userId: widget.teacher!.userId,
-            name: _nameController.text,
-            email: _emailController.text,
-            phone: _phoneController.text,
-
-            designation: _designationController.text,
-            lat: double.tryParse(_latController.text),
-            lon: double.tryParse(_lonController.text),
-            radius: double.tryParse(_radiusController.text),
-            imageFile: _imageFile,
-          );
-        } else {
-          await teacherNotifier.addTeacherToAPI(
-            name: _nameController.text,
-            email: _emailController.text,
-            password: _passwordController.text,
-            schoolId: schoolId,
-            phone: _phoneController.text,
-
-            designation: _designationController.text,
-            lat: double.tryParse(_latController.text),
-            lon: double.tryParse(_lonController.text),
-            radius: double.tryParse(_radiusController.text),
-            imageFile: _imageFile,
-          );
-        }
+        // if (isEditing) {
+        //   await teacherNotifier.updateTeacherOnAPI(
+        //     userId: widget.teacher!.userId,
+        //     name: _nameController.text,
+        //     email: _emailController.text,
+        //     phone: _phoneController.text,
+        //
+        //     designation: _designationController.text,
+        //     lat: double.tryParse(_latController.text),
+        //     lon: double.tryParse(_lonController.text),
+        //     radius: double.tryParse(_radiusController.text),
+        //     imageFile: _imageFile,
+        //   );
+        // } else {
+        //   await teacherNotifier.addTeacherToAPI(
+        //     name: _nameController.text,
+        //     email: _emailController.text,
+        //     password: _passwordController.text,
+        //     schoolId: schoolId,
+        //     phone: _phoneController.text,
+        //
+        //     designation: _designationController.text,
+        //     lat: double.tryParse(_latController.text),
+        //     lon: double.tryParse(_lonController.text),
+        //     radius: double.tryParse(_radiusController.text),
+        //     imageFile: _imageFile,
+        //   );
+        // }
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -344,6 +400,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
+                      keyboardType: TextInputType.emailAddress,
                       validator: (val) =>
                           val!.isEmpty ? 'Please enter email' : null,
                     ),
@@ -356,7 +413,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                      ),
+                      ),keyboardType: TextInputType.phone,
                       validator: (val) =>
                           val!.isEmpty ? 'Please enter phone' : null,
                     ),
@@ -400,7 +457,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
+                    ),keyboardType: TextInputType.visiblePassword,
                     validator: (val) =>
                         val!.length < 6 ? 'Password too short' : null,
                   ),
