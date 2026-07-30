@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/notifications/providers/notification_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
@@ -34,19 +35,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
         foregroundColor: AppColors.white,
 
         leading: BackButton(),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              context.read<NotificationNotifier>().fetchNotifications();
-            },
-          ),
-        ],
+
       ),
       body: Consumer<NotificationNotifier>(
         builder: (context, notifier, child) {
           if (notifier.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return _NotificationShimmer(isDark: isDark);
           }
 
           if (notifier.error != null) {
@@ -231,6 +225,91 @@ class _NotificationItem extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─── Shimmer skeleton ────────────────────────────────────────────────────────
+
+class _NotificationShimmer extends StatelessWidget {
+  final bool isDark;
+  const _NotificationShimmer({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: 8,
+      itemBuilder: (context, _) {
+        return Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Card(
+            margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Avatar placeholder
+                  const CircleAvatar(radius: 24, backgroundColor: Colors.white),
+                  const SizedBox(width: 14),
+                  // Text column placeholder
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Title line
+                        Container(
+                          height: 14,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        // Body line 1
+                        Container(
+                          height: 12,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        // Body line 2 (shorter)
+                        Container(
+                          height: 12,
+                          width: MediaQuery.of(context).size.width * 0.45,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        // Timestamp pill
+                        Container(
+                          height: 10,
+                          width: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
