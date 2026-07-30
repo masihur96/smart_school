@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 
 import '../../../models/school_models.dart';
@@ -101,7 +102,7 @@ class _TeacherRoutineScreenState extends State<TeacherRoutineScreen>
         ),
       ),
       body: routineNotifier.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? _buildShimmerLoading()
           : TabBarView(
               controller: _tabController,
               children: _days.map((day) {
@@ -145,6 +146,72 @@ class _TeacherRoutineScreenState extends State<TeacherRoutineScreen>
                 );
               }).toList(),
             ),
+    );
+  }
+
+  Widget _buildShimmerLoading() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 5,
+      itemBuilder: (context, index) {
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey.shade300,
+            highlightColor: Colors.grey.shade100,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: 150,
+                        height: 20,
+                        color: Colors.white,
+                      ),
+                      Container(
+                        width: 100,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Container(width: 16, height: 16, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Container(width: 120, height: 14, color: Colors.white),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Container(width: 16, height: 16, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Container(width: 140, height: 14, color: Colors.white),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Container(width: 16, height: 16, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Container(width: 100, height: 14, color: Colors.white),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
