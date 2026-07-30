@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
@@ -49,10 +50,6 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
 
     final routineNotifier = context.watch<StudentRoutineNotifier>();
     final homeworkNotifier = context.watch<StudentHomeworkNotifier>();
-
-    if (routineNotifier.isLoading && routineNotifier.routineEntries.isEmpty) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
 
     final classId = currentUser.classIds.first;
     if (classId.isEmpty) {
@@ -129,6 +126,10 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
     StudentRoutineNotifier routineNotifier,
     List<String> days,
   ) {
+    if (routineNotifier.isLoading && entries.isEmpty) {
+      return _buildRoutineShimmer();
+    }
+
     if (entries.isEmpty && !routineNotifier.isLoading) {
       return _buildEmptyState(
         icon: Icons.calendar_month_outlined,
@@ -209,7 +210,7 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
     final homeworkList = homeworkNotifier.homeworkList;
 
     if (homeworkNotifier.isLoading && homeworkList.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return _buildHomeworkShimmer();
     }
 
     if (homeworkList.isEmpty && !homeworkNotifier.isLoading) {
@@ -230,6 +231,169 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
         if (hw == null) return const SizedBox();
 
         return _HomeworkCard(sh: sh);
+      },
+    );
+  }
+
+  Widget _buildRoutineShimmer() {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      itemCount: 4,
+      itemBuilder: (context, index) {
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12, left: 16, right: 16),
+          child: IntrinsicHeight(
+            child: Row(
+              children: [
+                Container(
+                  width: 5,
+                  decoration: const BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      bottomLeft: Radius.circular(16),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Shimmer.fromColors(
+                              baseColor: Colors.grey[300]!,
+                              highlightColor: Colors.grey[100]!,
+                              child: Container(width: 60, height: 14, color: Colors.white),
+                            ),
+                            const SizedBox(height: 4),
+                            Shimmer.fromColors(
+                              baseColor: Colors.grey[300]!,
+                              highlightColor: Colors.grey[100]!,
+                              child: Container(width: 50, height: 11, color: Colors.white),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 16),
+                        Container(height: 30, width: 1, color: Colors.grey[300]),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: Container(width: 100, height: 15, color: Colors.white),
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  Shimmer.fromColors(
+                                    baseColor: Colors.grey[300]!,
+                                    highlightColor: Colors.grey[100]!,
+                                    child: const Icon(Icons.person_outline, size: 12),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Shimmer.fromColors(
+                                    baseColor: Colors.grey[300]!,
+                                    highlightColor: Colors.grey[100]!,
+                                    child: Container(width: 80, height: 12, color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            width: 50,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHomeworkShimmer() {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      itemCount: 4,
+      itemBuilder: (context, index) {
+        return Card(
+          margin: const EdgeInsets.only(bottom: 16),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Shimmer.fromColors(
+                            baseColor: Colors.grey[300]!,
+                            highlightColor: Colors.grey[100]!,
+                            child: Container(width: 40, height: 14, color: Colors.white),
+                          ),
+                          Shimmer.fromColors(
+                            baseColor: Colors.grey[300]!,
+                            highlightColor: Colors.grey[100]!,
+                            child: Container(
+                              width: 60,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(width: 150, height: 16, color: Colors.white),
+                      ),
+                      const SizedBox(height: 8),
+                      Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(width: double.infinity, height: 13, color: Colors.white),
+                      ),
+                      const SizedBox(height: 4),
+                      Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(width: 200, height: 13, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
       },
     );
   }
