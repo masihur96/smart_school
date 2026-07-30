@@ -353,68 +353,34 @@ class NotificationService {
 
   Future<void> subscribeToUserTopics(User user) async {
     try {
-      // General topic
-      await subscribeToTopic('all');
+      // Build the complete, deduplicated list of topics for this user.
+      final topics = <String>{'all', user.id};
 
-      // Role-specific ID topics
-      if (user.role == UserRole.superadmin || user.role == UserRole.admin) {
-        await subscribeToTopic(user.id);
-      } else if (user.role == UserRole.teacher) {
-        await subscribeToTopic(user.id);
-      } else if (user.role == UserRole.student) {
-        await subscribeToTopic(user.id);
-      }
-
-      // Legacy ID support (keep for compatibility if needed, or remove if strictly following new structure)
-      await subscribeToTopic(user.id);
-
-      // School specific topic
       if (user.schoolId != null && user.schoolId!.isNotEmpty) {
-        await subscribeToTopic(user.schoolId ?? "");
+        topics.add(user.schoolId!);
       }
 
-      // Class specific topic
-      if (user.classIds.isNotEmpty) {
-        for (var claId in user.classIds) {
-          await subscribeToTopic(claId);
-        }
-      }
+      topics.addAll(user.classIds);
+      topics.addAll(user.sectionIds);
 
-      // Section specific topic
-      if (user.sectionIds.isNotEmpty) {
-        for (var secId in user.sectionIds) {
-          await subscribeToTopic(secId);
-        }
-      }
-
-      // Functional topics based on role
       if (user.role == UserRole.superadmin) {
-        await subscribeToTopic('subscription');
+        topics.add('subscription');
       }
 
       if (user.role == UserRole.admin) {
-        await subscribeToTopic('notice');
-        await subscribeToTopic('exam');
-        await subscribeToTopic('routine');
-        await subscribeToTopic('result');
-        await subscribeToTopic('homework');
-        await subscribeToTopic('attendance');
+        topics.addAll(['notice', 'exam', 'routine', 'result', 'homework', 'attendance']);
       }
 
       if (user.role == UserRole.teacher) {
-        await subscribeToTopic('notice');
-        await subscribeToTopic('routine');
-        await subscribeToTopic('exam');
+        topics.addAll(['notice', 'routine', 'exam']);
       }
 
       if (user.role == UserRole.student) {
-        await subscribeToTopic('notice');
-        await subscribeToTopic('routine');
-        await subscribeToTopic('exam');
-        await subscribeToTopic('result');
-        await subscribeToTopic('homework');
-        await subscribeToTopic('attendance');
+        topics.addAll(['notice', 'routine', 'exam', 'result', 'homework', 'attendance']);
       }
+
+      // Subscribe to all topics in parallel — much faster than sequential awaits.
+      await Future.wait(topics.map((t) => subscribeToTopic(t)));
 
       log(
         'Successfully subscribed to all user topics for ${user.name} (${user.role.name})',

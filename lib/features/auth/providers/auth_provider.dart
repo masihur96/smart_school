@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
@@ -96,9 +97,18 @@ class AuthNotifier extends ChangeNotifier {
           await _fetchAdminSubscription(_user!.schoolId!);
         }
 
-        // Register FCM Token
-        await NotificationService().subscribeToUserTopics(_user!);
-        await NotificationService().registerTokenToBackend();
+        // FCM topic subscription & token registration are fire-and-forget.
+        // They do NOT block navigation out of the splash screen.
+        unawaited(
+          NotificationService().subscribeToUserTopics(_user!).catchError(
+            (e) => log('subscribeToUserTopics error: $e'),
+          ),
+        );
+        unawaited(
+          NotificationService().registerTokenToBackend().catchError(
+            (e) => log('registerTokenToBackend error: $e'),
+          ),
+        );
       } else {
         _user = null;
       }
@@ -153,9 +163,18 @@ class AuthNotifier extends ChangeNotifier {
         await _fetchAdminSubscription(_user!.schoolId!);
       }
 
-      // Register FCM Token
-      await NotificationService().subscribeToUserTopics(_user!);
-      await NotificationService().registerTokenToBackend();
+      // FCM topic subscription & token registration are fire-and-forget.
+      // They do NOT block the login response.
+      unawaited(
+        NotificationService().subscribeToUserTopics(_user!).catchError(
+          (e) => log('subscribeToUserTopics error: $e'),
+        ),
+      );
+      unawaited(
+        NotificationService().registerTokenToBackend().catchError(
+          (e) => log('registerTokenToBackend error: $e'),
+        ),
+      );
 
       _isLoading = false;
       notifyListeners();
