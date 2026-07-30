@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/features/admin/providers/student_provider.dart';
+import 'package:smart_school/features/admin/providers/teacher_provider.dart';
 import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/super_admin/models/pricing_plan_model.dart';
@@ -85,9 +87,13 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
                     return const SizedBox.shrink();
                   }
 
+                    final teacherNotifier = context.read<TeachersNotifier>();
+                    final studentNotifier = context.read<StudentsNotifier>();
+                    int totalUser = teacherNotifier.totalCount+ studentNotifier.totalCount;
+
                   return _AdminPricingPlanCard(
                     plan: plan,
-                    currentCount: subscription?.lastStudentCount ?? 0,
+                    currentCount: totalUser ?? 0,
                     isActive: subscription?.pricingPlan?.id == plan.id,
                     isAlreadyUsedFreePlan: isPlanFree ? true : false,
                   );
