@@ -36,10 +36,20 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
       final authNotifier = context.read<AuthNotifier>();
       final schoolId = authNotifier.user?.schoolId;
 
-      _fetchTeachers();
+      // Only fetch teachers if not already loaded
+      if (context.read<TeachersNotifier>().teachers.isEmpty) {
+        _fetchTeachers();
+      }
+
       if (schoolId != null) {
-        context.read<ClassSetupNotifier>().fetchClasses(schoolId);
-        context.read<SectionSetupNotifier>().fetchSections();
+        // Only fetch classes if not already loaded
+        if (context.read<ClassSetupNotifier>().classes.isEmpty) {
+          context.read<ClassSetupNotifier>().fetchClasses(schoolId);
+        }
+        // Only fetch sections if not already loaded
+        if (context.read<SectionSetupNotifier>().sections.isEmpty) {
+          context.read<SectionSetupNotifier>().fetchSections();
+        }
       }
     });
     _scrollController.addListener(_onScroll);
