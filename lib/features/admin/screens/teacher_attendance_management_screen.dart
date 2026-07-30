@@ -148,9 +148,11 @@ class _TeacherAttendanceManagementScreenState
                 ? Center(child: Text("Error: ${provider.error}"))
                 : provider.teacherAttendance.isEmpty
                 ? const Center(child: Text("No records found"))
-                : ListView.builder(
-                    itemCount: provider.teacherAttendance.length,
-                    padding: const EdgeInsets.all(16),
+                : RefreshIndicator(
+                    onRefresh: () async => _fetchData(),
+                    child: ListView.builder(
+                      itemCount: provider.teacherAttendance.length,
+                      padding: const EdgeInsets.all(16),
                     itemBuilder: (context, index) {
                       final record = provider.teacherAttendance[index];
                       final status = record['status']?.toString().toLowerCase();
@@ -285,6 +287,7 @@ class _TeacherAttendanceManagementScreenState
                       );
                     },
                   ),
+                ),
           ),
         ],
       ),
