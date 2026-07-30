@@ -76,7 +76,7 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
             'Academic Schedule',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          backgroundColor: AppColors.primaryTeacher,
+          backgroundColor: AppColors.primaryStudent,
           foregroundColor: Colors.white,
           elevation: 0,
           bottom: PreferredSize(
@@ -94,7 +94,7 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
-                labelColor: AppColors.primaryTeacher,
+                labelColor: AppColors.primaryStudent,
                 unselectedLabelColor: Colors.white,
                 labelStyle: TextStyle(fontWeight: FontWeight.bold),
                 tabs: [
@@ -168,7 +168,7 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
-                      color: isToday ? Colors.green : Colors.grey[500],
+                      color: isToday ? AppColors.primaryStudent : Colors.grey[500],
                     ),
                   ),
                   if (isToday) ...[
@@ -179,7 +179,7 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
+                        color: AppColors.primaryStudent.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: const Text(
@@ -187,7 +187,7 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: Colors.green,
+                          color: AppColors.primaryStudent,
                         ),
                       ),
                     ),
@@ -468,7 +468,7 @@ class _RoutineCard extends StatelessWidget {
             Container(
               width: 5,
               decoration: const BoxDecoration(
-                color: AppColors.primaryTeacher,
+                color: AppColors.primaryStudent,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(16),
                   bottomLeft: Radius.circular(16),

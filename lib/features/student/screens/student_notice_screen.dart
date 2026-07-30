@@ -50,7 +50,7 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
       appBar: widget.isFromDrawer
           ? AppBar(
               title: Text(l10n.schoolNotices),
-              backgroundColor: AppColors.primaryTeacher,
+              backgroundColor: AppColors.primaryStudent,
               foregroundColor: Colors.white,
               elevation: 0,
               centerTitle: true,
