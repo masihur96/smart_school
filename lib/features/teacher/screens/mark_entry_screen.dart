@@ -24,7 +24,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   String? _selectedClassId;
   String? _selectedSectionId;
   Subject? _selectedSubject;
-  bool _showFilters = true;
+  bool _showFilters = false;
 
   final Map<String, TextEditingController> _marksControllers = {};
   final Map<String, TextEditingController> _totalMarksControllers = {};
@@ -278,44 +278,36 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
               },
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildDropdownField<String>(
-                    label: 'Class',
-                    icon: Icons.school_outlined,
-                    value: _selectedClassId,
-                    enabled: _selectedExam != null,
-                    items: uniqueClasses.entries
-                        .map(
-                          (e) => DropdownMenuItem(
-                            value: e.key,
-                            child: Text(e.value),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: _onClassChanged,
-                  ),
+            _buildDropdownField<String>(
+              label: 'Class',
+              icon: Icons.school_outlined,
+              value: _selectedClassId,
+              enabled: _selectedExam != null,
+              items: uniqueClasses.entries
+                  .map(
+                    (e) => DropdownMenuItem(
+                  value: e.key,
+                  child: Text(e.value),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildDropdownField<String>(
-                    label: 'Section',
-                    icon: Icons.grid_view_outlined,
-                    value: _selectedSectionId,
-                    enabled: _selectedClassId != null,
-                    items: filteredSections
-                        .map(
-                          (s) => DropdownMenuItem(
-                            value: s.id,
-                            child: Text(s.name),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: _onSectionChanged,
-                  ),
+              )
+                  .toList(),
+              onChanged: _onClassChanged,
+            ),
+            const SizedBox(height: 12),
+            _buildDropdownField<String>(
+              label: 'Section',
+              icon: Icons.grid_view_outlined,
+              value: _selectedSectionId,
+              enabled: _selectedClassId != null,
+              items: filteredSections
+                  .map(
+                    (s) => DropdownMenuItem(
+                  value: s.id,
+                  child: Text(s.name),
                 ),
-              ],
+              )
+                  .toList(),
+              onChanged: _onSectionChanged,
             ),
             const SizedBox(height: 16),
             _buildDropdownField<Subject>(
