@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -28,17 +29,19 @@ class _TeacherAttendanceManagementScreenState
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.read<AttendanceManagementProvider>().teacherAttendance.isEmpty) {
+        _fetchData();
+      }
+    });
   }
 
   void _fetchData() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AttendanceManagementProvider>().fetchTeacherAttendance(
-        name: _searchController.text,
-        startDate: _selectedDateRange?.start,
-        endDate: _selectedDateRange?.end,
-      );
-    });
+    context.read<AttendanceManagementProvider>().fetchTeacherAttendance(
+      name: _searchController.text,
+      startDate: _selectedDateRange?.start,
+      endDate: _selectedDateRange?.end,
+    );
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -139,8 +142,8 @@ class _TeacherAttendanceManagementScreenState
             ),
           ),
           Expanded(
-            child: provider.isLoading
-                ? const Center(child: CircularProgressIndicator())
+            child: provider.isLoading && provider.teacherAttendance.isEmpty
+                ? _TeacherAttendanceShimmer(isDark: Theme.of(context).brightness == Brightness.dark)
                 : provider.error != null
                 ? Center(child: Text("Error: ${provider.error}"))
                 : provider.teacherAttendance.isEmpty
@@ -806,6 +809,165 @@ class _CreateAttendanceBottomSheetState
           ),
         ),
       ),
+    );
+  }
+}
+
+// ─── Shimmer skeleton ────────────────────────────────────────────────────────
+
+class _TeacherAttendanceShimmer extends StatelessWidget {
+  final bool isDark;
+  const _TeacherAttendanceShimmer({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 8,
+      itemBuilder: (context, _) {
+        return Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                children: [
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const CircleAvatar(
+                      backgroundColor: Colors.white,
+                    ),
+                    title: Container(
+                      height: 14,
+                      width: 140,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 8),
+                        Container(
+                          height: 12,
+                          width: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Container(
+                          height: 10,
+                          width: 80,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                      ],
+                    ),
+                    trailing: Container(
+                      width: 60,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                  const Divider(color: Colors.white),
+                  Row(
+                    children: [
+                      // In Time
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Container(
+                              height: 10,
+                              width: 40,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              height: 12,
+                              width: 60,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Out Time
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Container(
+                              height: 10,
+                              width: 40,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              height: 12,
+                              width: 60,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Location
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Container(
+                              height: 10,
+                              width: 40,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              height: 12,
+                              width: 60,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

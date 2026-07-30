@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
@@ -64,9 +65,13 @@ class _StudentAttendanceManagementScreenState
 
   void _fetchInitialData() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<SubjectSetupNotifier>().fetchSchoolData();
+      if (context.read<SubjectSetupNotifier>().subjects.isEmpty) {
+        context.read<SubjectSetupNotifier>().fetchSchoolData();
+      }
 
-      _fetchData();
+      if (context.read<AttendanceManagementProvider>().studentAttendance.isEmpty) {
+        _fetchData();
+      }
     });
   }
 
@@ -278,7 +283,7 @@ class _StudentAttendanceManagementScreenState
             child:
                 attendanceProvider.studentAttendance.isEmpty &&
                     attendanceProvider.isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? _AttendanceShimmer(isDark: Theme.of(context).brightness == Brightness.dark)
                 : attendanceProvider.error != null
                 ? Center(child: Text("Error: ${attendanceProvider.error}"))
                 : attendanceProvider.studentAttendance.isEmpty
@@ -541,5 +546,104 @@ class _StudentAttendanceManagementScreenState
       default:
         return Colors.grey;
     }
+  }
+}
+
+// ─── Shimmer skeleton ────────────────────────────────────────────────────────
+
+class _AttendanceShimmer extends StatelessWidget {
+  final bool isDark;
+  const _AttendanceShimmer({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 8,
+      itemBuilder: (context, _) {
+        return Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  // Leading avatar
+                  const CircleAvatar(
+                    backgroundColor: Colors.white,
+                  ),
+                  const SizedBox(width: 16),
+                  // Title and Subtitle Column
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Name
+                        Container(
+                          height: 14,
+                          width: 140,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        // Class/Section line
+                        Container(
+                          height: 12,
+                          width: 180,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        // Subject line
+                        Container(
+                          height: 11,
+                          width: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        // Date line
+                        Container(
+                          height: 10,
+                          width: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Trailing status badge
+                  Container(
+                    width: 60,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
