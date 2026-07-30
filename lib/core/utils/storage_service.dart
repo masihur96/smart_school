@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
   static const String _tokenKey = 'auth_token';
-  static const String _tempTokenKey = 'temp_token';
+  static const String _refreshTokenKey = 'refresh_token';
   static const String _forceResetKey = 'force_reset';
   static const String _userEmailKey = 'user_email';
   static const String _userPasswordKey = 'user_password';
@@ -27,12 +27,16 @@ class StorageService {
     await _storage.delete(key: _tokenKey);
   }
 
-  static Future<void> saveSmallToken(String token) async {
-    await _storage.write(key: _tempTokenKey, value: token);
+  static Future<void> saveRefreshToken(String token) async {
+    await _storage.write(key: _refreshTokenKey, value: token);
   }
 
-  static Future<String?> getSmallToken() async {
-    return await _storage.read(key: _tempTokenKey);
+  static Future<String?> getRefreshToken() async {
+    return await _storage.read(key: _refreshTokenKey);
+  }
+
+  static Future<void> deleteRefreshToken() async {
+    await _storage.delete(key: _refreshTokenKey);
   }
 
   static Future<void> saveIsForcePasswordReset(bool value) async {

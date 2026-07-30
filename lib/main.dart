@@ -55,6 +55,8 @@ import 'firebase_options.dart';
 import 'services/database_service.dart';
 import 'services/notification_service.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -181,6 +183,7 @@ class MyApp extends StatelessWidget {
     final settings = context.watch<SettingsProvider>();
 
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Smart School',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,

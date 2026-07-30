@@ -43,7 +43,7 @@ class AuthRemoteDataSource {
       // Also save refresh token if present
       final refreshToken = innerData['refreshToken'];
       if (refreshToken != null) {
-        await StorageService.saveSmallToken(refreshToken);
+        await StorageService.saveRefreshToken(refreshToken);
       }
 
       final userData = innerData['user'] ?? innerData;
