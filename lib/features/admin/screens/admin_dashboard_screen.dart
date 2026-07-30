@@ -59,9 +59,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         context.read<AdminDashboardProvider>().fetchDashboardData();
         context.read<NotificationNotifier>().fetchNotifications();
         final now = DateTime.now();
-        context
-            .read<TeacherPerformanceProvider>()
-            .fetchForMonth(now.month, now.year);
+        context.read<TeacherPerformanceProvider>().fetchForMonth(
+          now.month,
+          now.year,
+        );
       }
     });
   }
@@ -361,6 +362,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
 
     return Card(
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Column(
@@ -995,7 +997,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           ? r.teacherName[0].toUpperCase()
                           : '?';
 
-
                       final inTime = formatTime(r.startTime);
                       final outTime = formatTime(r.endTime);
 
@@ -1563,7 +1564,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildTeacherPerformancePreview(BuildContext context) {
     return Consumer<TeacherPerformanceProvider>(
       builder: (context, provider, _) {
-
         if (provider.isLoading && provider.allPerformances.isEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
