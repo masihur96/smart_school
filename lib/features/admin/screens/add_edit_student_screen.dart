@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/providers/student_provider.dart';
+import 'package:smart_school/features/admin/providers/teacher_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/student_model.dart';
@@ -140,11 +141,15 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
         final authNotifier = context.read<AuthNotifier>();
         final adminSubscription = authNotifier.adminSubscription;
         final studentNotifier = context.read<StudentsNotifier>();
+        final teacherNotifier = context.read<TeachersNotifier>();
+
+        int totalUser = teacherNotifier.totalCount+ studentNotifier.totalCount;
+
 
         if (adminSubscription != null &&
             adminSubscription.pricingPlan != null) {
           final maxStudents = adminSubscription.pricingPlan!.maxStudents;
-          if (studentNotifier.totalCount >= maxStudents) {
+          if (totalUser >= maxStudents) {
             _showLimitReachedDialog();
             return;
           }

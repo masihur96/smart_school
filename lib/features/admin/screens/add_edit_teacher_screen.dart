@@ -229,34 +229,34 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
       final teacherNotifier = context.read<TeachersNotifier>();
 
       try {
-        // if (isEditing) {
-        //   await teacherNotifier.updateTeacherOnAPI(
-        //     userId: widget.teacher!.userId,
-        //     name: _nameController.text,
-        //     email: _emailController.text,
-        //     phone: _phoneController.text,
-        //
-        //     designation: _designationController.text,
-        //     lat: double.tryParse(_latController.text),
-        //     lon: double.tryParse(_lonController.text),
-        //     radius: double.tryParse(_radiusController.text),
-        //     imageFile: _imageFile,
-        //   );
-        // } else {
-        //   await teacherNotifier.addTeacherToAPI(
-        //     name: _nameController.text,
-        //     email: _emailController.text,
-        //     password: _passwordController.text,
-        //     schoolId: schoolId,
-        //     phone: _phoneController.text,
-        //
-        //     designation: _designationController.text,
-        //     lat: double.tryParse(_latController.text),
-        //     lon: double.tryParse(_lonController.text),
-        //     radius: double.tryParse(_radiusController.text),
-        //     imageFile: _imageFile,
-        //   );
-        // }
+        if (isEditing) {
+          await teacherNotifier.updateTeacherOnAPI(
+            userId: widget.teacher!.userId,
+            name: _nameController.text,
+            email: _emailController.text,
+            phone: _phoneController.text,
+
+            designation: _designationController.text,
+            lat: double.tryParse(_latController.text),
+            lon: double.tryParse(_lonController.text),
+            radius: double.tryParse(_radiusController.text),
+            imageFile: _imageFile,
+          );
+        } else {
+          await teacherNotifier.addTeacherToAPI(
+            name: _nameController.text,
+            email: _emailController.text,
+            password: _passwordController.text,
+            schoolId: schoolId,
+            phone: _phoneController.text,
+
+            designation: _designationController.text,
+            lat: double.tryParse(_latController.text),
+            lon: double.tryParse(_lonController.text),
+            radius: double.tryParse(_radiusController.text),
+            imageFile: _imageFile,
+          );
+        }
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
