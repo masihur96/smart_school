@@ -80,6 +80,13 @@ class _BackupScreenState extends State<BackupScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: _entities.length + 1, vsync: this);
+    _tabController.addListener(() {
+      // Clear selection when switching tabs
+      final notifier = context.read<TrashRestoreNotifier>();
+      if (notifier.selectionMode) {
+        notifier.clearSelection();
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Only fetch if there's nothing yet loaded (avoid re-fetching on tab switch)
       final notifier = context.read<TrashRestoreNotifier>();
@@ -112,34 +119,47 @@ class _BackupScreenState extends State<BackupScreen>
         as IconData);
   }
 
+  /// Returns the entity key for the currently selected tab (null = All tab).
+  String? _currentEntityKey() {
+    final idx = _tabController.index;
+    if (idx == 0) return null;
+    return _entities[idx - 1]['key'] as String;
+  }
+
   @override
   Widget build(BuildContext context) {
     final notifier = context.watch<TrashRestoreNotifier>();
     return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (ctx, innerBoxScrolled) => [
-          _buildSliverAppBar(notifier),
-        ],
-        body: Column(
-          children: [
-            _buildTabBar(notifier),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildAllTab(notifier),
-                  ..._entities.map(
-                    (e) => _buildEntityTab(
-                      notifier,
-                      e['key'] as String,
-                      e['color'] as Color,
-                    ),
+      body: Stack(
+        children: [
+          NestedScrollView(
+            headerSliverBuilder: (ctx, innerBoxScrolled) => [
+              _buildSliverAppBar(notifier),
+            ],
+            body: Column(
+              children: [
+                _buildTabBar(notifier),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildAllTab(notifier),
+                      ..._entities.map(
+                        (e) => _buildEntityTab(
+                          notifier,
+                          e['key'] as String,
+                          e['color'] as Color,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          // Floating bulk action bar
+          if (notifier.selectionMode) _buildBulkActionBar(notifier),
+        ],
       ),
     );
   }
@@ -151,6 +171,13 @@ class _BackupScreenState extends State<BackupScreen>
       stretch: true,
       backgroundColor: const Color(0xFF0F172A),
       iconTheme: const IconThemeData(color: Colors.white),
+      // Exit selection mode via back button override
+      leading: notifier.selectionMode
+          ? IconButton(
+              icon: const Icon(Icons.close_rounded, color: Colors.white),
+              onPressed: () => notifier.clearSelection(),
+            )
+          : null,
       flexibleSpace: FlexibleSpaceBar(
         stretchModes: const [
           StretchMode.blurBackground,
@@ -278,7 +305,6 @@ class _BackupScreenState extends State<BackupScreen>
         decoration: InputDecoration(
           hintText: 'Search records...',
           hintStyle: TextStyle(
-            // color: Colors.white.withOpacity(0.4),4ß
             fontSize: 14,
           ),
           prefixIcon: Icon(Icons.search_rounded, size: 20),
@@ -403,7 +429,7 @@ class _BackupScreenState extends State<BackupScreen>
     }
 
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.fromLTRB(16, 12, 16, notifier.selectionMode ? 120 : 12),
       physics: const BouncingScrollPhysics(),
       children: grouped.entries.map((entry) {
         return _buildEntityGroup(notifier, entry.key, entry.value);
@@ -474,7 +500,18 @@ class _BackupScreenState extends State<BackupScreen>
             record: r,
             color: color,
             icon: icon,
+            isSelected: notifier.isSelected(r.id),
+            selectionMode: notifier.selectionMode,
             onRestore: () => _confirmRestore(context, notifier, r),
+            onDelete: () => _confirmPermanentDelete(context, notifier, r),
+            onLongPress: () {
+              if (!notifier.selectionMode) {
+                notifier.enterSelectionMode(r.id);
+              }
+            },
+            onTap: notifier.selectionMode
+                ? () => notifier.toggleSelection(r.id)
+                : null,
           ),
         ),
         const SizedBox(height: 4),
@@ -511,21 +548,259 @@ class _BackupScreenState extends State<BackupScreen>
     }
 
     final icon = _entityIcon(entity);
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      physics: const BouncingScrollPhysics(),
-      itemCount: records.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (ctx, i) => _RecordCard(
-        record: records[i],
-        color: color,
-        icon: icon,
-        onRestore: () => _confirmRestore(context, notifier, records[i]),
+
+    // Bulk select header
+    final allSelected = notifier.areAllSelected(records);
+
+    return Column(
+      children: [
+        // Selection header — only shown when in selection mode
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          child: notifier.selectionMode
+              ? _buildSelectionHeader(notifier, entity, records, allSelected)
+              : const SizedBox.shrink(),
+        ),
+        Expanded(
+          child: ListView.separated(
+            padding: EdgeInsets.fromLTRB(
+                16, 16, 16, notifier.selectionMode ? 120 : 16),
+            physics: const BouncingScrollPhysics(),
+            itemCount: records.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (ctx, i) => _RecordCard(
+              record: records[i],
+              color: color,
+              icon: icon,
+              isSelected: notifier.isSelected(records[i].id),
+              selectionMode: notifier.selectionMode,
+              onRestore: () => _confirmRestore(context, notifier, records[i]),
+              onDelete: () =>
+                  _confirmPermanentDelete(context, notifier, records[i]),
+              onLongPress: () {
+                if (!notifier.selectionMode) {
+                  notifier.enterSelectionMode(records[i].id);
+                }
+              },
+              onTap: notifier.selectionMode
+                  ? () => notifier.toggleSelection(records[i].id)
+                  : null,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSelectionHeader(
+    TrashRestoreNotifier notifier,
+    String entity,
+    List<DeletedRecord> records,
+    bool allSelected,
+  ) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEF4444).withOpacity(0.07),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.checklist_rounded,
+              size: 18, color: const Color(0xFFEF4444)),
+          const SizedBox(width: 8),
+          Text(
+            '${notifier.selectedCount} selected',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFFEF4444),
+            ),
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: () {
+              if (allSelected) {
+                notifier.clearSelection();
+                notifier.enterSelectionMode('');
+                // Re-enter selection mode with empty set — keep bar visible
+                // We just clear selection here; user can still long-press again
+                notifier.clearSelection();
+              } else {
+                notifier.selectAllVisible(records);
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: allSelected
+                    ? const Color(0xFFEF4444).withOpacity(0.15)
+                    : Colors.grey.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                allSelected ? 'Deselect All' : 'Select All',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: allSelected
+                      ? const Color(0xFFEF4444)
+                      : Colors.grey[600],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  // ─── CONFIRM + RESTORE ────────────────────────────────────────────────────
+  // ─── BULK ACTION BAR ──────────────────────────────────────────────────────
+  Widget _buildBulkActionBar(TrashRestoreNotifier notifier) {
+    final entityKey = _currentEntityKey();
+    final safeEntityKey = entityKey ?? '';
+    final isAllTab = entityKey == null;
+
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F172A),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 24,
+              offset: const Offset(0, -4),
+            ),
+          ],
+          border: Border(
+            top: BorderSide(
+              color: Colors.white.withOpacity(0.06),
+              width: 1,
+            ),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag indicator
+            Container(
+              width: 36,
+              height: 3,
+              margin: const EdgeInsets.only(bottom: 10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Row(
+              children: [
+                // Selection count badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.checklist_rounded,
+                        size: 16,
+                        color: Colors.white.withOpacity(0.7),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${notifier.selectedCount} item${notifier.selectedCount == 1 ? '' : 's'}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withOpacity(0.8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+                // Cancel button
+                IconButton(
+                  icon: Icon(
+                    Icons.close_rounded,
+                    color: Colors.white.withOpacity(0.5),
+                    size: 20,
+                  ),
+                  onPressed: () => notifier.clearSelection(),
+                  tooltip: 'Cancel',
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                // Restore Selected
+                if (!isAllTab)
+                  Expanded(
+                    child: _BulkActionButton(
+                      label: 'Restore Selected',
+                      icon: Icons.unarchive_rounded,
+                      color: const Color(0xFF22C55E),
+                      loading: notifier.restoring,
+                      onTap: notifier.selectedCount == 0
+                          ? null
+                          : () => _confirmBulkRestore(
+                                context,
+                                notifier,
+                                safeEntityKey,
+                              ),
+                    ),
+                  ),
+                if (!isAllTab) const SizedBox(width: 10),
+                // Delete Selected
+                Expanded(
+                  child: _BulkActionButton(
+                    label: 'Delete Forever',
+                    icon: Icons.delete_forever_rounded,
+                    color: const Color(0xFFEF4444),
+                    loading: notifier.deleting,
+                    onTap: notifier.selectedCount == 0 || isAllTab
+                        ? null
+                        : () => _confirmBulkDelete(
+                              context,
+                              notifier,
+                              safeEntityKey,
+                            ),
+                  ),
+                ),
+              ],
+            ),
+            if (isAllTab)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  'Switch to a specific category tab to use bulk actions.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.white.withOpacity(0.4),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── CONFIRM RESTORE (single) ─────────────────────────────────────────────
   Future<void> _confirmRestore(
     BuildContext ctx,
     TrashRestoreNotifier notifier,
@@ -631,35 +906,402 @@ class _BackupScreenState extends State<BackupScreen>
       final success = await notifier.restoreRecord(record);
       if (ctx.mounted) {
         ScaffoldMessenger.of(ctx).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Icon(
-                  success ? Icons.check_circle_rounded : Icons.error_rounded,
-                  color: Colors.white,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    success
-                        ? '${record.displayName} restored successfully!'
-                        : notifier.error ?? 'Restore failed.',
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: success
-                ? const Color(0xFF2E7D32)
-                : Colors.red[700],
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            duration: const Duration(seconds: 3),
+          _buildSnackBar(
+            success
+                ? '${record.displayName} restored successfully!'
+                : notifier.error ?? 'Restore failed.',
+            success,
           ),
         );
       }
     }
+  }
+
+  // ─── CONFIRM PERMANENT DELETE (single) ───────────────────────────────────
+  Future<void> _confirmPermanentDelete(
+    BuildContext ctx,
+    TrashRestoreNotifier notifier,
+    DeletedRecord record,
+  ) async {
+    const dangerColor = Color(0xFFEF4444);
+    final confirmed = await showDialog<bool>(
+      context: ctx,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: dangerColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.delete_forever_rounded,
+                color: dangerColor,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Delete Permanently',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: dangerColor.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: dangerColor.withOpacity(0.2)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _entityIcon(record.entity),
+                    color: dangerColor,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          record.displayName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        if (record.subtitle != null)
+                          Text(
+                            record.subtitle!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: dangerColor.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: dangerColor.withOpacity(0.15)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    size: 16,
+                    color: dangerColor,
+                  ),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'This action cannot be undone. The record will be permanently removed from the database.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: dangerColor,
+                        fontWeight: FontWeight.w600,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(false),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.of(dialogCtx).pop(true),
+            icon: const Icon(Icons.delete_forever_rounded, size: 16),
+            label: const Text('Delete Forever'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: dangerColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && ctx.mounted) {
+      final success = await notifier.permanentDelete(record);
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          _buildSnackBar(
+            success
+                ? '${record.displayName} permanently deleted.'
+                : notifier.error ?? 'Delete failed.',
+            success,
+            isDelete: true,
+          ),
+        );
+      }
+    }
+  }
+
+  // ─── CONFIRM BULK RESTORE ─────────────────────────────────────────────────
+  Future<void> _confirmBulkRestore(
+    BuildContext ctx,
+    TrashRestoreNotifier notifier,
+    String entity,
+  ) async {
+    final ids = notifier.selectedIds.toList();
+    final count = ids.length;
+    final entityLabel = _entities.firstWhere(
+      (e) => e['key'] == entity,
+      orElse: () => {'label': entity},
+    )['label'] as String;
+
+    final color = _entityColor(entity);
+
+    final confirmed = await showDialog<bool>(
+      context: ctx,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(Icons.unarchive_rounded, color: color, size: 22),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Restore Records',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Restore $count $entityLabel record${count == 1 ? '' : 's'}?',
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Selected records will become active again in the system.',
+              style: TextStyle(color: Colors.grey[500], fontSize: 12),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(false),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.of(dialogCtx).pop(true),
+            icon: const Icon(Icons.unarchive_rounded, size: 16),
+            label: Text('Restore $count'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: color,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && ctx.mounted) {
+      final result = await notifier.restoreSelected(entity, ids);
+      if (ctx.mounted) {
+        final msg = result.failed == 0
+            ? '${result.succeeded} record${result.succeeded == 1 ? '' : 's'} restored successfully!'
+            : '${result.succeeded} restored, ${result.failed} failed.';
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          _buildSnackBar(msg, result.failed == 0),
+        );
+      }
+    }
+  }
+
+  // ─── CONFIRM BULK DELETE ──────────────────────────────────────────────────
+  Future<void> _confirmBulkDelete(
+    BuildContext ctx,
+    TrashRestoreNotifier notifier,
+    String entity,
+  ) async {
+    final ids = notifier.selectedIds.toList();
+    final count = ids.length;
+    const dangerColor = Color(0xFFEF4444);
+    final entityLabel = _entities.firstWhere(
+      (e) => e['key'] == entity,
+      orElse: () => {'label': entity},
+    )['label'] as String;
+
+    final confirmed = await showDialog<bool>(
+      context: ctx,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: dangerColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.delete_forever_rounded,
+                color: dangerColor,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Delete Permanently',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'You are about to permanently delete $count $entityLabel record${count == 1 ? '' : 's'}.',
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: dangerColor.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: dangerColor.withOpacity(0.2)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    size: 16,
+                    color: dangerColor,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: RichText(
+                      text: const TextSpan(
+                        style: TextStyle(fontSize: 12, height: 1.4),
+                        children: [
+                          TextSpan(
+                            text: 'This action cannot be undone. ',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: dangerColor,
+                            ),
+                          ),
+                          TextSpan(
+                            text:
+                                'All selected records will be permanently removed from the database.',
+                            style: TextStyle(
+                              color: dangerColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(false),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.of(dialogCtx).pop(true),
+            icon: const Icon(Icons.delete_forever_rounded, size: 16),
+            label: Text('Delete $count Forever'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: dangerColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && ctx.mounted) {
+      final result = await notifier.permanentDeleteBulk(entity, ids);
+      if (ctx.mounted) {
+        final msg = result.failed == 0
+            ? '${result.succeeded} record${result.succeeded == 1 ? '' : 's'} permanently deleted.'
+            : '${result.succeeded} deleted, ${result.failed} failed.';
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          _buildSnackBar(msg, result.failed == 0, isDelete: true),
+        );
+      }
+    }
+  }
+
+  SnackBar _buildSnackBar(String message, bool success,
+      {bool isDelete = false}) {
+    final color = success
+        ? (isDelete ? const Color(0xFFEF4444) : const Color(0xFF2E7D32))
+        : Colors.red[700]!;
+    final icon = success
+        ? (isDelete ? Icons.delete_forever_rounded : Icons.check_circle_rounded)
+        : Icons.error_rounded;
+    return SnackBar(
+      content: Row(
+        children: [
+          Icon(icon, color: Colors.white),
+          const SizedBox(width: 8),
+          Expanded(child: Text(message)),
+        ],
+      ),
+      backgroundColor: color,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      duration: const Duration(seconds: 3),
+    );
   }
 }
 
@@ -669,13 +1311,23 @@ class _RecordCard extends StatelessWidget {
   final DeletedRecord record;
   final Color color;
   final IconData icon;
+  final bool isSelected;
+  final bool selectionMode;
   final VoidCallback onRestore;
+  final VoidCallback onDelete;
+  final VoidCallback onLongPress;
+  final VoidCallback? onTap;
 
   const _RecordCard({
     required this.record,
     required this.color,
     required this.icon,
+    required this.isSelected,
+    required this.selectionMode,
     required this.onRestore,
+    required this.onDelete,
+    required this.onLongPress,
+    this.onTap,
   });
 
   String _formatDate(String? raw) {
@@ -696,53 +1348,90 @@ class _RecordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ClipRRect(
+    const dangerColor = Color(0xFFEF4444);
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(icon, size: 24),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      record.displayName,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-
-                        letterSpacing: -0.2,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    if (record.subtitle != null)
-                      Text(
-                        record.subtitle!,
-                        style: const TextStyle(
-                          fontSize: 12,
-
-                          fontWeight: FontWeight.w500,
+        border: isSelected
+            ? Border.all(color: dangerColor, width: 2)
+            : Border.all(color: Colors.transparent, width: 2),
+      ),
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          borderRadius: BorderRadius.circular(20),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  // Checkbox overlay in selection mode
+                  if (selectionMode) ...[
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      width: 24,
+                      height: 24,
+                      margin: const EdgeInsets.only(right: 12),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? dangerColor
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: isSelected
+                              ? dangerColor
+                              : Colors.grey.withOpacity(0.4),
+                          width: 2,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    const SizedBox(height: 6),
-                    Row(
+                      child: isSelected
+                          ? const Icon(Icons.check_rounded,
+                              size: 14, color: Colors.white)
+                          : null,
+                    ),
+                  ],
+                  // Entity icon
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(icon, size: 24),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text(
+                          record.displayName,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        if (record.subtitle != null)
+                          Text(
+                            record.subtitle!,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        const SizedBox(height: 6),
                         Row(
                           children: [
                             const Icon(
@@ -763,12 +1452,23 @@ class _RecordCard extends StatelessWidget {
                         ),
                       ],
                     ),
+                  ),
+                  // Action buttons — hidden in selection mode
+                  if (!selectionMode) ...[
+                    const SizedBox(width: 8),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        _RestoreButton(onTap: onRestore, color: color),
+                        const SizedBox(height: 6),
+                        _DeleteForeverButton(onTap: onDelete),
+                      ],
+                    ),
                   ],
-                ),
+                ],
               ),
-              const SizedBox(width: 12),
-              _RestoreButton(onTap: onRestore, color: color),
-            ],
+            ),
           ),
         ),
       ),
@@ -788,29 +1488,147 @@ class _RestoreButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
             color: color.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(color: color.withOpacity(0.12)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.unarchive_rounded, color: color, size: 16),
-              const SizedBox(width: 6),
+              Icon(Icons.unarchive_rounded, color: color, size: 14),
+              const SizedBox(width: 5),
               Text(
                 'Restore',
                 style: TextStyle(
                   color: color,
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DeleteForeverButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _DeleteForeverButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    const dangerColor = Color(0xFFEF4444);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: dangerColor.withOpacity(0.07),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: dangerColor.withOpacity(0.15)),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.delete_forever_rounded, color: dangerColor, size: 14),
+              SizedBox(width: 5),
+              Text(
+                'Delete',
+                style: TextStyle(
+                  color: dangerColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BulkActionButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+  final bool loading;
+  final VoidCallback? onTap;
+
+  const _BulkActionButton({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.loading,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final disabled = onTap == null;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: disabled ? null : onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(vertical: 13),
+          decoration: BoxDecoration(
+            color: disabled
+                ? Colors.white.withOpacity(0.04)
+                : color.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: disabled
+                  ? Colors.white.withOpacity(0.06)
+                  : color.withOpacity(0.3),
+            ),
+          ),
+          child: loading
+              ? Center(
+                  child: SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(color),
+                    ),
+                  ),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 16,
+                      color: disabled
+                          ? Colors.white.withOpacity(0.25)
+                          : color,
+                    ),
+                    const SizedBox(width: 7),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: disabled
+                            ? Colors.white.withOpacity(0.25)
+                            : color,
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ),
     );

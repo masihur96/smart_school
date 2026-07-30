@@ -84,7 +84,12 @@ class TrashRestoreNotifier extends ChangeNotifier {
   final Map<String, List<DeletedRecord>> _deletedData = {};
   final Map<String, bool> _loadingMap = {};
   bool _restoring = false;
+  bool _deleting = false;
   String? _error;
+
+  // Selection state for bulk operations
+  final Set<String> _selectedIds = {};
+  bool _selectionMode = false;
 
   static const List<String> supportedEntities = [
     'user',
@@ -101,6 +106,7 @@ class TrashRestoreNotifier extends ChangeNotifier {
   List<DeletedRecord> recordsFor(String entity) => _deletedData[entity] ?? [];
   bool isLoadingEntity(String entity) => _loadingMap[entity] ?? false;
   bool get restoring => _restoring;
+  bool get deleting => _deleting;
   String? get error => _error;
 
   bool _isLoadingAll = false;
@@ -108,6 +114,51 @@ class TrashRestoreNotifier extends ChangeNotifier {
 
   int get totalDeleted => _deletedData.values.fold(0, (s, l) => s + l.length);
 
+  // ─── Selection helpers ──────────────────────────────────────────────────────
+  bool get selectionMode => _selectionMode;
+  Set<String> get selectedIds => Set.unmodifiable(_selectedIds);
+  int get selectedCount => _selectedIds.length;
+  bool isSelected(String id) => _selectedIds.contains(id);
+
+  void enterSelectionMode(String id) {
+    _selectionMode = true;
+    _selectedIds.add(id);
+    notifyListeners();
+  }
+
+  void toggleSelection(String id) {
+    if (_selectedIds.contains(id)) {
+      _selectedIds.remove(id);
+    } else {
+      _selectedIds.add(id);
+    }
+    if (_selectedIds.isEmpty) _selectionMode = false;
+    notifyListeners();
+  }
+
+  void selectAll(String entity) {
+    final records = _deletedData[entity] ?? [];
+    _selectedIds.addAll(records.map((r) => r.id));
+    notifyListeners();
+  }
+
+  void selectAllVisible(List<DeletedRecord> records) {
+    _selectedIds.addAll(records.map((r) => r.id));
+    notifyListeners();
+  }
+
+  void clearSelection() {
+    _selectedIds.clear();
+    _selectionMode = false;
+    notifyListeners();
+  }
+
+  bool areAllSelected(List<DeletedRecord> records) {
+    if (records.isEmpty) return false;
+    return records.every((r) => _selectedIds.contains(r.id));
+  }
+
+  // ─── Fetch ──────────────────────────────────────────────────────────────────
   Future<void> fetchAll() async {
     await fetchAllFromTrash();
   }
@@ -130,16 +181,16 @@ class TrashRestoreNotifier extends ChangeNotifier {
       if (response != null && response.statusCode == 200) {
         final dynamic body = response.data;
         final dynamic nestedData = (body is Map) ? body['data'] : null;
-        
+
         // Clear old data
         _deletedData.clear();
-        
+
         if (nestedData is Map<String, dynamic>) {
           nestedData.forEach((key, value) {
             if (key == 'summary') return; // Skip summary object
 
             String entityKey = key;
-            
+
             // Map backend keys to internal supported entities
             if (key == 'pricingPlans') {
               entityKey = 'pricing';
@@ -164,7 +215,7 @@ class TrashRestoreNotifier extends ChangeNotifier {
                 entityKey = singular;
               }
             }
-            
+
             if (value is List && supportedEntities.contains(entityKey)) {
               _deletedData[entityKey] = value
                   .map((j) => DeletedRecord.fromJson(j as Map<String, dynamic>, entityKey))
@@ -222,6 +273,7 @@ class TrashRestoreNotifier extends ChangeNotifier {
     }
   }
 
+  // ─── Restore ────────────────────────────────────────────────────────────────
   Future<bool> restoreRecord(DeletedRecord record) async {
     _restoring = true;
     _error = null;
@@ -242,8 +294,8 @@ class TrashRestoreNotifier extends ChangeNotifier {
 
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
-        // Remove from local list
         _deletedData[record.entity]?.removeWhere((r) => r.id == record.id);
+        _selectedIds.remove(record.id);
         log('[Trash] Restored ${record.entity} id=${record.id}');
         return true;
       } else {
@@ -259,5 +311,174 @@ class TrashRestoreNotifier extends ChangeNotifier {
       _restoring = false;
       notifyListeners();
     }
+  }
+
+  // ─── Permanent Delete (single) ──────────────────────────────────────────────
+  Future<bool> permanentDelete(DeletedRecord record) async {
+    _deleting = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await DataProvider().performRequest(
+        'DELETE',
+        APIPath.permanentDelete(record.entity, record.id),
+        header: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 ||
+              response.statusCode == 204 ||
+              response.statusCode == 201)) {
+        _deletedData[record.entity]?.removeWhere((r) => r.id == record.id);
+        _selectedIds.remove(record.id);
+        log('[Trash] Permanently deleted ${record.entity} id=${record.id}');
+        return true;
+      } else {
+        _error = 'Delete failed: ${response?.statusCode}';
+        log('[Trash] Permanent delete failed: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error deleting record: $e';
+      log('[Trash] Exception permanently deleting: $e');
+      return false;
+    } finally {
+      _deleting = false;
+      notifyListeners();
+    }
+  }
+
+  // ─── Permanent Delete (bulk) ────────────────────────────────────────────────
+  Future<({int succeeded, int failed})> permanentDeleteBulk(
+    String entity,
+    List<String> ids,
+  ) async {
+    _deleting = true;
+    _error = null;
+    notifyListeners();
+
+    int succeeded = 0;
+    int failed = 0;
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await DataProvider().performRequest(
+        'DELETE',
+        APIPath.permanentDeleteBulk(entity),
+        header: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        data: {'ids': ids},
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 ||
+              response.statusCode == 204 ||
+              response.statusCode == 201)) {
+        // Remove all selected IDs locally
+        _deletedData[entity]?.removeWhere((r) => ids.contains(r.id));
+        _selectedIds.removeAll(ids);
+        succeeded = ids.length;
+        log('[Trash] Bulk deleted $succeeded ${entity} records');
+      } else {
+        // Fallback: delete one by one
+        log('[Trash] Bulk endpoint failed (${response?.statusCode}), falling back to sequential deletes');
+        for (final id in ids) {
+          try {
+            final res = await DataProvider().performRequest(
+              'DELETE',
+              APIPath.permanentDelete(entity, id),
+              header: {
+                'Authorization': 'Bearer $token',
+                'Content-Type': 'application/json',
+              },
+            );
+            if (res != null &&
+                (res.statusCode == 200 ||
+                    res.statusCode == 204 ||
+                    res.statusCode == 201)) {
+              _deletedData[entity]?.removeWhere((r) => r.id == id);
+              _selectedIds.remove(id);
+              succeeded++;
+            } else {
+              failed++;
+            }
+          } catch (_) {
+            failed++;
+          }
+        }
+        if (failed > 0) {
+          _error = '$failed record(s) could not be deleted.';
+        }
+      }
+    } catch (e) {
+      _error = 'Error during bulk delete: $e';
+      log('[Trash] Exception in permanentDeleteBulk: $e');
+    } finally {
+      if (_selectedIds.isEmpty) _selectionMode = false;
+      _deleting = false;
+      notifyListeners();
+    }
+
+    return (succeeded: succeeded, failed: failed);
+  }
+
+  // ─── Restore bulk (selected) ────────────────────────────────────────────────
+  Future<({int succeeded, int failed})> restoreSelected(
+    String entity,
+    List<String> ids,
+  ) async {
+    _restoring = true;
+    _error = null;
+    notifyListeners();
+
+    int succeeded = 0;
+    int failed = 0;
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      for (final id in ids) {
+        try {
+          final res = await DataProvider().performRequest(
+            'PATCH',
+            APIPath.restore(entity, id),
+            header: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          );
+          if (res != null &&
+              (res.statusCode == 200 || res.statusCode == 201)) {
+            _deletedData[entity]?.removeWhere((r) => r.id == id);
+            _selectedIds.remove(id);
+            succeeded++;
+          } else {
+            failed++;
+          }
+        } catch (_) {
+          failed++;
+        }
+      }
+    } catch (e) {
+      _error = 'Error during bulk restore: $e';
+    } finally {
+      if (_selectedIds.isEmpty) _selectionMode = false;
+      _restoring = false;
+      notifyListeners();
+    }
+
+    return (succeeded: succeeded, failed: failed);
   }
 }

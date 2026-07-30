@@ -84,6 +84,48 @@ class APIPath {
       "$baseUrl/superadmin/backup/deleted?entity=$entity";
   static String restoreRecord = "$baseUrl/superadmin/backup/restore";
 
+  // Permanent delete — each entity maps to its real backend DELETE route.
+  // Mirrors the existing soft-delete endpoints already defined above.
+  static String permanentDelete(String entity, String id) {
+    switch (entity) {
+      case 'user':
+        return "$baseUrl/admin/users/$id";
+      case 'school':
+        return "$baseUrl/superadmin/schools/$id";
+      case 'class':
+        return "$baseUrl/admin/classes/$id";
+      case 'section':
+        return "$baseUrl/admin/sections/$id";
+      case 'subject':
+        return "$baseUrl/admin/subjects/$id";
+      case 'pricing':
+        return "$baseUrl/pricing/$id";
+      case 'subscription':
+        return "$baseUrl/subscriptions/$id";   // DELETE /subscriptions/:id
+      case 'homework':
+        return "$baseUrl/admin/homework/$id";
+      case 'attendance':
+        return "$baseUrl/admin/attendance/$id";
+      default:
+        return "$baseUrl/admin/${entity}s/$id";
+    }
+  }
+
+  // Bulk delete — entity-scoped, falls back to sequential single deletes
+  // if the backend doesn't support a bulk endpoint for that entity.
+  static String permanentDeleteBulk(String entity) {
+    switch (entity) {
+      case 'subscription':
+        return "$baseUrl/subscriptions/bulk";
+      case 'pricing':
+        return "$baseUrl/pricing/bulk";
+      case 'school':
+        return "$baseUrl/superadmin/schools/bulk";
+      default:
+        return "$baseUrl/admin/${entity}s/bulk";
+    }
+  }
+
   // Notifications
   static String registerFcmToken = "$baseUrl/notifications/fcm-token";
   static String notifications = "$baseUrl/notifications";
