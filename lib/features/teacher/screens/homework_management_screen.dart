@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/teacher/screens/homework_details_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
@@ -197,7 +198,7 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
             ),
           ),
           if (_isLoading)
-            const LinearProgressIndicator()
+            Expanded(child: _buildShimmerLoading())
           else
             Expanded(
               child: homeworkList.isEmpty
@@ -255,6 +256,88 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
       //     style: TextStyle(fontWeight: FontWeight.bold),
       //   ),
       // ),
+    );
+  }
+
+  Widget _buildShimmerLoading() {
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+      itemCount: 6,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        return Card(
+          margin: EdgeInsets.zero,
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey.shade300,
+            highlightColor: Colors.grey.shade100,
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          height: 16,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(height: 6),
+                        Container(
+                          width: 120,
+                          height: 12,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          width: double.infinity,
+                          height: 12,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          width: double.infinity,
+                          height: 12,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Container(
+                              width: 14,
+                              height: 14,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 4),
+                            Container(
+                              width: 80,
+                              height: 12,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Icon(Icons.more_vert, color: Colors.white, size: 20),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
