@@ -21,6 +21,9 @@ class ExamsNotifier extends ChangeNotifier {
   }
 
   Future<void> _load() async {
+    _isLoading = true;
+    notifyListeners();
+
     try {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
@@ -46,8 +49,10 @@ class ExamsNotifier extends ChangeNotifier {
       }
     } catch (e) {
       log('Error fetching exams: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   Future<void> createExamWithAssignments({
