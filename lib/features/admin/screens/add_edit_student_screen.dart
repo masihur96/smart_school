@@ -26,6 +26,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
 
   final _phoneController = TextEditingController();
   final _aboutController = TextEditingController();
+  final _rollIdController = TextEditingController();
+
+  String? _selectedClassId;
+  String? _selectedSectionId;
 
   bool _obscurePassword = true;
   bool _isLoading = false;
@@ -40,7 +44,13 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
       _nameController.text = s.user?.name ?? '';
       _emailController.text = s.user?.email ?? '';
       _phoneController.text = s.user?.phone ?? s.guardianContact;
+      _rollIdController.text = s.rollId;
       _existingImageUrl = s.user?.avatar;
+
+      // Ensure classId and sectionId exist in the current setup lists before selecting them
+      // In a real app, you might want to verify they exist in context.read<ClassSetupNotifier>().classes
+      _selectedClassId = s.classId.isNotEmpty ? s.classId : null;
+      _selectedSectionId = s.sectionId.isNotEmpty ? s.sectionId : null;
     }
   }
 
@@ -88,6 +98,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
 
     _phoneController.dispose();
     _aboutController.dispose();
+    _rollIdController.dispose();
     super.dispose();
   }
 
@@ -107,7 +118,9 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             email: _emailController.text,
             password: _passwordController.text,
             phone: _phoneController.text,
-
+            classId: _selectedClassId,
+            sectionId: _selectedSectionId,
+            rollId: _rollIdController.text,
             designation: _aboutController.text,
             imageFile: _imageFile,
           );
@@ -119,6 +132,9 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             role: 'student',
             schoolId: schoolId,
             phone: _phoneController.text,
+            classId: _selectedClassId,
+            sectionId: _selectedSectionId,
+            rollId: _rollIdController.text,
             designation: _aboutController.text,
             imageFile: _imageFile,
           );
@@ -148,7 +164,16 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   @override
   Widget build(BuildContext context) {
     final classes = context.watch<ClassSetupNotifier>().classes;
-    final sections = context.watch<SectionSetupNotifier>().sections;
+    final allSections = context.watch<SectionSetupNotifier>().sections;
+    final filteredSections = _selectedClassId == null
+        ? allSections.where((s) => false).toList() // empty list of same type
+        : allSections.where((s) => s.classId == _selectedClassId).toList();
+
+    // Prevent DropdownButton assertion error if _selectedSectionId is invalid for the current class
+    if (_selectedSectionId != null &&
+        !filteredSections.any((s) => s.id == _selectedSectionId)) {
+      _selectedSectionId = null;
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -220,6 +245,56 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
               validator: (val) => val!.isEmpty ? 'Please enter name' : null,
             ),
             const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _selectedClassId,
+              decoration: const InputDecoration(
+                labelText: 'Class',
+                prefixIcon: Icon(Icons.class_),
+              ),
+              items: classes.map((c) {
+                return DropdownMenuItem(value: c.id, child: Text(c.name));
+              }).toList(),
+              onChanged: (val) {
+                setState(() {
+                  if (_selectedClassId != val) {
+                    _selectedClassId = val;
+                    _selectedSectionId = null;
+                  }
+                });
+              },
+              validator: (val) => val == null ? 'Please select a class' : null,
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _selectedSectionId,
+              decoration: const InputDecoration(
+                labelText: 'Section',
+                prefixIcon: Icon(Icons.meeting_room),
+              ),
+              items: filteredSections.map((s) {
+                return DropdownMenuItem(value: s.id, child: Text(s.name));
+              }).toList(),
+              onChanged: (val) {
+                setState(() {
+                  _selectedSectionId = val;
+                });
+              },
+              validator: (val) =>
+                  val == null ? 'Please select a section' : null,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _rollIdController,
+              decoration: const InputDecoration(
+                labelText: 'Roll Number',
+                prefixIcon: Icon(Icons.numbers),
+
+              ),
+              keyboardType: TextInputType.number,
+              validator: (val) =>
+                  val!.isEmpty ? 'Please enter roll number' : null,
+            ),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _aboutController,
               decoration: const InputDecoration(
@@ -243,6 +318,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 labelText: 'Phone',
                 prefixIcon: Icon(Icons.phone),
               ),
+              keyboardType: TextInputType.phone,
               validator: (val) => val!.isEmpty ? 'Required' : null,
             ),
 
@@ -266,6 +342,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                   },
                 ),
               ),
+              keyboardType: TextInputType.visiblePassword,
               validator: (val) {
                 if (widget.student == null && (val == null || val.isEmpty)) {
                   return 'Please enter password';

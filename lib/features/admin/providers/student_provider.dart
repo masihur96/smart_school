@@ -91,7 +91,6 @@ class StudentsNotifier extends ChangeNotifier {
             ? inner
             : (inner is Map ? (inner['data'] as List<dynamic>? ?? []) : []);
 
-
         final responseTotal = (inner is Map && inner['total'] != null)
             ? int.tryParse(inner['total'].toString()) ?? 0
             : data.length;
@@ -116,7 +115,6 @@ class StudentsNotifier extends ChangeNotifier {
             _dbService.students.add(parsedStudent);
           } catch (e, stacktrace) {
             log("Error parsing student: $e");
-
           }
         }
         _students = [..._dbService.students];
@@ -237,8 +235,10 @@ class StudentsNotifier extends ChangeNotifier {
         'limit': '15',
       };
       if (search != null && search.isNotEmpty) query['search'] = search;
-      if (filterClassId != null && filterClassId.isNotEmpty) query['classId'] = filterClassId;
-      if (filterSectionId != null && filterSectionId.isNotEmpty) query['sectionId'] = filterSectionId;
+      if (filterClassId != null && filterClassId.isNotEmpty)
+        query['classId'] = filterClassId;
+      if (filterSectionId != null && filterSectionId.isNotEmpty)
+        query['sectionId'] = filterSectionId;
 
       final response = await DataProvider().performRequest(
         'GET',
@@ -262,7 +262,8 @@ class StudentsNotifier extends ChangeNotifier {
         _unassignedTotalCount = responseTotal;
 
         if (data.length < 15 ||
-            (loadMore && _unassignedStudents.length + data.length >= responseTotal)) {
+            (loadMore &&
+                _unassignedStudents.length + data.length >= responseTotal)) {
           _unassignedHasMore = false;
         }
 
@@ -310,6 +311,9 @@ class StudentsNotifier extends ChangeNotifier {
     required String schoolId,
     required String phone,
     required String designation,
+    String? classId,
+    String? sectionId,
+    String? rollId,
     File? imageFile,
   }) async {
     final token = await StorageService.getToken();
@@ -324,6 +328,19 @@ class StudentsNotifier extends ChangeNotifier {
       "phone": phone,
       "designation": designation,
     };
+
+    if (classId != null && classId.isNotEmpty) {
+      dataMap["classId"] = classId;
+      dataMap["classIds"] = [classId];
+    }
+    if (sectionId != null && sectionId.isNotEmpty) {
+      dataMap["sectionId"] = sectionId;
+      dataMap["sectionIds"] = [sectionId];
+    }
+    if (rollId != null && rollId.isNotEmpty) {
+      dataMap["rollId"] = rollId;
+      dataMap["rollNumber"] = rollId;
+    }
 
     if (imageFile != null) {
       final uploadFormData = FormData.fromMap({
@@ -385,7 +402,9 @@ class StudentsNotifier extends ChangeNotifier {
     required String email,
     String? password, // optional for update
     required String phone,
-
+    String? classId,
+    String? sectionId,
+    String? rollId,
     required String designation,
     File? imageFile,
   }) async {
@@ -400,6 +419,18 @@ class StudentsNotifier extends ChangeNotifier {
     };
     if (password != null && password.isNotEmpty) {
       dataMap["password"] = password;
+    }
+    if (classId != null && classId.isNotEmpty) {
+      dataMap["classId"] = classId;
+      dataMap["classIds"] = [classId];
+    }
+    if (sectionId != null && sectionId.isNotEmpty) {
+      dataMap["sectionId"] = sectionId;
+      dataMap["sectionIds"] = [sectionId];
+    }
+    if (rollId != null && rollId.isNotEmpty) {
+      dataMap["rollId"] = rollId;
+      dataMap["rollNumber"] = rollId;
     }
 
     if (imageFile != null) {
