@@ -35,14 +35,21 @@ class StudentDashboardScreen extends StatefulWidget {
 
 class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
   int _selectedIndex = 0;
+  final Set<int> _visitedTabs = {0};
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<StudentDashboardProvider>().fetchStudentDashboard();
+      final provider = context.read<StudentDashboardProvider>();
+      if (provider.dashboardData == null) {
+        provider.fetchStudentDashboard();
+      }
       if (mounted) {
-        context.read<NotificationNotifier>().fetchNotifications();
+        final notifProvider = context.read<NotificationNotifier>();
+        if (notifProvider.notifications.isEmpty) {
+          notifProvider.fetchNotifications();
+        }
       }
     });
   }
@@ -50,6 +57,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      _visitedTabs.add(index);
     });
   }
 
@@ -148,10 +156,22 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           index: _selectedIndex,
           children: [
             _buildDashboardOverview(context, user, l10n),
-            const StudentAttendanceScreen(hideAppBar: true),
-            const StudentResultScreen(hideAppBar: true),
-            const StudentHomeworkScreen(hideAppBar: true),
-            const StudentNoticeScreen(isFromDrawer: false),
+            if (_visitedTabs.contains(1))
+              const StudentAttendanceScreen(hideAppBar: true)
+            else
+              const SizedBox(),
+            if (_visitedTabs.contains(2))
+              const StudentResultScreen(hideAppBar: true)
+            else
+              const SizedBox(),
+            if (_visitedTabs.contains(3))
+              const StudentHomeworkScreen(hideAppBar: true)
+            else
+              const SizedBox(),
+            if (_visitedTabs.contains(4))
+              const StudentNoticeScreen(isFromDrawer: false)
+            else
+              const SizedBox(),
           ],
         ),
         bottomNavigationBar: Container(
@@ -259,7 +279,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                   _buildSectionHeader(
                     "My ${l10n.attendance}",
                     onSeeAll: () {
-                      setState(() => _selectedIndex = 1);
+                      _onItemTapped(1);
                     },
                   ),
                   _buildAttendanceSection(context, data, l10n),
@@ -267,7 +287,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                   if (data?.myRecentExamListWithResult.isNotEmpty ?? false) ...[
                     _buildSectionHeader(
                       l10n.exams,
-                      onSeeAll: () => setState(() => _selectedIndex = 2),
+                      onSeeAll: () => _onItemTapped(2),
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
@@ -288,7 +308,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                   if (data?.recentHomework.isNotEmpty ?? false) ...[
                     _buildSectionHeader(
                       l10n.recentHomework,
-                      onSeeAll: () => setState(() => _selectedIndex = 3),
+                      onSeeAll: () => _onItemTapped(3),
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
@@ -308,7 +328,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                   if (data?.myRecentNotice.isNotEmpty ?? false) ...[
                     _buildSectionHeader(
                       l10n.notices,
-                      onSeeAll: () => setState(() => _selectedIndex = 4),
+                      onSeeAll: () => _onItemTapped(4),
                     ),
                     const SizedBox(height: 12),
                     ...data!.myRecentNotice

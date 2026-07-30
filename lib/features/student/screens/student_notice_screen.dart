@@ -20,7 +20,10 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
     super.initState();
     Future.microtask(() {
       if (!mounted) return;
-      context.read<NoticesNotifier>().fetchNoticesFromAPI();
+      final provider = context.read<NoticesNotifier>();
+      if (provider.notices.isEmpty) {
+        provider.fetchNoticesFromAPI();
+      }
     });
   }
 

@@ -26,7 +26,10 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<StudentAttendanceNotifier>().fetchAttendance();
+      final provider = context.read<StudentAttendanceNotifier>();
+      if (provider.attendanceRecords.isEmpty) {
+        provider.fetchAttendance();
+      }
     });
   }
 

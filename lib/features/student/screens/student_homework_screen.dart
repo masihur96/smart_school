@@ -24,10 +24,11 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final user = context.read<AuthNotifier>().user;
-      if (user?.classIds != null) {
-        context.read<StudentHomeworkNotifier>().fetchHomework(
-          user!.classIds.first,
-        );
+      final provider = context.read<StudentHomeworkNotifier>();
+      if (user?.classIds != null && user!.classIds.isNotEmpty) {
+        if (provider.homeworkList.isEmpty) {
+          provider.fetchHomework(user.classIds.first);
+        }
       }
     });
   }

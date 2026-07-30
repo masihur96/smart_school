@@ -22,7 +22,10 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
     super.initState();
     Future.microtask(() {
       if (!mounted) return;
-      context.read<StudentExamNotifier>().fetchExams();
+      final provider = context.read<StudentExamNotifier>();
+      if (provider.exams.isEmpty) {
+        provider.fetchExams();
+      }
     });
   }
 
