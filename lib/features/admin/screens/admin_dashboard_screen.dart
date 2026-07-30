@@ -26,6 +26,8 @@ import 'notice_management_screen.dart';
 import 'student_attendance_management_screen.dart';
 import 'student_management_screen.dart';
 import 'teacher_attendance_management_screen.dart';
+import '../providers/student_provider.dart';
+import '../providers/teacher_provider.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -70,6 +72,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       // Only the two core calls on startup — no teacher/student perf here.
       context.read<AdminDashboardProvider>().fetchDashboardData();
       context.read<NotificationNotifier>().fetchNotifications();
+      context.read<StudentsNotifier>().fetchStudents();
+      context.read<TeachersNotifier>().fetchTeachers();
     });
   }
 
