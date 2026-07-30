@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:shimmer/shimmer.dart';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -296,7 +298,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
             ),
             Expanded(
               child: studentsNotifier.isLoading && students.isEmpty
-                  ? const Center(child: CircularProgressIndicator())
+                  ? _StudentShimmer(
+                      isDark: Theme.of(context).brightness == Brightness.dark,
+                    )
                   : students.isEmpty
                   ? Center(
                       child: Text(
@@ -729,6 +733,125 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
           );
         },
       ),
+    );
+  }
+}
+
+// ─── Shimmer skeleton ────────────────────────────────────────────────────────
+
+class _StudentShimmer extends StatelessWidget {
+  final bool isDark;
+  const _StudentShimmer({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      itemCount: 8,
+      itemBuilder: (context, _) {
+        return Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Card(
+            margin: const EdgeInsets.symmetric(vertical: 5),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Avatar placeholder
+                      const CircleAvatar(
+                        radius: 25,
+                        backgroundColor: Colors.white,
+                      ),
+                      const SizedBox(width: 12),
+                      // Text column placeholder
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Name line
+                            Container(
+                              height: 14,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            // Roll line
+                            Container(
+                              height: 12,
+                              width: 120,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            // Class name line
+                            Container(
+                              height: 11,
+                              width: 160,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            // Section line
+                            Container(
+                              height: 11,
+                              width: 100,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 36), // space for trailing icon
+                    ],
+                  ),
+                ),
+                // Status badge placeholder (top-right)
+                Positioned(
+                  right: 10,
+                  top: 10,
+                  child: Container(
+                    width: 52,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                // Trailing icon placeholder
+                Positioned(
+                  right: 8,
+                  bottom: 8,
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
