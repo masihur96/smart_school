@@ -18,12 +18,6 @@ class AdminDashboardProvider extends ChangeNotifier {
   AdminDashboardData? _dashboardData;
   AdminDashboardData? get dashboardData => _dashboardData;
 
-  List<TeacherPerformance>? _teacherPerformances;
-  List<TeacherPerformance>? get teacherPerformances => _teacherPerformances;
-
-  List<StudentPerformance>? _studentPerformances;
-  List<StudentPerformance>? get studentPerformances => _studentPerformances;
-
   String? _error;
   String? get error => _error;
 
@@ -36,18 +30,24 @@ class AdminDashboardProvider extends ChangeNotifier {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No auth token found');
 
-      final response = await DataProvider().performRequest(
-        'GET',
-        APIPath.adminDashboard,
-        header: {'Authorization': 'Bearer $token'},
-      );
-
       final currentYear = DateTime.now().year;
-      final monthlyResponse = await DataProvider().performRequest(
-        'GET',
-        '${APIPath.baseUrl}/admin/attendance/monthly-overview?year=$currentYear',
-        header: {'Authorization': 'Bearer $token'},
-      );
+
+      // Run both core calls in parallel — no more sequential chain
+      final results = await Future.wait([
+        DataProvider().performRequest(
+          'GET',
+          APIPath.adminDashboard,
+          header: {'Authorization': 'Bearer $token'},
+        ),
+        DataProvider().performRequest(
+          'GET',
+          '${APIPath.baseUrl}/admin/attendance/monthly-overview?year=$currentYear',
+          header: {'Authorization': 'Bearer $token'},
+        ),
+      ]);
+
+      final response = results[0];
+      final monthlyResponse = results[1];
 
       if (response != null && response.statusCode == 200) {
         final data = response.data['data'];
@@ -66,51 +66,6 @@ class AdminDashboardProvider extends ChangeNotifier {
         log('Fetched Admin Monthly Overview successfully.');
       } else {
         log('Failed to fetch monthly overview: ${monthlyResponse?.data}');
-      }
-
-      log("APIPath.teacherPerformance:: ${APIPath.teacherPerformance}");
-      final performanceResponse = await DataProvider().performRequest(
-        'GET',
-        APIPath.teacherPerformance,
-        header: {'Authorization': 'Bearer $token'},
-      );
-      log("APIPath.teacherPerformance:: ${token}");
-      log("APIPath.teacherPerformance:: ${performanceResponse!.data}");
-      if (performanceResponse != null &&
-          performanceResponse.statusCode == 200) {
-        final performanceData =
-            performanceResponse.data['data'] as List<dynamic>?;
-        if (performanceData != null) {
-          _teacherPerformances = performanceData
-              .map((e) => TeacherPerformance.fromJson(e))
-              .toList();
-          log('Fetched Teacher Performances successfully.');
-        }
-      } else {
-        log(
-          'Failed to fetch teacher performances: ${performanceResponse?.data}',
-        );
-      }
-
-      final studentPerformanceResponse = await DataProvider().performRequest(
-        'GET',
-        APIPath.studentPerformance,
-        header: {'Authorization': 'Bearer $token'},
-      );
-
-      if (studentPerformanceResponse != null &&
-          studentPerformanceResponse.statusCode == 200) {
-        final data = studentPerformanceResponse.data['data'] as List<dynamic>?;
-        if (data != null) {
-          _studentPerformances = data
-              .map((e) => StudentPerformance.fromJson(e))
-              .toList();
-          log('Fetched Student Performances successfully.');
-        }
-      } else {
-        log(
-          'Failed to fetch student performances: ${studentPerformanceResponse?.data}',
-        );
       }
     } catch (e) {
       _error = 'Error loading dashboard: $e';

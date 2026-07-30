@@ -36,6 +36,17 @@ class AdminDashboardScreen extends StatefulWidget {
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   int _selectedIndex = 0;
+
+  /// Tracks which bottom-nav tabs have been opened at least once.
+  /// Sub-screens are only built after their tab is first tapped,
+  /// preventing their providers from firing on initial load.
+  final Set<int> _tabsInitialized = {0};
+
+  /// Lazy-fetch guards — each performance section triggers its own
+  /// provider fetch exactly once when it first becomes visible.
+  bool _teacherPerfFetched = false;
+  bool _studentPerfFetched = false;
+
   final List<String> _months = [
     'Jan',
     'Feb',
@@ -55,21 +66,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        context.read<AdminDashboardProvider>().fetchDashboardData();
-        context.read<NotificationNotifier>().fetchNotifications();
-        final now = DateTime.now();
-        context.read<TeacherPerformanceProvider>().fetchForMonth(
-          now.month,
-          now.year,
-        );
-      }
+      if (!mounted) return;
+      // Only the two core calls on startup — no teacher/student perf here.
+      context.read<AdminDashboardProvider>().fetchDashboardData();
+      context.read<NotificationNotifier>().fetchNotifications();
     });
   }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      // Mark this tab as initialized so its sub-screen widget is built.
+      _tabsInitialized.add(index);
     });
   }
 
@@ -152,9 +160,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           index: _selectedIndex,
           children: [
             _buildDashboardOverview(l10n, authNotifier),
-            const StudentManagementScreen(hideAppBar: true),
-            const ExamManagementScreen(hideAppBar: true),
-            const NoticeManagementScreen(hideAppBar: true),
+            // Tabs 1-3 are deferred: only built after their tab is first tapped.
+            _tabsInitialized.contains(1)
+                ? const StudentManagementScreen(hideAppBar: true)
+                : const SizedBox.shrink(),
+            _tabsInitialized.contains(2)
+                ? const ExamManagementScreen(hideAppBar: true)
+                : const SizedBox.shrink(),
+            _tabsInitialized.contains(3)
+                ? const NoticeManagementScreen(hideAppBar: true)
+                : const SizedBox.shrink(),
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
@@ -1564,6 +1579,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildTeacherPerformancePreview(BuildContext context) {
     return Consumer<TeacherPerformanceProvider>(
       builder: (context, provider, _) {
+        // Lazy fetch — trigger exactly once when this section first renders.
+        if (!_teacherPerfFetched) {
+          _teacherPerfFetched = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            final now = DateTime.now();
+            context.read<TeacherPerformanceProvider>().fetchForMonth(
+              now.month,
+              now.year,
+            );
+          });
+        }
+
         if (provider.isLoading && provider.allPerformances.isEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1847,19 +1875,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildStudentPerformancePreview(BuildContext context) {
     return Consumer<StudentPerformanceProvider>(
       builder: (context, perfProvider, _) {
-        // Trigger fetch only for current month/year on first load
-        if (perfProvider.allPerformances.isEmpty &&
-            !perfProvider.isLoading &&
-            perfProvider.error == null) {
+        // Lazy fetch — trigger exactly once when this section first renders.
+        if (!_studentPerfFetched) {
+          _studentPerfFetched = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            // Ensure we always use current month/year on dashboard
+            if (!mounted) return;
             final now = DateTime.now();
-            if (perfProvider.selectedMonth != now.month ||
-                perfProvider.selectedYear != now.year) {
-              perfProvider.fetchForMonth(now.month, now.year);
-            } else {
-              perfProvider.fetchPerformances();
-            }
+            context.read<StudentPerformanceProvider>().fetchForMonth(
+              now.month,
+              now.year,
+            );
           });
         }
 
