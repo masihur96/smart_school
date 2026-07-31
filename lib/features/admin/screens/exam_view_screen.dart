@@ -8,6 +8,7 @@ import '../../../models/student_model.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/exam_provider.dart';
 import '../providers/student_provider.dart';
+import '../providers/setup_provider.dart';
 
 class ExamViewScreen extends StatefulWidget {
   final Exam exam;
@@ -298,7 +299,15 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
         .where((a) => a.classId == _selectedClassId)
         .toList();
 
+    final allSections = context.watch<SectionSetupNotifier>().sections;
     final uniqueSections = <String, String>{};
+    for (var s in allSections) {
+      if (s.classId == _selectedClassId) {
+        uniqueSections[s.id] = s.name;
+      }
+    }
+
+    // Fallback if there are any sections present in assignments not in setup
     for (var a in classAssignments) {
       if (a.sectionId != null) {
         uniqueSections[a.sectionId!] = a.sectionName ?? 'N/A';
@@ -307,7 +316,8 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
 
     final filteredAssignments = classAssignments.where((a) {
       if (_selectedSectionId == null) return true;
-      return a.sectionId == _selectedSectionId;
+      // If an assignment doesn't specify a section, it applies to all sections
+      return a.sectionId == null || a.sectionId == _selectedSectionId;
     }).toList();
     print(uniqueSections.isEmpty);
     return Card(
