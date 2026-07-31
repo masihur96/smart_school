@@ -20,6 +20,7 @@ class ExamViewScreen extends StatefulWidget {
 class _ExamViewScreenState extends State<ExamViewScreen> {
   late List<ExamAssignment> _sortedAssignments;
   String? _selectedClassId;
+  String? _selectedSectionId;
   ExamAssignment? _selectedAssignment;
   final Map<String, TextEditingController> _marksControllers = {};
   final Map<String, TextEditingController> _totalMarksControllers = {};
@@ -33,6 +34,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
     if (_sortedAssignments.isNotEmpty) {
       _selectedAssignment = _sortedAssignments.first;
       _selectedClassId = _selectedAssignment!.classId;
+      _selectedSectionId = _selectedAssignment!.sectionId;
       _fetchStudents();
     }
   }
@@ -42,7 +44,10 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context
             .read<StudentsNotifier>()
-            .fetchStudentsBySection(classId: _selectedAssignment!.classId)
+            .fetchStudentsBySection(
+              classId: _selectedAssignment!.classId,
+              sectionId: _selectedSectionId,
+            )
             .then((_) {
               if (mounted) {
                 _populateExistingMarks();
@@ -289,10 +294,22 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
       uniqueClasses[a.classId] = a.className;
     }
 
-    final filteredAssignments = _sortedAssignments
+    final classAssignments = _sortedAssignments
         .where((a) => a.classId == _selectedClassId)
         .toList();
 
+    final uniqueSections = <String, String>{};
+    for (var a in classAssignments) {
+      if (a.sectionId != null) {
+        uniqueSections[a.sectionId!] = a.sectionName ?? 'N/A';
+      }
+    }
+
+    final filteredAssignments = classAssignments.where((a) {
+      if (_selectedSectionId == null) return true;
+      return a.sectionId == _selectedSectionId;
+    }).toList();
+    print(uniqueSections.isEmpty);
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 0,
@@ -337,8 +354,12 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
                         final newFiltered = _sortedAssignments
                             .where((a) => a.classId == val)
                             .toList();
+
+                        _selectedSectionId = null;
+
                         if (newFiltered.isNotEmpty) {
                           _selectedAssignment = newFiltered.first;
+                          _selectedSectionId = _selectedAssignment!.sectionId;
                         } else {
                           _selectedAssignment = null;
                         }
@@ -348,6 +369,43 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
                     icon: Icons.school_outlined,
                   ),
                 ),
+                if (uniqueSections.isNotEmpty) ...[
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDropdownField<String?>(
+                      label: 'Section',
+                      value: _selectedSectionId,
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('All Sections'),
+                        ),
+                        ...uniqueSections.entries.map((e) {
+                          return DropdownMenuItem(
+                            value: e.key,
+                            child: Text(e.value),
+                          );
+                        }),
+                      ],
+                      onChanged: (val) {
+                        setState(() {
+                          _selectedSectionId = val;
+                          final newFiltered = classAssignments.where((a) {
+                            if (val == null) return true;
+                            return a.sectionId == val;
+                          }).toList();
+                          if (newFiltered.isNotEmpty) {
+                            _selectedAssignment = newFiltered.first;
+                          } else {
+                            _selectedAssignment = null;
+                          }
+                        });
+                        _fetchStudents();
+                      },
+                      icon: Icons.group_work_outlined,
+                    ),
+                  ),
+                ],
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildDropdownField<ExamAssignment>(
