@@ -31,6 +31,9 @@ class StudentPerformanceProvider extends ChangeNotifier {
   String? _filterClass;
   String? get filterClass => _filterClass;
 
+  String? _filterSection;
+  String? get filterSection => _filterSection;
+
   // Selected student for individual detail view
   StudentPerformance? _selectedStudent;
   StudentPerformance? get selectedStudent => _selectedStudent;
@@ -57,6 +60,10 @@ class StudentPerformanceProvider extends ChangeNotifier {
       list = list.where((p) => p.classInfo?.name == _filterClass).toList();
     }
 
+    if (_filterSection != null && _filterSection!.isNotEmpty) {
+      list = list.where((p) => p.section?.name == _filterSection).toList();
+    }
+
     return list;
   }
 
@@ -66,6 +73,17 @@ class StudentPerformanceProvider extends ChangeNotifier {
       if (p.classInfo?.name != null) classes.add(p.classInfo!.name);
     }
     return classes.toList()..sort();
+  }
+
+  List<String> get availableSections {
+    final sections = <String>{};
+    for (final p in _allPerformances) {
+      if (_filterClass != null && p.classInfo?.name != _filterClass) {
+        continue;
+      }
+      if (p.section?.name != null) sections.add(p.section!.name);
+    }
+    return sections.toList()..sort();
   }
 
   // All student names for dropdown search
@@ -85,6 +103,12 @@ class StudentPerformanceProvider extends ChangeNotifier {
 
   void setClassFilter(String? className) {
     _filterClass = className;
+    _filterSection = null; // Reset section when class changes
+    notifyListeners();
+  }
+
+  void setSectionFilter(String? sectionName) {
+    _filterSection = sectionName;
     notifyListeners();
   }
 
@@ -114,6 +138,7 @@ class StudentPerformanceProvider extends ChangeNotifier {
     _selectedStudent = null; // reset individual selection on date change
     _filterSearch = '';
     _filterClass = null;
+    _filterSection = null;
     await fetchPerformances();
   }
 

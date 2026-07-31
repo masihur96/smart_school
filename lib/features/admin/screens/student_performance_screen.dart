@@ -438,6 +438,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
     final currentYear = DateTime.now().year;
     final years = List.generate(5, (i) => currentYear - i);
     final classes = provider.availableClasses;
+    final sections = provider.availableSections;
 
     return Container(
       color: Colors.white,
@@ -489,6 +490,27 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                   ),
                 ],
                 onChanged: provider.setClassFilter,
+              ),
+              const SizedBox(width: 8),
+            ],
+
+            // ── Section dropdown ─────────────────────────────
+            if (sections.isNotEmpty) ...[
+              _dropdownChip<String?>(
+                icon: Icons.group_work_rounded,
+                color: const Color(0xFFF59E0B),
+                hint: 'All Sections',
+                value: provider.filterSection,
+                items: [
+                  const DropdownMenuItem<String?>(
+                    value: null,
+                    child: Text('All Sections'),
+                  ),
+                  ...sections.map(
+                    (s) => DropdownMenuItem(value: s, child: Text(s)),
+                  ),
+                ],
+                onChanged: provider.setSectionFilter,
               ),
             ],
           ],
