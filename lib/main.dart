@@ -52,10 +52,12 @@ import 'features/teacher/providers/teacher_attendance_provider.dart';
 import 'features/teacher/providers/teacher_dashboard_provider.dart';
 import 'features/notifications/providers/notification_provider.dart';
 import 'firebase_options.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'services/database_service.dart';
 import 'services/notification_service.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -199,6 +201,9 @@ class MyApp extends StatelessWidget {
       supportedLocales: const [Locale('en'), Locale('bn')],
       onGenerateRoute: RouteGenerator.generateRoute,
       initialRoute: RouteGenerator.splashRoute,
+      navigatorObservers: [
+        FirebaseAnalyticsObserver(analytics: analytics),
+      ],
     );
   }
 }

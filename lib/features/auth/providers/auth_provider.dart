@@ -11,6 +11,7 @@ import '../../../core/constants/api_path.dart';
 import '../../../models/user_model.dart';
 import '../../../services/notification_service.dart';
 import '../../super_admin/models/subscription_model.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import '../domain/usecases/change_password_usecase.dart';
 import '../domain/usecases/get_profile_usecase.dart';
 import '../domain/usecases/login_usecase.dart';
@@ -97,6 +98,12 @@ class AuthNotifier extends ChangeNotifier {
           await _fetchAdminSubscription(_user!.schoolId!);
         }
 
+        unawaited(
+          FirebaseAnalytics.instance.setUserId(id: _user!.id).catchError(
+            (e) => log('setUserId error: $e'),
+          ),
+        );
+
         // FCM topic subscription & token registration are fire-and-forget.
         // They do NOT block navigation out of the splash screen.
         unawaited(
@@ -163,6 +170,17 @@ class AuthNotifier extends ChangeNotifier {
         await _fetchAdminSubscription(_user!.schoolId!);
       }
 
+      unawaited(
+        FirebaseAnalytics.instance.setUserId(id: _user!.id).catchError(
+          (e) => log('setUserId error: $e'),
+        ),
+      );
+      unawaited(
+        FirebaseAnalytics.instance.logLogin(loginMethod: 'email').catchError(
+          (e) => log('logLogin error: $e'),
+        ),
+      );
+
       // FCM topic subscription & token registration are fire-and-forget.
       // They do NOT block the login response.
       unawaited(
@@ -208,6 +226,14 @@ class AuthNotifier extends ChangeNotifier {
         schoolId: schoolId,
         phone: phone,
       );
+      
+      if (success) {
+        unawaited(
+          FirebaseAnalytics.instance.logSignUp(signUpMethod: 'email').catchError(
+            (e) => log('logSignUp error: $e'),
+          ),
+        );
+      }
 
       _isLoading = false;
       notifyListeners();
@@ -231,6 +257,17 @@ class AuthNotifier extends ChangeNotifier {
     _user = null;
     _adminSubscription = null;
     notifyListeners();
+
+    unawaited(
+      FirebaseAnalytics.instance.logEvent(name: 'logout').catchError(
+        (e) => log('logEvent logout error: $e'),
+      ),
+    );
+    unawaited(
+      FirebaseAnalytics.instance.setUserId(id: null).catchError(
+        (e) => log('setUserId null error: $e'),
+      ),
+    );
 
     // Clear local storage immediately to prevent race conditions with new logins.
     await StorageService.clear();
