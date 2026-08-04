@@ -311,8 +311,8 @@ class StudentsNotifier extends ChangeNotifier {
     required String schoolId,
     required String phone,
     required String designation,
-    String? classId,
-    String? sectionId,
+    List<String>? classIds,
+    List<String>? sectionIds,
     String? rollId,
     File? imageFile,
   }) async {
@@ -329,13 +329,13 @@ class StudentsNotifier extends ChangeNotifier {
       "designation": designation,
     };
 
-    if (classId != null && classId.isNotEmpty) {
-      dataMap["classId"] = classId;
-      dataMap["classIds"] = [classId];
+    if (classIds != null && classIds.isNotEmpty) {
+      dataMap["classId"] = classIds.first;
+      dataMap["classIds"] = classIds;
     }
-    if (sectionId != null && sectionId.isNotEmpty) {
-      dataMap["sectionId"] = sectionId;
-      dataMap["sectionIds"] = [sectionId];
+    if (sectionIds != null && sectionIds.isNotEmpty) {
+      dataMap["sectionId"] = sectionIds.first;
+      dataMap["sectionIds"] = sectionIds;
     }
     if (rollId != null && rollId.isNotEmpty) {
       dataMap["rollId"] = rollId;
@@ -402,8 +402,8 @@ class StudentsNotifier extends ChangeNotifier {
     required String email,
     String? password, // optional for update
     required String phone,
-    String? classId,
-    String? sectionId,
+    List<String>? classIds,
+    List<String>? sectionIds,
     String? rollId,
     required String designation,
     File? imageFile,
@@ -420,13 +420,13 @@ class StudentsNotifier extends ChangeNotifier {
     if (password != null && password.isNotEmpty) {
       dataMap["password"] = password;
     }
-    if (classId != null && classId.isNotEmpty) {
-      dataMap["classId"] = classId;
-      dataMap["classIds"] = [classId];
+    if (classIds != null && classIds.isNotEmpty) {
+      dataMap["classId"] = classIds.first;
+      dataMap["classIds"] = classIds;
     }
-    if (sectionId != null && sectionId.isNotEmpty) {
-      dataMap["sectionId"] = sectionId;
-      dataMap["sectionIds"] = [sectionId];
+    if (sectionIds != null && sectionIds.isNotEmpty) {
+      dataMap["sectionId"] = sectionIds.first;
+      dataMap["sectionIds"] = sectionIds;
     }
     if (rollId != null && rollId.isNotEmpty) {
       dataMap["rollId"] = rollId;
