@@ -9,8 +9,10 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/student_model.dart';
+import '../providers/setup_provider.dart';
+import '../providers/student_provider.dart';
 
-class GenerateReportCardScreen extends StatelessWidget {
+class GenerateReportCardScreen extends StatefulWidget {
   final Exam exam;
   final List<Student> students;
 
@@ -21,25 +23,177 @@ class GenerateReportCardScreen extends StatelessWidget {
   });
 
   @override
+  State<GenerateReportCardScreen> createState() => _GenerateReportCardScreenState();
+}
+
+class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
+  String? _selectedClassId;
+  String? _selectedSectionId;
+  late List<Student> _currentStudents;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentStudents = widget.students;
+    if (_currentStudents.isNotEmpty) {
+      _selectedClassId = _currentStudents.first.classId;
+      _selectedSectionId = _currentStudents.first.sectionId;
+    } else if (widget.exam.assignments.isNotEmpty) {
+      _selectedClassId = widget.exam.assignments.first.classId;
+      _selectedSectionId = widget.exam.assignments.first.sectionId;
+    }
+  }
+
+  void _fetchStudents() {
+    if (_selectedClassId == null) return;
+    setState(() => _isLoading = true);
+    context
+        .read<StudentsNotifier>()
+        .fetchStudentsBySection(
+          classId: _selectedClassId!,
+          sectionId: _selectedSectionId,
+        )
+        .then((_) {
+      if (mounted) {
+        setState(() {
+          _currentStudents = List.from(context.read<StudentsNotifier>().students);
+          _isLoading = false;
+        });
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final authNotifier = context.read<AuthNotifier>();
     final school = authNotifier.user?.school;
 
+    final uniqueClasses = <String, String>{};
+    for (var a in widget.exam.assignments) {
+      uniqueClasses[a.classId] = a.className;
+    }
+
+    final allSections = context.watch<SectionSetupNotifier>().sections;
+    final uniqueSections = <String, String>{};
+    if (_selectedClassId != null) {
+      for (var s in allSections) {
+        if (s.classId == _selectedClassId) {
+          uniqueSections[s.id] = s.name;
+        }
+      }
+      for (var a in widget.exam.assignments.where((a) => a.classId == _selectedClassId)) {
+        if (a.sectionId != null) {
+          uniqueSections[a.sectionId!] = a.sectionName ?? 'N/A';
+        }
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          students.length == 1
+          _currentStudents.length == 1
               ? 'Report Card Preview'
-              : 'Report Cards (${students.length})',
+              : 'Report Cards (${_currentStudents.length})',
         ),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
       ),
-      body: students.isEmpty
-          ? const Center(child: Text('No students selected for report cards.'))
-          : PdfPreview(
-              build: (format) => _generateReportCardsPdf(format, school),
+      body: Column(
+        children: [
+          _buildFilters(uniqueClasses, uniqueSections),
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _currentStudents.isEmpty
+                    ? const Center(child: Text('No students selected for report cards.'))
+                    : PdfPreview(
+                        key: ValueKey('${_selectedClassId}_${_selectedSectionId}_${_currentStudents.length}'),
+                        build: (format) => _generateReportCardsPdf(format, school),
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilters(Map<String, String> uniqueClasses, Map<String, String> uniqueSections) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: Colors.purple.shade50,
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildDropdown(
+              label: 'Class',
+              value: _selectedClassId,
+              items: uniqueClasses.entries.map((e) => DropdownMenuItem(value: e.key, child: Text(e.value))).toList(),
+              onChanged: (val) {
+                if (val != _selectedClassId) {
+                  setState(() {
+                    _selectedClassId = val;
+                    _selectedSectionId = null;
+                  });
+                  _fetchStudents();
+                }
+              },
             ),
+          ),
+          if (uniqueSections.isNotEmpty) ...[
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildDropdown(
+                label: 'Section',
+                value: _selectedSectionId,
+                items: [
+                  const DropdownMenuItem(value: null, child: Text('All Sections')),
+                  ...uniqueSections.entries.map((e) => DropdownMenuItem(value: e.key, child: Text(e.value))),
+                ],
+                onChanged: (val) {
+                  if (val != _selectedSectionId) {
+                    setState(() {
+                      _selectedSectionId = val;
+                    });
+                    _fetchStudents();
+                  }
+                },
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDropdown<T>({
+    required String label,
+    required T? value,
+    required List<DropdownMenuItem<T>> items,
+    required ValueChanged<T?> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.purple)),
+        const SizedBox(height: 4),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.purple.shade200),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<T>(
+              value: value,
+              items: items,
+              onChanged: onChanged,
+              isExpanded: true,
+              icon: const Icon(Icons.arrow_drop_down, color: Colors.purple),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -62,9 +216,9 @@ class GenerateReportCardScreen extends StatelessWidget {
       }
     }
 
-    for (var student in students) {
+    for (var student in _currentStudents) {
       // Get all results for this student in the current exam
-      final studentResults = exam.results
+      final studentResults = widget.exam.results
           .where((r) => r.studentId == student.userId)
           .toList();
 
@@ -192,7 +346,7 @@ class GenerateReportCardScreen extends StatelessWidget {
           ),
           pw.Center(
             child: pw.Text(
-              exam.name,
+              widget.exam.name,
               style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
             ),
           ),
@@ -218,7 +372,7 @@ class GenerateReportCardScreen extends StatelessWidget {
                         String name = student.className ?? 'N/A';
                         if (name == 'N/A' || name.isEmpty) {
                           try {
-                            name = exam.assignments.firstWhere((a) => a.classId == student.classId).className;
+                            name = widget.exam.assignments.firstWhere((a) => a.classId == student.classId).className;
                           } catch (_) {}
                         }
                         return name;
@@ -236,7 +390,7 @@ class GenerateReportCardScreen extends StatelessWidget {
                         String name = student.sectionName ?? 'N/A';
                         if (name == 'N/A' || name.isEmpty) {
                           try {
-                            name = exam.assignments.firstWhere((a) => a.sectionId == student.sectionId).sectionName ?? 'N/A';
+                            name = widget.exam.assignments.firstWhere((a) => a.sectionId == student.sectionId).sectionName ?? 'N/A';
                           } catch (_) {}
                         }
                         return name;
@@ -284,7 +438,7 @@ class GenerateReportCardScreen extends StatelessWidget {
                 String subjectName = r.subject?.name ?? 'Unknown';
                 if (subjectName == 'Unknown' || subjectName.isEmpty) {
                   try {
-                    subjectName = exam.assignments.firstWhere((a) => a.subjectId == r.subjectId).subjectName;
+                    subjectName = widget.exam.assignments.firstWhere((a) => a.subjectId == r.subjectId).subjectName;
                   } catch (_) {}
                 }
 
