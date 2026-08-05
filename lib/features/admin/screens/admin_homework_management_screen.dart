@@ -3,13 +3,13 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/teacher/screens/homework_details_screen.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/school_models.dart';
 import '../../admin/providers/setup_provider.dart';
 import '../../admin/providers/teacher_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../teacher/providers/homework_provider.dart';
-import 'package:smart_school/l10n/app_localizations.dart';
 
 class AdminHomeworkManagementScreen extends StatefulWidget {
   const AdminHomeworkManagementScreen({super.key});
@@ -411,7 +411,10 @@ class _AdminHomeworkManagementScreenState
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
+            child: Text(
+              AppLocalizations.of(context)!.delete,
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -427,7 +430,9 @@ class _AdminHomeworkManagementScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              success ? AppLocalizations.of(context)!.homeworkDeleted : AppLocalizations.of(context)!.failedToSaveHomework,
+              success
+                  ? AppLocalizations.of(context)!.homeworkDeleted
+                  : AppLocalizations.of(context)!.failedToSaveHomework,
             ),
           ),
         );
@@ -518,7 +523,7 @@ class _HomeworkCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  _buildStatusChip(isPast),
+
                   const SizedBox(width: 4),
                   PopupMenuButton<String>(
                     padding: EdgeInsets.zero,
@@ -551,7 +556,10 @@ class _HomeworkCard extends StatelessWidget {
                               color: Colors.red,
                             ),
                             const SizedBox(width: 8),
-                            Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
+                            Text(
+                              AppLocalizations.of(context)!.delete,
+                              style: const TextStyle(color: Colors.red),
+                            ),
                           ],
                         ),
                       ),
@@ -593,7 +601,7 @@ class _HomeworkCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Due: $due',
+                        'Date: $due',
                         style: TextStyle(
                           fontSize: 13,
                           color: isPast
@@ -604,10 +612,7 @@ class _HomeworkCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  Text(
-                    'Created: ${DateFormat('dd/MM/yy').format(homework.createdAt)}',
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
-                  ),
+                  _buildStatusChip(isPast),
                 ],
               ),
             ],
@@ -725,7 +730,9 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
         _selectedTeacherId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.pleaseSelectClassSubjectTeacher),
+          content: Text(
+            AppLocalizations.of(context)!.pleaseSelectClassSubjectTeacher,
+          ),
         ),
       );
       return;
@@ -766,7 +773,9 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.failedToSaveHomework)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.failedToSaveHomework),
+          ),
         );
       }
     }
