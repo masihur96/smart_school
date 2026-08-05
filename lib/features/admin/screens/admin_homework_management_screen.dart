@@ -678,7 +678,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
-  DateTime _dueDate = DateTime.now().add(const Duration(days: 1));
+  DateTime _dueDate = DateTime.now();
   String? _selectedClassId;
   String? _selectedSectionId;
   String? _selectedSubjectId;
@@ -711,7 +711,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     final picked = await showDatePicker(
       context: context,
       initialDate: _dueDate,
-      firstDate: DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 30)),
       lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
@@ -909,7 +909,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                   onTap: _pickDueDate,
                   child: AbsorbPointer(
                     child: TextFormField(
-                      decoration: _inputDeco('Due Date').copyWith(
+                      decoration: _inputDeco('Homework Date').copyWith(
                         suffixIcon: const Icon(Icons.calendar_today_rounded),
                       ),
                       controller: TextEditingController(
