@@ -143,7 +143,9 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
     final teacherId = authNotifier.user?.id;
     if (teacherId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.errorNoActiveUser)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.errorNoActiveUser),
+        ),
       );
       return;
     }
@@ -181,7 +183,9 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.attendanceSavedSuccessfully),
+          content: Text(
+            AppLocalizations.of(context)!.attendanceSavedSuccessfully,
+          ),
           backgroundColor: AppColors.primaryAdmin,
           behavior: SnackBarBehavior.floating,
         ),
@@ -872,7 +876,7 @@ class _HomeworkCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Due: $due',
+                        'HW Date: $due',
                         style: TextStyle(
                           fontSize: 11,
                           color: isPast ? Colors.red[400] : Colors.grey[500],
@@ -923,9 +927,16 @@ class _HomeworkCard extends StatelessWidget {
                     value: 'delete',
                     child: Row(
                       children: [
-                        const Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                        const Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                          size: 18,
+                        ),
                         const SizedBox(width: 8),
-                        Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+                        Text(
+                          l10n.delete,
+                          style: const TextStyle(color: Colors.red),
+                        ),
                       ],
                     ),
                   ),
@@ -977,8 +988,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
       text: widget.homework?.description ?? '',
     );
 
-    _dueDate =
-        widget.homework?.dueDate ?? DateTime.now().add(const Duration(days: 3));
+    _dueDate = widget.homework?.dueDate ?? DateTime.now();
   }
 
   @override
@@ -992,7 +1002,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     final picked = await showDatePicker(
       context: context,
       initialDate: _dueDate,
-      firstDate: DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 30)),
       lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
@@ -1014,12 +1024,12 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     if (user == null) {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.errorNoActiveUser)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.errorNoActiveUser),
+        ),
       );
       return;
     }
-
-
 
     final homework = Homework(
       id: widget.homework?.id ?? '',
@@ -1162,7 +1172,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                   onTap: _pickDueDate,
                   child: AbsorbPointer(
                     child: TextFormField(
-                      decoration: _inputDeco('Due Date').copyWith(
+                      decoration: _inputDeco(' HW Date').copyWith(
                         suffixIcon: const Icon(Icons.calendar_today_rounded),
                       ),
                       controller: TextEditingController(text: dueLabel),

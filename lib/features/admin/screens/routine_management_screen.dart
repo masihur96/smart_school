@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/screens/class_detail_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
@@ -126,14 +125,20 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
 
   @override
   Widget build(BuildContext context) {
-
     final user = context.read<AuthNotifier>().user;
 
-    final rawClasses = context.watch<ClassSetupNotifier>().classes.where((c) => c.schoolId == user?.schoolId).toList();
-    final classes = rawClasses.fold<Map<String, ClassRoom>>({}, (map, c) {
-      map[c.id] = c;
-      return map;
-    }).values.toList();
+    final rawClasses = context
+        .watch<ClassSetupNotifier>()
+        .classes
+        .where((c) => c.schoolId == user?.schoolId)
+        .toList();
+    final classes = rawClasses
+        .fold<Map<String, ClassRoom>>({}, (map, c) {
+          map[c.id] = c;
+          return map;
+        })
+        .values
+        .toList();
 
     final sections = context.watch<SectionSetupNotifier>().sections;
     final filteredSections = sections
@@ -141,22 +146,31 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
         .fold<Map<String, Section>>({}, (map, s) {
           map[s.id] = s;
           return map;
-        }).values.toList();
+        })
+        .values
+        .toList();
 
-    if (_selectedClassId != null && !classes.any((c) => c.id == _selectedClassId)) {
+    if (_selectedClassId != null &&
+        !classes.any((c) => c.id == _selectedClassId)) {
       // Defer state update until after build
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) setState(() => _selectedClassId = null);
       });
     }
-    if (_selectedSectionId != null && !filteredSections.any((s) => s.id == _selectedSectionId)) {
+    if (_selectedSectionId != null &&
+        !filteredSections.any((s) => s.id == _selectedSectionId)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) setState(() => _selectedSectionId = null);
       });
     }
 
-    final validClassId = classes.any((c) => c.id == _selectedClassId) ? _selectedClassId : null;
-    final validSectionId = filteredSections.any((s) => s.id == _selectedSectionId) ? _selectedSectionId : null;
+    final validClassId = classes.any((c) => c.id == _selectedClassId)
+        ? _selectedClassId
+        : null;
+    final validSectionId =
+        filteredSections.any((s) => s.id == _selectedSectionId)
+        ? _selectedSectionId
+        : null;
 
     final bool isFiltered = validClassId != null;
 
@@ -192,9 +206,14 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
     List<Section> filteredSections,
   ) {
     final user = context.read<AuthNotifier>().user;
-    
-    final validClassId = classes.any((c) => c.id == _selectedClassId) ? _selectedClassId : null;
-    final validSectionId = filteredSections.any((s) => s.id == _selectedSectionId) ? _selectedSectionId : null;
+
+    final validClassId = classes.any((c) => c.id == _selectedClassId)
+        ? _selectedClassId
+        : null;
+    final validSectionId =
+        filteredSections.any((s) => s.id == _selectedSectionId)
+        ? _selectedSectionId
+        : null;
 
     return SliverAppBar(
       expandedHeight: 160,

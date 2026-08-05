@@ -796,6 +796,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
         .toList();
 
     return Card(
+      margin: EdgeInsets.zero,
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
