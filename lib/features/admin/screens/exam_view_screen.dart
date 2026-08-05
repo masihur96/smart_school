@@ -7,8 +7,8 @@ import '../../../models/school_models.dart';
 import '../../../models/student_model.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/exam_provider.dart';
-import '../providers/student_provider.dart';
 import '../providers/setup_provider.dart';
+import '../providers/student_provider.dart';
 import 'generate_report_card_screen.dart';
 
 class ExamViewScreen extends StatefulWidget {
@@ -183,13 +183,13 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
       elevation: 0,
       backgroundColor: AppColors.primaryAdmin,
       actions: [
-        IconButton(
-          icon: const Icon(Icons.picture_as_pdf),
-          tooltip: 'Generate Report Cards',
+        TextButton(
           onPressed: () {
             if (students.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('No students available for this exam section.')),
+                const SnackBar(
+                  content: Text('No students available for this exam section.'),
+                ),
               );
               return;
             }
@@ -203,6 +203,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
               ),
             );
           },
+          child: Text("Report Card", style: TextStyle(color: AppColors.white)),
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
