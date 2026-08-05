@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/features/admin/providers/student_provider.dart';
 import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart';
+import 'package:smart_school/features/admin/screens/generate_id_card_screen.dart';
 import 'package:smart_school/features/admin/screens/generate_tc_screen.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/student_model.dart';
@@ -179,6 +180,34 @@ class StudentDetailScreen extends StatelessWidget {
                         backgroundColor: student.isActive
                             ? Colors.orange
                             : Colors.green,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GenerateIdCardScreen(
+                              students: [student],
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.badge, color: Colors.white),
+                      label: const Text(
+                        'Generate ID Card',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.indigo,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
