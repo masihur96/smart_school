@@ -9,6 +9,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../providers/exam_provider.dart';
 import '../providers/student_provider.dart';
 import '../providers/setup_provider.dart';
+import 'generate_report_card_screen.dart';
 
 class ExamViewScreen extends StatefulWidget {
   final Exam exam;
@@ -157,7 +158,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          _buildAppBar(),
+          _buildAppBar(students),
           SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,12 +176,35 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar(List<Student> students) {
     return SliverAppBar(
       expandedHeight: 120,
       pinned: true,
       elevation: 0,
       backgroundColor: AppColors.primaryAdmin,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.picture_as_pdf),
+          tooltip: 'Generate Report Cards',
+          onPressed: () {
+            if (students.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('No students available for this exam section.')),
+              );
+              return;
+            }
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GenerateReportCardScreen(
+                  exam: widget.exam,
+                  students: students,
+                ),
+              ),
+            );
+          },
+        ),
+      ],
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
           widget.exam.name,

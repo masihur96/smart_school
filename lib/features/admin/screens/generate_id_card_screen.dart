@@ -49,6 +49,7 @@ class GenerateIdCardScreen extends StatelessWidget {
     final schoolLogoUrl = school?.avatar ?? '';
     final schoolAddress = school?.address ?? '';
     final schoolPhone = school?.phone ?? '';
+    final schoolEmail = school?.email ?? '';
 
     pw.ImageProvider? schoolLogo;
     if (schoolLogoUrl.isNotEmpty) {
@@ -103,6 +104,7 @@ class GenerateIdCardScreen extends StatelessWidget {
                   cardHeight,
                   schoolAddress,
                   schoolPhone,
+                  schoolEmail,
                 );
               }).toList(),
             );
@@ -123,6 +125,7 @@ class GenerateIdCardScreen extends StatelessWidget {
     double height,
     String schoolAddress,
     String schoolPhone,
+    String schoolEmail,
   ) {
     final className = student.className ?? 'N/A';
     final sectionName = student.sectionName ?? 'N/A';
@@ -131,7 +134,7 @@ class GenerateIdCardScreen extends StatelessWidget {
       width: width,
       height: height,
       decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: PdfColors.purple, width: 2),
+        border: pw.Border.all(color: PdfColors.deepPurple, width: 3),
         borderRadius: const pw.BorderRadius.all(pw.Radius.circular(12)),
         color: PdfColors.white,
       ),
@@ -139,25 +142,27 @@ class GenerateIdCardScreen extends StatelessWidget {
         children: [
           // Header
           pw.Container(
-            padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            padding: const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 8),
             decoration: const pw.BoxDecoration(
-              color: PdfColors.purple,
+              color: PdfColors.deepPurple,
               borderRadius: pw.BorderRadius.only(
-                topLeft: pw.Radius.circular(10),
-                topRight: pw.Radius.circular(10),
+                topLeft: pw.Radius.circular(9),
+                topRight: pw.Radius.circular(9),
               ),
             ),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.center,
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
               children: [
                 if (schoolLogo != null)
                   pw.Container(
-                    height: 30,
-                    width: 30,
+                    height: 35,
+                    width: 35,
                     margin: const pw.EdgeInsets.only(right: 8),
                     decoration: pw.BoxDecoration(
                       shape: pw.BoxShape.circle,
-                      image: pw.DecorationImage(image: schoolLogo, fit: pw.BoxFit.cover),
+                      color: PdfColors.white,
+                      image: pw.DecorationImage(image: schoolLogo, fit: pw.BoxFit.contain),
                     ),
                   ),
                 pw.Expanded(
@@ -181,6 +186,19 @@ class GenerateIdCardScreen extends StatelessWidget {
                             fontSize: 6,
                           ),
                           textAlign: pw.TextAlign.center,
+                          maxLines: 2,
+                        ),
+                      if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty)
+                        pw.Text(
+                          [
+                            if (schoolPhone.isNotEmpty) 'Ph: $schoolPhone',
+                            if (schoolEmail.isNotEmpty) 'Email: $schoolEmail'
+                          ].join(' | '),
+                          style: const pw.TextStyle(
+                            color: PdfColors.amber,
+                            fontSize: 5,
+                          ),
+                          textAlign: pw.TextAlign.center,
                           maxLines: 1,
                         ),
                     ],
@@ -190,15 +208,35 @@ class GenerateIdCardScreen extends StatelessWidget {
             ),
           ),
           
+          // Identity Card Banner
+          pw.Container(
+            width: double.infinity,
+            color: PdfColors.amber,
+            padding: const pw.EdgeInsets.symmetric(vertical: 4),
+            child: pw.Text(
+              'IDENTITY CARD',
+              style: pw.TextStyle(
+                color: PdfColors.black,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 10,
+                letterSpacing: 1.5,
+              ),
+              textAlign: pw.TextAlign.center,
+            ),
+          ),
+          
           pw.SizedBox(height: 12),
           
           // Photo
           pw.Container(
-            height: 70,
-            width: 70,
+            height: 85,
+            width: 85,
             decoration: pw.BoxDecoration(
               shape: pw.BoxShape.circle,
-              border: pw.Border.all(color: PdfColors.purple, width: 2),
+              border: pw.Border.all(color: PdfColors.amber, width: 3),
+              boxShadow: const [
+                pw.BoxShadow(color: PdfColors.grey300, blurRadius: 4, offset: PdfPoint(0, 2))
+              ],
             ),
             child: studentAvatar != null
                 ? pw.ClipOval(child: pw.Image(studentAvatar, fit: pw.BoxFit.cover))
@@ -207,7 +245,7 @@ class GenerateIdCardScreen extends StatelessWidget {
                       student.user?.name.isNotEmpty == true
                           ? student.user!.name[0].toUpperCase()
                           : '?',
-                      style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.purple),
+                      style: pw.TextStyle(fontSize: 32, fontWeight: pw.FontWeight.bold, color: PdfColors.deepPurple),
                     ),
                   ),
           ),
@@ -216,24 +254,27 @@ class GenerateIdCardScreen extends StatelessWidget {
           
           // Student Name
           pw.Text(
-            student.user?.name ?? 'Unknown',
+            student.user?.name.toUpperCase() ?? 'UNKNOWN',
             style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 14,
-              color: PdfColors.purple900,
+              color: PdfColors.deepPurple900,
             ),
             textAlign: pw.TextAlign.center,
+            maxLines: 1,
           ),
           pw.Text(
-            'Student',
-            style: const pw.TextStyle(
-              fontSize: 10,
-              color: PdfColors.grey700,
+            'STUDENT',
+            style: pw.TextStyle(
+              fontSize: 9,
+              color: PdfColors.red800,
+              fontWeight: pw.FontWeight.bold,
+              letterSpacing: 1,
             ),
             textAlign: pw.TextAlign.center,
           ),
           
-          pw.SizedBox(height: 10),
+          pw.SizedBox(height: 12),
           
           // Details
           pw.Padding(
@@ -243,31 +284,37 @@ class GenerateIdCardScreen extends StatelessWidget {
                 _buildDetailRow('Roll No', student.rollId),
                 _buildDetailRow('Class', '$className - $sectionName'),
                 _buildDetailRow('Contact', student.guardianContact.isNotEmpty ? student.guardianContact : (student.user?.phone ?? 'N/A')),
+                _buildDetailRow('Email', student.user?.email ?? 'N/A'),
               ],
             ),
           ),
           
           pw.Spacer(),
           
-          // Footer / Signature
+          // Barcode & Signatures
           pw.Padding(
             padding: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
-                pw.Column(
-                  children: [
-                    pw.SizedBox(height: 20),
-                    pw.Container(width: 50, child: pw.Divider(color: PdfColors.black, thickness: 1)),
-                    pw.Text('Holder Sign', style: const pw.TextStyle(fontSize: 8)),
-                  ],
+                // Barcode
+                pw.Container(
+                  width: 50,
+                  height: 30,
+                  child: pw.BarcodeWidget(
+                    data: student.userId.isNotEmpty ? student.userId : 'UNKNOWN',
+                    barcode: pw.Barcode.code128(),
+                    drawText: false,
+                    color: PdfColors.black,
+                  ),
                 ),
+                // Principal Signature
                 pw.Column(
                   children: [
-                    pw.SizedBox(height: 20),
-                    pw.Container(width: 50, child: pw.Divider(color: PdfColors.black, thickness: 1)),
-                    pw.Text('Principal', style: const pw.TextStyle(fontSize: 8)),
+                    pw.Container(width: 60, child: pw.Divider(color: PdfColors.black, thickness: 1)),
+                    pw.SizedBox(height: 2),
+                    pw.Text('Principal', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold, color: PdfColors.deepPurple)),
                   ],
                 ),
               ],
@@ -276,18 +323,18 @@ class GenerateIdCardScreen extends StatelessWidget {
           
           // Bottom Bar
           pw.Container(
-            height: 15,
+            height: 18,
             width: double.infinity,
             decoration: const pw.BoxDecoration(
-              color: PdfColors.purple,
+              color: PdfColors.deepPurple,
               borderRadius: pw.BorderRadius.only(
-                bottomLeft: pw.Radius.circular(10),
-                bottomRight: pw.Radius.circular(10),
+                bottomLeft: pw.Radius.circular(9),
+                bottomRight: pw.Radius.circular(9),
               ),
             ),
             child: pw.Center(
               child: pw.Text(
-                schoolPhone.isNotEmpty ? 'Phone: $schoolPhone' : 'Valid for Current Academic Year',
+                'Valid for Current Academic Session',
                 style: const pw.TextStyle(color: PdfColors.white, fontSize: 7),
               ),
             ),
@@ -299,21 +346,26 @@ class GenerateIdCardScreen extends StatelessWidget {
 
   pw.Widget _buildDetailRow(String label, String value) {
     return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 2),
+      padding: const pw.EdgeInsets.symmetric(vertical: 3),
       child: pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.SizedBox(
-            width: 50,
+            width: 55,
             child: pw.Text(
-              '$label:',
-              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9, color: PdfColors.purple800),
+              '$label',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9, color: PdfColors.deepPurple800),
             ),
+          ),
+          pw.Text(
+            ': ',
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9, color: PdfColors.deepPurple800),
           ),
           pw.Expanded(
             child: pw.Text(
               value,
-              style: const pw.TextStyle(fontSize: 9),
+              style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+              maxLines: 1,
             ),
           ),
         ],
