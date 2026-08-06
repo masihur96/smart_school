@@ -1,5 +1,6 @@
 import '../models/book.dart';
 import '../models/issued_book.dart';
+import '../models/book_request.dart';
 
 class DummyLibraryData {
   static const List<Book> books = [
@@ -70,5 +71,54 @@ class DummyLibraryData {
         dueDate: DateTime.now().subtract(const Duration(days: 6)), // Overdue
       ),
     ];
+  }
+
+  static List<BookRequest> bookRequests = [
+    BookRequest(
+      id: 'req1',
+      bookId: '1',
+      bookTitle: 'The Great Gatsby',
+      studentId: 's1',
+      studentName: 'Alice Smith',
+      requestDate: DateTime.now().subtract(const Duration(hours: 2)),
+      status: 'pending',
+    ),
+    BookRequest(
+      id: 'req2',
+      bookId: '3',
+      bookTitle: '1984',
+      studentId: 's2',
+      studentName: 'Bob Johnson',
+      requestDate: DateTime.now().subtract(const Duration(days: 1)),
+      status: 'pending',
+    ),
+  ];
+
+  static void addRequest(String bookId, String bookTitle, String studentId, String studentName) {
+    bookRequests.add(
+      BookRequest(
+        id: 'req${DateTime.now().millisecondsSinceEpoch}',
+        bookId: bookId,
+        bookTitle: bookTitle,
+        studentId: studentId,
+        studentName: studentName,
+        requestDate: DateTime.now(),
+        status: 'pending',
+      ),
+    );
+  }
+
+  static void acceptRequest(String requestId) {
+    final index = bookRequests.indexWhere((r) => r.id == requestId);
+    if (index != -1) {
+      bookRequests[index].status = 'accepted';
+    }
+  }
+
+  static void declineRequest(String requestId) {
+    final index = bookRequests.indexWhere((r) => r.id == requestId);
+    if (index != -1) {
+      bookRequests[index].status = 'declined';
+    }
   }
 }

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/book.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:provider/provider.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../data/dummy_library_data.dart';
 
 class BookDetailScreen extends StatelessWidget {
   final Book book;
@@ -89,6 +92,40 @@ class BookDetailScreen extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ElevatedButton(
+            onPressed: book.isAvailable
+                ? () {
+                    final user = context.read<AuthNotifier>().user;
+                    if (user != null) {
+                      DummyLibraryData.addRequest(book.id, book.title, user.id, user.name);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Book issue requested successfully!')),
+                      );
+                      Navigator.pop(context);
+                    }
+                  }
+                : null,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              backgroundColor: AppColors.primaryStudent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              'Request Issue',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
         ),
       ),
     );
