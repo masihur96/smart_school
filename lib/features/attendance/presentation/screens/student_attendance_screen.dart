@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_school/core/theme.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/data/mock_data/mock_data.dart';
 
 class StudentAttendanceScreen extends StatefulWidget {
@@ -69,7 +69,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
         children: [
           Container(
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-            color: AppColors.background,
+            color: AppColors.primaryStudent,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

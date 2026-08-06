@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:smart_school/core/theme.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebviewScreen extends StatefulWidget {
   final String url;
   final String title;
 
-  const WebviewScreen({
-    super.key,
-    required this.url,
-    required this.title,
-  });
+  const WebviewScreen({super.key, required this.url, required this.title});
 
   @override
   State<WebviewScreen> createState() => _WebviewScreenState();
@@ -54,10 +50,7 @@ class _WebviewScreenState extends State<WebviewScreen> {
       body: Stack(
         children: [
           WebViewWidget(controller: _controller),
-          if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
+          if (_isLoading) const Center(child: CircularProgressIndicator()),
         ],
       ),
     );

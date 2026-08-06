@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:smart_school/core/theme.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/data/mock_data/mock_data.dart';
 
 class MarkAttendanceScreen extends StatefulWidget {

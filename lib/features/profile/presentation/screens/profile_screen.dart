@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_school/core/theme.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});

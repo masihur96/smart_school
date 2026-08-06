@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_school/core/theme.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/data/mock_data/mock_data.dart';
 import 'package:smart_school/models/online_class_model.dart';
-import 'package:uuid/uuid.dart'; // We should probably just generate a simple ID
 
 class AddEditOnlineClassScreen extends StatefulWidget {
   final OnlineClass? onlineClass;
@@ -11,7 +10,8 @@ class AddEditOnlineClassScreen extends StatefulWidget {
   const AddEditOnlineClassScreen({super.key, this.onlineClass});
 
   @override
-  State<AddEditOnlineClassScreen> createState() => _AddEditOnlineClassScreenState();
+  State<AddEditOnlineClassScreen> createState() =>
+      _AddEditOnlineClassScreenState();
 }
 
 class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
@@ -19,7 +19,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   final _linkController = TextEditingController();
-  
+
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
 
@@ -88,7 +88,9 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
 
       final isEditing = widget.onlineClass != null;
       final newClass = OnlineClass(
-        id: isEditing ? widget.onlineClass!.id : DateTime.now().millisecondsSinceEpoch.toString(),
+        id: isEditing
+            ? widget.onlineClass!.id
+            : DateTime.now().millisecondsSinceEpoch.toString(),
         title: _titleController.text.trim(),
         description: _descController.text.trim(),
         meetLink: _linkController.text.trim(),
@@ -98,7 +100,9 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
       );
 
       if (isEditing) {
-        final index = MockData.onlineClasses.indexWhere((c) => c['id'] == widget.onlineClass!.id);
+        final index = MockData.onlineClasses.indexWhere(
+          (c) => c['id'] == widget.onlineClass!.id,
+        );
         if (index != -1) {
           MockData.onlineClasses[index] = newClass.toJson();
         }
@@ -114,10 +118,13 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(widget.onlineClass == null ? 'Create Online Class' : 'Edit Online Class'),
-        backgroundColor: Colors.white,
+        title: Text(
+          widget.onlineClass == null
+              ? 'Create Online Class'
+              : 'Edit Online Class',
+        ),
+        backgroundColor: AppColors.primaryAdmin,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -133,7 +140,8 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                 label: 'Title',
                 hint: 'e.g., Mathematics Chapter 1',
                 icon: Icons.title,
-                validator: (val) => val == null || val.isEmpty ? 'Title is required' : null,
+                validator: (val) =>
+                    val == null || val.isEmpty ? 'Title is required' : null,
               ),
               const SizedBox(height: 16),
               _buildTextField(
@@ -153,7 +161,8 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                 icon: Icons.link,
                 validator: (val) {
                   if (val == null || val.isEmpty) return 'Link is required';
-                  if (!val.startsWith('http://') && !val.startsWith('https://')) {
+                  if (!val.startsWith('http://') &&
+                      !val.startsWith('https://')) {
                     return 'Please enter a valid URL';
                   }
                   return null;
@@ -165,7 +174,9 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                   Expanded(
                     child: _buildDateTimePicker(
                       label: 'Date',
-                      value: _selectedDate != null ? DateFormat('MMM dd, yyyy').format(_selectedDate!) : 'Select Date',
+                      value: _selectedDate != null
+                          ? DateFormat('MMM dd, yyyy').format(_selectedDate!)
+                          : 'Select Date',
                       icon: Icons.calendar_today,
                       onTap: _pickDate,
                     ),
@@ -174,7 +185,9 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                   Expanded(
                     child: _buildDateTimePicker(
                       label: 'Time',
-                      value: _selectedTime != null ? _selectedTime!.format(context) : 'Select Time',
+                      value: _selectedTime != null
+                          ? _selectedTime!.format(context)
+                          : 'Select Time',
                       icon: Icons.access_time,
                       onTap: _pickTime,
                     ),
@@ -197,7 +210,10 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                       ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
                         )
                       : const Text(
                           'Save Class',
@@ -242,7 +258,9 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        prefixIcon: maxLines == 1 ? Icon(icon, color: AppColors.textSecondary) : null,
+        prefixIcon: maxLines == 1
+            ? Icon(icon, color: AppColors.textSecondary)
+            : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
@@ -280,7 +298,13 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -289,7 +313,10 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                 Expanded(
                   child: Text(
                     value,
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

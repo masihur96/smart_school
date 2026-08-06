@@ -24,6 +24,7 @@ import 'package:smart_school/features/teacher/screens/teacher_attendance_screen.
 import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_exam_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_routine_screen.dart';
+import 'package:smart_school/features/online_class/presentation/screens/online_class_list_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../features/admin/screens/teacher_attendance_management_screen.dart';
@@ -179,6 +180,12 @@ class AppDrawer extends StatelessWidget {
           MaterialPageRoute(builder: (_) => ExamManagementScreen()),
         );
       }, context),
+      _buildDrawerItem(Icons.video_call, 'Online Classes', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const OnlineClassListScreen()),
+        );
+      }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
         Navigator.push(
           context,
@@ -225,6 +232,12 @@ class AppDrawer extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const TeacherExamScreen()),
+        );
+      }, context),
+      _buildDrawerItem(Icons.video_call, 'Online Classes', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const OnlineClassListScreen()),
         );
       }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
