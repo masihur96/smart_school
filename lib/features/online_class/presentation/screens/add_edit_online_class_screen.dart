@@ -6,8 +6,12 @@ import 'package:smart_school/models/online_class_model.dart';
 
 class AddEditOnlineClassScreen extends StatefulWidget {
   final OnlineClass? onlineClass;
-
-  const AddEditOnlineClassScreen({super.key, this.onlineClass});
+  final bool isAdminOrTeacher;
+  const AddEditOnlineClassScreen({
+    super.key,
+    this.onlineClass,
+    this.isAdminOrTeacher = true,
+  });
 
   @override
   State<AddEditOnlineClassScreen> createState() =>
@@ -124,7 +128,9 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
               ? 'Create Online Class'
               : 'Edit Online Class',
         ),
-        backgroundColor: AppColors.primaryAdmin,
+        backgroundColor: widget.isAdminOrTeacher
+            ? AppColors.primaryAdmin
+            : AppColors.primaryTeacher,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -200,7 +206,9 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _save,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: widget.isAdminOrTeacher
+                        ? AppColors.primaryAdmin
+                        : AppColors.primaryTeacher,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),

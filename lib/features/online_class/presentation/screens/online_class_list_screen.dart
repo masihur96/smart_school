@@ -54,7 +54,9 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Online Classes'),
-        backgroundColor: AppColors.primaryAdmin,
+        backgroundColor: widget.isAdminOrTeacher
+            ? AppColors.primaryAdmin
+            : AppColors.primaryTeacher,
       ),
       body: onlineClasses.isEmpty
           ? const Center(
@@ -77,14 +79,18 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const AddEditOnlineClassScreen(),
+                    builder: (context) => AddEditOnlineClassScreen(
+                      isAdminOrTeacher: widget.isAdminOrTeacher,
+                    ),
                   ),
                 );
                 if (result == true) {
                   _loadOnlineClasses();
                 }
               },
-              backgroundColor: AppColors.primary,
+              backgroundColor: widget.isAdminOrTeacher
+                  ? AppColors.primaryAdmin
+                  : AppColors.primaryTeacher,
               icon: const Icon(Icons.add, color: Colors.white),
               label: const Text(
                 'New Class',
@@ -208,7 +214,9 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
             child: ElevatedButton.icon(
               onPressed: () => _launchURL(oClass.meetLink),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: widget.isAdminOrTeacher
+                    ? AppColors.primaryAdmin
+                    : AppColors.primaryTeacher,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
