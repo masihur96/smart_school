@@ -10,6 +10,7 @@ import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
 import 'package:smart_school/features/admin/screens/student_detail_screen.dart';
 import 'package:smart_school/features/admin/screens/generate_id_card_screen.dart';
+import 'package:smart_school/features/admin/screens/generate_transcript_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/student_model.dart';
 import 'package:smart_school/services/notification_service.dart';
@@ -106,6 +107,25 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
               backgroundColor: AppColors.primaryAdmin,
               foregroundColor: Colors.white,
               actions: [
+                IconButton(
+                  icon: const Icon(Icons.receipt_long),
+                  onPressed: () {
+                    if (students.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('No students to generate transcripts.')),
+                      );
+                      return;
+                    }
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => GenerateTranscriptScreen(
+                          students: students,
+                        ),
+                      ),
+                    );
+                  },
+                ),
                 IconButton(
                   icon: const Icon(Icons.badge),
                   onPressed: () {
