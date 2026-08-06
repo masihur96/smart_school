@@ -101,4 +101,27 @@ class MockData {
       'onTimeRate': '98%',
     };
   }
+
+  static List<Map<String, dynamic>> onlineClasses = [
+    {
+      'id': '1',
+      'title': 'Math Algebra Intro',
+      'description': 'Introduction to Algebra for Class 10.',
+      'meetLink': 'https://meet.google.com/abc-defg-hij',
+      'scheduledTime': DateTime.now().add(const Duration(hours: 1)).toIso8601String(),
+      'teacherId': 't1',
+      'teacherName': 'Masihur Rahman',
+      'createdAt': today,
+    },
+    {
+      'id': '2',
+      'title': 'Science Physics',
+      'description': 'Physics chapter 3 revision.',
+      'meetLink': 'https://meet.google.com/xyz-uvwx-abc',
+      'scheduledTime': DateTime.now().add(const Duration(days: 1, hours: 2)).toIso8601String(),
+      'teacherId': 't2',
+      'teacherName': 'John Doe',
+      'createdAt': today,
+    }
+  ];
 }

@@ -1,13 +1,8 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
-import 'package:smart_school/main.dart';
-import 'package:smart_school/configs/route_generator.dart';
-import 'package:smart_school/features/auth/presentation/screens/login_screen.dart' as import_login;
 
 class DataProvider {
   static final BaseOptions _options = BaseOptions(
@@ -79,11 +74,11 @@ class DataProvider {
                 }
               } catch (refreshError) {
                 log("Refresh token failed: $refreshError");
-                await _handleSessionExpired();
+                // await _handleSessionExpired();
                 return handler.next(e);
               }
             } else {
-              await _handleSessionExpired();
+              // await _handleSessionExpired();
             }
           }
           return handler.next(e);
@@ -92,15 +87,15 @@ class DataProvider {
     );
   }
 
-  Future<void> _handleSessionExpired() async {
-    await StorageService.clear();
-    navigatorKey.currentState?.pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (context) => const import_login.LoginScreen(),
-      ),
-      (route) => false,
-    );
-  }
+  // Future<void> _handleSessionExpired() async {
+  //   await StorageService.clear();
+  //   navigatorKey.currentState?.pushAndRemoveUntil(
+  //     MaterialPageRoute(
+  //       builder: (context) => const import_login.LoginScreen(),
+  //     ),
+  //     (route) => false,
+  //   );
+  // }
 
   Future<Response<dynamic>?> performRequest(
     String method,
