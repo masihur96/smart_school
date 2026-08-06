@@ -136,14 +136,18 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
       child: Row(
         children: [
           Expanded(
-            child: _buildDropdown(
+            child: _buildDropdown<String?>(
               label: 'Class',
-              value: _selectedClassId,
-              items: uniqueClasses.entries
-                  .map(
-                    (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
-                  )
-                  .toList(),
+              value: uniqueClasses.containsKey(_selectedClassId) ? _selectedClassId : null,
+              items: [
+                if (!uniqueClasses.containsKey(_selectedClassId) && _selectedClassId != null)
+                  DropdownMenuItem(value: _selectedClassId, child: const Text('Unknown Class')),
+                if (!uniqueClasses.containsKey(_selectedClassId) && _selectedClassId == null)
+                  const DropdownMenuItem(value: null, child: Text('Select Class')),
+                ...uniqueClasses.entries.map(
+                  (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
+                ),
+              ],
               onChanged: (val) {
                 if (val != _selectedClassId) {
                   setState(() {
@@ -158,14 +162,16 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
           if (uniqueSections.isNotEmpty) ...[
             const SizedBox(width: 16),
             Expanded(
-              child: _buildDropdown(
+              child: _buildDropdown<String?>(
                 label: 'Section',
-                value: _selectedSectionId,
+                value: uniqueSections.containsKey(_selectedSectionId) ? _selectedSectionId : null,
                 items: [
                   const DropdownMenuItem(
                     value: null,
                     child: Text('All Sections'),
                   ),
+                  if (!uniqueSections.containsKey(_selectedSectionId) && _selectedSectionId != null)
+                    DropdownMenuItem(value: _selectedSectionId, child: const Text('Unknown Section')),
                   ...uniqueSections.entries.map(
                     (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
                   ),
@@ -246,6 +252,25 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
       }
     }
 
+    pw.PageTheme makePageTheme({pw.Widget Function(pw.Context)? foreground}) {
+        return pw.PageTheme(
+          pageFormat: format,
+          margin: const pw.EdgeInsets.only(left: 64, top: 64, right: 64, bottom: 120),
+          buildBackground: (pw.Context context) {
+            return pw.FullPage(
+              ignoreMargins: true,
+              child: pw.Container(
+                margin: const pw.EdgeInsets.all(32),
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.deepPurple, width: 2),
+                ),
+              ),
+            );
+          },
+          buildForeground: foreground,
+        );
+      }
+
     for (var student in _currentStudents) {
       // Get all results for this student in the current exam
       final studentResults = widget.exam.results
@@ -254,9 +279,75 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
 
       if (studentResults.isEmpty) continue; // Skip if no marks
 
+      final dummyPdf = pw.Document();
+      dummyPdf.addPage(
+        pw.MultiPage(
+          pageTheme: makePageTheme(),
+          build: (context) => _buildReportCardPage(
+            context,
+            student,
+            studentResults,
+            schoolName,
+            schoolLogo,
+            schoolAddress,
+            schoolPhone,
+            schoolEmail,
+          ),
+        ),
+      );
+      final int studentPages = dummyPdf.document.pdfPageList.pages.length;
+      final int startPage = pdf.document.pdfPageList.pages.length + 1;
+      final int endPage = startPage + studentPages - 1;
+
       pdf.addPage(
-        pw.Page(
-          pageFormat: format,
+        pw.MultiPage(
+          pageTheme: makePageTheme(
+            foreground: (pw.Context context) {
+              if (context.pageNumber == endPage) {
+                return pw.FullPage(
+                  ignoreMargins: true,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.only(left: 64, right: 64, bottom: 50),
+                    alignment: pw.Alignment.bottomCenter,
+                    child: pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Column(
+                          mainAxisSize: pw.MainAxisSize.min,
+                          children: [
+                            pw.Container(
+                              width: 150,
+                              child: pw.Divider(color: PdfColors.black, thickness: 1),
+                            ),
+                            pw.SizedBox(height: 4),
+                            pw.Text(
+                              'Class Teacher Signature',
+                              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        pw.Column(
+                          mainAxisSize: pw.MainAxisSize.min,
+                          children: [
+                            pw.Container(
+                              width: 150,
+                              child: pw.Divider(color: PdfColors.black, thickness: 1),
+                            ),
+                            pw.SizedBox(height: 4),
+                            pw.Text(
+                              'Principal Signature',
+                              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              return pw.SizedBox();
+            },
+          ),
           build: (pw.Context context) {
             return _buildReportCardPage(
               context,
@@ -287,7 +378,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
     return pdf.save();
   }
 
-  pw.Widget _buildReportCardPage(
+  List<pw.Widget> _buildReportCardPage(
     pw.Context context,
     Student student,
     List<Result> results,
@@ -311,14 +402,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
         : 0.0;
     final String overallGrade = _calculateGrade(percentage);
 
-    return pw.Container(
-      padding: const pw.EdgeInsets.all(32),
-      decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: PdfColors.deepPurple, width: 2),
-      ),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
+    return [
           // HEADER
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.center,
@@ -543,46 +627,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
               ],
             ),
           ),
-
-          pw.Spacer(),
-
-          // SIGNATURES
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            children: [
-              pw.Column(
-                children: [
-                  pw.SizedBox(height: 40),
-                  pw.Container(
-                    width: 150,
-                    child: pw.Divider(color: PdfColors.black, thickness: 1),
-                  ),
-                  pw.SizedBox(height: 4),
-                  pw.Text(
-                    'Class Teacher Signature',
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                  ),
-                ],
-              ),
-              pw.Column(
-                children: [
-                  pw.SizedBox(height: 40),
-                  pw.Container(
-                    width: 150,
-                    child: pw.Divider(color: PdfColors.black, thickness: 1),
-                  ),
-                  pw.SizedBox(height: 4),
-                  pw.Text(
-                    'Principal Signature',
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+    ];
   }
 
   pw.Widget _buildInfoRow(String label, String value) {
