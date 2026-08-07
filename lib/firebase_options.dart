@@ -51,18 +51,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDA5y1XV8Cdk0bXxOZxtOmzTk2WVte9xxM',
-    appId: '1:2512295449:android:e0a8b58e4d3a343c237c88',
+    appId: '1:2512295449:android:b57fa365a41b8bb8237c88',
     messagingSenderId: '2512295449',
     projectId: 'smart-school-eb7c5',
     storageBucket: 'smart-school-eb7c5.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBqC0O7wd8ecxaKiiYoo1jjhElE0ZgoHbc',
-    appId: '1:2512295449:ios:163ef37a877892b2237c88',
+    appId: '1:2512295449:ios:b3080eaf41ea5bac237c88',
     messagingSenderId: '2512295449',
     projectId: 'smart-school-eb7c5',
     storageBucket: 'smart-school-eb7c5.firebasestorage.app',
-    iosBundleId: 'com.example.smartSchool',
+    iosBundleId: 'net.schoolcare.app',
   );
 }

@@ -506,6 +506,47 @@ class AuthNotifier extends ChangeNotifier {
     }
   }
 
+  Future<bool> deleteAccount() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+      if (_user == null) throw Exception('No user found');
+
+      final response = await DataProvider().performRequest(
+        'DELETE',
+        APIPath.deleteAdminUser(_user!.id),
+        header: {
+          'Authorization': 'Bearer $token',
+          'accept': '*/*',
+        },
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 204)) {
+        log('Account deleted successfully');
+        _isLoading = false;
+        notifyListeners();
+        await logout();
+        return true;
+      } else {
+        _error = 'Failed to delete account: ${response?.statusCode}';
+        log('Error deleting account: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error deleting account: $e';
+      log('Exception deleting account: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> uploadProfileImage(File imageFile) async {
     _isLoading = true;
     _error = null;

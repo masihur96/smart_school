@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:2512295449:android:5322dbf0ecbad594237c88",
+        "mobilesdk_app_id": "1:2512295449:android:b57fa365a41b8bb8237c88",
         "android_client_info": {
-          "package_name": "com.schoolcare.app"
+          "package_name": "net.schoolcare.app"
         }
       },
       "oauth_client": [],
