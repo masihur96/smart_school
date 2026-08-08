@@ -35,7 +35,11 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
   void _toggleSelection(Student student) {
     if (student.guardianContact.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${student.user?.name ?? 'Student'} does not have a contact number.')),
+        SnackBar(
+          content: Text(
+            '${student.user?.name ?? 'Student'} does not have a contact number.',
+          ),
+        ),
       );
       return;
     }
@@ -58,9 +62,9 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
     }
 
     if (_messageController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a message.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please enter a message.')));
       return;
     }
 
@@ -87,7 +91,11 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to send SMS. Please check your credentials and try again.')),
+        const SnackBar(
+          content: Text(
+            'Failed to send SMS. Please check your credentials and try again.',
+          ),
+        ),
       );
     }
   }
@@ -96,6 +104,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: AppColors.primaryAdmin,
         title: const Text('Bulk SMS (Selected Students)'),
       ),
       body: Column(
@@ -116,21 +125,26 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                   itemBuilder: (context, index) {
                     final student = notifier.students[index];
                     final hasContact = student.guardianContact.isNotEmpty;
-                    final isSelected = _selectedStudentNumbers.contains(student.guardianContact);
+                    final isSelected = _selectedStudentNumbers.contains(
+                      student.guardianContact,
+                    );
 
                     return CheckboxListTile(
                       title: Text(student.user?.name ?? 'Unknown Student'),
                       subtitle: Text(
-                        hasContact 
-                          ? 'Contact: ${student.guardianContact}' 
-                          : 'No contact number',
+                        hasContact
+                            ? 'Contact: ${student.guardianContact}'
+                            : 'No contact number',
                       ),
                       value: isSelected,
                       onChanged: (bool? value) {
                         _toggleSelection(student);
                       },
                       secondary: CircleAvatar(
-                        child: Text(student.user?.name?.substring(0, 1).toUpperCase() ?? '?'),
+                        child: Text(
+                          student.user?.name?.substring(0, 1).toUpperCase() ??
+                              '?',
+                        ),
                       ),
                     );
                   },

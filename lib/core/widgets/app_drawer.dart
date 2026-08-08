@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/screens/add_edit_marquee_screen.dart';
 import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
+import 'package:smart_school/features/admin/screens/bulk_sms_screen.dart';
 import 'package:smart_school/features/admin/screens/exam_management_screen.dart';
 import 'package:smart_school/features/admin/screens/notice_management_screen.dart';
 import 'package:smart_school/features/admin/screens/routine_management_screen.dart';
@@ -11,9 +12,6 @@ import 'package:smart_school/features/admin/screens/student_attendance_managemen
 import 'package:smart_school/features/admin/screens/student_management_screen.dart';
 import 'package:smart_school/features/admin/screens/teacher_management_screen.dart';
 import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
-import 'package:smart_school/features/library/screens/book_requests_screen.dart';
-import 'package:smart_school/features/library/screens/library_dashboard_screen.dart';
-import 'package:smart_school/features/online_class/presentation/screens/online_class_list_screen.dart';
 import 'package:smart_school/features/setting_management_screen.dart';
 import 'package:smart_school/features/student/screens/student_attendance_screen.dart';
 import 'package:smart_school/features/student/screens/student_dashboard_screen.dart';
@@ -194,6 +192,12 @@ class AppDrawer extends StatelessWidget {
       //     MaterialPageRoute(builder: (_) => const LibraryDashboardScreen()),
       //   );
       // }, context),
+      _buildDrawerItem(Icons.sms_outlined, "Bulk SMS", () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => BulkSmsScreen()),
+        );
+      }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
         Navigator.push(
           context,
