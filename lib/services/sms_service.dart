@@ -24,6 +24,11 @@ class SmsService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = response.data;
+        if (responseData != null && responseData is Map && responseData['statusCode'] != 200) {
+          log('API Error: ${responseData['status'] ?? 'Unknown Error'} - $responseData');
+          return false;
+        }
         log('Bulk SMS sent successfully: ${response.data}');
         return true;
       } else {
