@@ -434,59 +434,63 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
     final years = List.generate(5, (i) => currentYear - i);
     final designations = provider.availableDesignations;
 
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            // ── Month chip ──────────────────────────────────
-            _filterChip(
-              icon: Icons.calendar_month_rounded,
-              label: _months[provider.selectedMonth - 1],
-              color: AppColors.primaryAdmin,
-              onTap: () => _showMonthPicker(provider),
-              trailing: Icons.keyboard_arrow_down_rounded,
-            ),
-            const SizedBox(width: 8),
+    return Padding(
+      padding: const EdgeInsets.only(top: 5.0),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                // ── Month chip ──────────────────────────────────
+                _filterChip(
+                  icon: Icons.calendar_month_rounded,
+                  label: _months[provider.selectedMonth - 1],
+                  color: AppColors.primaryAdmin,
+                  onTap: () => _showMonthPicker(provider),
+                  trailing: Icons.keyboard_arrow_down_rounded,
+                ),
+                const SizedBox(width: 8),
 
-            // ── Year dropdown ────────────────────────────────
-            _dropdownChip<int>(
-              icon: Icons.date_range_rounded,
-              color: const Color(0xFF6366F1),
-              value: provider.selectedYear,
-              items: years
-                  .map((y) => DropdownMenuItem(value: y, child: Text('$y')))
-                  .toList(),
-              onChanged: (y) {
-                if (y != null) {
-                  provider.fetchForMonth(provider.selectedMonth, y);
-                }
-              },
-            ),
-            const SizedBox(width: 8),
+                // ── Year dropdown ────────────────────────────────
+                _dropdownChip<int>(
+                  icon: Icons.date_range_rounded,
+                  color: const Color(0xFF6366F1),
+                  value: provider.selectedYear,
+                  items: years
+                      .map((y) => DropdownMenuItem(value: y, child: Text('$y')))
+                      .toList(),
+                  onChanged: (y) {
+                    if (y != null) {
+                      provider.fetchForMonth(provider.selectedMonth, y);
+                    }
+                  },
+                ),
+                const SizedBox(width: 8),
 
-            // ── Designation dropdown ───────────────────────────────
-            if (designations.isNotEmpty) ...[
-              _dropdownChip<String?>(
-                icon: Icons.work_outline_rounded,
-                color: const Color(0xFF10B981),
-                hint: 'All Designations',
-                value: provider.filterDesignation,
-                items: [
-                  const DropdownMenuItem<String?>(
-                    value: null,
-                    child: Text('All Designations'),
-                  ),
-                  ...designations.map(
-                    (d) => DropdownMenuItem(value: d, child: Text(d)),
+                // ── Designation dropdown ───────────────────────────────
+                if (designations.isNotEmpty) ...[
+                  _dropdownChip<String?>(
+                    icon: Icons.work_outline_rounded,
+                    color: const Color(0xFF10B981),
+                    hint: 'All Designations',
+                    value: provider.filterDesignation,
+                    items: [
+                      const DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('All Designations'),
+                      ),
+                      ...designations.map(
+                        (d) => DropdownMenuItem(value: d, child: Text(d)),
+                      ),
+                    ],
+                    onChanged: provider.setDesignationFilter,
                   ),
                 ],
-                onChanged: provider.setDesignationFilter,
-              ),
-            ],
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -595,109 +599,94 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
               )
               .toList();
 
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+    return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Search field
-          Container(
-            height: 46,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(14),
-              border: _showTeacherDropdown
-                  ? Border.all(
-                      color: AppColors.primaryAdmin.withValues(alpha: 0.5),
-                      width: 1.5,
-                    )
-                  : null,
-            ),
-            child: Row(
-              children: [
-                const SizedBox(width: 12),
-                Icon(
-                  provider.selectedTeacher != null
-                      ? Icons.person_rounded
-                      : Icons.search_rounded,
-                  size: 18,
-                  color: provider.selectedTeacher != null
-                      ? AppColors.primaryAdmin
-                      : Colors.grey.shade400,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _teacherSearchController,
-                    focusNode: _teacherSearchFocus,
-                    onTap: () {
-                      setState(() {
-                        _showTeacherDropdown = true;
-                        _teacherQuery = '';
-                        _teacherSearchController.clear();
-                      });
-                    },
-                    onChanged: (v) {
-                      setState(() {
-                        _teacherQuery = v;
-                        _showTeacherDropdown = true;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: provider.selectedTeacher != null
-                          ? provider.selectedTeacher!.name
-                          : 'Search teacher for individual report...',
-                      hintStyle: TextStyle(
-                        color: provider.selectedTeacher != null
-                            ? Colors.grey.shade700
-                            : Colors.grey.shade400,
-                        fontSize: 13,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 13),
-                    ),
-                    style: const TextStyle(fontSize: 13),
-                  ),
-                ),
-                if (provider.selectedTeacher != null) ...[
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 16),
-                    onPressed: () {
+          Row(
+            children: [
+              const SizedBox(width: 12),
+              Icon(
+                provider.selectedTeacher != null
+                    ? Icons.person_rounded
+                    : Icons.search_rounded,
+                size: 18,
+                color: provider.selectedTeacher != null
+                    ? AppColors.primaryAdmin
+                    : Colors.grey.shade400,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _teacherSearchController,
+                  focusNode: _teacherSearchFocus,
+                  onTap: () {
+                    setState(() {
+                      _showTeacherDropdown = true;
+                      _teacherQuery = '';
                       _teacherSearchController.clear();
-                      setState(() {
-                        _teacherQuery = '';
-                        _showTeacherDropdown = false;
-                      });
-                      provider.clearSelectedTeacher();
-                    },
-                    color: Colors.grey.shade500,
-                    tooltip: 'Clear selection',
+                    });
+                  },
+                  onChanged: (v) {
+                    setState(() {
+                      _teacherQuery = v;
+                      _showTeacherDropdown = true;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    hintText: provider.selectedTeacher != null
+                        ? provider.selectedTeacher!.name
+                        : 'Search teacher for individual report...',
+                    hintStyle: TextStyle(
+                      color: provider.selectedTeacher != null
+                          ? Colors.grey.shade700
+                          : Colors.grey.shade400,
+                      fontSize: 13,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 13),
                   ),
-                ] else ...[
-                  const SizedBox(width: 12),
-                ],
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ),
+              if (provider.selectedTeacher != null) ...[
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 16),
+                  onPressed: () {
+                    _teacherSearchController.clear();
+                    setState(() {
+                      _teacherQuery = '';
+                      _showTeacherDropdown = false;
+                    });
+                    provider.clearSelectedTeacher();
+                  },
+                  color: Colors.grey.shade500,
+                  tooltip: 'Clear selection',
+                ),
+              ] else ...[
+                const SizedBox(width: 12),
               ],
-            ),
+            ],
           ),
 
           // Dropdown list
           if (_showTeacherDropdown && allNames.isNotEmpty)
-            Container(
+            Card(
               margin: const EdgeInsets.only(top: 2),
-              constraints: const BoxConstraints(maxHeight: 220),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.grey.shade200),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
+              // constraints: const BoxConstraints(maxHeight: 220),
+              // decoration: BoxDecoration(
+              //   color: Colors.white,
+              //   borderRadius: BorderRadius.circular(14),
+              //   border: Border.all(color: Colors.grey.shade200),
+              //   boxShadow: [
+              //     BoxShadow(
+              //       color: Colors.black.withValues(alpha: 0.08),
+              //       blurRadius: 12,
+              //       offset: const Offset(0, 4),
+              //     ),
+              //   ],
+              // ),
               child: filtered.isEmpty
                   ? Padding(
                       padding: const EdgeInsets.all(16),
@@ -713,17 +702,15 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                       shrinkWrap: true,
                       padding: const EdgeInsets.symmetric(vertical: 6),
                       itemCount: filtered.length,
-                      separatorBuilder: (_, __) => Divider(
-                        height: 1,
-                        color: Colors.grey.shade100,
-                        indent: 48,
-                      ),
+                      separatorBuilder: (_, __) =>
+                          Divider(height: 1, indent: 48),
                       itemBuilder: (context, i) {
                         final name = filtered[i];
                         final isSelected =
                             provider.selectedTeacher?.name == name;
                         return ListTile(
                           dense: true,
+
                           leading: CircleAvatar(
                             radius: 16,
                             backgroundColor: AppColors.primaryAdmin.withValues(
@@ -734,7 +721,6 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.primaryAdmin,
                               ),
                             ),
                           ),
@@ -745,9 +731,7 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                               fontWeight: isSelected
                                   ? FontWeight.bold
                                   : FontWeight.normal,
-                              color: isSelected
-                                  ? AppColors.primaryAdmin
-                                  : Colors.grey.shade800,
+                              color: isSelected ? AppColors.primaryAdmin : null,
                             ),
                           ),
                           trailing: isSelected
@@ -927,26 +911,23 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
           const SizedBox(height: 16),
 
           // Period info
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.grey.shade100),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.info_outline_rounded,
-                  size: 16,
-                  color: Colors.grey.shade400,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Showing data for ${_months[provider.selectedMonth - 1]} ${provider.selectedYear}',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                ),
-              ],
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(18.0),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 16,
+                    color: Colors.grey.shade400,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Showing data for ${_months[provider.selectedMonth - 1]} ${provider.selectedYear}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -996,11 +977,7 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
           const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 6),
           ClipRRect(
@@ -1149,23 +1126,7 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
           perf.name,
         );
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: isTop3
-              ? Border.all(color: medalColor.withValues(alpha: 0.5), width: 1.5)
-              : Border.all(color: Colors.grey.shade100),
-          boxShadow: [
-            BoxShadow(
-              color: isTop3
-                  ? medalColor.withValues(alpha: 0.12)
-                  : Colors.black.withValues(alpha: 0.03),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+      child: Card(
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Row(
