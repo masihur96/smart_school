@@ -192,7 +192,6 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
         setState(() => _showStudentDropdown = false);
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFF4F6FB),
         appBar: AppBar(
           backgroundColor: AppColors.primaryAdmin,
           title: Consumer<StudentPerformanceProvider>(
@@ -440,80 +439,81 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
     final classes = provider.availableClasses;
     final sections = provider.availableSections;
 
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            // ── Month chip ──────────────────────────────────
-            _filterChip(
-              icon: Icons.calendar_month_rounded,
-              label: _months[provider.selectedMonth - 1],
-              color: AppColors.primaryAdmin,
-              onTap: () => _showMonthPicker(provider),
-              trailing: Icons.keyboard_arrow_down_rounded,
-            ),
-            const SizedBox(width: 8),
-
-            // ── Year dropdown ────────────────────────────────
-            _dropdownChip<int>(
-              icon: Icons.date_range_rounded,
-              color: const Color(0xFF6366F1),
-              value: provider.selectedYear,
-              items: years
-                  .map((y) => DropdownMenuItem(value: y, child: Text('$y')))
-                  .toList(),
-              onChanged: (y) {
-                if (y != null) {
-                  provider.fetchForMonth(provider.selectedMonth, y);
-                }
-              },
-            ),
-            const SizedBox(width: 8),
-
-            // ── Class dropdown ───────────────────────────────
-            if (classes.isNotEmpty) ...[
-              _dropdownChip<String?>(
-                icon: Icons.class_rounded,
-                color: const Color(0xFF10B981),
-                hint: 'All Classes',
-                value: provider.filterClass,
-                items: [
-                  const DropdownMenuItem<String?>(
-                    value: null,
-                    child: Text('All Classes'),
-                  ),
-                  ...classes.map(
-                    (c) => DropdownMenuItem(value: c, child: Text(c)),
-                  ),
-                ],
-                onChanged: provider.setClassFilter,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              // ── Month chip ──────────────────────────────────
+              _filterChip(
+                icon: Icons.calendar_month_rounded,
+                label: _months[provider.selectedMonth - 1],
+                color: AppColors.primaryAdmin,
+                onTap: () => _showMonthPicker(provider),
+                trailing: Icons.keyboard_arrow_down_rounded,
               ),
               const SizedBox(width: 8),
-            ],
 
-            // ── Section dropdown ─────────────────────────────
-            if (sections.isNotEmpty) ...[
-              _dropdownChip<String?>(
-                icon: Icons.group_work_rounded,
-                color: const Color(0xFFF59E0B),
-                hint: 'All Sections',
-                value: provider.filterSection,
-                items: [
-                  const DropdownMenuItem<String?>(
-                    value: null,
-                    child: Text('All Sections'),
-                  ),
-                  ...sections.map(
-                    (s) => DropdownMenuItem(value: s, child: Text(s)),
-                  ),
-                ],
-                onChanged: provider.setSectionFilter,
+              // ── Year dropdown ────────────────────────────────
+              _dropdownChip<int>(
+                icon: Icons.date_range_rounded,
+                color: const Color(0xFF6366F1),
+                value: provider.selectedYear,
+                items: years
+                    .map((y) => DropdownMenuItem(value: y, child: Text('$y')))
+                    .toList(),
+                onChanged: (y) {
+                  if (y != null) {
+                    provider.fetchForMonth(provider.selectedMonth, y);
+                  }
+                },
               ),
+              const SizedBox(width: 8),
+
+              // ── Class dropdown ───────────────────────────────
+              if (classes.isNotEmpty) ...[
+                _dropdownChip<String?>(
+                  icon: Icons.class_rounded,
+                  color: const Color(0xFF10B981),
+                  hint: 'All Classes',
+                  value: provider.filterClass,
+                  items: [
+                    const DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text('All Classes'),
+                    ),
+                    ...classes.map(
+                      (c) => DropdownMenuItem(value: c, child: Text(c)),
+                    ),
+                  ],
+                  onChanged: provider.setClassFilter,
+                ),
+                const SizedBox(width: 8),
+              ],
+
+              // ── Section dropdown ─────────────────────────────
+              if (sections.isNotEmpty) ...[
+                _dropdownChip<String?>(
+                  icon: Icons.group_work_rounded,
+                  color: const Color(0xFFF59E0B),
+                  hint: 'All Sections',
+                  value: provider.filterSection,
+                  items: [
+                    const DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text('All Sections'),
+                    ),
+                    ...sections.map(
+                      (s) => DropdownMenuItem(value: s, child: Text(s)),
+                    ),
+                  ],
+                  onChanged: provider.setSectionFilter,
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -622,26 +622,14 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
               )
               .toList();
 
-    return Container(
-      color: Colors.white,
+    return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Search field
-          Container(
-            height: 46,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(14),
-              border: _showStudentDropdown
-                  ? Border.all(
-                      color: AppColors.primaryAdmin.withValues(alpha: 0.5),
-                      width: 1.5,
-                    )
-                  : null,
-            ),
-            child: Row(
+      child: Card(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Search field
+            Row(
               children: [
                 const SizedBox(width: 12),
                 Icon(
@@ -706,98 +694,81 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                 ],
               ],
             ),
-          ),
 
-          // Dropdown list
-          if (_showStudentDropdown && allNames.isNotEmpty)
-            Container(
-              margin: const EdgeInsets.only(top: 2),
-              constraints: const BoxConstraints(maxHeight: 220),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.grey.shade200),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: filtered.isEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        'No student found',
-                        style: TextStyle(
-                          color: Colors.grey.shade400,
-                          fontSize: 13,
+            // Dropdown list
+            if (_showStudentDropdown && allNames.isNotEmpty)
+              Card(
+                margin: const EdgeInsets.only(top: 2),
+
+                child: filtered.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          'No student found',
+                          style: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontSize: 13,
+                          ),
                         ),
-                      ),
-                    )
-                  : ListView.separated(
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      itemCount: filtered.length,
-                      separatorBuilder: (_, __) => Divider(
-                        height: 1,
-                        color: Colors.grey.shade100,
-                        indent: 48,
-                      ),
-                      itemBuilder: (context, i) {
-                        final name = filtered[i];
-                        final isSelected =
-                            provider.selectedStudent?.name == name;
-                        return ListTile(
-                          dense: true,
-                          leading: CircleAvatar(
-                            radius: 16,
-                            backgroundColor: AppColors.primaryAdmin.withValues(
-                              alpha: 0.1,
-                            ),
-                            child: Text(
-                              name.isNotEmpty ? name[0].toUpperCase() : '?',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primaryAdmin,
+                      )
+                    : ListView.separated(
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        itemCount: filtered.length,
+                        separatorBuilder: (_, __) =>
+                            Divider(height: 1, indent: 48),
+                        itemBuilder: (context, i) {
+                          final name = filtered[i];
+                          final isSelected =
+                              provider.selectedStudent?.name == name;
+                          return ListTile(
+                            dense: true,
+                            leading: CircleAvatar(
+                              radius: 16,
+                              backgroundColor: AppColors.primaryAdmin
+                                  .withValues(alpha: 0.1),
+                              child: Text(
+                                name.isNotEmpty ? name[0].toUpperCase() : '?',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                          title: Text(
-                            name,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              color: isSelected
-                                  ? AppColors.primaryAdmin
-                                  : Colors.grey.shade800,
+                            title: Text(
+                              name,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                color: isSelected
+                                    ? AppColors.primaryAdmin
+                                    : null,
+                              ),
                             ),
-                          ),
-                          trailing: isSelected
-                              ? Icon(
-                                  Icons.check_circle_rounded,
-                                  size: 16,
-                                  color: AppColors.primaryAdmin,
-                                )
-                              : null,
-                          onTap: () {
-                            _studentSearchController.text = name;
-                            _studentSearchFocus.unfocus();
-                            setState(() {
-                              _showStudentDropdown = false;
-                              _studentQuery = '';
-                            });
-                            provider.selectStudentByName(name);
-                          },
-                        );
-                      },
-                    ),
-            ),
-        ],
+                            trailing: isSelected
+                                ? Icon(
+                                    Icons.check_circle_rounded,
+                                    size: 16,
+                                    color: AppColors.primaryAdmin,
+                                  )
+                                : null,
+                            onTap: () {
+                              _studentSearchController.text = name;
+                              _studentSearchFocus.unfocus();
+                              setState(() {
+                                _showStudentDropdown = false;
+                                _studentQuery = '';
+                              });
+                              provider.selectStudentByName(name);
+                            },
+                          );
+                        },
+                      ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -989,26 +960,23 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
           const SizedBox(height: 16),
 
           // Period info
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.grey.shade100),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.info_outline_rounded,
-                  size: 16,
-                  color: Colors.grey.shade400,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Showing data for ${_months[provider.selectedMonth - 1]} ${provider.selectedYear}',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                ),
-              ],
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 16,
+                    color: Colors.grey.shade400,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Showing data for ${_months[provider.selectedMonth - 1]} ${provider.selectedYear}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -1058,11 +1026,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
           const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 6),
           ClipRRect(
@@ -1211,23 +1175,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
           perf.name,
         );
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: isTop3
-              ? Border.all(color: medalColor.withValues(alpha: 0.5), width: 1.5)
-              : Border.all(color: Colors.grey.shade100),
-          boxShadow: [
-            BoxShadow(
-              color: isTop3
-                  ? medalColor.withValues(alpha: 0.12)
-                  : Colors.black.withValues(alpha: 0.03),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+      child: Card(
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Row(
