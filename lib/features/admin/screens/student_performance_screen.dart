@@ -260,17 +260,17 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
             },
           ),
 
-          actions: [
-            Consumer<StudentPerformanceProvider>(
-              builder: (context, provider, _) {
-                return IconButton(
-                  icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-                  onPressed: () => provider.fetchPerformances(),
-                  tooltip: 'Refresh',
-                );
-              },
-            ),
-          ],
+          // actions: [
+          //   Consumer<StudentPerformanceProvider>(
+          //     builder: (context, provider, _) {
+          //       return IconButton(
+          //         icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+          //         onPressed: () => provider.fetchPerformances(),
+          //         tooltip: 'Refresh',
+          //       );
+          //     },
+          //   ),
+          // ],
         ),
         body: Consumer<StudentPerformanceProvider>(
           builder: (context, provider, _) {
