@@ -1382,10 +1382,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
         return Container(
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
           height: 110,
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(16),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
           child: Center(
             child: i == 0
                 ? const SizedBox(
