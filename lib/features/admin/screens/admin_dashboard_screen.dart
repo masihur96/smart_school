@@ -20,14 +20,14 @@ import '../../auth/providers/auth_provider.dart';
 import '../../notifications/providers/notification_provider.dart';
 import '../models/admin_dashboard_model.dart';
 import '../providers/admin_dashboard_provider.dart';
+import '../providers/student_provider.dart';
+import '../providers/teacher_provider.dart';
 import 'admin_homework_management_screen.dart';
 import 'exam_management_screen.dart';
 import 'notice_management_screen.dart';
 import 'student_attendance_management_screen.dart';
 import 'student_management_screen.dart';
 import 'teacher_attendance_management_screen.dart';
-import '../providers/student_provider.dart';
-import '../providers/teacher_provider.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -1707,131 +1707,117 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           MaterialPageRoute(builder: (_) => const TeacherPerformanceScreen()),
         );
       },
-      child: Container(
-        width: 220,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: rank <= 3
-                ? badgeColor.withValues(alpha: 0.5)
-                : Colors.grey.shade100,
-            width: rank <= 3 ? 1.5 : 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header: Rank + Score
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: SizedBox(
+            width: 220,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: badgeColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    badgeText,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: rank <= 3 ? Colors.black87 : Colors.grey.shade600,
-                    ),
-                  ),
-                ),
-                Text(
-                  '${score.toStringAsFixed(1)}%',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryAdmin,
-                  ),
-                ),
-              ],
-            ),
-            const Spacer(),
-            // Avatar + Name
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: AppColors.primaryAdmin.withValues(
-                    alpha: 0.1,
-                  ),
-                  child: Text(
-                    perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryAdmin,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        perf.name,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                // Header: Rank + Score
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
                       ),
-                      Text(
-                        perf.designation.isNotEmpty
-                            ? perf.designation
-                            : 'Teacher',
+                      decoration: BoxDecoration(
+                        color: badgeColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        badgeText,
                         style: TextStyle(
                           fontSize: 10,
-                          color: Colors.grey.shade500,
+                          fontWeight: FontWeight.bold,
+                          color: rank <= 3 ? null : Colors.grey.shade600,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                  ),
+                    ),
+                    Text(
+                      '${score.toStringAsFixed(1)}%',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                // Avatar + Name
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundColor: AppColors.primaryAdmin.withValues(
+                        alpha: 0.1,
+                      ),
+                      child: Text(
+                        perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryAdmin,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            perf.name,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            perf.designation.isNotEmpty
+                                ? perf.designation
+                                : 'Teacher',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey.shade500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                // Mini progress bars
+                Row(
+                  children: [
+                    Expanded(
+                      child: _miniProgressBar(
+                        'Att',
+                        perf.attendance.percentage,
+                        Colors.green,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _miniProgressBar(
+                        'HW',
+                        perf.homework.percentage,
+                        Colors.blue,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            // Mini progress bars
-            Row(
-              children: [
-                Expanded(
-                  child: _miniProgressBar(
-                    'Att',
-                    perf.attendance.percentage,
-                    Colors.green,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _miniProgressBar(
-                    'HW',
-                    perf.homework.percentage,
-                    Colors.blue,
-                  ),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -2063,144 +2049,137 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           MaterialPageRoute(builder: (_) => const StudentPerformanceScreen()),
         );
       },
-      child: Container(
-        width: 130,
-        margin: EdgeInsets.only(left: rank == 1 ? 0 : 0, right: 10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: borderColor, width: 1.5),
-          boxShadow: [
-            BoxShadow(
-              color: isTop3
-                  ? medalColors[rank]!.withOpacity(0.1)
-                  : Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
+      child: Card(
+        margin: const EdgeInsets.all(5),
         child: Padding(
           padding: const EdgeInsets.all(12),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Rank indicator
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (isTop3)
-                    Text(
-                      rankEmojis[rank]!,
-                      style: const TextStyle(fontSize: 16),
-                    )
-                  else
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '#$rank',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade500,
+          child: SizedBox(
+            width: 130,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Rank indicator
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (isTop3)
+                      Text(
+                        rankEmojis[rank]!,
+                        style: const TextStyle(fontSize: 16),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
                         ),
-                      ),
-                    ),
-                  // Score ring (small)
-                  SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        CircularProgressIndicator(
-                          value: score / 100,
-                          strokeWidth: 3.5,
-                          backgroundColor: gradeColor.withOpacity(0.1),
-                          valueColor: AlwaysStoppedAnimation<Color>(gradeColor),
-                          strokeCap: StrokeCap.round,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        Text(
-                          '${score.toStringAsFixed(0)}%',
+                        child: Text(
+                          '#$rank',
                           style: TextStyle(
-                            fontSize: 8,
+                            fontSize: 9,
                             fontWeight: FontWeight.bold,
-                            color: gradeColor,
+                            color: Colors.grey.shade500,
                           ),
                         ),
-                      ],
+                      ),
+                    // Score ring (small)
+                    SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            value: score / 100,
+                            strokeWidth: 3.5,
+                            backgroundColor: gradeColor.withOpacity(0.1),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              gradeColor,
+                            ),
+                            strokeCap: StrokeCap.round,
+                          ),
+                          Text(
+                            '${score.toStringAsFixed(0)}%',
+                            style: TextStyle(
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                              color: gradeColor,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              // Avatar
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: gradeColor.withOpacity(0.12),
-                child: Text(
-                  perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
-                  style: TextStyle(
-                    color: gradeColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                  ],
                 ),
-              ),
-              // Name
-              Text(
-                perf.name.split(' ').first,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-              // Class chip
-              if (perf.classInfo != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.purple.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                // Avatar
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: gradeColor.withOpacity(0.12),
                   child: Text(
-                    perf.classInfo!.name,
-                    style: const TextStyle(
-                      fontSize: 9,
-                      color: Colors.purple,
-                      fontWeight: FontWeight.w700,
+                    perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
+                    style: TextStyle(
+                      color: gradeColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                )
-              else
-                const SizedBox(height: 14),
-              // Mini metric strip
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _metricDot(
-                    perf.attendance.percentage,
-                    const Color(0xFF10B981),
+                ),
+                // Name
+                Text(
+                  perf.name.split(' ').first,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
                   ),
-                  _metricDot(perf.homework.percentage, const Color(0xFF3B82F6)),
-                  _metricDot(perf.exams.percentage, const Color(0xFFEF4444)),
-                ],
-              ),
-            ],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+                // Class chip
+                if (perf.classInfo != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.purple.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      perf.classInfo!.name,
+                      style: const TextStyle(
+                        fontSize: 9,
+                        color: Colors.purple,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  )
+                else
+                  const SizedBox(height: 14),
+                // Mini metric strip
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _metricDot(
+                      perf.attendance.percentage,
+                      const Color(0xFF10B981),
+                    ),
+                    _metricDot(
+                      perf.homework.percentage,
+                      const Color(0xFF3B82F6),
+                    ),
+                    _metricDot(perf.exams.percentage, const Color(0xFFEF4444)),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
