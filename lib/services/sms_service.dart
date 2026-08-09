@@ -6,9 +6,15 @@ class SmsService {
   // TODO: Replace with your actual MiMSMS credentials
   static const String _apiKey = "C55AX924Q4H13M3";
   static const String _userName = "masihur96@gmail.com";
-  static const String _senderName = "8809617634017";
+  static const String _nonMaskedSenderName = "8809617634017";
+  // TODO: Replace with your actual Mask SMS sender name
+  static const String _maskedSenderName = "School Care";
 
-  Future<bool> sendBulkSms(List<String> phoneNumbers, String message) async {
+  Future<bool> sendBulkSms(
+    List<String> phoneNumbers,
+    String message, {
+    bool isMasked = false,
+  }) async {
     if (phoneNumbers.isEmpty || message.isEmpty) return false;
 
     try {
@@ -18,7 +24,7 @@ class SmsService {
         data: {
           "apiKey": _apiKey,
           "userName": _userName,
-          "senderName": _senderName,
+          "senderName": isMasked ? _maskedSenderName : _nonMaskedSenderName,
           "message": message,
           "smsData": phoneNumbers.map((num) => {"mobNumber": num}).toList(),
         },

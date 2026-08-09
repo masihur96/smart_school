@@ -25,6 +25,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
   String? _selectedClassId;
   String? _selectedSectionId;
   String _searchQuery = '';
+  String _smsType = 'Normal SMS';
   Timer? _debounce;
   final ScrollController _scrollController = ScrollController();
 
@@ -128,6 +129,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
     final success = await _smsService.sendBulkSms(
       numbers,
       _messageController.text.trim(),
+      isMasked: _smsType == 'Mask SMS',
     );
 
     setState(() {
@@ -373,6 +375,23 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                 Text(
                   'Selected: ${_selectedStudentIds.length} students',
                   style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: _smsType,
+                  decoration: const InputDecoration(
+                    labelText: 'SMS Type',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'Normal SMS', child: Text('Normal SMS')),
+                    DropdownMenuItem(value: 'Mask SMS', child: Text('Mask SMS')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() => _smsType = val);
+                    }
+                  },
                 ),
                 const SizedBox(height: 8),
                 TextField(
