@@ -282,6 +282,20 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
   ) async {
     final pdf = pw.Document();
 
+    String resolvedClassName = 'N/A';
+    if (_selectedClassId != null) {
+      try {
+        resolvedClassName = context.read<ClassSetupNotifier>().classes.firstWhere((c) => c.id == _selectedClassId).name;
+      } catch (_) {}
+    }
+
+    String resolvedSectionName = 'N/A';
+    if (_selectedSectionId != null) {
+      try {
+        resolvedSectionName = context.read<SectionSetupNotifier>().sections.firstWhere((s) => s.id == _selectedSectionId).name;
+      } catch (_) {}
+    }
+
     final schoolName = school?.name ?? 'Unknown School';
     final schoolLogoUrl = school?.avatar ?? '';
     final schoolAddress = school?.address ?? '';
@@ -316,10 +330,10 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
       }
     }
 
-    // Group students into pages (e.g. 8 per page on A4)
+    // Group students into pages (4 per page on A4)
     // A4 is 595 x 842 points.
-    // We can fit 2 columns, 4 rows = 8 cards.
-    final itemsPerPage = 8;
+    // We can fit 2 columns, 2 rows = 4 cards.
+    final itemsPerPage = 4;
     for (var i = 0; i < _currentStudents.length; i += itemsPerPage) {
       final pageStudents = _currentStudents.skip(i).take(itemsPerPage).toList();
 
@@ -342,6 +356,8 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                   schoolAddress,
                   schoolPhone,
                   schoolEmail,
+                  resolvedClassName,
+                  resolvedSectionName,
                 );
               }).toList(),
             );
@@ -363,9 +379,11 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
     String schoolAddress,
     String schoolPhone,
     String schoolEmail,
+    String resolvedClassName,
+    String resolvedSectionName,
   ) {
-    final className = student.className ?? 'N/A';
-    final sectionName = student.sectionName ?? 'N/A';
+    final className = student.className?.isNotEmpty == true ? student.className! : resolvedClassName;
+    final sectionName = student.sectionName?.isNotEmpty == true ? student.sectionName! : resolvedSectionName;
 
     return pw.Container(
       width: width,
