@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
 import '../models/book.dart';
 import '../data/dummy_library_data.dart';
 import 'id_card_scanner_screen.dart';
+import '../../admin/providers/student_provider.dart';
+import '../../../models/student_model.dart';
 
 class BookDetailScreen extends StatelessWidget {
   final Book book;
@@ -11,27 +14,108 @@ class BookDetailScreen extends StatelessWidget {
 
   // ── Issue button tap handler ───────────────────────────────────────────────
   Future<void> _onRequestIssue(BuildContext context) async {
-    // 1. Open the ID card barcode scanner
+    // Show method picker first
+    final method = await _showMethodPicker(context);
+    if (method == null || !context.mounted) return;
+
+    if (method == 'scan') {
+      await _handleScanOption(context);
+    } else {
+      await _handleSelectStudentOption(context);
+    }
+  }
+
+  Future<String?> _showMethodPicker(BuildContext context) {
+    return showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => Container(
+        margin: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE5E7EB),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Issue Book To',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF111827),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'How would you like to identify the student?',
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+            ),
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  _MethodTile(
+                    icon: Icons.qr_code_scanner_rounded,
+                    color: const Color(0xFF2563EB),
+                    title: 'Scan ID Card',
+                    subtitle: 'Use the camera to scan student\'s barcode',
+                    onTap: () => Navigator.pop(sheetCtx, 'scan'),
+                  ),
+                  const SizedBox(height: 10),
+                  _MethodTile(
+                    icon: Icons.people_alt_rounded,
+                    color: const Color(0xFF7C3AED),
+                    title: 'Select Student',
+                    subtitle: 'Search and pick from the student list',
+                    onTap: () => Navigator.pop(sheetCtx, 'select'),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleScanOption(BuildContext context) async {
     final result = await Navigator.push<ScanResult>(
       context,
       MaterialPageRoute(builder: (_) => const IdCardScannerScreen()),
     );
+    if (result == null || !context.mounted) return;
+    DummyLibraryData.addRequest(book.id, book.title, result.studentId, result.studentName);
+    _showSuccessDialog(context, ScanResult(studentId: result.studentId, studentName: result.studentName, rawBarcode: result.rawBarcode));
+  }
 
-    // 2. User cancelled the scanner
-    if (result == null) return;
-
-    if (!context.mounted) return;
-
-    // 3. Record the issue request with the scanned student info
-    DummyLibraryData.addRequest(
-      book.id,
-      book.title,
-      result.studentId,
-      result.studentName,
+  Future<void> _handleSelectStudentOption(BuildContext context) async {
+    final student = await showModalBottomSheet<Student>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => ChangeNotifierProvider.value(
+        value: context.read<StudentsNotifier>(),
+        child: const _SelectStudentSheet(),
+      ),
     );
-
-    // 4. Show success confirmation
-    _showSuccessDialog(context, result);
+    if (student == null || !context.mounted) return;
+    final name = student.user?.name ?? 'Unknown';
+    final id = student.userId;
+    DummyLibraryData.addRequest(book.id, book.title, id, name);
+    _showSuccessDialog(context, ScanResult(studentId: id, studentName: name, rawBarcode: ''));
   }
 
   void _showSuccessDialog(BuildContext context, ScanResult result) {
@@ -379,11 +463,10 @@ class _IssueButtonState extends State<_IssueButton>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
-              Icon(Icons.qr_code_scanner_rounded,
-                  color: Colors.white, size: 20),
+              Icon(Icons.assignment_rounded, color: Colors.white, size: 20),
               SizedBox(width: 10),
               Text(
-                'Scan ID Card & Request Issue',
+                'Request Issue',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
@@ -636,6 +719,335 @@ class _DialogInfoRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─── Method picker tile ───────────────────────────────────────────────────────
+
+class _MethodTile extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _MethodTile({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.06),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withOpacity(0.2)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF111827),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded, size: 14, color: color),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Select student bottom sheet ─────────────────────────────────────────────
+
+class _SelectStudentSheet extends StatefulWidget {
+  const _SelectStudentSheet();
+
+  @override
+  State<_SelectStudentSheet> createState() => _SelectStudentSheetState();
+}
+
+class _SelectStudentSheetState extends State<_SelectStudentSheet> {
+  final TextEditingController _searchCtrl = TextEditingController();
+  String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final notifier = context.read<StudentsNotifier>();
+      if (notifier.students.isEmpty) notifier.fetchStudents();
+    });
+    _searchCtrl.addListener(() => setState(() => _query = _searchCtrl.text));
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<StudentsNotifier>(
+      builder: (context, notifier, _) {
+        final all = notifier.students;
+        final filtered = _query.isEmpty
+            ? all
+            : all.where((s) {
+                final name = (s.user?.name ?? '').toLowerCase();
+                final roll = s.rollId.toLowerCase();
+                final q = _query.toLowerCase();
+                return name.contains(q) || roll.contains(q);
+              }).toList();
+
+        return Container(
+          margin: const EdgeInsets.only(top: 60),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE5E7EB),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Select Student',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF111827),
+                        ),
+                      ),
+                    ),
+                    if (notifier.isLoading)
+                      const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF3F4F6),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.close_rounded,
+                            size: 18, color: Color(0xFF6B7280)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF4F6FB),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                  ),
+                  child: TextField(
+                    controller: _searchCtrl,
+                    style: const TextStyle(fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: 'Search by name or roll number…',
+                      hintStyle: TextStyle(
+                          color: Colors.grey.shade400, fontSize: 13),
+                      prefixIcon: Icon(Icons.search_rounded,
+                          color: Colors.grey.shade400, size: 18),
+                      suffixIcon: _query.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(Icons.close_rounded,
+                                  color: Colors.grey.shade400, size: 16),
+                              onPressed: () => _searchCtrl.clear(),
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '${filtered.length} student${filtered.length == 1 ? '' : 's'}',
+                    style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF9CA3AF),
+                        fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: notifier.isLoading && all.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : filtered.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.person_search_rounded,
+                                    size: 48, color: Colors.grey.shade300),
+                                const SizedBox(height: 10),
+                                Text('No students found',
+                                    style: TextStyle(
+                                        color: Colors.grey.shade400,
+                                        fontSize: 14)),
+                              ],
+                            ),
+                          )
+                        : ListView.separated(
+                            padding:
+                                const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                            itemCount: filtered.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 8),
+                            itemBuilder: (ctx, i) {
+                              final s = filtered[i];
+                              final name = s.user?.name ?? 'Unknown';
+                              final avatar = s.user?.avatar ?? '';
+                              final roll = s.rollId.isNotEmpty
+                                  ? 'Roll: ${s.rollId}'
+                                  : '';
+                              final cls = s.className != null
+                                  ? ' · ${s.className}'
+                                  : '';
+                              return GestureDetector(
+                                onTap: () => Navigator.pop(ctx, s),
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                        color: const Color(0xFFE5E7EB)),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color:
+                                            Colors.black.withOpacity(0.04),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 22,
+                                        backgroundColor: const Color(
+                                                0xFF7C3AED)
+                                            .withOpacity(0.12),
+                                        backgroundImage: avatar.isNotEmpty
+                                            ? NetworkImage(avatar)
+                                            : null,
+                                        child: avatar.isEmpty
+                                            ? Text(
+                                                name.isNotEmpty
+                                                    ? name[0].toUpperCase()
+                                                    : '?',
+                                                style: const TextStyle(
+                                                  color: Color(0xFF7C3AED),
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 16,
+                                                ),
+                                              )
+                                            : null,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(name,
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Color(0xFF111827),
+                                                )),
+                                            if (roll.isNotEmpty ||
+                                                cls.isNotEmpty)
+                                              Text('$roll$cls',
+                                                  style: const TextStyle(
+                                                      fontSize: 12,
+                                                      color:
+                                                          Color(0xFF9CA3AF))),
+                                          ],
+                                        ),
+                                      ),
+                                      const Icon(
+                                          Icons.arrow_forward_ios_rounded,
+                                          size: 14,
+                                          color: Color(0xFFD1D5DB)),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
