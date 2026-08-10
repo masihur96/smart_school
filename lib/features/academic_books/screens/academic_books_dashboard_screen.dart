@@ -232,7 +232,7 @@ class _AcademicBooksDashboardScreenState
     final bookNotifier = context.watch<AcademicBookNotifier>();
     final classNotifier = context.watch<ClassSetupNotifier>();
     final subjectNotifier = context.watch<SubjectSetupNotifier>();
-    final admin = _isAdmin(context);
+    final admin = true;
 
     final allBooks = bookNotifier.books;
     final filtered = _filteredBooks(allBooks);
