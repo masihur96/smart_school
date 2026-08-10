@@ -12,6 +12,7 @@ import 'package:smart_school/models/student_model.dart';
 import '../providers/exam_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class GenerateTranscriptScreen extends StatefulWidget {
   final List<Student> students;
@@ -31,6 +32,8 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
   String? _selectedSectionId;
   late List<Student> _currentStudents;
   bool _isLoading = false;
+  Uint8List? _pdfBytes;
+  final PdfViewerController _pdfViewerController = PdfViewerController();
 
   @override
   void initState() {
@@ -39,6 +42,31 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
     if (_currentStudents.isNotEmpty) {
       _selectedClassId = _currentStudents.first.classId;
       _selectedSectionId = _currentStudents.first.sectionId;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _generatePdf();
+    });
+  }
+
+  Future<void> _generatePdf() async {
+    setState(() => _isLoading = true);
+    final authNotifier = context.read<AuthNotifier>();
+    final school = authNotifier.user?.school;
+    final exams = context.read<ExamsNotifier>().state;
+
+    try {
+      final bytes = await _generateTranscriptsPdf(PdfPageFormat.a4, school, exams);
+      if (mounted) {
+        setState(() {
+          _pdfBytes = bytes;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -57,18 +85,14 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
               _currentStudents = List.from(
                 context.read<StudentsNotifier>().students,
               );
-              _isLoading = false;
             });
+            _generatePdf();
           }
         });
   }
 
   @override
   Widget build(BuildContext context) {
-    final authNotifier = context.read<AuthNotifier>();
-    final school = authNotifier.user?.school;
-    final exams = context.watch<ExamsNotifier>().state;
-
     final allClasses = context.watch<ClassSetupNotifier>().classes;
     final allSections = context.watch<SectionSetupNotifier>().sections;
 
@@ -95,22 +119,57 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
         ),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.zoom_out),
+            onPressed: () {
+              _pdfViewerController.zoomLevel = (_pdfViewerController.zoomLevel - 0.5).clamp(1.0, 3.0);
+            },
+            tooltip: 'Zoom Out',
+          ),
+          IconButton(
+            icon: const Icon(Icons.zoom_in),
+            onPressed: () {
+              _pdfViewerController.zoomLevel = (_pdfViewerController.zoomLevel + 0.5).clamp(1.0, 3.0);
+            },
+            tooltip: 'Zoom In',
+          ),
+          IconButton(
+            icon: const Icon(Icons.print),
+            onPressed: () async {
+              if (_pdfBytes != null) {
+                await Printing.layoutPdf(onLayout: (_) async => _pdfBytes!);
+              }
+            },
+            tooltip: 'Print',
+          ),
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () async {
+              if (_pdfBytes != null) {
+                await Printing.sharePdf(bytes: _pdfBytes!, filename: 'transcripts.pdf');
+              }
+            },
+            tooltip: 'Share',
+          ),
+        ],
       ),
       body: Column(
         children: [
           _buildFilters(uniqueClasses, uniqueSections),
           Expanded(
-            child: _isLoading
+            child: _isLoading || _pdfBytes == null
                 ? const Center(child: CircularProgressIndicator())
                 : _currentStudents.isEmpty
                 ? const Center(
                     child: Text('No students selected for transcripts.'),
                   )
-                : PdfPreview(
+                : SfPdfViewer.memory(
+                    _pdfBytes!,
+                    controller: _pdfViewerController,
                     key: ValueKey(
                       'transcript_${_selectedClassId}_${_selectedSectionId}_${_currentStudents.length}',
                     ),
-                    build: (format) => _generateTranscriptsPdf(format, school, exams),
                   ),
           ),
         ],
