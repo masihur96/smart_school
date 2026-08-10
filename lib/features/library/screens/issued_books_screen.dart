@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../data/dummy_library_data.dart';
+import '../models/issued_book.dart';
 import 'book_detail_screen.dart';
 
 class IssuedBooksScreen extends StatelessWidget {
@@ -9,101 +10,381 @@ class IssuedBooksScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final issuedBooks = DummyLibraryData.getIssuedBooks();
-    final dateFormat = DateFormat('MMM dd, yyyy');
 
     if (issuedBooks.isEmpty) {
-      return const Center(child: Text('No books currently issued.'));
+      return _buildEmptyState();
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: issuedBooks.length,
-      itemBuilder: (context, index) {
-        final issuedBook = issuedBooks[index];
-        final isOverdue = issuedBook.isOverdue;
+    final overdue = issuedBooks.where((b) => b.isOverdue).toList();
+    final onTime = issuedBooks.where((b) => !b.isOverdue).toList();
 
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BookDetailScreen(book: issuedBook.book),
-                ),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          issuedBook.book.title,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (isOverdue)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.red[50],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            'Overdue',
-                            style: TextStyle(
-                              color: Colors.red[700],
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Issued: ${dateFormat.format(issuedBook.issueDate)}',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.event_busy, size: 16, color: isOverdue ? Colors.red : Colors.grey),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Due: ${dateFormat.format(issuedBook.dueDate)}',
-                        style: TextStyle(
-                          color: isOverdue ? Colors.red : Colors.grey[700],
-                          fontWeight: isOverdue ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      children: [
+        if (overdue.isNotEmpty) ...[
+          _SectionHeader(
+            label: 'Overdue',
+            count: overdue.length,
+            color: const Color(0xFFEF4444),
+            icon: Icons.warning_rounded,
+          ),
+          const SizedBox(height: 8),
+          ...overdue.map((ib) => _IssuedBookCard(issuedBook: ib)),
+          const SizedBox(height: 16),
+        ],
+        if (onTime.isNotEmpty) ...[
+          _SectionHeader(
+            label: 'On Track',
+            count: onTime.length,
+            color: const Color(0xFF10B981),
+            icon: Icons.check_circle_rounded,
+          ),
+          const SizedBox(height: 8),
+          ...onTime.map((ib) => _IssuedBookCard(issuedBook: ib)),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A3C6E).withOpacity(0.07),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.bookmark_border_rounded,
+                size: 40, color: Color(0xFF1A3C6E)),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'No Books Issued',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF374151),
             ),
           ),
-        );
-      },
+          const SizedBox(height: 6),
+          Text(
+            'All books are currently available.',
+            style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String label;
+  final int count;
+  final Color color;
+  final IconData icon;
+
+  const _SectionHeader({
+    required this.label,
+    required this.count,
+    required this.color,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 16, color: color),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: color,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            '$count',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _IssuedBookCard extends StatelessWidget {
+  final IssuedBook issuedBook;
+
+  const _IssuedBookCard({required this.issuedBook});
+
+  @override
+  Widget build(BuildContext context) {
+    final fmt = DateFormat('MMM dd, yyyy');
+    final isOverdue = issuedBook.isOverdue;
+    final daysLeft = issuedBook.dueDate.difference(DateTime.now()).inDays;
+    final daysOverdue = DateTime.now().difference(issuedBook.dueDate).inDays;
+
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => BookDetailScreen(book: issuedBook.book),
+        ),
+      ),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isOverdue
+                ? const Color(0xFFEF4444).withOpacity(0.25)
+                : const Color(0xFFE5E7EB),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isOverdue
+                  ? const Color(0xFFEF4444).withOpacity(0.08)
+                  : Colors.black.withOpacity(0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Book cover
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  issuedBook.book.coverImageUrl,
+                  width: 58,
+                  height: 82,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: 58,
+                    height: 82,
+                    color: const Color(0xFFE5E7EB),
+                    child: const Icon(Icons.book_rounded,
+                        color: Color(0xFF9CA3AF), size: 24),
+                  ),
+                  loadingBuilder: (_, child, progress) => progress == null
+                      ? child
+                      : Container(
+                          width: 58,
+                          height: 82,
+                          color: const Color(0xFFF3F4F6),
+                        ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              // Details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            issuedBook.book.title,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF111827),
+                              height: 1.3,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        _StatusBadge(isOverdue: isOverdue),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      issuedBook.book.author,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF6B7280),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    // Date row
+                    _DateRow(
+                      icon: Icons.calendar_today_rounded,
+                      label: 'Issued',
+                      value: fmt.format(issuedBook.issueDate),
+                      color: const Color(0xFF6B7280),
+                    ),
+                    const SizedBox(height: 5),
+                    _DateRow(
+                      icon: isOverdue
+                          ? Icons.event_busy_rounded
+                          : Icons.event_available_rounded,
+                      label: 'Due',
+                      value: fmt.format(issuedBook.dueDate),
+                      color: isOverdue
+                          ? const Color(0xFFEF4444)
+                          : const Color(0xFF10B981),
+                    ),
+                    const SizedBox(height: 8),
+                    // Countdown chip
+                    _CountdownChip(
+                      isOverdue: isOverdue,
+                      daysLeft: isOverdue ? daysOverdue : daysLeft,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final bool isOverdue;
+  const _StatusBadge({required this.isOverdue});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isOverdue
+            ? const Color(0xFFEF4444).withOpacity(0.1)
+            : const Color(0xFF2563EB).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        isOverdue ? 'Overdue' : 'Issued',
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: isOverdue
+              ? const Color(0xFFDC2626)
+              : const Color(0xFF2563EB),
+        ),
+      ),
+    );
+  }
+}
+
+class _DateRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color color;
+
+  const _DateRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 13, color: color),
+        const SizedBox(width: 5),
+        Text(
+          '$label: ',
+          style: const TextStyle(
+            fontSize: 11,
+            color: Color(0xFF9CA3AF),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 11,
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CountdownChip extends StatelessWidget {
+  final bool isOverdue;
+  final int daysLeft;
+
+  const _CountdownChip({required this.isOverdue, required this.daysLeft});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isOverdue ? const Color(0xFFEF4444) : const Color(0xFF10B981);
+    final bgColor = color.withOpacity(0.08);
+    final text = isOverdue
+        ? '$daysLeft ${daysLeft == 1 ? 'day' : 'days'} overdue'
+        : daysLeft == 0
+            ? 'Due today!'
+            : '$daysLeft ${daysLeft == 1 ? 'day' : 'days'} remaining';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isOverdue ? Icons.access_time_filled_rounded : Icons.hourglass_top_rounded,
+            size: 12,
+            color: color,
+          ),
+          const SizedBox(width: 5),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 11,
+              color: color,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
