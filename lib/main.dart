@@ -56,6 +56,8 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'services/database_service.dart';
 import 'services/notification_service.dart';
 
+import 'features/academic_books/providers/academic_book_provider.dart';
+
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
@@ -120,6 +122,7 @@ void main() async {
         ),
         ChangeNotifierProvider(create: (_) => RoutineNotifier()),
         ChangeNotifierProvider(create: (_) => ExamsNotifier()),
+        ChangeNotifierProvider(create: (_) => AcademicBookNotifier()),
         ChangeNotifierProvider(
           create: (_) => HomeworkNotifier(
             databaseService,

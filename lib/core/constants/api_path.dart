@@ -146,4 +146,8 @@ class APIPath {
   static String submitMarks = "$baseUrl/admin/marks";
   static String adminPeriodAttendance = "$baseUrl/admin/attendance/period";
   static String teacherPeriodAttendance = "$baseUrl/attendance/period";
+
+  // Academic Books
+  static String academicBooks = "$baseUrl/admin/academic-books";
+  static String academicBook(String id) => "$baseUrl/admin/academic-books/$id";
 }
