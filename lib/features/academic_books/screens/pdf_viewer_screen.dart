@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 class PdfViewerScreen extends StatefulWidget {
   final String pdfUrl;
@@ -17,33 +17,10 @@ class PdfViewerScreen extends StatefulWidget {
 }
 
 class _PdfViewerScreenState extends State<PdfViewerScreen> {
-  late final WebViewController _controller;
-  bool _isLoading = true;
-  bool _hasError = false;
+  final PdfViewerController _pdfViewerController = PdfViewerController();
+  final GlobalKey<SfPdfViewerState> _pdfViewerKey = GlobalKey();
 
-  String get _viewerUrl =>
-      'https://docs.google.com/viewer?embedded=true&url=${Uri.encodeComponent(widget.pdfUrl)}';
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (_) => setState(() {
-            _isLoading = true;
-            _hasError = false;
-          }),
-          onPageFinished: (_) => setState(() => _isLoading = false),
-          onWebResourceError: (error) => setState(() {
-            _isLoading = false;
-            _hasError = true;
-          }),
-        ),
-      )
-      ..loadRequest(Uri.parse(_viewerUrl));
-  }
+  bool _isVertical = false;
 
   Future<void> _openInBrowser() async {
     final uri = Uri.parse(widget.pdfUrl);
@@ -52,18 +29,10 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
     }
   }
 
-  Future<void> _refresh() async {
-    setState(() {
-      _isLoading = true;
-      _hasError = false;
-    });
-    await _controller.loadRequest(Uri.parse(_viewerUrl));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FB),
+      backgroundColor: const Color(0xFFE5E7EB),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A3C6E),
         foregroundColor: Colors.white,
@@ -85,9 +54,9 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            const Text(
-              'PDF Viewer',
-              style: TextStyle(
+            Text(
+              _isVertical ? 'Continuous Scroll Mode' : 'Book Reading Mode',
+              style: const TextStyle(
                 fontSize: 10,
                 color: Colors.white60,
                 fontWeight: FontWeight.w400,
@@ -97,9 +66,26 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, size: 20),
-            tooltip: 'Refresh',
-            onPressed: _refresh,
+            icon: Icon(
+              _isVertical
+                  ? Icons.menu_book_rounded
+                  : Icons.swap_vert_rounded,
+              size: 20,
+            ),
+            tooltip: _isVertical ? 'Switch to Book Mode' : 'Switch to Continuous Scroll',
+            onPressed: () {
+              setState(() {
+                _isVertical = !_isVertical;
+              });
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.zoom_in_rounded, size: 20),
+            tooltip: 'Zoom In',
+            onPressed: () {
+              _pdfViewerController.zoomLevel =
+                  _pdfViewerController.zoomLevel + 0.5;
+            },
           ),
           IconButton(
             icon: const Icon(Icons.open_in_browser_rounded, size: 20),
@@ -108,166 +94,22 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          // WebView
-          if (!_hasError)
-            WebViewWidget(controller: _controller)
-          else
-            _ErrorView(
-              onRetry: _refresh,
-              onOpenBrowser: _openInBrowser,
-              title: widget.title,
-            ),
-
-          // Loading overlay
-          if (_isLoading && !_hasError)
-            Container(
-              color: const Color(0xFFF4F6FB),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          const SizedBox(
-                            width: 48,
-                            height: 48,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 3,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                  Color(0xFF2563EB)),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Loading PDF…',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF374151),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Please wait a moment',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Error view ─────────────────────────────────────────────────────────────────
-
-class _ErrorView extends StatelessWidget {
-  final VoidCallback onRetry;
-  final VoidCallback onOpenBrowser;
-  final String title;
-
-  const _ErrorView({
-    required this.onRetry,
-    required this.onOpenBrowser,
-    required this.title,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEF4444).withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.picture_as_pdf_rounded,
-                  color: Color(0xFFEF4444), size: 40),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Unable to Load PDF',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF111827),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'The PDF could not be rendered inline.\nYou can try opening it in your browser.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey.shade500,
-                height: 1.6,
-              ),
-            ),
-            const SizedBox(height: 28),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: onRetry,
-                  icon: const Icon(Icons.refresh_rounded, size: 16),
-                  label: const Text('Retry'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF1A3C6E),
-                    side: const BorderSide(color: Color(0xFF1A3C6E)),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 12),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                ElevatedButton.icon(
-                  onPressed: onOpenBrowser,
-                  icon: const Icon(Icons.open_in_browser_rounded, size: 16),
-                  label: const Text('Open in Browser'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 12),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+      body: SfPdfViewer.network(
+        widget.pdfUrl,
+        key: _pdfViewerKey,
+        controller: _pdfViewerController,
+        canShowScrollHead: false,
+        canShowScrollStatus: true,
+        // Using single page layout makes it transition like a book
+        pageLayoutMode: _isVertical
+            ? PdfPageLayoutMode.continuous
+            : PdfPageLayoutMode.single,
+        // Set horizontal scroll direction for book-like flipping
+        scrollDirection: _isVertical
+            ? PdfScrollDirection.vertical
+            : PdfScrollDirection.horizontal,
+        enableTextSelection: true, // Enables marking/selecting text
+        enableDocumentLinkAnnotation: true,
       ),
     );
   }
