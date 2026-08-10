@@ -57,17 +57,74 @@ class AcademicBookNotifier extends ChangeNotifier {
         }
         _books = data.map((e) => AcademicBook.fromJson(e)).toList();
         log('AcademicBookNotifier: fetched ${_books.length} books');
+        
+        // If API returns empty (no backend data yet), show dummy data for UI testing
+        if (_books.isEmpty) {
+          _loadDummyData();
+        }
       } else {
         log('AcademicBookNotifier: fetch error ${response?.data}');
-        _error = 'Failed to load books';
+        _error = 'Failed to load books. Showing dummy data.';
+        _loadDummyData();
       }
     } catch (e) {
       log('AcademicBookNotifier: exception $e');
-      _error = e.toString();
+      _error = 'Network error. Showing dummy data.';
+      _loadDummyData();
     } finally {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  void _loadDummyData() {
+    if (_books.isNotEmpty) return;
+    _books = [
+      AcademicBook(
+        id: 'dummy_1',
+        title: 'Mathematics Grade 8 - Algebra',
+        description: 'Complete guide to algebra for 8th grade.',
+        classId: 'dummy_class_1',
+        className: 'Class 8',
+        subjectId: 'dummy_sub_1',
+        subjectName: 'Mathematics',
+        pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        createdAt: DateTime.now().subtract(const Duration(days: 2)),
+      ),
+      AcademicBook(
+        id: 'dummy_2',
+        title: 'Physics Fundamentals',
+        description: 'Introductory physics concepts.',
+        classId: 'dummy_class_2',
+        className: 'Class 9',
+        subjectId: 'dummy_sub_2',
+        subjectName: 'Physics',
+        pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        createdAt: DateTime.now().subtract(const Duration(days: 5)),
+      ),
+      AcademicBook(
+        id: 'dummy_3',
+        title: 'World History Part 1',
+        description: 'Ancient civilizations and world history.',
+        classId: 'dummy_class_1',
+        className: 'Class 8',
+        subjectId: 'dummy_sub_3',
+        subjectName: 'History',
+        pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        createdAt: DateTime.now().subtract(const Duration(days: 10)),
+      ),
+      AcademicBook(
+        id: 'dummy_4',
+        title: 'Basic English Grammar',
+        description: 'Grammar rules and exercises.',
+        classId: 'dummy_class_3',
+        className: 'Class 6',
+        subjectId: 'dummy_sub_4',
+        subjectName: 'English',
+        pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        createdAt: DateTime.now().subtract(const Duration(days: 1)),
+      ),
+    ];
   }
 
   // ── Upload PDF file ────────────────────────────────────────────────────────
