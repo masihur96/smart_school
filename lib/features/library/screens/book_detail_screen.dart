@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:smart_school/features/library/screens/book_requests_screen.dart';
 import '../models/book.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:provider/provider.dart';
@@ -100,8 +101,11 @@ class BookDetailScreen extends StatelessWidget {
           child: ElevatedButton(
             onPressed: book.isAvailable
                 ? () {
+
+              // Navigator.push(context, MaterialPageRoute(builder: (_)=>BookRequestsScreen()));
                     final user = context.read<AuthNotifier>().user;
                     if (user != null) {
+
                       DummyLibraryData.addRequest(book.id, book.title, user.id, user.name);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Book issue requested successfully!')),
