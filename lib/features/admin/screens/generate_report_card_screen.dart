@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/student_model.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
@@ -32,6 +33,8 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
   String? _selectedSectionId;
   late List<Student> _currentStudents;
   bool _isLoading = false;
+  Uint8List? _pdfBytes;
+  final PdfViewerController _pdfViewerController = PdfViewerController();
 
   @override
   void initState() {
@@ -43,6 +46,30 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
     } else if (widget.exam.assignments.isNotEmpty) {
       _selectedClassId = widget.exam.assignments.first.classId;
       _selectedSectionId = widget.exam.assignments.first.sectionId;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _generatePdf();
+    });
+  }
+
+  Future<void> _generatePdf() async {
+    setState(() => _isLoading = true);
+    final authNotifier = context.read<AuthNotifier>();
+    final school = authNotifier.user?.school;
+
+    try {
+      final bytes = await _generateReportCardsPdf(PdfPageFormat.a4, school);
+      if (mounted) {
+        setState(() {
+          _pdfBytes = bytes;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -61,17 +88,14 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
               _currentStudents = List.from(
                 context.read<StudentsNotifier>().students,
               );
-              _isLoading = false;
             });
+            _generatePdf();
           }
         });
   }
 
   @override
   Widget build(BuildContext context) {
-    final authNotifier = context.read<AuthNotifier>();
-    final school = authNotifier.user?.school;
-
     final uniqueClasses = <String, String>{};
     for (var a in widget.exam.assignments) {
       uniqueClasses[a.classId] = a.className;
@@ -103,22 +127,57 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
         ),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.zoom_out),
+            onPressed: () {
+              _pdfViewerController.zoomLevel = (_pdfViewerController.zoomLevel - 0.5).clamp(1.0, 3.0);
+            },
+            tooltip: 'Zoom Out',
+          ),
+          IconButton(
+            icon: const Icon(Icons.zoom_in),
+            onPressed: () {
+              _pdfViewerController.zoomLevel = (_pdfViewerController.zoomLevel + 0.5).clamp(1.0, 3.0);
+            },
+            tooltip: 'Zoom In',
+          ),
+          IconButton(
+            icon: const Icon(Icons.print),
+            onPressed: () async {
+              if (_pdfBytes != null) {
+                await Printing.layoutPdf(onLayout: (_) async => _pdfBytes!);
+              }
+            },
+            tooltip: 'Print',
+          ),
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () async {
+              if (_pdfBytes != null) {
+                await Printing.sharePdf(bytes: _pdfBytes!, filename: 'report_cards.pdf');
+              }
+            },
+            tooltip: 'Share',
+          ),
+        ],
       ),
       body: Column(
         children: [
           _buildFilters(uniqueClasses, uniqueSections),
           Expanded(
-            child: _isLoading
+            child: _isLoading || _pdfBytes == null
                 ? const Center(child: CircularProgressIndicator())
                 : _currentStudents.isEmpty
                 ? const Center(
                     child: Text('No students selected for report cards.'),
                   )
-                : PdfPreview(
+                : SfPdfViewer.memory(
+                    _pdfBytes!,
+                    controller: _pdfViewerController,
                     key: ValueKey(
                       '${_selectedClassId}_${_selectedSectionId}_${_currentStudents.length}',
                     ),
-                    build: (format) => _generateReportCardsPdf(format, school),
                   ),
           ),
         ],

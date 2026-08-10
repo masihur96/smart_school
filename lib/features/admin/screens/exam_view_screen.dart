@@ -183,29 +183,31 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
       elevation: 0,
       backgroundColor: AppColors.primaryAdmin,
       actions: [
-        TextButton(
-          onPressed: () {
-            if (students.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('No students available for this exam section.'),
-                ),
-              );
-              return;
-            }
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => GenerateReportCardScreen(
-                  exam: widget.exam,
-                  students: students,
-                ),
-              ),
-            );
-          },
-          child: Text("Report Card", style: TextStyle(color: AppColors.white)),
-        ),
-      ],
+    IconButton(
+    icon: const Icon(Icons.report_outlined),
+    onPressed: () {
+    if (students.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+    content: Text('No students available for this exam section.'),
+    ),
+    );
+    return;
+    }
+    Navigator.push(
+    context,
+    MaterialPageRoute(
+    builder: (context) => GenerateReportCardScreen(
+    exam: widget.exam,
+    students: students,
+    ),
+    ),
+    );
+    // Implement download functionality here
+    },
+    )
+
+    ],
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
           widget.exam.name,
