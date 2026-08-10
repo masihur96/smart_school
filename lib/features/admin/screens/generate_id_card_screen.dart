@@ -9,29 +9,270 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/student_model.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import '../providers/setup_provider.dart';
+import '../providers/student_provider.dart';
 
-class GenerateIdCardScreen extends StatelessWidget {
+class GenerateIdCardScreen extends StatefulWidget {
   final List<Student> students;
 
   const GenerateIdCardScreen({super.key, required this.students});
 
   @override
-  Widget build(BuildContext context) {
+  State<GenerateIdCardScreen> createState() => _GenerateIdCardScreenState();
+}
+
+class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
+  String? _selectedClassId;
+  String? _selectedSectionId;
+  late List<Student> _currentStudents;
+  bool _isLoading = false;
+  Uint8List? _pdfBytes;
+  final PdfViewerController _pdfViewerController = PdfViewerController();
+
+  @override
+  void initState() {
+    super.initState();
+    _currentStudents = widget.students;
+    if (_currentStudents.isNotEmpty) {
+      _selectedClassId = _currentStudents.first.classId;
+      _selectedSectionId = _currentStudents.first.sectionId;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _generatePdf();
+    });
+  }
+
+  Future<void> _generatePdf() async {
+    setState(() => _isLoading = true);
     final authNotifier = context.read<AuthNotifier>();
     final school = authNotifier.user?.school;
+
+    try {
+      final bytes = await _generateIdCardsPdf(PdfPageFormat.a4, school);
+      if (mounted) {
+        setState(() {
+          _pdfBytes = bytes;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  void _fetchStudents() {
+    if (_selectedClassId == null) return;
+    setState(() => _isLoading = true);
+    context
+        .read<StudentsNotifier>()
+        .fetchStudentsBySection(
+          classId: _selectedClassId!,
+          sectionId: _selectedSectionId,
+        )
+        .then((_) {
+          if (mounted) {
+            setState(() {
+              _currentStudents = List.from(
+                context.read<StudentsNotifier>().students,
+              );
+            });
+            _generatePdf();
+          }
+        });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final allClasses = context.watch<ClassSetupNotifier>().classes;
+    final allSections = context.watch<SectionSetupNotifier>().sections;
+
+    final uniqueClasses = <String, String>{};
+    for (var c in allClasses) {
+      uniqueClasses[c.id] = c.name;
+    }
+
+    final uniqueSections = <String, String>{};
+    if (_selectedClassId != null) {
+      for (var s in allSections) {
+        if (s.classId == _selectedClassId) {
+          uniqueSections[s.id] = s.name;
+        }
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          students.length == 1
+          _currentStudents.length == 1
               ? 'ID Card Preview'
-              : 'ID Cards Preview (${students.length})',
+              : 'ID Cards Preview (${_currentStudents.length})',
         ),
         backgroundColor: AppColors.primaryAdmin,
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.zoom_out),
+            onPressed: () {
+              _pdfViewerController.zoomLevel = (_pdfViewerController.zoomLevel - 0.5).clamp(1.0, 3.0);
+            },
+            tooltip: 'Zoom Out',
+          ),
+          IconButton(
+            icon: const Icon(Icons.zoom_in),
+            onPressed: () {
+              _pdfViewerController.zoomLevel = (_pdfViewerController.zoomLevel + 0.5).clamp(1.0, 3.0);
+            },
+            tooltip: 'Zoom In',
+          ),
+          IconButton(
+            icon: const Icon(Icons.print),
+            onPressed: () async {
+              if (_pdfBytes != null) {
+                await Printing.layoutPdf(onLayout: (_) async => _pdfBytes!);
+              }
+            },
+            tooltip: 'Print',
+          ),
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () async {
+              if (_pdfBytes != null) {
+                await Printing.sharePdf(bytes: _pdfBytes!, filename: 'id_cards.pdf');
+              }
+            },
+            tooltip: 'Share',
+          ),
+        ],
       ),
-      body: students.isEmpty
-          ? const Center(child: Text('No students to generate ID cards.'))
-          : PdfPreview(build: (format) => _generateIdCardsPdf(format, school)),
+      body: Column(
+        children: [
+          _buildFilters(uniqueClasses, uniqueSections),
+          Expanded(
+            child: _isLoading || _pdfBytes == null
+                ? const Center(child: CircularProgressIndicator())
+                : _currentStudents.isEmpty
+                ? const Center(
+                    child: Text('No students selected for ID cards.'),
+                  )
+                : SfPdfViewer.memory(
+                    _pdfBytes!,
+                    controller: _pdfViewerController,
+                    key: ValueKey(
+                      'idcard_${_selectedClassId}_${_selectedSectionId}_${_currentStudents.length}',
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilters(
+    Map<String, String> uniqueClasses,
+    Map<String, String> uniqueSections,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: AppColors.primaryAdmin.withValues(alpha: 0.05),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildDropdown<String?>(
+              label: 'Class',
+              value: uniqueClasses.containsKey(_selectedClassId) ? _selectedClassId : null,
+              items: [
+                if (!uniqueClasses.containsKey(_selectedClassId) && _selectedClassId != null)
+                  DropdownMenuItem(value: _selectedClassId, child: const Text('Unknown Class')),
+                if (!uniqueClasses.containsKey(_selectedClassId) && _selectedClassId == null)
+                  const DropdownMenuItem(value: null, child: Text('Select Class')),
+                ...uniqueClasses.entries.map(
+                  (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
+                ),
+              ],
+              onChanged: (val) {
+                if (val != _selectedClassId) {
+                  setState(() {
+                    _selectedClassId = val;
+                    _selectedSectionId = null;
+                  });
+                  _fetchStudents();
+                }
+              },
+            ),
+          ),
+          if (uniqueSections.isNotEmpty) ...[
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildDropdown<String?>(
+                label: 'Section',
+                value: uniqueSections.containsKey(_selectedSectionId) ? _selectedSectionId : null,
+                items: [
+                  const DropdownMenuItem(
+                    value: null,
+                    child: Text('All Sections'),
+                  ),
+                  if (!uniqueSections.containsKey(_selectedSectionId) && _selectedSectionId != null)
+                    DropdownMenuItem(value: _selectedSectionId, child: const Text('Unknown Section')),
+                  ...uniqueSections.entries.map(
+                    (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
+                  ),
+                ],
+                onChanged: (val) {
+                  if (val != _selectedSectionId) {
+                    setState(() {
+                      _selectedSectionId = val;
+                    });
+                    _fetchStudents();
+                  }
+                },
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDropdown<T>({
+    required String label,
+    required T? value,
+    required List<DropdownMenuItem<T>> items,
+    required ValueChanged<T?> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryAdmin,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.primaryAdmin.withValues(alpha: 0.3)),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<T>(
+              value: value,
+              items: items,
+              onChanged: onChanged,
+              isExpanded: true,
+              icon: const Icon(Icons.arrow_drop_down, color: AppColors.primaryAdmin),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -64,7 +305,7 @@ class GenerateIdCardScreen extends StatelessWidget {
 
     // Fetch all student avatars concurrently
     final Map<String, pw.ImageProvider> avatars = {};
-    for (var student in students) {
+    for (var student in _currentStudents) {
       final avatarUrl = student.user?.avatar ?? '';
       if (avatarUrl.isNotEmpty) {
         try {
@@ -79,8 +320,8 @@ class GenerateIdCardScreen extends StatelessWidget {
     // A4 is 595 x 842 points.
     // We can fit 2 columns, 4 rows = 8 cards.
     final itemsPerPage = 8;
-    for (var i = 0; i < students.length; i += itemsPerPage) {
-      final pageStudents = students.skip(i).take(itemsPerPage).toList();
+    for (var i = 0; i < _currentStudents.length; i += itemsPerPage) {
+      final pageStudents = _currentStudents.skip(i).take(itemsPerPage).toList();
 
       pdf.addPage(
         pw.Page(
@@ -379,7 +620,7 @@ class GenerateIdCardScreen extends StatelessWidget {
           pw.SizedBox(
             width: 55,
             child: pw.Text(
-              '$label',
+              label,
               style: pw.TextStyle(
                 fontWeight: pw.FontWeight.bold,
                 fontSize: 9,
