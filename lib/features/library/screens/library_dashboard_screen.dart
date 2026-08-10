@@ -197,31 +197,33 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          _StatChip(
-                            icon: Icons.book_rounded,
-                            label: 'Total',
-                            value: '$totalBooks',
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 10),
-                          _StatChip(
-                            icon: Icons.check_circle_rounded,
-                            label: 'Available',
-                            value: '$availableBooks',
-                            color: const Color(0xFF34D399),
-                          ),
-                          const SizedBox(width: 10),
-                          _StatChip(
-                            icon: Icons.bookmark_rounded,
-                            label: 'Issued',
-                            value: '$issuedCount',
-                            color: const Color(0xFF60A5FA),
-                          ),
-                          if (overdueCount > 0) ...[
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _StatChip(
+                              icon: Icons.book_rounded,
+                              label: 'Total',
+                              value: '$totalBooks',
+                              color: Colors.white,
+                            ),
                             const SizedBox(width: 10),
                             _StatChip(
+                              icon: Icons.check_circle_rounded,
+                              label: 'Available',
+                              value: '$availableBooks',
+                              color: const Color(0xFF34D399),
+                            ),
+                            const SizedBox(width: 10),
+                            _StatChip(
+                              icon: Icons.bookmark_rounded,
+                              label: 'Issued',
+                              value: '$issuedCount',
+                              color: const Color(0xFF60A5FA),
+                            ),
+                            if (overdueCount > 0) ...[
+                              const SizedBox(width: 10),
+                              _StatChip(
                               icon: Icons.warning_rounded,
                               label: 'Overdue',
                               value: '$overdueCount',
@@ -230,7 +232,7 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                           ],
                         ],
                       ),
-                    ],
+                      ),],
                   ),
                 ),
               ),
