@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/features/academic_books/screens/academic_books_dashboard_screen.dart';
 import 'package:smart_school/features/admin/screens/add_edit_marquee_screen.dart';
 import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
 import 'package:smart_school/features/admin/screens/bulk_sms_screen.dart';
@@ -198,6 +199,12 @@ class AppDrawer extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => BulkSmsScreen()),
+        );
+      }, context),
+      _buildDrawerItem(Icons.menu_book_rounded, "Academic Books", () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AcademicBooksDashboardScreen()),
         );
       }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {

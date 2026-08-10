@@ -246,7 +246,7 @@ class _AcademicBooksDashboardScreenState
             .toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FB),
+
       body: NestedScrollView(
         headerSliverBuilder: (context, _) => [
           SliverAppBar(
