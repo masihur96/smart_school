@@ -150,4 +150,7 @@ class APIPath {
   // Academic Books
   static String academicBooks = "$baseUrl/admin/academic-books";
   static String academicBook(String id) => "$baseUrl/admin/academic-books/$id";
+
+  // Online Classes
+  static String onlineClasses = "$baseUrl/online-classes";
 }

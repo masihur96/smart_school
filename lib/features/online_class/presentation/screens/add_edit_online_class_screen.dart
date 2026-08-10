@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/data/mock_data/mock_data.dart';
 import 'package:smart_school/models/online_class_model.dart';
+import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
 
 class AddEditOnlineClassScreen extends StatefulWidget {
   final OnlineClass? onlineClass;
@@ -26,6 +28,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
 
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
+  TimeOfDay? _selectedEndTime;
 
   bool _isLoading = false;
 
@@ -38,6 +41,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
       _linkController.text = widget.onlineClass!.meetLink;
       _selectedDate = widget.onlineClass!.scheduledTime;
       _selectedTime = TimeOfDay.fromDateTime(widget.onlineClass!.scheduledTime);
+      _selectedEndTime = TimeOfDay.fromDateTime(widget.onlineClass!.scheduledTime.add(const Duration(hours: 1)));
     }
   }
 
@@ -71,51 +75,87 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
     }
   }
 
-  void _save() {
+  Future<void> _pickEndTime() async {
+    final time = await showTimePicker(
+      context: context,
+      initialTime: _selectedEndTime ?? TimeOfDay.now(),
+    );
+    if (time != null) {
+      setState(() => _selectedEndTime = time);
+    }
+  }
+
+  void _save() async {
     if (_formKey.currentState!.validate()) {
-      if (_selectedDate == null || _selectedTime == null) {
+      if (_selectedDate == null || _selectedTime == null || _selectedEndTime == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select both date and time')),
+          const SnackBar(content: Text('Please select date, start time, and end time')),
         );
         return;
       }
 
       setState(() => _isLoading = true);
 
-      final scheduledDateTime = DateTime(
-        _selectedDate!.year,
-        _selectedDate!.month,
-        _selectedDate!.day,
-        _selectedTime!.hour,
-        _selectedTime!.minute,
-      );
-
       final isEditing = widget.onlineClass != null;
-      final newClass = OnlineClass(
-        id: isEditing
-            ? widget.onlineClass!.id
-            : DateTime.now().millisecondsSinceEpoch.toString(),
-        title: _titleController.text.trim(),
-        description: _descController.text.trim(),
-        meetLink: _linkController.text.trim(),
-        scheduledTime: scheduledDateTime,
-        teacherId: 't1', // Assuming current user is a teacher
-        teacherName: 'Masihur Rahman', // Dummy data for now
-      );
 
-      if (isEditing) {
+      if (!isEditing) {
+        final dateStr = _selectedDate!.toUtc().toIso8601String();
+        
+        final startTimeStr = _selectedTime!.format(context);
+        final endTimeStr = _selectedEndTime!.format(context);
+
+        final success = await context.read<OnlineClassProvider>().createOnlineClass(
+          title: _titleController.text.trim(),
+          description: _descController.text.trim(),
+          meetLink: _linkController.text.trim(),
+          date: dateStr,
+          startTime: startTimeStr,
+          endTime: endTimeStr,
+          classId: "c4d3269b-1234-4a21-93e1-456789abcdef", // Dummy from cURL
+          sectionId: "b1a2345c-5678-4b32-82d2-123456abcdef", // Dummy from cURL
+          subjectId: "d9c8765e-9876-4c43-91e3-abcdef123456", // Dummy from cURL
+        );
+
+        setState(() => _isLoading = false);
+
+        if (success && mounted) {
+          Navigator.pop(context, true);
+        } else if (mounted) {
+          final error = context.read<OnlineClassProvider>().error;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(error ?? 'Failed to create online class')),
+          );
+        }
+      } else {
+        // Mock update for now
+        final scheduledDateTime = DateTime(
+          _selectedDate!.year,
+          _selectedDate!.month,
+          _selectedDate!.day,
+          _selectedTime!.hour,
+          _selectedTime!.minute,
+        );
+
+        final newClass = OnlineClass(
+          id: widget.onlineClass!.id,
+          title: _titleController.text.trim(),
+          description: _descController.text.trim(),
+          meetLink: _linkController.text.trim(),
+          scheduledTime: scheduledDateTime,
+          teacherId: 't1',
+          teacherName: 'Masihur Rahman',
+        );
+
         final index = MockData.onlineClasses.indexWhere(
           (c) => c['id'] == widget.onlineClass!.id,
         );
         if (index != -1) {
           MockData.onlineClasses[index] = newClass.toJson();
         }
-      } else {
-        MockData.onlineClasses.add(newClass.toJson());
-      }
 
-      setState(() => _isLoading = false);
-      Navigator.pop(context, true);
+        setState(() => _isLoading = false);
+        Navigator.pop(context, true);
+      }
     }
   }
 
@@ -187,15 +227,30 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                       onTap: _pickDate,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
                   Expanded(
                     child: _buildDateTimePicker(
-                      label: 'Time',
+                      label: 'Start Time',
                       value: _selectedTime != null
                           ? _selectedTime!.format(context)
                           : 'Select Time',
                       icon: Icons.access_time,
                       onTap: _pickTime,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildDateTimePicker(
+                      label: 'End Time',
+                      value: _selectedEndTime != null
+                          ? _selectedEndTime!.format(context)
+                          : 'Select Time',
+                      icon: Icons.access_time,
+                      onTap: _pickEndTime,
                     ),
                   ),
                 ],
