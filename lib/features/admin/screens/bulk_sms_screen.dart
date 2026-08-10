@@ -161,6 +161,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
     final sections = context.watch<SectionSetupNotifier>().sections;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
@@ -191,124 +192,124 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              children: [
-                TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    labelText: 'Search by name',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() => _searchQuery = '');
-                              _applyFilters();
-                            },
-                          )
-                        : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      labelText: 'Search by name',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _searchQuery = '');
+                                _applyFilters();
+                              },
+                            )
+                          : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
+                    onChanged: (val) {
+                      setState(() => _searchQuery = val.trim());
+                      if (_debounce?.isActive ?? false) _debounce!.cancel();
+                      _debounce = Timer(
+                        const Duration(milliseconds: 500),
+                        _applyFilters,
+                      );
+                    },
                   ),
-                  onChanged: (val) {
-                    setState(() => _searchQuery = val.trim());
-                    if (_debounce?.isActive ?? false) _debounce!.cancel();
-                    _debounce = Timer(
-                      const Duration(milliseconds: 500),
-                      _applyFilters,
-                    );
-                  },
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          labelText: 'Class',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
-                        items: [
-                          const DropdownMenuItem<String>(
-                            value: null,
-                            child: Text('All Classes'),
-                          ),
-                          ...classes.map(
-                            (c) => DropdownMenuItem(
-                              value: c.id,
-                              child: Text(c.name),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: 'Class',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
                             ),
                           ),
-                        ],
-                        value: _selectedClassId,
-                        onChanged: (val) {
-                          setState(() {
-                            _selectedClassId = val;
-                            _selectedSectionId = null;
-                          });
-                          _applyFilters();
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          labelText: 'Section',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
+                          items: [
+                            const DropdownMenuItem<String>(
+                              value: null,
+                              child: Text('All Classes'),
+                            ),
+                            ...classes.map(
+                              (c) => DropdownMenuItem(
+                                value: c.id,
+                                child: Text(c.name),
+                              ),
+                            ),
+                          ],
+                          value: _selectedClassId,
+                          onChanged: (val) {
+                            setState(() {
+                              _selectedClassId = val;
+                              _selectedSectionId = null;
+                            });
+                            _applyFilters();
+                          },
                         ),
-                        items: [
-                          const DropdownMenuItem<String>(
-                            value: null,
-                            child: Text('All Sections'),
-                          ),
-                          ...sections
-                            .where((s) => _selectedClassId == null || s.classId == _selectedClassId)
-                            .map(
-                            (s) => DropdownMenuItem(
-                              value: s.id,
-                              child: Text(s.name),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: 'Section',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
                             ),
                           ),
-                        ],
-                        value: _selectedSectionId,
-                        onChanged: (val) {
-                          setState(() {
-                            _selectedSectionId = val;
-                          });
-                          _applyFilters();
-                        },
+                          items: [
+                            const DropdownMenuItem<String>(
+                              value: null,
+                              child: Text('All Sections'),
+                            ),
+                            ...sections
+                              .where((s) => _selectedClassId == null || s.classId == _selectedClassId)
+                              .map(
+                              (s) => DropdownMenuItem(
+                                value: s.id,
+                                child: Text(s.name),
+                              ),
+                            ),
+                          ],
+                          value: _selectedSectionId,
+                          onChanged: (val) {
+                            setState(() {
+                              _selectedSectionId = val;
+                            });
+                            _applyFilters();
+                          },
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: Consumer<StudentsNotifier>(
+            Consumer<StudentsNotifier>(
               builder: (context, notifier, child) {
                 if (notifier.isLoading && notifier.students.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
@@ -320,6 +321,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
 
                 return ListView.builder(
                   controller: _scrollController,
+                  shrinkWrap: true,
                   itemCount: notifier.students.length + (notifier.hasMore ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (index == notifier.students.length) {
@@ -356,70 +358,71 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                 );
               },
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 4,
-                  offset: Offset(0, -2),
-                ),
-              ],
+            Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 4,
+                    offset: Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Selected: ${_selectedStudentIds.length} students',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _smsType,
+                    decoration: const InputDecoration(
+                      labelText: 'SMS Type',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'Normal SMS', child: Text('Normal SMS')),
+                      DropdownMenuItem(value: 'Mask SMS', child: Text('Mask SMS')),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) {
+                        setState(() => _smsType = val);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _messageController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your SMS message here...',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _isSending ? null : _sendBulkSms,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: _isSending
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Send SMS'),
+                  ),
+                ],
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Selected: ${_selectedStudentIds.length} students',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  value: _smsType,
-                  decoration: const InputDecoration(
-                    labelText: 'SMS Type',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: 'Normal SMS', child: Text('Normal SMS')),
-                    DropdownMenuItem(value: 'Mask SMS', child: Text('Mask SMS')),
-                  ],
-                  onChanged: (val) {
-                    if (val != null) {
-                      setState(() => _smsType = val);
-                    }
-                  },
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _messageController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter your SMS message here...',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _isSending ? null : _sendBulkSms,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: _isSending
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Send SMS'),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
