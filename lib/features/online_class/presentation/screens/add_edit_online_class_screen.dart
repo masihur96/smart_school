@@ -5,6 +5,8 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/data/mock_data/mock_data.dart';
 import 'package:smart_school/models/online_class_model.dart';
 import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
+import 'package:smart_school/features/admin/providers/setup_provider.dart';
+import 'package:smart_school/models/school_models.dart';
 
 class AddEditOnlineClassScreen extends StatefulWidget {
   final OnlineClass? onlineClass;
@@ -30,6 +32,10 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
   TimeOfDay? _selectedTime;
   TimeOfDay? _selectedEndTime;
 
+  String? _selectedClassId;
+  String? _selectedSectionId;
+  String? _selectedSubjectId;
+
   bool _isLoading = false;
 
   @override
@@ -42,6 +48,9 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
       _selectedDate = widget.onlineClass!.scheduledTime;
       _selectedTime = TimeOfDay.fromDateTime(widget.onlineClass!.scheduledTime);
       _selectedEndTime = TimeOfDay.fromDateTime(widget.onlineClass!.scheduledTime.add(const Duration(hours: 1)));
+      _selectedClassId = widget.onlineClass!.classId;
+      _selectedSectionId = widget.onlineClass!.sectionId;
+      _selectedSubjectId = widget.onlineClass!.subjectId;
     }
   }
 
@@ -111,9 +120,9 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
           date: dateStr,
           startTime: startTimeStr,
           endTime: endTimeStr,
-          classId: "c4d3269b-1234-4a21-93e1-456789abcdef", // Dummy from cURL
-          sectionId: "b1a2345c-5678-4b32-82d2-123456abcdef", // Dummy from cURL
-          subjectId: "d9c8765e-9876-4c43-91e3-abcdef123456", // Dummy from cURL
+          classId: _selectedClassId,
+          sectionId: _selectedSectionId,
+          subjectId: _selectedSubjectId,
         );
 
         setState(() => _isLoading = false);
@@ -197,6 +206,10 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                 icon: Icons.description_outlined,
                 maxLines: 3,
               ),
+              const SizedBox(height: 24),
+              _buildSectionTitle('Academic Details'),
+              const SizedBox(height: 12),
+              _buildDropdowns(),
               const SizedBox(height: 24),
               _buildSectionTitle('Meeting Details'),
               const SizedBox(height: 12),
@@ -389,6 +402,77 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDropdowns() {
+    final classSetup = context.watch<ClassSetupNotifier>();
+    final sectionSetup = context.watch<SectionSetupNotifier>();
+    final subjectSetup = context.watch<SubjectSetupNotifier>();
+
+    return Column(
+      children: [
+        DropdownButtonFormField<String>(
+          value: _selectedClassId,
+          decoration: _buildInputDecoration('Class', Icons.class_),
+          items: classSetup.classes.map((c) {
+            return DropdownMenuItem(value: c.id, child: Text(c.name));
+          }).toList(),
+          onChanged: (val) {
+            setState(() {
+              _selectedClassId = val;
+              _selectedSectionId = null;
+              _selectedSubjectId = null;
+            });
+          },
+          validator: (val) => val == null ? 'Please select a class' : null,
+        ),
+        const SizedBox(height: 16),
+        DropdownButtonFormField<String>(
+          value: _selectedSectionId,
+          decoration: _buildInputDecoration('Section', Icons.group),
+          items: sectionSetup.sections
+              .where((s) => s.classId == _selectedClassId)
+              .map((s) {
+            return DropdownMenuItem(value: s.id, child: Text(s.name));
+          }).toList(),
+          onChanged: (val) => setState(() => _selectedSectionId = val),
+          validator: (val) => val == null ? 'Please select a section' : null,
+        ),
+        const SizedBox(height: 16),
+        DropdownButtonFormField<String>(
+          value: _selectedSubjectId,
+          decoration: _buildInputDecoration('Subject', Icons.book),
+          items: subjectSetup.subjects
+              .where((s) => s.classId == _selectedClassId)
+              .map((s) {
+            return DropdownMenuItem(value: s.id, child: Text(s.name));
+          }).toList(),
+          onChanged: (val) => setState(() => _selectedSubjectId = val),
+          validator: (val) => val == null ? 'Please select a subject' : null,
+        ),
+      ],
+    );
+  }
+
+  InputDecoration _buildInputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, color: AppColors.textSecondary),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.primary),
+      ),
+      filled: true,
+      fillColor: Colors.white,
     );
   }
 }
