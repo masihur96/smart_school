@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
-import 'package:smart_school/data/mock_data/mock_data.dart';
 import 'package:smart_school/models/online_class_model.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:dio/dio.dart';
 
 import 'add_edit_online_class_screen.dart';
 
@@ -20,7 +20,8 @@ class OnlineClassListScreen extends StatefulWidget {
 }
 
 class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
-  late List<OnlineClass> onlineClasses;
+  List<OnlineClass> onlineClasses = [];
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -28,14 +29,70 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     _loadOnlineClasses();
   }
 
-  void _loadOnlineClasses() {
+  Future<void> _loadOnlineClasses() async {
     setState(() {
-      onlineClasses = MockData.onlineClasses
-          .map((json) => OnlineClass.fromJson(json))
-          .toList();
-      // Sort by scheduled time
-      onlineClasses.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
+      isLoading = true;
     });
+
+    try {
+      final dio = Dio();
+      final response = await dio.get(
+        'https://smart-school-backend-production.up.railway.app/online-classes',
+        options: Options(
+          headers: {
+            'accept': '*/*',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYTBjM2ZmZi1hZTU5LTQ2YTMtYTAzNy0xOWZhNjgwMDNjNmIiLCJyb2xlIjoiYWRtaW4iLCJzY2hvb2xJZCI6IjI5ZjA1ZWRiLThlMGItNDM0Yy1hNDcxLWFhNzc2MzA4YTFjMSIsImNsYXNzSWRzIjpbXSwic2VjdGlvbklkcyI6W10sImlhdCI6MTc4NjY0NTM1NCwiZXhwIjoxNzg2NzMxNzU0fQ.MVNAkFfJ6iuN7TXOrPYYZCyVMKPgp5uaMFBdpHTlP1s',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final List<dynamic> listData = data['data'] ?? [];
+        
+        setState(() {
+          onlineClasses = listData.map((json) {
+            return OnlineClass(
+              id: json['id'] ?? '',
+              title: json['title'] ?? '',
+              description: json['description'] ?? '',
+              meetLink: json['meetLink'] ?? '',
+              scheduledTime: json['date'] != null 
+                  ? DateTime.parse(json['date']) 
+                  : DateTime.now(),
+              teacherId: json['hostId'] ?? '',
+              teacherName: 'Host', // Default since name is missing in response
+              classId: json['classId'],
+              sectionId: json['sectionId'],
+              subjectId: json['subjectId'],
+              createdAt: json['createdAt'] != null
+                  ? DateTime.parse(json['createdAt'])
+                  : null,
+            );
+          }).toList();
+          onlineClasses.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to load classes: ${response.statusCode}')),
+          );
+        }
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _launchURL(String urlString) async {
@@ -58,14 +115,16 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
             ? AppColors.primaryAdmin
             : AppColors.primaryTeacher,
       ),
-      body: onlineClasses.isEmpty
-          ? const Center(
-              child: Text(
-                'No online classes scheduled.',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
-              ),
-            )
-          : ListView.builder(
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : onlineClasses.isEmpty
+              ? const Center(
+                  child: Text(
+                    'No online classes scheduled.',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                  ),
+                )
+              : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: onlineClasses.length,
               itemBuilder: (context, index) {
