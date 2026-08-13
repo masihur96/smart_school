@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../data/dummy_library_data.dart';
 import '../models/book.dart';
 import '../widgets/book_grid_card.dart';
@@ -17,13 +18,15 @@ class _BookListScreenState extends State<BookListScreen> {
   bool _gridView = true;
 
   List<String> get _categories {
-    final cats = DummyLibraryData.books.map((b) => b.category).toSet().toList()..sort();
+    final cats = DummyLibraryData.books.map((b) => b.category).toSet().toList()
+      ..sort();
     return ['All', ...cats];
   }
 
   List<Book> get _filteredBooks {
     return DummyLibraryData.books.where((book) {
-      final matchesSearch = book.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+      final matchesSearch =
+          book.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           book.author.toLowerCase().contains(_searchQuery.toLowerCase());
       final matchesCat =
           _selectedCategory == 'All' || book.category == _selectedCategory;
@@ -35,19 +38,21 @@ class _BookListScreenState extends State<BookListScreen> {
   Widget build(BuildContext context) {
     final books = _filteredBooks;
 
-    return Column(
-      children: [
-        _buildSearchAndFilter(),
-        _buildCategoryChips(),
-        _buildResultsHeader(books.length),
-        Expanded(
-          child: books.isEmpty
-              ? _buildEmptyState()
-              : _gridView
-                  ? _buildGridView(books)
-                  : _buildListView(books),
-        ),
-      ],
+    return Scaffold(
+      body: Column(
+        children: [
+          _buildSearchAndFilter(),
+          _buildCategoryChips(),
+          _buildResultsHeader(books.length),
+          Expanded(
+            child: books.isEmpty
+                ? _buildEmptyState()
+                : _gridView
+                ? _buildGridView(books)
+                : _buildListView(books),
+          ),
+        ],
+      ),
     );
   }
 
@@ -69,19 +74,30 @@ class _BookListScreenState extends State<BookListScreen> {
                 style: const TextStyle(fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Search title or author…',
-                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-                  prefixIcon:
-                      Icon(Icons.search_rounded, color: Colors.grey.shade400, size: 20),
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontSize: 14,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: Colors.grey.shade400,
+                    size: 20,
+                  ),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
-                          icon: Icon(Icons.close_rounded,
-                              color: Colors.grey.shade400, size: 18),
+                          icon: Icon(
+                            Icons.close_rounded,
+                            color: Colors.grey.shade400,
+                            size: 18,
+                          ),
                           onPressed: () => setState(() => _searchQuery = ''),
                         )
                       : null,
                   border: InputBorder.none,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 13,
+                  ),
                 ),
               ),
             ),
@@ -114,12 +130,19 @@ class _BookListScreenState extends State<BookListScreen> {
               onTap: () => setState(() => _selectedCategory = cat),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: selected ? const Color(0xFF1A3C6E) : const Color(0xFFF4F6FB),
+                  color: selected
+                      ? const Color(0xFF1A3C6E)
+                      : const Color(0xFFF4F6FB),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: selected ? const Color(0xFF1A3C6E) : const Color(0xFFE5E7EB),
+                    color: selected
+                        ? const Color(0xFF1A3C6E)
+                        : const Color(0xFFE5E7EB),
                   ),
                 ),
                 child: Text(
@@ -162,7 +185,11 @@ class _BookListScreenState extends State<BookListScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.filter_list_rounded, size: 14, color: const Color(0xFF1A3C6E)),
+                Icon(
+                  Icons.filter_list_rounded,
+                  size: 14,
+                  color: const Color(0xFF1A3C6E),
+                ),
                 const SizedBox(width: 4),
                 Text(
                   _selectedCategory,
@@ -320,8 +347,11 @@ class _BookListTile extends StatelessWidget {
                     width: 62,
                     height: 88,
                     color: const Color(0xFFE5E7EB),
-                    child: const Icon(Icons.book_rounded,
-                        color: Color(0xFF9CA3AF), size: 28),
+                    child: const Icon(
+                      Icons.book_rounded,
+                      color: Color(0xFF9CA3AF),
+                      size: 28,
+                    ),
                   ),
                   loadingBuilder: (_, child, progress) => progress == null
                       ? child
@@ -330,7 +360,8 @@ class _BookListTile extends StatelessWidget {
                           height: 88,
                           color: const Color(0xFFF3F4F6),
                           child: const Center(
-                              child: CircularProgressIndicator(strokeWidth: 2)),
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
                         ),
                 ),
               ),
@@ -425,7 +456,9 @@ class _AvailabilityBadge extends StatelessWidget {
             width: 6,
             height: 6,
             decoration: BoxDecoration(
-              color: isAvailable ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+              color: isAvailable
+                  ? const Color(0xFF10B981)
+                  : const Color(0xFFEF4444),
               shape: BoxShape.circle,
             ),
           ),
@@ -434,7 +467,9 @@ class _AvailabilityBadge extends StatelessWidget {
             isAvailable ? 'Available' : 'Issued',
             style: TextStyle(
               fontSize: 10,
-              color: isAvailable ? const Color(0xFF059669) : const Color(0xFFDC2626),
+              color: isAvailable
+                  ? const Color(0xFF059669)
+                  : const Color(0xFFDC2626),
               fontWeight: FontWeight.w600,
             ),
           ),

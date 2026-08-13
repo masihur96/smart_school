@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/features/library/screens/add_edit_book_screen.dart';
+
 import '../data/dummy_library_data.dart';
 import 'book_list_screen.dart';
 import 'issued_books_screen.dart';
@@ -25,9 +28,17 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
       vsync: this,
       duration: const Duration(milliseconds: 700),
     );
-    _fadeAnim = CurvedAnimation(parent: _heroAnimController, curve: Curves.easeOut);
+    _fadeAnim = CurvedAnimation(
+      parent: _heroAnimController,
+      curve: Curves.easeOut,
+    );
     _slideAnim = Tween<Offset>(begin: const Offset(0, 0.25), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _heroAnimController, curve: Curves.easeOutCubic));
+        .animate(
+          CurvedAnimation(
+            parent: _heroAnimController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
     _heroAnimController.forward();
   }
 
@@ -41,12 +52,34 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
   @override
   Widget build(BuildContext context) {
     final totalBooks = DummyLibraryData.books.length;
-    final availableBooks = DummyLibraryData.books.where((b) => b.isAvailable).length;
+    final availableBooks = DummyLibraryData.books
+        .where((b) => b.isAvailable)
+        .length;
     final issuedBooks = DummyLibraryData.getIssuedBooks().length;
-    final overdueBooks = DummyLibraryData.getIssuedBooks().where((b) => b.isOverdue).length;
+    final overdueBooks = DummyLibraryData.getIssuedBooks()
+        .where((b) => b.isOverdue)
+        .length;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FB),
+      // backgroundColor: AppColors.primaryAdmin,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddEditBookScreen(isAdminOrTeacher: true),
+            ),
+          );
+          if (result == true) {}
+        },
+        backgroundColor: AppColors.primaryAdmin,
+
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text(
+          'New Book',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
           SliverAppBar(
@@ -54,9 +87,12 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
             floating: false,
             pinned: true,
             elevation: 0,
-            backgroundColor: const Color(0xFF1A3C6E),
+            backgroundColor: AppColors.primaryAdmin,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+              ),
               onPressed: () => Navigator.of(context).pop(),
             ),
             flexibleSpace: FlexibleSpaceBar(
@@ -86,7 +122,10 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                   dividerColor: Colors.transparent,
                   labelColor: Colors.white,
                   unselectedLabelColor: const Color(0xFF6B7280),
-                  labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  labelStyle: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
                   tabs: const [
                     Tab(text: '📚  All Books'),
                     Tab(text: '🔖  Issued'),
@@ -98,10 +137,7 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
         ],
         body: TabBarView(
           controller: _tabController,
-          children: const [
-            BookListScreen(),
-            IssuedBooksScreen(),
-          ],
+          children: const [BookListScreen(), IssuedBooksScreen()],
         ),
       ),
     );
@@ -113,117 +149,112 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
     required int issuedCount,
     required int overdueCount,
   }) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF1A3C6E), Color(0xFF2563EB)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return Stack(
+      children: [
+        // Decorative circles
+        Positioned(
+          top: -30,
+          right: -30,
+          child: Container(
+            width: 160,
+            height: 160,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withOpacity(0.06),
+            ),
+          ),
         ),
-      ),
-      child: Stack(
-        children: [
-          // Decorative circles
-          Positioned(
-            top: -30,
-            right: -30,
-            child: Container(
-              width: 160,
-              height: 160,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.06),
-              ),
+        Positioned(
+          bottom: 60,
+          left: -50,
+          child: Container(
+            width: 200,
+            height: 200,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withOpacity(0.04),
             ),
           ),
-          Positioned(
-            bottom: 60,
-            left: -50,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.04),
-              ),
-            ),
-          ),
-          // Content
-          SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-              child: FadeTransition(
-                opacity: _fadeAnim,
-                child: SlideTransition(
-                  position: _slideAnim,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(Icons.local_library_rounded,
-                                color: Colors.white, size: 22),
+        ),
+        // Content
+        SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+            child: FadeTransition(
+              opacity: _fadeAnim,
+              child: SlideTransition(
+                position: _slideAnim,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          const SizedBox(width: 12),
-                          const Text(
-                            'School Library',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 2),
-                        child: Text(
-                          'Manage books & track issues',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.75),
-                            fontSize: 13,
+                          child: const Icon(
+                            Icons.local_library_rounded,
+                            color: Colors.white,
+                            size: 22,
                           ),
                         ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'School Library',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 2),
+                      child: Text(
+                        'Manage books & track issues',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.75),
+                          fontSize: 13,
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _StatChip(
-                              icon: Icons.book_rounded,
-                              label: 'Total',
-                              value: '$totalBooks',
-                              color: Colors.white,
-                            ),
+                    ),
+                    const SizedBox(height: 16),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _StatChip(
+                            icon: Icons.book_rounded,
+                            label: 'Total',
+                            value: '$totalBooks',
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 10),
+                          _StatChip(
+                            icon: Icons.check_circle_rounded,
+                            label: 'Available',
+                            value: '$availableBooks',
+                            color: const Color(0xFF34D399),
+                          ),
+                          const SizedBox(width: 10),
+                          _StatChip(
+                            icon: Icons.bookmark_rounded,
+                            label: 'Issued',
+                            value: '$issuedCount',
+                            color: const Color(0xFF60A5FA),
+                          ),
+                          if (overdueCount > 0) ...[
                             const SizedBox(width: 10),
                             _StatChip(
-                              icon: Icons.check_circle_rounded,
-                              label: 'Available',
-                              value: '$availableBooks',
-                              color: const Color(0xFF34D399),
-                            ),
-                            const SizedBox(width: 10),
-                            _StatChip(
-                              icon: Icons.bookmark_rounded,
-                              label: 'Issued',
-                              value: '$issuedCount',
-                              color: const Color(0xFF60A5FA),
-                            ),
-                            if (overdueCount > 0) ...[
-                              const SizedBox(width: 10),
-                              _StatChip(
                               icon: Icons.warning_rounded,
                               label: 'Overdue',
                               value: '$overdueCount',
@@ -232,14 +263,14 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                           ],
                         ],
                       ),
-                      ),],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
