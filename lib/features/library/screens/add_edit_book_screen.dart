@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:smart_school/configs/network/data_provider.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
+import 'package:dio/dio.dart';
 class AddEditBookScreen extends StatefulWidget {
   final Book? book;
   final bool isAdminOrTeacher;
@@ -145,9 +146,50 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source);
     if (pickedFile != null) {
-      setState(() {
-        _coverImageController.text = pickedFile.path;
-      });
+      setState(() => _isLoading = true);
+      try {
+        final token = await StorageService.getToken();
+        final uploadFormData = FormData.fromMap({
+          'file': await MultipartFile.fromFile(
+            pickedFile.path,
+            filename: pickedFile.path.split('/').last,
+          ),
+        });
+
+        final uploadResponse = await DataProvider().performRequest(
+          'POST',
+          'https://smart-school-backend-production.up.railway.app/general/upload',
+          header: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'multipart/form-data',
+          },
+          data: uploadFormData,
+        );
+
+        if (uploadResponse != null &&
+            (uploadResponse.statusCode == 200 ||
+                uploadResponse.statusCode == 201)) {
+          final url = uploadResponse.data['data']['url'];
+          if (url != null) {
+            setState(() {
+              _coverImageController.text = url;
+            });
+          }
+        } else {
+          throw Exception(uploadResponse?.data ?? 'Failed to upload image');
+        }
+      } catch (e) {
+        debugPrint('Image upload error: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to upload image: $e')),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+      }
     }
   }
 
