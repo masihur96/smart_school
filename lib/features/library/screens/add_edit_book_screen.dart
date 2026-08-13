@@ -3,7 +3,7 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/library/models/book.dart';
 import 'package:uuid/uuid.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:dio/dio.dart';
 class AddEditBookScreen extends StatefulWidget {
   final Book? book;
   final bool isAdminOrTeacher;
@@ -76,24 +76,56 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
 
       setState(() => _isLoading = true);
 
-      // Simulate a network request
-      await Future.delayed(const Duration(seconds: 1));
+      try {
+        if (widget.book == null) {
+          // Create book using the API
+          await Dio().post(
+            'https://smart-school-backend-production.up.railway.app/library/books',
+            data: {
+              "title": _titleController.text.trim(),
+              "author": _authorController.text.trim(),
+              "isbn": _isbnController.text.trim(),
+              "category": _selectedCategory,
+              "coverImageUrl": _coverImageController.text.trim(),
+              "isAvailable": true,
+              "description": _descriptionController.text.trim(),
+            },
+            options: Options(
+              headers: {
+                'accept': '*/*',
+                'Content-Type': 'application/json',
+              },
+            ),
+          );
+        } else {
+          // Simulate a network request for editing
+          await Future.delayed(const Duration(seconds: 1));
+        }
 
-      final newBook = Book(
-        id: widget.book?.id ?? const Uuid().v4(),
-        title: _titleController.text.trim(),
-        author: _authorController.text.trim(),
-        isbn: _isbnController.text.trim(),
-        category: _selectedCategory!,
-        coverImageUrl: _coverImageController.text.trim(),
-        description: _descriptionController.text.trim(),
-        isAvailable: widget.book?.isAvailable ?? true,
-      );
+        final newBook = Book(
+          id: widget.book?.id ?? const Uuid().v4(),
+          title: _titleController.text.trim(),
+          author: _authorController.text.trim(),
+          isbn: _isbnController.text.trim(),
+          category: _selectedCategory!,
+          coverImageUrl: _coverImageController.text.trim(),
+          description: _descriptionController.text.trim(),
+          isAvailable: widget.book?.isAvailable ?? true,
+        );
 
-      setState(() => _isLoading = false);
-
-      if (mounted) {
-        Navigator.pop(context, newBook);
+        if (mounted) {
+          Navigator.pop(context, newBook);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error saving book: $e')),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
       }
     }
   }
