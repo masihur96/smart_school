@@ -4,6 +4,7 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/models/online_class_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:dio/dio.dart';
+import 'package:shimmer/shimmer.dart';
 
 import 'add_edit_online_class_screen.dart';
 
@@ -182,7 +183,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
             : AppColors.primaryTeacher,
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? _buildShimmerLoader()
           : onlineClasses.isEmpty
               ? const Center(
                   child: Text(
@@ -226,6 +227,59 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
               ),
             )
           : null,
+    );
+  }
+
+  Widget _buildShimmerLoader() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 4,
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(width: 150, height: 20, color: Colors.white),
+                    Container(
+                      width: 70, 
+                      height: 24, 
+                      decoration: BoxDecoration(
+                        color: Colors.white, 
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Container(width: 120, height: 16, color: Colors.white),
+                const SizedBox(height: 8),
+                Container(width: 180, height: 16, color: Colors.white),
+                const SizedBox(height: 24),
+                Container(
+                  width: double.infinity, 
+                  height: 48, 
+                  decoration: BoxDecoration(
+                    color: Colors.white, 
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
