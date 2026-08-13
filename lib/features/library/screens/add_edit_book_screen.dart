@@ -3,7 +3,8 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/library/models/book.dart';
 import 'package:uuid/uuid.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:dio/dio.dart';
+import 'package:smart_school/configs/network/data_provider.dart';
+import 'package:smart_school/core/utils/storage_service.dart';
 class AddEditBookScreen extends StatefulWidget {
   final Book? book;
   final bool isAdminOrTeacher;
@@ -78,8 +79,18 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
 
       try {
         if (widget.book == null) {
-          // Create book using the API
-          await Dio().post(
+          // Create book using the API via DataProvider
+          final token = await StorageService.getToken();
+          final headers = {
+            'accept': '*/*',
+            'Content-Type': 'application/json',
+          };
+          if (token != null) {
+            headers['Authorization'] = 'Bearer $token';
+          }
+
+          final response = await DataProvider().performRequest(
+            'POST',
             'https://smart-school-backend-production.up.railway.app/library/books',
             data: {
               "title": _titleController.text.trim(),
@@ -90,13 +101,12 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
               "isAvailable": true,
               "description": _descriptionController.text.trim(),
             },
-            options: Options(
-              headers: {
-                'accept': '*/*',
-                'Content-Type': 'application/json',
-              },
-            ),
+            header: headers,
           );
+          
+          if (response?.statusCode != 200 && response?.statusCode != 201) {
+            throw Exception(response?.data ?? 'Failed to create book');
+          }
         } else {
           // Simulate a network request for editing
           await Future.delayed(const Duration(seconds: 1));
@@ -117,6 +127,7 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
           Navigator.pop(context, newBook);
         }
       } catch (e) {
+        debugPrint('Error saving book: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error saving book: $e')),
