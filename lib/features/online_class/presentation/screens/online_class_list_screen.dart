@@ -95,6 +95,72 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     }
   }
 
+  Future<void> _deleteClass(String id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Class'),
+        content: const Text('Are you sure you want to delete this class?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final dio = Dio();
+      final response = await dio.delete(
+        'https://smart-school-backend-production.up.railway.app/online-classes/$id',
+        options: Options(
+          headers: {
+            'accept': '*/*',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYTBjM2ZmZi1hZTU5LTQ2YTMtYTAzNy0xOWZhNjgwMDNjNmIiLCJyb2xlIjoiYWRtaW4iLCJzY2hvb2xJZCI6IjI5ZjA1ZWRiLThlMGItNDM0Yy1hNDcxLWFhNzc2MzA4YTFjMSIsImNsYXNzSWRzIjpbXSwic2VjdGlvbklkcyI6W10sImlhdCI6MTc4NjY0NTM1NCwiZXhwIjoxNzg2NzMxNzU0fQ.MVNAkFfJ6iuN7TXOrPYYZCyVMKPgp5uaMFBdpHTlP1s',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Class deleted successfully')),
+          );
+        }
+        _loadOnlineClasses();
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to delete class: ${response.statusCode}')),
+          );
+        }
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error deleting class: $e')),
+        );
+      }
+    }
+  }
+
   Future<void> _launchURL(String urlString) async {
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
@@ -219,6 +285,50 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                   ),
                 ),
               ),
+              if (widget.isAdminOrTeacher)
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, color: AppColors.textSecondary),
+                  onSelected: (value) async {
+                    if (value == 'edit') {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddEditOnlineClassScreen(
+                            onlineClass: oClass,
+                            isAdminOrTeacher: widget.isAdminOrTeacher,
+                          ),
+                        ),
+                      );
+                      if (result == true) {
+                        _loadOnlineClasses();
+                      }
+                    } else if (value == 'delete') {
+                      _deleteClass(oClass.id);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit, size: 20),
+                          SizedBox(width: 8),
+                          Text('Edit'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, size: 20, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text('Delete', style: TextStyle(color: Colors.red)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
             ],
           ),
           const SizedBox(height: 8),
