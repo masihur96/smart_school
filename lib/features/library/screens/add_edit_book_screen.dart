@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/library/models/book.dart';
 import 'package:uuid/uuid.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AddEditBookScreen extends StatefulWidget {
   final Book? book;
@@ -97,6 +98,60 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
     }
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: source);
+    if (pickedFile != null) {
+      setState(() {
+        _coverImageController.text = pickedFile.path;
+      });
+    }
+  }
+
+  void _showImageOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.auto_awesome, color: AppColors.primary),
+                title: const Text('Generate Random Cover'),
+                onTap: () {
+                  Navigator.pop(context);
+                  final randomId = const Uuid().v4().substring(0, 8);
+                  final url = 'https://picsum.photos/seed/$randomId/400/600';
+                  _coverImageController.text = url;
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library, color: AppColors.primary),
+                title: const Text('Pick from Gallery'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt, color: AppColors.primary),
+                title: const Text('Take a Photo'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -157,14 +212,16 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
               const SizedBox(height: 16),
               _buildTextField(
                 controller: _coverImageController,
-                label: 'Cover Image URL',
+                label: 'Cover Image URL or Path',
                 hint: 'https://example.com/image.jpg',
                 icon: Icons.image_outlined,
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.add_photo_alternate, color: AppColors.primary),
+                  tooltip: 'Image Options',
+                  onPressed: _showImageOptions,
+                ),
                 validator: (val) {
-                  if (val == null || val.isEmpty) return 'Cover image URL is required';
-                  if (!val.startsWith('http://') && !val.startsWith('https://')) {
-                    return 'Please enter a valid URL';
-                  }
+                  if (val == null || val.isEmpty) return 'Cover image is required';
                   return null;
                 },
               ),
@@ -234,21 +291,23 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
     required IconData icon,
     int maxLines = 1,
     String? Function(String?)? validator,
+    Widget? suffixIcon,
   }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
       validator: validator,
-      decoration: _buildInputDecoration(label, icon).copyWith(
+      decoration: _buildInputDecoration(label, icon, suffixIcon: suffixIcon).copyWith(
         hintText: hint,
       ),
     );
   }
 
-  InputDecoration _buildInputDecoration(String label, IconData icon) {
+  InputDecoration _buildInputDecoration(String label, IconData icon, {Widget? suffixIcon}) {
     return InputDecoration(
       labelText: label,
       prefixIcon: Icon(icon, color: AppColors.textSecondary),
+      suffixIcon: suffixIcon,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
