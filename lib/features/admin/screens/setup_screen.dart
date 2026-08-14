@@ -1009,7 +1009,11 @@ class _LoadingView extends StatelessWidget {
         return Shimmer.fromColors(
           baseColor: baseColor,
           highlightColor: highlightColor,
-          child: Card(
+          child: Container(
+            margin: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade200),
+            ),
             child: Column(
               children: [
                 // Header strip

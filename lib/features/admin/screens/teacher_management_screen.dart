@@ -876,13 +876,10 @@ class _TeacherShimmer extends StatelessWidget {
         return Shimmer.fromColors(
           baseColor: baseColor,
           highlightColor: highlightColor,
-          child: Card(
-            elevation: 0,
+          child: Container(
+
             margin: const EdgeInsets.only(bottom: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(color: Colors.grey.shade200),
-            ),
+
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Row(
