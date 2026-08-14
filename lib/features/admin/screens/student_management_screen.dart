@@ -337,7 +337,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
               ],
             ),
             Expanded(
-              child: studentsNotifier.isLoading && students.isEmpty
+              child: studentsNotifier.isLoading
                   ? _StudentShimmer(
                       isDark: Theme.of(context).brightness == Brightness.dark,
                     )
@@ -795,7 +795,7 @@ class _StudentShimmer extends StatelessWidget {
         return Shimmer.fromColors(
           baseColor: baseColor,
           highlightColor: highlightColor,
-          child: Card(
+          child: Container(
             margin: const EdgeInsets.symmetric(vertical: 5),
             child: Stack(
               children: [

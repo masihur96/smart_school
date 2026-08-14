@@ -909,7 +909,7 @@ class _NoticeShimmer extends StatelessWidget {
         return Shimmer.fromColors(
           baseColor: baseColor,
           highlightColor: highlightColor,
-          child: Card(
+          child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(14, 14, 4, 10),
