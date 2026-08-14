@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:shimmer/shimmer.dart';
+
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -406,7 +408,15 @@ class _DayRoutineTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stateMap = context.watch<RoutineNotifier>().state;
+    final routineNotifier = context.watch<RoutineNotifier>();
+    final isLoading = routineNotifier.isLoading;
+    final stateMap = routineNotifier.state;
+
+    // ── Shimmer skeleton while loading ─────────────────────────────────────
+    if (isLoading) {
+      return _buildShimmerSkeleton(context);
+    }
+
     // If sectionId is empty, show entries for ALL sections of this class
     final List<RoutineEntry> allEntries;
     if (sectionId.isEmpty) {
@@ -501,6 +511,129 @@ class _DayRoutineTab extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  // ── Shimmer skeleton ────────────────────────────────────────────────────
+  Widget _buildShimmerSkeleton(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color shimBase =
+        isDark ? const Color(0xFF1E1E1E) : const Color(0xFFE8E8E8);
+    final Color shimHighlight =
+        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF8F8F8);
+    final Color lineColor =
+        isDark ? const Color(0xFF3D3D3D) : const Color(0xFFDEDEDE);
+    final Color cardBorder =
+        isDark ? const Color(0xFF333333) : const Color(0xFFEEEEEE);
+
+    // Thin rounded text-line placeholder
+    Widget line(double w, {double h = 11, double r = 30}) => Container(
+          width: w,
+          height: h,
+          decoration: BoxDecoration(
+            color: lineColor,
+            borderRadius: BorderRadius.circular(r),
+          ),
+        );
+
+    // Solid block (avatar, icon, badge)
+    Widget block(double w, double h, {double r = 8}) => Container(
+          width: w,
+          height: h,
+          decoration: BoxDecoration(
+            color: lineColor,
+            borderRadius: BorderRadius.circular(r),
+          ),
+        );
+
+    // One skeleton card that mirrors _RoutineEntryCard
+    Widget skeletonCard() => Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: cardBorder, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: isDark
+                    ? Colors.black.withOpacity(0.25)
+                    : Colors.black.withOpacity(0.06),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: IntrinsicHeight(
+              child: Row(
+                children: [
+                  // ── Time column skeleton ──────────────────────
+                  Container(
+                    width: 90,
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    decoration: BoxDecoration(
+                      color: lineColor.withOpacity(0.25),
+                      border: Border(
+                        right: BorderSide(color: cardBorder),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        line(48, h: 16, r: 8),   // start time
+                        const SizedBox(height: 8),
+                        block(1, 14, r: 1),        // divider tick
+                        const SizedBox(height: 8),
+                        line(38, h: 12, r: 8),   // end time
+                      ],
+                    ),
+                  ),
+                  // ── Content column skeleton ───────────────────
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Subject name + 3-dot menu
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              line(140, h: 14, r: 8),
+                              block(20, 20, r: 10),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          // Teacher icon + name
+                          Row(
+                            children: [
+                              block(14, 14, r: 7),
+                              const SizedBox(width: 6),
+                              line(100, h: 11),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          // Room badge
+                          block(80, 22, r: 6),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+    return Shimmer.fromColors(
+      baseColor: shimBase,
+      highlightColor: shimHighlight,
+      child: ListView.builder(
+        padding: const EdgeInsets.only(top: 16, bottom: 16),
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 4,
+        itemBuilder: (_, __) => skeletonCard(),
+      ),
     );
   }
 
