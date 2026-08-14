@@ -142,7 +142,7 @@ class _TeacherAttendanceManagementScreenState
             ),
           ),
           Expanded(
-            child: provider.isLoading && provider.teacherAttendance.isEmpty
+            child: provider.isLoading
                 ? _TeacherAttendanceShimmer(isDark: Theme.of(context).brightness == Brightness.dark)
                 : provider.error != null
                 ? Center(child: Text("Error: ${provider.error}"))
@@ -834,9 +834,10 @@ class _TeacherAttendanceShimmer extends StatelessWidget {
         return Shimmer.fromColors(
           baseColor: baseColor,
           highlightColor: highlightColor,
-          child: Card(
+          child: Container(
             margin: const EdgeInsets.only(bottom: 12),
-            shape: RoundedRectangleBorder(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[300]!),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Padding(

@@ -182,7 +182,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
             ? AppColors.primaryAdmin
             : AppColors.primaryTeacher,
       ),
-      body: isLoading
+      body: !isLoading
           ? _buildShimmerLoader()
           : onlineClasses.isEmpty
               ? const Center(
@@ -242,7 +242,8 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              border: Border.all(color: Colors.grey[300]!),
+
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
