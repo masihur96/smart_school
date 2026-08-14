@@ -281,8 +281,9 @@ class _StudentAttendanceManagementScreenState
           ),
           Expanded(
             child:
-                attendanceProvider.studentAttendance.isEmpty &&
-                    attendanceProvider.isLoading
+
+
+            attendanceProvider.isLoading
                 ? _AttendanceShimmer(isDark: Theme.of(context).brightness == Brightness.dark)
                 : attendanceProvider.error != null
                 ? Center(child: Text("Error: ${attendanceProvider.error}"))
@@ -567,12 +568,10 @@ class _AttendanceShimmer extends StatelessWidget {
         return Shimmer.fromColors(
           baseColor: baseColor,
           highlightColor: highlightColor,
-          child: Card(
+          child: Container(
             margin: const EdgeInsets.only(bottom: 12),
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            decoration: BoxDecoration(border: Border.all(color: Colors.grey[300]!)),
+
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
