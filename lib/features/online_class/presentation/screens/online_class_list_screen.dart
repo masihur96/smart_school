@@ -182,7 +182,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
             ? AppColors.primaryAdmin
             : AppColors.primaryTeacher,
       ),
-      body: !isLoading
+      body: isLoading
           ? _buildShimmerLoader()
           : onlineClasses.isEmpty
               ? const Center(
