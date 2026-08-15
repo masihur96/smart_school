@@ -153,4 +153,8 @@ class APIPath {
 
   // Online Classes
   static String onlineClasses = "$baseUrl/online-classes";
+
+  // Library
+  static String libraryBooks = "$baseUrl/library/books";
+  static String libraryBook(String id) => "$baseUrl/library/books/$id";
 }

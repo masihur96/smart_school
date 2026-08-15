@@ -58,6 +58,7 @@ import 'services/notification_service.dart';
 
 import 'features/academic_books/providers/academic_book_provider.dart';
 import 'features/expense_tracking/providers/expense_provider.dart';
+import 'features/library/providers/library_book_provider.dart';
 import 'features/online_class/providers/online_class_provider.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -160,6 +161,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => MarqueeProvider()),
         ChangeNotifierProvider(create: (_) => SchoolManagementNotifier()),
         ChangeNotifierProvider(create: (_) => ExpenseProvider()),
+        ChangeNotifierProvider(create: (_) => LibraryBookNotifier()),
         ChangeNotifierProvider(create: (_) => OnlineClassProvider(DataProvider())),
         ChangeNotifierProxyProvider4<ClassSetupNotifier, SectionSetupNotifier,
             SubjectSetupNotifier, AuthNotifier, OnboardingNotifier>(

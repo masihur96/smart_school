@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../data/dummy_library_data.dart';
 import '../models/book.dart';
+import '../providers/library_book_provider.dart';
 import '../widgets/book_grid_card.dart';
 import 'book_detail_screen.dart';
 
@@ -17,14 +18,29 @@ class _BookListScreenState extends State<BookListScreen> {
   String _selectedCategory = 'All';
   bool _gridView = true;
 
-  List<String> get _categories {
-    final cats = DummyLibraryData.books.map((b) => b.category).toSet().toList()
-      ..sort();
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<LibraryBookNotifier>().fetchBooks();
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<String> _categories(List<Book> books) {
+    final cats = books.map((b) => b.category).toSet().toList()..sort();
     return ['All', ...cats];
   }
 
-  List<Book> get _filteredBooks {
-    return DummyLibraryData.books.where((book) {
+  List<Book> _filteredBooks(List<Book> books) {
+    return books.where((book) {
       final matchesSearch =
           book.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           book.author.toLowerCase().contains(_searchQuery.toLowerCase());
@@ -36,27 +52,71 @@ class _BookListScreenState extends State<BookListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final books = _filteredBooks;
+    return Consumer<LibraryBookNotifier>(
+      builder: (context, notifier, _) {
+        if (notifier.isLoading) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-    return Scaffold(
-      body: Column(
-        children: [
-          _buildSearchAndFilter(),
-          _buildCategoryChips(),
-          _buildResultsHeader(books.length),
-          Expanded(
-            child: books.isEmpty
-                ? _buildEmptyState()
-                : _gridView
-                ? _buildGridView(books)
-                : _buildListView(books),
+        final allBooks = notifier.books;
+        final books = _filteredBooks(allBooks);
+        final cats = _categories(allBooks);
+
+        return Scaffold(
+          body: Column(
+            children: [
+              _buildSearchAndFilter(notifier),
+              _buildCategoryChips(cats),
+              _buildResultsHeader(books.length),
+              if (notifier.error != null && allBooks.isEmpty)
+                _buildErrorBanner(notifier)
+              else
+                Expanded(
+                  child: books.isEmpty
+                      ? _buildEmptyState()
+                      : _gridView
+                      ? _buildGridView(books)
+                      : _buildListView(books),
+                ),
+            ],
           ),
-        ],
+        );
+      },
+    );
+  }
+
+  Widget _buildErrorBanner(LibraryBookNotifier notifier) {
+    return Expanded(
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.cloud_off_rounded, size: 64, color: Colors.grey.shade300),
+            const SizedBox(height: 12),
+            Text(
+              notifier.error ?? 'Something went wrong',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade500,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            TextButton.icon(
+              onPressed: () => notifier.fetchBooks(),
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Retry'),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSearchAndFilter() {
+  Widget _buildSearchAndFilter(LibraryBookNotifier notifier) {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
@@ -70,6 +130,7 @@ class _BookListScreenState extends State<BookListScreen> {
                 border: Border.all(color: const Color(0xFFE5E7EB)),
               ),
               child: TextField(
+                controller: _searchController,
                 onChanged: (v) => setState(() => _searchQuery = v),
                 style: const TextStyle(fontSize: 14),
                 decoration: InputDecoration(
@@ -90,7 +151,10 @@ class _BookListScreenState extends State<BookListScreen> {
                             color: Colors.grey.shade400,
                             size: 18,
                           ),
-                          onPressed: () => setState(() => _searchQuery = ''),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _searchQuery = '');
+                          },
                         )
                       : null,
                   border: InputBorder.none,
@@ -112,7 +176,7 @@ class _BookListScreenState extends State<BookListScreen> {
     );
   }
 
-  Widget _buildCategoryChips() {
+  Widget _buildCategoryChips(List<String> categories) {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -121,10 +185,10 @@ class _BookListScreenState extends State<BookListScreen> {
         child: ListView.separated(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           scrollDirection: Axis.horizontal,
-          itemCount: _categories.length,
+          itemCount: categories.length,
           separatorBuilder: (_, __) => const SizedBox(width: 8),
           itemBuilder: (context, i) {
-            final cat = _categories[i];
+            final cat = categories[i];
             final selected = _selectedCategory == cat;
             return GestureDetector(
               onTap: () => setState(() => _selectedCategory = cat),
@@ -185,10 +249,10 @@ class _BookListScreenState extends State<BookListScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                const Icon(
                   Icons.filter_list_rounded,
                   size: 14,
-                  color: const Color(0xFF1A3C6E),
+                  color: Color(0xFF1A3C6E),
                 ),
                 const SizedBox(width: 4),
                 Text(
@@ -338,32 +402,27 @@ class _BookListTile extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  book.coverImageUrl,
-                  width: 62,
-                  height: 88,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    width: 62,
-                    height: 88,
-                    color: const Color(0xFFE5E7EB),
-                    child: const Icon(
-                      Icons.book_rounded,
-                      color: Color(0xFF9CA3AF),
-                      size: 28,
-                    ),
-                  ),
-                  loadingBuilder: (_, child, progress) => progress == null
-                      ? child
-                      : Container(
-                          width: 62,
-                          height: 88,
-                          color: const Color(0xFFF3F4F6),
-                          child: const Center(
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        ),
-                ),
+                child: book.coverImageUrl.isNotEmpty
+                    ? Image.network(
+                        book.coverImageUrl,
+                        width: 62,
+                        height: 88,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _placeholderCover(),
+                        loadingBuilder: (_, child, progress) =>
+                            progress == null
+                                ? child
+                                : Container(
+                                    width: 62,
+                                    height: 88,
+                                    color: const Color(0xFFF3F4F6),
+                                    child: const Center(
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    ),
+                                  ),
+                      )
+                    : _placeholderCover(),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -406,6 +465,19 @@ class _BookListTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _placeholderCover() {
+    return Container(
+      width: 62,
+      height: 88,
+      color: const Color(0xFFE5E7EB),
+      child: const Icon(
+        Icons.book_rounded,
+        color: Color(0xFF9CA3AF),
+        size: 28,
       ),
     );
   }

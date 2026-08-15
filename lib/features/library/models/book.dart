@@ -18,4 +18,22 @@ class Book {
     this.isAvailable = true,
     this.description = '',
   });
+
+  factory Book.fromJson(Map<String, dynamic> json) {
+    return Book(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? 'Unknown Title',
+      author: json['author']?.toString() ?? 'Unknown Author',
+      isbn: json['isbn']?.toString() ?? '',
+      category: json['category']?.toString() ?? 'General',
+      coverImageUrl: json['coverImageUrl']?.toString() ??
+          json['cover_image_url']?.toString() ??
+          json['imageUrl']?.toString() ??
+          '',
+      isAvailable: json['isAvailable'] as bool? ??
+          json['available'] as bool? ??
+          true,
+      description: json['description']?.toString() ?? '',
+    );
+  }
 }
