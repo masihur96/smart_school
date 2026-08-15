@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
-import 'package:smart_school/features/library/models/book.dart';
+import 'package:smart_school/features/library/data/models/book.dart';
 import 'package:uuid/uuid.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:smart_school/configs/network/data_provider.dart';

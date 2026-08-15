@@ -14,7 +14,7 @@ class IssuedBook {
     required this.dueDate,
     this.returnDate,
   });
-  
+
   bool get isOverdue {
     if (returnDate != null) return false;
     return DateTime.now().isAfter(dueDate);

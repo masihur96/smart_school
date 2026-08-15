@@ -6,7 +6,7 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import '../../../models/student_model.dart';
 import '../../admin/providers/student_provider.dart';
 import '../data/dummy_library_data.dart';
-import '../models/book.dart';
+import '../data/models/book.dart';
 import 'id_card_scanner_screen.dart';
 
 class BookDetailScreen extends StatelessWidget {

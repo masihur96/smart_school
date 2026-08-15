@@ -5,7 +5,7 @@ import 'package:smart_school/core/utils/storage_service.dart';
 
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
-import '../models/book.dart';
+import '../data/models/book.dart';
 
 class LibraryBookNotifier extends ChangeNotifier {
   List<Book> _books = [];

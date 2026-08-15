@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/book.dart';
+import '../data/models/book.dart';
 import '../providers/library_book_provider.dart';
 import '../widgets/book_grid_card.dart';
 import 'book_detail_screen.dart';

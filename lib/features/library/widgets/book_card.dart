@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/book.dart';
+import '../data/models/book.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class BookCard extends StatelessWidget {

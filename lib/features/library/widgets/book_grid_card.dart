@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/book.dart';
+import '../data/models/book.dart';
 
 class BookGridCard extends StatefulWidget {
   final Book book;

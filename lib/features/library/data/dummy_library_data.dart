@@ -1,6 +1,6 @@
-import '../models/book.dart';
-import '../models/issued_book.dart';
-import '../models/book_request.dart';
+import './models/book.dart';
+import './models/issued_book.dart';
+import './models/book_request.dart';
 
 class DummyLibraryData {
   static const List<Book> books = [
