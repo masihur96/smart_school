@@ -188,6 +188,51 @@ class AcademicBookNotifier extends ChangeNotifier {
     }
   }
 
+  // ── Upload image file (cover) ──────────────────────────────────────────────
+
+  Future<String?> uploadImage(File file) async {
+    _isUploading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          file.path,
+          filename: file.path.split('/').last,
+        ),
+      });
+
+      final response = await DataProvider().performRequest(
+        'POST',
+        '${APIPath.baseUrl}/general/upload',
+        header: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'multipart/form-data',
+        },
+        data: formData,
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
+        final url = response.data['data']?['url'] as String?;
+        log('AcademicBookNotifier: image uploaded → $url');
+        return url;
+      } else {
+        log('AcademicBookNotifier: image upload failed ${response?.data}');
+        return null;
+      }
+    } catch (e) {
+      log('AcademicBookNotifier: image upload exception $e');
+      return null;
+    } finally {
+      _isUploading = false;
+      notifyListeners();
+    }
+  }
+
   // ── Add book (POST /academic-ebooks) ──────────────────────────────────────
 
   Future<bool> addBook({

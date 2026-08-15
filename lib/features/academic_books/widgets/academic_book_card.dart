@@ -17,6 +17,9 @@ class AcademicBookCard extends StatelessWidget {
     this.isAdmin = false,
   });
 
+  String get _displaySubject =>
+      book.subject.isNotEmpty ? book.subject : (book.subjectName.isNotEmpty ? book.subjectName : 'General');
+
   // Derive a consistent color from the subject name
   Color _subjectColor() {
     final colors = [
@@ -29,15 +32,15 @@ class AcademicBookCard extends StatelessWidget {
       const Color(0xFFDB2777),
       const Color(0xFF65A30D),
     ];
-    final idx = book.subjectName.isEmpty
-        ? 0
-        : book.subjectName.codeUnitAt(0) % colors.length;
+    final name = _displaySubject;
+    final idx = name.isEmpty ? 0 : name.codeUnitAt(0) % colors.length;
     return colors[idx];
   }
 
   @override
   Widget build(BuildContext context) {
     final color = _subjectColor();
+    final hasCover = book.coverImageUrl.isNotEmpty;
 
     return Container(
       decoration: BoxDecoration(
@@ -54,7 +57,7 @@ class AcademicBookCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Top banner ─────────────────────────────────────────────────────
+          // ── Top banner / Cover ─────────────────────────────────────────────
           Container(
             height: 110,
             decoration: BoxDecoration(
@@ -66,21 +69,43 @@ class AcademicBookCard extends StatelessWidget {
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(18)),
             ),
+            clipBehavior: Clip.hardEdge,
             child: Stack(
+              fit: StackFit.expand,
               children: [
-                // Decorative circle
-                Positioned(
-                  top: -20,
-                  right: -20,
-                  child: Container(
-                    width: 90,
-                    height: 90,
+                if (hasCover)
+                  Image.network(
+                    book.coverImageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  ),
+                if (hasCover)
+                  Container(
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.08),
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.black.withOpacity(0.4),
+                          Colors.black.withOpacity(0.6),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
                     ),
                   ),
-                ),
+                // Decorative circle
+                if (!hasCover)
+                  Positioned(
+                    top: -20,
+                    right: -20,
+                    child: Container(
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withOpacity(0.08),
+                      ),
+                    ),
+                  ),
                 // PDF icon + subject badge
                 Padding(
                   padding: const EdgeInsets.all(14),
@@ -115,13 +140,13 @@ class AcademicBookCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.22),
+                          color: Colors.white.withOpacity(0.25),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
                           book.className.isNotEmpty
                               ? book.className
-                              : 'Unknown Class',
+                              : 'Academic Book',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
@@ -144,26 +169,43 @@ class AcademicBookCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Subject chip
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      book.subjectName.isNotEmpty
-                          ? book.subjectName
-                          : 'General',
-                      style: TextStyle(
-                        color: color,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
+                  // Subject & Author chips
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 7, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: color.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            _displaySubject,
+                            style: TextStyle(
+                              color: color,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                      if (book.author.isNotEmpty) ...[
+                        const SizedBox(width: 4),
+                        Text(
+                          book.author,
+                          style: TextStyle(
+                            fontSize: 9,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 6),
                   // Title
@@ -302,6 +344,9 @@ class AcademicBookListTile extends StatelessWidget {
     this.isAdmin = false,
   });
 
+  String get _displaySubject =>
+      book.subject.isNotEmpty ? book.subject : (book.subjectName.isNotEmpty ? book.subjectName : 'General');
+
   Color _subjectColor() {
     final colors = [
       const Color(0xFF2563EB),
@@ -313,15 +358,16 @@ class AcademicBookListTile extends StatelessWidget {
       const Color(0xFFDB2777),
       const Color(0xFF65A30D),
     ];
-    final idx = book.subjectName.isEmpty
-        ? 0
-        : book.subjectName.codeUnitAt(0) % colors.length;
+    final name = _displaySubject;
+    final idx = name.isEmpty ? 0 : name.codeUnitAt(0) % colors.length;
     return colors[idx];
   }
 
   @override
   Widget build(BuildContext context) {
     final color = _subjectColor();
+    final hasCover = book.coverImageUrl.isNotEmpty;
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -337,7 +383,7 @@ class AcademicBookListTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Icon
+          // Icon / Cover
           Container(
             width: 52,
             height: 52,
@@ -349,8 +395,19 @@ class AcademicBookListTile extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.picture_as_pdf_rounded,
-                color: Colors.white, size: 24),
+            clipBehavior: Clip.hardEdge,
+            child: hasCover
+                ? Image.network(
+                    book.coverImageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.picture_as_pdf_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  )
+                : const Icon(Icons.picture_as_pdf_rounded,
+                    color: Colors.white, size: 24),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -371,9 +428,25 @@ class AcademicBookListTile extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    _SmallChip(label: book.className, color: const Color(0xFF1A3C6E)),
-                    const SizedBox(width: 6),
-                    _SmallChip(label: book.subjectName, color: color),
+                    if (book.className.isNotEmpty) ...[
+                      _SmallChip(label: book.className, color: const Color(0xFF1A3C6E)),
+                      const SizedBox(width: 6),
+                    ],
+                    _SmallChip(label: _displaySubject, color: color),
+                    if (book.author.isNotEmpty) ...[
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          book.author,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey.shade600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ],

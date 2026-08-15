@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 
 import '../../admin/providers/setup_provider.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -37,20 +38,19 @@ class _AcademicBooksDashboardScreenState
       vsync: this,
       duration: const Duration(milliseconds: 700),
     );
-    _fadeAnim =
-        CurvedAnimation(parent: _heroAnimCtrl, curve: Curves.easeOut);
-    _slideAnim =
-        Tween<Offset>(begin: const Offset(0, 0.22), end: Offset.zero).animate(
-      CurvedAnimation(parent: _heroAnimCtrl, curve: Curves.easeOutCubic),
-    );
+    _fadeAnim = CurvedAnimation(parent: _heroAnimCtrl, curve: Curves.easeOut);
+    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.22), end: Offset.zero)
+        .animate(
+          CurvedAnimation(parent: _heroAnimCtrl, curve: Curves.easeOutCubic),
+        );
     _heroAnimCtrl.forward();
 
     // Fetch books on init
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final auth = context.read<AuthNotifier>();
-      context
-          .read<AcademicBookNotifier>()
-          .fetchBooks(schoolId: auth.user?.schoolId ?? '');
+      context.read<AcademicBookNotifier>().fetchBooks(
+        schoolId: auth.user?.schoolId ?? '',
+      );
     });
   }
 
@@ -66,9 +66,7 @@ class _AcademicBooksDashboardScreenState
     return all.where((b) {
       final matchesSearch =
           b.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              b.subjectName
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase());
+          b.subjectName.toLowerCase().contains(_searchQuery.toLowerCase());
       final matchesClass =
           _selectedClassId == 'all' || b.classId == _selectedClassId;
       final matchesSubject =
@@ -104,23 +102,26 @@ class _AcademicBooksDashboardScreenState
                   color: const Color(0xFFEF4444).withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.delete_rounded,
-                    color: Color(0xFFEF4444), size: 32),
+                child: const Icon(
+                  Icons.delete_rounded,
+                  color: Color(0xFFEF4444),
+                  size: 32,
+                ),
               ),
               const SizedBox(height: 16),
               const Text(
                 'Delete Book?',
                 style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF111827)),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF111827),
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 '"${book.title}" will be permanently removed.',
                 textAlign: TextAlign.center,
-                style:
-                    const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
               ),
               const SizedBox(height: 24),
               Row(
@@ -132,11 +133,14 @@ class _AcademicBooksDashboardScreenState
                         foregroundColor: const Color(0xFF6B7280),
                         side: const BorderSide(color: Color(0xFFE5E7EB)),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      child: const Text('Cancel',
-                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -148,11 +152,14 @@ class _AcademicBooksDashboardScreenState
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      child: const Text('Delete',
-                          style: TextStyle(fontWeight: FontWeight.w700)),
+                      child: const Text(
+                        'Delete',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
                     ),
                   ),
                 ],
@@ -177,12 +184,15 @@ class _AcademicBooksDashboardScreenState
     if (book.pdfUrl.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('No PDF available for this book',
-              style: TextStyle(fontWeight: FontWeight.w600)),
+          content: const Text(
+            'No PDF available for this book',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
           backgroundColor: const Color(0xFFEF4444),
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           margin: const EdgeInsets.all(16),
         ),
       );
@@ -191,25 +201,26 @@ class _AcademicBooksDashboardScreenState
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) =>
-            PdfViewerScreen(pdfUrl: book.pdfUrl, title: book.title),
+        builder: (_) => PdfViewerScreen(pdfUrl: book.pdfUrl, title: book.title),
       ),
     );
   }
 
-  Future<void> _openAddEdit(BuildContext context,
-      {AcademicBook? book}) async {
+  Future<void> _openAddEdit(BuildContext context, {AcademicBook? book}) async {
     final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (_) => MultiProvider(
           providers: [
             ChangeNotifierProvider.value(
-                value: context.read<AcademicBookNotifier>()),
+              value: context.read<AcademicBookNotifier>(),
+            ),
             ChangeNotifierProvider.value(
-                value: context.read<ClassSetupNotifier>()),
+              value: context.read<ClassSetupNotifier>(),
+            ),
             ChangeNotifierProvider.value(
-                value: context.read<SubjectSetupNotifier>()),
+              value: context.read<SubjectSetupNotifier>(),
+            ),
             ChangeNotifierProvider.value(value: context.read<AuthNotifier>()),
           ],
           child: AddEditAcademicBookScreen(book: book),
@@ -219,9 +230,9 @@ class _AcademicBooksDashboardScreenState
     if (result == true && context.mounted) {
       // Refresh
       final auth = context.read<AuthNotifier>();
-      context
-          .read<AcademicBookNotifier>()
-          .fetchBooks(schoolId: auth.user?.schoolId ?? '');
+      context.read<AcademicBookNotifier>().fetchBooks(
+        schoolId: auth.user?.schoolId ?? '',
+      );
     }
   }
 
@@ -241,12 +252,10 @@ class _AcademicBooksDashboardScreenState
     final subjects = _selectedClassId == 'all'
         ? subjectNotifier.subjects.where((s) => !s.isDeleted).toList()
         : subjectNotifier.subjects
-            .where((s) =>
-                !s.isDeleted && s.classId == _selectedClassId)
-            .toList();
+              .where((s) => !s.isDeleted && s.classId == _selectedClassId)
+              .toList();
 
     return Scaffold(
-
       body: NestedScrollView(
         headerSliverBuilder: (context, _) => [
           SliverAppBar(
@@ -254,10 +263,12 @@ class _AcademicBooksDashboardScreenState
             floating: false,
             pinned: true,
             elevation: 0,
-            backgroundColor: const Color(0xFF1A3C6E),
+            backgroundColor: AppColors.primaryAdmin,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white),
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
             actions: [
@@ -293,20 +304,29 @@ class _AcademicBooksDashboardScreenState
                   decoration: InputDecoration(
                     hintText: 'Search books or subjects…',
                     hintStyle: TextStyle(
-                        color: Colors.grey.shade400, fontSize: 14),
-                    prefixIcon: Icon(Icons.search_rounded,
-                        color: Colors.grey.shade400, size: 20),
+                      color: Colors.grey.shade400,
+                      fontSize: 14,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: Colors.grey.shade400,
+                      size: 20,
+                    ),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
-                            icon: Icon(Icons.close_rounded,
-                                color: Colors.grey.shade400, size: 18),
-                            onPressed: () =>
-                                setState(() => _searchQuery = ''),
+                            icon: Icon(
+                              Icons.close_rounded,
+                              color: Colors.grey.shade400,
+                              size: 18,
+                            ),
+                            onPressed: () => setState(() => _searchQuery = ''),
                           )
                         : null,
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 13),
+                      horizontal: 16,
+                      vertical: 13,
+                    ),
                   ),
                 ),
               ),
@@ -332,17 +352,19 @@ class _AcademicBooksDashboardScreenState
                     ),
                     ...classNotifier.classes
                         .where((c) => !c.isDeleted)
-                        .map((c) => Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: _FilterChip(
-                                label: c.name,
-                                selected: _selectedClassId == c.id,
-                                onTap: () => setState(() {
-                                  _selectedClassId = c.id;
-                                  _selectedSubjectId = 'all';
-                                }),
-                              ),
-                            )),
+                        .map(
+                          (c) => Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: _FilterChip(
+                              label: c.name,
+                              selected: _selectedClassId == c.id,
+                              onTap: () => setState(() {
+                                _selectedClassId = c.id;
+                                _selectedSubjectId = 'all';
+                              }),
+                            ),
+                          ),
+                        ),
                   ],
                 ),
               ),
@@ -363,19 +385,20 @@ class _AcademicBooksDashboardScreenState
                         label: 'All Subjects',
                         selected: _selectedSubjectId == 'all',
                         isSubject: true,
-                        onTap: () =>
-                            setState(() => _selectedSubjectId = 'all'),
+                        onTap: () => setState(() => _selectedSubjectId = 'all'),
                       ),
-                      ...subjects.map((s) => Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: _FilterChip(
-                              label: s.name,
-                              selected: _selectedSubjectId == s.id,
-                              isSubject: true,
-                              onTap: () => setState(
-                                  () => _selectedSubjectId = s.id),
-                            ),
-                          )),
+                      ...subjects.map(
+                        (s) => Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: _FilterChip(
+                            label: s.name,
+                            selected: _selectedSubjectId == s.id,
+                            isSubject: true,
+                            onTap: () =>
+                                setState(() => _selectedSubjectId = s.id),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -407,15 +430,16 @@ class _AcademicBooksDashboardScreenState
                   ? const Center(
                       child: CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0xFF2563EB)),
+                          Color(0xFF2563EB),
+                        ),
                         strokeWidth: 2.5,
                       ),
                     )
                   : filtered.isEmpty
-                      ? _buildEmptyState()
-                      : _isGrid
-                          ? _buildGrid(filtered, admin)
-                          : _buildList(filtered, admin),
+                  ? _buildEmptyState()
+                  : _isGrid
+                  ? _buildGrid(filtered, admin)
+                  : _buildList(filtered, admin),
             ),
           ],
         ),
@@ -442,13 +466,7 @@ class _AcademicBooksDashboardScreenState
 
   Widget _buildHeroBanner(int totalBooks) {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF1A3C6E), Color(0xFF2563EB)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
+      decoration: const BoxDecoration(color: AppColors.primaryAdmin),
       child: Stack(
         children: [
           Positioned(
@@ -458,8 +476,9 @@ class _AcademicBooksDashboardScreenState
               width: 160,
               height: 160,
               decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.06)),
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.06),
+              ),
             ),
           ),
           Positioned(
@@ -469,8 +488,9 @@ class _AcademicBooksDashboardScreenState
               width: 200,
               height: 200,
               decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.04)),
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.04),
+              ),
             ),
           ),
           SafeArea(
@@ -494,8 +514,11 @@ class _AcademicBooksDashboardScreenState
                               color: Colors.white.withOpacity(0.15),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.menu_book_rounded,
-                                color: Colors.white, size: 22),
+                            child: const Icon(
+                              Icons.menu_book_rounded,
+                              color: Colors.white,
+                              size: 22,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           const Column(
@@ -628,8 +651,11 @@ class _AcademicBooksDashboardScreenState
                 color: const Color(0xFF2563EB).withOpacity(0.08),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.menu_book_rounded,
-                  color: Color(0xFF2563EB), size: 44),
+              child: const Icon(
+                Icons.menu_book_rounded,
+                color: Color(0xFF2563EB),
+                size: 44,
+              ),
             ),
             const SizedBox(height: 20),
             const Text(
@@ -691,14 +717,21 @@ class _HeroStat extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(value,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800)),
-              Text(label,
-                  style: TextStyle(
-                      color: Colors.white.withOpacity(0.7), fontSize: 9)),
+              Text(
+                value,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.7),
+                  fontSize: 9,
+                ),
+              ),
             ],
           ),
         ],
@@ -733,7 +766,9 @@ class _FilterChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(
-            horizontal: 14, vertical: isSubject ? 4 : 6),
+          horizontal: 14,
+          vertical: isSubject ? 4 : 6,
+        ),
         decoration: BoxDecoration(
           color: selected ? activeColor : const Color(0xFFF4F6FB),
           borderRadius: BorderRadius.circular(20),

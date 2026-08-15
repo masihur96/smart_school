@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 
@@ -28,17 +29,23 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
   late final TextEditingController _authorCtrl;
   late final TextEditingController _subjectCtrl;
   late final TextEditingController _descCtrl;
-  late final TextEditingController _coverImageUrlCtrl;
   late final TextEditingController _totalPagesCtrl;
   late final TextEditingController _publishedYearCtrl;
 
   String? _selectedClassId;
   String? _selectedClassName;
+
+  // PDF
   String? _pdfUrl;
   String? _pdfFileName;
   File? _pdfFile;
-  bool _isActive = true;
 
+  // Cover image
+  File? _coverImageFile;
+  String? _coverImageUrl;
+  bool _isUploadingCover = false;
+
+  bool _isActive = true;
   bool _isSaving = false;
 
   bool get _isEdit => widget.book != null;
@@ -53,7 +60,6 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
       text: b?.subject.isNotEmpty == true ? b!.subject : (b?.subjectName ?? ''),
     );
     _descCtrl = TextEditingController(text: b?.description ?? '');
-    _coverImageUrlCtrl = TextEditingController(text: b?.coverImageUrl ?? '');
     _totalPagesCtrl = TextEditingController(
       text: (b?.totalPages != null && b!.totalPages > 0)
           ? b.totalPages.toString()
@@ -67,6 +73,9 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
     _selectedClassId = b?.classId;
     _selectedClassName = b?.className;
     _isActive = b?.isActive ?? true;
+    _coverImageUrl = b?.coverImageUrl.isNotEmpty == true
+        ? b!.coverImageUrl
+        : null;
     _pdfUrl = b?.pdfUrl;
     if (_pdfUrl != null && _pdfUrl!.isNotEmpty) {
       _pdfFileName = _pdfUrl!.split('/').last;
@@ -79,10 +88,48 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
     _authorCtrl.dispose();
     _subjectCtrl.dispose();
     _descCtrl.dispose();
-    _coverImageUrlCtrl.dispose();
     _totalPagesCtrl.dispose();
     _publishedYearCtrl.dispose();
     super.dispose();
+  }
+
+  // ── Pick cover image from gallery ──────────────────────────────────────────
+
+  Future<void> _pickCoverImage() async {
+    final notifier = context.read<AcademicBookNotifier>();
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+    if (picked == null) return;
+
+    final file = File(picked.path);
+    if (!mounted) return;
+    setState(() {
+      _coverImageFile = file;
+      _coverImageUrl = null; // clear old url while uploading
+      _isUploadingCover = true;
+    });
+
+    // Auto-upload immediately after pick
+    final uploaded = await notifier.uploadImage(file);
+
+    if (mounted) {
+      setState(() {
+        _isUploadingCover = false;
+        if (uploaded != null) {
+          _coverImageUrl = uploaded;
+        } else {
+          // Upload failed — keep local preview but clear url
+          _coverImageUrl = null;
+          _showSnack(
+            'Cover image upload failed. Please try again.',
+            isError: true,
+          );
+        }
+      });
+    }
   }
 
   // ── Pick PDF ───────────────────────────────────────────────────────────────
@@ -119,6 +166,10 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
       _showSnack('Please select a PDF file', isError: true);
       return;
     }
+    if (_isUploadingCover) {
+      _showSnack('Please wait — cover image is still uploading', isError: true);
+      return;
+    }
 
     setState(() => _isSaving = true);
 
@@ -128,9 +179,9 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
       final schoolId = auth.user?.schoolId ?? '';
       final uploadedBy = auth.user?.name ?? '';
 
-      String finalUrl = _pdfUrl ?? '';
+      String finalPdfUrl = _pdfUrl ?? '';
 
-      // Upload if a new file was picked
+      // Upload PDF if a new file was picked
       if (_pdfFile != null) {
         final uploaded = await notifier.uploadPdf(_pdfFile!);
         if (uploaded == null) {
@@ -139,14 +190,14 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
           }
           return;
         }
-        finalUrl = uploaded;
+        finalPdfUrl = uploaded;
       }
 
       final title = _titleCtrl.text.trim();
       final author = _authorCtrl.text.trim();
       final subject = _subjectCtrl.text.trim();
       final description = _descCtrl.text.trim();
-      final coverImageUrl = _coverImageUrlCtrl.text.trim();
+      final coverImageUrl = _coverImageUrl ?? '';
       final totalPages = int.tryParse(_totalPagesCtrl.text.trim()) ?? 0;
       final publishedYear = int.tryParse(_publishedYearCtrl.text.trim()) ?? 0;
 
@@ -159,7 +210,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
           classId: _selectedClassId!,
           className: _selectedClassName ?? '',
           subject: subject,
-          pdfUrl: finalUrl,
+          pdfUrl: finalPdfUrl,
           coverImageUrl: coverImageUrl,
           description: description,
           totalPages: totalPages,
@@ -174,7 +225,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
             classId: _selectedClassId!,
             className: _selectedClassName ?? '',
             subject: subject,
-            pdfUrl: finalUrl,
+            pdfUrl: finalPdfUrl,
             coverImageUrl: coverImageUrl,
             description: description,
             totalPages: totalPages,
@@ -190,7 +241,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
           classId: _selectedClassId!,
           className: _selectedClassName ?? '',
           subject: subject,
-          pdfUrl: finalUrl,
+          pdfUrl: finalPdfUrl,
           coverImageUrl: coverImageUrl,
           description: description,
           totalPages: totalPages,
@@ -206,7 +257,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
             classId: _selectedClassId!,
             className: _selectedClassName ?? '',
             subject: subject,
-            pdfUrl: finalUrl,
+            pdfUrl: finalPdfUrl,
             coverImageUrl: coverImageUrl,
             description: description,
             totalPages: totalPages,
@@ -255,6 +306,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
     final classNotifier = context.watch<ClassSetupNotifier>();
     final bookNotifier = context.watch<AcademicBookNotifier>();
     final isUploading = bookNotifier.isUploading;
+    final isBusy = _isSaving || isUploading || _isUploadingCover;
 
     return Scaffold(
       appBar: AppBar(
@@ -411,15 +463,18 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
             ),
             const SizedBox(height: 18),
 
-            // ── Cover Image URL ──────────────────────────────────────────────
+            // ── Cover Image Picker ───────────────────────────────────────────
             _SectionLabel(
-              label: 'Cover Image URL (optional)',
+              label: 'Cover Image (optional)',
               icon: Icons.image_rounded,
             ),
             const SizedBox(height: 8),
-            _buildTextField(
-              controller: _coverImageUrlCtrl,
-              hint: 'https://storage.googleapis.com/…/cover.jpg',
+            _CoverImagePicker(
+              imageFile: _coverImageFile,
+              imageUrl: _coverImageUrl,
+              isUploading: _isUploadingCover,
+              isBusy: isBusy,
+              onTap: _pickCoverImage,
             ),
             const SizedBox(height: 18),
 
@@ -510,7 +565,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
             _SectionLabel(label: 'PDF File *', icon: Icons.attach_file_rounded),
             const SizedBox(height: 8),
             GestureDetector(
-              onTap: _isSaving || isUploading ? null : _pickPdf,
+              onTap: isBusy ? null : _pickPdf,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.all(20),
@@ -625,7 +680,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
               width: double.infinity,
               height: 54,
               child: ElevatedButton(
-                onPressed: (_isSaving || isUploading) ? null : _save,
+                onPressed: isBusy ? null : _save,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1A3C6E),
                   foregroundColor: Colors.white,
@@ -637,7 +692,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
                     0xFF1A3C6E,
                   ).withOpacity(0.4),
                 ),
-                child: (_isSaving || isUploading)
+                child: isBusy
                     ? const SizedBox(
                         width: 22,
                         height: 22,
@@ -750,6 +805,215 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
       ),
     );
   }
+}
+
+// ── Cover image picker widget ──────────────────────────────────────────────────
+
+class _CoverImagePicker extends StatelessWidget {
+  final File? imageFile;
+  final String? imageUrl;
+  final bool isUploading;
+  final bool isBusy;
+  final VoidCallback onTap;
+
+  const _CoverImagePicker({
+    required this.imageFile,
+    required this.imageUrl,
+    required this.isUploading,
+    required this.isBusy,
+    required this.onTap,
+  });
+
+  bool get _hasImage =>
+      imageFile != null || (imageUrl != null && imageUrl!.isNotEmpty);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: isBusy ? null : onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: 140,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isUploading
+                ? const Color(0xFF2563EB)
+                : _hasImage
+                ? const Color(0xFF10B981)
+                : const Color(0xFFE5E7EB),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.hardEdge,
+        child: _buildContent(),
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    // Uploading spinner overlay on top of preview
+    if (isUploading) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          if (imageFile != null)
+            Image.file(imageFile!, fit: BoxFit.cover)
+          else
+            Container(color: const Color(0xFFF4F6FB)),
+          Container(
+            color: Colors.black.withOpacity(0.35),
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Uploading…',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    // Image preview (local file takes priority over remote url)
+    if (imageFile != null) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.file(imageFile!, fit: BoxFit.cover),
+          _uploadedBadge(),
+          _changeButton(),
+        ],
+      );
+    }
+
+    if (imageUrl != null && imageUrl!.isNotEmpty) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.network(
+            imageUrl!,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => _emptyState(),
+          ),
+          _uploadedBadge(),
+          _changeButton(),
+        ],
+      );
+    }
+
+    // Empty state — prompt to pick
+    return _emptyState();
+  }
+
+  Widget _uploadedBadge() => Positioned(
+    top: 10,
+    right: 10,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFF10B981),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.check_rounded, color: Colors.white, size: 13),
+          SizedBox(width: 4),
+          Text(
+            'Uploaded',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  Widget _changeButton() => Positioned(
+    bottom: 10,
+    right: 10,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.55),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.photo_library_rounded, color: Colors.white, size: 14),
+          SizedBox(width: 5),
+          Text(
+            'Change',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  Widget _emptyState() => Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2563EB).withOpacity(0.08),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.add_photo_alternate_rounded,
+          color: Color(0xFF2563EB),
+          size: 28,
+        ),
+      ),
+      const SizedBox(height: 10),
+      const Text(
+        'Tap to pick cover image',
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          color: Color(0xFF374151),
+        ),
+      ),
+      const SizedBox(height: 3),
+      const Text(
+        'JPG, PNG from gallery',
+        style: TextStyle(fontSize: 11, color: Color(0xFF9CA3AF)),
+      ),
+    ],
+  );
 }
 
 // ── Section label ─────────────────────────────────────────────────────────────
