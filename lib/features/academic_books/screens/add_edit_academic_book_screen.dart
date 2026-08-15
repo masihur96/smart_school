@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 
 import '../../admin/providers/setup_provider.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -20,8 +21,7 @@ class AddEditAcademicBookScreen extends StatefulWidget {
       _AddEditAcademicBookScreenState();
 }
 
-class _AddEditAcademicBookScreenState
-    extends State<AddEditAcademicBookScreen> {
+class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _titleCtrl;
@@ -50,17 +50,20 @@ class _AddEditAcademicBookScreenState
     _titleCtrl = TextEditingController(text: b?.title ?? '');
     _authorCtrl = TextEditingController(text: b?.author ?? '');
     _subjectCtrl = TextEditingController(
-        text: b?.subject.isNotEmpty == true ? b!.subject : (b?.subjectName ?? ''));
+      text: b?.subject.isNotEmpty == true ? b!.subject : (b?.subjectName ?? ''),
+    );
     _descCtrl = TextEditingController(text: b?.description ?? '');
     _coverImageUrlCtrl = TextEditingController(text: b?.coverImageUrl ?? '');
     _totalPagesCtrl = TextEditingController(
-        text: (b?.totalPages != null && b!.totalPages > 0)
-            ? b.totalPages.toString()
-            : '');
+      text: (b?.totalPages != null && b!.totalPages > 0)
+          ? b.totalPages.toString()
+          : '',
+    );
     _publishedYearCtrl = TextEditingController(
-        text: (b?.publishedYear != null && b!.publishedYear > 0)
-            ? b.publishedYear.toString()
-            : '');
+      text: (b?.publishedYear != null && b!.publishedYear > 0)
+          ? b.publishedYear.toString()
+          : '',
+    );
     _selectedClassId = b?.classId;
     _selectedClassName = b?.className;
     _isActive = b?.isActive ?? true;
@@ -228,9 +231,16 @@ class _AddEditAcademicBookScreenState
   void _showSnack(String msg, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg,
-            style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
-        backgroundColor: isError ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+        content: Text(
+          msg,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: isError
+            ? const Color(0xFFEF4444)
+            : const Color(0xFF10B981),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
@@ -247,9 +257,8 @@ class _AddEditAcademicBookScreenState
     final isUploading = bookNotifier.isUploading;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FB),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A3C6E),
+        backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -259,7 +268,10 @@ class _AddEditAcademicBookScreenState
         title: Text(
           _isEdit ? 'Edit Academic Book' : 'Add Academic Book',
           style: const TextStyle(
-              fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
         ),
       ),
       body: Form(
@@ -286,8 +298,11 @@ class _AddEditAcademicBookScreenState
                       color: Colors.white.withOpacity(0.18),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.picture_as_pdf_rounded,
-                        color: Colors.white, size: 26),
+                    child: const Icon(
+                      Icons.picture_as_pdf_rounded,
+                      color: Colors.white,
+                      size: 26,
+                    ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -351,9 +366,13 @@ class _AddEditAcademicBookScreenState
                   .map<DropdownMenuItem<String>>(
                     (c) => DropdownMenuItem<String>(
                       value: c.id,
-                      child: Text(c.name,
-                          style: const TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w500)),
+                      child: Text(
+                        c.name,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   )
                   .toList(),
@@ -381,8 +400,9 @@ class _AddEditAcademicBookScreenState
 
             // ── Description ──────────────────────────────────────────────────
             _SectionLabel(
-                label: 'Description (optional)',
-                icon: Icons.description_rounded),
+              label: 'Description (optional)',
+              icon: Icons.description_rounded,
+            ),
             const SizedBox(height: 8),
             _buildTextField(
               controller: _descCtrl,
@@ -393,8 +413,9 @@ class _AddEditAcademicBookScreenState
 
             // ── Cover Image URL ──────────────────────────────────────────────
             _SectionLabel(
-                label: 'Cover Image URL (optional)',
-                icon: Icons.image_rounded),
+              label: 'Cover Image URL (optional)',
+              icon: Icons.image_rounded,
+            ),
             const SizedBox(height: 8),
             _buildTextField(
               controller: _coverImageUrlCtrl,
@@ -410,13 +431,17 @@ class _AddEditAcademicBookScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _SectionLabel(
-                          label: 'Total Pages', icon: Icons.menu_book_rounded),
+                        label: 'Total Pages',
+                        icon: Icons.menu_book_rounded,
+                      ),
                       const SizedBox(height: 8),
                       _buildTextField(
                         controller: _totalPagesCtrl,
                         hint: '220',
                         keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                       ),
                     ],
                   ),
@@ -427,14 +452,17 @@ class _AddEditAcademicBookScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _SectionLabel(
-                          label: 'Published Year',
-                          icon: Icons.calendar_today_rounded),
+                        label: 'Published Year',
+                        icon: Icons.calendar_today_rounded,
+                      ),
                       const SizedBox(height: 8),
                       _buildTextField(
                         controller: _publishedYearCtrl,
                         hint: '2024',
                         keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                       ),
                     ],
                   ),
@@ -445,8 +473,7 @@ class _AddEditAcademicBookScreenState
 
             // ── Active toggle ────────────────────────────────────────────────
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(14),
@@ -463,14 +490,14 @@ class _AddEditAcademicBookScreenState
                 title: const Text(
                   'Active',
                   style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF374151)),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF374151),
+                  ),
                 ),
                 subtitle: Text(
                   _isActive ? 'Book is visible to students' : 'Book is hidden',
-                  style:
-                      TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                 ),
                 value: _isActive,
                 activeColor: const Color(0xFF10B981),
@@ -491,7 +518,8 @@ class _AddEditAcademicBookScreenState
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: (_pdfFile != null ||
+                    color:
+                        (_pdfFile != null ||
                             (_pdfUrl != null && _pdfUrl!.isNotEmpty))
                         ? const Color(0xFF10B981)
                         : const Color(0xFFE5E7EB),
@@ -505,19 +533,22 @@ class _AddEditAcademicBookScreenState
                     ),
                   ],
                 ),
-                child: (_pdfFile != null ||
+                child:
+                    (_pdfFile != null ||
                         (_pdfUrl != null && _pdfUrl!.isNotEmpty))
                     ? Row(
                         children: [
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color:
-                                  const Color(0xFF10B981).withOpacity(0.12),
+                              color: const Color(0xFF10B981).withOpacity(0.12),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.picture_as_pdf_rounded,
-                                color: Color(0xFF10B981), size: 24),
+                            child: const Icon(
+                              Icons.picture_as_pdf_rounded,
+                              color: Color(0xFF10B981),
+                              size: 24,
+                            ),
                           ),
                           const SizedBox(width: 14),
                           Expanded(
@@ -545,8 +576,11 @@ class _AddEditAcademicBookScreenState
                               ],
                             ),
                           ),
-                          const Icon(Icons.check_circle_rounded,
-                              color: Color(0xFF10B981), size: 22),
+                          const Icon(
+                            Icons.check_circle_rounded,
+                            color: Color(0xFF10B981),
+                            size: 22,
+                          ),
                         ],
                       )
                     : Column(
@@ -557,8 +591,11 @@ class _AddEditAcademicBookScreenState
                               color: const Color(0xFF2563EB).withOpacity(0.08),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.upload_file_rounded,
-                                color: Color(0xFF2563EB), size: 28),
+                            child: const Icon(
+                              Icons.upload_file_rounded,
+                              color: Color(0xFF2563EB),
+                              size: 28,
+                            ),
                           ),
                           const SizedBox(height: 12),
                           const Text(
@@ -594,9 +631,11 @@ class _AddEditAcademicBookScreenState
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  disabledBackgroundColor:
-                      const Color(0xFF1A3C6E).withOpacity(0.4),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  disabledBackgroundColor: const Color(
+                    0xFF1A3C6E,
+                  ).withOpacity(0.4),
                 ),
                 child: (_isSaving || isUploading)
                     ? const SizedBox(
@@ -604,8 +643,9 @@ class _AddEditAcademicBookScreenState
                         height: 22,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.5,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         ),
                       )
                     : Text(
@@ -660,8 +700,10 @@ class _AddEditAcademicBookScreenState
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide.none,
           ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
           filled: true,
           fillColor: Colors.white,
         ),
@@ -691,17 +733,19 @@ class _AddEditAcademicBookScreenState
       child: DropdownButtonHideUnderline(
         child: DropdownButton<T>(
           value: value,
-          hint: Text(hint,
-              style:
-                  TextStyle(color: Colors.grey.shade400, fontSize: 14)),
+          hint: Text(
+            hint,
+            style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+          ),
           isExpanded: true,
           borderRadius: BorderRadius.circular(14),
           items: items,
           onChanged: onChanged,
           style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF111827),
-              fontWeight: FontWeight.w500),
+            fontSize: 14,
+            color: Color(0xFF111827),
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );
