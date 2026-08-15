@@ -37,7 +37,7 @@ class AcademicBookNotifier extends ChangeNotifier {
 
       final response = await DataProvider().performRequest(
         'GET',
-        APIPath.academicBooks,
+        APIPath.academicEbooks,
         query: query.isEmpty ? null : query,
         header: {'Authorization': 'Bearer $token'},
       );
@@ -57,7 +57,7 @@ class AcademicBookNotifier extends ChangeNotifier {
         }
         _books = data.map((e) => AcademicBook.fromJson(e)).toList();
         log('AcademicBookNotifier: fetched ${_books.length} books');
-        
+
         // If API returns empty (no backend data yet), show dummy data for UI testing
         if (_books.isEmpty) {
           _loadDummyData();
@@ -88,7 +88,11 @@ class AcademicBookNotifier extends ChangeNotifier {
         className: 'Class 8',
         subjectId: 'dummy_sub_1',
         subjectName: 'Mathematics',
+        subject: 'Mathematics',
+        author: 'NCTB',
         pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        totalPages: 220,
+        publishedYear: 2024,
         createdAt: DateTime.now().subtract(const Duration(days: 2)),
       ),
       AcademicBook(
@@ -99,7 +103,11 @@ class AcademicBookNotifier extends ChangeNotifier {
         className: 'Class 9',
         subjectId: 'dummy_sub_2',
         subjectName: 'Physics',
+        subject: 'Physics',
+        author: 'NCTB',
         pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        totalPages: 180,
+        publishedYear: 2024,
         createdAt: DateTime.now().subtract(const Duration(days: 5)),
       ),
       AcademicBook(
@@ -110,7 +118,11 @@ class AcademicBookNotifier extends ChangeNotifier {
         className: 'Class 8',
         subjectId: 'dummy_sub_3',
         subjectName: 'History',
+        subject: 'History',
+        author: 'NCTB',
         pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        totalPages: 260,
+        publishedYear: 2023,
         createdAt: DateTime.now().subtract(const Duration(days: 10)),
       ),
       AcademicBook(
@@ -121,7 +133,11 @@ class AcademicBookNotifier extends ChangeNotifier {
         className: 'Class 6',
         subjectId: 'dummy_sub_4',
         subjectName: 'English',
+        subject: 'English',
+        author: 'NCTB',
         pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        totalPages: 160,
+        publishedYear: 2024,
         createdAt: DateTime.now().subtract(const Duration(days: 1)),
       ),
     ];
@@ -172,38 +188,46 @@ class AcademicBookNotifier extends ChangeNotifier {
     }
   }
 
-  // ── Add book ───────────────────────────────────────────────────────────────
+  // ── Add book (POST /academic-ebooks) ──────────────────────────────────────
 
   Future<bool> addBook({
     required String title,
-    required String description,
+    required String author,
     required String classId,
-    required String className,
-    required String subjectId,
-    required String subjectName,
+    required String subject,
     required String pdfUrl,
-    required String schoolId,
-    required String uploadedBy,
+    String coverImageUrl = '',
+    String description = '',
+    int totalPages = 0,
+    int publishedYear = 0,
+    bool isActive = true,
+    // Legacy / local-state helpers
+    String className = '',
+    String subjectId = '',
+    String subjectName = '',
+    String schoolId = '',
+    String uploadedBy = '',
   }) async {
     try {
       final token = await StorageService.getToken();
       if (token == null) return false;
 
-      final body = {
+      final body = <String, dynamic>{
         'title': title,
-        'description': description,
+        'author': author,
         'classId': classId,
-        'className': className,
-        'subjectId': subjectId,
-        'subjectName': subjectName,
+        'subject': subject,
         'pdfUrl': pdfUrl,
-        'schoolId': schoolId,
-        'uploadedBy': uploadedBy,
+        'isActive': isActive,
       };
+      if (coverImageUrl.isNotEmpty) body['coverImageUrl'] = coverImageUrl;
+      if (description.isNotEmpty) body['description'] = description;
+      if (totalPages > 0) body['totalPages'] = totalPages;
+      if (publishedYear > 0) body['publishedYear'] = publishedYear;
 
       final response = await DataProvider().performRequest(
         'POST',
-        APIPath.academicBooks,
+        APIPath.academicEbooks,
         data: body,
         header: {'Authorization': 'Bearer $token'},
       );
@@ -219,12 +243,15 @@ class AcademicBookNotifier extends ChangeNotifier {
               : {
                   'id': DateTime.now().millisecondsSinceEpoch.toString(),
                   'title': title,
-                  'description': description,
+                  'author': author,
                   'classId': classId,
-                  'className': className,
-                  'subjectId': subjectId,
-                  'subjectName': subjectName,
+                  'subject': subject,
                   'pdfUrl': pdfUrl,
+                  'coverImageUrl': coverImageUrl,
+                  'description': description,
+                  'totalPages': totalPages,
+                  'publishedYear': publishedYear,
+                  'isActive': isActive,
                   'schoolId': schoolId,
                   'uploadedBy': uploadedBy,
                   'createdAt': DateTime.now().toIso8601String(),
@@ -233,12 +260,18 @@ class AcademicBookNotifier extends ChangeNotifier {
           book = AcademicBook(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             title: title,
-            description: description,
+            author: author,
             classId: classId,
             className: className,
+            subject: subject,
             subjectId: subjectId,
             subjectName: subjectName,
             pdfUrl: pdfUrl,
+            coverImageUrl: coverImageUrl,
+            description: description,
+            totalPages: totalPages,
+            publishedYear: publishedYear,
+            isActive: isActive,
             schoolId: schoolId,
             uploadedBy: uploadedBy,
             createdAt: DateTime.now(),
@@ -257,35 +290,45 @@ class AcademicBookNotifier extends ChangeNotifier {
     }
   }
 
-  // ── Update book ────────────────────────────────────────────────────────────
+  // ── Update book (PUT /academic-ebooks/:id) ────────────────────────────────
 
   Future<bool> updateBook({
     required String id,
     required String title,
-    required String description,
+    required String author,
     required String classId,
-    required String className,
-    required String subjectId,
-    required String subjectName,
+    required String subject,
     required String pdfUrl,
+    String coverImageUrl = '',
+    String description = '',
+    int totalPages = 0,
+    int publishedYear = 0,
+    bool isActive = true,
+    // Legacy / local-state helpers
+    String className = '',
+    String subjectId = '',
+    String subjectName = '',
   }) async {
     try {
       final token = await StorageService.getToken();
       if (token == null) return false;
 
-      final body = {
+      final body = <String, dynamic>{
         'title': title,
-        'description': description,
+        'author': author,
         'classId': classId,
-        'className': className,
-        'subjectId': subjectId,
-        'subjectName': subjectName,
+        'subject': subject,
         'pdfUrl': pdfUrl,
+        'isActive': isActive,
       };
+      if (coverImageUrl.isNotEmpty) body['coverImageUrl'] = coverImageUrl;
+      if (description.isNotEmpty) body['description'] = description;
+      if (totalPages > 0) body['totalPages'] = totalPages;
+      if (publishedYear > 0) body['publishedYear'] = publishedYear;
 
       final response = await DataProvider().performRequest(
         'PUT',
-        APIPath.academicBook(id),
+        APIPath.academicEbook(id),
         data: body,
         header: {'Authorization': 'Bearer $token'},
       );
@@ -296,12 +339,18 @@ class AcademicBookNotifier extends ChangeNotifier {
         if (idx != -1) {
           _books[idx] = _books[idx].copyWith(
             title: title,
-            description: description,
+            author: author,
             classId: classId,
             className: className,
+            subject: subject,
             subjectId: subjectId,
             subjectName: subjectName,
             pdfUrl: pdfUrl,
+            coverImageUrl: coverImageUrl,
+            description: description,
+            totalPages: totalPages,
+            publishedYear: publishedYear,
+            isActive: isActive,
             updatedAt: DateTime.now(),
           );
           notifyListeners();
@@ -324,7 +373,7 @@ class AcademicBookNotifier extends ChangeNotifier {
 
       final response = await DataProvider().performRequest(
         'DELETE',
-        APIPath.academicBook(id),
+        APIPath.academicEbook(id),
         header: {'Authorization': 'Bearer $token'},
       );
 
@@ -345,12 +394,18 @@ class AcademicBookNotifier extends ChangeNotifier {
 
   void addBookLocally({
     required String title,
-    required String description,
+    required String author,
     required String classId,
-    required String className,
-    required String subjectId,
-    required String subjectName,
+    required String subject,
     required String pdfUrl,
+    String coverImageUrl = '',
+    String description = '',
+    int totalPages = 0,
+    int publishedYear = 0,
+    bool isActive = true,
+    String className = '',
+    String subjectId = '',
+    String subjectName = '',
     String schoolId = '',
     String uploadedBy = '',
   }) {
@@ -358,12 +413,18 @@ class AcademicBookNotifier extends ChangeNotifier {
       AcademicBook(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         title: title,
-        description: description,
+        author: author,
         classId: classId,
         className: className,
+        subject: subject,
         subjectId: subjectId,
         subjectName: subjectName,
         pdfUrl: pdfUrl,
+        coverImageUrl: coverImageUrl,
+        description: description,
+        totalPages: totalPages,
+        publishedYear: publishedYear,
+        isActive: isActive,
         schoolId: schoolId,
         uploadedBy: uploadedBy,
         createdAt: DateTime.now(),
@@ -376,23 +437,35 @@ class AcademicBookNotifier extends ChangeNotifier {
   void updateBookLocally({
     required String id,
     required String title,
-    required String description,
+    required String author,
     required String classId,
-    required String className,
-    required String subjectId,
-    required String subjectName,
+    required String subject,
     required String pdfUrl,
+    String coverImageUrl = '',
+    String description = '',
+    int totalPages = 0,
+    int publishedYear = 0,
+    bool isActive = true,
+    String className = '',
+    String subjectId = '',
+    String subjectName = '',
   }) {
     final idx = _books.indexWhere((b) => b.id == id);
     if (idx != -1) {
       _books[idx] = _books[idx].copyWith(
         title: title,
-        description: description,
+        author: author,
         classId: classId,
         className: className,
+        subject: subject,
         subjectId: subjectId,
         subjectName: subjectName,
         pdfUrl: pdfUrl,
+        coverImageUrl: coverImageUrl,
+        description: description,
+        totalPages: totalPages,
+        publishedYear: publishedYear,
+        isActive: isActive,
         updatedAt: DateTime.now(),
       );
       notifyListeners();

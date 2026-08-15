@@ -4,9 +4,20 @@ class AcademicBook {
   final String description;
   final String classId;
   final String className;
+
+  // Legacy fields (admin/academic-books)
   final String subjectId;
   final String subjectName;
+
+  // New /academic-ebooks fields
+  final String author;
+  final String subject; // subject name string (used in new API)
+  final String coverImageUrl;
   final String pdfUrl;
+  final int totalPages;
+  final int publishedYear;
+  final bool isActive;
+
   final String uploadedBy;
   final String schoolId;
   final DateTime createdAt;
@@ -17,10 +28,16 @@ class AcademicBook {
     required this.title,
     this.description = '',
     required this.classId,
-    required this.className,
-    required this.subjectId,
-    required this.subjectName,
+    this.className = '',
+    this.subjectId = '',
+    this.subjectName = '',
+    this.author = '',
+    this.subject = '',
+    this.coverImageUrl = '',
     required this.pdfUrl,
+    this.totalPages = 0,
+    this.publishedYear = 0,
+    this.isActive = true,
     this.uploadedBy = '',
     this.schoolId = '',
     required this.createdAt,
@@ -39,16 +56,22 @@ class AcademicBook {
         className: (json['class'] is Map ? json['class']['name'] : null) ??
             json['className'] ??
             '',
-        subjectId: (json['subject'] is Map
-                ? (json['subject']['uuid'] ?? json['subject']['id'])
+        subjectId: (json['subjectObj'] is Map
+                ? (json['subjectObj']['uuid'] ?? json['subjectObj']['id'])
                 : null) ??
             json['subjectId'] ??
             '',
         subjectName:
-            (json['subject'] is Map ? json['subject']['name'] : null) ??
+            (json['subjectObj'] is Map ? json['subjectObj']['name'] : null) ??
                 json['subjectName'] ??
                 '',
+        author: json['author'] ?? '',
+        subject: json['subject'] ?? '',
+        coverImageUrl: json['coverImageUrl'] ?? '',
         pdfUrl: json['pdfUrl'] ?? json['fileUrl'] ?? json['url'] ?? '',
+        totalPages: (json['totalPages'] as num?)?.toInt() ?? 0,
+        publishedYear: (json['publishedYear'] as num?)?.toInt() ?? 0,
+        isActive: json['isActive'] ?? true,
         uploadedBy: json['uploadedBy'] ?? '',
         schoolId: json['schoolId'] ?? '',
         createdAt: json['createdAt'] != null
@@ -67,7 +90,13 @@ class AcademicBook {
         'className': className,
         'subjectId': subjectId,
         'subjectName': subjectName,
+        'author': author,
+        'subject': subject,
+        'coverImageUrl': coverImageUrl,
         'pdfUrl': pdfUrl,
+        'totalPages': totalPages,
+        'publishedYear': publishedYear,
+        'isActive': isActive,
         'uploadedBy': uploadedBy,
         'schoolId': schoolId,
         'createdAt': createdAt.toIso8601String(),
@@ -82,7 +111,13 @@ class AcademicBook {
     String? className,
     String? subjectId,
     String? subjectName,
+    String? author,
+    String? subject,
+    String? coverImageUrl,
     String? pdfUrl,
+    int? totalPages,
+    int? publishedYear,
+    bool? isActive,
     String? uploadedBy,
     String? schoolId,
     DateTime? createdAt,
@@ -96,7 +131,13 @@ class AcademicBook {
         className: className ?? this.className,
         subjectId: subjectId ?? this.subjectId,
         subjectName: subjectName ?? this.subjectName,
+        author: author ?? this.author,
+        subject: subject ?? this.subject,
+        coverImageUrl: coverImageUrl ?? this.coverImageUrl,
         pdfUrl: pdfUrl ?? this.pdfUrl,
+        totalPages: totalPages ?? this.totalPages,
+        publishedYear: publishedYear ?? this.publishedYear,
+        isActive: isActive ?? this.isActive,
         uploadedBy: uploadedBy ?? this.uploadedBy,
         schoolId: schoolId ?? this.schoolId,
         createdAt: createdAt ?? this.createdAt,

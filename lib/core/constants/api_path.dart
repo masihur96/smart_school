@@ -147,9 +147,13 @@ class APIPath {
   static String adminPeriodAttendance = "$baseUrl/admin/attendance/period";
   static String teacherPeriodAttendance = "$baseUrl/attendance/period";
 
-  // Academic Books
+  // Academic Books (legacy admin)
   static String academicBooks = "$baseUrl/admin/academic-books";
   static String academicBook(String id) => "$baseUrl/admin/academic-books/$id";
+
+  // Academic eBooks (new endpoint)
+  static String academicEbooks = "$baseUrl/academic-ebooks";
+  static String academicEbook(String id) => "$baseUrl/academic-ebooks/$id";
 
   // Online Classes
   static String onlineClasses = "$baseUrl/online-classes";
