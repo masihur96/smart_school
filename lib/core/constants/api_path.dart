@@ -166,4 +166,7 @@ class APIPath {
   static String walletAddMoney = "$baseUrl/wallet/add-money";
   static String walletAddMoneyWithSchool(String schoolId) =>
       "$baseUrl/wallet/add-money?schoolId=$schoolId";
+  static String walletAddExpense = "$baseUrl/wallet/add-expense";
+  static String walletAddExpenseWithSchool(String schoolId) =>
+      "$baseUrl/wallet/add-expense?schoolId=$schoolId";
 }

@@ -517,6 +517,103 @@ class ExpenseProvider with ChangeNotifier {
     }
   }
 
+  Future<Map<String, dynamic>> addExpenseToWalletApi({
+    required String schoolId,
+    required double amount,
+    required String category,
+    required String title,
+    required String description,
+    required String paymentMethod,
+    String? referenceNumber,
+    required DateTime transactionDate,
+    String? attachmentUrl,
+  }) async {
+    _isActionLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null || token.isEmpty) {
+        _isActionLoading = false;
+        notifyListeners();
+        return {
+          'success': false,
+          'message': 'Authentication session expired. Please log in again.',
+        };
+      }
+
+      final payload = {
+        'amount': amount,
+        'category': category,
+        'title': title,
+        'description': description,
+        'paymentMethod': paymentMethod,
+        if (referenceNumber != null && referenceNumber.isNotEmpty)
+          'referenceNumber': referenceNumber,
+        'transactionDate': transactionDate.toUtc().toIso8601String(),
+        if (attachmentUrl != null && attachmentUrl.isNotEmpty)
+          'attachmentUrl': attachmentUrl,
+      };
+
+      log('Sending add-expense request for school: $schoolId with payload: $payload');
+
+      final url = '${APIPath.baseUrl}/wallet/add-expense?schoolId=$schoolId';
+      final response = await DataProvider().performRequest(
+        'POST',
+        url,
+        data: payload,
+        header: {
+          'accept': '*/*',
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      _isActionLoading = false;
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
+        String newId = DateTime.now().millisecondsSinceEpoch.toString();
+        if (response.data is Map) {
+          final dataMap = response.data['data'] ?? response.data;
+          if (dataMap is Map && dataMap['id'] != null) {
+            newId = dataMap['id'].toString();
+          }
+        }
+
+        final newExpense = Expense(
+          id: newId,
+          title: title,
+          amount: amount,
+          date: transactionDate,
+          category: category,
+          description: description,
+          type: TransactionType.expense,
+          paymentMethod: paymentMethod,
+          referenceNumber: referenceNumber,
+          attachmentUrl: attachmentUrl,
+        );
+
+        addExpense(newExpense);
+        return {'success': true, 'data': response.data};
+      } else {
+        String errorMessage = 'Failed to record expense.';
+        if (response?.data is Map && response?.data['message'] != null) {
+          errorMessage = response!.data['message'].toString();
+        } else if (response?.statusMessage != null) {
+          errorMessage = response!.statusMessage!;
+        }
+        notifyListeners();
+        return {'success': false, 'message': errorMessage};
+      }
+    } catch (e) {
+      log('Error adding expense to wallet: $e');
+      _isActionLoading = false;
+      notifyListeners();
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
   void _checkAndRefreshStoryHighlights() {
     // Dynamic recalculation for the main stories if needed
   }

@@ -68,6 +68,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
     'Events',
     'Utilities',
     'Electricity',
+    'Electricity Bill',
     'Lab Equipment',
     'Transport',
     'Others',
@@ -322,8 +323,8 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
     final isEditing = widget.expense != null;
     final provider = context.read<ExpenseProvider>();
 
-    if (isIncome && !isEditing) {
-      // Add money to school wallet using backend API
+    if (!isEditing) {
+      // Add transaction (Income or Expense) to school wallet using backend API
       setState(() => _isSubmitting = true);
 
       final auth = context.read<AuthNotifier>();
@@ -341,37 +342,57 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
           ? _attachmentUrlController.text.trim()
           : null;
 
-      final result = await provider.addMoneyToWalletApi(
-        schoolId: schoolId,
-        amount: amount,
-        category: category,
-        title: title,
-        description: description,
-        paymentMethod: paymentMethod,
-        referenceNumber: refNumber,
-        transactionDate: _selectedDate,
-        attachmentUrl: attachmentUrl,
-      );
+      final result = isIncome
+          ? await provider.addMoneyToWalletApi(
+              schoolId: schoolId,
+              amount: amount,
+              category: category,
+              title: title,
+              description: description,
+              paymentMethod: paymentMethod,
+              referenceNumber: refNumber,
+              transactionDate: _selectedDate,
+              attachmentUrl: attachmentUrl,
+            )
+          : await provider.addExpenseToWalletApi(
+              schoolId: schoolId,
+              amount: amount,
+              category: category,
+              title: title,
+              description: description,
+              paymentMethod: paymentMethod,
+              referenceNumber: refNumber,
+              transactionDate: _selectedDate,
+              attachmentUrl: attachmentUrl,
+            );
 
       if (!mounted) return;
       setState(() => _isSubmitting = false);
 
       if (result['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Row(
               children: [
-                Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-                SizedBox(width: 10),
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Amount added to school wallet successfully!',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                    isIncome
+                        ? 'Amount added to school wallet successfully!'
+                        : 'Expense recorded successfully!',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
             ),
-            backgroundColor: Color(0xFF10B981),
+            backgroundColor: isIncome
+                ? const Color(0xFF10B981)
+                : AppColors.primaryAdmin,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -389,7 +410,10 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    result['message'] ?? 'Failed to add money to wallet',
+                    result['message'] ??
+                        (isIncome
+                            ? 'Failed to add money to wallet'
+                            : 'Failed to record expense'),
                   ),
                 ),
               ],
@@ -400,10 +424,9 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
         );
       }
     } else {
-      // Local / standard expense creation or update
+      // Local / standard expense update
       final newExpense = Expense(
-        id: widget.expense?.id ??
-            DateTime.now().millisecondsSinceEpoch.toString(),
+        id: widget.expense!.id,
         title: _titleController.text.trim(),
         amount: double.parse(_amountController.text.trim()),
         date: _selectedDate,
@@ -419,18 +442,14 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
             : null,
       );
 
-      if (widget.expense == null) {
-        provider.addExpense(newExpense);
-      } else {
-        provider.updateExpense(newExpense);
-      }
+      provider.updateExpense(newExpense);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             isIncome
-                ? 'Amount added to school wallet successfully!'
-                : 'Expense recorded successfully!',
+                ? 'Income updated successfully!'
+                : 'Expense updated successfully!',
           ),
           backgroundColor: isIncome
               ? const Color(0xFF10B981)
