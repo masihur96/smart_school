@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import '../models/expense_model.dart';
 import '../screens/add_edit_expense_screen.dart';
 
@@ -169,7 +170,11 @@ class ExpenseListTile extends StatelessWidget {
               const SizedBox(height: 20),
 
               // Details List
-              _buildReceiptRow('Category', expense.category, Icons.category_outlined),
+              _buildReceiptRow(
+                'Category',
+                expense.category,
+                Icons.category_outlined,
+              ),
               _buildReceiptRow(
                 'Date & Time',
                 DateFormat('MMM dd, yyyy • hh:mm a').format(expense.date),
@@ -180,7 +185,8 @@ class ExpenseListTile extends StatelessWidget {
                 expense.paymentMethod,
                 Icons.payment_outlined,
               ),
-              if (expense.referenceNumber != null && expense.referenceNumber!.isNotEmpty)
+              if (expense.referenceNumber != null &&
+                  expense.referenceNumber!.isNotEmpty)
                 _buildReceiptRow(
                   'Reference No.',
                   expense.referenceNumber!,
@@ -192,7 +198,8 @@ class ExpenseListTile extends StatelessWidget {
                   expense.description,
                   Icons.notes_rounded,
                 ),
-              if (expense.attachmentUrl != null && expense.attachmentUrl!.isNotEmpty)
+              if (expense.attachmentUrl != null &&
+                  expense.attachmentUrl!.isNotEmpty)
                 _buildReceiptRow(
                   'Attachment',
                   'View Attachment / Receipt',
@@ -211,7 +218,10 @@ class ExpenseListTile extends StatelessWidget {
                         _showDeleteConfirm(context);
                       },
                       icon: const Icon(Icons.delete_outline, color: Colors.red),
-                      label: const Text('Delete', style: TextStyle(color: Colors.red)),
+                      label: const Text(
+                        'Delete',
+                        style: TextStyle(color: Colors.red),
+                      ),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.red),
                         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -229,12 +239,16 @@ class ExpenseListTile extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => AddEditExpenseScreen(expense: expense),
+                            builder: (_) =>
+                                AddEditExpenseScreen(expense: expense),
                           ),
                         );
                       },
                       icon: const Icon(Icons.edit, color: Colors.white),
-                      label: const Text('Edit Entry', style: TextStyle(color: Colors.white)),
+                      label: const Text(
+                        'Edit Entry',
+                        style: TextStyle(color: Colors.white),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF6750A4),
                         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -321,10 +335,7 @@ class ExpenseListTile extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: color.withOpacity(0.18),
-          width: 1,
-        ),
+        side: BorderSide(color: color.withOpacity(0.18), width: 1),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -341,11 +352,7 @@ class ExpenseListTile extends StatelessWidget {
                   color: color.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(
-                  iconData,
-                  color: color,
-                  size: 24,
-                ),
+                child: Icon(iconData, color: color, size: 24),
               ),
               const SizedBox(width: 14),
 
@@ -368,7 +375,10 @@ class ExpenseListTile extends StatelessWidget {
                       children: [
                         // Category Pill
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.grey.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(6),
@@ -396,10 +406,7 @@ class ExpenseListTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       DateFormat('MMM dd, yyyy').format(expense.date),
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        color: Colors.grey[500],
-                      ),
+                      style: TextStyle(fontSize: 11.5, color: Colors.grey[500]),
                     ),
                   ],
                 ),
@@ -413,7 +420,9 @@ class ExpenseListTile extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        isIncome ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
+                        isIncome
+                            ? Icons.arrow_downward_rounded
+                            : Icons.arrow_upward_rounded,
                         size: 14,
                         color: color,
                       ),
@@ -430,7 +439,10 @@ class ExpenseListTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: color.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(4),
