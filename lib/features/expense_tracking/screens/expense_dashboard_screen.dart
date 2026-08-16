@@ -100,6 +100,66 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                       ),
                     ),
                   )
+                else if (provider.error != null && provider.expenses.isEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 36,
+                      ),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.08),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.cloud_off_rounded,
+                                size: 40,
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              provider.error!,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                final schoolId =
+                                    context.read<AuthNotifier>().user?.schoolId ??
+                                        '';
+                                context
+                                    .read<ExpenseProvider>()
+                                    .fetchTransactions(schoolId: schoolId);
+                              },
+                              icon: const Icon(Icons.refresh_rounded, size: 16),
+                              label: const Text('Retry Fetching'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primaryAdmin,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 10,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
                 else if (filteredExpenses.isEmpty)
                   SliverToBoxAdapter(
                     child: Padding(

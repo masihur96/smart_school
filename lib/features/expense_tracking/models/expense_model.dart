@@ -60,36 +60,107 @@ class Expense {
   factory Expense.fromJson(Map<String, dynamic> json) {
     final typeStr = (json['type'] ??
             json['transactionType'] ??
+            json['walletTransactionType'] ??
             json['typeOfTransaction'] ??
             '')
         .toString()
         .toUpperCase();
 
-    final isIncome = typeStr == 'INCOME' ||
-        typeStr == 'ADD_MONEY' ||
-        typeStr == 'DEPOSIT' ||
-        typeStr == 'CREDIT' ||
-        json['isIncome'] == true;
+    final catStr = (json['category'] ?? '').toString().toUpperCase();
+    final titleStr = (json['title'] ?? '').toString().toUpperCase();
+
+    bool isIncome = false;
+    if (typeStr.isNotEmpty) {
+      if (typeStr == 'INCOME' ||
+          typeStr == 'ADD_MONEY' ||
+          typeStr == 'DEPOSIT' ||
+          typeStr == 'CREDIT' ||
+          typeStr == 'INFLOW' ||
+          typeStr.contains('INCOME')) {
+        isIncome = true;
+      } else if (typeStr == 'EXPENSE' ||
+          typeStr == 'ADD_EXPENSE' ||
+          typeStr == 'DEBIT' ||
+          typeStr == 'OUTFLOW' ||
+          typeStr.contains('EXPENSE')) {
+        isIncome = false;
+      }
+    } else if (json['isIncome'] != null) {
+      isIncome = json['isIncome'] == true;
+    } else if (json['isExpense'] != null) {
+      isIncome = json['isExpense'] != true;
+    } else {
+      // Check category and title heuristics
+      if (catStr.contains('FEE') ||
+          catStr.contains('TUITION') ||
+          catStr.contains('ADMISSION') ||
+          catStr.contains('GRANT') ||
+          catStr.contains('DONATION') ||
+          catStr.contains('COLLECTION') ||
+          titleStr.contains('FEE') ||
+          titleStr.contains('TUITION') ||
+          titleStr.contains('DEPOSIT')) {
+        isIncome = true;
+      } else {
+        isIncome = false;
+      }
+    }
+
+    double parsedAmount = 0.0;
+    if (json['amount'] != null) {
+      if (json['amount'] is num) {
+        parsedAmount = (json['amount'] as num).toDouble();
+      } else {
+        parsedAmount = double.tryParse(json['amount'].toString()) ?? 0.0;
+      }
+    }
+
+    DateTime parsedDate = DateTime.now();
+    final rawDate = json['transactionDate'] ??
+        json['date'] ??
+        json['createdAt'] ??
+        json['created_at'] ??
+        json['timestamp'] ??
+        json['time'];
+    if (rawDate != null) {
+      parsedDate = DateTime.tryParse(rawDate.toString()) ?? DateTime.now();
+    }
 
     return Expense(
-      id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
-      title: json['title']?.toString() ?? '',
-      amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
-      date: json['transactionDate'] != null
-          ? DateTime.tryParse(json['transactionDate'].toString()) ??
-              DateTime.now()
-          : (json['date'] != null
-              ? DateTime.tryParse(json['date'].toString()) ?? DateTime.now()
-              : (json['createdAt'] != null
-                  ? DateTime.tryParse(json['createdAt'].toString()) ??
-                      DateTime.now()
-                  : DateTime.now())),
-      category: json['category']?.toString() ?? '',
-      description: json['description']?.toString() ?? '',
+      id: json['id']?.toString() ??
+          json['_id']?.toString() ??
+          json['transactionId']?.toString() ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
+      title: (json['title'] ??
+              json['name'] ??
+              json['reason'] ??
+              json['description'] ??
+              json['category'] ??
+              'Transaction')
+          .toString(),
+      amount: parsedAmount,
+      date: parsedDate,
+      category: json['category']?.toString() ?? 'General',
+      description: (json['description'] ??
+              json['note'] ??
+              json['remarks'] ??
+              json['details'] ??
+              '')
+          .toString(),
       type: isIncome ? TransactionType.income : TransactionType.expense,
-      paymentMethod: json['paymentMethod']?.toString() ?? 'Cash',
-      referenceNumber: json['referenceNumber']?.toString(),
-      attachmentUrl: json['attachmentUrl']?.toString(),
+      paymentMethod: (json['paymentMethod'] ??
+              json['method'] ??
+              json['channel'] ??
+              'Cash')
+          .toString(),
+      referenceNumber: json['referenceNumber']?.toString() ??
+          json['refNumber']?.toString() ??
+          json['reference']?.toString() ??
+          json['trn']?.toString(),
+      attachmentUrl: json['attachmentUrl']?.toString() ??
+          json['receiptUrl']?.toString() ??
+          json['fileUrl']?.toString() ??
+          json['attachment']?.toString(),
     );
   }
 

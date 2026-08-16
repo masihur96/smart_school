@@ -128,19 +128,37 @@ class ExpenseProvider with ChangeNotifier {
 
   List<FinancialStory> get stories => _stories;
 
+  double? _serverBalance;
+  double? _serverTotalIncome;
+  double? _serverTotalExpense;
+
   double get totalIncome {
-    return _expenses
+    final calc = _expenses
         .where((e) => e.isIncome)
         .fold(0.0, (sum, item) => sum + item.amount);
+    if (calc == 0.0 && _serverTotalIncome != null) {
+      return _serverTotalIncome!;
+    }
+    return calc;
   }
 
   double get totalExpenses {
-    return _expenses
+    final calc = _expenses
         .where((e) => e.isExpense)
         .fold(0.0, (sum, item) => sum + item.amount);
+    if (calc == 0.0 && _serverTotalExpense != null) {
+      return _serverTotalExpense!;
+    }
+    return calc;
   }
 
   double get walletBalance {
+    if (_expenses.isNotEmpty) {
+      return totalIncome - totalExpenses;
+    }
+    if (_serverBalance != null) {
+      return _serverBalance!;
+    }
     return totalIncome - totalExpenses;
   }
 
@@ -407,6 +425,101 @@ class ExpenseProvider with ChangeNotifier {
   bool _isActionLoading = false;
   bool get isActionLoading => _isActionLoading;
 
+  List<Map<String, dynamic>> _extractTransactionsList(dynamic raw) {
+    if (raw == null) return [];
+
+    if (raw is List) {
+      final list = <Map<String, dynamic>>[];
+      for (var item in raw) {
+        if (item is Map) {
+          final map = Map<String, dynamic>.from(item);
+          if (map['transactions'] is List) {
+            list.addAll(_extractTransactionsList(map['transactions']));
+          } else {
+            list.add(map);
+          }
+        }
+      }
+      return list;
+    }
+
+    if (raw is Map) {
+      final map = Map<String, dynamic>.from(raw);
+
+      for (final key in [
+        'transactions',
+        'walletTransactions',
+        'history',
+        'items',
+        'records',
+        'data',
+        'results',
+        'rows',
+        'docs',
+        'list'
+      ]) {
+        if (map[key] is List) {
+          return _extractTransactionsList(map[key]);
+        }
+      }
+
+      if (map['expenses'] is List || map['incomes'] is List) {
+        final list = <Map<String, dynamic>>[];
+        if (map['incomes'] is List) {
+          list.addAll(_extractTransactionsList(map['incomes']));
+        }
+        if (map['expenses'] is List) {
+          list.addAll(_extractTransactionsList(map['expenses']));
+        }
+        return list;
+      }
+
+      for (final key in ['data', 'wallet', 'result', 'response']) {
+        if (map[key] is Map) {
+          final extracted = _extractTransactionsList(map[key]);
+          if (extracted.isNotEmpty) return extracted;
+        } else if (map[key] is List) {
+          return _extractTransactionsList(map[key]);
+        }
+      }
+    }
+
+    return [];
+  }
+
+  void _extractServerMetrics(dynamic raw) {
+    if (raw == null) return;
+    if (raw is Map) {
+      final map = Map<String, dynamic>.from(raw);
+
+      final b = map['balance'] ?? map['walletBalance'] ?? map['currentBalance'];
+      if (b != null) {
+        _serverBalance =
+            b is num ? b.toDouble() : double.tryParse(b.toString());
+      }
+
+      final ti = map['totalIncome'] ?? map['inflow'] ?? map['totalInflow'];
+      if (ti != null) {
+        _serverTotalIncome =
+            ti is num ? ti.toDouble() : double.tryParse(ti.toString());
+      }
+
+      final te = map['totalExpense'] ??
+          map['totalExpenses'] ??
+          map['outflow'] ??
+          map['totalOutflow'];
+      if (te != null) {
+        _serverTotalExpense =
+            te is num ? te.toDouble() : double.tryParse(te.toString());
+      }
+
+      if (map['data'] is Map) _extractServerMetrics(map['data']);
+      if (map['wallet'] is Map) _extractServerMetrics(map['wallet']);
+    } else if (raw is List && raw.isNotEmpty && raw.first is Map) {
+      _extractServerMetrics(raw.first);
+    }
+  }
+
   Future<void> fetchTransactions({String? schoolId}) async {
     _isLoading = true;
     _error = null;
@@ -441,45 +554,23 @@ class ExpenseProvider with ChangeNotifier {
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
         final raw = response.data;
-        List<dynamic> listData = [];
+        log('Wallet raw response received: $raw');
 
-        if (raw is List) {
-          listData = raw;
-        } else if (raw is Map) {
-          final dataField = raw['data'];
-          if (dataField is List) {
-            listData = dataField;
-          } else if (dataField is Map) {
-            if (dataField['transactions'] is List) {
-              listData = dataField['transactions'];
-            } else if (dataField['data'] is List) {
-              listData = dataField['data'];
-            } else if (dataField['items'] is List) {
-              listData = dataField['items'];
-            } else if (dataField['expenses'] is List) {
-              listData = dataField['expenses'];
-            }
-          } else if (raw['transactions'] is List) {
-            listData = raw['transactions'];
-          } else if (raw['items'] is List) {
-            listData = raw['items'];
-          } else if (raw['expenses'] is List) {
-            listData = raw['expenses'];
+        _extractServerMetrics(raw);
+        final listData = _extractTransactionsList(raw);
+
+        final fetched = <Expense>[];
+        for (var item in listData) {
+          try {
+            fetched.add(Expense.fromJson(item));
+          } catch (itemError) {
+            log('Error parsing transaction item: $item, error: $itemError');
           }
         }
 
-        if (listData.isNotEmpty) {
-          final fetched = listData
-              .where((e) => e is Map)
-              .map((e) => Expense.fromJson(Map<String, dynamic>.from(e as Map)))
-              .toList();
-
-          _expenses.clear();
-          _expenses.addAll(fetched);
-          log('Successfully fetched ${_expenses.length} transactions from wallet API');
-        } else if (raw is List && raw.isEmpty) {
-          _expenses.clear();
-        }
+        _expenses.clear();
+        _expenses.addAll(fetched);
+        log('Successfully parsed ${_expenses.length} transactions from wallet API');
 
         _checkAndRefreshStoryHighlights();
         notifyListeners();
