@@ -13,262 +13,98 @@ enum TransactionFilter {
 }
 
 class ExpenseProvider with ChangeNotifier {
-  final List<Expense> _expenses = [
-    // Income Transactions (Student Fees, Grants, etc.)
-    Expense(
-      id: 'inc_1',
-      title: 'Class 10 Monthly Tuition Fees',
-      amount: 32500.0,
-      date: DateTime.now().subtract(const Duration(hours: 4)),
-      category: 'Tuition Fee',
-      description: 'Collected tuition fees for Class 10 (Section A & B).',
-      type: TransactionType.income,
-      paymentMethod: 'Bank Transfer',
-      referenceNumber: 'TXN-FEE-8891',
-    ),
-    Expense(
-      id: 'inc_2',
-      title: 'New Admission Fees (Grade 1)',
-      amount: 18000.0,
-      date: DateTime.now().subtract(const Duration(days: 1)),
-      category: 'Admission Fee',
-      description: 'Admission fee packages collected for 12 new applicants.',
-      type: TransactionType.income,
-      paymentMethod: 'bKash / Mobile',
-      referenceNumber: 'TXN-ADM-4412',
-    ),
-    Expense(
-      id: 'inc_3',
-      title: 'Govt. Education Tech Grant',
-      amount: 25000.0,
-      date: DateTime.now().subtract(const Duration(days: 4)),
-      category: 'Grant',
-      description: 'Q3 STEM laboratory infrastructure development grant.',
-      type: TransactionType.income,
-      paymentMethod: 'Bank Transfer',
-      referenceNumber: 'GOV-GRNT-901',
-    ),
-    Expense(
-      id: 'inc_4',
-      title: 'Annual Sports Day Registration',
-      amount: 6400.0,
-      date: DateTime.now().subtract(const Duration(days: 8)),
-      category: 'Event Fee',
-      description: 'Student registration collection for sports competitions.',
-      type: TransactionType.income,
-      paymentMethod: 'Cash',
-      referenceNumber: 'REC-SPT-102',
-    ),
-    Expense(
-      id: 'inc_5',
-      title: 'Cafeteria & Canteen Revenue',
-      amount: 4200.0,
-      date: DateTime.now().subtract(const Duration(days: 12)),
-      category: 'Cafeteria',
-      description: 'Monthly cafeteria lease and revenue share deposit.',
-      type: TransactionType.income,
-      paymentMethod: 'Cash',
-      referenceNumber: 'REC-CAF-330',
-    ),
-
-    // Expense Transactions
-    Expense(
-      id: '1',
-      title: 'Teacher Salaries',
-      amount: 45000.0,
-      date: DateTime.now().subtract(const Duration(days: 2)),
-      category: 'Salary',
-      description: 'Monthly salary for teaching staff.',
-      type: TransactionType.expense,
-      paymentMethod: 'Bank Transfer',
-      referenceNumber: 'PAY-SAL-008',
-    ),
-    Expense(
-      id: '2',
-      title: 'Electricity Bill',
-      amount: 1200.50,
-      date: DateTime.now().subtract(const Duration(days: 5)),
-      category: 'Maintenance',
-      description: 'Monthly electricity bill for main building & AC units.',
-      type: TransactionType.expense,
-      paymentMethod: 'bKash / Mobile',
-      referenceNumber: 'UTIL-ELEC-412',
-    ),
-    Expense(
-      id: '3',
-      title: 'New Whiteboards & Markers',
-      amount: 350.0,
-      date: DateTime.now().subtract(const Duration(days: 10)),
-      category: 'Supplies',
-      description: 'Purchased 5 magnetic whiteboards for science classrooms.',
-      type: TransactionType.expense,
-      paymentMethod: 'Cash',
-      referenceNumber: 'SUPP-WB-991',
-    ),
-    Expense(
-      id: '4',
-      title: 'Annual Sports Day Organization',
-      amount: 2500.0,
-      date: DateTime.now().subtract(const Duration(days: 15)),
-      category: 'Events',
-      description: 'Trophies, guest refreshments, sound system, and track flags.',
-      type: TransactionType.expense,
-      paymentMethod: 'Cash',
-      referenceNumber: 'EVNT-SPT-772',
-    ),
-    Expense(
-      id: '5',
-      title: 'Plumbing Repair & Sanitation',
-      amount: 150.0,
-      date: DateTime.now().subtract(const Duration(days: 20)),
-      category: 'Maintenance',
-      description: 'Fixed leaking water pipe in chemistry laboratory.',
-      type: TransactionType.expense,
-      paymentMethod: 'Cash',
-      referenceNumber: 'MAINT-PLB-094',
-    ),
-  ];
+  final List<Expense> _expenses = [];
 
   late List<FinancialStory> _stories;
 
   ExpenseProvider() {
-    _initStories();
+    _refreshStories();
   }
 
-  void _initStories() {
+  void _refreshStories() {
+    final income = totalIncome;
+    final expenses = totalExpenses;
+    final balance = walletBalance;
+    final incomeList = onlyIncomes;
+    final expenseList = onlyExpenses;
+
     _stories = [
       FinancialStory(
-        id: 'story_fee',
-        title: 'Fee Stories',
-        subtitle: 'Collection Pulse',
-        icon: Icons.account_balance_wallet_rounded,
-        gradientColors: const [Color(0xFF10B981), Color(0xFF047857)],
-        slides: [
-          StorySlide(
-            title: 'Tuition Fee Collection',
-            highlightValue: '\$32,500.00',
-            subtitle: 'Collected this month',
-            description: '92% of Class 9 & 10 tuition fees have been settled successfully through online portals & treasury counter.',
-            bulletPoints: [
-              'Online Bank/Mobile: \$26,100 (80%)',
-              'Counter Cash: \$6,400 (20%)',
-              'Outstanding pending dues: \$2,800',
-            ],
-            badge: 'Fee Inflow',
-            badgeColor: const Color(0xFF10B981),
-            icon: Icons.payments_rounded,
-            footerNote: 'Auto-reminder SMS sent to remaining 14 students.',
-          ),
-          StorySlide(
-            title: 'Admission Package Receipts',
-            highlightValue: '\$18,000.00',
-            subtitle: 'New enrollments intake',
-            description: 'Fresh admission fees logged for Grade 1 and transfer candidates for the upcoming academic session.',
-            bulletPoints: [
-              '12 Full admission packages cleared',
-              'Orientation kit & uniforms included',
-              'Next batch interviews on Monday',
-            ],
-            badge: 'Admissions',
-            badgeColor: const Color(0xFF059669),
-            icon: Icons.how_to_reg_rounded,
-            footerNote: 'Target 95% met for Grade 1 admissions.',
-          ),
-        ],
-      ),
-      FinancialStory(
         id: 'story_month',
-        title: 'Monthly Pulse',
+        title: 'Treasury Pulse',
         subtitle: 'Cashflow Overview',
         icon: Icons.insights_rounded,
         gradientColors: const [Color(0xFF6366F1), Color(0xFF4338CA)],
         slides: [
           StorySlide(
             title: 'Treasury Cashflow',
-            highlightValue: '+\$36,899.50',
-            subtitle: 'Net Balance Growth',
-            description: 'School liquidity remains strong with total receipts exceeding operational disbursements by 42%.',
+            highlightValue:
+                '${balance >= 0 ? '+' : ''}\$${balance.toStringAsFixed(2)}',
+            subtitle: 'Net Balance',
+            description: balance >= 0
+                ? 'School liquidity remains healthy with total receipts exceeding operational disbursements.'
+                : 'Operational disbursements currently exceed logged receipts.',
             bulletPoints: [
-              'Total Inflow: \$86,100.00',
-              'Total Outflow: \$49,200.50',
-              'Surplus reserve allocated to STEM lab upgrade',
+              'Total Inflow: \$${income.toStringAsFixed(2)}',
+              'Total Outflow: \$${expenses.toStringAsFixed(2)}',
+              'Total Transactions: ${_expenses.length}',
             ],
-            badge: 'Financial Health',
+            badge: 'Treasury Health',
             badgeColor: const Color(0xFF6366F1),
             icon: Icons.trending_up_rounded,
-            footerNote: 'Financial audit status: In full compliance.',
+            footerNote: 'Synchronized with backend records.',
           ),
         ],
       ),
       FinancialStory(
-        id: 'story_salaries',
-        title: 'Staff Payroll',
-        subtitle: 'Disbursement',
-        icon: Icons.people_alt_rounded,
-        gradientColors: const [Color(0xFFF59E0B), Color(0xFFD97706)],
+        id: 'story_fee',
+        title: 'Fee Inflow',
+        subtitle: 'Collection Pulse',
+        icon: Icons.account_balance_wallet_rounded,
+        gradientColors: const [Color(0xFF10B981), Color(0xFF047857)],
         slides: [
           StorySlide(
-            title: 'Teacher & Staff Payroll',
-            highlightValue: '\$45,000.00',
-            subtitle: 'Disbursed on 1st of month',
-            description: 'Salaries disbursed to 24 full-time teaching faculty and 8 support & administrative staff members.',
+            title: 'Fee & Income Collection',
+            highlightValue: '\$${income.toStringAsFixed(2)}',
+            subtitle: 'Total receipts collected',
+            description: incomeList.isEmpty
+                ? 'No income transactions logged yet. Tap "+ Add Money" to add collections.'
+                : '${incomeList.length} income deposits logged across all channels.',
             bulletPoints: [
-              'Direct Bank Deposit: 100% completed',
-              'Provident fund deductions registered',
-              'Bonus evaluation scheduled for Q4',
+              'Bank Transfers: \$${incomeList.where((e) => e.paymentMethod.toUpperCase().contains('BANK')).fold(0.0, (s, e) => s + e.amount).toStringAsFixed(2)}',
+              'Cash Receipts: \$${incomeList.where((e) => e.paymentMethod.toUpperCase().contains('CASH')).fold(0.0, (s, e) => s + e.amount).toStringAsFixed(2)}',
+              'Other Channels: \$${incomeList.where((e) => !e.paymentMethod.toUpperCase().contains('BANK') && !e.paymentMethod.toUpperCase().contains('CASH')).fold(0.0, (s, e) => s + e.amount).toStringAsFixed(2)}',
             ],
-            badge: 'Payroll Done',
-            badgeColor: const Color(0xFFF59E0B),
-            icon: Icons.badge_rounded,
-            footerNote: 'Tax certificates generated for all personnel.',
+            badge: 'Fee Inflow',
+            badgeColor: const Color(0xFF10B981),
+            icon: Icons.payments_rounded,
+            footerNote: 'Real-time sync enabled.',
           ),
         ],
       ),
       FinancialStory(
-        id: 'story_utilities',
-        title: 'Campus Bills',
-        subtitle: 'Utilities & Power',
-        icon: Icons.bolt_rounded,
-        gradientColors: const [Color(0xFFEC4899), Color(0xFFBE185D)],
+        id: 'story_expenses',
+        title: 'Outflows',
+        subtitle: 'Disbursements',
+        icon: Icons.receipt_long_rounded,
+        gradientColors: const [Color(0xFFEF4444), Color(0xFFB91C1C)],
         slides: [
           StorySlide(
-            title: 'Utilities & Energy',
-            highlightValue: '\$1,200.50',
-            subtitle: 'Monthly electricity & water',
-            description: 'Electricity expenses dropped 8% this month following the installation of solar inverter panels in the library.',
+            title: 'Campus Expenditures',
+            highlightValue: '\$${expenses.toStringAsFixed(2)}',
+            subtitle: 'Total expenses recorded',
+            description: expenseList.isEmpty
+                ? 'No campus expenses logged yet. Tap "- Add Expense" to log bills or payroll.'
+                : '${expenseList.length} operational expenditure vouchers recorded.',
             bulletPoints: [
-              'Main Building: \$780.00',
-              'Science & Computer Lab: \$320.50',
-              'Campus Water & Gas: \$100.00',
+              'Total Outflows: \$${expenses.toStringAsFixed(2)}',
+              'Transactions Logged: ${expenseList.length}',
+              'Net Operating Reserve: \$${balance.toStringAsFixed(2)}',
             ],
-            badge: 'Utility Outflow',
-            badgeColor: const Color(0xFFEC4899),
-            icon: Icons.lightbulb_rounded,
-            footerNote: 'Next maintenance review due on 25th.',
-          ),
-        ],
-      ),
-      FinancialStory(
-        id: 'story_reserve',
-        title: 'Reserve Fund',
-        subtitle: 'Safety Treasury',
-        icon: Icons.shield_rounded,
-        gradientColors: const [Color(0xFF8B5CF6), Color(0xFF6D28D9)],
-        slides: [
-          StorySlide(
-            title: 'Emergency & Dev Reserve',
-            highlightValue: '\$25,000.00',
-            subtitle: 'Government tech grant',
-            description: 'Dedicated fund secured for robotics kits, interactive smartboards, and library digital terminals.',
-            bulletPoints: [
-              'Robotics kit procurement: In progress',
-              'High-speed fiber installation: Approved',
-              'Unused contingency: \$18,500 held',
-            ],
-            badge: 'Grant Reserve',
-            badgeColor: const Color(0xFF8B5CF6),
-            icon: Icons.savings_rounded,
-            footerNote: 'Quarterly grant utilization report ready.',
+            badge: 'Expenses Done',
+            badgeColor: const Color(0xFFEF4444),
+            icon: Icons.receipt_long_rounded,
+            footerNote: 'Updated from school wallet database.',
           ),
         ],
       ),
@@ -417,8 +253,104 @@ class ExpenseProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+  String? _error;
+  String? get error => _error;
+
   bool _isActionLoading = false;
   bool get isActionLoading => _isActionLoading;
+
+  Future<void> fetchTransactions({String? schoolId}) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null || token.isEmpty) {
+        _isLoading = false;
+        _error = 'Authentication token not found';
+        notifyListeners();
+        return;
+      }
+
+      final String url = (schoolId != null && schoolId.isNotEmpty)
+          ? '${APIPath.baseUrl}/wallet?schoolId=$schoolId'
+          : '${APIPath.baseUrl}/wallet';
+
+      log('Fetching wallet transactions from: $url');
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        url,
+        header: {
+          'accept': '*/*',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      _isLoading = false;
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
+        final raw = response.data;
+        List<dynamic> listData = [];
+
+        if (raw is List) {
+          listData = raw;
+        } else if (raw is Map) {
+          final dataField = raw['data'];
+          if (dataField is List) {
+            listData = dataField;
+          } else if (dataField is Map) {
+            if (dataField['transactions'] is List) {
+              listData = dataField['transactions'];
+            } else if (dataField['data'] is List) {
+              listData = dataField['data'];
+            } else if (dataField['items'] is List) {
+              listData = dataField['items'];
+            } else if (dataField['expenses'] is List) {
+              listData = dataField['expenses'];
+            }
+          } else if (raw['transactions'] is List) {
+            listData = raw['transactions'];
+          } else if (raw['items'] is List) {
+            listData = raw['items'];
+          } else if (raw['expenses'] is List) {
+            listData = raw['expenses'];
+          }
+        }
+
+        if (listData.isNotEmpty) {
+          final fetched = listData
+              .where((e) => e is Map)
+              .map((e) => Expense.fromJson(Map<String, dynamic>.from(e as Map)))
+              .toList();
+
+          _expenses.clear();
+          _expenses.addAll(fetched);
+          log('Successfully fetched ${_expenses.length} transactions from wallet API');
+        } else if (raw is List && raw.isEmpty) {
+          _expenses.clear();
+        }
+
+        _checkAndRefreshStoryHighlights();
+        notifyListeners();
+      } else {
+        _error = response?.data is Map && response?.data['message'] != null
+            ? response!.data['message'].toString()
+            : (response?.statusMessage ?? 'Failed to fetch transactions');
+        log('Error fetching wallet transactions: $_error');
+        notifyListeners();
+      }
+    } catch (e) {
+      log('Exception fetching wallet transactions: $e');
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
 
   Future<Map<String, dynamic>> addMoneyToWalletApi({
     required String schoolId,
@@ -615,6 +547,6 @@ class ExpenseProvider with ChangeNotifier {
   }
 
   void _checkAndRefreshStoryHighlights() {
-    // Dynamic recalculation for the main stories if needed
+    _refreshStories();
   }
 }

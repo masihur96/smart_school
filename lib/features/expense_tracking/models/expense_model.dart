@@ -58,23 +58,38 @@ class Expense {
   }
 
   factory Expense.fromJson(Map<String, dynamic> json) {
+    final typeStr = (json['type'] ??
+            json['transactionType'] ??
+            json['typeOfTransaction'] ??
+            '')
+        .toString()
+        .toUpperCase();
+
+    final isIncome = typeStr == 'INCOME' ||
+        typeStr == 'ADD_MONEY' ||
+        typeStr == 'DEPOSIT' ||
+        typeStr == 'CREDIT' ||
+        json['isIncome'] == true;
+
     return Expense(
       id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
-      title: json['title'] ?? '',
+      title: json['title']?.toString() ?? '',
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
       date: json['transactionDate'] != null
-          ? DateTime.tryParse(json['transactionDate']) ?? DateTime.now()
+          ? DateTime.tryParse(json['transactionDate'].toString()) ??
+              DateTime.now()
           : (json['date'] != null
-              ? DateTime.tryParse(json['date']) ?? DateTime.now()
-              : DateTime.now()),
-      category: json['category'] ?? '',
-      description: json['description'] ?? '',
-      type: (json['type'] == 'income' || json['type'] == 'INCOME')
-          ? TransactionType.income
-          : TransactionType.expense,
-      paymentMethod: json['paymentMethod'] ?? 'Cash',
-      referenceNumber: json['referenceNumber'],
-      attachmentUrl: json['attachmentUrl'],
+              ? DateTime.tryParse(json['date'].toString()) ?? DateTime.now()
+              : (json['createdAt'] != null
+                  ? DateTime.tryParse(json['createdAt'].toString()) ??
+                      DateTime.now()
+                  : DateTime.now())),
+      category: json['category']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      type: isIncome ? TransactionType.income : TransactionType.expense,
+      paymentMethod: json['paymentMethod']?.toString() ?? 'Cash',
+      referenceNumber: json['referenceNumber']?.toString(),
+      attachmentUrl: json['attachmentUrl']?.toString(),
     );
   }
 

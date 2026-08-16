@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../models/expense_model.dart';
 import '../providers/expense_provider.dart';
 import '../widgets/expense_list_tile.dart';
@@ -19,6 +20,15 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
   bool _isBalanceVisible = true;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
+      context.read<ExpenseProvider>().fetchTransactions(schoolId: schoolId);
+    });
+  }
 
   @override
   void dispose() {
@@ -57,7 +67,11 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              setState(() {});
+              final schoolId =
+                  context.read<AuthNotifier>().user?.schoolId ?? '';
+              await context.read<ExpenseProvider>().fetchTransactions(
+                schoolId: schoolId,
+              );
             },
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(
@@ -75,7 +89,18 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                 ),
 
                 // 5. Transactions List
-                if (filteredExpenses.isEmpty)
+                if (provider.isLoading && provider.expenses.isEmpty)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 50),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryAdmin,
+                        ),
+                      ),
+                    ),
+                  )
+                else if (filteredExpenses.isEmpty)
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -150,6 +175,11 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
     BuildContext context,
     ExpenseProvider provider,
   ) {
+    final auth = context.watch<AuthNotifier>();
+    final schoolName = auth.user?.school?.name ?? 'School Treasury Wallet';
+    final schoolId = auth.user?.school?.address ?? '';
+    final formattedAccount = schoolId;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       decoration: BoxDecoration(
@@ -218,16 +248,16 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'School Treasury Wallet',
-                              style: TextStyle(
+                            Text(
+                              schoolName,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
                               ),
                             ),
                             Text(
-                              'ACC: SCH-TR-8842',
+                              formattedAccount,
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.65),
                                 fontSize: 10.5,

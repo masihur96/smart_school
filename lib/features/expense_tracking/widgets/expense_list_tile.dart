@@ -14,44 +14,53 @@ class ExpenseListTile extends StatelessWidget {
   });
 
   IconData _getCategoryIcon(String category, bool isIncome) {
+    final cat = category.toLowerCase().trim();
     if (isIncome) {
-      switch (category.toLowerCase()) {
-        case 'tuition fee':
-        case 'student fee':
-          return Icons.school_rounded;
-        case 'admission fee':
-          return Icons.how_to_reg_rounded;
-        case 'exam fee':
-          return Icons.assignment_turned_in_rounded;
-        case 'grant':
-          return Icons.account_balance_rounded;
-        case 'donation':
-          return Icons.volunteer_activism_rounded;
-        case 'cafeteria':
-          return Icons.restaurant_rounded;
-        case 'event fee':
-          return Icons.emoji_events_rounded;
-        default:
-          return Icons.add_circle_outline_rounded;
+      if (cat.contains('tuition') || cat.contains('student')) {
+        return Icons.school_rounded;
+      } else if (cat.contains('admission')) {
+        return Icons.how_to_reg_rounded;
+      } else if (cat.contains('exam')) {
+        return Icons.assignment_turned_in_rounded;
+      } else if (cat.contains('grant')) {
+        return Icons.account_balance_rounded;
+      } else if (cat.contains('donation')) {
+        return Icons.volunteer_activism_rounded;
+      } else if (cat.contains('cafeteria') ||
+          cat.contains('canteen') ||
+          cat.contains('food')) {
+        return Icons.restaurant_rounded;
+      } else if (cat.contains('event') || cat.contains('sports')) {
+        return Icons.emoji_events_rounded;
+      } else if (cat.contains('library')) {
+        return Icons.local_library_rounded;
       }
+      return Icons.account_balance_wallet_rounded;
     } else {
-      switch (category.toLowerCase()) {
-        case 'salary':
-          return Icons.people_rounded;
-        case 'maintenance':
-          return Icons.build_circle_rounded;
-        case 'supplies':
-          return Icons.inventory_2_rounded;
-        case 'events':
-          return Icons.celebration_rounded;
-        case 'utilities':
-        case 'electricity':
-          return Icons.bolt_rounded;
-        case 'lab':
-          return Icons.science_rounded;
-        default:
-          return Icons.receipt_long_rounded;
+      if (cat.contains('salary') ||
+          cat.contains('payroll') ||
+          cat.contains('staff') ||
+          cat.contains('teacher')) {
+        return Icons.people_rounded;
+      } else if (cat.contains('maintenance') || cat.contains('repair')) {
+        return Icons.build_circle_rounded;
+      } else if (cat.contains('supplies') || cat.contains('stationary')) {
+        return Icons.inventory_2_rounded;
+      } else if (cat.contains('event') || cat.contains('sports')) {
+        return Icons.celebration_rounded;
+      } else if (cat.contains('electric') ||
+          cat.contains('power') ||
+          cat.contains('utilit') ||
+          cat.contains('bill') ||
+          cat.contains('water') ||
+          cat.contains('gas')) {
+        return Icons.bolt_rounded;
+      } else if (cat.contains('lab') || cat.contains('science')) {
+        return Icons.science_rounded;
+      } else if (cat.contains('transport') || cat.contains('bus')) {
+        return Icons.directions_bus_rounded;
       }
+      return Icons.receipt_long_rounded;
     }
   }
 
