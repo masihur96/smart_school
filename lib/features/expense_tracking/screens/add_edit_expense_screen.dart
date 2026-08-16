@@ -65,6 +65,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
     'Salary',
     'Maintenance',
     'Supplies',
+    'Office Supplies',
     'Events',
     'Utilities',
     'Electricity',
@@ -322,27 +323,28 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
     final isIncome = _transactionType == TransactionType.income;
     final isEditing = widget.expense != null;
     final provider = context.read<ExpenseProvider>();
+    final auth = context.read<AuthNotifier>();
+    final schoolId = auth.user?.schoolId ?? '';
+
+    setState(() => _isSubmitting = true);
+
+    final amount = double.tryParse(_amountController.text.trim()) ?? 0.0;
+    final title = _titleController.text.trim();
+    final description = _descriptionController.text.trim();
+    final category = _selectedCategory;
+    final paymentMethod = _mapPaymentMethodToApi(_selectedPaymentMethod);
+    final refNumber = _refNumberController.text.trim().isNotEmpty
+        ? _refNumberController.text.trim()
+        : null;
+    final attachmentUrl = _attachmentUrlController.text.trim().isNotEmpty
+        ? _attachmentUrlController.text.trim()
+        : null;
+
+    Map<String, dynamic> result;
 
     if (!isEditing) {
       // Add transaction (Income or Expense) to school wallet using backend API
-      setState(() => _isSubmitting = true);
-
-      final auth = context.read<AuthNotifier>();
-      final schoolId = auth.user?.schoolId ?? '';
-
-      final amount = double.parse(_amountController.text.trim());
-      final title = _titleController.text.trim();
-      final description = _descriptionController.text.trim();
-      final category = _selectedCategory;
-      final paymentMethod = _mapPaymentMethodToApi(_selectedPaymentMethod);
-      final refNumber = _refNumberController.text.trim().isNotEmpty
-          ? _refNumberController.text.trim()
-          : null;
-      final attachmentUrl = _attachmentUrlController.text.trim().isNotEmpty
-          ? _attachmentUrlController.text.trim()
-          : null;
-
-      final result = isIncome
+      result = isIncome
           ? await provider.addMoneyToWalletApi(
               schoolId: schoolId,
               amount: amount,
@@ -365,91 +367,48 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
               transactionDate: _selectedDate,
               attachmentUrl: attachmentUrl,
             );
-
-      if (!mounted) return;
-      setState(() => _isSubmitting = false);
-
-      if (result['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(
-                  Icons.check_circle_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    isIncome
-                        ? 'Amount added to school wallet successfully!'
-                        : 'Expense recorded successfully!',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: isIncome
-                ? const Color(0xFF10B981)
-                : AppColors.primaryAdmin,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        Navigator.pop(context);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(
-                  Icons.error_outline_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    result['message'] ??
-                        (isIncome
-                            ? 'Failed to add money to wallet'
-                            : 'Failed to record expense'),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.redAccent,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
     } else {
-      // Local / standard expense update
-      final newExpense = Expense(
-        id: widget.expense!.id,
-        title: _titleController.text.trim(),
-        amount: double.parse(_amountController.text.trim()),
-        date: _selectedDate,
-        category: _selectedCategory,
-        description: _descriptionController.text.trim(),
+      // Edit / Update transaction (PATCH) via backend API
+      result = await provider.updateTransactionApi(
+        transactionId: widget.expense!.id,
+        schoolId: schoolId,
+        amount: amount,
+        category: category,
+        title: title,
+        description: description,
+        paymentMethod: paymentMethod,
+        referenceNumber: refNumber,
+        transactionDate: _selectedDate,
+        attachmentUrl: attachmentUrl,
         type: _transactionType,
-        paymentMethod: _selectedPaymentMethod,
-        referenceNumber: _refNumberController.text.trim().isNotEmpty
-            ? _refNumberController.text.trim()
-            : null,
-        attachmentUrl: _attachmentUrlController.text.trim().isNotEmpty
-            ? _attachmentUrlController.text.trim()
-            : null,
       );
+    }
 
-      provider.updateExpense(newExpense);
+    if (!mounted) return;
+    setState(() => _isSubmitting = false);
 
+    if (result['success'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            isIncome
-                ? 'Income updated successfully!'
-                : 'Expense updated successfully!',
+          content: Row(
+            children: [
+              const Icon(
+                Icons.check_circle_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  isEditing
+                      ? 'Transaction updated successfully!'
+                      : (isIncome
+                          ? 'Amount added to school wallet successfully!'
+                          : 'Expense recorded successfully!'),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
           ),
           backgroundColor: isIncome
               ? const Color(0xFF10B981)
@@ -457,8 +416,34 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
           behavior: SnackBarBehavior.floating,
         ),
       );
-
       Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(
+                Icons.error_outline_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  result['message'] ??
+                      (isEditing
+                          ? 'Failed to update transaction'
+                          : (isIncome
+                              ? 'Failed to add money to wallet'
+                              : 'Failed to record expense')),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 

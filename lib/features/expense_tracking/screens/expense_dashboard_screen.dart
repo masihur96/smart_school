@@ -156,7 +156,6 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                       final expense = filteredExpenses[index];
                       return ExpenseListTile(
                         expense: expense,
-                        onDelete: () => provider.deleteExpense(expense.id),
                       );
                     }, childCount: filteredExpenses.length),
                   ),

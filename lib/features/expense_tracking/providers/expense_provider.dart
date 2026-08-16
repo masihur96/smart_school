@@ -240,6 +240,152 @@ class ExpenseProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<Map<String, dynamic>> deleteTransactionApi({
+    required String transactionId,
+    required String schoolId,
+  }) async {
+    try {
+      final token = await StorageService.getToken();
+      if (token == null || token.isEmpty) {
+        return {
+          'success': false,
+          'message': 'Authentication session expired. Please log in again.',
+        };
+      }
+
+      final url =
+          '${APIPath.baseUrl}/wallet/transactions/$transactionId?schoolId=$schoolId';
+      log('Deleting transaction with URL: $url');
+
+      final response = await DataProvider().performRequest(
+        'DELETE',
+        url,
+        header: {
+          'accept': '*/*',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 ||
+              response.statusCode == 204 ||
+              response.statusCode == 201)) {
+        deleteExpense(transactionId);
+        return {'success': true, 'data': response.data};
+      } else {
+        String errorMessage = 'Failed to delete transaction.';
+        if (response?.data is Map && response?.data['message'] != null) {
+          errorMessage = response!.data['message'].toString();
+        } else if (response?.statusMessage != null) {
+          errorMessage = response!.statusMessage!;
+        }
+        return {'success': false, 'message': errorMessage};
+      }
+    } catch (e) {
+      log('Error deleting transaction: $e');
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> updateTransactionApi({
+    required String transactionId,
+    required String schoolId,
+    double? amount,
+    required String category,
+    required String title,
+    required String description,
+    required String paymentMethod,
+    String? referenceNumber,
+    required DateTime transactionDate,
+    String? attachmentUrl,
+    TransactionType? type,
+  }) async {
+    _isActionLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null || token.isEmpty) {
+        _isActionLoading = false;
+        notifyListeners();
+        return {
+          'success': false,
+          'message': 'Authentication session expired. Please log in again.',
+        };
+      }
+
+      final payload = {
+        if (amount != null) 'amount': amount,
+        'category': category,
+        'title': title,
+        'description': description,
+        'paymentMethod': paymentMethod,
+        if (referenceNumber != null && referenceNumber.isNotEmpty)
+          'referenceNumber': referenceNumber,
+        'transactionDate': transactionDate.toUtc().toIso8601String(),
+        if (attachmentUrl != null && attachmentUrl.isNotEmpty)
+          'attachmentUrl': attachmentUrl,
+      };
+
+      final url =
+          '${APIPath.baseUrl}/wallet/transactions/$transactionId?schoolId=$schoolId';
+      log('Sending PATCH transaction request: $url with payload: $payload');
+
+      final response = await DataProvider().performRequest(
+        'PATCH',
+        url,
+        data: payload,
+        header: {
+          'accept': '*/*',
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      _isActionLoading = false;
+
+      if (response != null &&
+          (response.statusCode == 200 ||
+              response.statusCode == 201 ||
+              response.statusCode == 204)) {
+        final existingIndex =
+            _expenses.indexWhere((e) => e.id == transactionId);
+        final existingExpense =
+            existingIndex >= 0 ? _expenses[existingIndex] : null;
+
+        final updatedExpense = Expense(
+          id: transactionId,
+          title: title,
+          amount: amount ?? existingExpense?.amount ?? 0.0,
+          date: transactionDate,
+          category: category,
+          description: description,
+          type: type ?? existingExpense?.type ?? TransactionType.expense,
+          paymentMethod: paymentMethod,
+          referenceNumber: referenceNumber,
+          attachmentUrl: attachmentUrl,
+        );
+
+        updateExpense(updatedExpense);
+        return {'success': true, 'data': response.data};
+      } else {
+        String errorMessage = 'Failed to update transaction.';
+        if (response?.data is Map && response?.data['message'] != null) {
+          errorMessage = response!.data['message'].toString();
+        } else if (response?.statusMessage != null) {
+          errorMessage = response!.statusMessage!;
+        }
+        notifyListeners();
+        return {'success': false, 'message': errorMessage};
+      }
+    } catch (e) {
+      log('Error updating transaction: $e');
+      _isActionLoading = false;
+      notifyListeners();
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
   void markStoryAsViewed(String storyId) {
     final index = _stories.indexWhere((s) => s.id == storyId);
     if (index >= 0 && !_stories[index].isViewed) {

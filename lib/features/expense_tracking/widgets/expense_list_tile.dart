@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
+import '../../auth/providers/auth_provider.dart';
 import '../models/expense_model.dart';
+import '../providers/expense_provider.dart';
 import '../screens/add_edit_expense_screen.dart';
 
 class ExpenseListTile extends StatelessWidget {
   final Expense expense;
-  final VoidCallback onDelete;
+  final VoidCallback? onDelete;
 
   const ExpenseListTile({
     super.key,
     required this.expense,
-    required this.onDelete,
+    this.onDelete,
   });
 
   IconData _getCategoryIcon(String category, bool isIncome) {
@@ -304,20 +307,119 @@ class ExpenseListTile extends StatelessWidget {
   void _showDeleteConfirm(BuildContext context) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Transaction'),
-        content: Text('Are you sure you want to remove "${expense.title}"?'),
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.delete_forever_rounded, color: Colors.red, size: 24),
+            SizedBox(width: 8),
+            Text(
+              'Delete Transaction',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: Text(
+          'Are you sure you want to remove "${expense.title}"? This will update the school wallet balance.',
+        ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => Navigator.pop(dialogCtx),
             child: const Text('Cancel'),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              onDelete();
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(dialogCtx);
+              final schoolId =
+                  context.read<AuthNotifier>().user?.schoolId ?? '';
+              final provider = context.read<ExpenseProvider>();
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Row(
+                    children: [
+                      SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Text('Deleting transaction...'),
+                    ],
+                  ),
+                  duration: Duration(seconds: 1),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+
+              final result = await provider.deleteTransactionApi(
+                transactionId: expense.id,
+                schoolId: schoolId,
+              );
+
+              if (!context.mounted) return;
+
+              if (result['success'] == true) {
+                onDelete?.call();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        const Icon(
+                          Icons.check_circle_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Transaction "${expense.title}" deleted successfully.',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                    backgroundColor: const Color(0xFFEF4444),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        const Icon(
+                          Icons.error_outline_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            result['message'] ?? 'Failed to delete transaction',
+                          ),
+                        ),
+                      ],
+                    ),
+                    backgroundColor: Colors.redAccent,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text('Delete'),
           ),
         ],
       ),
