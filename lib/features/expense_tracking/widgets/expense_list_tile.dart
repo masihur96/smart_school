@@ -183,6 +183,12 @@ class ExpenseListTile extends StatelessWidget {
                   expense.description,
                   Icons.notes_rounded,
                 ),
+              if (expense.attachmentUrl != null && expense.attachmentUrl!.isNotEmpty)
+                _buildReceiptRow(
+                  'Attachment',
+                  'View Attachment / Receipt',
+                  Icons.attachment_rounded,
+                ),
 
               const SizedBox(height: 24),
 
