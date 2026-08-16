@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../../core/theme/app_colors.dart';
 import '../models/expense_model.dart';
 import '../models/financial_story_model.dart';
 import '../providers/expense_provider.dart';
 import '../widgets/expense_list_tile.dart';
 import '../widgets/financial_story_viewer.dart';
 import 'add_edit_expense_screen.dart';
-import '../../../core/theme/app_colors.dart';
 
 class ExpenseDashboardScreen extends StatefulWidget {
   const ExpenseDashboardScreen({super.key});
@@ -56,7 +57,10 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
           children: [
             Icon(Icons.auto_stories_rounded, color: Color(0xFF6750A4)),
             SizedBox(width: 8),
-            Text('Create Fee / Story Note', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              'Create Fee / Story Note',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
           ],
         ),
         content: SingleChildScrollView(
@@ -68,7 +72,9 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                 decoration: InputDecoration(
                   labelText: 'Story Title',
                   hintText: 'e.g. Midterm Fee Collection',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -77,7 +83,9 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                 decoration: InputDecoration(
                   labelText: 'Highlight Stat / Amount',
                   hintText: 'e.g. \$14,200 (88% Cleared)',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -86,8 +94,11 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                 maxLines: 3,
                 decoration: InputDecoration(
                   labelText: 'Brief Description',
-                  hintText: 'e.g. 150 students cleared fees for upcoming exams...',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  hintText:
+                      'e.g. 150 students cleared fees for upcoming exams...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ],
@@ -102,7 +113,9 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF6750A4),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             onPressed: () {
               if (titleController.text.trim().isEmpty) return;
@@ -207,7 +220,9 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
               _buildInsightMetricRow(
                 'This Month Net Surplus',
                 '${provider.thisMonthNet >= 0 ? '+' : ''}\$${provider.thisMonthNet.toStringAsFixed(2)}',
-                provider.thisMonthNet >= 0 ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                provider.thisMonthNet >= 0
+                    ? const Color(0xFF10B981)
+                    : const Color(0xFFEF4444),
                 Icons.savings_rounded,
               ),
 
@@ -218,9 +233,14 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                   backgroundColor: const Color(0xFF6750A4),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
-                child: const Text('Close Overview', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Close Overview',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
@@ -229,7 +249,12 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
     );
   }
 
-  Widget _buildInsightMetricRow(String label, String value, Color color, IconData icon) {
+  Widget _buildInsightMetricRow(
+    String label,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
@@ -274,7 +299,11 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
       appBar: AppBar(
         title: const Row(
           children: [
-            Icon(Icons.account_balance_wallet_rounded, color: Colors.white, size: 22),
+            Icon(
+              Icons.account_balance_wallet_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
             SizedBox(width: 8),
             Text(
               'School Wallet & Expenses',
@@ -285,20 +314,6 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
         backgroundColor: const Color(0xFF4A148C), // Deep Royal Purple
         foregroundColor: Colors.white,
         elevation: 0,
-        actions: [
-          IconButton(
-            tooltip: 'Add Story Note',
-            icon: const Icon(Icons.add_photo_alternate_outlined, color: Colors.white),
-            onPressed: () => _showAddQuickStoryDialog(context),
-          ),
-          Consumer<ExpenseProvider>(
-            builder: (context, provider, _) => IconButton(
-              tooltip: 'Financial Insights',
-              icon: const Icon(Icons.bar_chart_rounded, color: Colors.white),
-              onPressed: () => _showInsightsSummary(context, provider),
-            ),
-          ),
-        ],
       ),
       body: Consumer<ExpenseProvider>(
         builder: (context, provider, child) {
@@ -312,22 +327,16 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
               setState(() {});
             },
             child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
               slivers: [
-                // 1. Top Fee Stories Reels Section
-                SliverToBoxAdapter(
-                  child: _buildStoriesReel(context, provider.stories),
-                ),
-
                 // 2. Digital Wallet Hero Card
                 SliverToBoxAdapter(
                   child: _buildDigitalWalletCard(context, provider),
                 ),
-
                 // 3. Quick Summary Metric Row
-                SliverToBoxAdapter(
-                  child: _buildSummaryMetrics(provider),
-                ),
+                SliverToBoxAdapter(child: _buildSummaryMetrics(provider)),
 
                 // 4. Activity Header & Filters
                 SliverToBoxAdapter(
@@ -338,7 +347,10 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                 if (filteredExpenses.isEmpty)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 40,
+                      ),
                       child: Center(
                         child: Column(
                           children: [
@@ -359,16 +371,23 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                               _searchQuery.isNotEmpty
                                   ? 'No matching transactions found.'
                                   : (_currentFilter == TransactionFilter.income
-                                      ? 'No fee / income records yet.'
-                                      : (_currentFilter == TransactionFilter.expense
-                                          ? 'No expense records yet.'
-                                          : 'No transaction history found.')),
-                              style: TextStyle(fontSize: 15, color: Colors.grey[600]),
+                                        ? 'No fee / income records yet.'
+                                        : (_currentFilter ==
+                                                  TransactionFilter.expense
+                                              ? 'No expense records yet.'
+                                              : 'No transaction history found.')),
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.grey[600],
+                              ),
                             ),
                             const SizedBox(height: 10),
                             Text(
                               'Tap "+ Add Money / Fee" or "- Add Expense" to log records.',
-                              style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[400],
+                              ),
                             ),
                           ],
                         ),
@@ -377,21 +396,16 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                   )
                 else
                   SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final expense = filteredExpenses[index];
-                        return ExpenseListTile(
-                          expense: expense,
-                          onDelete: () => provider.deleteExpense(expense.id),
-                        );
-                      },
-                      childCount: filteredExpenses.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final expense = filteredExpenses[index];
+                      return ExpenseListTile(
+                        expense: expense,
+                        onDelete: () => provider.deleteExpense(expense.id),
+                      );
+                    }, childCount: filteredExpenses.length),
                   ),
 
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: 80),
-                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 80)),
               ],
             ),
           );
@@ -410,13 +424,20 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 2.0,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.auto_stories_rounded, size: 16, color: Color(0xFF6750A4)),
+                    Icon(
+                      Icons.auto_stories_rounded,
+                      size: 16,
+                      color: Color(0xFF6750A4),
+                    ),
                     SizedBox(width: 6),
                     Text(
                       'Fee & Financial Stories',
@@ -507,7 +528,10 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                             shape: BoxShape.circle,
                             gradient: story.isViewed
                                 ? LinearGradient(
-                                    colors: [Colors.grey[400]!, Colors.grey[500]!],
+                                    colors: [
+                                      Colors.grey[400]!,
+                                      Colors.grey[500]!,
+                                    ],
                                   )
                                 : LinearGradient(
                                     begin: Alignment.topLeft,
@@ -544,7 +568,9 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 11,
-                            fontWeight: story.isViewed ? FontWeight.normal : FontWeight.bold,
+                            fontWeight: story.isViewed
+                                ? FontWeight.normal
+                                : FontWeight.bold,
                           ),
                         ),
                       ],
@@ -560,7 +586,10 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
   }
 
   // Hero Wallet Card
-  Widget _buildDigitalWalletCard(BuildContext context, ExpenseProvider provider) {
+  Widget _buildDigitalWalletCard(
+    BuildContext context,
+    ExpenseProvider provider,
+  ) {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       decoration: BoxDecoration(
@@ -659,7 +688,9 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                     ),
                     IconButton(
                       icon: Icon(
-                        _isBalanceVisible ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+                        _isBalanceVisible
+                            ? Icons.visibility_rounded
+                            : Icons.visibility_off_rounded,
                         color: Colors.white.withOpacity(0.85),
                         size: 20,
                       ),
@@ -700,7 +731,10 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
 
                 // Inflow and Outflow Mini-Chips inside Card
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
@@ -715,7 +749,9 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                             Container(
                               padding: const EdgeInsets.all(5),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF10B981).withOpacity(0.25),
+                                color: const Color(
+                                  0xFF10B981,
+                                ).withOpacity(0.25),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -768,7 +804,9 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                             Container(
                               padding: const EdgeInsets.all(5),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFEF4444).withOpacity(0.25),
+                                color: const Color(
+                                  0xFFEF4444,
+                                ).withOpacity(0.25),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -830,7 +868,10 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                         icon: const Icon(Icons.add_rounded, size: 18),
                         label: const Text(
                           'Add Money',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF10B981),
@@ -862,7 +903,10 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                         icon: const Icon(Icons.remove_rounded, size: 18),
                         label: const Text(
                           'Add Expense',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white.withOpacity(0.2),
@@ -970,7 +1014,10 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
   }
 
   // Transactions Header & Filter Section
-  Widget _buildTransactionsHeader(BuildContext context, ExpenseProvider provider) {
+  Widget _buildTransactionsHeader(
+    BuildContext context,
+    ExpenseProvider provider,
+  ) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
       child: Column(
@@ -982,10 +1029,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
             children: [
               const Text(
                 'Recent Transactions',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
               Text(
                 '${provider.expenses.length} Records',
@@ -1023,7 +1067,10 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                       },
                     )
                   : null,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 10,
+              ),
               filled: true,
               fillColor: Theme.of(context).cardColor,
               border: OutlineInputBorder(
@@ -1156,7 +1203,9 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
             return Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
               ),
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
               child: Column(
@@ -1177,7 +1226,9 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                   ),
                   const SizedBox(height: 16),
                   ListTile(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                     tileColor: const Color(0xFF10B981).withOpacity(0.08),
                     leading: Container(
                       padding: const EdgeInsets.all(8),
@@ -1185,13 +1236,18 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                         color: const Color(0xFF10B981).withOpacity(0.18),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.add_circle_rounded, color: Color(0xFF10B981)),
+                      child: const Icon(
+                        Icons.add_circle_rounded,
+                        color: Color(0xFF10B981),
+                      ),
                     ),
                     title: const Text(
                       'Add Money / Fee Collection',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: const Text('Log tuition fees, grants, donations or cash deposits'),
+                    subtitle: const Text(
+                      'Log tuition fees, grants, donations or cash deposits',
+                    ),
                     onTap: () {
                       Navigator.pop(ctx);
                       Navigator.push(
@@ -1206,7 +1262,9 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                   ),
                   const SizedBox(height: 10),
                   ListTile(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                     tileColor: AppColors.primaryAdmin.withOpacity(0.08),
                     leading: Container(
                       padding: const EdgeInsets.all(8),
@@ -1214,13 +1272,18 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                         color: AppColors.primaryAdmin.withOpacity(0.18),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.remove_circle_rounded, color: AppColors.primaryAdmin),
+                      child: const Icon(
+                        Icons.remove_circle_rounded,
+                        color: AppColors.primaryAdmin,
+                      ),
                     ),
                     title: const Text(
                       'Record School Expense',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: const Text('Log salaries, utility bills, maintenance or supplies'),
+                    subtitle: const Text(
+                      'Log salaries, utility bills, maintenance or supplies',
+                    ),
                     onTap: () {
                       Navigator.pop(ctx);
                       Navigator.push(
