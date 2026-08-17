@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/library/data/models/book.dart';
+import 'package:smart_school/features/library/providers/library_book_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:smart_school/configs/network/data_provider.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
 import 'package:dio/dio.dart';
+
 class AddEditBookScreen extends StatefulWidget {
   final Book? book;
   final bool isAdminOrTeacher;
@@ -79,59 +82,58 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
       setState(() => _isLoading = true);
 
       try {
-        if (widget.book == null) {
-          // Create book using the API via DataProvider
-          final token = await StorageService.getToken();
-          final headers = {
-            'accept': '*/*',
-            'Content-Type': 'application/json',
-          };
-          if (token != null) {
-            headers['Authorization'] = 'Bearer $token';
-          }
+        final bookData = {
+          "title": _titleController.text.trim(),
+          "author": _authorController.text.trim(),
+          "isbn": _isbnController.text.trim(),
+          "category": _selectedCategory,
+          "coverImageUrl": _coverImageController.text.trim(),
+          "isAvailable": widget.book?.isAvailable ?? true,
+          "description": _descriptionController.text.trim(),
+        };
 
-          final response = await DataProvider().performRequest(
-            'POST',
-            'https://smart-school-backend-production.up.railway.app/library/books',
-            data: {
-              "title": _titleController.text.trim(),
-              "author": _authorController.text.trim(),
-              "isbn": _isbnController.text.trim(),
-              "category": _selectedCategory,
-              "coverImageUrl": _coverImageController.text.trim(),
-              "isAvailable": true,
-              "description": _descriptionController.text.trim(),
-            },
-            header: headers,
-          );
-          
-          if (response?.statusCode != 200 && response?.statusCode != 201) {
-            throw Exception(response?.data ?? 'Failed to create book');
-          }
+        Book savedBook;
+        final notifier = context.read<LibraryBookNotifier>();
+
+        if (widget.book == null) {
+          savedBook = await notifier.addBook(bookData);
         } else {
-          // Simulate a network request for editing
-          await Future.delayed(const Duration(seconds: 1));
+          savedBook = await notifier.updateBook(widget.book!.id, bookData);
         }
 
-        final newBook = Book(
-          id: widget.book?.id ?? const Uuid().v4(),
-          title: _titleController.text.trim(),
-          author: _authorController.text.trim(),
-          isbn: _isbnController.text.trim(),
-          category: _selectedCategory!,
-          coverImageUrl: _coverImageController.text.trim(),
-          description: _descriptionController.text.trim(),
-          isAvailable: widget.book?.isAvailable ?? true,
-        );
-
         if (mounted) {
-          Navigator.pop(context, newBook);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: const Color(0xFF10B981),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              content: Text(
+                widget.book == null
+                    ? 'Book added successfully!'
+                    : 'Book updated successfully!',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          );
+          Navigator.pop(context, savedBook);
         }
       } catch (e) {
         debugPrint('Error saving book: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error saving book: $e')),
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: const Color(0xFFDC2626),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              content: Text(
+                e.toString().replaceFirst('Exception: ', ''),
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
           );
         }
       } finally {
@@ -141,6 +143,7 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
       }
     }
   }
+
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();

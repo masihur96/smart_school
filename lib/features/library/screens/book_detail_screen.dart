@@ -8,12 +8,143 @@ import '../../../models/student_model.dart';
 import '../../admin/providers/student_provider.dart';
 import '../data/models/book.dart';
 import '../providers/library_book_provider.dart';
+import 'add_edit_book_screen.dart';
 import 'id_card_scanner_screen.dart';
 
-class BookDetailScreen extends StatelessWidget {
+class BookDetailScreen extends StatefulWidget {
   final Book book;
 
   const BookDetailScreen({super.key, required this.book});
+
+  @override
+  State<BookDetailScreen> createState() => _BookDetailScreenState();
+}
+
+class _BookDetailScreenState extends State<BookDetailScreen> {
+  late Book _book;
+
+  @override
+  void initState() {
+    super.initState();
+    _book = widget.book;
+  }
+
+  // ── Edit book handler ──────────────────────────────────────────────────────
+  Future<void> _onEditBook(BuildContext context) async {
+    final updated = await Navigator.push<Book>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddEditBookScreen(
+          book: _book,
+          isAdminOrTeacher: true,
+        ),
+      ),
+    );
+    if (updated != null && mounted) {
+      setState(() {
+        _book = updated;
+      });
+    }
+  }
+
+  // ── Delete book handler ────────────────────────────────────────────────────
+  Future<void> _onDeleteBook(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Delete Book',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          'Are you sure you want to delete "${_book.title}"? This action cannot be undone.',
+          style: const TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFDC2626),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !context.mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(color: Color(0xFFDC2626)),
+      ),
+    );
+
+    try {
+      await context.read<LibraryBookNotifier>().deleteBook(_book.id);
+      if (!context.mounted) return;
+      Navigator.of(context).pop(); // close loading dialog
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: const Color(0xFF10B981),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          content: const Row(
+            children: [
+              Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 18),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Book deleted successfully!',
+                  style: TextStyle(color: Colors.white, fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      Navigator.of(context).pop(true); // Return to book list
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.of(context).pop(); // close loading dialog
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: const Color(0xFFDC2626),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline_rounded, color: Colors.white, size: 18),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  e.toString().replaceFirst('Exception: ', ''),
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
 
   // ── Issue button tap handler ───────────────────────────────────────────────
   Future<void> _onRequestIssue(BuildContext context) async {
@@ -27,6 +158,7 @@ class BookDetailScreen extends StatelessWidget {
       await _handleSelectStudentOption(context);
     }
   }
+
 
   Future<String?> _showMethodPicker(BuildContext context) {
     return showModalBottomSheet<String>(
@@ -339,7 +471,7 @@ class BookDetailScreen extends StatelessWidget {
 
     try {
       await context.read<LibraryBookNotifier>().issueBook(
-        bookId: book.id,
+        bookId: _book.id,
         studentId: studentId,
         dueDate: dueDate,
       );
@@ -422,7 +554,7 @@ class BookDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '"${book.title}" has been requested for:',
+                '"${_book.title}" has been requested for:',
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
               ),
@@ -502,11 +634,24 @@ class BookDetailScreen extends StatelessWidget {
 
             centerTitle: true,
             title: Text(
-              book.title,
+              _book.title,
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.edit_outlined, color: Colors.white),
+                tooltip: 'Edit Book',
+                onPressed: () => _onEditBook(context),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline_rounded, color: Colors.white),
+                tooltip: 'Delete Book',
+                onPressed: () => _onDeleteBook(context),
+              ),
+              const SizedBox(width: 4),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               collapseMode: CollapseMode.parallax,
               background: Stack(
@@ -536,7 +681,7 @@ class BookDetailScreen extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 50),
                       child: Hero(
-                        tag: 'book_cover_${book.id}',
+                        tag: 'book_cover_${_book.id}',
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
@@ -551,7 +696,7 @@ class BookDetailScreen extends StatelessWidget {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
                             child: CachedNetworkImage(
-                              imageUrl: book.coverImageUrl,
+                              imageUrl: _book.coverImageUrl,
                               height: 210,
                               width: 150,
                               fit: BoxFit.cover,
@@ -595,7 +740,7 @@ class BookDetailScreen extends StatelessWidget {
                 children: [
                   // Title + Author
                   Text(
-                    book.title,
+                    _book.title,
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
@@ -613,7 +758,7 @@ class BookDetailScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        book.author,
+                        _book.author,
                         style: const TextStyle(
                           fontSize: 15,
                           color: Color(0xFF6B7280),
@@ -627,15 +772,15 @@ class BookDetailScreen extends StatelessWidget {
                   // Status badge row
                   Row(
                     children: [
-                      _StatusBadge(isAvailable: book.isAvailable),
+                      _StatusBadge(isAvailable: _book.isAvailable),
                       const SizedBox(width: 10),
-                      _CategoryBadge(label: book.category),
+                      _CategoryBadge(label: _book.category),
                     ],
                   ),
                   const SizedBox(height: 24),
 
                   // Details card
-                  _DetailCard(book: book),
+                  _DetailCard(book: _book),
                   const SizedBox(height: 20),
 
                   // Description
@@ -649,8 +794,8 @@ class BookDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    book.description.isNotEmpty
-                        ? book.description
+                    _book.description.isNotEmpty
+                        ? _book.description
                         : 'No description available for this book.',
                     style: const TextStyle(
                       fontSize: 14,
@@ -670,13 +815,14 @@ class BookDetailScreen extends StatelessWidget {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-          child: book.isAvailable
+          child: _book.isAvailable
               ? _IssueButton(onTap: () => _onRequestIssue(context))
               : _UnavailableButton(),
         ),
       ),
     );
   }
+
 }
 
 // ─── Supporting widgets ───────────────────────────────────────────────────────

@@ -162,6 +162,8 @@ class APIPath {
   static String libraryBooks = "$baseUrl/library/books";
   static String libraryBook(String id) => "$baseUrl/library/books/$id";
   static String libraryIssuedBooks = "$baseUrl/library/issued-books";
+  static String libraryReturnBook(String id) =>
+      "$baseUrl/library/issued-books/$id/return";
 
   // Wallet
   static String wallet(String schoolId) => "$baseUrl/wallet?schoolId=$schoolId";

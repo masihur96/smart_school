@@ -185,4 +185,163 @@ class LibraryBookNotifier extends ChangeNotifier {
       throw Exception(msg.toString());
     }
   }
+
+  // ── Return a book ────────────────────────────────────────────────────────
+
+  /// Marks an issued book as returned via PATCH /library/issued-books/{id}/return.
+  ///
+  /// Throws an [Exception] with a user-readable message on failure.
+  Future<void> returnBook(String issuedBookId) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    log('LibraryBookNotifier.returnBook: issuedBookId=$issuedBookId');
+
+    final response = await DataProvider().performRequest(
+      'PATCH',
+      APIPath.libraryReturnBook(issuedBookId),
+      header: {
+        'Authorization': 'Bearer $token',
+        'accept': '*/*',
+      },
+    );
+
+    if (response != null &&
+        (response.statusCode == 200 || response.statusCode == 201)) {
+      log('LibraryBookNotifier.returnBook: success → ${response.data}');
+      // Refresh both lists so availability & issued count update everywhere
+      fetchIssuedBooks();
+      fetchBooks();
+    } else {
+      final msg = response?.data is Map
+          ? (response!.data['message'] ?? 'Failed to return book.')
+          : 'Failed to return book.';
+      log('LibraryBookNotifier.returnBook: error → $msg');
+      throw Exception(msg.toString());
+    }
+  }
+
+  // ── Add a book ───────────────────────────────────────────────────────────
+
+  /// Adds a new book via POST /library/books.
+  ///
+  /// Throws an [Exception] with a user-readable message on failure.
+  Future<Book> addBook(Map<String, dynamic> data) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    log('LibraryBookNotifier.addBook: data=$data');
+
+    final response = await DataProvider().performRequest(
+      'POST',
+      APIPath.libraryBooks,
+      data: data,
+      header: {
+        'Authorization': 'Bearer $token',
+        'accept': '*/*',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response != null &&
+        (response.statusCode == 200 || response.statusCode == 201)) {
+      log('LibraryBookNotifier.addBook: success → ${response.data}');
+      Book newBook;
+      final raw = response.data;
+      if (raw is Map && raw['data'] != null && raw['data'] is Map) {
+        newBook = Book.fromJson(raw['data'] as Map<String, dynamic>);
+      } else if (raw is Map) {
+        newBook = Book.fromJson(raw as Map<String, dynamic>);
+      } else {
+        newBook = Book.fromJson(data);
+      }
+      fetchBooks();
+      return newBook;
+    } else {
+      final msg = response?.data is Map
+          ? (response!.data['message'] ?? 'Failed to create book.')
+          : 'Failed to create book.';
+      log('LibraryBookNotifier.addBook: error → $msg');
+      throw Exception(msg.toString());
+    }
+  }
+
+  // ── Update a book ────────────────────────────────────────────────────────
+
+  /// Updates a book via PATCH /library/books/{id}.
+  ///
+  /// Throws an [Exception] with a user-readable message on failure.
+  Future<Book> updateBook(String id, Map<String, dynamic> data) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    log('LibraryBookNotifier.updateBook: id=$id, data=$data');
+
+    final response = await DataProvider().performRequest(
+      'PATCH',
+      APIPath.libraryBook(id),
+      data: data,
+      header: {
+        'Authorization': 'Bearer $token',
+        'accept': '*/*',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response != null &&
+        (response.statusCode == 200 || response.statusCode == 201)) {
+      log('LibraryBookNotifier.updateBook: success → ${response.data}');
+      Book updatedBook;
+      final raw = response.data;
+      if (raw is Map && raw['data'] != null && raw['data'] is Map) {
+        updatedBook = Book.fromJson(raw['data'] as Map<String, dynamic>);
+      } else if (raw is Map) {
+        updatedBook = Book.fromJson(raw as Map<String, dynamic>);
+      } else {
+        updatedBook = Book.fromJson(data);
+      }
+      fetchBooks();
+      return updatedBook;
+    } else {
+      final msg = response?.data is Map
+          ? (response!.data['message'] ?? 'Failed to update book.')
+          : 'Failed to update book.';
+      log('LibraryBookNotifier.updateBook: error → $msg');
+      throw Exception(msg.toString());
+    }
+  }
+
+  // ── Delete a book ────────────────────────────────────────────────────────
+
+  /// Deletes a book via DELETE /library/books/{id}.
+  ///
+  /// Throws an [Exception] with a user-readable message on failure.
+  Future<void> deleteBook(String id) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    log('LibraryBookNotifier.deleteBook: id=$id');
+
+    final response = await DataProvider().performRequest(
+      'DELETE',
+      APIPath.libraryBook(id),
+      header: {
+        'Authorization': 'Bearer $token',
+        'accept': '*/*',
+      },
+    );
+
+    if (response != null &&
+        (response.statusCode == 200 || response.statusCode == 204)) {
+      log('LibraryBookNotifier.deleteBook: success → ${response.data}');
+      fetchBooks();
+    } else {
+      final msg = response?.data is Map
+          ? (response!.data['message'] ?? 'Failed to delete book.')
+          : 'Failed to delete book.';
+      log('LibraryBookNotifier.deleteBook: error → $msg');
+      throw Exception(msg.toString());
+    }
+  }
 }
+

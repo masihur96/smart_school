@@ -464,6 +464,11 @@ class _IssuedBookCard extends StatelessWidget {
                       isOverdue: isOverdue,
                       daysLeft: isOverdue ? daysOverdue : daysLeft,
                     ),
+                    // Return button (only if not already returned)
+                    if (issuedBook.returnDate == null) ...[  
+                      const SizedBox(height: 10),
+                      _ReturnButton(issuedBook: issuedBook),
+                    ],
                   ],
                 ),
               ),
@@ -593,3 +598,143 @@ class _CountdownChip extends StatelessWidget {
     );
   }
 }
+
+class _ReturnButton extends StatelessWidget {
+  final IssuedBook issuedBook;
+
+  const _ReturnButton({required this.issuedBook});
+
+  Future<void> _handleReturn(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Return Book',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          'Are you sure you want to mark "${issuedBook.book.title}" as returned by ${issuedBook.studentName}?',
+          style: const TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF10B981),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Return Book'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !context.mounted) return;
+
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(color: Color(0xFF10B981)),
+      ),
+    );
+
+    try {
+      await context.read<LibraryBookNotifier>().returnBook(issuedBook.id);
+      if (!context.mounted) return;
+      Navigator.of(context).pop(); // close loading dialog
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: const Color(0xFF10B981),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          content: const Row(
+            children: [
+              Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 18),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Book marked as returned successfully!',
+                  style: TextStyle(color: Colors.white, fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.of(context).pop(); // close loading dialog
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: const Color(0xFFDC2626),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline_rounded, color: Colors.white, size: 18),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  e.toString().replaceFirst('Exception: ', ''),
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => _handleReturn(context),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: const Color(0xFF10B981).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.assignment_return_rounded,
+              size: 14,
+              color: Color(0xFF059669),
+            ),
+            SizedBox(width: 6),
+            Text(
+              'Mark as Returned',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF059669),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
