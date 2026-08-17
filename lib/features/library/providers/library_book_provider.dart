@@ -56,6 +56,8 @@ class LibraryBookNotifier extends ChangeNotifier {
         final raw = response.data;
         List<dynamic> data = [];
 
+
+        print(raw);
         if (raw is List) {
           data = raw;
         } else if (raw is Map) {
