@@ -113,7 +113,7 @@ class _BookListScreenState extends State<BookListScreen> {
   /// Skeleton for the category chip row
   Widget _buildCategoryChipsShimmer() {
     return Container(
-      color: Colors.white,
+
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Shimmer.fromColors(
         baseColor: const Color(0xFFE8E8E8),
@@ -135,7 +135,7 @@ class _BookListScreenState extends State<BookListScreen> {
   /// Skeleton for the results header row
   Widget _buildResultsHeaderShimmer() {
     return Container(
-      color: const Color(0xFFF4F6FB),
+
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
       child: Shimmer.fromColors(
         baseColor: const Color(0xFFE8E8E8),
@@ -174,7 +174,7 @@ class _BookListScreenState extends State<BookListScreen> {
   Widget _buildGridCardSkeleton() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        border: Border.all(color: Colors.grey[300]!),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
