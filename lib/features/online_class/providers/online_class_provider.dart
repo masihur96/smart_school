@@ -60,25 +60,9 @@ class OnlineClassProvider extends ChangeNotifier {
         final data = response.data;
         final List<dynamic> listData = data['data'] ?? [];
 
-        _onlineClasses = listData.map((json) {
-          return OnlineClass(
-            id: json['id'] ?? '',
-            title: json['title'] ?? '',
-            description: json['description'] ?? '',
-            meetLink: json['meetLink'] ?? '',
-            scheduledTime: json['date'] != null
-                ? DateTime.parse(json['date'])
-                : DateTime.now(),
-            teacherId: json['hostId'] ?? '',
-            teacherName: 'Host',
-            classId: json['classId'],
-            sectionId: json['sectionId'],
-            subjectId: json['subjectId'],
-            createdAt: json['createdAt'] != null
-                ? DateTime.parse(json['createdAt'])
-                : null,
-          );
-        }).toList();
+        _onlineClasses = listData
+            .map((json) => OnlineClass.fromJson(json))
+            .toList();
 
         _onlineClasses.sort(
           (a, b) => a.scheduledTime.compareTo(b.scheduledTime),

@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/models/online_class_model.dart';
+import 'package:smart_school/models/user_model.dart';
+import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -26,7 +29,13 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = context.read<AuthNotifier>().user;
+      final schoolId = user?.schoolId ?? '';
       context.read<OnlineClassProvider>().fetchOnlineClasses();
+      if (schoolId.isNotEmpty) {
+        context.read<ClassSetupNotifier>().fetchClasses(schoolId);
+      }
+      context.read<SectionSetupNotifier>().fetchSections();
     });
   }
 
@@ -70,23 +79,75 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
   }
 
   Future<void> _launchURL(String urlString) async {
-    final Uri url = Uri.parse(urlString);
+    String formattedUrl = urlString.trim();
+    if (formattedUrl.isEmpty) return;
+    if (!formattedUrl.startsWith('http://') &&
+        !formattedUrl.startsWith('https://')) {
+      formattedUrl = 'https://$formattedUrl';
+    }
+    final Uri url = Uri.parse(formattedUrl);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not launch $urlString')),
+          SnackBar(content: Text('Could not launch $formattedUrl')),
         );
       }
     }
+  }
+
+  String _getClassSectionLabel(BuildContext context, OnlineClass oClass) {
+    if (oClass.className != null && oClass.className!.isNotEmpty) {
+      if (oClass.sectionName != null && oClass.sectionName!.isNotEmpty) {
+        return '${oClass.className} (${oClass.sectionName})';
+      }
+      return oClass.className!;
+    }
+
+    final classSetup = context.watch<ClassSetupNotifier>();
+    final sectionSetup = context.watch<SectionSetupNotifier>();
+
+    if (oClass.classId != null) {
+      final clsList = classSetup.classes;
+      final cls = clsList.cast<dynamic>().firstWhere(
+            (c) => c.id == oClass.classId,
+            orElse: () => null,
+          );
+      if (cls != null) {
+        if (oClass.sectionId != null) {
+          final secList = sectionSetup.sections;
+          final sec = secList.cast<dynamic>().firstWhere(
+                (s) => s.id == oClass.sectionId,
+                orElse: () => null,
+              );
+          if (sec != null) {
+            return '${cls.name} (${sec.name})';
+          }
+        }
+        return cls.name;
+      }
+    }
+
+    return 'All Classes & Sections';
   }
 
   // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    final themeColor = widget.isAdminOrTeacher
-        ? AppColors.primaryAdmin
-        : AppColors.primaryTeacher;
+    final user = context.watch<AuthNotifier>().user;
+    final isTeacher = user?.role == UserRole.teacher;
+    final isAdmin =
+        user?.role == UserRole.admin || user?.role == UserRole.superadmin;
+    final isStudent = user?.role == UserRole.student;
+
+    final bool canManageClass = widget.isAdminOrTeacher && (isAdmin || isTeacher);
+
+    Color themeColor = AppColors.primaryAdmin;
+    if (isTeacher) {
+      themeColor = AppColors.primaryTeacher;
+    } else if (isStudent) {
+      themeColor = AppColors.primaryStudent;
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -149,20 +210,25 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
               padding: const EdgeInsets.all(16),
               itemCount: provider.onlineClasses.length,
               itemBuilder: (context, index) {
-                return _buildOnlineClassCard(provider.onlineClasses[index]);
+                return _buildOnlineClassCard(
+                  context,
+                  provider.onlineClasses[index],
+                  canManageClass,
+                  themeColor,
+                );
               },
             ),
           );
         },
       ),
-      floatingActionButton: widget.isAdminOrTeacher
+      floatingActionButton: canManageClass
           ? FloatingActionButton.extended(
               onPressed: () async {
                 final result = await Navigator.push<bool>(
                   context,
                   MaterialPageRoute(
                     builder: (context) => AddEditOnlineClassScreen(
-                      isAdminOrTeacher: widget.isAdminOrTeacher,
+                      isAdminOrTeacher: canManageClass,
                     ),
                   ),
                 );
@@ -200,7 +266,6 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey[300]!),
-
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
@@ -264,11 +329,17 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
 
   // ── Card ──────────────────────────────────────────────────────────────────
 
-  Widget _buildOnlineClassCard(OnlineClass oClass) {
+  Widget _buildOnlineClassCard(
+    BuildContext context,
+    OnlineClass oClass,
+    bool canManageClass,
+    Color themeColor,
+  ) {
     final formattedDate = DateFormat(
       'MMM dd, yyyy • hh:mm a',
     ).format(oClass.scheduledTime);
     final isUpcoming = oClass.scheduledTime.isAfter(DateTime.now());
+    final classSectionLabel = _getClassSectionLabel(context, oClass);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -320,7 +391,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                   ),
                 ),
               ),
-              if (widget.isAdminOrTeacher)
+              if (canManageClass)
                 PopupMenuButton<String>(
                   icon: const Icon(
                     Icons.more_vert,
@@ -333,7 +404,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                         MaterialPageRoute(
                           builder: (context) => AddEditOnlineClassScreen(
                             onlineClass: oClass,
-                            isAdminOrTeacher: widget.isAdminOrTeacher,
+                            isAdminOrTeacher: canManageClass,
                           ),
                         ),
                       );
@@ -371,29 +442,63 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                 ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
+
+          // Host / Teacher info
           Row(
             children: [
               const Icon(
-                Icons.person_outline,
+                Icons.person_outline_rounded,
                 size: 16,
                 color: AppColors.textSecondary,
               ),
               const SizedBox(width: 6),
-              Text(
-                'By ${oClass.teacherName}',
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14,
+              Expanded(
+                child: Text(
+                  'Teacher: ${oClass.teacherName}',
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
+
+          // Target Class & Section
           Row(
             children: [
               const Icon(
-                Icons.access_time,
+                Icons.school_outlined,
+                size: 16,
+                color: AppColors.textSecondary,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  'Target: $classSectionLabel',
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+
+          // Scheduled Time
+          Row(
+            children: [
+              const Icon(
+                Icons.access_time_rounded,
                 size: 16,
                 color: AppColors.textSecondary,
               ),
@@ -402,11 +507,12 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                 formattedDate,
                 style: const TextStyle(
                   color: AppColors.textSecondary,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
               ),
             ],
           ),
+
           if (oClass.description.isNotEmpty) ...[
             const SizedBox(height: 12),
             Text(
@@ -418,26 +524,27 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
             ),
           ],
           const SizedBox(height: 16),
+
+          // Join Meeting Button for all roles
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () => _launchURL(oClass.meetLink),
               style: ElevatedButton.styleFrom(
-                backgroundColor: widget.isAdminOrTeacher
-                    ? AppColors.primaryAdmin
-                    : AppColors.primaryTeacher,
+                backgroundColor: themeColor,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
+                elevation: 0,
               ),
-              icon: const Icon(Icons.video_call, color: Colors.white),
+              icon: const Icon(Icons.video_call_rounded, color: Colors.white),
               label: const Text(
                 'Join Meeting',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: 15,
                 ),
               ),
             ),

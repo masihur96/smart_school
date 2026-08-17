@@ -262,18 +262,12 @@ class AppDrawer extends StatelessWidget {
           MaterialPageRoute(builder: (_) => const TeacherExamScreen()),
         );
       }, context),
-      // _buildDrawerItem(Icons.video_call, 'Online Classes', () {
-      //   Navigator.push(
-      //     context,
-      //     MaterialPageRoute(builder: (_) => const OnlineClassListScreen()),
-      //   );
-      // }, context),
-      // _buildDrawerItem(Icons.bookmark_added, 'Book Requests', () {
-      //   Navigator.push(
-      //     context,
-      //     MaterialPageRoute(builder: (_) => const BookRequestsScreen()),
-      //   );
-      // }, context),
+      _buildDrawerItem(Icons.video_call, 'Online Classes', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const OnlineClassListScreen()),
+        );
+      }, context),
       _buildDrawerItem(Icons.local_library, 'Library', () {
         Navigator.push(
           context,
@@ -328,6 +322,12 @@ class AppDrawer extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => StudentResultScreen()),
+        );
+      }, context),
+      _buildDrawerItem(Icons.video_call, 'Online Classes', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const OnlineClassListScreen()),
         );
       }, context),
       _buildDrawerItem(Icons.local_library, 'Library', () {
