@@ -83,6 +83,49 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
     'Cheque',
   ];
 
+  String _normalizePaymentMethod(String method) {
+    final clean = method.trim();
+    final lower = clean.toLowerCase().replaceAll('_', ' ');
+    if (lower == 'cash') return 'Cash';
+    if (lower.contains('bank')) return 'Bank Transfer';
+    if (lower.contains('bkash') ||
+        lower.contains('mobile') ||
+        lower.contains('nagad') ||
+        lower.contains('rocket')) {
+      return 'bKash / Mobile';
+    }
+    if (lower.contains('card') || lower.contains('pos')) return 'Card';
+    if (lower.contains('cheque') || lower.contains('check')) return 'Cheque';
+
+    for (final pm in _paymentMethods) {
+      if (pm.toLowerCase() == lower || pm.toLowerCase() == clean.toLowerCase()) {
+        return pm;
+      }
+    }
+
+    if (!_paymentMethods.contains(clean)) {
+      _paymentMethods.add(clean);
+    }
+    return clean;
+  }
+
+  String _normalizeCategory(String category, bool isIncome) {
+    final list = isIncome ? _incomeCategories : _expenseCategories;
+    final clean = category.trim();
+    final lower = clean.toLowerCase();
+
+    for (final cat in list) {
+      if (cat.toLowerCase() == lower) {
+        return cat;
+      }
+    }
+
+    if (!list.contains(clean)) {
+      list.add(clean);
+    }
+    return clean;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -105,19 +148,13 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
 
     if (item != null) {
       _selectedDate = item.date;
-      _selectedCategory = item.category;
-      _selectedPaymentMethod = item.paymentMethod;
-
-      final catList = _transactionType == TransactionType.income
-          ? _incomeCategories
-          : _expenseCategories;
-      if (!catList.contains(_selectedCategory)) {
-        catList.add(_selectedCategory);
-      }
+      _selectedCategory = _normalizeCategory(item.category, item.isIncome);
+      _selectedPaymentMethod = _normalizePaymentMethod(item.paymentMethod);
     } else {
       _selectedCategory = _transactionType == TransactionType.income
           ? _incomeCategories.first
           : _expenseCategories.first;
+      _selectedPaymentMethod = _paymentMethods.first;
     }
   }
 
@@ -471,9 +508,10 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
         : AppColors.primaryAdmin;
 
     final categories = isIncome ? _incomeCategories : _expenseCategories;
-    if (!categories.contains(_selectedCategory)) {
-      _selectedCategory = categories.first;
-    }
+    _selectedCategory = _normalizeCategory(_selectedCategory, isIncome);
+    _selectedPaymentMethod = _normalizePaymentMethod(_selectedPaymentMethod);
+    final uniqueCategories = categories.toSet().toList();
+    final uniquePaymentMethods = _paymentMethods.toSet().toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -686,7 +724,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                   ),
                   prefixIcon: const Icon(Icons.category_outlined),
                 ),
-                items: categories.map((String category) {
+                items: uniqueCategories.map((String category) {
                   return DropdownMenuItem<String>(
                     value: category,
                     child: Text(category),
@@ -716,7 +754,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                         ),
                         prefixIcon: const Icon(Icons.payment_rounded),
                       ),
-                      items: _paymentMethods.map((String method) {
+                      items: uniquePaymentMethods.map((String method) {
                         return DropdownMenuItem<String>(
                           value: method,
                           child: Text(
