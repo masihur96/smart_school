@@ -74,4 +74,45 @@ class LibraryBookNotifier extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Issues a book to a student via POST /library/issued-books.
+  ///
+  /// Throws a [Exception] with a user-readable message on failure.
+  Future<void> issueBook({
+    required String bookId,
+    required String studentId,
+    required DateTime dueDate,
+  }) async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+
+    final body = {
+      'bookId': bookId,
+      'studentId': studentId,
+      'dueDate': dueDate.toUtc().toIso8601String(),
+    };
+
+    log('LibraryBookNotifier.issueBook: $body');
+
+    final response = await DataProvider().performRequest(
+      'POST',
+      APIPath.libraryIssuedBooks,
+      data: body,
+      header: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response != null &&
+        (response.statusCode == 200 || response.statusCode == 201)) {
+      log('LibraryBookNotifier.issueBook: success → ${response.data}');
+    } else {
+      final msg = response?.data is Map
+          ? (response!.data['message'] ?? 'Failed to issue book.')
+          : 'Failed to issue book.';
+      log('LibraryBookNotifier.issueBook: error → $msg');
+      throw Exception(msg.toString());
+    }
+  }
 }

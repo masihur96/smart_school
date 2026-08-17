@@ -1,12 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 
 import '../../../models/student_model.dart';
 import '../../admin/providers/student_provider.dart';
-import '../data/dummy_library_data.dart';
 import '../data/models/book.dart';
+import '../providers/library_book_provider.dart';
 import 'id_card_scanner_screen.dart';
 
 class BookDetailScreen extends StatelessWidget {
@@ -99,19 +100,10 @@ class BookDetailScreen extends StatelessWidget {
       MaterialPageRoute(builder: (_) => const IdCardScannerScreen()),
     );
     if (result == null || !context.mounted) return;
-    DummyLibraryData.addRequest(
-      book.id,
-      book.title,
-      result.studentId,
-      result.studentName,
-    );
-    _showSuccessDialog(
+    await _callIssueApi(
       context,
-      ScanResult(
-        studentId: result.studentId,
-        studentName: result.studentName,
-        rawBarcode: result.rawBarcode,
-      ),
+      studentId: result.studentId,
+      studentName: result.studentName,
     );
   }
 
@@ -126,16 +118,274 @@ class BookDetailScreen extends StatelessWidget {
       ),
     );
     if (student == null || !context.mounted) return;
-    final name = student.user?.name ?? 'Unknown';
-    final id = student.userId;
-    DummyLibraryData.addRequest(book.id, book.title, id, name);
-    _showSuccessDialog(
+    await _callIssueApi(
       context,
-      ScanResult(studentId: id, studentName: name, rawBarcode: ''),
+      studentId: student.userId,
+      studentName: student.user?.name ?? 'Unknown',
     );
   }
 
-  void _showSuccessDialog(BuildContext context, ScanResult result) {
+  // ── Due-date picker ────────────────────────────────────────────────────────
+  Future<DateTime?> _pickDueDate(BuildContext context) async {
+    final now = DateTime.now();
+    // Default: 14 days from today
+    DateTime selected = now.add(const Duration(days: 14));
+
+    return showModalBottomSheet<DateTime>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetCtx) {
+        return StatefulBuilder(
+          builder: (ctx, setSt) {
+            return Container(
+              margin: const EdgeInsets.all(12),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 8, bottom: 20),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE5E7EB),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const Text(
+                    'Set Due Date',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF111827),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Choose when the book must be returned',
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+                  ),
+                  const SizedBox(height: 20),
+                  // Quick-select chips
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [7, 14, 21, 30].map((days) {
+                        final d = now.add(Duration(days: days));
+                        final isSelected =
+                            selected.year == d.year &&
+                            selected.month == d.month &&
+                            selected.day == d.day;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: GestureDetector(
+                            onTap: () => setSt(() => selected = d),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? const Color(0xFF1A3C6E)
+                                    : const Color(0xFFF4F6FB),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? const Color(0xFF1A3C6E)
+                                      : const Color(0xFFE5E7EB),
+                                ),
+                              ),
+                              child: Text(
+                                '+$days days',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : const Color(0xFF374151),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Date display + calendar picker
+                  GestureDetector(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: ctx,
+                        initialDate: selected,
+                        firstDate: now.add(const Duration(days: 1)),
+                        lastDate: now.add(const Duration(days: 365)),
+                        builder: (ctx2, child) => Theme(
+                          data: Theme.of(ctx2).copyWith(
+                            colorScheme: const ColorScheme.light(
+                              primary: Color(0xFF1A3C6E),
+                            ),
+                          ),
+                          child: child!,
+                        ),
+                      );
+                      if (picked != null) setSt(() => selected = picked);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF4F6FB),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: const Color(0xFFE5E7EB)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.calendar_month_rounded,
+                            color: Color(0xFF1A3C6E),
+                            size: 22,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Due Date',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFF9CA3AF),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Text(
+                                  DateFormat('EEE, MMM d, yyyy')
+                                      .format(selected),
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF111827),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(
+                            Icons.edit_calendar_rounded,
+                            size: 16,
+                            color: Color(0xFF9CA3AF),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(sheetCtx, selected),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1A3C6E),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Confirm & Issue',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ── Real API call ──────────────────────────────────────────────────────────
+  Future<void> _callIssueApi(
+    BuildContext context, {
+    required String studentId,
+    required String studentName,
+  }) async {
+    // 1. Pick due date
+    final dueDate = await _pickDueDate(context);
+    if (dueDate == null || !context.mounted) return;
+
+    // 2. Show loading overlay
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(color: Color(0xFF1A3C6E)),
+      ),
+    );
+
+    try {
+      await context.read<LibraryBookNotifier>().issueBook(
+        bookId: book.id,
+        studentId: studentId,
+        dueDate: dueDate,
+      );
+      if (!context.mounted) return;
+      Navigator.of(context).pop(); // close loading
+      _showSuccessDialog(
+        context,
+        ScanResult(studentId: studentId, studentName: studentName, rawBarcode: ''),
+        dueDate: dueDate,
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.of(context).pop(); // close loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: const Color(0xFFDC2626),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          content: Row(
+            children: [
+              const Icon(
+                Icons.error_outline_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  e.toString().replaceFirst('Exception: ', ''),
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
+
+  void _showSuccessDialog(
+    BuildContext context,
+    ScanResult result, {
+    DateTime? dueDate,
+  }) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -162,7 +412,8 @@ class BookDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               const Text(
-                'Issue Requested!',
+                'Book Issued!',
+                // was: 'Issue Requested!' — updated to confirm real API success
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -195,6 +446,14 @@ class BookDetailScreen extends StatelessWidget {
                       label: 'ID',
                       value: result.studentId,
                     ),
+                    if (dueDate != null) ...[
+                      const SizedBox(height: 8),
+                      _DialogInfoRow(
+                        icon: Icons.event_rounded,
+                        label: 'Due',
+                        value: DateFormat('MMM d, yyyy').format(dueDate),
+                      ),
+                    ],
                   ],
                 ),
               ),
