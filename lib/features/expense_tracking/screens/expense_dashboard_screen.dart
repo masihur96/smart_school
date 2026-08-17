@@ -246,10 +246,6 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
     BuildContext context,
     ExpenseProvider provider,
   ) {
-    final auth = context.watch<AuthNotifier>();
-    final schoolName = auth.user?.school?.name ?? 'School Treasury Wallet';
-    final schoolId = auth.user?.school?.address ?? '';
-    final formattedAccount = schoolId;
 
     final allTime = provider.allTimeSummary;
     final currentMonth = provider.currentMonthSummary;
@@ -333,7 +329,6 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
 
-                const SizedBox(height: 12),
 
                 // Period Switcher Segment
                 Container(
