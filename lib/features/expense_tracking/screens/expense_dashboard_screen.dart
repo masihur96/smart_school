@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -90,25 +91,22 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
               slivers: [
                 // 1. Digital Wallet Hero Card with Period Selector
                 SliverToBoxAdapter(
-                  child: _buildDigitalWalletCard(context, provider),
+                  child: (provider.isLoading && provider.expenses.isEmpty)
+                      ? _buildWalletCardShimmer(context)
+                      : _buildDigitalWalletCard(context, provider),
                 ),
 
                 // 2. Activity Header & Filters
                 SliverToBoxAdapter(
-                  child: _buildTransactionsHeader(context, provider),
+                  child: (provider.isLoading && provider.expenses.isEmpty)
+                      ? _buildHeaderShimmer(context)
+                      : _buildTransactionsHeader(context, provider),
                 ),
 
                 // 3. Transactions List
                 if (provider.isLoading && provider.expenses.isEmpty)
-                  const SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 50),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primaryAdmin,
-                        ),
-                      ),
-                    ),
+                  SliverToBoxAdapter(
+                    child: _buildTransactionListShimmer(context),
                   )
                 else if (provider.error != null && provider.expenses.isEmpty)
                   SliverToBoxAdapter(
@@ -970,5 +968,204 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
       ],
     );
   }
+
+  // ── Shimmer Skeleton Helpers ───────────────────────────────────────────────
+
+  /// A helper that wraps [child] in a single Shimmer.fromColors sweep.
+  Widget _shimmer({required Widget child, required BuildContext context}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Shimmer.fromColors(
+      baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
+      highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
+      child: child,
+    );
+  }
+
+  /// Rounded pill placeholder used throughout the shimmer skeletons.
+  Widget _shimBox({
+    double? w,
+    double h = 14,
+    double radius = 8,
+    Color color = Colors.white,
+  }) {
+    return Container(
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    );
+  }
+
+  /// Shimmer placeholder that mimics the Digital Wallet Hero Card.
+  Widget _buildWalletCardShimmer(BuildContext context) {
+    return _shimmer(
+      context: context,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+        height: 210,
+        decoration: BoxDecoration(
+          color: AppColors.primaryAdmin.withOpacity(0.55),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Period tab row
+            Row(
+              children: List.generate(
+                3,
+                (i) => Expanded(
+                  child: Container(
+                    margin: EdgeInsets.only(right: i < 2 ? 8 : 0),
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            // Balance label
+            _shimBox(w: 180, h: 12),
+            const SizedBox(height: 8),
+            // Big balance amount
+            _shimBox(w: 140, h: 30, radius: 10),
+            const SizedBox(height: 18),
+            // Inflow / Outflow row
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Container(
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Shimmer placeholder that mimics the "Recent Transactions" header,
+  /// search bar, and filter chips.
+  Widget _buildHeaderShimmer(BuildContext context) {
+    return _shimmer(
+      context: context,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _shimBox(w: 160, h: 16),
+                _shimBox(w: 64, h: 12),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Search bar placeholder
+            Container(
+              height: 46,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Filter chip row
+            Row(
+              children: [
+                _shimBox(w: 110, h: 30, radius: 20),
+                const SizedBox(width: 8),
+                _shimBox(w: 100, h: 30, radius: 20),
+                const SizedBox(width: 8),
+                _shimBox(w: 80, h: 30, radius: 20),
+              ],
+            ),
+            const SizedBox(height: 4),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Shimmer placeholder that mimics 6 transaction list tiles.
+  Widget _buildTransactionListShimmer(BuildContext context) {
+    return _shimmer(
+      context: context,
+      child: Column(
+        children: List.generate(6, (index) {
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                // Category icon circle
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Title + subtitle lines
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _shimBox(w: double.infinity, h: 13),
+                      const SizedBox(height: 7),
+                      _shimBox(w: 120, h: 11),
+                      const SizedBox(height: 6),
+                      _shimBox(w: 80, h: 10),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Amount column
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _shimBox(w: 70, h: 14),
+                    const SizedBox(height: 6),
+                    _shimBox(w: 50, h: 10),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }),
+      ),
+    );
+  }
 }
+
 
