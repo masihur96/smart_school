@@ -691,12 +691,12 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                   color: themeColor,
                 ),
                 decoration: InputDecoration(
-                  labelText: 'Amount (\$)',
+                  labelText: 'Amount (৳)',
                   hintText: '0.00',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  prefixIcon: const Icon(Icons.attach_money_rounded),
+                  prefixIcon: const Icon(Icons.currency_exchange_rounded),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {

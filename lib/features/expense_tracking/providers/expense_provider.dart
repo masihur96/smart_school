@@ -37,14 +37,14 @@ class ExpenseProvider with ChangeNotifier {
           StorySlide(
             title: 'Treasury Cashflow',
             highlightValue:
-                '${balance >= 0 ? '+' : ''}\$${balance.toStringAsFixed(2)}',
+                 '${balance >= 0 ? '+' : ''}৳${balance.toStringAsFixed(2)}',
             subtitle: 'Net Balance',
             description: balance >= 0
                 ? 'School liquidity remains healthy with total receipts exceeding operational disbursements.'
                 : 'Operational disbursements currently exceed logged receipts.',
             bulletPoints: [
-              'Total Inflow: \$${income.toStringAsFixed(2)}',
-              'Total Outflow: \$${expenses.toStringAsFixed(2)}',
+              'Total Inflow: ৳${income.toStringAsFixed(2)}',
+              'Total Outflow: ৳${expenses.toStringAsFixed(2)}',
               'Total Transactions: ${_expenses.length}',
             ],
             badge: 'Treasury Health',
@@ -63,15 +63,15 @@ class ExpenseProvider with ChangeNotifier {
         slides: [
           StorySlide(
             title: 'Fee & Income Collection',
-            highlightValue: '\$${income.toStringAsFixed(2)}',
+            highlightValue: '৳${income.toStringAsFixed(2)}',
             subtitle: 'Total receipts collected',
             description: incomeList.isEmpty
                 ? 'No income transactions logged yet. Tap "+ Add Money" to add collections.'
                 : '${incomeList.length} income deposits logged across all channels.',
             bulletPoints: [
-              'Bank Transfers: \$${incomeList.where((e) => e.paymentMethod.toUpperCase().contains('BANK')).fold(0.0, (s, e) => s + e.amount).toStringAsFixed(2)}',
-              'Cash Receipts: \$${incomeList.where((e) => e.paymentMethod.toUpperCase().contains('CASH')).fold(0.0, (s, e) => s + e.amount).toStringAsFixed(2)}',
-              'Other Channels: \$${incomeList.where((e) => !e.paymentMethod.toUpperCase().contains('BANK') && !e.paymentMethod.toUpperCase().contains('CASH')).fold(0.0, (s, e) => s + e.amount).toStringAsFixed(2)}',
+              'Bank Transfers: ৳${incomeList.where((e) => e.paymentMethod.toUpperCase().contains('BANK')).fold(0.0, (s, e) => s + e.amount).toStringAsFixed(2)}',
+              'Cash Receipts: ৳${incomeList.where((e) => e.paymentMethod.toUpperCase().contains('CASH')).fold(0.0, (s, e) => s + e.amount).toStringAsFixed(2)}',
+              'Other Channels: ৳${incomeList.where((e) => !e.paymentMethod.toUpperCase().contains('BANK') && !e.paymentMethod.toUpperCase().contains('CASH')).fold(0.0, (s, e) => s + e.amount).toStringAsFixed(2)}',
             ],
             badge: 'Fee Inflow',
             badgeColor: const Color(0xFF10B981),
@@ -89,15 +89,15 @@ class ExpenseProvider with ChangeNotifier {
         slides: [
           StorySlide(
             title: 'Campus Expenditures',
-            highlightValue: '\$${expenses.toStringAsFixed(2)}',
+            highlightValue: '৳${expenses.toStringAsFixed(2)}',
             subtitle: 'Total expenses recorded',
             description: expenseList.isEmpty
                 ? 'No campus expenses logged yet. Tap "- Add Expense" to log bills or payroll.'
                 : '${expenseList.length} operational expenditure vouchers recorded.',
             bulletPoints: [
-              'Total Outflows: \$${expenses.toStringAsFixed(2)}',
+              'Total Outflows: ৳${expenses.toStringAsFixed(2)}',
               'Transactions Logged: ${expenseList.length}',
-              'Net Operating Reserve: \$${balance.toStringAsFixed(2)}',
+              'Net Operating Reserve: ৳${balance.toStringAsFixed(2)}',
             ],
             badge: 'Expenses Done',
             badgeColor: const Color(0xFFEF4444),

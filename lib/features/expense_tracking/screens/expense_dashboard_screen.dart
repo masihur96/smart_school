@@ -52,7 +52,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
       'en_US',
     );
     final formatted = formatter.format(absAmount);
-    return amount < 0 ? '-\$$formatted' : '\$$formatted';
+    return amount < 0 ? '-৳$formatted' : '৳$formatted';
   }
 
   @override

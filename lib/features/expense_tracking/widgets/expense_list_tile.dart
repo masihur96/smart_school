@@ -150,7 +150,7 @@ class ExpenseListTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '${isIncome ? '+' : '-'}\$${expense.amount.toStringAsFixed(2)}',
+                      '${isIncome ? '+' : '-'}৳${expense.amount.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.w900,
@@ -533,7 +533,7 @@ class ExpenseListTile extends StatelessWidget {
                       ),
                       const SizedBox(width: 2),
                       Text(
-                        '${isIncome ? '+' : '-'}\$${expense.amount.toStringAsFixed(2)}',
+                        '${isIncome ? '+' : '-'}৳${expense.amount.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 15.5,
