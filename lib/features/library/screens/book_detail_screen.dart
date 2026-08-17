@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -5,7 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 
 import '../../../models/student_model.dart';
+import '../../admin/providers/setup_provider.dart';
 import '../../admin/providers/student_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../data/models/book.dart';
 import '../providers/library_book_provider.dart';
 import 'add_edit_book_screen.dart';
@@ -244,8 +247,13 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => ChangeNotifierProvider.value(
-        value: context.read<StudentsNotifier>(),
+      builder: (_) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: context.read<StudentsNotifier>()),
+          ChangeNotifierProvider.value(value: context.read<ClassSetupNotifier>()),
+          ChangeNotifierProvider.value(value: context.read<SectionSetupNotifier>()),
+          ChangeNotifierProvider.value(value: context.read<AuthNotifier>()),
+        ],
         child: const _SelectStudentSheet(),
       ),
     );
@@ -1217,6 +1225,8 @@ class _MethodTile extends StatelessWidget {
 
 // ─── Select student bottom sheet ─────────────────────────────────────────────
 
+// ─── Select student bottom sheet ─────────────────────────────────────────────
+
 class _SelectStudentSheet extends StatefulWidget {
   const _SelectStudentSheet();
 
@@ -1226,37 +1236,85 @@ class _SelectStudentSheet extends StatefulWidget {
 
 class _SelectStudentSheetState extends State<_SelectStudentSheet> {
   final TextEditingController _searchCtrl = TextEditingController();
-  String _query = '';
+  final ScrollController _scrollCtrl = ScrollController();
+  String? _selectedClassId;
+  String? _selectedSectionId;
+  Timer? _debounceTimer;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final notifier = context.read<StudentsNotifier>();
-      if (notifier.students.isEmpty) notifier.fetchStudents();
+      final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
+
+      final classNotifier = context.read<ClassSetupNotifier>();
+      if (classNotifier.classes.isEmpty && schoolId.isNotEmpty) {
+        classNotifier.fetchClasses(schoolId);
+      }
+
+      final sectionNotifier = context.read<SectionSetupNotifier>();
+      if (sectionNotifier.sections.isEmpty) {
+        sectionNotifier.fetchSections();
+      }
+
+      _fetchStudentsFromServer();
     });
-    _searchCtrl.addListener(() => setState(() => _query = _searchCtrl.text));
+
+    _scrollCtrl.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollCtrl.position.pixels >=
+        _scrollCtrl.position.maxScrollExtent - 200) {
+      final notifier = context.read<StudentsNotifier>();
+      if (!notifier.isLoadingMore && notifier.hasMore) {
+        notifier.fetchStudents(
+          classId: _selectedClassId,
+          sectionId: _selectedSectionId,
+          search: _searchCtrl.text.trim(),
+          loadMore: true,
+        );
+      }
+    }
+  }
+
+  void _fetchStudentsFromServer() {
+    context.read<StudentsNotifier>().fetchStudents(
+          classId: _selectedClassId,
+          sectionId: _selectedSectionId,
+          search: _searchCtrl.text.trim(),
+        );
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 400), () {
+      _fetchStudentsFromServer();
+    });
   }
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _searchCtrl.dispose();
+    _scrollCtrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final classes = context.watch<ClassSetupNotifier>().classes;
+    final allSections = context.watch<SectionSetupNotifier>().sections;
+
+    final availableSections = _selectedClassId == null
+        ? allSections
+        : allSections.where((s) => s.classId == _selectedClassId).toList();
+
     return Consumer<StudentsNotifier>(
       builder: (context, notifier, _) {
-        final all = notifier.students;
-        final filtered = _query.isEmpty
-            ? all
-            : all.where((s) {
-                final name = (s.user?.name ?? '').toLowerCase();
-                final roll = s.rollId.toLowerCase();
-                final q = _query.toLowerCase();
-                return name.contains(q) || roll.contains(q);
-              }).toList();
+        final students = notifier.students;
+        final displayCount =
+            notifier.totalCount > 0 ? notifier.totalCount : students.length;
 
         return Container(
           margin: const EdgeInsets.only(top: 60),
@@ -1266,6 +1324,7 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
           ),
           child: Column(
             children: [
+              // Drag Handle
               Container(
                 margin: const EdgeInsets.only(top: 12),
                 width: 40,
@@ -1276,6 +1335,8 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                 ),
               ),
               const SizedBox(height: 16),
+
+              // Title Row
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -1316,6 +1377,139 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                 ),
               ),
               const SizedBox(height: 14),
+
+              // Class & Section Filters
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    // Class Filter Dropdown
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF4F6FB),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE5E7EB)),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String?>(
+                            value: _selectedClassId,
+                            isExpanded: true,
+                            hint: const Text(
+                              'All Classes',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF6B7280),
+                              ),
+                            ),
+                            icon: const Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              size: 18,
+                            ),
+                            items: [
+                              const DropdownMenuItem<String?>(
+                                value: null,
+                                child: Text(
+                                  'All Classes',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              ...classes.map(
+                                (c) => DropdownMenuItem<String?>(
+                                  value: c.id,
+                                  child: Text(
+                                    c.name,
+                                    style: const TextStyle(fontSize: 13),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            onChanged: (val) {
+                              setState(() {
+                                _selectedClassId = val;
+                                _selectedSectionId = null;
+                              });
+                              _fetchStudentsFromServer();
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+
+                    // Section Filter Dropdown
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF4F6FB),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE5E7EB)),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String?>(
+                            value: _selectedSectionId,
+                            isExpanded: true,
+                            hint: const Text(
+                              'All Sections',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF6B7280),
+                              ),
+                            ),
+                            icon: const Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              size: 18,
+                            ),
+                            items: [
+                              const DropdownMenuItem<String?>(
+                                value: null,
+                                child: Text(
+                                  'All Sections',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              ...availableSections.map(
+                                (s) => DropdownMenuItem<String?>(
+                                  value: s.id,
+                                  child: Text(
+                                    s.name,
+                                    style: const TextStyle(fontSize: 13),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            onChanged: (val) {
+                              setState(() {
+                                _selectedSectionId = val;
+                              });
+                              _fetchStudentsFromServer();
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Search Input (Server side search by name/roll)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Container(
@@ -1326,9 +1520,10 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                   ),
                   child: TextField(
                     controller: _searchCtrl,
+                    onChanged: _onSearchChanged,
                     style: const TextStyle(fontSize: 14),
                     decoration: InputDecoration(
-                      hintText: 'Search by name or roll number…',
+                      hintText: 'Search student name from server…',
                       hintStyle: TextStyle(
                         color: Colors.grey.shade400,
                         fontSize: 13,
@@ -1338,14 +1533,17 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                         color: Colors.grey.shade400,
                         size: 18,
                       ),
-                      suffixIcon: _query.isNotEmpty
+                      suffixIcon: _searchCtrl.text.isNotEmpty
                           ? IconButton(
                               icon: Icon(
                                 Icons.close_rounded,
                                 color: Colors.grey.shade400,
                                 size: 16,
                               ),
-                              onPressed: () => _searchCtrl.clear(),
+                              onPressed: () {
+                                _searchCtrl.clear();
+                                _fetchStudentsFromServer();
+                              },
                             )
                           : null,
                       border: InputBorder.none,
@@ -1357,6 +1555,8 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                   ),
                 ),
               ),
+
+              // Results Count Bar
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -1365,7 +1565,7 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    '${filtered.length} student${filtered.length == 1 ? '' : 's'}',
+                    '$displayCount student${displayCount == 1 ? '' : 's'} found',
                     style: const TextStyle(
                       fontSize: 12,
                       color: Color(0xFF9CA3AF),
@@ -1374,121 +1574,139 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                   ),
                 ),
               ),
+
+              // Student List View
               Expanded(
-                child: notifier.isLoading && all.isEmpty
+                child: notifier.isLoading && students.isEmpty
                     ? const Center(child: CircularProgressIndicator())
-                    : filtered.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.person_search_rounded,
-                              size: 48,
-                              color: Colors.grey.shade300,
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              'No students found',
-                              style: TextStyle(
-                                color: Colors.grey.shade400,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                        itemCount: filtered.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 8),
-                        itemBuilder: (ctx, i) {
-                          final s = filtered[i];
-                          final name = s.user?.name ?? 'Unknown';
-                          final avatar = s.user?.avatar ?? '';
-                          final roll = s.rollId.isNotEmpty
-                              ? 'Roll: ${s.rollId}'
-                              : '';
-                          final cls = s.className != null
-                              ? ' · ${s.className}'
-                              : '';
-                          return GestureDetector(
-                            onTap: () => Navigator.pop(ctx, s),
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                  color: const Color(0xFFE5E7EB),
+                    : students.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.person_search_rounded,
+                                  size: 48,
+                                  color: Colors.grey.shade300,
                                 ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.04),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
+                                const SizedBox(height: 10),
+                                Text(
+                                  'No students found',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade400,
+                                    fontSize: 14,
                                   ),
-                                ],
-                              ),
-                              child: Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 22,
-                                    backgroundColor: const Color(
-                                      0xFF7C3AED,
-                                    ).withOpacity(0.12),
-                                    backgroundImage: avatar.isNotEmpty
-                                        ? NetworkImage(avatar)
-                                        : null,
-                                    child: avatar.isEmpty
-                                        ? Text(
-                                            name.isNotEmpty
-                                                ? name[0].toUpperCase()
-                                                : '?',
-                                            style: const TextStyle(
-                                              color: Color(0xFF7C3AED),
-                                              fontWeight: FontWeight.w700,
-                                              fontSize: 16,
-                                            ),
-                                          )
-                                        : null,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          name,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w700,
-                                            color: Color(0xFF111827),
-                                          ),
-                                        ),
-                                        if (roll.isNotEmpty || cls.isNotEmpty)
-                                          Text(
-                                            '$roll$cls',
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              color: Color(0xFF9CA3AF),
-                                            ),
-                                          ),
-                                      ],
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.separated(
+                            controller: _scrollCtrl,
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                            itemCount:
+                                students.length + (notifier.isLoadingMore ? 1 : 0),
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 8),
+                            itemBuilder: (ctx, i) {
+                              if (i == students.length) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
                                     ),
                                   ),
-                                  const Icon(
-                                    Icons.arrow_forward_ios_rounded,
-                                    size: 14,
-                                    color: Color(0xFFD1D5DB),
+                                );
+                              }
+
+                              final s = students[i];
+                              final name = s.user?.name ?? 'Unknown';
+                              final avatar = s.user?.avatar ?? '';
+                              final roll = s.rollId.isNotEmpty
+                                  ? 'Roll: ${s.rollId}'
+                                  : '';
+                              final cls = s.className != null
+                                  ? ' · Class ${s.className}'
+                                  : '';
+
+                              return GestureDetector(
+                                onTap: () => Navigator.pop(ctx, s),
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: const Color(0xFFE5E7EB),
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.04),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 22,
+                                        backgroundColor: const Color(
+                                          0xFF7C3AED,
+                                        ).withOpacity(0.12),
+                                        backgroundImage: avatar.isNotEmpty
+                                            ? NetworkImage(avatar)
+                                            : null,
+                                        child: avatar.isEmpty
+                                            ? Text(
+                                                name.isNotEmpty
+                                                    ? name[0].toUpperCase()
+                                                    : '?',
+                                                style: const TextStyle(
+                                                  color: Color(0xFF7C3AED),
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 16,
+                                                ),
+                                              )
+                                            : null,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              name,
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w700,
+                                                color: Color(0xFF111827),
+                                              ),
+                                            ),
+                                            if (roll.isNotEmpty ||
+                                                cls.isNotEmpty)
+                                              Text(
+                                                '$roll$cls',
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Color(0xFF9CA3AF),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.arrow_forward_ios_rounded,
+                                        size: 14,
+                                        color: Color(0xFFD1D5DB),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
               ),
             ],
           ),
