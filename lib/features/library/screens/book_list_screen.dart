@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../data/models/book.dart';
 import '../providers/library_book_provider.dart';
@@ -55,8 +56,19 @@ class _BookListScreenState extends State<BookListScreen> {
     return Consumer<LibraryBookNotifier>(
       builder: (context, notifier, _) {
         if (notifier.isLoading) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+          return Scaffold(
+            body: Column(
+              children: [
+                _buildSearchAndFilter(notifier),
+                _buildCategoryChipsShimmer(),
+                _buildResultsHeaderShimmer(),
+                Expanded(
+                  child: _gridView
+                      ? _buildGridShimmer()
+                      : _buildListShimmer(),
+                ),
+              ],
+            ),
           );
         }
 
@@ -84,6 +96,179 @@ class _BookListScreenState extends State<BookListScreen> {
           ),
         );
       },
+    );
+  }
+
+  // ─── Shimmer Helpers ──────────────────────────────────────────────────────
+
+  static Widget _shimBox(double w, double h, {double r = 8}) => Container(
+        width: w,
+        height: h,
+        decoration: BoxDecoration(
+          color: const Color(0xFFDEDEDE),
+          borderRadius: BorderRadius.circular(r),
+        ),
+      );
+
+  /// Skeleton for the category chip row
+  Widget _buildCategoryChipsShimmer() {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Shimmer.fromColors(
+        baseColor: const Color(0xFFE8E8E8),
+        highlightColor: const Color(0xFFF8F8F8),
+        child: SizedBox(
+          height: 34,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            scrollDirection: Axis.horizontal,
+            itemCount: 5,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (_, __) => _shimBox(72, 34, r: 20),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Skeleton for the results header row
+  Widget _buildResultsHeaderShimmer() {
+    return Container(
+      color: const Color(0xFFF4F6FB),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+      child: Shimmer.fromColors(
+        baseColor: const Color(0xFFE8E8E8),
+        highlightColor: const Color(0xFFF8F8F8),
+        child: Row(
+          children: [
+            _shimBox(100, 13, r: 30),
+            const Spacer(),
+            _shimBox(60, 26, r: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Skeleton that mirrors the 2-column BookGridCard layout
+  Widget _buildGridShimmer() {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFFE8E8E8),
+      highlightColor: const Color(0xFFF8F8F8),
+      child: GridView.builder(
+        padding: const EdgeInsets.fromLTRB(14, 4, 14, 20),
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.62,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+        ),
+        itemCount: 6,
+        itemBuilder: (_, __) => _buildGridCardSkeleton(),
+      ),
+    );
+  }
+
+  Widget _buildGridCardSkeleton() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Cover image placeholder
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            child: Container(
+              height: 155,
+              color: const Color(0xFFDEDEDE),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _shimBox(double.infinity, 12, r: 30),
+                const SizedBox(height: 6),
+                _shimBox(80, 10, r: 30),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    _shimBox(50, 20, r: 6),
+                    const Spacer(),
+                    _shimBox(54, 20, r: 6),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Skeleton that mirrors the _BookListTile layout
+  Widget _buildListShimmer() {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFFE8E8E8),
+      highlightColor: const Color(0xFFF8F8F8),
+      child: ListView.separated(
+        padding: const EdgeInsets.fromLTRB(14, 4, 14, 20),
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 6,
+        separatorBuilder: (_, __) => const SizedBox(height: 10),
+        itemBuilder: (_, __) => _buildListTileSkeleton(),
+      ),
+    );
+  }
+
+  Widget _buildListTileSkeleton() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Cover thumbnail placeholder
+            Container(
+              width: 62,
+              height: 88,
+              decoration: BoxDecoration(
+                color: const Color(0xFFDEDEDE),
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _shimBox(double.infinity, 14, r: 30),
+                  const SizedBox(height: 6),
+                  _shimBox(120, 11, r: 30),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      _shimBox(55, 20, r: 6),
+                      const Spacer(),
+                      _shimBox(60, 20, r: 6),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
