@@ -1,50 +1,212 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../data/dummy_library_data.dart';
+import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
+
 import '../data/models/issued_book.dart';
+import '../providers/library_book_provider.dart';
 import 'book_detail_screen.dart';
 
-class IssuedBooksScreen extends StatelessWidget {
+class IssuedBooksScreen extends StatefulWidget {
   const IssuedBooksScreen({super.key});
 
   @override
+  State<IssuedBooksScreen> createState() => _IssuedBooksScreenState();
+}
+
+class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<LibraryBookNotifier>().fetchIssuedBooks();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final issuedBooks = DummyLibraryData.getIssuedBooks();
+    return Consumer<LibraryBookNotifier>(
+      builder: (context, notifier, _) {
+        // ── Loading ────────────────────────────────────────────────────────
+        if (notifier.isIssuedLoading) {
+          return _buildShimmer();
+        }
 
-    if (issuedBooks.isEmpty) {
-      return _buildEmptyState();
-    }
+        // ── Error ──────────────────────────────────────────────────────────
+        if (notifier.issuedError != null && notifier.issuedBooks.isEmpty) {
+          return _buildError(notifier);
+        }
 
-    final overdue = issuedBooks.where((b) => b.isOverdue).toList();
-    final onTime = issuedBooks.where((b) => !b.isOverdue).toList();
+        // ── Empty ──────────────────────────────────────────────────────────
+        final issuedBooks = notifier.issuedBooks;
+        if (issuedBooks.isEmpty) {
+          return RefreshIndicator(
+            onRefresh: () => notifier.fetchIssuedBooks(),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.4,
+                  child: _buildEmptyState(),
+                ),
+              ],
+            ),
+          );
+        }
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-      children: [
-        if (overdue.isNotEmpty) ...[
-          _SectionHeader(
-            label: 'Overdue',
-            count: overdue.length,
-            color: const Color(0xFFEF4444),
-            icon: Icons.warning_rounded,
+        // ── Data ───────────────────────────────────────────────────────────
+        final overdue = issuedBooks.where((b) => b.isOverdue).toList();
+        final onTime = issuedBooks.where((b) => !b.isOverdue).toList();
+
+        return RefreshIndicator(
+          onRefresh: () => notifier.fetchIssuedBooks(),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            children: [
+              if (overdue.isNotEmpty) ...[
+                _SectionHeader(
+                  label: 'Overdue',
+                  count: overdue.length,
+                  color: const Color(0xFFEF4444),
+                  icon: Icons.warning_rounded,
+                ),
+                const SizedBox(height: 8),
+                ...overdue.map((ib) => _IssuedBookCard(issuedBook: ib)),
+                const SizedBox(height: 16),
+              ],
+              if (onTime.isNotEmpty) ...[
+                _SectionHeader(
+                  label: 'On Track',
+                  count: onTime.length,
+                  color: const Color(0xFF10B981),
+                  icon: Icons.check_circle_rounded,
+                ),
+                const SizedBox(height: 8),
+                ...onTime.map((ib) => _IssuedBookCard(issuedBook: ib)),
+              ],
+            ],
           ),
-          const SizedBox(height: 8),
-          ...overdue.map((ib) => _IssuedBookCard(issuedBook: ib)),
-          const SizedBox(height: 16),
-        ],
-        if (onTime.isNotEmpty) ...[
-          _SectionHeader(
-            label: 'On Track',
-            count: onTime.length,
-            color: const Color(0xFF10B981),
-            icon: Icons.check_circle_rounded,
-          ),
-          const SizedBox(height: 8),
-          ...onTime.map((ib) => _IssuedBookCard(issuedBook: ib)),
-        ],
-      ],
+        );
+      },
     );
   }
+
+  // ── Shimmer skeleton ──────────────────────────────────────────────────────
+
+  Widget _buildShimmer() {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFFE8E8E8),
+      highlightColor: const Color(0xFFF8F8F8),
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 5,
+        itemBuilder: (_, __) => _skeletonCard(),
+      ),
+    );
+  }
+
+  static Widget _box(double w, double h, {double r = 8}) => Container(
+        width: w,
+        height: h,
+        decoration: BoxDecoration(
+          color: const Color(0xFFDEDEDE),
+          borderRadius: BorderRadius.circular(r),
+        ),
+      );
+
+  Widget _skeletonCard() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Cover placeholder
+          Container(
+            width: 58,
+            height: 82,
+            decoration: BoxDecoration(
+              color: const Color(0xFFDEDEDE),
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: _box(double.infinity, 14, r: 30)),
+                    const SizedBox(width: 8),
+                    _box(52, 22, r: 6),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                _box(100, 11, r: 30),
+                const SizedBox(height: 12),
+                _box(130, 11, r: 30),
+                const SizedBox(height: 6),
+                _box(120, 11, r: 30),
+                const SizedBox(height: 8),
+                _box(90, 22, r: 8),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Error state ───────────────────────────────────────────────────────────
+
+  Widget _buildError(LibraryBookNotifier notifier) {
+    return RefreshIndicator(
+      onRefresh: () => notifier.fetchIssuedBooks(),
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.4,
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.cloud_off_rounded,
+                    size: 56,
+                    color: Colors.grey.shade300,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    notifier.issuedError ?? 'Something went wrong',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  TextButton.icon(
+                    onPressed: () => notifier.fetchIssuedBooks(),
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Empty state ───────────────────────────────────────────────────────────
 
   Widget _buildEmptyState() {
     return Center(
@@ -58,8 +220,11 @@ class IssuedBooksScreen extends StatelessWidget {
               color: const Color(0xFF1A3C6E).withOpacity(0.07),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.bookmark_border_rounded,
-                size: 40, color: Color(0xFF1A3C6E)),
+            child: const Icon(
+              Icons.bookmark_border_rounded,
+              size: 40,
+              color: Color(0xFF1A3C6E),
+            ),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -75,11 +240,18 @@ class IssuedBooksScreen extends StatelessWidget {
             'All books are currently available.',
             style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
           ),
+          const SizedBox(height: 4),
+          Text(
+            'Pull down to refresh',
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
+          ),
         ],
       ),
     );
   }
 }
+
+// ─── Section header ───────────────────────────────────────────────────────────
 
 class _SectionHeader extends StatelessWidget {
   final String label;
@@ -135,6 +307,8 @@ class _SectionHeader extends StatelessWidget {
     );
   }
 }
+
+// ─── Issued book card ─────────────────────────────────────────────────────────
 
 class _IssuedBookCard extends StatelessWidget {
   final IssuedBook issuedBook;
@@ -193,8 +367,11 @@ class _IssuedBookCard extends StatelessWidget {
                     width: 58,
                     height: 82,
                     color: const Color(0xFFE5E7EB),
-                    child: const Icon(Icons.book_rounded,
-                        color: Color(0xFF9CA3AF), size: 24),
+                    child: const Icon(
+                      Icons.book_rounded,
+                      color: Color(0xFF9CA3AF),
+                      size: 24,
+                    ),
                   ),
                   loadingBuilder: (_, child, progress) => progress == null
                       ? child
@@ -239,8 +416,31 @@ class _IssuedBookCard extends StatelessWidget {
                         color: Color(0xFF6B7280),
                       ),
                     ),
+                    // Student name (from API)
+                    if (issuedBook.studentName.isNotEmpty &&
+                        issuedBook.studentName != 'Student') ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.person_outline_rounded,
+                            size: 12,
+                            color: Color(0xFF9CA3AF),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            issuedBook.studentName,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF9CA3AF),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 10),
-                    // Date row
+                    // Date rows
                     _DateRow(
                       icon: Icons.calendar_today_rounded,
                       label: 'Issued',
@@ -274,6 +474,8 @@ class _IssuedBookCard extends StatelessWidget {
     );
   }
 }
+
+// ─── Supporting widgets ───────────────────────────────────────────────────────
 
 class _StatusBadge extends StatelessWidget {
   final bool isOverdue;
@@ -351,7 +553,8 @@ class _CountdownChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isOverdue ? const Color(0xFFEF4444) : const Color(0xFF10B981);
+    final color =
+        isOverdue ? const Color(0xFFEF4444) : const Color(0xFF10B981);
     final bgColor = color.withOpacity(0.08);
     final text = isOverdue
         ? '$daysLeft ${daysLeft == 1 ? 'day' : 'days'} overdue'
@@ -370,7 +573,9 @@ class _CountdownChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isOverdue ? Icons.access_time_filled_rounded : Icons.hourglass_top_rounded,
+            isOverdue
+                ? Icons.access_time_filled_rounded
+                : Icons.hourglass_top_rounded,
             size: 12,
             color: color,
           ),

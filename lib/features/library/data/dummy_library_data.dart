@@ -61,12 +61,16 @@ class DummyLibraryData {
       IssuedBook(
         id: 'i1',
         book: books.firstWhere((b) => b.id == '2'),
+        studentId: 's1',
+        studentName: 'Alice Smith',
         issueDate: DateTime.now().subtract(const Duration(days: 10)),
         dueDate: DateTime.now().add(const Duration(days: 4)),
       ),
       IssuedBook(
         id: 'i2',
         book: books.firstWhere((b) => b.id == '5'),
+        studentId: 's2',
+        studentName: 'Bob Johnson',
         issueDate: DateTime.now().subtract(const Duration(days: 20)),
         dueDate: DateTime.now().subtract(const Duration(days: 6)), // Overdue
       ),

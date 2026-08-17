@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/library/screens/add_edit_book_screen.dart';
 
-import '../data/dummy_library_data.dart';
+import '../providers/library_book_provider.dart';
 import 'book_list_screen.dart';
 import 'issued_books_screen.dart';
 
@@ -51,14 +52,11 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
 
   @override
   Widget build(BuildContext context) {
-    final totalBooks = DummyLibraryData.books.length;
-    final availableBooks = DummyLibraryData.books
-        .where((b) => b.isAvailable)
-        .length;
-    final issuedBooks = DummyLibraryData.getIssuedBooks().length;
-    final overdueBooks = DummyLibraryData.getIssuedBooks()
-        .where((b) => b.isOverdue)
-        .length;
+    final notifier = context.watch<LibraryBookNotifier>();
+    final totalBooks = notifier.books.length;
+    final availableBooks = notifier.books.where((b) => b.isAvailable).length;
+    final issuedCount = notifier.issuedBooks.length;
+    final overdueCount = notifier.issuedBooks.where((b) => b.isOverdue).length;
 
     return Scaffold(
       // backgroundColor: AppColors.primaryAdmin,
@@ -100,8 +98,8 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
               background: _buildHeroBanner(
                 totalBooks: totalBooks,
                 availableBooks: availableBooks,
-                issuedCount: issuedBooks,
-                overdueCount: overdueBooks,
+                issuedCount: issuedCount,
+                overdueCount: overdueCount,
               ),
             ),
             bottom: PreferredSize(
