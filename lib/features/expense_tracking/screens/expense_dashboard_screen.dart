@@ -58,19 +58,9 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
-          children: [
-            Icon(
-              Icons.account_balance_wallet_rounded,
-              color: Colors.white,
-              size: 22,
-            ),
-            SizedBox(width: 8),
-            Text(
-              'School Wallet & Expenses',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-          ],
+        title:  Text(
+          'School Wallet & Expenses',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         backgroundColor: AppColors.primaryAdmin, // Deep Royal Purple
         foregroundColor: Colors.white,
