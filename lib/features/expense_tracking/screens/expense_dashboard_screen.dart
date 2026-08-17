@@ -26,6 +26,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
   TransactionFilter _currentFilter = TransactionFilter.all;
   SummaryPeriod _selectedPeriod = SummaryPeriod.allTime;
   bool _isBalanceVisible = true;
+  bool _isFabOpen = false;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
@@ -58,14 +59,15 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:  Text(
+        title: const Text(
           'School Wallet & Expenses',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        backgroundColor: AppColors.primaryAdmin, // Deep Royal Purple
+        backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
+      floatingActionButton: _buildSpeedDialFab(context),
       body: Consumer<ExpenseProvider>(
         builder: (context, provider, child) {
           final filteredExpenses = provider.getFilteredTransactions(
@@ -230,7 +232,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                     }, childCount: filteredExpenses.length),
                   ),
 
-                const SliverToBoxAdapter(child: SizedBox(height: 80)),
+                const SliverToBoxAdapter(child: SizedBox(height: 120)),
               ],
             ),
           );
@@ -577,80 +579,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 14),
 
-                // Quick Action Buttons on Wallet Card
-                Row(
-                  children: [
-                    // + Add Money / Fee
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const AddEditExpenseScreen(
-                                initialType: TransactionType.income,
-                              ),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.add_rounded, size: 18),
-                        label: const Text(
-                          'Add Money',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF10B981),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          elevation: 0,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 10),
-
-                    // - Add Expense
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const AddEditExpenseScreen(
-                                initialType: TransactionType.expense,
-                              ),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.remove_rounded, size: 18),
-                        label: const Text(
-                          'Add Expense',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white.withOpacity(0.2),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          elevation: 0,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -888,4 +817,163 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
       ),
     );
   }
+
+  // ── Speed-Dial FAB ─────────────────────────────────────────────────────────
+  Widget _buildSpeedDialFab(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        // "Add Expense" mini FAB
+        AnimatedSlide(
+          offset: _isFabOpen ? Offset.zero : const Offset(0, 0.5),
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          child: AnimatedOpacity(
+            opacity: _isFabOpen ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 200),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Label chip
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade700,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red.withOpacity(0.3),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Text(
+                      'Add Expense',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  // Mini FAB
+                  FloatingActionButton.small(
+                    heroTag: 'fab_expense',
+                    onPressed: _isFabOpen
+                        ? () {
+                            setState(() => _isFabOpen = false);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const AddEditExpenseScreen(
+                                  initialType: TransactionType.expense,
+                                ),
+                              ),
+                            );
+                          }
+                        : null,
+                    backgroundColor: Colors.red.shade600,
+                    foregroundColor: Colors.white,
+                    elevation: 4,
+                    child: const Icon(Icons.remove_rounded, size: 20),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        // "Add Money" mini FAB
+        AnimatedSlide(
+          offset: _isFabOpen ? Offset.zero : const Offset(0, 0.5),
+          duration: const Duration(milliseconds: 160),
+          curve: Curves.easeOut,
+          child: AnimatedOpacity(
+            opacity: _isFabOpen ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 160),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Label chip
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF059669),
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF10B981).withOpacity(0.35),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Text(
+                      'Add Money',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  // Mini FAB
+                  FloatingActionButton.small(
+                    heroTag: 'fab_income',
+                    onPressed: _isFabOpen
+                        ? () {
+                            setState(() => _isFabOpen = false);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const AddEditExpenseScreen(
+                                  initialType: TransactionType.income,
+                                ),
+                              ),
+                            );
+                          }
+                        : null,
+                    backgroundColor: const Color(0xFF10B981),
+                    foregroundColor: Colors.white,
+                    elevation: 4,
+                    child: const Icon(Icons.add_rounded, size: 20),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        // Main FAB (toggle)
+        FloatingActionButton(
+          heroTag: 'fab_main',
+          onPressed: () => setState(() => _isFabOpen = !_isFabOpen),
+          backgroundColor: AppColors.primaryAdmin,
+          foregroundColor: Colors.white,
+          elevation: 6,
+          child: AnimatedRotation(
+            turns: _isFabOpen ? 0.125 : 0.0, // 45° rotation when open
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOut,
+            child: const Icon(Icons.add_rounded, size: 28),
+          ),
+        ),
+      ],
+    );
+  }
 }
+
