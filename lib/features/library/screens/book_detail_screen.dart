@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 
 import '../../../models/student_model.dart';
+import '../../../models/user_model.dart';
 import '../../admin/providers/setup_provider.dart';
 import '../../admin/providers/student_provider.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -34,18 +35,19 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
   // ── Edit book handler ──────────────────────────────────────────────────────
   Future<void> _onEditBook(BuildContext context) async {
-    final updated = await Navigator.push<Book>(
+    final updatedBook = await Navigator.push<Book>(
       context,
       MaterialPageRoute(
-        builder: (_) => AddEditBookScreen(
+        builder: (context) => AddEditBookScreen(
           book: _book,
           isAdminOrTeacher: true,
         ),
       ),
     );
-    if (updated != null && mounted) {
+
+    if (updatedBook != null && mounted) {
       setState(() {
-        _book = updated;
+        _book = updatedBook;
       });
     }
   }
@@ -55,25 +57,41 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Delete Book',
-          style: TextStyle(fontWeight: FontWeight.w700),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Color(0xFFDC2626)),
+            SizedBox(width: 8),
+            Text(
+              'Delete Book',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF111827),
+              ),
+            ),
+          ],
         ),
         content: Text(
           'Are you sure you want to delete "${_book.title}"? This action cannot be undone.',
-          style: const TextStyle(fontSize: 14),
+          style: const TextStyle(fontSize: 14, color: Color(0xFF4B5563)),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Color(0xFF6B7280)),
+            ),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
+            onPressed: () => Navigator.of(ctx).pop(true),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFDC2626),
               foregroundColor: Colors.white,
+              elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -84,13 +102,14 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       ),
     );
 
-    if (confirm != true || !context.mounted) return;
+    if (confirm != true || !mounted) return;
 
+    // Show loading dialog
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => const Center(
-        child: CircularProgressIndicator(color: Color(0xFFDC2626)),
+        child: CircularProgressIndicator(color: Color(0xFF1A3C6E)),
       ),
     );
 
@@ -222,19 +241,24 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
+  // ── Option A: Scan ─────────────────────────────────────────────────────────
   Future<void> _handleScanOption(BuildContext context) async {
     final result = await Navigator.push<ScanResult>(
       context,
-      MaterialPageRoute(builder: (_) => const IdCardScannerScreen()),
+      MaterialPageRoute(
+        builder: (_) => const IdCardScannerScreen(),
+      ),
     );
+
     if (result == null || !context.mounted) return;
+
     await _callIssueApi(
       context,
       studentId: result.studentId,
@@ -242,12 +266,13 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     );
   }
 
+  // ── Option B: Select from sheet ───────────────────────────────────────────
   Future<void> _handleSelectStudentOption(BuildContext context) async {
     final student = await showModalBottomSheet<Student>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => MultiProvider(
+      builder: (sheetCtx) => MultiProvider(
         providers: [
           ChangeNotifierProvider.value(value: context.read<StudentsNotifier>()),
           ChangeNotifierProvider.value(value: context.read<ClassSetupNotifier>()),
@@ -257,6 +282,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         child: const _SelectStudentSheet(),
       ),
     );
+
     if (student == null || !context.mounted) return;
     await _callIssueApi(
       context,
@@ -349,7 +375,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                   fontWeight: FontWeight.w600,
                                   color: isSelected
                                       ? Colors.white
-                                      : const Color(0xFF374151),
+                                      : const Color(0xFF4B5563),
                                 ),
                               ),
                             ),
@@ -359,27 +385,24 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Date display + calendar picker
+                  // Calendar date display tile
                   GestureDetector(
                     onTap: () async {
                       final picked = await showDatePicker(
                         context: ctx,
                         initialDate: selected,
-                        firstDate: now.add(const Duration(days: 1)),
+                        firstDate: now,
                         lastDate: now.add(const Duration(days: 365)),
-                        builder: (ctx2, child) => Theme(
-                          data: Theme.of(ctx2).copyWith(
-                            colorScheme: const ColorScheme.light(
-                              primary: Color(0xFF1A3C6E),
-                            ),
-                          ),
-                          child: child!,
-                        ),
                       );
-                      if (picked != null) setSt(() => selected = picked);
+                      if (picked != null) {
+                        setSt(() => selected = picked);
+                      }
                     },
                     child: Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF4F6FB),
                         borderRadius: BorderRadius.circular(14),
@@ -390,7 +413,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                           const Icon(
                             Icons.calendar_month_rounded,
                             color: Color(0xFF1A3C6E),
-                            size: 22,
+                            size: 20,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -521,6 +544,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     }
   }
 
+  // ── Success Dialog ────────────────────────────────────────────────────────
   void _showSuccessDialog(
     BuildContext context,
     ScanResult result, {
@@ -529,49 +553,51 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => Dialog(
+      builder: (ctx) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Success animation
+              // Icon
               Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withOpacity(0.12),
+                width: 64,
+                height: 64,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFDCFCE7),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.check_circle_rounded,
-                  color: Color(0xFF10B981),
-                  size: 40,
+                  color: Color(0xFF16A34A),
+                  size: 38,
                 ),
               ),
               const SizedBox(height: 16),
               const Text(
                 'Book Issued!',
-                // was: 'Issue Requested!' — updated to confirm real API success
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF111827),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Text(
-                '"${_book.title}" has been requested for:',
+                '"${_book.title}" has been successfully assigned.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
+
+              // Details card inside dialog
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF4F6FB),
+                  color: const Color(0xFFF9FAFB),
                   borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFE5E7EB)),
                 ),
                 child: Column(
                   children: [
@@ -630,6 +656,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   // ─────────────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthNotifier>().user;
+    final isAdmin = user?.role == UserRole.admin || user?.role == UserRole.superadmin;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FB),
       body: CustomScrollView(
@@ -639,7 +668,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             expandedHeight: 320,
             pinned: true,
             backgroundColor: AppColors.primaryAdmin,
-
             centerTitle: true,
             title: Text(
               _book.title,
@@ -648,17 +676,19 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               overflow: TextOverflow.ellipsis,
             ),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.edit_outlined, color: Colors.white),
-                tooltip: 'Edit Book',
-                onPressed: () => _onEditBook(context),
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline_rounded, color: Colors.white),
-                tooltip: 'Delete Book',
-                onPressed: () => _onDeleteBook(context),
-              ),
-              const SizedBox(width: 4),
+              if (isAdmin) ...[
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined, color: Colors.white),
+                  tooltip: 'Edit Book',
+                  onPressed: () => _onEditBook(context),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline_rounded, color: Colors.white),
+                  tooltip: 'Delete Book',
+                  onPressed: () => _onDeleteBook(context),
+                ),
+                const SizedBox(width: 4),
+              ],
             ],
             flexibleSpace: FlexibleSpaceBar(
               collapseMode: CollapseMode.parallax,
@@ -820,14 +850,16 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       ),
 
       // ── Issue button ─────────────────────────────────────────
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-          child: _book.isAvailable
-              ? _IssueButton(onTap: () => _onRequestIssue(context))
-              : _UnavailableButton(),
-        ),
-      ),
+      bottomNavigationBar: isAdmin
+          ? SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                child: _book.isAvailable
+                    ? _IssueButton(onTap: () => _onRequestIssue(context))
+                    : _UnavailableButton(),
+              ),
+            )
+          : null,
     );
   }
 

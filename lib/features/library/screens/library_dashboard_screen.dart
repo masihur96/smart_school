@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/library/screens/add_edit_book_screen.dart';
 
+import '../../../models/user_model.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/library_book_provider.dart';
 import 'book_list_screen.dart';
 import 'issued_books_screen.dart';
@@ -53,31 +55,34 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
   @override
   Widget build(BuildContext context) {
     final notifier = context.watch<LibraryBookNotifier>();
+    final user = context.watch<AuthNotifier>().user;
+    final isAdmin = user?.role == UserRole.admin || user?.role == UserRole.superadmin;
+
     final totalBooks = notifier.books.length;
     final availableBooks = notifier.books.where((b) => b.isAvailable).length;
     final issuedCount = notifier.issuedBooks.length;
     final overdueCount = notifier.issuedBooks.where((b) => b.isOverdue).length;
 
     return Scaffold(
-      // backgroundColor: AppColors.primaryAdmin,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddEditBookScreen(isAdminOrTeacher: true),
-            ),
-          );
-          if (result == true) {}
-        },
-        backgroundColor: AppColors.primaryAdmin,
-
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'New Book',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      ),
+      floatingActionButton: isAdmin
+          ? FloatingActionButton.extended(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddEditBookScreen(isAdminOrTeacher: true),
+                  ),
+                );
+                if (result == true) {}
+              },
+              backgroundColor: AppColors.primaryAdmin,
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text(
+                'New Book',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+            )
+          : null,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
           SliverAppBar(

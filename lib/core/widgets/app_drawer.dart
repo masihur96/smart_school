@@ -274,6 +274,12 @@ class AppDrawer extends StatelessWidget {
       //     MaterialPageRoute(builder: (_) => const BookRequestsScreen()),
       //   );
       // }, context),
+      _buildDrawerItem(Icons.local_library, 'Library', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const LibraryDashboardScreen()),
+        );
+      }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
         Navigator.push(
           context,
@@ -324,12 +330,12 @@ class AppDrawer extends StatelessWidget {
           MaterialPageRoute(builder: (_) => StudentResultScreen()),
         );
       }, context),
-      // _buildDrawerItem(Icons.local_library, 'Library', () {
-      //   Navigator.push(
-      //     context,
-      //     MaterialPageRoute(builder: (_) => const LibraryDashboardScreen()),
-      //   );
-      // }, context),
+      _buildDrawerItem(Icons.local_library, 'Library', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const LibraryDashboardScreen()),
+        );
+      }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
         Navigator.push(
           context,

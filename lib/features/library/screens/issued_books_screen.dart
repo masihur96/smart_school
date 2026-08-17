@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../models/user_model.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../data/models/issued_book.dart';
 import '../providers/library_book_provider.dart';
 import 'book_detail_screen.dart';
@@ -317,6 +319,9 @@ class _IssuedBookCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthNotifier>().user;
+    final isAdmin = user?.role == UserRole.admin || user?.role == UserRole.superadmin;
+
     final fmt = DateFormat('MMM dd, yyyy');
     final isOverdue = issuedBook.isOverdue;
     final daysLeft = issuedBook.dueDate.difference(DateTime.now()).inDays;
@@ -464,8 +469,8 @@ class _IssuedBookCard extends StatelessWidget {
                       isOverdue: isOverdue,
                       daysLeft: isOverdue ? daysOverdue : daysLeft,
                     ),
-                    // Return button (only if not already returned)
-                    if (issuedBook.returnDate == null) ...[  
+                    // Return button (only for admin and if not already returned)
+                    if (isAdmin && issuedBook.returnDate == null) ...[  
                       const SizedBox(height: 10),
                       _ReturnButton(issuedBook: issuedBook),
                     ],
