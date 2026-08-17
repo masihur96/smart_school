@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/models/online_class_model.dart';
+import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:dio/dio.dart';
-import 'package:shimmer/shimmer.dart';
 
 import 'add_edit_online_class_screen.dart';
 
@@ -13,7 +14,7 @@ class OnlineClassListScreen extends StatefulWidget {
 
   const OnlineClassListScreen({
     super.key,
-    this.isAdminOrTeacher = true, // Default to true for demo purposes
+    this.isAdminOrTeacher = true,
   });
 
   @override
@@ -21,80 +22,15 @@ class OnlineClassListScreen extends StatefulWidget {
 }
 
 class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
-  List<OnlineClass> onlineClasses = [];
-  bool isLoading = true;
-
   @override
   void initState() {
     super.initState();
-    _loadOnlineClasses();
-  }
-
-  Future<void> _loadOnlineClasses() async {
-    setState(() {
-      isLoading = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OnlineClassProvider>().fetchOnlineClasses();
     });
-
-    try {
-      final dio = Dio();
-      final response = await dio.get(
-        'https://smart-school-backend-production.up.railway.app/online-classes',
-        options: Options(
-          headers: {
-            'accept': '*/*',
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYTBjM2ZmZi1hZTU5LTQ2YTMtYTAzNy0xOWZhNjgwMDNjNmIiLCJyb2xlIjoiYWRtaW4iLCJzY2hvb2xJZCI6IjI5ZjA1ZWRiLThlMGItNDM0Yy1hNDcxLWFhNzc2MzA4YTFjMSIsImNsYXNzSWRzIjpbXSwic2VjdGlvbklkcyI6W10sImlhdCI6MTc4NjY0NTM1NCwiZXhwIjoxNzg2NzMxNzU0fQ.MVNAkFfJ6iuN7TXOrPYYZCyVMKPgp5uaMFBdpHTlP1s',
-          },
-        ),
-      );
-
-      if (response.statusCode == 200) {
-        final data = response.data;
-        final List<dynamic> listData = data['data'] ?? [];
-        
-        setState(() {
-          onlineClasses = listData.map((json) {
-            return OnlineClass(
-              id: json['id'] ?? '',
-              title: json['title'] ?? '',
-              description: json['description'] ?? '',
-              meetLink: json['meetLink'] ?? '',
-              scheduledTime: json['date'] != null 
-                  ? DateTime.parse(json['date']) 
-                  : DateTime.now(),
-              teacherId: json['hostId'] ?? '',
-              teacherName: 'Host', // Default since name is missing in response
-              classId: json['classId'],
-              sectionId: json['sectionId'],
-              subjectId: json['subjectId'],
-              createdAt: json['createdAt'] != null
-                  ? DateTime.parse(json['createdAt'])
-                  : null,
-            );
-          }).toList();
-          onlineClasses.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          isLoading = false;
-        });
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to load classes: ${response.statusCode}')),
-          );
-        }
-      }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
-    }
   }
+
+  // ── Actions ──────────────────────────────────────────────────────────────
 
   Future<void> _deleteClass(String id) async {
     final confirm = await showDialog<bool>(
@@ -115,50 +51,21 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
       ),
     );
 
-    if (confirm != true) return;
+    if (confirm != true || !mounted) return;
 
-    setState(() {
-      isLoading = true;
-    });
+    final success =
+        await context.read<OnlineClassProvider>().deleteOnlineClass(id);
 
-    try {
-      final dio = Dio();
-      final response = await dio.delete(
-        'https://smart-school-backend-production.up.railway.app/online-classes/$id',
-        options: Options(
-          headers: {
-            'accept': '*/*',
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYTBjM2ZmZi1hZTU5LTQ2YTMtYTAzNy0xOWZhNjgwMDNjNmIiLCJyb2xlIjoiYWRtaW4iLCJzY2hvb2xJZCI6IjI5ZjA1ZWRiLThlMGItNDM0Yy1hNDcxLWFhNzc2MzA4YTFjMSIsImNsYXNzSWRzIjpbXSwic2VjdGlvbklkcyI6W10sImlhdCI6MTc4NjY0NTM1NCwiZXhwIjoxNzg2NzMxNzU0fQ.MVNAkFfJ6iuN7TXOrPYYZCyVMKPgp5uaMFBdpHTlP1s',
-          },
-        ),
+    if (!mounted) return;
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Class deleted successfully')),
       );
-
-      if (response.statusCode == 200) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Class deleted successfully')),
-          );
-        }
-        _loadOnlineClasses();
-      } else {
-        setState(() {
-          isLoading = false;
-        });
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to delete class: ${response.statusCode}')),
-          );
-        }
-      }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error deleting class: $e')),
-        );
-      }
+    } else {
+      final error = context.read<OnlineClassProvider>().error;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error ?? 'Failed to delete class')),
+      );
     }
   }
 
@@ -166,43 +73,92 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Could not launch $urlString')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch $urlString')),
+        );
       }
     }
   }
 
+  // ── Build ─────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
+    final themeColor = widget.isAdminOrTeacher
+        ? AppColors.primaryAdmin
+        : AppColors.primaryTeacher;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Online Classes'),
-        backgroundColor: widget.isAdminOrTeacher
-            ? AppColors.primaryAdmin
-            : AppColors.primaryTeacher,
+        backgroundColor: themeColor,
+        foregroundColor: Colors.white,
       ),
-      body: isLoading
-          ? _buildShimmerLoader()
-          : onlineClasses.isEmpty
-              ? const Center(
-                  child: Text(
-                    'No online classes scheduled.',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+      body: Consumer<OnlineClassProvider>(
+        builder: (context, provider, _) {
+          if (!provider.isLoading) {
+            return _buildShimmerLoader();
+          }
+
+          if (provider.error != null && provider.onlineClasses.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.cloud_off_rounded,
+                    size: 60,
+                    color: Colors.redAccent,
                   ),
-                )
-              : ListView.builder(
+                  const SizedBox(height: 12),
+                  Text(
+                    provider.error!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: provider.fetchOnlineClasses,
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: const Text('Retry'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: themeColor,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (provider.onlineClasses.isEmpty) {
+            return const Center(
+              child: Text(
+                'No online classes scheduled.',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 16,
+                ),
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: provider.fetchOnlineClasses,
+            child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: onlineClasses.length,
+              itemCount: provider.onlineClasses.length,
               itemBuilder: (context, index) {
-                final oClass = onlineClasses[index];
-                return _buildOnlineClassCard(oClass);
+                return _buildOnlineClassCard(provider.onlineClasses[index]);
               },
             ),
+          );
+        },
+      ),
       floatingActionButton: widget.isAdminOrTeacher
           ? FloatingActionButton.extended(
               onPressed: () async {
-                final result = await Navigator.push(
+                final result = await Navigator.push<bool>(
                   context,
                   MaterialPageRoute(
                     builder: (context) => AddEditOnlineClassScreen(
@@ -210,13 +166,11 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                     ),
                   ),
                 );
-                if (result == true) {
-                  _loadOnlineClasses();
+                if (result == true && mounted) {
+                  context.read<OnlineClassProvider>().fetchOnlineClasses();
                 }
               },
-              backgroundColor: widget.isAdminOrTeacher
-                  ? AppColors.primaryAdmin
-                  : AppColors.primaryTeacher,
+              backgroundColor: themeColor,
               icon: const Icon(Icons.add, color: Colors.white),
               label: const Text(
                 'New Class',
@@ -230,14 +184,17 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     );
   }
 
+  // ── Shimmer ───────────────────────────────────────────────────────────────
+
   Widget _buildShimmerLoader() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: 4,
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
-          baseColor: Colors.grey[300]!,
-          highlightColor: Colors.grey[100]!,
+          baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
+          highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
           child: Container(
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(16),
@@ -252,27 +209,48 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(width: 150, height: 20, color: Colors.white),
                     Container(
-                      width: 70, 
-                      height: 24, 
+                      width: 150,
+                      height: 18,
                       decoration: BoxDecoration(
-                        color: Colors.white, 
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    Container(
+                      width: 70,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                Container(width: 120, height: 16, color: Colors.white),
+                Container(
+                  width: 120,
+                  height: 13,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Container(width: 180, height: 16, color: Colors.white),
+                Container(
+                  width: 180,
+                  height: 13,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
                 const SizedBox(height: 24),
                 Container(
-                  width: double.infinity, 
-                  height: 48, 
+                  width: double.infinity,
+                  height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.white, 
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
@@ -283,6 +261,8 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
       },
     );
   }
+
+  // ── Card ──────────────────────────────────────────────────────────────────
 
   Widget _buildOnlineClassCard(OnlineClass oClass) {
     final formattedDate = DateFormat(
@@ -342,10 +322,13 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
               ),
               if (widget.isAdminOrTeacher)
                 PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert, color: AppColors.textSecondary),
+                  icon: const Icon(
+                    Icons.more_vert,
+                    color: AppColors.textSecondary,
+                  ),
                   onSelected: (value) async {
                     if (value == 'edit') {
-                      final result = await Navigator.push(
+                      final result = await Navigator.push<bool>(
                         context,
                         MaterialPageRoute(
                           builder: (context) => AddEditOnlineClassScreen(
@@ -354,8 +337,10 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                           ),
                         ),
                       );
-                      if (result == true) {
-                        _loadOnlineClasses();
+                      if (result == true && mounted) {
+                        context
+                            .read<OnlineClassProvider>()
+                            .fetchOnlineClasses();
                       }
                     } else if (value == 'delete') {
                       _deleteClass(oClass.id);

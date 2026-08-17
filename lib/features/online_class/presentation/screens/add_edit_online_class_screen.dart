@@ -6,7 +6,6 @@ import 'package:smart_school/models/online_class_model.dart';
 import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/models/school_models.dart';
-import 'package:dio/dio.dart';
 
 class AddEditOnlineClassScreen extends StatefulWidget {
   final OnlineClass? onlineClass;
@@ -106,12 +105,12 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
       setState(() => _isLoading = true);
 
       final isEditing = widget.onlineClass != null;
+      final dateStr = _selectedDate!.toUtc().toIso8601String();
 
+      final startTimeStr = _selectedTime!.format(context);
+      final endTimeStr = _selectedEndTime!.format(context);
       if (!isEditing) {
-        final dateStr = _selectedDate!.toUtc().toIso8601String();
-        
-        final startTimeStr = _selectedTime!.format(context);
-        final endTimeStr = _selectedEndTime!.format(context);
+
 
         final success = await context.read<OnlineClassProvider>().createOnlineClass(
           title: _titleController.text.trim(),
@@ -136,51 +135,30 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
           );
         }
       } else {
-        final dateStr = _selectedDate!.toUtc().toIso8601String();
-        final startTimeStr = _selectedTime!.format(context);
-        final endTimeStr = _selectedEndTime!.format(context);
+        // ── Edit existing class via provider ────────────────────────────────
+        final success =
+            await context.read<OnlineClassProvider>().updateOnlineClass(
+                  id: widget.onlineClass!.id,
+                  title: _titleController.text.trim(),
+                  description: _descController.text.trim(),
+                  meetLink: _linkController.text.trim(),
+                  date: dateStr,
+                  startTime: startTimeStr,
+                  endTime: endTimeStr,
+                  classId: _selectedClassId,
+                  sectionId: _selectedSectionId,
+                  subjectId: _selectedSubjectId,
+                );
 
-        try {
-          final dio = Dio();
-          final response = await dio.patch(
-            'https://smart-school-backend-production.up.railway.app/online-classes/${widget.onlineClass!.id}',
-            options: Options(
-              headers: {
-                'accept': '*/*',
-                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYTBjM2ZmZi1hZTU5LTQ2YTMtYTAzNy0xOWZhNjgwMDNjNmIiLCJyb2xlIjoiYWRtaW4iLCJzY2hvb2xJZCI6IjI5ZjA1ZWRiLThlMGItNDM0Yy1hNDcxLWFhNzc2MzA4YTFjMSIsImNsYXNzSWRzIjpbXSwic2VjdGlvbklkcyI6W10sImlhdCI6MTc4NjY0NTM1NCwiZXhwIjoxNzg2NzMxNzU0fQ.MVNAkFfJ6iuN7TXOrPYYZCyVMKPgp5uaMFBdpHTlP1s',
-              },
-            ),
-            data: {
-              'title': _titleController.text.trim(),
-              'description': _descController.text.trim(),
-              'meetLink': _linkController.text.trim(),
-              'date': dateStr,
-              'startTime': startTimeStr,
-              'endTime': endTimeStr,
-              if (_selectedClassId != null) 'classId': _selectedClassId,
-              if (_selectedSectionId != null) 'sectionId': _selectedSectionId,
-              if (_selectedSubjectId != null) 'subjectId': _selectedSubjectId,
-            },
+        setState(() => _isLoading = false);
+
+        if (success && mounted) {
+          Navigator.pop(context, true);
+        } else if (mounted) {
+          final error = context.read<OnlineClassProvider>().error;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(error ?? 'Failed to update online class')),
           );
-
-          setState(() => _isLoading = false);
-
-          if (response.statusCode == 200 || response.statusCode == 201) {
-            if (mounted) Navigator.pop(context, true);
-          } else {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Failed to update class: ${response.statusCode}')),
-              );
-            }
-          }
-        } catch (e) {
-          setState(() => _isLoading = false);
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error updating class: $e')),
-            );
-          }
         }
       }
     }
