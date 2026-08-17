@@ -135,8 +135,11 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                             ElevatedButton.icon(
                               onPressed: () {
                                 final schoolId =
-                                    context.read<AuthNotifier>().user?.schoolId ??
-                                        '';
+                                    context
+                                        .read<AuthNotifier>()
+                                        .user
+                                        ?.schoolId ??
+                                    '';
                                 context
                                     .read<ExpenseProvider>()
                                     .fetchTransactions(schoolId: schoolId);
@@ -214,9 +217,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                   SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final expense = filteredExpenses[index];
-                      return ExpenseListTile(
-                        expense: expense,
-                      );
+                      return ExpenseListTile(expense: expense);
                     }, childCount: filteredExpenses.length),
                   ),
 

@@ -1,16 +1,14 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
+
 import '../../../configs/network/data_provider.dart';
 import '../../../core/constants/api_path.dart';
 import '../../../core/utils/storage_service.dart';
 import '../models/expense_model.dart';
 import '../models/financial_story_model.dart';
 
-enum TransactionFilter {
-  all,
-  income,
-  expense,
-}
+enum TransactionFilter { all, income, expense }
 
 class ExpenseProvider with ChangeNotifier {
   final List<Expense> _expenses = [];
@@ -165,20 +163,24 @@ class ExpenseProvider with ChangeNotifier {
   double get thisMonthIncome {
     final now = DateTime.now();
     return _expenses
-        .where((e) =>
-            e.isIncome &&
-            e.date.year == now.year &&
-            e.date.month == now.month)
+        .where(
+          (e) =>
+              e.isIncome &&
+              e.date.year == now.year &&
+              e.date.month == now.month,
+        )
         .fold(0.0, (sum, item) => sum + item.amount);
   }
 
   double get thisMonthExpenses {
     final now = DateTime.now();
     return _expenses
-        .where((e) =>
-            e.isExpense &&
-            e.date.year == now.year &&
-            e.date.month == now.month)
+        .where(
+          (e) =>
+              e.isExpense &&
+              e.date.year == now.year &&
+              e.date.month == now.month,
+        )
         .fold(0.0, (sum, item) => sum + item.amount);
   }
 
@@ -187,22 +189,26 @@ class ExpenseProvider with ChangeNotifier {
   double get todayIncome {
     final now = DateTime.now();
     return _expenses
-        .where((e) =>
-            e.isIncome &&
-            e.date.year == now.year &&
-            e.date.month == now.month &&
-            e.date.day == now.day)
+        .where(
+          (e) =>
+              e.isIncome &&
+              e.date.year == now.year &&
+              e.date.month == now.month &&
+              e.date.day == now.day,
+        )
         .fold(0.0, (sum, item) => sum + item.amount);
   }
 
   double get todayExpenses {
     final now = DateTime.now();
     return _expenses
-        .where((e) =>
-            e.isExpense &&
-            e.date.year == now.year &&
-            e.date.month == now.month &&
-            e.date.day == now.day)
+        .where(
+          (e) =>
+              e.isExpense &&
+              e.date.year == now.year &&
+              e.date.month == now.month &&
+              e.date.day == now.day,
+        )
         .fold(0.0, (sum, item) => sum + item.amount);
   }
 
@@ -278,10 +284,7 @@ class ExpenseProvider with ChangeNotifier {
       final response = await DataProvider().performRequest(
         'DELETE',
         url,
-        header: {
-          'accept': '*/*',
-          'Authorization': 'Bearer $token',
-        },
+        header: {'accept': '*/*', 'Authorization': 'Bearer $token'},
       );
 
       if (response != null &&
@@ -366,10 +369,12 @@ class ExpenseProvider with ChangeNotifier {
           (response.statusCode == 200 ||
               response.statusCode == 201 ||
               response.statusCode == 204)) {
-        final existingIndex =
-            _expenses.indexWhere((e) => e.id == transactionId);
-        final existingExpense =
-            existingIndex >= 0 ? _expenses[existingIndex] : null;
+        final existingIndex = _expenses.indexWhere(
+          (e) => e.id == transactionId,
+        );
+        final existingExpense = existingIndex >= 0
+            ? _expenses[existingIndex]
+            : null;
 
         final updatedExpense = Expense(
           id: transactionId,
@@ -456,7 +461,7 @@ class ExpenseProvider with ChangeNotifier {
         'results',
         'rows',
         'docs',
-        'list'
+        'list',
       ]) {
         if (map[key] is List) {
           return _extractTransactionsList(map[key]);
@@ -494,23 +499,27 @@ class ExpenseProvider with ChangeNotifier {
 
       final b = map['balance'] ?? map['walletBalance'] ?? map['currentBalance'];
       if (b != null) {
-        _serverBalance =
-            b is num ? b.toDouble() : double.tryParse(b.toString());
+        _serverBalance = b is num
+            ? b.toDouble()
+            : double.tryParse(b.toString());
       }
 
       final ti = map['totalIncome'] ?? map['inflow'] ?? map['totalInflow'];
       if (ti != null) {
-        _serverTotalIncome =
-            ti is num ? ti.toDouble() : double.tryParse(ti.toString());
+        _serverTotalIncome = ti is num
+            ? ti.toDouble()
+            : double.tryParse(ti.toString());
       }
 
-      final te = map['totalExpense'] ??
+      final te =
+          map['totalExpense'] ??
           map['totalExpenses'] ??
           map['outflow'] ??
           map['totalOutflow'];
       if (te != null) {
-        _serverTotalExpense =
-            te is num ? te.toDouble() : double.tryParse(te.toString());
+        _serverTotalExpense = te is num
+            ? te.toDouble()
+            : double.tryParse(te.toString());
       }
 
       if (map['data'] is Map) _extractServerMetrics(map['data']);
@@ -543,10 +552,7 @@ class ExpenseProvider with ChangeNotifier {
       final response = await DataProvider().performRequest(
         'GET',
         url,
-        header: {
-          'accept': '*/*',
-          'Authorization': 'Bearer $token',
-        },
+        header: {'accept': '*/*', 'Authorization': 'Bearer $token'},
       );
 
       _isLoading = false;
@@ -570,7 +576,9 @@ class ExpenseProvider with ChangeNotifier {
 
         _expenses.clear();
         _expenses.addAll(fetched);
-        log('Successfully parsed ${_expenses.length} transactions from wallet API');
+        log(
+          'Successfully parsed ${_expenses.length} transactions from wallet API',
+        );
 
         _checkAndRefreshStoryHighlights();
         notifyListeners();
@@ -627,7 +635,9 @@ class ExpenseProvider with ChangeNotifier {
           'attachmentUrl': attachmentUrl,
       };
 
-      log('Sending add-money request for school: $schoolId with payload: $payload');
+      log(
+        'Sending add-money request for school: $schoolId with payload: $payload',
+      );
 
       final url = '${APIPath.baseUrl}/wallet/add-money?schoolId=$schoolId';
       final response = await DataProvider().performRequest(
@@ -724,7 +734,9 @@ class ExpenseProvider with ChangeNotifier {
           'attachmentUrl': attachmentUrl,
       };
 
-      log('Sending add-expense request for school: $schoolId with payload: $payload');
+      log(
+        'Sending add-expense request for school: $schoolId with payload: $payload',
+      );
 
       final url = '${APIPath.baseUrl}/wallet/add-expense?schoolId=$schoolId';
       final response = await DataProvider().performRequest(
