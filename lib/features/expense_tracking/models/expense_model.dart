@@ -179,3 +179,180 @@ class Expense {
     };
   }
 }
+
+class WalletPeriodSummary {
+  final double totalIncome;
+  final double totalExpense;
+  final double netBalance;
+  final int? month;
+  final int? year;
+
+  const WalletPeriodSummary({
+    this.totalIncome = 0.0,
+    this.totalExpense = 0.0,
+    this.netBalance = 0.0,
+    this.month,
+    this.year,
+  });
+
+  factory WalletPeriodSummary.fromJson(Map<String, dynamic> json) {
+    double parseDouble(dynamic val) {
+      if (val == null) return 0.0;
+      if (val is num) return val.toDouble();
+      return double.tryParse(val.toString()) ?? 0.0;
+    }
+
+    final income = parseDouble(
+      json['totalIncome'] ??
+          json['income'] ??
+          json['inflow'] ??
+          json['totalInflow'],
+    );
+
+    final expense = parseDouble(
+      json['totalExpense'] ??
+          json['totalExpenses'] ??
+          json['expense'] ??
+          json['expenses'] ??
+          json['outflow'] ??
+          json['totalOutflow'],
+    );
+
+    final net = json['netBalance'] != null ||
+            json['net'] != null ||
+            json['balance'] != null
+        ? parseDouble(json['netBalance'] ?? json['net'] ?? json['balance'])
+        : (income - expense);
+
+    int? parsedMonth;
+    if (json['month'] != null) {
+      parsedMonth = int.tryParse(json['month'].toString());
+    }
+
+    int? parsedYear;
+    if (json['year'] != null) {
+      parsedYear = int.tryParse(json['year'].toString());
+    }
+
+    return WalletPeriodSummary(
+      totalIncome: income,
+      totalExpense: expense,
+      netBalance: net,
+      month: parsedMonth,
+      year: parsedYear,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'totalIncome': totalIncome,
+      'totalExpense': totalExpense,
+      'netBalance': netBalance,
+      if (month != null) 'month': month,
+      if (year != null) 'year': year,
+    };
+  }
+
+  WalletPeriodSummary copyWith({
+    double? totalIncome,
+    double? totalExpense,
+    double? netBalance,
+    int? month,
+    int? year,
+  }) {
+    return WalletPeriodSummary(
+      totalIncome: totalIncome ?? this.totalIncome,
+      totalExpense: totalExpense ?? this.totalExpense,
+      netBalance: netBalance ?? this.netBalance,
+      month: month ?? this.month,
+      year: year ?? this.year,
+    );
+  }
+
+  String get monthName {
+    if (month == null || month! < 1 || month! > 12) return '';
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return months[month! - 1];
+  }
+
+  String get shortMonthName {
+    if (month == null || month! < 1 || month! > 12) return '';
+    const shortMonths = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return shortMonths[month! - 1];
+  }
+}
+
+class WalletSummary {
+  final WalletPeriodSummary allTime;
+  final WalletPeriodSummary currentMonth;
+  final WalletPeriodSummary currentYear;
+
+  const WalletSummary({
+    this.allTime = const WalletPeriodSummary(),
+    this.currentMonth = const WalletPeriodSummary(),
+    this.currentYear = const WalletPeriodSummary(),
+  });
+
+  factory WalletSummary.fromJson(Map<String, dynamic> json) {
+    WalletPeriodSummary parsePeriod(dynamic val) {
+      if (val is Map<String, dynamic>) {
+        return WalletPeriodSummary.fromJson(val);
+      } else if (val is Map) {
+        return WalletPeriodSummary.fromJson(Map<String, dynamic>.from(val));
+      }
+      return const WalletPeriodSummary();
+    }
+
+    return WalletSummary(
+      allTime: parsePeriod(json['allTime']),
+      currentMonth: parsePeriod(json['currentMonth']),
+      currentYear: parsePeriod(json['currentYear']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'allTime': allTime.toJson(),
+      'currentMonth': currentMonth.toJson(),
+      'currentYear': currentYear.toJson(),
+    };
+  }
+
+  WalletSummary copyWith({
+    WalletPeriodSummary? allTime,
+    WalletPeriodSummary? currentMonth,
+    WalletPeriodSummary? currentYear,
+  }) {
+    return WalletSummary(
+      allTime: allTime ?? this.allTime,
+      currentMonth: currentMonth ?? this.currentMonth,
+      currentYear: currentYear ?? this.currentYear,
+    );
+  }
+}

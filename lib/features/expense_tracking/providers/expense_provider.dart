@@ -126,43 +126,46 @@ class ExpenseProvider with ChangeNotifier {
 
   List<FinancialStory> get stories => _stories;
 
+  WalletSummary? _summary;
+  WalletSummary? get summary => _summary;
+
   double? _serverBalance;
   double? _serverTotalIncome;
   double? _serverTotalExpense;
 
-  double get totalIncome {
-    final calc = _expenses
+  WalletPeriodSummary get allTimeSummary =>
+      _summary?.allTime ?? _calculateFallbackAllTime();
+
+  WalletPeriodSummary get currentMonthSummary =>
+      _summary?.currentMonth ?? _calculateFallbackCurrentMonth();
+
+  WalletPeriodSummary get currentYearSummary =>
+      _summary?.currentYear ?? _calculateFallbackCurrentYear();
+
+  WalletPeriodSummary _calculateFallbackAllTime() {
+    final calcIncome = _expenses
         .where((e) => e.isIncome)
         .fold(0.0, (sum, item) => sum + item.amount);
-    if (calc == 0.0 && _serverTotalIncome != null) {
-      return _serverTotalIncome!;
-    }
-    return calc;
-  }
-
-  double get totalExpenses {
-    final calc = _expenses
+    final calcExpense = _expenses
         .where((e) => e.isExpense)
         .fold(0.0, (sum, item) => sum + item.amount);
-    if (calc == 0.0 && _serverTotalExpense != null) {
-      return _serverTotalExpense!;
-    }
-    return calc;
+    final inc = _serverTotalIncome != null && _serverTotalIncome! > 0
+        ? _serverTotalIncome!
+        : calcIncome;
+    final exp = _serverTotalExpense != null && _serverTotalExpense! > 0
+        ? _serverTotalExpense!
+        : calcExpense;
+    final net = _serverBalance ?? (inc - exp);
+    return WalletPeriodSummary(
+      totalIncome: inc,
+      totalExpense: exp,
+      netBalance: net,
+    );
   }
 
-  double get walletBalance {
-    if (_expenses.isNotEmpty) {
-      return totalIncome - totalExpenses;
-    }
-    if (_serverBalance != null) {
-      return _serverBalance!;
-    }
-    return totalIncome - totalExpenses;
-  }
-
-  double get thisMonthIncome {
+  WalletPeriodSummary _calculateFallbackCurrentMonth() {
     final now = DateTime.now();
-    return _expenses
+    final calcIncome = _expenses
         .where(
           (e) =>
               e.isIncome &&
@@ -170,11 +173,7 @@ class ExpenseProvider with ChangeNotifier {
               e.date.month == now.month,
         )
         .fold(0.0, (sum, item) => sum + item.amount);
-  }
-
-  double get thisMonthExpenses {
-    final now = DateTime.now();
-    return _expenses
+    final calcExpense = _expenses
         .where(
           (e) =>
               e.isExpense &&
@@ -182,9 +181,48 @@ class ExpenseProvider with ChangeNotifier {
               e.date.month == now.month,
         )
         .fold(0.0, (sum, item) => sum + item.amount);
+    return WalletPeriodSummary(
+      totalIncome: calcIncome,
+      totalExpense: calcExpense,
+      netBalance: calcIncome - calcExpense,
+      month: now.month,
+      year: now.year,
+    );
   }
 
-  double get thisMonthNet => thisMonthIncome - thisMonthExpenses;
+  WalletPeriodSummary _calculateFallbackCurrentYear() {
+    final now = DateTime.now();
+    final calcIncome = _expenses
+        .where((e) => e.isIncome && e.date.year == now.year)
+        .fold(0.0, (sum, item) => sum + item.amount);
+    final calcExpense = _expenses
+        .where((e) => e.isExpense && e.date.year == now.year)
+        .fold(0.0, (sum, item) => sum + item.amount);
+    return WalletPeriodSummary(
+      totalIncome: calcIncome,
+      totalExpense: calcExpense,
+      netBalance: calcIncome - calcExpense,
+      year: now.year,
+    );
+  }
+
+  double get totalIncome => allTimeSummary.totalIncome;
+
+  double get totalExpenses => allTimeSummary.totalExpense;
+
+  double get walletBalance => allTimeSummary.netBalance;
+
+  double get thisMonthIncome => currentMonthSummary.totalIncome;
+
+  double get thisMonthExpenses => currentMonthSummary.totalExpense;
+
+  double get thisMonthNet => currentMonthSummary.netBalance;
+
+  double get thisYearIncome => currentYearSummary.totalIncome;
+
+  double get thisYearExpenses => currentYearSummary.totalExpense;
+
+  double get thisYearNet => currentYearSummary.netBalance;
 
   double get todayIncome {
     final now = DateTime.now();
@@ -237,14 +275,118 @@ class ExpenseProvider with ChangeNotifier {
     return list;
   }
 
+  void _adjustSummaryOnTransactionAdd(Expense transaction) {
+    if (_summary == null) return;
+    final now = DateTime.now();
+    final isCurrentMonth = transaction.date.year ==
+            (_summary!.currentMonth.year ?? now.year) &&
+        transaction.date.month ==
+            (_summary!.currentMonth.month ?? now.month);
+    final isCurrentYear =
+        transaction.date.year == (_summary!.currentYear.year ?? now.year);
+
+    final amount = transaction.amount;
+    final isIncome = transaction.isIncome;
+
+    final newAllTime = _summary!.allTime.copyWith(
+      totalIncome: _summary!.allTime.totalIncome + (isIncome ? amount : 0),
+      totalExpense: _summary!.allTime.totalExpense + (isIncome ? 0 : amount),
+      netBalance: _summary!.allTime.netBalance + (isIncome ? amount : -amount),
+    );
+
+    final newCurrentMonth = isCurrentMonth
+        ? _summary!.currentMonth.copyWith(
+            totalIncome: _summary!.currentMonth.totalIncome +
+                (isIncome ? amount : 0),
+            totalExpense: _summary!.currentMonth.totalExpense +
+                (isIncome ? 0 : amount),
+            netBalance: _summary!.currentMonth.netBalance +
+                (isIncome ? amount : -amount),
+          )
+        : _summary!.currentMonth;
+
+    final newCurrentYear = isCurrentYear
+        ? _summary!.currentYear.copyWith(
+            totalIncome: _summary!.currentYear.totalIncome +
+                (isIncome ? amount : 0),
+            totalExpense: _summary!.currentYear.totalExpense +
+                (isIncome ? 0 : amount),
+            netBalance: _summary!.currentYear.netBalance +
+                (isIncome ? amount : -amount),
+          )
+        : _summary!.currentYear;
+
+    _summary = WalletSummary(
+      allTime: newAllTime,
+      currentMonth: newCurrentMonth,
+      currentYear: newCurrentYear,
+    );
+  }
+
+  void _adjustSummaryOnTransactionDelete(Expense transaction) {
+    if (_summary == null) return;
+    final now = DateTime.now();
+    final isCurrentMonth = transaction.date.year ==
+            (_summary!.currentMonth.year ?? now.year) &&
+        transaction.date.month ==
+            (_summary!.currentMonth.month ?? now.month);
+    final isCurrentYear =
+        transaction.date.year == (_summary!.currentYear.year ?? now.year);
+
+    final amount = transaction.amount;
+    final isIncome = transaction.isIncome;
+
+    final newAllTime = _summary!.allTime.copyWith(
+      totalIncome: (_summary!.allTime.totalIncome - (isIncome ? amount : 0))
+          .clamp(0, double.infinity),
+      totalExpense: (_summary!.allTime.totalExpense - (isIncome ? 0 : amount))
+          .clamp(0, double.infinity),
+      netBalance: _summary!.allTime.netBalance - (isIncome ? amount : -amount),
+    );
+
+    final newCurrentMonth = isCurrentMonth
+        ? _summary!.currentMonth.copyWith(
+            totalIncome: (_summary!.currentMonth.totalIncome -
+                    (isIncome ? amount : 0))
+                .clamp(0, double.infinity),
+            totalExpense: (_summary!.currentMonth.totalExpense -
+                    (isIncome ? 0 : amount))
+                .clamp(0, double.infinity),
+            netBalance: _summary!.currentMonth.netBalance -
+                (isIncome ? amount : -amount),
+          )
+        : _summary!.currentMonth;
+
+    final newCurrentYear = isCurrentYear
+        ? _summary!.currentYear.copyWith(
+            totalIncome: (_summary!.currentYear.totalIncome -
+                    (isIncome ? amount : 0))
+                .clamp(0, double.infinity),
+            totalExpense: (_summary!.currentYear.totalExpense -
+                    (isIncome ? 0 : amount))
+                .clamp(0, double.infinity),
+            netBalance: _summary!.currentYear.netBalance -
+                (isIncome ? amount : -amount),
+          )
+        : _summary!.currentYear;
+
+    _summary = WalletSummary(
+      allTime: newAllTime,
+      currentMonth: newCurrentMonth,
+      currentYear: newCurrentYear,
+    );
+  }
+
   void addExpense(Expense expense) {
     _expenses.add(expense);
+    _adjustSummaryOnTransactionAdd(expense);
     _checkAndRefreshStoryHighlights();
     notifyListeners();
   }
 
   void addAmount(Expense income) {
     _expenses.add(income);
+    _adjustSummaryOnTransactionAdd(income);
     _checkAndRefreshStoryHighlights();
     notifyListeners();
   }
@@ -252,16 +394,24 @@ class ExpenseProvider with ChangeNotifier {
   void updateExpense(Expense expense) {
     final index = _expenses.indexWhere((e) => e.id == expense.id);
     if (index >= 0) {
+      final old = _expenses[index];
       _expenses[index] = expense;
+      _adjustSummaryOnTransactionDelete(old);
+      _adjustSummaryOnTransactionAdd(expense);
       _checkAndRefreshStoryHighlights();
       notifyListeners();
     }
   }
 
   void deleteExpense(String id) {
-    _expenses.removeWhere((e) => e.id == id);
-    _checkAndRefreshStoryHighlights();
-    notifyListeners();
+    final index = _expenses.indexWhere((e) => e.id == id);
+    if (index >= 0) {
+      final old = _expenses[index];
+      _expenses.removeAt(index);
+      _adjustSummaryOnTransactionDelete(old);
+      _checkAndRefreshStoryHighlights();
+      notifyListeners();
+    }
   }
 
   Future<Map<String, dynamic>> deleteTransactionApi({
@@ -497,33 +647,79 @@ class ExpenseProvider with ChangeNotifier {
     if (raw is Map) {
       final map = Map<String, dynamic>.from(raw);
 
-      final b = map['balance'] ?? map['walletBalance'] ?? map['currentBalance'];
+      // 1. Check for summary object
+      if (map['summary'] is Map) {
+        try {
+          _summary = WalletSummary.fromJson(
+            Map<String, dynamic>.from(map['summary']),
+          );
+          _serverTotalIncome = _summary!.allTime.totalIncome;
+          _serverTotalExpense = _summary!.allTime.totalExpense;
+          _serverBalance = _summary!.allTime.netBalance;
+          log('Parsed summary from response: ${_summary?.toJson()}');
+        } catch (e) {
+          log('Error parsing summary object: $e');
+        }
+      } else if (map['allTime'] is Map ||
+          map['currentMonth'] is Map ||
+          map['currentYear'] is Map) {
+        try {
+          _summary = WalletSummary.fromJson(map);
+          _serverTotalIncome = _summary!.allTime.totalIncome;
+          _serverTotalExpense = _summary!.allTime.totalExpense;
+          _serverBalance = _summary!.allTime.netBalance;
+          log('Parsed summary direct map: ${_summary?.toJson()}');
+        } catch (e) {
+          log('Error parsing summary direct map: $e');
+        }
+      }
+
+      // Check nested objects if summary was not found at root level
+      if (_summary == null) {
+        if (map['data'] is Map) _extractServerMetrics(map['data']);
+        if (_summary == null && map['wallet'] is Map) {
+          _extractServerMetrics(map['wallet']);
+        }
+        if (_summary == null && map['result'] is Map) {
+          _extractServerMetrics(map['result']);
+        }
+        if (_summary == null && map['response'] is Map) {
+          _extractServerMetrics(map['response']);
+        }
+      }
+
+      final b = map['balance'] ??
+          map['walletBalance'] ??
+          map['currentBalance'] ??
+          map['netBalance'] ??
+          map['net'];
       if (b != null) {
         _serverBalance = b is num
             ? b.toDouble()
             : double.tryParse(b.toString());
       }
 
-      final ti = map['totalIncome'] ?? map['inflow'] ?? map['totalInflow'];
+      final ti = map['totalIncome'] ??
+          map['inflow'] ??
+          map['totalInflow'] ??
+          map['income'];
       if (ti != null) {
         _serverTotalIncome = ti is num
             ? ti.toDouble()
             : double.tryParse(ti.toString());
       }
 
-      final te =
-          map['totalExpense'] ??
+      final te = map['totalExpense'] ??
           map['totalExpenses'] ??
           map['outflow'] ??
-          map['totalOutflow'];
+          map['totalOutflow'] ??
+          map['expense'] ??
+          map['expenses'];
       if (te != null) {
         _serverTotalExpense = te is num
             ? te.toDouble()
             : double.tryParse(te.toString());
       }
-
-      if (map['data'] is Map) _extractServerMetrics(map['data']);
-      if (map['wallet'] is Map) _extractServerMetrics(map['wallet']);
     } else if (raw is List && raw.isNotEmpty && raw.first is Map) {
       _extractServerMetrics(raw.first);
     }

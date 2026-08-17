@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -7,6 +8,12 @@ import '../models/expense_model.dart';
 import '../providers/expense_provider.dart';
 import '../widgets/expense_list_tile.dart';
 import 'add_edit_expense_screen.dart';
+
+enum SummaryPeriod {
+  allTime,
+  currentMonth,
+  currentYear,
+}
 
 class ExpenseDashboardScreen extends StatefulWidget {
   const ExpenseDashboardScreen({super.key});
@@ -17,6 +24,7 @@ class ExpenseDashboardScreen extends StatefulWidget {
 
 class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
   TransactionFilter _currentFilter = TransactionFilter.all;
+  SummaryPeriod _selectedPeriod = SummaryPeriod.allTime;
   bool _isBalanceVisible = true;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
@@ -34,6 +42,16 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  String _formatMoney(double amount, {bool includeCents = false}) {
+    final absAmount = amount.abs();
+    final formatter = NumberFormat(
+      includeCents || (absAmount % 1 != 0) ? '#,##0.00' : '#,##0',
+      'en_US',
+    );
+    final formatted = formatter.format(absAmount);
+    return amount < 0 ? '-\$$formatted' : '\$$formatted';
   }
 
   @override
@@ -78,17 +96,22 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                 parent: BouncingScrollPhysics(),
               ),
               slivers: [
-                // 2. Digital Wallet Hero Card
+                // 1. Digital Wallet Hero Card with Period Selector
                 SliverToBoxAdapter(
                   child: _buildDigitalWalletCard(context, provider),
                 ),
 
-                // 4. Activity Header & Filters
+                // 2. 3-Period Financial Summary Cards (All-Time, Current Month, Current Year)
+                SliverToBoxAdapter(
+                  child: _buildFinancialSummarySection(context, provider),
+                ),
+
+                // 3. Activity Header & Filters
                 SliverToBoxAdapter(
                   child: _buildTransactionsHeader(context, provider),
                 ),
 
-                // 5. Transactions List
+                // 4. Transactions List
                 if (provider.isLoading && provider.expenses.isEmpty)
                   const SliverToBoxAdapter(
                     child: Padding(
@@ -168,41 +191,42 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
-                        vertical: 40,
+                        vertical: 36,
                       ),
                       child: Center(
                         child: Column(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(20),
+                              padding: const EdgeInsets.all(18),
                               decoration: BoxDecoration(
-                                color: Colors.grey.withOpacity(0.1),
+                                color: Colors.grey.withOpacity(0.08),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
                                 Icons.receipt_long_outlined,
-                                size: 48,
+                                size: 44,
                                 color: Colors.grey[400],
                               ),
                             ),
-                            const SizedBox(height: 14),
+                            const SizedBox(height: 12),
                             Text(
                               _searchQuery.isNotEmpty
                                   ? 'No matching transactions found.'
                                   : (_currentFilter == TransactionFilter.income
-                                        ? 'No fee / income records yet.'
+                                        ? 'No fee / income records found.'
                                         : (_currentFilter ==
                                                   TransactionFilter.expense
-                                              ? 'No expense records yet.'
-                                              : 'No transaction history found.')),
+                                              ? 'No expense records found.'
+                                              : 'No recent transactions recorded.')),
                               style: TextStyle(
-                                fontSize: 15,
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w600,
                                 color: Colors.grey[600],
                               ),
                             ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 6),
                             Text(
-                              'Tap "+ Add Money / Fee" or "- Add Expense" to log records.',
+                              'Tap "+ Add Money" or "- Add Expense" to record a transaction.',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey[400],
@@ -230,7 +254,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
     );
   }
 
-  // Hero Wallet Card
+  // Hero Wallet Card with Integrated Period Switcher
   Widget _buildDigitalWalletCard(
     BuildContext context,
     ExpenseProvider provider,
@@ -240,8 +264,43 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
     final schoolId = auth.user?.school?.address ?? '';
     final formattedAccount = schoolId;
 
+    final allTime = provider.allTimeSummary;
+    final currentMonth = provider.currentMonthSummary;
+    final currentYear = provider.currentYearSummary;
+
+    // Determine metrics for the currently selected period
+    final WalletPeriodSummary selectedSummary;
+    final String periodTitle;
+    switch (_selectedPeriod) {
+      case SummaryPeriod.currentMonth:
+        selectedSummary = currentMonth;
+        final mName = currentMonth.monthName.isNotEmpty
+            ? currentMonth.monthName
+            : 'Month ${currentMonth.month ?? DateTime.now().month}';
+        final yName = currentMonth.year ?? DateTime.now().year;
+        periodTitle = 'Net Balance • $mName $yName';
+        break;
+      case SummaryPeriod.currentYear:
+        selectedSummary = currentYear;
+        final yName = currentYear.year ?? DateTime.now().year;
+        periodTitle = 'Net Balance • FY $yName';
+        break;
+      case SummaryPeriod.allTime:
+      default:
+        selectedSummary = allTime;
+        periodTitle = 'Available Treasury Balance (All-Time)';
+        break;
+    }
+
+    final monthTabLabel = currentMonth.shortMonthName.isNotEmpty
+        ? '${currentMonth.shortMonthName} ${currentMonth.year ?? ''}'
+        : 'This Month';
+    final yearTabLabel = currentYear.year != null
+        ? 'FY ${currentYear.year}'
+        : 'This Year';
+
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         color: AppColors.primaryAdmin,
@@ -255,7 +314,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
       ),
       child: Stack(
         children: [
-          // Background decorative ambient circles
+          // Background ambient circles
           Positioned(
             right: -20,
             top: -20,
@@ -282,7 +341,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
           ),
 
           Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(18.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -316,14 +375,15 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                                 fontSize: 13,
                               ),
                             ),
-                            Text(
-                              formattedAccount,
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.65),
-                                fontSize: 10.5,
-                                letterSpacing: 0.5,
+                            if (formattedAccount.isNotEmpty)
+                              Text(
+                                formattedAccount,
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.65),
+                                  fontSize: 10.5,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
-                            ),
                           ],
                         ),
                       ],
@@ -345,33 +405,119 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                   ],
                 ),
 
+                const SizedBox(height: 12),
+
+                // Period Switcher Segment
+                Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.18),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    children: [
+                      _buildPeriodTab(
+                        label: 'All-Time',
+                        period: SummaryPeriod.allTime,
+                        icon: Icons.all_inclusive_rounded,
+                      ),
+                      _buildPeriodTab(
+                        label: monthTabLabel,
+                        period: SummaryPeriod.currentMonth,
+                        icon: Icons.calendar_month_rounded,
+                      ),
+                      _buildPeriodTab(
+                        label: yearTabLabel,
+                        period: SummaryPeriod.currentYear,
+                        icon: Icons.date_range_rounded,
+                      ),
+                    ],
+                  ),
+                ),
+
                 const SizedBox(height: 14),
 
-                // Balance Label & Amount
+                // Period Label & Net Balance Amount
                 Text(
-                  'Available Wallet Balance',
+                  periodTitle,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.75),
-                    fontSize: 12.5,
+                    fontSize: 11.5,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  _isBalanceVisible
-                      ? '\$${provider.walletBalance.toStringAsFixed(2)}'
-                      : '••••••••',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.5,
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      _isBalanceVisible
+                          ? _formatMoney(
+                              selectedSummary.netBalance,
+                              includeCents: true,
+                            )
+                          : '••••••••',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    if (_isBalanceVisible && selectedSummary.netBalance >= 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981).withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(0xFF10B981).withOpacity(0.4),
+                          ),
+                        ),
+                        child: Text(
+                          selectedSummary.netBalance > 0
+                              ? 'Surplus'
+                              : 'Balanced',
+                          style: const TextStyle(
+                            color: Color(0xFF34D399),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      )
+                    else if (_isBalanceVisible)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEF4444).withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(0xFFEF4444).withOpacity(0.4),
+                          ),
+                        ),
+                        child: const Text(
+                          'Deficit',
+                          style: TextStyle(
+                            color: Color(0xFFF87171),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
 
-                // Inflow and Outflow Mini-Chips inside Card
+                // Inflow and Outflow Summary Mini-Chips
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
@@ -384,7 +530,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                   ),
                   child: Row(
                     children: [
-                      // Total Inflow (Fees & Grants)
+                      // Total Inflow
                       Expanded(
                         child: Row(
                           children: [
@@ -416,7 +562,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                                   ),
                                   Text(
                                     _isBalanceVisible
-                                        ? '+\$${provider.totalIncome.toStringAsFixed(0)}'
+                                        ? '+${_formatMoney(selectedSummary.totalIncome)}'
                                         : '••••',
                                     style: const TextStyle(
                                       color: Color(0xFF34D399),
@@ -439,7 +585,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
 
                       const SizedBox(width: 10),
 
-                      // Total Outflow (Expenses)
+                      // Total Outflow
                       Expanded(
                         child: Row(
                           children: [
@@ -471,7 +617,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                                   ),
                                   Text(
                                     _isBalanceVisible
-                                        ? '-\$${provider.totalExpenses.toStringAsFixed(0)}'
+                                        ? '-${_formatMoney(selectedSummary.totalExpense)}'
                                         : '••••',
                                     style: const TextStyle(
                                       color: Color(0xFFF87171),
@@ -489,7 +635,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
 
                 // Quick Action Buttons on Wallet Card
                 Row(
@@ -571,13 +717,370 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
     );
   }
 
+  Widget _buildPeriodTab({
+    required String label,
+    required SummaryPeriod period,
+    required IconData icon,
+  }) {
+    final isSelected = _selectedPeriod == period;
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _selectedPeriod = period;
+          });
+        },
+        borderRadius: BorderRadius.circular(11),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(vertical: 7),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? Colors.white.withOpacity(0.22)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(11),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 13,
+                color: isSelected ? Colors.white : Colors.white.withOpacity(0.6),
+              ),
+              const SizedBox(width: 5),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: isSelected
+                        ? Colors.white
+                        : Colors.white.withOpacity(0.65),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 3-Period Financial Summary Cards Section
+  Widget _buildFinancialSummarySection(
+    BuildContext context,
+    ExpenseProvider provider,
+  ) {
+    final allTime = provider.allTimeSummary;
+    final currentMonth = provider.currentMonthSummary;
+    final currentYear = provider.currentYearSummary;
+
+    final monthTitle = currentMonth.monthName.isNotEmpty
+        ? '${currentMonth.monthName} ${currentMonth.year ?? ''}'
+        : 'Month ${currentMonth.month ?? DateTime.now().month}';
+
+    final yearTitle = 'Year ${currentYear.year ?? DateTime.now().year}';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section Title
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Row(
+                children: [
+                  Icon(
+                    Icons.insights_rounded,
+                    size: 18,
+                    color: AppColors.primaryAdmin,
+                  ),
+                  SizedBox(width: 6),
+                  Text(
+                    'Financial Summary',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                'All-Time • Monthly • Annual',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey[500],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          // 3 Horizontal Summary Cards
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                // 1. All Time Card
+                _buildSummaryPeriodCard(
+                  title: 'All-Time Record',
+                  subtitle: 'Lifetime Total',
+                  period: SummaryPeriod.allTime,
+                  metrics: allTime,
+                  accentColor: const Color(0xFF6750A4),
+                  icon: Icons.all_inclusive_rounded,
+                ),
+
+                const SizedBox(width: 10),
+
+                // 2. Current Month Card
+                _buildSummaryPeriodCard(
+                  title: monthTitle,
+                  subtitle: 'Current Month',
+                  period: SummaryPeriod.currentMonth,
+                  metrics: currentMonth,
+                  accentColor: const Color(0xFF0D9488), // Teal
+                  icon: Icons.calendar_month_rounded,
+                ),
+
+                const SizedBox(width: 10),
+
+                // 3. Current Year Card
+                _buildSummaryPeriodCard(
+                  title: yearTitle,
+                  subtitle: 'Fiscal Year',
+                  period: SummaryPeriod.currentYear,
+                  metrics: currentYear,
+                  accentColor: const Color(0xFF2563EB), // Blue
+                  icon: Icons.date_range_rounded,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryPeriodCard({
+    required String title,
+    required String subtitle,
+    required SummaryPeriod period,
+    required WalletPeriodSummary metrics,
+    required Color accentColor,
+    required IconData icon,
+  }) {
+    final isSelected = _selectedPeriod == period;
+
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedPeriod = period;
+        });
+      },
+      borderRadius: BorderRadius.circular(18),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 220,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isSelected ? accentColor : Colors.grey.withOpacity(0.18),
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isSelected
+                  ? accentColor.withOpacity(0.12)
+                  : Colors.black.withOpacity(0.04),
+              blurRadius: isSelected ? 10 : 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top Badge Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: accentColor.withOpacity(0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(icon, size: 14, color: accentColor),
+                    ),
+                    const SizedBox(width: 6),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                if (isSelected)
+                  Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: accentColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      size: 10,
+                      color: Colors.white,
+                    ),
+                  ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // Net Balance
+            Text(
+              'Net Balance',
+              style: TextStyle(
+                fontSize: 10.5,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              _isBalanceVisible
+                  ? _formatMoney(metrics.netBalance, includeCents: true)
+                  : '••••••',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                color: metrics.netBalance >= 0
+                    ? Colors.grey[900]
+                    : Colors.redAccent,
+                letterSpacing: -0.3,
+              ),
+            ),
+
+            const SizedBox(height: 10),
+            Divider(height: 1, color: Colors.grey.withOpacity(0.15)),
+            const SizedBox(height: 8),
+
+            // Inflow & Outflow Mini Rows
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Inflow
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.arrow_downward_rounded,
+                          size: 11,
+                          color: Color(0xFF10B981),
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          'Inflow',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      _isBalanceVisible
+                          ? '+${_formatMoney(metrics.totalIncome)}'
+                          : '••••',
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF10B981),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Outflow
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.arrow_upward_rounded,
+                          size: 11,
+                          color: Color(0xFFEF4444),
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          'Outflow',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      _isBalanceVisible
+                          ? '-${_formatMoney(metrics.totalExpense)}'
+                          : '••••',
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFEF4444),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // Transactions Header & Filter Section
   Widget _buildTransactionsHeader(
     BuildContext context,
     ExpenseProvider provider,
   ) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -587,7 +1090,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
             children: [
               const Text(
                 'Recent Transactions',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Text(
                 '${provider.expenses.length} Records',
@@ -611,7 +1114,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
               });
             },
             decoration: InputDecoration(
-              hintText: 'Search by title, fee category, voucher...',
+              hintText: 'Search by title, category, voucher...',
               hintStyle: TextStyle(fontSize: 13, color: Colors.grey[500]),
               prefixIcon: const Icon(Icons.search_rounded, size: 20),
               suffixIcon: _searchQuery.isNotEmpty
