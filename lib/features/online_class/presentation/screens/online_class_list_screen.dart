@@ -96,7 +96,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
       ),
       body: Consumer<OnlineClassProvider>(
         builder: (context, provider, _) {
-          if (!provider.isLoading) {
+          if (provider.isLoading) {
             return _buildShimmerLoader();
           }
 
