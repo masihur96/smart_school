@@ -10,7 +10,8 @@ import 'book_list_screen.dart';
 import 'issued_books_screen.dart';
 
 class LibraryDashboardScreen extends StatefulWidget {
-  const LibraryDashboardScreen({super.key});
+  final String comeFrom;
+  const LibraryDashboardScreen({super.key, required this.comeFrom});
 
   @override
   State<LibraryDashboardScreen> createState() => _LibraryDashboardScreenState();
@@ -75,7 +76,7 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                 );
                 if (result == true) {}
               },
-              backgroundColor: AppColors.primaryAdmin,
+              backgroundColor:widget.comeFrom == 'admin' ? AppColors.primaryAdmin : widget.comeFrom == 'teacher' ? AppColors.primaryTeacher : AppColors.primaryStudent,
               icon: const Icon(Icons.add, color: Colors.white),
               label: const Text(
                 'New Book',
@@ -90,7 +91,8 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
             floating: false,
             pinned: true,
             elevation: 0,
-            backgroundColor: AppColors.primaryAdmin,
+            backgroundColor:widget.comeFrom == 'admin' ? AppColors.primaryAdmin : widget.comeFrom == 'teacher' ? AppColors.primaryTeacher : AppColors.primaryStudent,
+
             leading: IconButton(
               icon: const Icon(
                 Icons.arrow_back_ios_new_rounded,
@@ -140,7 +142,7 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
         ],
         body: TabBarView(
           controller: _tabController,
-          children: const [BookListScreen(), IssuedBooksScreen()],
+          children:  [BookListScreen(comeFrom: widget.comeFrom), IssuedBooksScreen(comeFrom: widget.comeFrom)],
         ),
       ),
     );

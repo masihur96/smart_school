@@ -10,7 +10,8 @@ import '../providers/library_book_provider.dart';
 import 'book_detail_screen.dart';
 
 class IssuedBooksScreen extends StatefulWidget {
-  const IssuedBooksScreen({super.key});
+  final String comeFrom;
+  const IssuedBooksScreen({super.key, required this.comeFrom});
 
   @override
   State<IssuedBooksScreen> createState() => _IssuedBooksScreenState();
@@ -73,7 +74,7 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
                   icon: Icons.warning_rounded,
                 ),
                 const SizedBox(height: 8),
-                ...overdue.map((ib) => _IssuedBookCard(issuedBook: ib)),
+                ...overdue.map((ib) => _IssuedBookCard(issuedBook: ib,comeFrom: widget.comeFrom,)),
                 const SizedBox(height: 16),
               ],
               if (onTime.isNotEmpty) ...[
@@ -84,7 +85,7 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
                   icon: Icons.check_circle_rounded,
                 ),
                 const SizedBox(height: 8),
-                ...onTime.map((ib) => _IssuedBookCard(issuedBook: ib)),
+                ...onTime.map((ib) => _IssuedBookCard(issuedBook: ib,comeFrom: widget.comeFrom,)),
               ],
             ],
           ),
@@ -314,8 +315,9 @@ class _SectionHeader extends StatelessWidget {
 
 class _IssuedBookCard extends StatelessWidget {
   final IssuedBook issuedBook;
+  final String comeFrom;
 
-  const _IssuedBookCard({required this.issuedBook});
+  const _IssuedBookCard({required this.issuedBook, required this.comeFrom});
 
   @override
   Widget build(BuildContext context) {
@@ -331,7 +333,7 @@ class _IssuedBookCard extends StatelessWidget {
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => BookDetailScreen(book: issuedBook.book),
+          builder: (_) => BookDetailScreen(book: issuedBook.book, comeFrom: comeFrom),
         ),
       ),
       child: Container(

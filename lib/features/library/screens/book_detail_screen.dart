@@ -16,9 +16,10 @@ import 'add_edit_book_screen.dart';
 import 'id_card_scanner_screen.dart';
 
 class BookDetailScreen extends StatefulWidget {
+  final String comeFrom;
   final Book book;
 
-  const BookDetailScreen({super.key, required this.book});
+  const BookDetailScreen({super.key, required this.comeFrom, required this.book});
 
   @override
   State<BookDetailScreen> createState() => _BookDetailScreenState();
@@ -660,14 +661,15 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     final isAdmin = user?.role == UserRole.admin || user?.role == UserRole.superadmin;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FB),
+
       body: CustomScrollView(
         slivers: [
           // ── Hero AppBar with book cover ──────────────────────
           SliverAppBar(
             expandedHeight: 320,
             pinned: true,
-            backgroundColor: AppColors.primaryAdmin,
+            backgroundColor: widget.comeFrom == 'admin' ? AppColors.primaryAdmin : widget.comeFrom == 'teacher' ? AppColors.primaryTeacher : AppColors.primaryStudent,
+
             centerTitle: true,
             title: Text(
               _book.title,
@@ -697,8 +699,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 children: [
                   // Background gradient
                   Container(
-                    decoration: const BoxDecoration(
-                      color: AppColors.primaryAdmin,
+                    decoration:  BoxDecoration(
+                      color: widget.comeFrom == 'admin' ? AppColors.primaryAdmin : widget.comeFrom == 'teacher' ? AppColors.primaryTeacher : AppColors.primaryStudent,
+
                     ),
                   ),
                   // Blurred decorative circle

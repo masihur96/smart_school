@@ -8,7 +8,8 @@ import '../widgets/book_grid_card.dart';
 import 'book_detail_screen.dart';
 
 class BookListScreen extends StatefulWidget {
-  const BookListScreen({super.key});
+  final String comeFrom;
+  const BookListScreen({super.key, required this.comeFrom});
 
   @override
   State<BookListScreen> createState() => _BookListScreenState();
@@ -472,7 +473,7 @@ class _BookListScreenState extends State<BookListScreen> {
           book: book,
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => BookDetailScreen(book: book)),
+            MaterialPageRoute(builder: (_) => BookDetailScreen(book: book,comeFrom: widget.comeFrom)),
           ),
         );
       },
@@ -490,7 +491,7 @@ class _BookListScreenState extends State<BookListScreen> {
           book: book,
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => BookDetailScreen(book: book)),
+            MaterialPageRoute(builder: (_) => BookDetailScreen(book: book, comeFrom: widget.comeFrom)),
           ),
         );
       },

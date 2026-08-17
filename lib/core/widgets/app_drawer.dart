@@ -193,7 +193,7 @@ class AppDrawer extends StatelessWidget {
       _buildDrawerItem(Icons.local_library, 'Library', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const LibraryDashboardScreen()),
+          MaterialPageRoute(builder: (_) => const LibraryDashboardScreen(comeFrom: "admin",)),
         );
       }, context),
       _buildDrawerItem(Icons.sms_outlined, "Bulk SMS", () {
@@ -277,7 +277,7 @@ class AppDrawer extends StatelessWidget {
       _buildDrawerItem(Icons.local_library, 'Library', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const LibraryDashboardScreen()),
+          MaterialPageRoute(builder: (_) => const LibraryDashboardScreen(comeFrom: "teacher")),
         );
       }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
@@ -333,7 +333,7 @@ class AppDrawer extends StatelessWidget {
       _buildDrawerItem(Icons.local_library, 'Library', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const LibraryDashboardScreen()),
+          MaterialPageRoute(builder: (_) => const LibraryDashboardScreen(comeFrom: "student")),
         );
       }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
