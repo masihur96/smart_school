@@ -590,6 +590,8 @@ class ExpenseProvider with ChangeNotifier {
           final map = Map<String, dynamic>.from(item);
           if (map['transactions'] is List) {
             list.addAll(_extractTransactionsList(map['transactions']));
+          } else if (map['recentTransactions'] is List) {
+            list.addAll(_extractTransactionsList(map['recentTransactions']));
           } else {
             list.add(map);
           }
@@ -602,9 +604,13 @@ class ExpenseProvider with ChangeNotifier {
       final map = Map<String, dynamic>.from(raw);
 
       for (final key in [
+        'recentTransactions',
+        'recent_transactions',
         'transactions',
         'walletTransactions',
+        'wallet_transactions',
         'history',
+        'transactionHistory',
         'items',
         'records',
         'data',
@@ -629,7 +635,7 @@ class ExpenseProvider with ChangeNotifier {
         return list;
       }
 
-      for (final key in ['data', 'wallet', 'result', 'response']) {
+      for (final key in ['data', 'wallet', 'result', 'response', 'payload']) {
         if (map[key] is Map) {
           final extracted = _extractTransactionsList(map[key]);
           if (extracted.isNotEmpty) return extracted;
