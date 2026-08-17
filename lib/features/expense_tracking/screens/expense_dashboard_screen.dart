@@ -340,65 +340,6 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Row: Account Badge & Visibility Toggle
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.school_rounded,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              schoolName,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
-                            if (formattedAccount.isNotEmpty)
-                              Text(
-                                formattedAccount,
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.65),
-                                  fontSize: 10.5,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        _isBalanceVisible
-                            ? Icons.visibility_rounded
-                            : Icons.visibility_off_rounded,
-                        color: Colors.white.withOpacity(0.85),
-                        size: 20,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isBalanceVisible = !_isBalanceVisible;
-                        });
-                      },
-                    ),
-                  ],
-                ),
 
                 const SizedBox(height: 12),
 
@@ -507,6 +448,22 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                           ),
                         ),
                       ),
+
+                    Spacer(),
+                    IconButton(
+                      icon: Icon(
+                        _isBalanceVisible
+                            ? Icons.visibility_rounded
+                            : Icons.visibility_off_rounded,
+                        color: Colors.white.withOpacity(0.85),
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isBalanceVisible = !_isBalanceVisible;
+                        });
+                      },
+                    ),
                   ],
                 ),
 

@@ -4,7 +4,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/route_generator.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
-
 import 'configs/network/data_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'features/admin/providers/exam_provider.dart';
