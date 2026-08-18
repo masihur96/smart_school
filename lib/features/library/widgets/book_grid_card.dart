@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../data/models/book.dart';
 
 class BookGridCard extends StatefulWidget {
@@ -49,18 +50,7 @@ class _BookGridCardState extends State<BookGridCard>
         onTapDown: _onTapDown,
         onTapUp: _onTapUp,
         onTapCancel: _onTapCancel,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.07),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
+        child: Card(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(18),
             child: Column(
@@ -76,8 +66,8 @@ class _BookGridCardState extends State<BookGridCard>
                       Image.network(
                         book.coverImageUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _CoverPlaceholder(
-                            category: book.category),
+                        errorBuilder: (_, __, ___) =>
+                            _CoverPlaceholder(category: book.category),
                         loadingBuilder: (_, child, progress) {
                           if (progress == null) return child;
                           return _CoverLoadingSkeleton();
@@ -94,10 +84,7 @@ class _BookGridCardState extends State<BookGridCard>
                             gradient: LinearGradient(
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
-                              colors: [
-                                Color(0xCC000000),
-                                Colors.transparent,
-                              ],
+                              colors: [Color(0xCC000000), Colors.transparent],
                             ),
                           ),
                         ),
@@ -114,12 +101,15 @@ class _BookGridCardState extends State<BookGridCard>
                         left: 8,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 3),
+                            horizontal: 7,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.22),
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                                color: Colors.white.withOpacity(0.3)),
+                              color: Colors.white.withOpacity(0.3),
+                            ),
                           ),
                           child: Text(
                             book.category,
@@ -139,8 +129,7 @@ class _BookGridCardState extends State<BookGridCard>
                 Expanded(
                   flex: 4,
                   child: Padding(
-                    padding:
-                        const EdgeInsets.fromLTRB(10, 10, 10, 8),
+                    padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -151,7 +140,7 @@ class _BookGridCardState extends State<BookGridCard>
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF111827),
+
                             height: 1.3,
                           ),
                           maxLines: 2,
@@ -160,15 +149,14 @@ class _BookGridCardState extends State<BookGridCard>
                         // Author
                         Row(
                           children: [
-                            const Icon(Icons.person_rounded,
-                                size: 11, color: Color(0xFF9CA3AF)),
+                            const Icon(Icons.person_rounded, size: 11),
                             const SizedBox(width: 3),
                             Expanded(
                               child: Text(
                                 book.author,
                                 style: const TextStyle(
                                   fontSize: 11,
-                                  color: Color(0xFF9CA3AF),
+
                                   fontWeight: FontWeight.w500,
                                 ),
                                 maxLines: 1,
@@ -190,10 +178,11 @@ class _BookGridCardState extends State<BookGridCard>
                               ),
                             ),
                             const SizedBox(width: 2),
-                            Icon(Icons.arrow_forward_ios_rounded,
-                                size: 9,
-                                color:
-                                    const Color(0xFF2563EB).withOpacity(0.7)),
+                            Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 9,
+                              color: const Color(0xFF2563EB).withOpacity(0.7),
+                            ),
                           ],
                         ),
                       ],
@@ -218,15 +207,15 @@ class _PillBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color:
-            isAvailable ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+        color: isAvailable ? const Color(0xFF10B981) : const Color(0xFFEF4444),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: (isAvailable
-                    ? const Color(0xFF10B981)
-                    : const Color(0xFFEF4444))
-                .withOpacity(0.4),
+            color:
+                (isAvailable
+                        ? const Color(0xFF10B981)
+                        : const Color(0xFFEF4444))
+                    .withOpacity(0.4),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -271,7 +260,11 @@ class _CoverPlaceholder extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.book_rounded, color: Colors.white.withOpacity(0.7), size: 40),
+          Icon(
+            Icons.book_rounded,
+            color: Colors.white.withOpacity(0.7),
+            size: 40,
+          ),
           const SizedBox(height: 6),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -304,11 +297,14 @@ class _CoverLoadingSkeletonState extends State<_CoverLoadingSkeleton>
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(seconds: 1))
-      ..repeat(reverse: true);
-    _anim = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+    _anim = Tween<double>(
+      begin: 0.5,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
