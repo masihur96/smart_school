@@ -31,8 +31,12 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<TeachersNotifier>().fetchTeachers();
-      context.read<StudentsNotifier>().fetchStudents();
+      if (context.read<TeachersNotifier>().teachers.isEmpty) {
+        context.read<TeachersNotifier>().fetchTeachers();
+      }
+      if (context.read<StudentsNotifier>().students.isEmpty && !context.read<StudentsNotifier>().isLoading) {
+        context.read<StudentsNotifier>().fetchStudents();
+      }
     });
   }
 

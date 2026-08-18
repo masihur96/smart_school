@@ -45,11 +45,15 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
       final user = context.read<AuthNotifier>().user;
       final schoolId = user?.schoolId ?? '';
 
-      if (schoolId.isNotEmpty) {
+      if (schoolId.isNotEmpty && context.read<ClassSetupNotifier>().classes.isEmpty) {
         context.read<ClassSetupNotifier>().fetchClasses(schoolId);
       }
-      context.read<SectionSetupNotifier>().fetchSections();
-      context.read<StudentsNotifier>().fetchStudents();
+      if (context.read<SectionSetupNotifier>().sections.isEmpty) {
+        context.read<SectionSetupNotifier>().fetchSections();
+      }
+      if (context.read<StudentsNotifier>().students.isEmpty && !context.read<StudentsNotifier>().isLoading) {
+        context.read<StudentsNotifier>().fetchStudents();
+      }
     });
   }
 
@@ -337,17 +341,41 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
               ],
             ),
             Expanded(
-              child: studentsNotifier.isLoading
-                  ? _StudentShimmer(
-                      isDark: Theme.of(context).brightness == Brightness.dark,
-                    )
-                  : students.isEmpty
-                  ? Center(
-                      child: Text(
-                        AppLocalizations.of(context)!.noStudentsFound,
-                      ),
-                    )
-                  : ListView.builder(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  final user = context.read<AuthNotifier>().user;
+                  final schoolId = user?.schoolId ?? '';
+                  if (schoolId.isNotEmpty) {
+                    context.read<ClassSetupNotifier>().fetchClasses(schoolId);
+                  }
+                  context.read<SectionSetupNotifier>().fetchSections();
+                  await context.read<StudentsNotifier>().fetchStudents(
+                        classId: _selectedClassId,
+                        sectionId: _selectedSectionId,
+                        isActive: _selectedStatus,
+                        search: _searchQuery.isEmpty ? null : _searchQuery,
+                  );
+                },
+                child: studentsNotifier.isLoading && students.isEmpty
+                    ? _StudentShimmer(
+                        isDark: Theme.of(context).brightness == Brightness.dark,
+                      )
+                    : students.isEmpty
+                    ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.5,
+                            child: Center(
+                              child: Text(
+                                AppLocalizations.of(context)!.noStudentsFound,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
                       controller: _scrollController,
                       itemCount:
                           students.length + (studentsNotifier.hasMore ? 1 : 0),
@@ -610,6 +638,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                         );
                       },
                     ),
+              ),
             ),
           ],
         ),
