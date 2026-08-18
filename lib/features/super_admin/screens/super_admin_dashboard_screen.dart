@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/widgets/app_drawer.dart';
@@ -17,15 +18,33 @@ import 'package:smart_school/features/super_admin/screens/system_status_screen.d
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/user_model.dart';
 
-class SuperAdminDashboardScreen extends StatefulWidget {
+class SuperAdminDashboardScreen extends StatelessWidget {
   const SuperAdminDashboardScreen({super.key});
 
   @override
-  State<SuperAdminDashboardScreen> createState() =>
-      _SuperAdminDashboardScreenState();
+  Widget build(BuildContext context) {
+    return ZoomDrawer(
+      controller: ZoomDrawerController(),
+      menuScreen: const AppDrawer(),
+      mainScreen: const SuperAdminDashboardContent(),
+      borderRadius: 24.0,
+      showShadow: true,
+      angle: -12.0,
+      drawerShadowsBackgroundColor: Colors.grey.shade300,
+      slideWidth: MediaQuery.of(context).size.width * 0.65,
+    );
+  }
 }
 
-class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
+class SuperAdminDashboardContent extends StatefulWidget {
+  const SuperAdminDashboardContent({super.key});
+
+  @override
+  State<SuperAdminDashboardContent> createState() =>
+      _SuperAdminDashboardContentState();
+}
+
+class _SuperAdminDashboardContentState extends State<SuperAdminDashboardContent> {
   int _selectedIndex = 0;
 
   @override
@@ -92,6 +111,10 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.menu, color: Colors.white),
+            onPressed: () => ZoomDrawer.of(context)?.toggle(),
+          ),
           title: Text(
             _getTitle(l10n),
             style: const TextStyle(
@@ -118,7 +141,6 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
             const SizedBox(width: 8),
           ],
         ),
-        drawer: const AppDrawer(),
         body: IndexedStack(
           index: _selectedIndex,
           children: [

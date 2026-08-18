@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
@@ -30,20 +32,48 @@ import 'teacher_attendance_screen.dart';
 import 'teacher_exam_screen.dart';
 import 'teacher_routine_screen.dart';
 
-class TeacherDashboardScreen extends StatefulWidget {
+class TeacherDashboardScreen extends StatelessWidget {
   const TeacherDashboardScreen({super.key});
 
   @override
-  State<TeacherDashboardScreen> createState() => _TeacherDashboardScreenState();
+  Widget build(BuildContext context) {
+    return ZoomDrawer(
+      controller: ZoomDrawerController(),
+      menuScreen: const AppDrawer(),
+      mainScreen: const TeacherDashboardContent(),
+      borderRadius: 24.0,
+      showShadow: true,
+      angle: -12.0,
+      drawerShadowsBackgroundColor: Colors.grey.shade300,
+      slideWidth: MediaQuery.of(context).size.width * 0.65,
+    );
+  }
 }
 
-class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
-  int _selectedIndex = 0;
+class TeacherDashboardContent extends StatefulWidget {
+  const TeacherDashboardContent({super.key});
+
+  @override
+  State<TeacherDashboardContent> createState() => _TeacherDashboardContentState();
+}
+
+class _TeacherDashboardContentState extends State<TeacherDashboardContent>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   final List<bool> _visitedTabs = [true, false, false, false];
+
+  int get _selectedIndex => _tabController.index;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) return;
+      setState(() {
+        _visitedTabs[_tabController.index] = true;
+      });
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final user = context.read<AuthNotifier>().user;
       final now = DateTime.now();
@@ -65,11 +95,10 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     });
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-      _visitedTabs[index] = true;
-    });
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   String _getTitle(AppLocalizations l10n) {
@@ -90,8 +119,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthNotifier>().user;
-
     final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, dynamic result) async {
@@ -123,6 +153,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
+          leadingWidth: screenSize(context, .15),
+          leading: IconButton(
+            icon: const Icon(Icons.menu, color: Colors.white),
+            onPressed: () => ZoomDrawer.of(context)?.toggle(),
+          ),
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -145,7 +180,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           elevation: 0,
           backgroundColor: AppColors.primaryTeacher,
           foregroundColor: Colors.white,
-          iconTheme: IconThemeData(color: Colors.white70),
+          iconTheme: const IconThemeData(color: Colors.white70),
           actions: [
             NotificationIconButton(color: AppColors.primaryTeacher),
             IconButton(
@@ -160,68 +195,75 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             const SizedBox(width: 8),
           ],
         ),
-        drawer: const AppDrawer(),
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: [
-            user == null
-                ? SizedBox()
-                : _buildDashboardOverview(context, user.name, user, l10n),
-            _visitedTabs[1]
-                ? const TeacherAttendanceScreen(hideAppBar: true)
-                : const SizedBox(),
-            _visitedTabs[2]
-                ? const MarkEntryScreen(hideAppBar: true)
-                : const SizedBox(),
-            _visitedTabs[3]
-                ? const HomeworkManagementScreen(hideAppBar: true)
-                : const SizedBox(),
-          ],
-        ),
-        bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 10,
-                offset: const Offset(0, -4),
+        body: BottomBar(
+          layout: BottomBarLayout(
+            width: MediaQuery.of(context).size.width,
+            offset: 10,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          theme: BottomBarThemeData(
+            barDecoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+          ),
+          scrollBehavior: const BottomBarScrollBehavior(hideOnScroll: true),
+          showIcon: false,
+          child: TabBar(
+            controller: _tabController,
+            indicatorColor: AppColors.primaryTeacher,
+            labelColor: AppColors.primaryTeacher,
+            unselectedLabelColor:
+                isDark ? Colors.white54 : Colors.grey.shade500,
+            indicatorSize: TabBarIndicatorSize.label,
+            dividerColor: Colors.transparent,
+            labelStyle: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+            unselectedLabelStyle: const TextStyle(fontSize: 11),
+            tabs: [
+              Tab(
+                icon: const Icon(Icons.dashboard_outlined),
+                text: l10n.home,
+              ),
+              Tab(
+                icon: const Icon(Icons.check_circle_outline),
+                text: l10n.attendance,
+              ),
+              Tab(
+                icon: const Icon(Icons.assignment_turned_in_outlined),
+                text: l10n.marks,
+              ),
+              Tab(
+                icon: const Icon(Icons.assignment_outlined),
+                text: l10n.homework,
               ),
             ],
           ),
-          child: BottomNavigationBar(
-            currentIndex: _selectedIndex,
-            onTap: _onItemTapped,
-            type: BottomNavigationBarType.fixed,
-            selectedItemColor: Colors.green.shade700,
-            unselectedItemColor: Colors.grey.shade500,
-
-            elevation: 0,
-            selectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-            unselectedLabelStyle: const TextStyle(fontSize: 12),
-            items: [
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.dashboard_outlined),
-                activeIcon: const Icon(Icons.dashboard),
-                label: l10n.home,
-              ),
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.check_circle_outline),
-                activeIcon: const Icon(Icons.check_circle),
-                label: l10n.attendance,
-              ),
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.assignment_turned_in_outlined),
-                activeIcon: const Icon(Icons.assignment_turned_in),
-                label: l10n.marks,
-              ),
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.assignment_outlined),
-                activeIcon: const Icon(Icons.assignment),
-                label: l10n.homework,
-              ),
+          body: TabBarView(
+            controller: _tabController,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              user == null
+                  ? const SizedBox()
+                  : _buildDashboardOverview(context, user.name, user, l10n),
+              _visitedTabs[1]
+                  ? const TeacherAttendanceScreen(hideAppBar: true)
+                  : const SizedBox(),
+              _visitedTabs[2]
+                  ? const MarkEntryScreen(hideAppBar: true)
+                  : const SizedBox(),
+              _visitedTabs[3]
+                  ? const HomeworkManagementScreen(hideAppBar: true)
+                  : const SizedBox(),
             ],
           ),
         ),
@@ -370,7 +412,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                   if (data?.mySubmittedHomework.isNotEmpty ?? false) ...[
                     _buildSectionHeader(
                       l10n.recentHomework,
-                      onSeeAll: () => setState(() => _selectedIndex = 3),
+                      onSeeAll: () => _tabController.animateTo(3),
                     ),
                     const SizedBox(height: 12),
                     SizedBox(

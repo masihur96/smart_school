@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/academic_books/screens/academic_books_dashboard_screen.dart';
 import 'package:smart_school/features/admin/screens/add_edit_marquee_screen.dart';
@@ -45,57 +46,70 @@ class AppDrawer extends StatelessWidget {
 
     if (user == null) return const SizedBox.shrink();
 
-    return Drawer(
-      child: Column(
-        children: [
-          UserAccountsDrawerHeader(
-            accountName: Text(user.name),
-            accountEmail: Text(user.email),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: Colors.white,
-
-              child: Text(
-                user.name[0],
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+    return Theme(
+      data: Theme.of(context).copyWith(
+        listTileTheme: const ListTileThemeData(
+          iconColor: Colors.white,
+          textColor: Colors.white,
+        ),
+        dividerColor: Colors.white24,
+      ),
+      child: Scaffold(
+        backgroundColor: _getRoleColor(user.role),
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              UserAccountsDrawerHeader(
+                accountName: Text(user.name, style: const TextStyle(color: Colors.white)),
+                accountEmail: Text(user.email, style: const TextStyle(color: Colors.white)),
+                currentAccountPicture: CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: Text(
+                    user.name.isNotEmpty ? user.name[0] : '?',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: _getRoleColor(user.role),
+                    ),
+                  ),
+                ),
+                decoration: const BoxDecoration(color: Colors.transparent),
+              ),
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    if (user.role == UserRole.admin) ..._buildAdminItems(context),
+                    if (user.role == UserRole.teacher)
+                      ..._buildTeacherItems(context),
+                    if (user.role == UserRole.student)
+                      ..._buildStudentItems(context),
+                    if (user.role == UserRole.superadmin)
+                      ..._buildSuperAdminItems(context),
+                  ],
                 ),
               ),
-            ),
-            decoration: BoxDecoration(color: _getRoleColor(user.role)),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.redAccent),
+                title: Text(
+                  AppLocalizations.of(context)?.logout ?? 'Logout',
+                  style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                ),
+                onTap: () {
+                  context.read<AuthNotifier>().logout();
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
           ),
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                if (user.role == UserRole.admin) ..._buildAdminItems(context),
-                if (user.role == UserRole.teacher)
-                  ..._buildTeacherItems(context),
-                if (user.role == UserRole.student)
-                  ..._buildStudentItems(context),
-                if (user.role == UserRole.superadmin)
-                  ..._buildSuperAdminItems(context),
-              ],
-            ),
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: Text(
-              AppLocalizations.of(context)?.logout ?? 'Logout',
-              style: const TextStyle(color: Colors.red),
-            ),
-            onTap: () {
-              context.read<AuthNotifier>().logout();
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => LoginScreen()),
-                (route) => false,
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-        ],
+        ),
       ),
     );
   }
@@ -116,12 +130,7 @@ class AppDrawer extends StatelessWidget {
   List<Widget> _buildAdminItems(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return [
-      _buildDrawerItem(Icons.dashboard, l10n.dashboard, () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => AdminDashboardScreen()),
-        );
-      }, context),
+      _buildDrawerItem(Icons.dashboard, l10n.dashboard, () {}, context),
       _buildDrawerItem(Icons.people, l10n.students, () {
         Navigator.push(
           context,
@@ -230,12 +239,7 @@ class AppDrawer extends StatelessWidget {
   List<Widget> _buildTeacherItems(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return [
-      _buildDrawerItem(Icons.dashboard, l10n.dashboard, () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => TeacherDashboardScreen()),
-        );
-      }, context),
+      _buildDrawerItem(Icons.dashboard, l10n.dashboard, () {}, context),
       _buildDrawerItem(Icons.check_circle, l10n.attendance, () {
         Navigator.push(
           context,
@@ -301,12 +305,7 @@ class AppDrawer extends StatelessWidget {
   List<Widget> _buildStudentItems(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return [
-      _buildDrawerItem(Icons.dashboard, l10n.dashboard, () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => StudentDashboardScreen()),
-        );
-      }, context),
+      _buildDrawerItem(Icons.dashboard, l10n.dashboard, () {}, context),
       _buildDrawerItem(Icons.check_circle, l10n.attendance, () {
         Navigator.push(
           context,
@@ -406,6 +405,13 @@ class AppDrawer extends StatelessWidget {
     VoidCallback onTap,
     BuildContext context,
   ) {
-    return ListTile(leading: Icon(icon), title: Text(title), onTap: onTap);
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      onTap: () {
+        ZoomDrawer.of(context)?.close();
+        onTap();
+      },
+    );
   }
 }

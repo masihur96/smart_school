@@ -1,9 +1,14 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+
+import 'add_edit_student_screen.dart';
+import 'add_edit_teacher_screen.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/student_performance_provider.dart';
@@ -29,19 +34,36 @@ import 'student_attendance_management_screen.dart';
 import 'student_management_screen.dart';
 import 'teacher_attendance_management_screen.dart';
 
-class AdminDashboardScreen extends StatefulWidget {
+class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
 
   @override
-  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+  Widget build(BuildContext context) {
+    return ZoomDrawer(
+      controller: ZoomDrawerController(),
+      menuScreen: const AppDrawer(),
+      mainScreen: const AdminDashboardContent(),
+      borderRadius: 24.0,
+      showShadow: true,
+      angle: -12.0,
+      drawerShadowsBackgroundColor: Colors.grey.shade300,
+      slideWidth: MediaQuery.of(context).size.width * 0.65,
+    );
+  }
 }
 
-class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
-  int _selectedIndex = 0;
+class AdminDashboardContent extends StatefulWidget {
+  const AdminDashboardContent({super.key});
 
-  /// Tracks which bottom-nav tabs have been opened at least once.
-  /// Sub-screens are only built after their tab is first tapped,
-  /// preventing their providers from firing on initial load.
+  @override
+  State<AdminDashboardContent> createState() => _AdminDashboardContentState();
+}
+
+class _AdminDashboardContentState extends State<AdminDashboardContent>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  /// Tracks which tabs have been opened at least once for lazy init.
   final Set<int> _tabsInitialized = {0};
 
   /// Lazy-fetch guards — each performance section triggers its own
@@ -67,6 +89,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 5, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) return;
+      if (_tabController.index == 2) {
+        // Prevent selection of the dummy middle tab
+        _tabController.index = _tabController.previousIndex;
+        return;
+      }
+      setState(() {
+        _tabsInitialized.add(_tabController.index);
+      });
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       // Only the two core calls on startup — no teacher/student perf here.
@@ -77,13 +111,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     });
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-      // Mark this tab as initialized so its sub-screen widget is built.
-      _tabsInitialized.add(index);
-    });
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
+
+  int get _selectedIndex => _tabController.index;
 
   String _getTitle(AppLocalizations l10n) {
     final authNotifier = context.watch<AuthNotifier>();
@@ -92,19 +126,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         return authNotifier.user?.school?.name ?? l10n.studentManagement;
       case 1:
         return l10n.studentManagement;
-      case 2:
-        return l10n.examManagement;
       case 3:
+        return l10n.examManagement;
+      case 4:
         return l10n.schoolNotices;
       default:
         return l10n.adminDashboard;
     }
   }
 
+  Color get _primaryColor => AppColors.primaryAdmin;
+
   @override
   Widget build(BuildContext context) {
     final authNotifier = context.watch<AuthNotifier>();
     final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, dynamic result) async {
@@ -136,13 +174,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          leadingWidth: screenSize(context, .07),
+          leadingWidth: screenSize(context, .15),
+          leading: IconButton(
+            icon: const Icon(Icons.menu, color: Colors.white),
+            onPressed: () => ZoomDrawer.of(context)?.toggle(),
+          ),
           title: Text(
             _getTitle(l10n),
-            style: TextStyle(color: AppColors.white),
+            style: const TextStyle(color: AppColors.white),
           ),
-          iconTheme: IconThemeData(color: AppColors.white),
-
+          iconTheme: const IconThemeData(color: AppColors.white),
           backgroundColor: AppColors.primaryAdmin,
           foregroundColor: Colors.white,
           actions: [
@@ -159,47 +200,154 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             const SizedBox(width: 8),
           ],
         ),
-        drawer: const AppDrawer(),
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: [
-            _buildDashboardOverview(l10n, authNotifier),
-            // Tabs 1-3 are deferred: only built after their tab is first tapped.
-            _tabsInitialized.contains(1)
-                ? const StudentManagementScreen(hideAppBar: true)
-                : const SizedBox.shrink(),
-            _tabsInitialized.contains(2)
-                ? const ExamManagementScreen(hideAppBar: true)
-                : const SizedBox.shrink(),
-            _tabsInitialized.contains(3)
-                ? const NoticeManagementScreen(hideAppBar: true)
-                : const SizedBox.shrink(),
-          ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.purple,
-          unselectedItemColor: Colors.grey,
-          items: [
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.dashboard),
-              label: l10n.home,
+        body: BottomBar(
+          layout: BottomBarLayout(
+            width: MediaQuery.of(context).size.width,
+            offset: 10,
+            borderRadius: BorderRadius.circular(28),
+            clip: Clip.none,
+          ),
+          theme: BottomBarThemeData(
+            barDecoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.people),
-              label: l10n.students,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.assignment_turned_in),
-              label: l10n.exams,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.announcement),
-              label: l10n.notices,
-            ),
-          ],
+          ),
+          scrollBehavior: const BottomBarScrollBehavior(hideOnScroll: true),
+          showIcon: false,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              TabBar(
+                controller: _tabController,
+                indicatorColor: _primaryColor,
+                labelColor: _primaryColor,
+                unselectedLabelColor:
+                    isDark ? Colors.white54 : Colors.grey.shade500,
+                indicatorSize: TabBarIndicatorSize.label,
+                dividerColor: Colors.transparent,
+                labelStyle: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+                unselectedLabelStyle: const TextStyle(fontSize: 11),
+                onTap: (index) {
+                  if (index == 2) {
+                    _tabController.index = _tabController.previousIndex;
+                  }
+                },
+                tabs: [
+                  Tab(icon: const Icon(Icons.dashboard_outlined), text: l10n.home),
+                  Tab(icon: const Icon(Icons.people_outline), text: l10n.students),
+                  const Tab(child: SizedBox(width: 48)), // Gap for FAB
+                  Tab(
+                    icon: const Icon(Icons.assignment_turned_in_outlined),
+                    text: l10n.exams,
+                  ),
+                  Tab(
+                    icon: const Icon(Icons.announcement_outlined),
+                    text: l10n.notices,
+                  ),
+                ],
+              ),
+              Positioned(
+                top: -16,
+                child: Theme(
+                  data: Theme.of(context).copyWith(useMaterial3: true),
+                  child: PopupMenuButton<int>(
+                    offset: const Offset(0, -110),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    icon: Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryAdmin,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          )
+                        ],
+                      ),
+                      child: const Icon(Icons.add, color: Colors.white, size: 28),
+                    ),
+                    onSelected: (value) {
+                      if (value == 0) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AddEditStudentScreen(),
+                          ),
+                        );
+                      } else if (value == 1) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AddEditTeacherScreen(),
+                          ),
+                        );
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 0,
+                        child: Row(
+                          children: [
+                            const Icon(Icons.person_add,
+                                color: AppColors.primaryAdmin),
+                            const SizedBox(width: 12),
+                            Text(l10n.addStudent,
+                                style: const TextStyle(fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 1,
+                        child: Row(
+                          children: [
+                            const Icon(Icons.person_add_alt_1,
+                                color: AppColors.primaryAdmin),
+                            const SizedBox(width: 12),
+                            Text(l10n.addTeacher,
+                                style: const TextStyle(fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          body: TabBarView(
+            controller: _tabController,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              _buildDashboardOverview(l10n, authNotifier),
+              _tabsInitialized.contains(1)
+                  ? const StudentManagementScreen(hideAppBar: true)
+                  : const SizedBox.shrink(),
+              const SizedBox.shrink(), // Dummy for FAB gap
+              _tabsInitialized.contains(3)
+                  ? const ExamManagementScreen(hideAppBar: true)
+                  : const SizedBox.shrink(),
+              _tabsInitialized.contains(4)
+                  ? const NoticeManagementScreen(hideAppBar: true)
+                  : const SizedBox.shrink(),
+            ],
+          ),
         ),
       ),
     );
