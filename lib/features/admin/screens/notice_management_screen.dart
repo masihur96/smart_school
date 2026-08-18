@@ -29,11 +29,15 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
     // Fetch real notices from API so every item has a server id
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final user = context.read<AuthNotifier>().user;
-      if (user?.schoolId != null) {
+      if (user?.schoolId != null && context.read<NoticesNotifier>().notices.isEmpty && !context.read<NoticesNotifier>().isLoading) {
         context.read<NoticesNotifier>().fetchNoticesFromAPI();
       }
-      context.read<TeachersNotifier>().fetchTeachers();
-      context.read<StudentsNotifier>().fetchStudents();
+      if (context.read<TeachersNotifier>().teachers.isEmpty) {
+        context.read<TeachersNotifier>().fetchTeachers();
+      }
+      if (context.read<StudentsNotifier>().students.isEmpty && !context.read<StudentsNotifier>().isLoading) {
+        context.read<StudentsNotifier>().fetchStudents();
+      }
     });
   }
 
