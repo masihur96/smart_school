@@ -331,60 +331,6 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            // ── Header card ─────────────────────────────────────────────────
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF1A3C6E), Color(0xFF2563EB)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.18),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.picture_as_pdf_rounded,
-                      color: Colors.white,
-                      size: 26,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _isEdit ? 'Update Book Details' : 'Upload New Book',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Fill in the details below and attach a PDF',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.75),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
             // ── Title ────────────────────────────────────────────────────────
             _SectionLabel(label: 'Book Title *', icon: Icons.title_rounded),
             const SizedBox(height: 8),
@@ -527,36 +473,32 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
             const SizedBox(height: 18),
 
             // ── Active toggle ────────────────────────────────────────────────
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text(
-                  'Active',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF374151),
-                  ),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
                 ),
-                subtitle: Text(
-                  _isActive ? 'Book is visible to students' : 'Book is hidden',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                child: SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text(
+                    'Active',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF374151),
+                    ),
+                  ),
+                  subtitle: Text(
+                    _isActive
+                        ? 'Book is visible to students'
+                        : 'Book is hidden',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  ),
+                  value: _isActive,
+                  activeColor: const Color(0xFF10B981),
+                  onChanged: (v) => setState(() => _isActive = v),
                 ),
-                value: _isActive,
-                activeColor: const Color(0xFF10B981),
-                onChanged: (v) => setState(() => _isActive = v),
               ),
             ),
             const SizedBox(height: 24),
@@ -570,7 +512,6 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color:
@@ -731,7 +672,6 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -760,7 +700,6 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
             vertical: 14,
           ),
           filled: true,
-          fillColor: Colors.white,
         ),
       ),
     );
@@ -772,34 +711,18 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
     required List<DropdownMenuItem<T>> items,
     required void Function(T?)? onChanged,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<T>(
-          value: value,
-          hint: Text(
-            hint,
-            style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-          ),
-          isExpanded: true,
-          borderRadius: BorderRadius.circular(14),
-          items: items,
-          onChanged: onChanged,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF111827),
-            fontWeight: FontWeight.w500,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<T>(
+            value: value,
+            hint: Text(hint, style: TextStyle(fontSize: 14)),
+            isExpanded: true,
+            borderRadius: BorderRadius.circular(14),
+            items: items,
+            onChanged: onChanged,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           ),
         ),
       ),
@@ -835,7 +758,6 @@ class _CoverImagePicker extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         height: 140,
         decoration: BoxDecoration(
-          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isUploading
