@@ -98,7 +98,8 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
     if (lower.contains('cheque') || lower.contains('check')) return 'Cheque';
 
     for (final pm in _paymentMethods) {
-      if (pm.toLowerCase() == lower || pm.toLowerCase() == clean.toLowerCase()) {
+      if (pm.toLowerCase() == lower ||
+          pm.toLowerCase() == clean.toLowerCase()) {
         return pm;
       }
     }
@@ -212,10 +213,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
             children: [
               const Text(
                 'Select Attachment Source',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               ListTile(
@@ -278,7 +276,9 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
         type: FileType.custom,
         allowedExtensions: ['pdf', 'png', 'jpg', 'jpeg', 'doc', 'docx'],
       );
-      if (result != null && result.files.isNotEmpty && result.files.single.path != null) {
+      if (result != null &&
+          result.files.isNotEmpty &&
+          result.files.single.path != null) {
         final file = File(result.files.single.path!);
         final name = result.files.single.name;
         await _uploadPickedFile(file, name);
@@ -293,10 +293,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
     try {
       final token = await StorageService.getToken();
       final formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(
-          file.path,
-          filename: fileName,
-        ),
+        'file': await MultipartFile.fromFile(file.path, filename: fileName),
       });
 
       final uploadResponse = await DataProvider().performRequest(
@@ -440,8 +437,8 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                   isEditing
                       ? 'Transaction updated successfully!'
                       : (isIncome
-                          ? 'Amount added to school wallet successfully!'
-                          : 'Expense recorded successfully!'),
+                            ? 'Amount added to school wallet successfully!'
+                            : 'Expense recorded successfully!'),
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
@@ -471,8 +468,8 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                       (isEditing
                           ? 'Failed to update transaction'
                           : (isIncome
-                              ? 'Failed to add money to wallet'
-                              : 'Failed to record expense')),
+                                ? 'Failed to add money to wallet'
+                                : 'Failed to record expense')),
                 ),
               ),
             ],
@@ -522,7 +519,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                     ? 'Add Money / Fee Collection'
                     : 'Add School Expense'),
         ),
-        backgroundColor: themeColor,
+        backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -553,7 +550,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
                             color: isIncome
-                                ? const Color(0xFF10B981)
+                                ? AppColors.primaryAdmin
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: isIncome
@@ -806,7 +803,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.calendar_month_rounded, color: themeColor),
+                      Icon(Icons.calendar_month_rounded),
                       const SizedBox(width: 12),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -870,11 +867,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(
-                              Icons.attach_file_rounded,
-                              size: 18,
-                              color: themeColor,
-                            ),
+                            Icon(Icons.attach_file_rounded, size: 18),
                             const SizedBox(width: 6),
                             const Text(
                               'Receipt / Document Attachment (Optional)',
@@ -955,8 +948,9 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed:
-                                _isUploadingFile ? null : _pickAttachment,
+                            onPressed: _isUploadingFile
+                                ? null
+                                : _pickAttachment,
                             icon: const Icon(
                               Icons.upload_file_rounded,
                               size: 16,
@@ -968,16 +962,12 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                               style: const TextStyle(fontSize: 12),
                             ),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: themeColor,
-                              side: BorderSide(
-                                color: themeColor.withOpacity(0.5),
-                              ),
+                              foregroundColor: AppColors.primaryAdmin,
+                              side: BorderSide(color: AppColors.primaryAdmin),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 10,
-                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 10),
                             ),
                           ),
                         ),
@@ -993,7 +983,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _saveTransaction,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: themeColor,
+                  backgroundColor: AppColors.primaryAdmin,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
