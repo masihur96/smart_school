@@ -112,32 +112,47 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
 
           // Exam List
           Expanded(
-            child: examsNotifier.isLoading
-                ? _ExamShimmer(
-                    isDark: Theme.of(context).brightness == Brightness.dark,
-                  )
+            child: RefreshIndicator(
+              onRefresh: () async {
+                await context.read<ExamsNotifier>().fetchExams();
+                context.read<TeachersNotifier>().fetchTeachers();
+                context.read<StudentsNotifier>().fetchStudents();
+              },
+              child: examsNotifier.isLoading && exams.isEmpty
+                  ? _ExamShimmer(
+                      isDark: Theme.of(context).brightness == Brightness.dark,
+                    )
                 : exams.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.assignment_outlined,
-                          size: 64,
-                          color: Colors.grey.shade300,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          AppLocalizations.of(context)!.noExamsFound,
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 16,
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.5,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.assignment_outlined,
+                                size: 64,
+                                color: Colors.grey.shade300,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                AppLocalizations.of(context)!.noExamsFound,
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   )
                 : ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.all(16),
                     itemCount: exams.length,
                     itemBuilder: (context, index) {
@@ -387,6 +402,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                       );
                     },
                   ),
+            ),
           ),
         ],
       ),

@@ -20,6 +20,10 @@ class ExamsNotifier extends ChangeNotifier {
     _load();
   }
 
+  Future<void> fetchExams() async {
+    await _load();
+  }
+
   Future<void> _load() async {
     _isLoading = true;
     notifyListeners();

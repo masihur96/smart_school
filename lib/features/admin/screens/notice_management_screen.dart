@@ -81,25 +81,43 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                   ),
               ],
             ),
-      body: noticesNotifier.isLoading
-          ? _NoticeShimmer(
-              isDark: Theme.of(context).brightness == Brightness.dark,
-            )
+      body: RefreshIndicator(
+        onRefresh: () async {
+          final user = context.read<AuthNotifier>().user;
+          if (user?.schoolId != null) {
+            await context.read<NoticesNotifier>().fetchNoticesFromAPI();
+          }
+          context.read<TeachersNotifier>().fetchTeachers();
+          context.read<StudentsNotifier>().fetchStudents();
+        },
+        child: noticesNotifier.isLoading && notices.isEmpty
+            ? _NoticeShimmer(
+                isDark: Theme.of(context).brightness == Brightness.dark,
+              )
           : notices.isEmpty
-          ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.notifications_none, size: 64, color: Colors.grey),
-                  SizedBox(height: 12),
-                  Text(
-                    'No notices posted yet.',
-                    style: TextStyle(color: Colors.grey, fontSize: 16),
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  child: const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.notifications_none, size: 64, color: Colors.grey),
+                        SizedBox(height: 12),
+                        Text(
+                          'No notices posted yet.',
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             )
           : ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(vertical: 12),
               itemCount: notices.length,
               itemBuilder: (context, index) {
@@ -113,6 +131,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                 );
               },
             ),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _addNoticeDialog(context),
         backgroundColor: Colors.purple,
