@@ -25,6 +25,7 @@ import 'student_notice_screen.dart';
 import 'student_result_screen.dart';
 import 'student_routine_screen.dart';
 import '../../notifications/providers/notification_provider.dart';
+import '../../academic_books/screens/academic_books_dashboard_screen.dart';
 
 class StudentDashboardScreen extends StatefulWidget {
   const StudentDashboardScreen({super.key});
@@ -1155,7 +1156,12 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
           l10n.material,
           Icons.library_books_rounded,
           Colors.blue,
-          onTap: () {},
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const AcademicBooksDashboardScreen(),
+            ),
+          ),
         ),
         _buildActionGridItem(
           context,

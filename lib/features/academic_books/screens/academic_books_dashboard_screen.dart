@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/models/user_model.dart';
 
 import '../../admin/providers/setup_provider.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -83,6 +84,21 @@ class _AcademicBooksDashboardScreenState
     return 'Class ($classId)';
   }
 
+  // ── Role theme color resolver ─────────────────────────────────────────────
+
+  Color _getHeaderColor(UserRole? role) {
+    switch (role) {
+      case UserRole.teacher:
+        return AppColors.primaryTeacher;
+      case UserRole.student:
+        return AppColors.primaryStudent;
+      case UserRole.superadmin:
+        return Colors.deepPurple;
+      default:
+        return AppColors.primaryAdmin;
+    }
+  }
+
   // ── Filters ────────────────────────────────────────────────────────────────
 
   List<AcademicBook> _filteredBooks(List<AcademicBook> all) {
@@ -108,8 +124,9 @@ class _AcademicBooksDashboardScreenState
   // ── Admin check ────────────────────────────────────────────────────────────
 
   bool _isAdmin(BuildContext context) {
-    final role = context.read<AuthNotifier>().user?.role ?? '';
-    return role == 'admin' || role == 'super_admin';
+    final user = context.read<AuthNotifier>().user;
+    return user != null &&
+        (user.role == UserRole.admin || user.role == UserRole.superadmin);
   }
 
   // ── Delete confirmation ────────────────────────────────────────────────────
@@ -276,12 +293,17 @@ class _AcademicBooksDashboardScreenState
 
   @override
   Widget build(BuildContext context) {
+    final authNotifier = context.watch<AuthNotifier>();
+    final user = authNotifier.user;
+    final isAdmin = user != null &&
+        (user.role == UserRole.admin || user.role == UserRole.superadmin);
+
     final bookNotifier = context.watch<AcademicBookNotifier>();
     final classNotifier = context.watch<ClassSetupNotifier>();
-    final admin = true;
 
     final allBooks = bookNotifier.books;
     final filtered = _filteredBooks(allBooks);
+    final headerColor = _getHeaderColor(user?.role);
 
     // ── Build Class Options from Response & ClassNotifier ────────────────
     final Set<String> seenClassIds = {};
@@ -360,7 +382,7 @@ class _AcademicBooksDashboardScreenState
             floating: false,
             pinned: true,
             elevation: 0,
-            backgroundColor: AppColors.primaryAdmin,
+            backgroundColor: headerColor,
             leading: IconButton(
               icon: const Icon(
                 Icons.arrow_back_ios_new_rounded,
@@ -380,6 +402,7 @@ class _AcademicBooksDashboardScreenState
             flexibleSpace: FlexibleSpaceBar(
               collapseMode: CollapseMode.parallax,
               background: _buildHeroBanner(
+                headerColor: headerColor,
                 totalBooks: allBooks.length,
                 totalClasses: classOptions.length > 1
                     ? classOptions.length - 1
@@ -517,7 +540,7 @@ class _AcademicBooksDashboardScreenState
               ),
             ),
 
-            // ── Book list / grid ────────────────────────────────────────────
+            // ── Book list / grid ────────────────────────────────────
             Expanded(
               child: bookNotifier.isLoading
                   ? const Center(
@@ -531,10 +554,15 @@ class _AcademicBooksDashboardScreenState
                   : filtered.isEmpty
                   ? _buildEmptyState()
                   : _isGrid
-                  ? _buildGrid(filtered, admin, allBooks, classNotifier.classes)
+                  ? _buildGrid(
+                      filtered,
+                      isAdmin,
+                      allBooks,
+                      classNotifier.classes,
+                    )
                   : _buildList(
                       filtered,
-                      admin,
+                      isAdmin,
                       allBooks,
                       classNotifier.classes,
                     ),
@@ -544,7 +572,7 @@ class _AcademicBooksDashboardScreenState
       ),
 
       // ── FAB ────────────────────────────────────────────────────────────────
-      floatingActionButton: admin
+      floatingActionButton: isAdmin
           ? FloatingActionButton.extended(
               onPressed: () => _openAddEdit(context),
               backgroundColor: const Color(0xFF1A3C6E),
@@ -563,12 +591,13 @@ class _AcademicBooksDashboardScreenState
   // ── Hero banner ────────────────────────────────────────────────────────────
 
   Widget _buildHeroBanner({
+    required Color headerColor,
     required int totalBooks,
     required int totalClasses,
     required int totalSubjects,
   }) {
     return Container(
-      decoration: const BoxDecoration(color: AppColors.primaryAdmin),
+      decoration: BoxDecoration(color: headerColor),
       child: Stack(
         children: [
           Positioned(

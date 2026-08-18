@@ -274,6 +274,14 @@ class AppDrawer extends StatelessWidget {
           MaterialPageRoute(builder: (_) => const LibraryDashboardScreen(comeFrom: "teacher")),
         );
       }, context),
+      _buildDrawerItem(Icons.menu_book_rounded, "Academic Books", () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const AcademicBooksDashboardScreen(),
+          ),
+        );
+      }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
         Navigator.push(
           context,
@@ -334,6 +342,14 @@ class AppDrawer extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const LibraryDashboardScreen(comeFrom: "student")),
+        );
+      }, context),
+      _buildDrawerItem(Icons.menu_book_rounded, "Academic Books", () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const AcademicBooksDashboardScreen(),
+          ),
         );
       }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {

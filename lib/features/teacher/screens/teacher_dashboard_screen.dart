@@ -28,6 +28,7 @@ import 'mark_entry_screen.dart';
 import 'teacher_attendance_screen.dart';
 import 'teacher_exam_screen.dart';
 import 'teacher_routine_screen.dart';
+import '../../academic_books/screens/academic_books_dashboard_screen.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
   const TeacherDashboardScreen({super.key});
@@ -1767,6 +1768,18 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           Icons.bar_chart,
           Colors.purple,
           onTap: () {}, // Future: Add reports screen
+        ),
+        _buildActionGridItem(
+          context,
+          'Academic Books',
+          Icons.menu_book_rounded,
+          const Color(0xFF2563EB),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const AcademicBooksDashboardScreen(),
+            ),
+          ),
         ),
       ],
     );
