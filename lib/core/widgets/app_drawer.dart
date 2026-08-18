@@ -193,7 +193,9 @@ class AppDrawer extends StatelessWidget {
       _buildDrawerItem(Icons.local_library, 'Library', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const LibraryDashboardScreen(comeFrom: "admin",)),
+          MaterialPageRoute(
+            builder: (_) => const LibraryDashboardScreen(comeFrom: "admin"),
+          ),
         );
       }, context),
       _buildDrawerItem(Icons.sms_outlined, "Bulk SMS", () {
@@ -211,7 +213,9 @@ class AppDrawer extends StatelessWidget {
       _buildDrawerItem(Icons.menu_book_rounded, "Academic Books", () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => AcademicBooksDashboardScreen()),
+          MaterialPageRoute(
+            builder: (_) => AcademicBooksDashboardScreen(comeFrom: "admin"),
+          ),
         );
       }, context),
       _buildDrawerItem(Icons.settings, l10n.settings, () {
@@ -271,14 +275,17 @@ class AppDrawer extends StatelessWidget {
       _buildDrawerItem(Icons.local_library, 'Library', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const LibraryDashboardScreen(comeFrom: "teacher")),
+          MaterialPageRoute(
+            builder: (_) => const LibraryDashboardScreen(comeFrom: "teacher"),
+          ),
         );
       }, context),
       _buildDrawerItem(Icons.menu_book_rounded, "Academic Books", () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => const AcademicBooksDashboardScreen(),
+            builder: (_) =>
+                const AcademicBooksDashboardScreen(comeFrom: "teacher"),
           ),
         );
       }, context),
@@ -341,14 +348,17 @@ class AppDrawer extends StatelessWidget {
       _buildDrawerItem(Icons.local_library, 'Library', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const LibraryDashboardScreen(comeFrom: "student")),
+          MaterialPageRoute(
+            builder: (_) => const LibraryDashboardScreen(comeFrom: "student"),
+          ),
         );
       }, context),
       _buildDrawerItem(Icons.menu_book_rounded, "Academic Books", () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => const AcademicBooksDashboardScreen(),
+            builder: (_) =>
+                const AcademicBooksDashboardScreen(comeFrom: "student"),
           ),
         );
       }, context),

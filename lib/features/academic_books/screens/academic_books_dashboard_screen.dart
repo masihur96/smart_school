@@ -12,7 +12,8 @@ import 'add_edit_academic_book_screen.dart';
 import 'pdf_viewer_screen.dart';
 
 class AcademicBooksDashboardScreen extends StatefulWidget {
-  const AcademicBooksDashboardScreen({super.key});
+  final String comeFrom;
+  const AcademicBooksDashboardScreen({super.key, required this.comeFrom});
 
   @override
   State<AcademicBooksDashboardScreen> createState() =>
@@ -251,7 +252,7 @@ class _AcademicBooksDashboardScreenState
         builder: (_) => PdfViewerScreen(
           pdfUrl: book.pdfUrl,
           title: book.title,
-          comeFrom: "",
+          comeFrom: widget.comeFrom,
         ),
       ),
     );
@@ -295,7 +296,8 @@ class _AcademicBooksDashboardScreenState
   Widget build(BuildContext context) {
     final authNotifier = context.watch<AuthNotifier>();
     final user = authNotifier.user;
-    final isAdmin = user != null &&
+    final isAdmin =
+        user != null &&
         (user.role == UserRole.admin || user.role == UserRole.superadmin);
 
     final bookNotifier = context.watch<AcademicBookNotifier>();

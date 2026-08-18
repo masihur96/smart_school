@@ -19,6 +19,7 @@ import 'package:smart_school/models/user_model.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/marquee_notice.dart';
 import '../../../core/widgets/notification_icon_button.dart';
+import '../../academic_books/screens/academic_books_dashboard_screen.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../notifications/providers/notification_provider.dart';
 import '../data/models/teacher_dashboard_model.dart';
@@ -28,7 +29,6 @@ import 'mark_entry_screen.dart';
 import 'teacher_attendance_screen.dart';
 import 'teacher_exam_screen.dart';
 import 'teacher_routine_screen.dart';
-import '../../academic_books/screens/academic_books_dashboard_screen.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
   const TeacherDashboardScreen({super.key});
@@ -48,7 +48,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       final user = context.read<AuthNotifier>().user;
       final now = DateTime.now();
       final dayName = DateFormat('EEEE').format(now);
-      
+
       final provider = context.read<TeacherDashboardProvider>();
       if (provider.dashboardData == null) {
         provider.fetchTeacherDashboard();
@@ -167,9 +167,15 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             user == null
                 ? SizedBox()
                 : _buildDashboardOverview(context, user.name, user, l10n),
-            _visitedTabs[1] ? const TeacherAttendanceScreen(hideAppBar: true) : const SizedBox(),
-            _visitedTabs[2] ? const MarkEntryScreen(hideAppBar: true) : const SizedBox(),
-            _visitedTabs[3] ? const HomeworkManagementScreen(hideAppBar: true) : const SizedBox(),
+            _visitedTabs[1]
+                ? const TeacherAttendanceScreen(hideAppBar: true)
+                : const SizedBox(),
+            _visitedTabs[2]
+                ? const MarkEntryScreen(hideAppBar: true)
+                : const SizedBox(),
+            _visitedTabs[3]
+                ? const HomeworkManagementScreen(hideAppBar: true)
+                : const SizedBox(),
           ],
         ),
         bottomNavigationBar: Container(
@@ -1777,7 +1783,8 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => const AcademicBooksDashboardScreen(),
+              builder: (_) =>
+                  const AcademicBooksDashboardScreen(comeFrom: "teacher"),
             ),
           ),
         ),
