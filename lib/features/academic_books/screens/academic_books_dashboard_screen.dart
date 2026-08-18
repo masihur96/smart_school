@@ -932,7 +932,7 @@ class _FilterDropdown extends StatelessWidget {
               size: 18,
             ),
             borderRadius: BorderRadius.circular(14),
-            dropdownColor: Colors.white,
+            // dropdownColor: Colors.white,
             elevation: 4,
             style: const TextStyle(fontSize: 13),
             items: items.map((opt) {
@@ -960,7 +960,7 @@ class _FilterDropdown extends StatelessWidget {
                               : FontWeight.w500,
                           color: isItemActive
                               ? activeColor
-                              : const Color(0xFF374151),
+                              : const Color(0xFF9CA3AF),
                         ),
                       ),
                     ),
