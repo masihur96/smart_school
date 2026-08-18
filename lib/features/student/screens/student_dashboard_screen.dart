@@ -233,7 +233,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
     final provider = context.watch<StudentDashboardProvider>();
     final data = provider.dashboardData;
 
-    if (provider.isLoading && data == null) {
+    if (provider.isLoading) {
       return _buildShimmerLoading(context, user, l10n);
     }
 
@@ -1255,8 +1255,6 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
             Container(
               width: double.infinity,
               decoration: const BoxDecoration(
-                color: Colors
-                    .black, // Just to give the shimmer base a background shape
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(32),
                   bottomRight: Radius.circular(32),
@@ -1294,7 +1292,7 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                   const SizedBox(height: 16),
 
                   // Attendance Section Mock
-                  Card(
+                  Container(
                     margin: const EdgeInsets.all(0.0),
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
@@ -1417,7 +1415,8 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                         width: screenSize(context, .85),
                         margin: const EdgeInsets.only(right: 16, bottom: 8),
                         decoration: BoxDecoration(
-                          color: blockColor,
+                          // color: blockColor,
+                          border: BoxBorder.all(width: 1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Padding(
