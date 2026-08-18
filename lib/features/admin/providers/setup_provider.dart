@@ -39,7 +39,7 @@ class ClassSetupNotifier extends ChangeNotifier {
         final List<dynamic> data = response.data is List
             ? response.data
             : (response.data['data'] ?? response.data['classes'] ?? []);
-        log("Class Data $data");
+
         _dbService.classes.clear();
         for (var item in data) {
           final cls = ClassRoom.fromJson(item);
