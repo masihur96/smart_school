@@ -64,9 +64,7 @@ class _BookListScreenState extends State<BookListScreen> {
                 _buildCategoryChipsShimmer(),
                 _buildResultsHeaderShimmer(),
                 Expanded(
-                  child: _gridView
-                      ? _buildGridShimmer()
-                      : _buildListShimmer(),
+                  child: _gridView ? _buildGridShimmer() : _buildListShimmer(),
                 ),
               ],
             ),
@@ -103,18 +101,17 @@ class _BookListScreenState extends State<BookListScreen> {
   // ─── Shimmer Helpers ──────────────────────────────────────────────────────
 
   static Widget _shimBox(double w, double h, {double r = 8}) => Container(
-        width: w,
-        height: h,
-        decoration: BoxDecoration(
-          color: const Color(0xFFDEDEDE),
-          borderRadius: BorderRadius.circular(r),
-        ),
-      );
+    width: w,
+    height: h,
+    decoration: BoxDecoration(
+      color: const Color(0xFFDEDEDE),
+      borderRadius: BorderRadius.circular(r),
+    ),
+  );
 
   /// Skeleton for the category chip row
   Widget _buildCategoryChipsShimmer() {
     return Container(
-
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Shimmer.fromColors(
         baseColor: const Color(0xFFE8E8E8),
@@ -136,7 +133,6 @@ class _BookListScreenState extends State<BookListScreen> {
   /// Skeleton for the results header row
   Widget _buildResultsHeaderShimmer() {
     return Container(
-
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
       child: Shimmer.fromColors(
         baseColor: const Color(0xFFE8E8E8),
@@ -184,10 +180,7 @@ class _BookListScreenState extends State<BookListScreen> {
           // Cover image placeholder
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: Container(
-              height: 155,
-              color: const Color(0xFFDEDEDE),
-            ),
+            child: Container(height: 155, color: const Color(0xFFDEDEDE)),
           ),
           Padding(
             padding: const EdgeInsets.all(10),
@@ -279,7 +272,11 @@ class _BookListScreenState extends State<BookListScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cloud_off_rounded, size: 64, color: Colors.grey.shade300),
+            Icon(
+              Icons.cloud_off_rounded,
+              size: 64,
+              color: Colors.grey.shade300,
+            ),
             const SizedBox(height: 12),
             Text(
               notifier.error ?? 'Something went wrong',
@@ -304,14 +301,12 @@ class _BookListScreenState extends State<BookListScreen> {
 
   Widget _buildSearchAndFilter(LibraryBookNotifier notifier) {
     return Container(
-      color: Colors.white,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
       child: Row(
         children: [
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFFF4F6FB),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: const Color(0xFFE5E7EB)),
               ),
@@ -364,7 +359,7 @@ class _BookListScreenState extends State<BookListScreen> {
 
   Widget _buildCategoryChips(List<String> categories) {
     return Container(
-      color: Colors.white,
+      // color: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: SizedBox(
         height: 34,
@@ -413,7 +408,7 @@ class _BookListScreenState extends State<BookListScreen> {
 
   Widget _buildResultsHeader(int count) {
     return Container(
-      color: const Color(0xFFF4F6FB),
+      // color: const Color(0xFFF4F6FB),
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
       child: Row(
         children: [
@@ -473,7 +468,10 @@ class _BookListScreenState extends State<BookListScreen> {
           book: book,
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => BookDetailScreen(book: book,comeFrom: widget.comeFrom)),
+            MaterialPageRoute(
+              builder: (_) =>
+                  BookDetailScreen(book: book, comeFrom: widget.comeFrom),
+            ),
           ),
         );
       },
@@ -491,7 +489,10 @@ class _BookListScreenState extends State<BookListScreen> {
           book: book,
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => BookDetailScreen(book: book, comeFrom: widget.comeFrom)),
+            MaterialPageRoute(
+              builder: (_) =>
+                  BookDetailScreen(book: book, comeFrom: widget.comeFrom),
+            ),
           ),
         );
       },
@@ -595,18 +596,18 @@ class _BookListTile extends StatelessWidget {
                         height: 88,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => _placeholderCover(),
-                        loadingBuilder: (_, child, progress) =>
-                            progress == null
-                                ? child
-                                : Container(
-                                    width: 62,
-                                    height: 88,
-                                    color: const Color(0xFFF3F4F6),
-                                    child: const Center(
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 2),
-                                    ),
+                        loadingBuilder: (_, child, progress) => progress == null
+                            ? child
+                            : Container(
+                                width: 62,
+                                height: 88,
+                                color: const Color(0xFFF3F4F6),
+                                child: const Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
                                   ),
+                                ),
+                              ),
                       )
                     : _placeholderCover(),
               ),
@@ -660,11 +661,7 @@ class _BookListTile extends StatelessWidget {
       width: 62,
       height: 88,
       color: const Color(0xFFE5E7EB),
-      child: const Icon(
-        Icons.book_rounded,
-        color: Color(0xFF9CA3AF),
-        size: 28,
-      ),
+      child: const Icon(Icons.book_rounded, color: Color(0xFF9CA3AF), size: 28),
     );
   }
 }

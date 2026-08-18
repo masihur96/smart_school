@@ -57,7 +57,8 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
   Widget build(BuildContext context) {
     final notifier = context.watch<LibraryBookNotifier>();
     final user = context.watch<AuthNotifier>().user;
-    final isAdmin = user?.role == UserRole.admin || user?.role == UserRole.superadmin;
+    final isAdmin =
+        user?.role == UserRole.admin || user?.role == UserRole.superadmin;
 
     final totalBooks = notifier.books.length;
     final availableBooks = notifier.books.where((b) => b.isAvailable).length;
@@ -71,16 +72,24 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AddEditBookScreen(isAdminOrTeacher: true),
+                    builder: (context) =>
+                        AddEditBookScreen(isAdminOrTeacher: true),
                   ),
                 );
                 if (result == true) {}
               },
-              backgroundColor:widget.comeFrom == 'admin' ? AppColors.primaryAdmin : widget.comeFrom == 'teacher' ? AppColors.primaryTeacher : AppColors.primaryStudent,
+              backgroundColor: widget.comeFrom == 'admin'
+                  ? AppColors.primaryAdmin
+                  : widget.comeFrom == 'teacher'
+                  ? AppColors.primaryTeacher
+                  : AppColors.primaryStudent,
               icon: const Icon(Icons.add, color: Colors.white),
               label: const Text(
                 'New Book',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             )
           : null,
@@ -91,7 +100,11 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
             floating: false,
             pinned: true,
             elevation: 0,
-            backgroundColor:widget.comeFrom == 'admin' ? AppColors.primaryAdmin : widget.comeFrom == 'teacher' ? AppColors.primaryTeacher : AppColors.primaryStudent,
+            backgroundColor: widget.comeFrom == 'admin'
+                ? AppColors.primaryAdmin
+                : widget.comeFrom == 'teacher'
+                ? AppColors.primaryTeacher
+                : AppColors.primaryStudent,
 
             leading: IconButton(
               icon: const Icon(
@@ -113,20 +126,16 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
               preferredSize: const Size.fromHeight(52),
               child: Container(
                 decoration: const BoxDecoration(
-                  color: Colors.white,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
                 child: TabBar(
                   controller: _tabController,
-                  indicator: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: const Color(0xFF1A3C6E),
-                  ),
+
                   indicatorSize: TabBarIndicatorSize.tab,
                   indicatorPadding: const EdgeInsets.all(6),
                   dividerColor: Colors.transparent,
                   labelColor: Colors.white,
-                  unselectedLabelColor: const Color(0xFF6B7280),
+                  unselectedLabelColor: AppColors.lightGrey,
                   labelStyle: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
@@ -142,7 +151,10 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
         ],
         body: TabBarView(
           controller: _tabController,
-          children:  [BookListScreen(comeFrom: widget.comeFrom), IssuedBooksScreen(comeFrom: widget.comeFrom)],
+          children: [
+            BookListScreen(comeFrom: widget.comeFrom),
+            IssuedBooksScreen(comeFrom: widget.comeFrom),
+          ],
         ),
       ),
     );
