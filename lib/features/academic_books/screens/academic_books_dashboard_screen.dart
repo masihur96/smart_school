@@ -27,7 +27,7 @@ class _AcademicBooksDashboardScreenState
 
   String _searchQuery = '';
   String _selectedClassId = 'all';
-  String _selectedSubjectId = 'all';
+  String _selectedSubject = 'all';
   bool _isGrid = true;
 
   @override
@@ -45,12 +45,16 @@ class _AcademicBooksDashboardScreenState
         );
     _heroAnimCtrl.forward();
 
-    // Fetch books on init
+    // Fetch books and classes on init
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final auth = context.read<AuthNotifier>();
+      final schoolId = auth.user?.schoolId ?? '';
       context.read<AcademicBookNotifier>().fetchBooks(
-        schoolId: auth.user?.schoolId ?? '',
+        schoolId: schoolId,
       );
+      if (schoolId.isNotEmpty) {
+        context.read<ClassSetupNotifier>().fetchClasses(schoolId);
+      }
     });
   }
 
@@ -60,17 +64,43 @@ class _AcademicBooksDashboardScreenState
     super.dispose();
   }
 
+  // ── Class name resolver ───────────────────────────────────────────────────
+
+  String _resolveClassName(
+    String classId,
+    List<dynamic> classes,
+    List<AcademicBook> allBooks,
+  ) {
+    if (classId == 'all') return 'All Classes';
+    for (final c in classes) {
+      if (c.id == classId && (c.name as String).isNotEmpty) {
+        return c.name;
+      }
+    }
+    for (final b in allBooks) {
+      if (b.classId == classId && b.className.isNotEmpty) {
+        return b.className;
+      }
+    }
+    return 'Class ($classId)';
+  }
+
   // ── Filters ────────────────────────────────────────────────────────────────
 
   List<AcademicBook> _filteredBooks(List<AcademicBook> all) {
     return all.where((b) {
-      final matchesSearch =
-          b.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          b.subjectName.toLowerCase().contains(_searchQuery.toLowerCase());
+      final subjectStr = b.subject.isNotEmpty ? b.subject : b.subjectName;
+      final q = _searchQuery.trim().toLowerCase();
+      final matchesSearch = q.isEmpty ||
+          b.title.toLowerCase().contains(q) ||
+          subjectStr.toLowerCase().contains(q) ||
+          b.author.toLowerCase().contains(q) ||
+          b.description.toLowerCase().contains(q);
       final matchesClass =
           _selectedClassId == 'all' || b.classId == _selectedClassId;
-      final matchesSubject =
-          _selectedSubjectId == 'all' || b.subjectId == _selectedSubjectId;
+      final matchesSubject = _selectedSubject == 'all' ||
+          subjectStr.trim().toLowerCase() ==
+              _selectedSubject.trim().toLowerCase();
       return matchesSearch && matchesClass && matchesSubject;
     }).toList();
   }
@@ -230,9 +260,13 @@ class _AcademicBooksDashboardScreenState
     if (result == true && context.mounted) {
       // Refresh
       final auth = context.read<AuthNotifier>();
+      final schoolId = auth.user?.schoolId ?? '';
       context.read<AcademicBookNotifier>().fetchBooks(
-        schoolId: auth.user?.schoolId ?? '',
+        schoolId: schoolId,
       );
+      if (schoolId.isNotEmpty) {
+        context.read<ClassSetupNotifier>().fetchClasses(schoolId);
+      }
     }
   }
 
@@ -242,18 +276,78 @@ class _AcademicBooksDashboardScreenState
   Widget build(BuildContext context) {
     final bookNotifier = context.watch<AcademicBookNotifier>();
     final classNotifier = context.watch<ClassSetupNotifier>();
-    final subjectNotifier = context.watch<SubjectSetupNotifier>();
     final admin = true;
 
     final allBooks = bookNotifier.books;
     final filtered = _filteredBooks(allBooks);
 
-    // Unique subjects from current class filter
-    final subjects = _selectedClassId == 'all'
-        ? subjectNotifier.subjects.where((s) => !s.isDeleted).toList()
-        : subjectNotifier.subjects
-              .where((s) => !s.isDeleted && s.classId == _selectedClassId)
-              .toList();
+    // ── Build Class Options from Response & ClassNotifier ────────────────
+    final Set<String> seenClassIds = {};
+    final List<_DropdownOption> classOptions = [
+      const _DropdownOption(id: 'all', name: 'All Classes'),
+    ];
+
+    // 1. Classes extracted from the API response
+    for (final book in allBooks) {
+      if (book.classId.isNotEmpty && !seenClassIds.contains(book.classId)) {
+        seenClassIds.add(book.classId);
+        classOptions.add(
+          _DropdownOption(
+            id: book.classId,
+            name: _resolveClassName(
+              book.classId,
+              classNotifier.classes,
+              allBooks,
+            ),
+          ),
+        );
+      }
+    }
+
+    // 2. Any additional school classes from classNotifier not yet in response
+    for (final c in classNotifier.classes.where((c) => !c.isDeleted)) {
+      if (!seenClassIds.contains(c.id)) {
+        seenClassIds.add(c.id);
+        classOptions.add(_DropdownOption(id: c.id, name: c.name));
+      }
+    }
+
+    // ── Build Subject Options from Response (Filtered by selected class) ──
+    final booksForSelectedClass = _selectedClassId == 'all'
+        ? allBooks
+        : allBooks.where((b) => b.classId == _selectedClassId).toList();
+
+    final Set<String> uniqueSubjects = {};
+    for (final b in booksForSelectedClass) {
+      final s = b.subject.isNotEmpty ? b.subject.trim() : b.subjectName.trim();
+      if (s.isNotEmpty) {
+        uniqueSubjects.add(s);
+      }
+    }
+
+    final List<String> sortedSubjects = uniqueSubjects.toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+
+    final List<_DropdownOption> subjectOptions = [
+      const _DropdownOption(id: 'all', name: 'All Subjects'),
+      ...sortedSubjects.map((s) => _DropdownOption(id: s, name: s)),
+    ];
+
+    // Ensure currently selected values are safe
+    final effectiveClassId = classOptions.any((o) => o.id == _selectedClassId)
+        ? _selectedClassId
+        : 'all';
+    final effectiveSubject =
+        subjectOptions.any((o) => o.id == _selectedSubject)
+            ? _selectedSubject
+            : 'all';
+
+    // Unique subjects count for hero banner
+    final totalSubjectsCount = allBooks
+        .map((b) => b.subject.isNotEmpty ? b.subject.trim() : b.subjectName.trim())
+        .where((s) => s.isNotEmpty)
+        .toSet()
+        .length;
 
     return Scaffold(
       body: NestedScrollView(
@@ -282,7 +376,13 @@ class _AcademicBooksDashboardScreenState
             ],
             flexibleSpace: FlexibleSpaceBar(
               collapseMode: CollapseMode.parallax,
-              background: _buildHeroBanner(allBooks.length),
+              background: _buildHeroBanner(
+                totalBooks: allBooks.length,
+                totalClasses: classOptions.length > 1
+                    ? classOptions.length - 1
+                    : classNotifier.classes.where((c) => !c.isDeleted).length,
+                totalSubjects: totalSubjectsCount,
+              ),
             ),
           ),
         ],
@@ -332,79 +432,50 @@ class _AcademicBooksDashboardScreenState
               ),
             ),
 
-            // ── Class filter chips ──────────────────────────────────────────
+            // ── Class & Subject Dropdowns ────────────────────────────────────
             Container(
               color: Colors.white,
-              padding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
-              child: SizedBox(
-                height: 36,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  children: [
-                    _FilterChip(
-                      label: 'All Classes',
-                      selected: _selectedClassId == 'all',
-                      onTap: () => setState(() {
-                        _selectedClassId = 'all';
-                        _selectedSubjectId = 'all';
-                      }),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              child: Row(
+                children: [
+                  // ── Class Dropdown ────────────────────────
+                  Expanded(
+                    child: _FilterDropdown(
+                      label: 'Class',
+                      icon: Icons.school_rounded,
+                      activeColor: const Color(0xFF1A3C6E),
+                      value: effectiveClassId,
+                      items: classOptions,
+                      onChanged: (val) {
+                        if (val == null) return;
+                        setState(() {
+                          _selectedClassId = val;
+                          _selectedSubject = 'all';
+                        });
+                      },
                     ),
-                    ...classNotifier.classes
-                        .where((c) => !c.isDeleted)
-                        .map(
-                          (c) => Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: _FilterChip(
-                              label: c.name,
-                              selected: _selectedClassId == c.id,
-                              onTap: () => setState(() {
-                                _selectedClassId = c.id;
-                                _selectedSubjectId = 'all';
-                              }),
-                            ),
-                          ),
-                        ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 10),
+
+                  // ── Subject Dropdown ──────────────────────
+                  Expanded(
+                    child: _FilterDropdown(
+                      label: 'Subject',
+                      icon: Icons.auto_stories_rounded,
+                      activeColor: const Color(0xFF7C3AED),
+                      value: effectiveSubject,
+                      items: subjectOptions,
+                      onChanged: (val) {
+                        if (val == null) return;
+                        setState(() {
+                          _selectedSubject = val;
+                        });
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
-
-            // ── Subject filter chips ────────────────────────────────────────
-            if (subjects.isNotEmpty)
-              Container(
-                color: Colors.white,
-                padding: const EdgeInsets.fromLTRB(0, 8, 0, 12),
-                child: SizedBox(
-                  height: 30,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    children: [
-                      _FilterChip(
-                        label: 'All Subjects',
-                        selected: _selectedSubjectId == 'all',
-                        isSubject: true,
-                        onTap: () => setState(() => _selectedSubjectId = 'all'),
-                      ),
-                      ...subjects.map(
-                        (s) => Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: _FilterChip(
-                            label: s.name,
-                            selected: _selectedSubjectId == s.id,
-                            isSubject: true,
-                            onTap: () =>
-                                setState(() => _selectedSubjectId = s.id),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              const SizedBox(height: 8),
 
             // ── Count header ────────────────────────────────────────────────
             Container(
@@ -420,6 +491,23 @@ class _AcademicBooksDashboardScreenState
                       fontWeight: FontWeight.w500,
                     ),
                   ),
+                  const Spacer(),
+                  if (_selectedClassId != 'all' || _selectedSubject != 'all' || _searchQuery.isNotEmpty)
+                    GestureDetector(
+                      onTap: () => setState(() {
+                        _selectedClassId = 'all';
+                        _selectedSubject = 'all';
+                        _searchQuery = '';
+                      }),
+                      child: const Text(
+                        'Reset Filters',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF2563EB),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -438,8 +526,8 @@ class _AcademicBooksDashboardScreenState
                   : filtered.isEmpty
                   ? _buildEmptyState()
                   : _isGrid
-                  ? _buildGrid(filtered, admin)
-                  : _buildList(filtered, admin),
+                  ? _buildGrid(filtered, admin, allBooks, classNotifier.classes)
+                  : _buildList(filtered, admin, allBooks, classNotifier.classes),
             ),
           ],
         ),
@@ -464,7 +552,11 @@ class _AcademicBooksDashboardScreenState
 
   // ── Hero banner ────────────────────────────────────────────────────────────
 
-  Widget _buildHeroBanner(int totalBooks) {
+  Widget _buildHeroBanner({
+    required int totalBooks,
+    required int totalClasses,
+    required int totalSubjects,
+  }) {
     return Container(
       decoration: const BoxDecoration(color: AppColors.primaryAdmin),
       child: Stack(
@@ -557,24 +649,14 @@ class _AcademicBooksDashboardScreenState
                           _HeroStat(
                             icon: Icons.class_rounded,
                             label: 'Classes',
-                            value: context
-                                .read<ClassSetupNotifier>()
-                                .classes
-                                .where((c) => !c.isDeleted)
-                                .length
-                                .toString(),
+                            value: '$totalClasses',
                             color: const Color(0xFF34D399),
                           ),
                           const SizedBox(width: 12),
                           _HeroStat(
                             icon: Icons.subject_rounded,
                             label: 'Subjects',
-                            value: context
-                                .read<SubjectSetupNotifier>()
-                                .subjects
-                                .where((s) => !s.isDeleted)
-                                .length
-                                .toString(),
+                            value: '$totalSubjects',
                             color: const Color(0xFF60A5FA),
                           ),
                         ],
@@ -592,7 +674,12 @@ class _AcademicBooksDashboardScreenState
 
   // ── Grid ───────────────────────────────────────────────────────────────────
 
-  Widget _buildGrid(List<AcademicBook> books, bool admin) {
+  Widget _buildGrid(
+    List<AcademicBook> books,
+    bool admin,
+    List<AcademicBook> allBooks,
+    List<dynamic> classes,
+  ) {
     return GridView.builder(
       padding: const EdgeInsets.fromLTRB(14, 4, 14, 80),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -603,13 +690,18 @@ class _AcademicBooksDashboardScreenState
       ),
       itemCount: books.length,
       itemBuilder: (context, i) {
-        final book = books[i];
+        final rawBook = books[i];
+        final displayBook = rawBook.className.isEmpty
+            ? rawBook.copyWith(
+                className: _resolveClassName(rawBook.classId, classes, allBooks),
+              )
+            : rawBook;
         return AcademicBookCard(
-          book: book,
+          book: displayBook,
           isAdmin: admin,
-          onRead: () => _openPdf(book),
-          onEdit: () => _openAddEdit(context, book: book),
-          onDelete: () => _confirmDelete(context, book),
+          onRead: () => _openPdf(displayBook),
+          onEdit: () => _openAddEdit(context, book: rawBook),
+          onDelete: () => _confirmDelete(context, rawBook),
         );
       },
     );
@@ -617,19 +709,29 @@ class _AcademicBooksDashboardScreenState
 
   // ── List ───────────────────────────────────────────────────────────────────
 
-  Widget _buildList(List<AcademicBook> books, bool admin) {
+  Widget _buildList(
+    List<AcademicBook> books,
+    bool admin,
+    List<AcademicBook> allBooks,
+    List<dynamic> classes,
+  ) {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(14, 4, 14, 80),
       itemCount: books.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (context, i) {
-        final book = books[i];
+        final rawBook = books[i];
+        final displayBook = rawBook.className.isEmpty
+            ? rawBook.copyWith(
+                className: _resolveClassName(rawBook.classId, classes, allBooks),
+              )
+            : rawBook;
         return AcademicBookListTile(
-          book: book,
+          book: displayBook,
           isAdmin: admin,
-          onRead: () => _openPdf(book),
-          onEdit: () => _openAddEdit(context, book: book),
-          onDelete: () => _confirmDelete(context, book),
+          onRead: () => _openPdf(displayBook),
+          onEdit: () => _openAddEdit(context, book: rawBook),
+          onDelete: () => _confirmDelete(context, rawBook),
         );
       },
     );
@@ -740,49 +842,97 @@ class _HeroStat extends StatelessWidget {
   }
 }
 
-// ── Filter chip ────────────────────────────────────────────────────────────────
+// ── Dropdown Option Model ──────────────────────────────────────────────────────
 
-class _FilterChip extends StatelessWidget {
+class _DropdownOption {
+  final String id;
+  final String name;
+
+  const _DropdownOption({required this.id, required this.name});
+}
+
+// ── Filter Dropdown Widget ─────────────────────────────────────────────────────
+
+class _FilterDropdown extends StatelessWidget {
   final String label;
-  final bool selected;
-  final bool isSubject;
-  final VoidCallback onTap;
+  final IconData icon;
+  final Color activeColor;
+  final String value;
+  final List<_DropdownOption> items;
+  final ValueChanged<String?> onChanged;
 
-  const _FilterChip({
+  const _FilterDropdown({
     required this.label,
-    required this.selected,
-    required this.onTap,
-    this.isSubject = false,
+    required this.icon,
+    required this.activeColor,
+    required this.value,
+    required this.items,
+    required this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    const primary = Color(0xFF1A3C6E);
-    final subjectColor = const Color(0xFF7C3AED);
-    final activeColor = isSubject ? subjectColor : primary;
+    final isFiltered = value != 'all';
 
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: isSubject ? 4 : 6,
+    return Container(
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: isFiltered
+            ? activeColor.withOpacity(0.06)
+            : const Color(0xFFF4F6FB),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isFiltered
+              ? activeColor.withOpacity(0.5)
+              : const Color(0xFFE5E7EB),
+          width: isFiltered ? 1.4 : 1.0,
         ),
-        decoration: BoxDecoration(
-          color: selected ? activeColor : const Color(0xFFF4F6FB),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? activeColor : const Color(0xFFE5E7EB),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: items.any((i) => i.id == value) ? value : items.first.id,
+          isExpanded: true,
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: isFiltered ? activeColor : const Color(0xFF6B7280),
+            size: 18,
           ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? Colors.white : const Color(0xFF6B7280),
-            fontSize: isSubject ? 10 : 12,
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-          ),
+          borderRadius: BorderRadius.circular(14),
+          dropdownColor: Colors.white,
+          elevation: 4,
+          style: const TextStyle(fontSize: 13),
+          items: items.map((opt) {
+            final isItemActive = opt.id == value;
+            return DropdownMenuItem<String>(
+              value: opt.id,
+              child: Row(
+                children: [
+                  Icon(
+                    icon,
+                    size: 15,
+                    color: isItemActive ? activeColor : const Color(0xFF9CA3AF),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      opt.name,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight:
+                            isItemActive ? FontWeight.w700 : FontWeight.w500,
+                        color: isItemActive
+                            ? activeColor
+                            : const Color(0xFF374151),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+          onChanged: onChanged,
         ),
       ),
     );
