@@ -228,6 +228,23 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
           ),
           scrollBehavior: const BottomBarScrollBehavior(hideOnScroll: true),
           showIcon: false,
+          body: TabBarView(
+            controller: _tabController,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              _buildDashboardOverview(l10n, authNotifier),
+              _tabsInitialized.contains(1)
+                  ? const StudentManagementScreen(hideAppBar: true)
+                  : const SizedBox.shrink(),
+              const SizedBox.shrink(), // Dummy for FAB gap
+              _tabsInitialized.contains(3)
+                  ? const ExamManagementScreen(hideAppBar: true)
+                  : const SizedBox.shrink(),
+              _tabsInitialized.contains(4)
+                  ? const NoticeManagementScreen(hideAppBar: true)
+                  : const SizedBox.shrink(),
+            ],
+          ),
           child: Stack(
             clipBehavior: Clip.none,
             alignment: Alignment.center,
@@ -335,23 +352,6 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                   ),
                 ),
               ),
-            ],
-          ),
-          body: TabBarView(
-            controller: _tabController,
-            physics: const NeverScrollableScrollPhysics(),
-            children: [
-              _buildDashboardOverview(l10n, authNotifier),
-              _tabsInitialized.contains(1)
-                  ? const StudentManagementScreen(hideAppBar: true)
-                  : const SizedBox.shrink(),
-              const SizedBox.shrink(), // Dummy for FAB gap
-              _tabsInitialized.contains(3)
-                  ? const ExamManagementScreen(hideAppBar: true)
-                  : const SizedBox.shrink(),
-              _tabsInitialized.contains(4)
-                  ? const NoticeManagementScreen(hideAppBar: true)
-                  : const SizedBox.shrink(),
             ],
           ),
         ),
