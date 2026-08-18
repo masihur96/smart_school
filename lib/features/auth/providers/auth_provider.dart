@@ -506,6 +506,54 @@ class AuthNotifier extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateSchoolProfile({
+    required String name,
+    required String address,
+    String? avatar,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+      if (_user?.schoolId == null) throw Exception('No school found');
+
+      final Map<String, dynamic> requestData = {
+        'name': name,
+        'address': address,
+      };
+      if (avatar != null && avatar.isNotEmpty) {
+        requestData['avatar'] = avatar;
+      }
+
+      final response = await DataProvider().performRequest(
+        'PUT',
+        '${APIPath.baseUrl}/admin/schools/${_user!.schoolId}',
+        header: {'Authorization': 'Bearer $token'},
+        data: requestData,
+      );
+
+      if (response != null && response.statusCode == 200) {
+        log('School profile updated successfully');
+        await checkAuthStatus();
+        return true;
+      } else {
+        _error = 'Failed to update school profile: ${response?.statusCode}';
+        log('Error updating school profile: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error: $e';
+      log('Exception updating school profile: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> deleteAccount() async {
     _isLoading = true;
     _error = null;
@@ -594,6 +642,61 @@ class AuthNotifier extends ChangeNotifier {
     } catch (e) {
       _error = 'Error uploading image: $e';
       log('Exception uploading image: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> uploadSchoolProfileImage(File imageFile) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+      if (_user?.schoolId == null) throw Exception('No school found');
+
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          imageFile.path,
+          filename: imageFile.path.split('/').last,
+        ),
+      });
+
+      final response = await DataProvider().performRequest(
+        'POST',
+        'https://smart-school-backend-production.up.railway.app/general/upload',
+        header: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'multipart/form-data',
+        },
+        data: formData,
+      );
+
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
+        final url = response.data['data']['url'];
+        if (url != null) {
+          log('School image uploaded successfully: $url');
+          return await updateSchoolProfile(
+            name: _user!.school?.name ?? '',
+            address: _user!.school?.address ?? '',
+            avatar: url,
+          );
+        } else {
+          throw Exception('URL not found in response');
+        }
+      } else {
+        _error = 'Failed to upload school image: ${response?.statusCode}';
+        log('Error uploading school image: ${response?.data}');
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error uploading school image: $e';
+      log('Exception uploading school image: $e');
       return false;
     } finally {
       _isLoading = false;

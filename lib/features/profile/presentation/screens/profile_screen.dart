@@ -23,6 +23,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isEditing = false;
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
+  
+  bool _isEditingSchool = false;
+  late TextEditingController _schoolNameController;
+  late TextEditingController _schoolPhoneController;
+  late TextEditingController _schoolAddressController;
+  
   File? _imageFile;
 
   @override
@@ -31,12 +37,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = context.read<AuthNotifier>().user;
     _nameController = TextEditingController(text: user?.name);
     _phoneController = TextEditingController(text: user?.phone);
+    
+    _schoolNameController = TextEditingController(text: user?.school?.name);
+    _schoolPhoneController = TextEditingController(text: user?.school?.phone);
+    _schoolAddressController = TextEditingController(text: user?.school?.address);
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
+    _schoolNameController.dispose();
+    _schoolPhoneController.dispose();
+    _schoolAddressController.dispose();
     super.dispose();
   }
 
@@ -95,6 +108,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _pickSchoolImage() async {
+    final picker = ImagePicker();
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: Text(AppLocalizations.of(context)!.galleryOption),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: Text(AppLocalizations.of(context)!.cameraOption),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source != null) {
+      final pickedFile = await picker.pickImage(
+        source: source,
+        imageQuality: 50,
+      );
+      if (pickedFile != null) {
+        final auth = context.read<AuthNotifier>();
+        final success = await auth.uploadSchoolProfileImage(File(pickedFile.path));
+
+        if (success && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('School avatar updated successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(auth.error ?? 'Failed to update school avatar'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   void _handleUpdate() async {
     final auth = context.read<AuthNotifier>();
     final success = await auth.updateProfile(
@@ -114,6 +178,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(auth.error ?? 'Failed to update profile'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _handleSchoolUpdate() async {
+    final auth = context.read<AuthNotifier>();
+    final success = await auth.updateSchoolProfile(
+      name: _schoolNameController.text.trim(),
+      address: _schoolAddressController.text.trim(),
+      avatar: auth.user?.school?.avatar,
+    );
+
+    if (success && mounted) {
+      setState(() => _isEditingSchool = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('School profile updated successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(auth.error ?? 'Failed to update school profile'),
           backgroundColor: Colors.red,
         ),
       );
@@ -207,13 +297,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ]),
 
                   const SizedBox(height: 24),
-                  _buildSectionHeader(l10n.organizationalDetails),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildSectionHeader(l10n.organizationalDetails),
+                      if (user.role == UserRole.admin)
+                        TextButton.icon(
+                          onPressed: () {
+                            if (_isEditingSchool) {
+                              _handleSchoolUpdate();
+                            } else {
+                              setState(() => _isEditingSchool = true);
+                            }
+                          },
+                          icon: Icon(
+                            _isEditingSchool
+                                ? Icons.check_circle_rounded
+                                : Icons.edit_rounded,
+                            size: 18,
+                          ),
+                          label: Text(_isEditingSchool ? 'Save' : 'Edit'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: _isEditingSchool
+                                ? Colors.green
+                                : AppColors.primary,
+                          ),
+                        ),
+                    ],
+                  ),
                   _buildInfoCard(context, [
                     _buildInfoTile(
                       context,
                       icon: Icons.school_outlined,
                       label: 'School Name',
                       value: user.school?.name ?? 'N/A',
+                      isEditable: true,
+                      useSchoolEditState: true,
+                      controller: _schoolNameController,
+                      avatarUrl: user.school?.avatar.isNotEmpty == true 
+                          ? user.school!.avatar 
+                          : null,
+                      onAvatarTap: _isEditingSchool ? _pickSchoolImage : null,
                     ),
                     _buildInfoTile(
                       context,
@@ -234,6 +358,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       icon: Icons.school_outlined,
                       label: 'School Address',
                       value: user.school?.address ?? 'N/A',
+                      isEditable: true,
+                      useSchoolEditState: true,
+                      controller: _schoolAddressController,
                     ),
                     _buildInfoTile(
                       context,
@@ -433,18 +560,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String value,
     bool isCopyable = false,
     bool isEditable = false,
+    bool useSchoolEditState = false,
     TextEditingController? controller,
+    String? avatarUrl,
+    VoidCallback? onAvatarTap,
   }) {
     return Card(
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(10),
+          GestureDetector(
+            onTap: onAvatarTap,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  padding: avatarUrl != null ? EdgeInsets.zero : const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: avatarUrl != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            avatarUrl,
+                            width: 36,
+                            height: 36,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Icon(icon, size: 20),
+                            ),
+                          ),
+                        )
+                      : Icon(icon, size: 20),
+                ),
+                if (onAvatarTap != null)
+                  Positioned(
+                    bottom: -4,
+                    right: -4,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 1.5),
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        size: 10,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            child: Icon(icon, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -455,7 +625,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   label,
                   style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
                 ),
-                if (_isEditing && isEditable && controller != null)
+                if ((useSchoolEditState ? _isEditingSchool : _isEditing) && isEditable && controller != null)
                   TextField(
                     controller: controller,
                     style: const TextStyle(
