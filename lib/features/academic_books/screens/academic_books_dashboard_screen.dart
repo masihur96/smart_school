@@ -418,11 +418,9 @@ class _AcademicBooksDashboardScreenState
           children: [
             // ── Search ──────────────────────────────────────────────────────
             Container(
-              color: Colors.white,
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF4F6FB),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: const Color(0xFFE5E7EB)),
                 ),
@@ -462,7 +460,6 @@ class _AcademicBooksDashboardScreenState
 
             // ── Class & Subject Dropdowns ────────────────────────────────────
             Container(
-              color: Colors.white,
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
               child: Row(
                 children: [
@@ -507,7 +504,6 @@ class _AcademicBooksDashboardScreenState
 
             // ── Count header ────────────────────────────────────────────────
             Container(
-              color: const Color(0xFFF4F6FB),
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
               child: Row(
                 children: [
@@ -923,66 +919,57 @@ class _FilterDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     final isFiltered = value != 'all';
 
-    return Container(
-      height: 44,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: isFiltered
-            ? activeColor.withOpacity(0.06)
-            : const Color(0xFFF4F6FB),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isFiltered
-              ? activeColor.withOpacity(0.5)
-              : const Color(0xFFE5E7EB),
-          width: isFiltered ? 1.4 : 1.0,
-        ),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: items.any((i) => i.id == value) ? value : items.first.id,
-          isExpanded: true,
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: isFiltered ? activeColor : const Color(0xFF6B7280),
-            size: 18,
-          ),
-          borderRadius: BorderRadius.circular(14),
-          dropdownColor: Colors.white,
-          elevation: 4,
-          style: const TextStyle(fontSize: 13),
-          items: items.map((opt) {
-            final isItemActive = opt.id == value;
-            return DropdownMenuItem<String>(
-              value: opt.id,
-              child: Row(
-                children: [
-                  Icon(
-                    icon,
-                    size: 15,
-                    color: isItemActive ? activeColor : const Color(0xFF9CA3AF),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      opt.name,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: isItemActive
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                        color: isItemActive
-                            ? activeColor
-                            : const Color(0xFF374151),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: items.any((i) => i.id == value) ? value : items.first.id,
+            isExpanded: true,
+            icon: Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: isFiltered ? activeColor : const Color(0xFF6B7280),
+              size: 18,
+            ),
+            borderRadius: BorderRadius.circular(14),
+            dropdownColor: Colors.white,
+            elevation: 4,
+            style: const TextStyle(fontSize: 13),
+            items: items.map((opt) {
+              final isItemActive = opt.id == value;
+              return DropdownMenuItem<String>(
+                value: opt.id,
+                child: Row(
+                  children: [
+                    Icon(
+                      icon,
+                      size: 15,
+                      color: isItemActive
+                          ? activeColor
+                          : const Color(0xFF9CA3AF),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        opt.name,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: isItemActive
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: isItemActive
+                              ? activeColor
+                              : const Color(0xFF374151),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-          onChanged: onChanged,
+                  ],
+                ),
+              );
+            }).toList(),
+            onChanged: onChanged,
+          ),
         ),
       ),
     );
