@@ -10,8 +10,8 @@ import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/ai_tutor/screen/ai_tutor_chat_screen.dart';
+import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
 
-import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';

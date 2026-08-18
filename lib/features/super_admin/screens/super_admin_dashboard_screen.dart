@@ -6,6 +6,7 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/widgets/app_drawer.dart';
 import 'package:smart_school/core/widgets/notification_icon_button.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
 
 import 'package:smart_school/features/super_admin/providers/super_admin_dashboard_provider.dart';
 import 'package:smart_school/features/super_admin/providers/super_admin_school_provider.dart';
@@ -18,7 +19,7 @@ import 'package:smart_school/features/super_admin/screens/system_status_screen.d
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/user_model.dart';
 
-import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
+
 
 class SuperAdminDashboardScreen extends StatelessWidget {
   const SuperAdminDashboardScreen({super.key});

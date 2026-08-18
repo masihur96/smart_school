@@ -1,10 +1,8 @@
 import 'package:go_router/go_router.dart';
 import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
 import 'package:smart_school/features/auth/presntation/views/register_screen.dart';
-
+import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
 import 'package:smart_school/features/splash_screen.dart';
-
-import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import '../../features/admin/screens/add_edit_student_screen.dart';
 import '../../features/admin/screens/add_edit_teacher_screen.dart';
 import '../../features/admin/screens/admin_dashboard_screen.dart';

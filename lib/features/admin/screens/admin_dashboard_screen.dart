@@ -6,6 +6,7 @@ import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
 
 import 'add_edit_student_screen.dart';
 import 'add_edit_teacher_screen.dart';
@@ -16,7 +17,7 @@ import 'package:smart_school/features/admin/providers/teacher_performance_provid
 import 'package:smart_school/features/admin/screens/student_performance_screen.dart';
 import 'package:smart_school/features/admin/screens/teacher_performance_screen.dart';
 
-import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
+
 import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../core/services/geocoding_service.dart';
