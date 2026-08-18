@@ -711,18 +711,42 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
     required List<DropdownMenuItem<T>> items,
     required void Function(T?)? onChanged,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Card(
+      elevation: 0,
+      color: colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: colorScheme.outline.withOpacity(0.25)),
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: DropdownButtonHideUnderline(
           child: DropdownButton<T>(
             value: value,
-            hint: Text(hint, style: TextStyle(fontSize: 14)),
+            hint: Text(
+              hint,
+              style: TextStyle(
+                fontSize: 14,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
             isExpanded: true,
             borderRadius: BorderRadius.circular(14),
+            dropdownColor: colorScheme.surface,
+            icon: Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: colorScheme.primary,
+            ),
             items: items,
             onChanged: onChanged,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: colorScheme.onSurface,
+            ),
           ),
         ),
       ),
