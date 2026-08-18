@@ -10,6 +10,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/ai_tutor/screen/ai_tutor_chat_screen.dart';
+
 import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
@@ -25,7 +26,6 @@ import '../data/models/student_dashboard_model.dart';
 import '../providers/student_dashboard_provider.dart';
 import 'student_attendance_screen.dart';
 import 'student_homework_screen.dart';
-import 'student_notice_screen.dart';
 import 'student_result_screen.dart';
 import 'student_routine_screen.dart';
 

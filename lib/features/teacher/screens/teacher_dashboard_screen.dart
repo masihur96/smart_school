@@ -10,7 +10,6 @@ import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/ai_tutor/screen/ai_tutor_chat_screen.dart';
-import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import 'package:smart_school/features/teacher/screens/schedule_class_details.dart';
 import 'package:smart_school/features/teacher/screens/teacher_notice_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_self_attendance_detail_screen.dart';
@@ -18,6 +17,7 @@ import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
 
+import 'package:smart_school/features/profile/presentation/views/profile_screen.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/marquee_notice.dart';
 import '../../../core/widgets/notification_icon_button.dart';
