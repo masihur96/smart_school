@@ -206,9 +206,9 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const SizedBox(height: 8),
                     Row(
                       children: [
+                        SizedBox(width: 30),
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(

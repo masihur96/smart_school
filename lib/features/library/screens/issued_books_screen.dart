@@ -74,7 +74,12 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
                   icon: Icons.warning_rounded,
                 ),
                 const SizedBox(height: 8),
-                ...overdue.map((ib) => _IssuedBookCard(issuedBook: ib,comeFrom: widget.comeFrom,)),
+                ...overdue.map(
+                  (ib) => _IssuedBookCard(
+                    issuedBook: ib,
+                    comeFrom: widget.comeFrom,
+                  ),
+                ),
                 const SizedBox(height: 16),
               ],
               if (onTime.isNotEmpty) ...[
@@ -85,7 +90,12 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
                   icon: Icons.check_circle_rounded,
                 ),
                 const SizedBox(height: 8),
-                ...onTime.map((ib) => _IssuedBookCard(issuedBook: ib,comeFrom: widget.comeFrom,)),
+                ...onTime.map(
+                  (ib) => _IssuedBookCard(
+                    issuedBook: ib,
+                    comeFrom: widget.comeFrom,
+                  ),
+                ),
               ],
             ],
           ),
@@ -110,13 +120,13 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
   }
 
   static Widget _box(double w, double h, {double r = 8}) => Container(
-        width: w,
-        height: h,
-        decoration: BoxDecoration(
-          color: const Color(0xFFDEDEDE),
-          borderRadius: BorderRadius.circular(r),
-        ),
-      );
+    width: w,
+    height: h,
+    decoration: BoxDecoration(
+      color: const Color(0xFFDEDEDE),
+      borderRadius: BorderRadius.circular(r),
+    ),
+  );
 
   Widget _skeletonCard() {
     return Container(
@@ -188,10 +198,7 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
                   const SizedBox(height: 12),
                   Text(
                     notifier.issuedError ?? 'Something went wrong',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade500,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
@@ -322,7 +329,8 @@ class _IssuedBookCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthNotifier>().user;
-    final isAdmin = user?.role == UserRole.admin || user?.role == UserRole.superadmin;
+    final isAdmin =
+        user?.role == UserRole.admin || user?.role == UserRole.superadmin;
 
     final fmt = DateFormat('MMM dd, yyyy');
     final isOverdue = issuedBook.isOverdue;
@@ -333,7 +341,8 @@ class _IssuedBookCard extends StatelessWidget {
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => BookDetailScreen(book: issuedBook.book, comeFrom: comeFrom),
+          builder: (_) =>
+              BookDetailScreen(book: issuedBook.book, comeFrom: comeFrom),
         ),
       ),
       child: Container(
@@ -363,31 +372,35 @@ class _IssuedBookCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Book cover
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  issuedBook.book.coverImageUrl,
-                  width: 58,
-                  height: 82,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    width: 58,
-                    height: 82,
-                    color: const Color(0xFFE5E7EB),
-                    child: const Icon(
-                      Icons.book_rounded,
-                      color: Color(0xFF9CA3AF),
-                      size: 24,
+              Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      issuedBook.book.coverImageUrl,
+                      width: 58,
+                      height: 92,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        width: 58,
+                        height: 92,
+                        color: const Color(0xFFE5E7EB),
+                        child: const Icon(
+                          Icons.book_rounded,
+                          color: Color(0xFF9CA3AF),
+                          size: 24,
+                        ),
+                      ),
+                      loadingBuilder: (_, child, progress) => progress == null
+                          ? child
+                          : Container(
+                              width: 58,
+                              height: 82,
+                              color: const Color(0xFFF3F4F6),
+                            ),
                     ),
                   ),
-                  loadingBuilder: (_, child, progress) => progress == null
-                      ? child
-                      : Container(
-                          width: 58,
-                          height: 82,
-                          color: const Color(0xFFF3F4F6),
-                        ),
-                ),
+                ],
               ),
               const SizedBox(width: 14),
               // Details
@@ -404,14 +417,14 @@ class _IssuedBookCard extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF111827),
+
                               height: 1.3,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const SizedBox(width: 8),
+
                         _StatusBadge(isOverdue: isOverdue),
                       ],
                     ),
@@ -448,34 +461,44 @@ class _IssuedBookCard extends StatelessWidget {
                     ],
                     const SizedBox(height: 10),
                     // Date rows
-                    _DateRow(
-                      icon: Icons.calendar_today_rounded,
-                      label: 'Issued',
-                      value: fmt.format(issuedBook.issueDate),
-                      color: const Color(0xFF6B7280),
+                    Row(
+                      children: [
+                        _DateRow(
+                          icon: Icons.calendar_today_rounded,
+                          label: 'Issued',
+                          value: fmt.format(issuedBook.issueDate),
+                          color: const Color(0xFF6B7280),
+                        ),
+                        const SizedBox(width: 10),
+                        _DateRow(
+                          icon: isOverdue
+                              ? Icons.event_busy_rounded
+                              : Icons.event_available_rounded,
+                          label: 'Due',
+                          value: fmt.format(issuedBook.dueDate),
+                          color: isOverdue
+                              ? const Color(0xFFEF4444)
+                              : const Color(0xFF10B981),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 5),
-                    _DateRow(
-                      icon: isOverdue
-                          ? Icons.event_busy_rounded
-                          : Icons.event_available_rounded,
-                      label: 'Due',
-                      value: fmt.format(issuedBook.dueDate),
-                      color: isOverdue
-                          ? const Color(0xFFEF4444)
-                          : const Color(0xFF10B981),
-                    ),
+
                     const SizedBox(height: 8),
                     // Countdown chip
-                    _CountdownChip(
-                      isOverdue: isOverdue,
-                      daysLeft: isOverdue ? daysOverdue : daysLeft,
+                    Row(
+                      children: [
+                        _CountdownChip(
+                          isOverdue: isOverdue,
+                          daysLeft: isOverdue ? daysOverdue : daysLeft,
+                        ),
+                        if (isAdmin && issuedBook.returnDate == null) ...[
+                          const SizedBox(width: 10),
+                          _ReturnButton(issuedBook: issuedBook),
+                        ],
+                      ],
                     ),
+
                     // Return button (only for admin and if not already returned)
-                    if (isAdmin && issuedBook.returnDate == null) ...[  
-                      const SizedBox(height: 10),
-                      _ReturnButton(issuedBook: issuedBook),
-                    ],
                   ],
                 ),
               ),
@@ -508,9 +531,7 @@ class _StatusBadge extends StatelessWidget {
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w700,
-          color: isOverdue
-              ? const Color(0xFFDC2626)
-              : const Color(0xFF2563EB),
+          color: isOverdue ? const Color(0xFFDC2626) : const Color(0xFF2563EB),
         ),
       ),
     );
@@ -565,14 +586,13 @@ class _CountdownChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        isOverdue ? const Color(0xFFEF4444) : const Color(0xFF10B981);
+    final color = isOverdue ? const Color(0xFFEF4444) : const Color(0xFF10B981);
     final bgColor = color.withOpacity(0.08);
     final text = isOverdue
         ? '$daysLeft ${daysLeft == 1 ? 'day' : 'days'} overdue'
         : daysLeft == 0
-            ? 'Due today!'
-            : '$daysLeft ${daysLeft == 1 ? 'day' : 'days'} remaining';
+        ? 'Due today!'
+        : '$daysLeft ${daysLeft == 1 ? 'day' : 'days'} remaining';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -669,7 +689,11 @@ class _ReturnButton extends StatelessWidget {
           ),
           content: const Row(
             children: [
-              Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 18),
+              Icon(
+                Icons.check_circle_outline_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
               SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -694,7 +718,11 @@ class _ReturnButton extends StatelessWidget {
           ),
           content: Row(
             children: [
-              const Icon(Icons.error_outline_rounded, color: Colors.white, size: 18),
+              const Icon(
+                Icons.error_outline_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -744,4 +772,3 @@ class _ReturnButton extends StatelessWidget {
     );
   }
 }
-
