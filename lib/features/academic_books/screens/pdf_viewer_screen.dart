@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -35,7 +36,11 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A3C6E),
+        backgroundColor: widget.comeFrom == "admin"
+            ? AppColors.primaryAdmin
+            : widget.comeFrom == "teacher"
+            ? AppColors.primaryAdmin
+            : AppColors.primaryStudent,
         foregroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
