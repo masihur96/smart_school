@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
-import 'package:smart_school/models/online_class_model.dart';
-import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
-import 'package:smart_school/models/school_models.dart';
+import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
+import 'package:smart_school/models/online_class_model.dart';
 
 class AddEditOnlineClassScreen extends StatefulWidget {
   final OnlineClass? onlineClass;
@@ -46,7 +45,9 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
       _linkController.text = widget.onlineClass!.meetLink;
       _selectedDate = widget.onlineClass!.scheduledTime;
       _selectedTime = TimeOfDay.fromDateTime(widget.onlineClass!.scheduledTime);
-      _selectedEndTime = TimeOfDay.fromDateTime(widget.onlineClass!.scheduledTime.add(const Duration(hours: 1)));
+      _selectedEndTime = TimeOfDay.fromDateTime(
+        widget.onlineClass!.scheduledTime.add(const Duration(hours: 1)),
+      );
       _selectedClassId = widget.onlineClass!.classId;
       _selectedSectionId = widget.onlineClass!.sectionId;
       _selectedSubjectId = widget.onlineClass!.subjectId;
@@ -95,9 +96,13 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
 
   void _save() async {
     if (_formKey.currentState!.validate()) {
-      if (_selectedDate == null || _selectedTime == null || _selectedEndTime == null) {
+      if (_selectedDate == null ||
+          _selectedTime == null ||
+          _selectedEndTime == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select date, start time, and end time')),
+          const SnackBar(
+            content: Text('Please select date, start time, and end time'),
+          ),
         );
         return;
       }
@@ -110,19 +115,19 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
       final startTimeStr = _selectedTime!.format(context);
       final endTimeStr = _selectedEndTime!.format(context);
       if (!isEditing) {
-
-
-        final success = await context.read<OnlineClassProvider>().createOnlineClass(
-          title: _titleController.text.trim(),
-          description: _descController.text.trim(),
-          meetLink: _linkController.text.trim(),
-          date: dateStr,
-          startTime: startTimeStr,
-          endTime: endTimeStr,
-          classId: _selectedClassId,
-          sectionId: _selectedSectionId,
-          subjectId: _selectedSubjectId,
-        );
+        final success = await context
+            .read<OnlineClassProvider>()
+            .createOnlineClass(
+              title: _titleController.text.trim(),
+              description: _descController.text.trim(),
+              meetLink: _linkController.text.trim(),
+              date: dateStr,
+              startTime: startTimeStr,
+              endTime: endTimeStr,
+              classId: _selectedClassId,
+              sectionId: _selectedSectionId,
+              subjectId: _selectedSubjectId,
+            );
 
         setState(() => _isLoading = false);
 
@@ -136,19 +141,20 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
         }
       } else {
         // ── Edit existing class via provider ────────────────────────────────
-        final success =
-            await context.read<OnlineClassProvider>().updateOnlineClass(
-                  id: widget.onlineClass!.id,
-                  title: _titleController.text.trim(),
-                  description: _descController.text.trim(),
-                  meetLink: _linkController.text.trim(),
-                  date: dateStr,
-                  startTime: startTimeStr,
-                  endTime: endTimeStr,
-                  classId: _selectedClassId,
-                  sectionId: _selectedSectionId,
-                  subjectId: _selectedSubjectId,
-                );
+        final success = await context
+            .read<OnlineClassProvider>()
+            .updateOnlineClass(
+              id: widget.onlineClass!.id,
+              title: _titleController.text.trim(),
+              description: _descController.text.trim(),
+              meetLink: _linkController.text.trim(),
+              date: dateStr,
+              startTime: startTimeStr,
+              endTime: endTimeStr,
+              classId: _selectedClassId,
+              sectionId: _selectedSectionId,
+              subjectId: _selectedSubjectId,
+            );
 
         setState(() => _isLoading = false);
 
@@ -307,11 +313,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: AppColors.textPrimary,
-      ),
+      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
     );
   }
 
@@ -346,7 +348,6 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
           borderSide: const BorderSide(color: AppColors.primary),
         ),
         filled: true,
-        fillColor: Colors.white,
       ),
     );
   }
@@ -363,7 +364,6 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.grey.withOpacity(0.3)),
         ),
@@ -430,8 +430,9 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
           items: sectionSetup.sections
               .where((s) => s.classId == _selectedClassId)
               .map((s) {
-            return DropdownMenuItem(value: s.id, child: Text(s.name));
-          }).toList(),
+                return DropdownMenuItem(value: s.id, child: Text(s.name));
+              })
+              .toList(),
           onChanged: (val) => setState(() => _selectedSectionId = val),
           validator: (val) => val == null ? 'Please select a section' : null,
         ),
@@ -442,8 +443,9 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
           items: subjectSetup.subjects
               .where((s) => s.classId == _selectedClassId)
               .map((s) {
-            return DropdownMenuItem(value: s.id, child: Text(s.name));
-          }).toList(),
+                return DropdownMenuItem(value: s.id, child: Text(s.name));
+              })
+              .toList(),
           onChanged: (val) => setState(() => _selectedSubjectId = val),
           validator: (val) => val == null ? 'Please select a subject' : null,
         ),
@@ -468,7 +470,6 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
         borderSide: const BorderSide(color: AppColors.primary),
       ),
       filled: true,
-      fillColor: Colors.white,
     );
   }
 }
