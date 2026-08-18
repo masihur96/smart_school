@@ -39,7 +39,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
         backgroundColor: widget.comeFrom == "admin"
             ? AppColors.primaryAdmin
             : widget.comeFrom == "teacher"
-            ? AppColors.primaryAdmin
+            ? AppColors.primaryTeacher
             : AppColors.primaryStudent,
         foregroundColor: Colors.white,
         elevation: 0,
