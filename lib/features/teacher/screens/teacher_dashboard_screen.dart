@@ -242,7 +242,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         .toList();
     classes.sort((a, b) => a.startTime.compareTo(b.startTime));
 
-    if (provider.isLoading && data == null) {
+    if (provider.isLoading) {
       return _buildShimmerLoading(context, name, user, l10n);
     }
 
@@ -1911,8 +1911,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             Container(
               width: double.infinity,
               decoration: const BoxDecoration(
-                color: Colors
-                    .black, // Just to give the shimmer base a background shape
+                // Just to give the shimmer base a background shape
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(32),
                   bottomRight: Radius.circular(32),
@@ -1952,7 +1951,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                   const SizedBox(height: 16),
 
                   // My Attendance Section Mock
-                  Card(
+                  Container(
                     margin: const EdgeInsets.all(0.0),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -2060,10 +2059,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                   ),
                   const SizedBox(height: 12),
                   // Attendance Card
-                  Card(
+                  Container(
                     margin: const EdgeInsets.only(bottom: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
+                    decoration: BoxDecoration(
+                      border: Border.all(width: 1),
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
