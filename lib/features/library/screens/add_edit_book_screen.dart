@@ -1,23 +1,19 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/configs/network/data_provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/core/utils/storage_service.dart';
 import 'package:smart_school/features/library/data/models/book.dart';
 import 'package:smart_school/features/library/providers/library_book_provider.dart';
 import 'package:uuid/uuid.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:smart_school/configs/network/data_provider.dart';
-import 'package:smart_school/core/utils/storage_service.dart';
-import 'package:dio/dio.dart';
 
 class AddEditBookScreen extends StatefulWidget {
   final Book? book;
   final bool isAdminOrTeacher;
 
-  const AddEditBookScreen({
-    super.key,
-    this.book,
-    this.isAdminOrTeacher = true,
-  });
+  const AddEditBookScreen({super.key, this.book, this.isAdminOrTeacher = true});
 
   @override
   State<AddEditBookScreen> createState() => _AddEditBookScreenState();
@@ -25,7 +21,7 @@ class AddEditBookScreen extends StatefulWidget {
 
 class _AddEditBookScreenState extends State<AddEditBookScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   final _titleController = TextEditingController();
   final _authorController = TextEditingController();
   final _isbnController = TextEditingController();
@@ -44,7 +40,7 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
     'Arts',
     'Geography',
     'Languages',
-    'Others'
+    'Others',
   ];
 
   @override
@@ -144,7 +140,6 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
     }
   }
 
-
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source);
@@ -184,9 +179,9 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
       } catch (e) {
         debugPrint('Image upload error: $e');
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to upload image: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to upload image: $e')));
         }
       } finally {
         if (mounted) {
@@ -208,7 +203,10 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.auto_awesome, color: AppColors.primary),
+                leading: const Icon(
+                  Icons.auto_awesome,
+                  color: AppColors.primary,
+                ),
                 title: const Text('Generate Random Cover'),
                 onTap: () {
                   Navigator.pop(context);
@@ -218,7 +216,10 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library, color: AppColors.primary),
+                leading: const Icon(
+                  Icons.photo_library,
+                  color: AppColors.primary,
+                ),
                 title: const Text('Pick from Gallery'),
                 onTap: () {
                   Navigator.pop(context);
@@ -304,12 +305,16 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
                 hint: 'https://example.com/image.jpg',
                 icon: Icons.image_outlined,
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.add_photo_alternate, color: AppColors.primary),
+                  icon: const Icon(
+                    Icons.add_photo_alternate,
+                    color: AppColors.primary,
+                  ),
                   tooltip: 'Image Options',
                   onPressed: _showImageOptions,
                 ),
                 validator: (val) {
-                  if (val == null || val.isEmpty) return 'Cover image is required';
+                  if (val == null || val.isEmpty)
+                    return 'Cover image is required';
                   return null;
                 },
               ),
@@ -364,11 +369,7 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: AppColors.textPrimary,
-      ),
+      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
     );
   }
 
@@ -385,13 +386,19 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
       controller: controller,
       maxLines: maxLines,
       validator: validator,
-      decoration: _buildInputDecoration(label, icon, suffixIcon: suffixIcon).copyWith(
-        hintText: hint,
-      ),
+      decoration: _buildInputDecoration(
+        label,
+        icon,
+        suffixIcon: suffixIcon,
+      ).copyWith(hintText: hint),
     );
   }
 
-  InputDecoration _buildInputDecoration(String label, IconData icon, {Widget? suffixIcon}) {
+  InputDecoration _buildInputDecoration(
+    String label,
+    IconData icon, {
+    Widget? suffixIcon,
+  }) {
     return InputDecoration(
       labelText: label,
       prefixIcon: Icon(icon, color: AppColors.textSecondary),
@@ -409,7 +416,6 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
         borderSide: const BorderSide(color: AppColors.primary),
       ),
       filled: true,
-      fillColor: Colors.white,
     );
   }
 }
