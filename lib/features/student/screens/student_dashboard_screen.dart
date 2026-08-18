@@ -11,7 +11,6 @@ import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/ai_tutor/screen/ai_tutor_chat_screen.dart';
 import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
-
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
@@ -36,11 +35,17 @@ class StudentDashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ZoomDrawer(
       controller: ZoomDrawerController(),
+      mainScreenTapClose: true,
+      style: DrawerStyle.defaultStyle,
+      androidCloseOnBackTap: true,
       menuScreen: const AppDrawer(),
       mainScreen: const StudentDashboardContent(),
       borderRadius: 24.0,
       showShadow: true,
-      angle: -12.0,
+      angle: 0.0,
+      openCurve: Curves.fastOutSlowIn,
+      closeCurve: Curves.fastOutSlowIn,
+      duration: const Duration(milliseconds: 500),
       drawerShadowsBackgroundColor: Colors.grey.shade300,
       slideWidth: MediaQuery.of(context).size.width * 0.65,
     );
@@ -51,7 +56,8 @@ class StudentDashboardContent extends StatefulWidget {
   const StudentDashboardContent({super.key});
 
   @override
-  State<StudentDashboardContent> createState() => _StudentDashboardContentState();
+  State<StudentDashboardContent> createState() =>
+      _StudentDashboardContentState();
 }
 
 class _StudentDashboardContentState extends State<StudentDashboardContent>
@@ -209,8 +215,9 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
             controller: _tabController,
             indicatorColor: AppColors.primaryStudent,
             labelColor: AppColors.primaryStudent,
-            unselectedLabelColor:
-                isDark ? Colors.white54 : Colors.grey.shade500,
+            unselectedLabelColor: isDark
+                ? Colors.white54
+                : Colors.grey.shade500,
             indicatorSize: TabBarIndicatorSize.label,
             dividerColor: Colors.transparent,
             labelStyle: const TextStyle(
@@ -219,10 +226,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
             ),
             unselectedLabelStyle: const TextStyle(fontSize: 11),
             tabs: [
-              Tab(
-                icon: const Icon(Icons.dashboard_outlined),
-                text: l10n.home,
-              ),
+              Tab(icon: const Icon(Icons.dashboard_outlined), text: l10n.home),
               Tab(
                 icon: const Icon(Icons.check_circle_outline),
                 text: l10n.attendance,

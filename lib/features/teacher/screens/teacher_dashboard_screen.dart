@@ -39,11 +39,17 @@ class TeacherDashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ZoomDrawer(
       controller: ZoomDrawerController(),
+      mainScreenTapClose: true,
+      style: DrawerStyle.defaultStyle,
+      androidCloseOnBackTap: true,
       menuScreen: const AppDrawer(),
       mainScreen: const TeacherDashboardContent(),
       borderRadius: 24.0,
       showShadow: true,
-      angle: -12.0,
+      angle: 0.0,
+      openCurve: Curves.fastOutSlowIn,
+      closeCurve: Curves.fastOutSlowIn,
+      duration: const Duration(milliseconds: 500),
       drawerShadowsBackgroundColor: Colors.grey.shade300,
       slideWidth: MediaQuery.of(context).size.width * 0.65,
     );
@@ -54,7 +60,8 @@ class TeacherDashboardContent extends StatefulWidget {
   const TeacherDashboardContent({super.key});
 
   @override
-  State<TeacherDashboardContent> createState() => _TeacherDashboardContentState();
+  State<TeacherDashboardContent> createState() =>
+      _TeacherDashboardContentState();
 }
 
 class _TeacherDashboardContentState extends State<TeacherDashboardContent>
@@ -220,8 +227,9 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
             controller: _tabController,
             indicatorColor: AppColors.primaryTeacher,
             labelColor: AppColors.primaryTeacher,
-            unselectedLabelColor:
-                isDark ? Colors.white54 : Colors.grey.shade500,
+            unselectedLabelColor: isDark
+                ? Colors.white54
+                : Colors.grey.shade500,
             indicatorSize: TabBarIndicatorSize.label,
             dividerColor: Colors.transparent,
             labelStyle: const TextStyle(
@@ -230,10 +238,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
             ),
             unselectedLabelStyle: const TextStyle(fontSize: 11),
             tabs: [
-              Tab(
-                icon: const Icon(Icons.dashboard_outlined),
-                text: l10n.home,
-              ),
+              Tab(icon: const Icon(Icons.dashboard_outlined), text: l10n.home),
               Tab(
                 icon: const Icon(Icons.check_circle_outline),
                 text: l10n.attendance,
