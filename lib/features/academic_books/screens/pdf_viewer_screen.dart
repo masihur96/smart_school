@@ -5,11 +5,13 @@ import 'package:url_launcher/url_launcher.dart';
 class PdfViewerScreen extends StatefulWidget {
   final String pdfUrl;
   final String title;
+  final String comeFrom;
 
   const PdfViewerScreen({
     super.key,
     required this.pdfUrl,
     required this.title,
+    required this.comeFrom,
   });
 
   @override
@@ -32,7 +34,6 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE5E7EB),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A3C6E),
         foregroundColor: Colors.white,
@@ -67,12 +68,12 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
         actions: [
           IconButton(
             icon: Icon(
-              _isVertical
-                  ? Icons.menu_book_rounded
-                  : Icons.swap_vert_rounded,
+              _isVertical ? Icons.menu_book_rounded : Icons.swap_vert_rounded,
               size: 20,
             ),
-            tooltip: _isVertical ? 'Switch to Book Mode' : 'Switch to Continuous Scroll',
+            tooltip: _isVertical
+                ? 'Switch to Book Mode'
+                : 'Switch to Continuous Scroll',
             onPressed: () {
               setState(() {
                 _isVertical = !_isVertical;

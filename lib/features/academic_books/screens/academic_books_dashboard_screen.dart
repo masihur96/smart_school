@@ -49,9 +49,7 @@ class _AcademicBooksDashboardScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final auth = context.read<AuthNotifier>();
       final schoolId = auth.user?.schoolId ?? '';
-      context.read<AcademicBookNotifier>().fetchBooks(
-        schoolId: schoolId,
-      );
+      context.read<AcademicBookNotifier>().fetchBooks(schoolId: schoolId);
       if (schoolId.isNotEmpty) {
         context.read<ClassSetupNotifier>().fetchClasses(schoolId);
       }
@@ -91,14 +89,16 @@ class _AcademicBooksDashboardScreenState
     return all.where((b) {
       final subjectStr = b.subject.isNotEmpty ? b.subject : b.subjectName;
       final q = _searchQuery.trim().toLowerCase();
-      final matchesSearch = q.isEmpty ||
+      final matchesSearch =
+          q.isEmpty ||
           b.title.toLowerCase().contains(q) ||
           subjectStr.toLowerCase().contains(q) ||
           b.author.toLowerCase().contains(q) ||
           b.description.toLowerCase().contains(q);
       final matchesClass =
           _selectedClassId == 'all' || b.classId == _selectedClassId;
-      final matchesSubject = _selectedSubject == 'all' ||
+      final matchesSubject =
+          _selectedSubject == 'all' ||
           subjectStr.trim().toLowerCase() ==
               _selectedSubject.trim().toLowerCase();
       return matchesSearch && matchesClass && matchesSubject;
@@ -231,7 +231,11 @@ class _AcademicBooksDashboardScreenState
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PdfViewerScreen(pdfUrl: book.pdfUrl, title: book.title),
+        builder: (_) => PdfViewerScreen(
+          pdfUrl: book.pdfUrl,
+          title: book.title,
+          comeFrom: "",
+        ),
       ),
     );
   }
@@ -261,9 +265,7 @@ class _AcademicBooksDashboardScreenState
       // Refresh
       final auth = context.read<AuthNotifier>();
       final schoolId = auth.user?.schoolId ?? '';
-      context.read<AcademicBookNotifier>().fetchBooks(
-        schoolId: schoolId,
-      );
+      context.read<AcademicBookNotifier>().fetchBooks(schoolId: schoolId);
       if (schoolId.isNotEmpty) {
         context.read<ClassSetupNotifier>().fetchClasses(schoolId);
       }
@@ -337,14 +339,15 @@ class _AcademicBooksDashboardScreenState
     final effectiveClassId = classOptions.any((o) => o.id == _selectedClassId)
         ? _selectedClassId
         : 'all';
-    final effectiveSubject =
-        subjectOptions.any((o) => o.id == _selectedSubject)
-            ? _selectedSubject
-            : 'all';
+    final effectiveSubject = subjectOptions.any((o) => o.id == _selectedSubject)
+        ? _selectedSubject
+        : 'all';
 
     // Unique subjects count for hero banner
     final totalSubjectsCount = allBooks
-        .map((b) => b.subject.isNotEmpty ? b.subject.trim() : b.subjectName.trim())
+        .map(
+          (b) => b.subject.isNotEmpty ? b.subject.trim() : b.subjectName.trim(),
+        )
         .where((s) => s.isNotEmpty)
         .toSet()
         .length;
@@ -492,7 +495,9 @@ class _AcademicBooksDashboardScreenState
                     ),
                   ),
                   const Spacer(),
-                  if (_selectedClassId != 'all' || _selectedSubject != 'all' || _searchQuery.isNotEmpty)
+                  if (_selectedClassId != 'all' ||
+                      _selectedSubject != 'all' ||
+                      _searchQuery.isNotEmpty)
                     GestureDetector(
                       onTap: () => setState(() {
                         _selectedClassId = 'all';
@@ -527,7 +532,12 @@ class _AcademicBooksDashboardScreenState
                   ? _buildEmptyState()
                   : _isGrid
                   ? _buildGrid(filtered, admin, allBooks, classNotifier.classes)
-                  : _buildList(filtered, admin, allBooks, classNotifier.classes),
+                  : _buildList(
+                      filtered,
+                      admin,
+                      allBooks,
+                      classNotifier.classes,
+                    ),
             ),
           ],
         ),
@@ -693,7 +703,11 @@ class _AcademicBooksDashboardScreenState
         final rawBook = books[i];
         final displayBook = rawBook.className.isEmpty
             ? rawBook.copyWith(
-                className: _resolveClassName(rawBook.classId, classes, allBooks),
+                className: _resolveClassName(
+                  rawBook.classId,
+                  classes,
+                  allBooks,
+                ),
               )
             : rawBook;
         return AcademicBookCard(
@@ -723,7 +737,11 @@ class _AcademicBooksDashboardScreenState
         final rawBook = books[i];
         final displayBook = rawBook.className.isEmpty
             ? rawBook.copyWith(
-                className: _resolveClassName(rawBook.classId, classes, allBooks),
+                className: _resolveClassName(
+                  rawBook.classId,
+                  classes,
+                  allBooks,
+                ),
               )
             : rawBook;
         return AcademicBookListTile(
@@ -920,8 +938,9 @@ class _FilterDropdown extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 13,
-                        fontWeight:
-                            isItemActive ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight: isItemActive
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                         color: isItemActive
                             ? activeColor
                             : const Color(0xFF374151),
