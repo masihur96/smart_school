@@ -24,6 +24,7 @@ class ExamManagementScreen extends StatefulWidget {
 
 class _ExamManagementScreenState extends State<ExamManagementScreen> {
   String? _selectedClass;
+  String? _selectedSection;
   String? _selectedSubject;
   String _selectedStatus = 'All';
 
@@ -37,6 +38,9 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
       if (context.read<StudentsNotifier>().students.isEmpty && !context.read<StudentsNotifier>().isLoading) {
         context.read<StudentsNotifier>().fetchStudents();
       }
+      if (context.read<SectionSetupNotifier>().sections.isEmpty && !context.read<SectionSetupNotifier>().isLoading) {
+        context.read<SectionSetupNotifier>().fetchSections();
+      }
     });
   }
 
@@ -45,13 +49,21 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
     final examsNotifier = context.watch<ExamsNotifier>();
     final allExams = examsNotifier.state;
     final classes = context.watch<ClassSetupNotifier>().classes;
+    final sections = context.watch<SectionSetupNotifier>().sections;
     final subjects = context.watch<SubjectSetupNotifier>().subjects;
+
+    final availableSections = _selectedClass == null
+        ? sections
+        : sections.where((s) => s.classId == _selectedClass).toList();
 
     // Apply filters
     final exams = allExams.where((exam) {
       final matchesClass =
           _selectedClass == null ||
           exam.assignments.any((a) => a.classId == _selectedClass);
+      final matchesSection =
+          _selectedSection == null ||
+          exam.assignments.any((a) => a.sectionId == _selectedSection);
       final matchesSubject =
           _selectedSubject == null ||
           exam.assignments.any((a) => a.subjectId == _selectedSubject);
@@ -59,7 +71,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
           _selectedStatus == 'All' ||
           (_selectedStatus == 'Published' && exam.isPublished) ||
           (_selectedStatus == 'Unpublished' && !exam.isPublished);
-      return matchesClass && matchesSubject && matchesStatus;
+      return matchesClass && matchesSection && matchesSubject && matchesStatus;
     }).toList();
 
     return Scaffold(
@@ -88,25 +100,21 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                 ),
               ],
             ),
-            child: Column(
-              children: [
-                DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.publishStatus,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  value: _selectedStatus,
-                  items: [
-                    DropdownMenuItem(value: 'All', child: Text(AppLocalizations.of(context)!.all)),
-                    DropdownMenuItem(value: 'Published', child: Text(AppLocalizations.of(context)!.publishedOption)),
-                    DropdownMenuItem(value: 'Unpublished', child: Text(AppLocalizations.of(context)!.unpublishedOption)),
-                  ],
-                  onChanged: (val) => setState(() => _selectedStatus = val!),
+            child: DropdownButtonFormField<String>(
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.publishStatus,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
+              ),
+              value: _selectedStatus,
+              items: [
+                DropdownMenuItem(value: 'All', child: Text(AppLocalizations.of(context)!.all)),
+                DropdownMenuItem(value: 'Published', child: Text(AppLocalizations.of(context)!.publishedOption)),
+                DropdownMenuItem(value: 'Unpublished', child: Text(AppLocalizations.of(context)!.unpublishedOption)),
               ],
+              onChanged: (val) => setState(() => _selectedStatus = val!),
             ),
           ),
 
@@ -117,6 +125,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                 await context.read<ExamsNotifier>().fetchExams();
                 context.read<TeachersNotifier>().fetchTeachers();
                 context.read<StudentsNotifier>().fetchStudents();
+                context.read<SectionSetupNotifier>().fetchSections();
               },
               child: examsNotifier.isLoading && exams.isEmpty
                   ? _ExamShimmer(
