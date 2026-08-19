@@ -10,6 +10,7 @@ import 'package:smart_school/features/student/screens/student_dashboard_screen.d
 import 'package:smart_school/features/super_admin/screens/super_admin_dashboard_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
 import 'package:smart_school/models/user_model.dart';
+import 'package:smart_school/services/app_update_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -49,8 +50,12 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _checkAuth() async {
-    // Ensuring animation plays for at least 2 seconds for branding
-    await Future.delayed(const Duration(seconds: 2));
+    // Run the update check concurrently with the branding delay so it adds
+    // no extra latency in the common (no-update) case.
+    await Future.wait([
+      Future.delayed(const Duration(seconds: 2)),
+      _checkForAppUpdate(),
+    ]);
 
     if (!mounted) return;
 
@@ -118,6 +123,18 @@ class _SplashScreenState extends State<SplashScreen>
         (Route<dynamic> route) => false,
       );
     }
+  }
+
+  /// Triggers an in-app update check. Immediate updates block here until
+  /// the user completes the update; flexible updates will show a SnackBar
+  /// after navigation (via the mounted context check inside the service).
+  Future<void> _checkForAppUpdate() async {
+    // checkAndHandleUpdate is a no-op on non-Android platforms and on
+    // debug/sideloaded builds, so it's safe to call unconditionally.
+    await AppUpdateService.instance.checkAndHandleUpdate(
+      context,
+      staleDaysThreshold: 5, // treat as immediate after 5 days of staleness
+    );
   }
 
   @override
