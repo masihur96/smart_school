@@ -526,57 +526,23 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
   }
 
   Widget _buildMonthlyAttendanceChart(MonthlyAttendanceOverview data) {
-    final provider = context.watch<AdminDashboardProvider>();
-    final isMonthlyLoading = provider.isMonthlyLoading;
-
-    // Filter valid months and sort by month index
-    final validData = data.data
-        .where((d) => d.month >= 1 && d.month <= 12)
-        .toList()
-      ..sort((a, b) => a.month.compareTo(b.month));
-
-    final spots = <FlSpot>[];
-    for (final item in validData) {
+    List<FlSpot> spots = [];
+    for (int i = 0; i < data.data.length; i++) {
       spots.add(
         FlSpot(
-          item.month.toDouble(),
-          item.attendancePercentage.clamp(0.0, 100.0),
+          data.data[i].month.toDouble(),
+          data.data[i].attendancePercentage,
         ),
       );
-    }
-    spots.sort((a, b) => a.x.compareTo(b.x));
-
-    // Calculate average percentage
-    double avgPercentage = 0;
-    if (validData.isNotEmpty) {
-      final totalP = validData.fold<double>(
-        0,
-        (sum, item) => sum + item.attendancePercentage,
-      );
-      avgPercentage = totalP / validData.length;
-    }
-
-    final currentYear = DateTime.now().year;
-    final availableYears = [
-      currentYear - 2,
-      currentYear - 1,
-      currentYear,
-      currentYear + 1,
-    ];
-    if (!availableYears.contains(data.year)) {
-      availableYears.add(data.year);
-      availableYears.sort();
     }
 
     return Card(
       margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(14.0),
+        padding: const EdgeInsets.all(10.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with title and Year Dropdown Selector
             Row(
               children: [
                 Container(
@@ -592,388 +558,179 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Monthly Attendance Overview',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Monthly Attendance Overview',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
-                      if (validData.isNotEmpty)
-                        Text(
-                          '${validData.length} ${validData.length == 1 ? 'month' : 'months'} active • Avg: ${avgPercentage.toStringAsFixed(1)}%',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey.shade600,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        )
-                      else
-                        Text(
-                          'Year ${data.year}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                // Year Selector Dropdown
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.purple.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.purple.withOpacity(0.2)),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<int>(
-                      value: availableYears.contains(provider.selectedYear)
-                          ? provider.selectedYear
-                          : (availableYears.contains(data.year)
-                              ? data.year
-                              : availableYears.first),
-                      icon: const Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        size: 18,
-                        color: Colors.purple,
-                      ),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.purple,
-                      ),
-                      items: availableYears.map((y) {
-                        return DropdownMenuItem<int>(
-                          value: y,
-                          child: Text('$y'),
-                        );
-                      }).toList(),
-                      onChanged: (newYear) {
-                        if (newYear != null) {
-                          context
-                              .read<AdminDashboardProvider>()
-                              .changeYear(newYear);
-                        }
-                      },
                     ),
-                  ),
+                    Text('Year ${data.year}', style: TextStyle(fontSize: 12)),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 18),
-
-            if (isMonthlyLoading)
-              Container(
-                height: 190,
-                alignment: Alignment.center,
-                child: const CircularProgressIndicator(color: Colors.purple),
-              )
-            else if (spots.isEmpty)
-              Container(
-                height: 160,
-                alignment: Alignment.center,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.event_busy_rounded,
-                      size: 36,
-                      color: Colors.grey.shade300,
+            const SizedBox(height: 24),
+            SizedBox(
+              height: 200,
+              child: LineChart(
+                LineChartData(
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    horizontalInterval: 25,
+                    getDrawingHorizontalLine: (value) {
+                      return FlLine(
+                        color: Colors.grey.withOpacity(0.15),
+                        strokeWidth: 1,
+                        dashArray: [5, 5],
+                      );
+                    },
+                  ),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'No attendance data found for ${provider.selectedYear}',
-                      style:
-                          TextStyle(fontSize: 13, color: Colors.grey.shade500),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
                     ),
-                  ],
-                ),
-              )
-            else ...[
-              SizedBox(
-                height: 190,
-                child: LineChart(
-                  LineChartData(
-                    gridData: FlGridData(
-                      show: true,
-                      drawVerticalLine: false,
-                      horizontalInterval: 25,
-                      getDrawingHorizontalLine: (value) {
-                        return FlLine(
-                          color: Colors.grey.withOpacity(0.12),
-                          strokeWidth: 1,
-                          dashArray: [5, 5],
-                        );
-                      },
-                    ),
-                    titlesData: FlTitlesData(
-                      show: true,
-                      rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                      topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 28,
-                          interval: 1,
-                          getTitlesWidget: (value, meta) {
-                            const months = [
-                              'Jan',
-                              'Feb',
-                              'Mar',
-                              'Apr',
-                              'May',
-                              'Jun',
-                              'Jul',
-                              'Aug',
-                              'Sep',
-                              'Oct',
-                              'Nov',
-                              'Dec',
-                            ];
-                            final intVal = value.toInt();
-                            if (intVal >= 1 && intVal <= 12) {
-                              final hasData =
-                                  validData.any((d) => d.month == intVal);
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 6.0),
-                                child: Text(
-                                  months[intVal - 1],
-                                  style: TextStyle(
-                                    fontSize: 9.5,
-                                    fontWeight: hasData
-                                        ? FontWeight.w800
-                                        : FontWeight.w500,
-                                    color: hasData
-                                        ? Colors.purple
-                                        : Colors.grey.shade400,
-                                  ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 30,
+                        interval: 1,
+                        getTitlesWidget: (value, meta) {
+                          const months = [
+                            'Jan',
+                            'Feb',
+                            'Mar',
+                            'Apr',
+                            'May',
+                            'Jun',
+                            'Jul',
+                            'Aug',
+                            'Sep',
+                            'Oct',
+                            'Nov',
+                            'Dec',
+                          ];
+                          if (value.toInt() >= 1 && value.toInt() <= 12) {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                months[value.toInt() - 1],
+                                style: TextStyle(
+                                  // color: Colors.grey[600],
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
                                 ),
-                              );
-                            }
-                            return const Text('');
-                          },
-                        ),
-                      ),
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          interval: 25,
-                          reservedSize: 32,
-                          getTitlesWidget: (value, meta) {
-                            return Text(
-                              '${value.toInt()}%',
-                              style: TextStyle(
-                                fontSize: 9.5,
-                                color: Colors.grey.shade500,
-                                fontWeight: FontWeight.w600,
                               ),
                             );
-                          },
-                        ),
+                          }
+                          return const Text('');
+                        },
                       ),
                     ),
-                    borderData: FlBorderData(show: false),
-                    minX: 1,
-                    maxX: 12,
-                    minY: 0,
-                    maxY: 100,
-                    lineBarsData: [
-                      LineChartBarData(
-                        spots: spots,
-                        isCurved: spots.length > 1,
-                        color: Colors.purple,
-                        barWidth: 3,
-                        isStrokeCapRound: true,
-                        dotData: FlDotData(
-                          show: true,
-                          getDotPainter: (spot, percent, barData, index) {
-                            return FlDotCirclePainter(
-                              radius: 4,
-                              color: Colors.white,
-                              strokeWidth: 2.5,
-                              strokeColor: Colors.purple,
-                            );
-                          },
-                        ),
-                        belowBarData: BarAreaData(
-                          show: true,
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.purple.withOpacity(0.25),
-                              Colors.purple.withOpacity(0.0),
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
-                        ),
-                      ),
-                    ],
-                    lineTouchData: LineTouchData(
-                      touchTooltipData: LineTouchTooltipData(
-                        getTooltipItems: (touchedSpots) {
-                          return touchedSpots.map((LineBarSpot touchedSpot) {
-                            const months = [
-                              'Jan',
-                              'Feb',
-                              'Mar',
-                              'Apr',
-                              'May',
-                              'Jun',
-                              'Jul',
-                              'Aug',
-                              'Sep',
-                              'Oct',
-                              'Nov',
-                              'Dec',
-                            ];
-                            final monthIdx = touchedSpot.x.toInt();
-                            final monthStr =
-                                (monthIdx >= 1 && monthIdx <= 12)
-                                    ? months[monthIdx - 1]
-                                    : 'Month $monthIdx';
-
-                            final matchingMonth = validData.firstWhere(
-                              (d) => d.month == monthIdx,
-                              orElse: () => MonthlyAttendanceData(
-                                month: monthIdx,
-                                totalPresent: 0,
-                                totalAbsent: 0,
-                                totalLeave: 0,
-                                totalLate: 0,
-                                attendancePercentage: touchedSpot.y,
-                              ),
-                            );
-
-                            return LineTooltipItem(
-                              '$monthStr ${provider.selectedYear}\n',
-                              const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text:
-                                      '${touchedSpot.y.toStringAsFixed(1)}% Attendance\n',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                                if (matchingMonth.totalPresent > 0 ||
-                                    matchingMonth.totalAbsent > 0)
-                                  TextSpan(
-                                    text:
-                                        'Present: ${matchingMonth.totalPresent} • Absent: ${matchingMonth.totalAbsent}',
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.normal,
-                                    ),
-                                  ),
-                              ],
-                            );
-                          }).toList();
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        interval: 25,
+                        reservedSize: 35,
+                        getTitlesWidget: (value, meta) {
+                          return Text(
+                            '${value.toInt()}%',
+                            style: TextStyle(
+                              // color: Colors.grey[600],
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          );
                         },
                       ),
                     ),
                   ),
-                ),
-              ),
-
-              // Monthly Breakdown Cards
-              const SizedBox(height: 16),
-              const Divider(height: 1),
-              const SizedBox(height: 10),
-              SizedBox(
-                height: 58,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: validData.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  itemBuilder: (context, index) {
-                    final item = validData[index];
-                    final pct = item.attendancePercentage;
-                    final color = pct >= 75
-                        ? const Color(0xFF10B981)
-                        : pct >= 50
-                        ? const Color(0xFFF59E0B)
-                        : const Color(0xFFEF4444);
-
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
+                  borderData: FlBorderData(show: false),
+                  minX: 1,
+                  maxX: 12,
+                  minY: 0,
+                  maxY: 100,
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: spots,
+                      isCurved: true,
+                      color: Colors.purple,
+                      barWidth: 3,
+                      isStrokeCapRound: true,
+                      dotData: FlDotData(
+                        show: true,
+                        getDotPainter: (spot, percent, barData, index) {
+                          return FlDotCirclePainter(
+                            radius: 4,
+                            color: Colors.white,
+                            strokeWidth: 2,
+                            strokeColor: Colors.purple,
+                          );
+                        },
                       ),
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: color.withOpacity(0.2)),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.purple.withOpacity(0.3),
+                            Colors.purple.withOpacity(0.0),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
+                    ),
+                  ],
+                  lineTouchData: LineTouchData(
+                    touchTooltipData: LineTouchTooltipData(
+                      getTooltipItems: (touchedSpots) {
+                        return touchedSpots.map((LineBarSpot touchedSpot) {
+                          const months = [
+                            'Jan',
+                            'Feb',
+                            'Mar',
+                            'Apr',
+                            'May',
+                            'Jun',
+                            'Jul',
+                            'Aug',
+                            'Sep',
+                            'Oct',
+                            'Nov',
+                            'Dec',
+                          ];
+                          final monthStr = months[touchedSpot.x.toInt() - 1];
+                          return LineTooltipItem(
+                            '$monthStr\n',
+                            const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                             children: [
-                              Text(
-                                item.monthName,
+                              TextSpan(
+                                text: '${touchedSpot.y.toStringAsFixed(1)}%',
                                 style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF1F2937),
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 5,
-                                  vertical: 1,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  '${pct.toStringAsFixed(1)}%',
-                                  style: const TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white,
-                                  ),
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.normal,
                                 ),
                               ),
                             ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'P: ${item.totalPresent}  A: ${item.totalAbsent}${item.totalLeave > 0 ? '  L: ${item.totalLeave}' : ''}',
-                            style: TextStyle(
-                              fontSize: 9.5,
-                              color: Colors.grey.shade600,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                          );
+                        }).toList();
+                      },
+                    ),
+                  ),
                 ),
               ),
-            ],
+            ),
           ],
         ),
       ),
