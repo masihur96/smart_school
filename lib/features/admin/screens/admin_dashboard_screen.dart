@@ -2275,53 +2275,66 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                   ],
                 ),
                 // Avatar
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: gradeColor.withOpacity(0.12),
-                  child: Text(
-                    perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
-                    style: TextStyle(
-                      color: gradeColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: gradeColor.withOpacity(0.12),
+                      child: Text(
+                        perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
+                        style: TextStyle(
+                          color: gradeColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
-                  ),
+                    SizedBox(width: 10,),
+                    Column(
+
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          perf.name.split(' ').first,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
+                        // Class chip
+                        if (perf.classInfo != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.purple.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              perf.classInfo!.name,
+                              style: const TextStyle(
+                                fontSize: 9,
+                                color: Colors.purple,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          )
+                        else
+                          const SizedBox(height: 14),
+                      ],
+                    ),
+
+                  ],
                 ),
                 // Name
-                Text(
-                  perf.name.split(' ').first,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
-                // Class chip
-                if (perf.classInfo != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.purple.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      perf.classInfo!.name,
-                      style: const TextStyle(
-                        fontSize: 9,
-                        color: Colors.purple,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  )
-                else
-                  const SizedBox(height: 14),
+
                 // Mini metric strip
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
