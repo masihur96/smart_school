@@ -954,10 +954,13 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                   ),
                 ),
                 SizedBox(
-                  height: 255,
+                  height: screenSize(context, .65),
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
+                    controller: ScrollController(initialScrollOffset: 0),
+                    physics: const ClampingScrollPhysics(),
+                    padding: EdgeInsets.zero,
+
 
                     itemCount: _getGroupedStats(data.data).length,
                     itemBuilder: (context, index) {
@@ -965,7 +968,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                       return Padding(
                         padding: const EdgeInsets.only(right: 12.0),
                         child: SizedBox(
-                          width: screenSize(context, 0.88),
+                          width: screenSize(context, .9),
                           child: _AdminClassPerformanceCardWithSubjectDropdown(
                             stats: stats,
                           ),
@@ -3038,6 +3041,57 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              if (subjects.isNotEmpty) ...[
+                                Container(
+                                  height: 32,
+                                  constraints: const BoxConstraints(maxWidth: 80),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: Colors.grey.shade300),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String?>(
+                                      value: _selectedSubjectId,
+                                      isExpanded: true,
+                                      icon: const Icon(Icons.keyboard_arrow_down, size: 16),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey.shade800,
+                                      ),
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          _selectedSubjectId = newValue;
+                                        });
+                                      },
+                                      items: [
+                                        DropdownMenuItem<String?>(
+                                          value: null,
+                                          child: Text(
+                                            AppLocalizations.of(context)!.all,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey.shade700,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        ...subjects.map<DropdownMenuItem<String?>>(
+                                              (subject) => DropdownMenuItem<String?>(
+                                            value: subject['id'],
+                                            child: Text(
+                                              subject['name'] ?? '',
+                                              style: const TextStyle(fontSize: 12),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -3072,60 +3126,7 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                   ],
                 ),
                 const SizedBox(height: 10),
-                if (subjects.isNotEmpty) ...[
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Container(
-                      height: 32,
-                      constraints: const BoxConstraints(maxWidth: 140),
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String?>(
-                          value: _selectedSubjectId,
-                          isExpanded: true,
-                          icon: const Icon(Icons.keyboard_arrow_down, size: 16),
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade800,
-                          ),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedSubjectId = newValue;
-                            });
-                          },
-                          items: [
-                            DropdownMenuItem<String?>(
-                              value: null,
-                              child: Text(
-                                AppLocalizations.of(context)!.all,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade700,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            ...subjects.map<DropdownMenuItem<String?>>(
-                              (subject) => DropdownMenuItem<String?>(
-                                value: subject['id'],
-                                child: Text(
-                                  subject['name'] ?? '',
-                                  style: const TextStyle(fontSize: 12),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(
