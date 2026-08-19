@@ -287,14 +287,65 @@ class MonthlyAttendanceOverview {
     required this.data,
   });
 
-  factory MonthlyAttendanceOverview.fromJson(Map<String, dynamic> json) {
-    return MonthlyAttendanceOverview(
-      year: json['year'] ?? 0,
-      data: (json['data'] as List<dynamic>?)
-              ?.map((e) => MonthlyAttendanceData.fromJson(e))
-              .toList() ??
-          [],
-    );
+  factory MonthlyAttendanceOverview.fromJson(dynamic json) {
+    if (json == null) {
+      return MonthlyAttendanceOverview(year: DateTime.now().year, data: []);
+    }
+
+    if (json is List) {
+      final list = json
+          .map((e) => MonthlyAttendanceData.fromJson(e))
+          .where((e) => e.month >= 1 && e.month <= 12)
+          .toList()
+        ..sort((a, b) => a.month.compareTo(b.month));
+      return MonthlyAttendanceOverview(
+        year: DateTime.now().year,
+        data: list,
+      );
+    }
+
+    if (json is Map) {
+      final map = Map<String, dynamic>.from(json);
+      int parsedYear = DateTime.now().year;
+      final rawYear = map['year'] ?? map['currentYear'];
+      if (rawYear is int) {
+        parsedYear = rawYear;
+      } else if (rawYear != null) {
+        parsedYear = int.tryParse(rawYear.toString()) ?? DateTime.now().year;
+      }
+
+      dynamic rawList = map['data'] ??
+          map['overview'] ??
+          map['monthlyData'] ??
+          map['months'] ??
+          map['list'];
+
+      List<MonthlyAttendanceData> list = [];
+      if (rawList is List) {
+        list = rawList
+            .map((e) => MonthlyAttendanceData.fromJson(e))
+            .where((e) => e.month >= 1 && e.month <= 12)
+            .toList()
+          ..sort((a, b) => a.month.compareTo(b.month));
+      } else if (rawList is Map) {
+        list = rawList.entries.map((entry) {
+          if (entry.value is Map) {
+            final entryMap = Map<String, dynamic>.from(entry.value as Map);
+            entryMap['month'] ??= entry.key;
+            return MonthlyAttendanceData.fromJson(entryMap);
+          }
+          return MonthlyAttendanceData.fromJson({'month': entry.key});
+        }).where((e) => e.month >= 1 && e.month <= 12).toList()
+          ..sort((a, b) => a.month.compareTo(b.month));
+      }
+
+      return MonthlyAttendanceOverview(
+        year: parsedYear,
+        data: list,
+      );
+    }
+
+    return MonthlyAttendanceOverview(year: DateTime.now().year, data: []);
   }
 }
 
@@ -315,14 +366,127 @@ class MonthlyAttendanceData {
     required this.attendancePercentage,
   });
 
-  factory MonthlyAttendanceData.fromJson(Map<String, dynamic> json) {
+  String get monthName {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    if (month >= 1 && month <= 12) {
+      return months[month - 1];
+    }
+    return 'Month $month';
+  }
+
+  String get fullMonthName {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    if (month >= 1 && month <= 12) {
+      return months[month - 1];
+    }
+    return 'Month $month';
+  }
+
+  factory MonthlyAttendanceData.fromJson(dynamic json) {
+    if (json is! Map) {
+      return MonthlyAttendanceData(
+        month: 0,
+        totalPresent: 0,
+        totalAbsent: 0,
+        totalLeave: 0,
+        totalLate: 0,
+        attendancePercentage: 0.0,
+      );
+    }
+
+    final map = Map<String, dynamic>.from(json);
+
+    // Parse month (handles int, strings like "05", "5", "May", "may", etc.)
+    int parsedMonth = 0;
+    final rawMonth = map['month'] ??
+        map['monthNumber'] ??
+        map['month_number'] ??
+        map['monthName'] ??
+        map['month_name'] ??
+        map['name'];
+
+    if (rawMonth is int) {
+      parsedMonth = rawMonth;
+    } else if (rawMonth is num) {
+      parsedMonth = rawMonth.toInt();
+    } else if (rawMonth != null) {
+      final s = rawMonth.toString().trim();
+      final directInt = int.tryParse(s);
+      if (directInt != null) {
+        parsedMonth = directInt;
+      } else {
+        const monthNames = {
+          'jan': 1, 'january': 1, '01': 1, '1': 1,
+          'feb': 2, 'february': 2, '02': 2, '2': 2,
+          'mar': 3, 'march': 3, '03': 3, '3': 3,
+          'apr': 4, 'april': 4, '04': 4, '4': 4,
+          'may': 5, '05': 5, '5': 5,
+          'jun': 6, 'june': 6, '06': 6, '6': 6,
+          'jul': 7, 'july': 7, '07': 7, '7': 7,
+          'aug': 8, 'august': 8, '08': 8, '8': 8,
+          'sep': 9, 'september': 9, '09': 9, '9': 9,
+          'oct': 10, 'october': 10, '10': 10,
+          'nov': 11, 'november': 11, '11': 11,
+          'dec': 12, 'december': 12, '12': 12,
+        };
+        parsedMonth = monthNames[s.toLowerCase()] ?? 0;
+      }
+    }
+
+    // Parse percentage
+    double parsedPercentage = 0.0;
+    final rawPercentage = map['attendancePercentage'] ??
+        map['percentage'] ??
+        map['attendanceRate'] ??
+        map['rate'] ??
+        map['presentPercentage'];
+    if (rawPercentage is num) {
+      parsedPercentage = rawPercentage.toDouble();
+    } else if (rawPercentage != null) {
+      parsedPercentage = double.tryParse(rawPercentage.toString()) ?? 0.0;
+    }
+
+    int parseInt(dynamic val) {
+      if (val is int) return val;
+      if (val is num) return val.toInt();
+      if (val != null) return int.tryParse(val.toString()) ?? 0;
+      return 0;
+    }
+
+    final totalPresent = parseInt(
+      map['totalPresent'] ?? map['present'] ?? map['total_present'],
+    );
+    final totalAbsent = parseInt(
+      map['totalAbsent'] ?? map['absent'] ?? map['total_absent'],
+    );
+    final totalLeave = parseInt(
+      map['totalLeave'] ?? map['leave'] ?? map['total_leave'],
+    );
+    final totalLate = parseInt(
+      map['totalLate'] ?? map['late'] ?? map['total_late'],
+    );
+
+    // If attendancePercentage wasn't provided or 0, calculate if totalPresent and totalAbsent exist
+    if (parsedPercentage == 0.0 && (totalPresent > 0 || totalAbsent > 0)) {
+      final totalRecords = totalPresent + totalAbsent + totalLeave;
+      if (totalRecords > 0) {
+        parsedPercentage = (totalPresent / totalRecords) * 100;
+      }
+    }
+
     return MonthlyAttendanceData(
-      month: json['month'] ?? 0,
-      totalPresent: json['totalPresent'] ?? 0,
-      totalAbsent: json['totalAbsent'] ?? 0,
-      totalLeave: json['totalLeave'] ?? 0,
-      totalLate: json['totalLate'] ?? 0,
-      attendancePercentage: (json['attendancePercentage'] ?? 0).toDouble(),
+      month: parsedMonth,
+      totalPresent: totalPresent,
+      totalAbsent: totalAbsent,
+      totalLeave: totalLeave,
+      totalLate: totalLate,
+      attendancePercentage: parsedPercentage,
     );
   }
 }

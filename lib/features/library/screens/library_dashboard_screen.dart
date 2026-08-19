@@ -62,7 +62,10 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
 
     final totalBooks = notifier.books.length;
     final availableBooks = notifier.books.where((b) => b.isAvailable).length;
-    final issuedCount = notifier.issuedBooks.length;
+    final issuedCount =
+        notifier.issuedBooks.where((b) => b.returnDate == null).length;
+    final returnedCount =
+        notifier.issuedBooks.where((b) => b.returnDate != null).length;
     final overdueCount = notifier.issuedBooks.where((b) => b.isOverdue).length;
 
     return Scaffold(
@@ -119,6 +122,7 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                 totalBooks: totalBooks,
                 availableBooks: availableBooks,
                 issuedCount: issuedCount,
+                returnedCount: returnedCount,
                 overdueCount: overdueCount,
               ),
             ),
@@ -164,6 +168,7 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
     required int totalBooks,
     required int availableBooks,
     required int issuedCount,
+    required int returnedCount,
     required int overdueCount,
   }) {
     return Stack(
@@ -269,6 +274,15 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                             value: '$issuedCount',
                             color: const Color(0xFF60A5FA),
                           ),
+                          if (returnedCount > 0) ...[
+                            const SizedBox(width: 10),
+                            _StatChip(
+                              icon: Icons.assignment_turned_in_rounded,
+                              label: 'Returned',
+                              value: '$returnedCount',
+                              color: const Color(0xFF34D399),
+                            ),
+                          ],
                           if (overdueCount > 0) ...[
                             const SizedBox(width: 10),
                             _StatChip(
