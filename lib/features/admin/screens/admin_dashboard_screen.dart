@@ -1812,7 +1812,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
             ),
             const SizedBox(height: 12),
             SizedBox(
-              height: 155, // Fixed height for horizontal cards
+              height: 130, // Fixed height for horizontal cards
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: list.length,
