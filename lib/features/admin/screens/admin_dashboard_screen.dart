@@ -2037,31 +2037,25 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
           });
         }
 
-        // Sorted best → worst (descending score)
-        final sorted = perfProvider.sortedByBest;
-        final monthNames = [
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec',
-        ];
-        final now = DateTime.now();
+        if (perfProvider.isLoading && perfProvider.allPerformances.isEmpty) {
+          return _buildPerformanceShimmer();
+        } else if (perfProvider.error != null &&
+            perfProvider.allPerformances.isEmpty) {
+          return _buildPerformanceError(perfProvider);
+        }
+
+        final list = perfProvider.sortedByBest.take(10).toList();
+        if (list.isEmpty) {
+          return _buildPerformanceEmpty(context);
+        }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSectionTitle(
-              'Student Performance',
-              TextButton.icon(
-                onPressed: () {
+              'Top Students (${_months[perfProvider.selectedMonth - 1]})',
+              InkWell(
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -2069,133 +2063,82 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                     ),
                   );
                 },
-                icon: const Icon(Icons.open_in_new, size: 14),
-                label: const Text('View All'),
+                child: Text(
+                  'View All',
+                  style: TextStyle(
+                    color: AppColors.primaryAdmin,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            // Month indicator
-            Row(
-              children: [
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 12,
-                  color: Colors.grey.shade400,
-                ),
-                const SizedBox(width: 5),
-                Text(
-                  '${monthNames[now.month - 1]} ${now.year} • Best performers',
-                  style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
-                ),
-              ],
             ),
             const SizedBox(height: 12),
-
-            if (perfProvider.isLoading) ...[
-              _buildPerformanceShimmer(),
-            ] else if (perfProvider.error != null &&
-                perfProvider.allPerformances.isEmpty) ...[
-              _buildPerformanceError(perfProvider),
-            ] else if (sorted.isEmpty) ...[
-              _buildPerformanceEmpty(context),
-            ] else ...[
-              // Horizontal scrollable cards — best score first
-              SizedBox(
-                height: 170,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: sorted.length,
-                  itemBuilder: (context, idx) {
-                    return _buildDashboardPerfCard(
-                      context,
-                      sorted[idx],
-                      idx + 1,
-                    );
-                  },
-                ),
+            SizedBox(
+              height: 130, // Fixed height matching teacher cards
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: list.length,
+                clipBehavior: Clip.none,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  return _buildDashboardPerfCard(
+                    context,
+                    list[index],
+                    index + 1,
+                  );
+                },
               ),
-            ],
+            ),
           ],
         );
       },
     );
   }
 
-  Widget _buildMiniMetricBar(String label, double value, Color color) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 9,
-                  color: Colors.grey.shade400,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                '${value.toStringAsFixed(0)}%',
-                style: TextStyle(
-                  fontSize: 9,
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 2),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: LinearProgressIndicator(
-              value: value / 100,
-              minHeight: 4,
-              backgroundColor: color.withOpacity(0.1),
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Compact vertical card for horizontal dashboard scroll
+  /// Compact horizontal card for student performance dashboard scroll
   Widget _buildDashboardPerfCard(
     BuildContext context,
     StudentPerformance perf,
     int rank,
   ) {
+    // Calculate total score (average of the 3 percentages)
     final score =
         (perf.attendance.percentage +
             perf.homework.percentage +
             perf.exams.percentage) /
         3;
 
-    Color gradeColor;
-    if (score >= 80) {
-      gradeColor = const Color(0xFF10B981);
-    } else if (score >= 60) {
-      gradeColor = const Color(0xFF3B82F6);
-    } else if (score >= 40) {
-      gradeColor = const Color(0xFFF59E0B);
+    Color badgeColor;
+    String badgeText;
+    if (rank == 1) {
+      badgeColor = const Color(0xFFFFD700); // Gold
+      badgeText = '🥇 1st';
+    } else if (rank == 2) {
+      badgeColor = const Color(0xFFC0C0C0); // Silver
+      badgeText = '🥈 2nd';
+    } else if (rank == 3) {
+      badgeColor = const Color(0xFFCD7F32); // Bronze
+      badgeText = '🥉 3rd';
     } else {
-      gradeColor = const Color(0xFFEF4444);
+      badgeColor = Colors.grey.shade300;
+      badgeText = '#$rank';
     }
 
-    final medalColors = {
-      1: const Color(0xFFFFD700),
-      2: const Color(0xFFC0C0C0),
-      3: const Color(0xFFCD7F32),
-    };
-    final rankEmojis = {1: '🥇', 2: '🥈', 3: '🥉'};
-    final isTop3 = rank <= 3;
-    final borderColor = isTop3
-        ? medalColors[rank]!.withOpacity(0.5)
-        : Colors.grey.shade200;
+    String subtitle;
+    if (perf.classInfo != null) {
+      final sectionPart =
+          perf.section != null ? ' - ${perf.section!.name}' : '';
+      final rollPart =
+          perf.rollNumber != null && perf.rollNumber!.isNotEmpty
+              ? ' • Roll ${perf.rollNumber}'
+              : '';
+      subtitle = '${perf.classInfo!.name}$sectionPart$rollPart';
+    } else if (perf.rollNumber != null && perf.rollNumber!.isNotEmpty) {
+      subtitle = 'Roll ${perf.rollNumber}';
+    } else {
+      subtitle = 'Student';
+    }
 
     return GestureDetector(
       onTap: () {
@@ -2205,149 +2148,123 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
         );
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const StudentPerformanceScreen()),
+          MaterialPageRoute(
+            builder: (_) => const StudentPerformanceScreen(),
+          ),
         );
       },
       child: Card(
-        margin: const EdgeInsets.all(5),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: SizedBox(
-            width: 130,
+            width: 240,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Rank indicator
+                // Header: Rank badge + Score
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    if (isTop3)
-                      Text(
-                        rankEmojis[rank]!,
-                        style: const TextStyle(fontSize: 16),
-                      )
-                    else
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '#$rank',
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey.shade500,
-                          ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: badgeColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        badgeText,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: rank <= 3 ? null : Colors.grey.shade600,
                         ),
                       ),
-                    // Score ring (small)
-                    SizedBox(
-                      width: 36,
-                      height: 36,
-                      child: Stack(
-                        alignment: Alignment.center,
+                    ),
+                    Text(
+                      '${score.toStringAsFixed(1)}%',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                // Avatar + Student Name & Subtitle
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundColor: AppColors.primaryAdmin.withValues(
+                        alpha: 0.1,
+                      ),
+                      child: Text(
+                        perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryAdmin,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CircularProgressIndicator(
-                            value: score / 100,
-                            strokeWidth: 3.5,
-                            backgroundColor: gradeColor.withOpacity(0.1),
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              gradeColor,
+                          Text(
+                            perf.name,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
                             ),
-                            strokeCap: StrokeCap.round,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            '${score.toStringAsFixed(0)}%',
+                            subtitle,
                             style: TextStyle(
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold,
-                              color: gradeColor,
+                              fontSize: 10,
+                              color: Colors.grey.shade500,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                // Avatar
+                const SizedBox(height: 10),
+                // Mini progress bars for Att, HW, Exam
                 Row(
                   children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: gradeColor.withOpacity(0.12),
-                      child: Text(
-                        perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
-                        style: TextStyle(
-                          color: gradeColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                    Expanded(
+                      child: _miniProgressBar(
+                        'Att',
+                        perf.attendance.percentage,
+                        Colors.green,
                       ),
                     ),
-                    SizedBox(width: 10,),
-                    Column(
-
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          perf.name.split(' ').first,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                        ),
-                        // Class chip
-                        if (perf.classInfo != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.purple.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              perf.classInfo!.name,
-                              style: const TextStyle(
-                                fontSize: 9,
-                                color: Colors.purple,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          )
-                        else
-                          const SizedBox(height: 14),
-                      ],
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _miniProgressBar(
+                        'HW',
+                        perf.homework.percentage,
+                        Colors.blue,
+                      ),
                     ),
-
-                  ],
-                ),
-                // Name
-
-                // Mini metric strip
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _metricDot(
-                      perf.attendance.percentage,
-                      const Color(0xFF10B981),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _miniProgressBar(
+                        'Exam',
+                        perf.exams.percentage,
+                        Colors.purple,
+                      ),
                     ),
-                    _metricDot(
-                      perf.homework.percentage,
-                      const Color(0xFF3B82F6),
-                    ),
-                    _metricDot(perf.exams.percentage, const Color(0xFFEF4444)),
                   ],
                 ),
               ],
@@ -2358,56 +2275,31 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     );
   }
 
-  Widget _metricDot(double value, Color color) {
+  Widget _buildPerformanceShimmer() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 24,
-          height: 24,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color.withOpacity(0.1),
-          ),
-          child: Center(
-            child: Text(
-              '${value.toStringAsFixed(0)}%',
-              style: TextStyle(
-                fontSize: 7,
-                fontWeight: FontWeight.bold,
-                color: color,
+        _buildSectionTitle(
+          'Top Students',
+          const SizedBox.shrink(),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 130,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: 4,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (_, __) => Container(
+              width: 240,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildPerformanceShimmer() {
-    return SizedBox(
-      height: 170,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: 5,
-        itemBuilder: (_, i) => Container(
-          width: 130,
-          margin: const EdgeInsets.only(right: 10),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: i == 0
-              ? const Center(
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                )
-              : null,
-        ),
-      ),
     );
   }
 
