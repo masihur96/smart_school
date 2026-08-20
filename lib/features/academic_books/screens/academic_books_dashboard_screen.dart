@@ -625,7 +625,7 @@ class _AcademicBooksDashboardScreenState
           SafeArea(
             bottom: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+              padding: const EdgeInsets.fromLTRB(50, 8, 20, 16),
               child: FadeTransition(
                 opacity: _fadeAnim,
                 child: SlideTransition(
@@ -634,7 +634,6 @@ class _AcademicBooksDashboardScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const SizedBox(height: 8),
                       Row(
                         children: [
                           Container(
