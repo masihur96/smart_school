@@ -246,6 +246,65 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     );
   }
 
+  // ── Helpers ──────────────────────────────────────────────────────────────
+
+  String _getTimeAgoOrUpcoming(DateTime scheduledTime) {
+    final now = DateTime.now();
+    final difference = scheduledTime.difference(now);
+
+    if (difference.isNegative) {
+      final pastDiff = now.difference(scheduledTime);
+      if (pastDiff.inMinutes < 60) {
+        return '${pastDiff.inMinutes}m ago';
+      } else if (pastDiff.inHours < 24) {
+        return '${pastDiff.inHours}h ago';
+      } else if (pastDiff.inDays == 1) {
+        return 'Yesterday';
+      } else if (pastDiff.inDays < 7) {
+        return '${pastDiff.inDays}d ago';
+      } else {
+        return DateFormat('MMM dd').format(scheduledTime);
+      }
+    } else {
+      if (difference.inMinutes < 60) {
+        return 'in ${difference.inMinutes}m';
+      } else if (difference.inHours < 24) {
+        return 'in ${difference.inHours}h';
+      } else if (difference.inDays == 1) {
+        return 'Tomorrow';
+      } else if (difference.inDays < 7) {
+        return 'in ${difference.inDays}d';
+      } else {
+        return DateFormat('MMM dd').format(scheduledTime);
+      }
+    }
+  }
+
+  String _getPlatformLabel(String meetLink) {
+    final lower = meetLink.toLowerCase();
+    if (lower.contains('meet.google.com')) return 'Google Meet';
+    if (lower.contains('zoom.us')) return 'Zoom';
+    if (lower.contains('teams.microsoft.com') ||
+        lower.contains('teams.live.com')) {
+      return 'MS Teams';
+    }
+    if (lower.contains('webex.com')) return 'Webex';
+    return 'Online Meeting';
+  }
+
+  IconData _getPlatformIcon(String meetLink) {
+    final lower = meetLink.toLowerCase();
+    if (lower.contains('meet.google.com')) {
+      return Icons.video_camera_front_rounded;
+    }
+    if (lower.contains('zoom.us')) return Icons.videocam_rounded;
+    if (lower.contains('teams.microsoft.com') ||
+        lower.contains('teams.live.com')) {
+      return Icons.groups_rounded;
+    }
+    return Icons.link_rounded;
+  }
+
   // ── Shimmer ───────────────────────────────────────────────────────────────
 
   Widget _buildShimmerLoader() {
@@ -257,65 +316,89 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
         return Shimmer.fromColors(
           baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
           highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!),
+          child: Card(
+            elevation: 0,
+            margin: const EdgeInsets.only(bottom: 14),
+            shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: 150,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(6),
+            child: Padding(
+              padding: const EdgeInsets.all(14.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: 150,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                       ),
-                    ),
-                    Container(
-                      width: 70,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
+                      Container(
+                        width: 70,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    width: 90,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  width: 120,
-                  height: 13,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(6),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  width: 180,
-                  height: 13,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(6),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  width: double.infinity,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        width: 100,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 14),
+                  Container(
+                    width: double.infinity,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -331,55 +414,189 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     bool canManageClass,
     Color themeColor,
   ) {
-    final formattedDate = DateFormat(
-      'MMM dd, yyyy • hh:mm a',
-    ).format(oClass.scheduledTime);
-    final isUpcoming = oClass.scheduledTime.isAfter(DateTime.now());
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final now = DateTime.now();
+
+    // Meeting status computation
+    // Upcoming: Scheduled in the future
+    final isUpcoming = oClass.scheduledTime.isAfter(now);
+    // Live: Started within the last 60 minutes
+    final isLive = !isUpcoming &&
+        now.isBefore(oClass.scheduledTime.add(const Duration(minutes: 60)));
+    // Past: Started more than 60 minutes ago
+    final isPast = !isUpcoming && !isLive;
+
     final classSectionLabel = _getClassSectionLabel(context, oClass);
+    final relativeTime = _getTimeAgoOrUpcoming(oClass.scheduledTime);
+    final platformLabel = _getPlatformLabel(oClass.meetLink);
+    final platformIcon = _getPlatformIcon(oClass.meetLink);
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: 14),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(14.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── Top Row: Title, Status Badge, 3-dot Menu ──
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Text(
-                    oClass.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        oClass.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+                      // Badges: Subject & Platform
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          if (oClass.subjectName != null &&
+                              oClass.subjectName!.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.indigo.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.menu_book_outlined,
+                                    size: 11,
+                                    color: Colors.indigo.shade700,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    oClass.subjectName!,
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.indigo.shade700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  platformIcon,
+                                  size: 11,
+                                  color: Colors.blue.shade700,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  platformLabel,
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.blue.shade700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
+                const SizedBox(width: 8),
+                // Status badge (Live / Upcoming / Ended)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
+                    horizontal: 9,
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: isUpcoming
-                        ? AppColors.success.withOpacity(0.1)
-                        : Colors.grey.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    isUpcoming ? 'Upcoming' : 'Past',
-                    style: TextStyle(
-                      color: isUpcoming ? AppColors.success : Colors.grey,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                    color: isLive
+                        ? Colors.red.shade50
+                        : (isUpcoming
+                            ? Colors.green.shade50
+                            : (isDark
+                                ? Colors.grey.shade800
+                                : Colors.grey.shade100)),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isLive
+                          ? Colors.red.shade300
+                          : (isUpcoming
+                              ? Colors.green.shade300
+                              : (isDark
+                                  ? Colors.grey.shade700
+                                  : Colors.grey.shade300)),
+                      width: 0.8,
                     ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isLive
+                              ? Colors.red
+                              : (isUpcoming ? Colors.green : Colors.grey),
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        isLive
+                            ? 'LIVE NOW'
+                            : (isUpcoming ? 'Upcoming' : 'Ended'),
+                        style: TextStyle(
+                          color: isLive
+                              ? Colors.red.shade700
+                              : (isUpcoming
+                                  ? Colors.green.shade700
+                                  : (isDark
+                                      ? Colors.grey.shade400
+                                      : Colors.grey.shade600)),
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 if (canManageClass)
                   PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_vert),
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(Icons.more_vert, size: 20),
                     onSelected: (value) async {
                       if (value == 'edit') {
                         final result = await Navigator.push<bool>(
@@ -405,9 +622,9 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.edit, size: 20),
+                            Icon(Icons.edit_outlined, size: 18, color: Colors.blue),
                             SizedBox(width: 8),
-                            Text('Edit'),
+                            Text('Edit Class'),
                           ],
                         ),
                       ),
@@ -415,9 +632,10 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete, size: 20, color: Colors.red),
+                            Icon(Icons.delete_outline, size: 18, color: Colors.red),
                             SizedBox(width: 8),
-                            Text('Delete', style: TextStyle(color: Colors.red)),
+                            Text('Delete Class',
+                                style: TextStyle(color: Colors.red)),
                           ],
                         ),
                       ),
@@ -425,89 +643,237 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                   ),
               ],
             ),
+
+            const SizedBox(height: 12),
+
+            // ── Professional Time Box ──
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.grey.shade900.withValues(alpha: 0.6)
+                    : (isLive
+                        ? Colors.red.shade50.withValues(alpha: 0.5)
+                        : (isUpcoming
+                            ? themeColor.withValues(alpha: 0.05)
+                            : Colors.grey.shade100)),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isLive
+                      ? Colors.red.shade200
+                      : (isUpcoming
+                          ? themeColor.withValues(alpha: 0.15)
+                          : (isDark
+                              ? Colors.grey.shade800
+                              : Colors.grey.shade200)),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today_rounded,
+                    size: 14,
+                    color: isLive
+                        ? Colors.red
+                        : (isUpcoming ? themeColor : Colors.grey.shade600),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    DateFormat('MMM dd, yyyy').format(oClass.scheduledTime),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color:
+                          isDark ? Colors.grey.shade200 : Colors.grey.shade800,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Container(
+                    width: 3,
+                    height: 3,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade400,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Icon(
+                    Icons.access_time_filled_rounded,
+                    size: 14,
+                    color: isLive
+                        ? Colors.red
+                        : (isUpcoming ? themeColor : Colors.grey.shade600),
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    DateFormat('hh:mm a').format(oClass.scheduledTime),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color:
+                          isDark ? Colors.grey.shade200 : Colors.grey.shade800,
+                    ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isLive
+                          ? Colors.red
+                          : (isUpcoming
+                              ? themeColor.withValues(alpha: 0.12)
+                              : (isDark
+                                  ? Colors.grey.shade800
+                                  : Colors.grey.shade200)),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      isLive ? 'LIVE' : relativeTime,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: isLive
+                            ? Colors.white
+                            : (isUpcoming
+                                ? themeColor
+                                : (isDark
+                                    ? Colors.grey.shade400
+                                    : Colors.grey.shade600)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             const SizedBox(height: 10),
 
-            // Host / Teacher info
+            // ── Details Row: Teacher & Target Class ──
             Row(
               children: [
-                const Icon(Icons.person_outline_rounded, size: 16),
-                const SizedBox(width: 6),
                 Expanded(
-                  child: Text(
-                    'Teacher: ${oClass.teacherName}',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.person_outline_rounded,
+                        size: 14,
+                        color: Colors.teal.shade600,
+                      ),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: Text(
+                          oClass.teacherName,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: isDark
+                                ? Colors.grey.shade300
+                                : Colors.grey.shade700,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 6),
-
-            // Target Class & Section
-            Row(
-              children: [
-                const Icon(Icons.school_outlined, size: 16),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    'Target: $classSectionLabel',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.school_outlined,
+                        size: 14,
+                        color: AppColors.primaryAdmin,
+                      ),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: Text(
+                          classSectionLabel,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: isDark
+                                ? Colors.grey.shade300
+                                : Colors.grey.shade700,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 6),
-
-            // Scheduled Time
-            Row(
-              children: [
-                const Icon(Icons.access_time_rounded, size: 16),
-                const SizedBox(width: 6),
-                Text(formattedDate, style: const TextStyle(fontSize: 13)),
               ],
             ),
 
             if (oClass.description.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                oClass.description,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 14,
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.grey.shade900.withValues(alpha: 0.4)
+                      : Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  oClass.description,
+                  style: TextStyle(
+                    color:
+                        isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                    fontSize: 12,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
-            const SizedBox(height: 16),
 
-            // Join Meeting Button for all roles
+            const SizedBox(height: 12),
+
+            // ── Action Button: Join Meeting (Disabled if already passed) ──
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => _launchURL(oClass.meetLink),
+                onPressed: isPast ? null : () => _launchURL(oClass.meetLink),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: themeColor,
+                  backgroundColor:
+                      isLive ? const Color(0xFFEF4444) : themeColor,
+                  disabledBackgroundColor:
+                      isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                  disabledForegroundColor:
+                      isDark ? Colors.grey.shade500 : Colors.grey.shade500,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 0,
                 ),
-                icon: const Icon(Icons.video_call_rounded, color: Colors.white),
-                label: const Text(
-                  'Join Meeting',
+                icon: Icon(
+                  isPast
+                      ? Icons.videocam_off_outlined
+                      : (isLive
+                          ? Icons.videocam_rounded
+                          : Icons.video_call_rounded),
+                  color: isPast
+                      ? (isDark ? Colors.grey.shade500 : Colors.grey.shade500)
+                      : Colors.white,
+                  size: 18,
+                ),
+                label: Text(
+                  isPast
+                      ? 'Class Ended'
+                      : (isLive ? 'Join Live Class' : 'Join Meeting'),
                   style: TextStyle(
-                    color: Colors.white,
+                    color: isPast
+                        ? (isDark ? Colors.grey.shade500 : Colors.grey.shade500)
+                        : Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                    fontSize: 14,
                   ),
                 ),
               ),
