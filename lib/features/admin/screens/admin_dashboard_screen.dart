@@ -1914,14 +1914,22 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                       backgroundColor: AppColors.primaryAdmin.withValues(
                         alpha: 0.1,
                       ),
-                      child: Text(
-                        perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryAdmin,
-                        ),
-                      ),
+                      backgroundImage:
+                          perf.avatar != null && perf.avatar!.isNotEmpty
+                              ? NetworkImage(perf.avatar!)
+                              : null,
+                      child: perf.avatar != null && perf.avatar!.isNotEmpty
+                          ? null
+                          : Text(
+                              perf.name.isNotEmpty
+                                  ? perf.name[0].toUpperCase()
+                                  : '?',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryAdmin,
+                              ),
+                            ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -2201,14 +2209,22 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                       backgroundColor: AppColors.primaryAdmin.withValues(
                         alpha: 0.1,
                       ),
-                      child: Text(
-                        perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryAdmin,
-                        ),
-                      ),
+                      backgroundImage:
+                          perf.avatar != null && perf.avatar!.isNotEmpty
+                              ? NetworkImage(perf.avatar!)
+                              : null,
+                      child: perf.avatar != null && perf.avatar!.isNotEmpty
+                          ? null
+                          : Text(
+                              perf.name.isNotEmpty
+                                  ? perf.name[0].toUpperCase()
+                                  : '?',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryAdmin,
+                              ),
+                            ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(

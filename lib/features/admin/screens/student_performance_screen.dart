@@ -827,16 +827,22 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                           CircleAvatar(
                             radius: 28,
                             backgroundColor: color.withValues(alpha: 0.12),
-                            child: Text(
-                              perf.name.isNotEmpty
-                                  ? perf.name[0].toUpperCase()
-                                  : '?',
-                              style: TextStyle(
-                                color: color,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 24,
-                              ),
-                            ),
+                            backgroundImage:
+                                perf.avatar != null && perf.avatar!.isNotEmpty
+                                    ? NetworkImage(perf.avatar!)
+                                    : null,
+                            child: perf.avatar != null && perf.avatar!.isNotEmpty
+                                ? null
+                                : Text(
+                                    perf.name.isNotEmpty
+                                        ? perf.name[0].toUpperCase()
+                                        : '?',
+                                    style: TextStyle(
+                                      color: color,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 24,
+                                    ),
+                                  ),
                           ),
                         ],
                       ),
@@ -1218,14 +1224,20 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
               CircleAvatar(
                 radius: 22,
                 backgroundColor: color.withValues(alpha: 0.12),
-                child: Text(
-                  perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
-                  style: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
+                backgroundImage:
+                    perf.avatar != null && perf.avatar!.isNotEmpty
+                        ? NetworkImage(perf.avatar!)
+                        : null,
+                child: perf.avatar != null && perf.avatar!.isNotEmpty
+                    ? null
+                    : Text(
+                        perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
+                        style: TextStyle(
+                          color: color,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
               const SizedBox(width: 12),
               // Name + class info

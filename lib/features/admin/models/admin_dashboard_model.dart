@@ -330,6 +330,7 @@ class MonthlyAttendanceData {
 class TeacherPerformance {
   final String teacherId;
   final String name;
+  final String? avatar;
   final String designation;
   final PerformanceAttendance attendance;
   final PerformanceHomework homework;
@@ -337,6 +338,7 @@ class TeacherPerformance {
   TeacherPerformance({
     required this.teacherId,
     required this.name,
+    this.avatar,
     required this.designation,
     required this.attendance,
     required this.homework,
@@ -346,6 +348,16 @@ class TeacherPerformance {
     return TeacherPerformance(
       teacherId: json['teacherId'] ?? '',
       name: json['name'] ?? '',
+      avatar: json['avatar'] ??
+          json['avatarUrl'] ??
+          json['photo'] ??
+          json['image'] ??
+          json['profileImage'] ??
+          json['teacher']?['avatar'] ??
+          json['teacher']?['avatarUrl'] ??
+          json['teacher']?['photo'] ??
+          json['teacher']?['user']?['avatar'] ??
+          json['user']?['avatar'],
       designation: json['designation'] ?? '',
       attendance: PerformanceAttendance.fromJson(json['attendance'] ?? {}),
       homework: PerformanceHomework.fromJson(json['homework'] ?? {}),
@@ -396,6 +408,7 @@ class PerformanceHomework {
 class StudentPerformance {
   final String studentId;
   final String name;
+  final String? avatar;
   final String? rollNumber;
   final PerformanceClass? classInfo;
   final PerformanceSection? section;
@@ -406,6 +419,7 @@ class StudentPerformance {
   StudentPerformance({
     required this.studentId,
     required this.name,
+    this.avatar,
     this.rollNumber,
     this.classInfo,
     this.section,
@@ -418,6 +432,16 @@ class StudentPerformance {
     return StudentPerformance(
       studentId: json['studentId'] ?? '',
       name: json['name'] ?? '',
+      avatar: json['avatar'] ??
+          json['avatarUrl'] ??
+          json['photo'] ??
+          json['image'] ??
+          json['profileImage'] ??
+          json['student']?['avatar'] ??
+          json['student']?['avatarUrl'] ??
+          json['student']?['photo'] ??
+          json['student']?['user']?['avatar'] ??
+          json['user']?['avatar'],
       rollNumber: json['rollNumber'],
       classInfo: json['class'] != null ? PerformanceClass.fromJson(json['class']) : null,
       section: json['section'] != null ? PerformanceSection.fromJson(json['section']) : null,
