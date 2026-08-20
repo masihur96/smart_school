@@ -6,18 +6,13 @@ import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
-
-import 'add_edit_student_screen.dart';
-import 'add_edit_teacher_screen.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/student_performance_provider.dart';
 import 'package:smart_school/features/admin/providers/teacher_performance_provider.dart';
 import 'package:smart_school/features/admin/screens/student_performance_screen.dart';
 import 'package:smart_school/features/admin/screens/teacher_performance_screen.dart';
-
-
+import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../core/services/geocoding_service.dart';
@@ -29,6 +24,8 @@ import '../models/admin_dashboard_model.dart';
 import '../providers/admin_dashboard_provider.dart';
 import '../providers/student_provider.dart';
 import '../providers/teacher_provider.dart';
+import 'add_edit_student_screen.dart';
+import 'add_edit_teacher_screen.dart';
 import 'admin_homework_management_screen.dart';
 import 'exam_management_screen.dart';
 import 'notice_management_screen.dart';
@@ -50,7 +47,7 @@ class AdminDashboardScreen extends StatelessWidget {
       mainScreen: const AdminDashboardContent(),
       borderRadius: 24.0,
       showShadow: true,
-       angle: 0.0,
+      angle: 0.0,
       openCurve: Curves.fastOutSlowIn,
       closeCurve: Curves.fastOutSlowIn,
       duration: const Duration(milliseconds: 500),
@@ -255,8 +252,9 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                 controller: _tabController,
                 indicatorColor: _primaryColor,
                 labelColor: _primaryColor,
-                unselectedLabelColor:
-                    isDark ? Colors.white54 : Colors.grey.shade500,
+                unselectedLabelColor: isDark
+                    ? Colors.white54
+                    : Colors.grey.shade500,
                 indicatorSize: TabBarIndicatorSize.label,
                 dividerColor: Colors.transparent,
                 labelStyle: const TextStyle(
@@ -270,8 +268,14 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                   }
                 },
                 tabs: [
-                  Tab(icon: const Icon(Icons.dashboard_outlined), text: l10n.home),
-                  Tab(icon: const Icon(Icons.people_outline), text: l10n.students),
+                  Tab(
+                    icon: const Icon(Icons.dashboard_outlined),
+                    text: l10n.home,
+                  ),
+                  Tab(
+                    icon: const Icon(Icons.people_outline),
+                    text: l10n.students,
+                  ),
                   const Tab(child: SizedBox(width: 48)), // Gap for FAB
                   Tab(
                     icon: const Icon(Icons.assignment_turned_in_outlined),
@@ -303,10 +307,14 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                             color: Colors.black.withValues(alpha: 0.25),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
-                          )
+                          ),
                         ],
                       ),
-                      child: const Icon(Icons.add, color: Colors.white, size: 28),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 28,
+                      ),
                     ),
                     onSelected: (value) {
                       if (value == 0) {
@@ -330,11 +338,17 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                         value: 0,
                         child: Row(
                           children: [
-                            const Icon(Icons.person_add,
-                                color: AppColors.primaryAdmin),
+                            const Icon(
+                              Icons.person_add,
+                              color: AppColors.primaryAdmin,
+                            ),
                             const SizedBox(width: 12),
-                            Text(l10n.addStudent,
-                                style: const TextStyle(fontWeight: FontWeight.w600)),
+                            Text(
+                              l10n.addStudent,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -342,11 +356,17 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                         value: 1,
                         child: Row(
                           children: [
-                            const Icon(Icons.person_add_alt_1,
-                                color: AppColors.primaryAdmin),
+                            const Icon(
+                              Icons.person_add_alt_1,
+                              color: AppColors.primaryAdmin,
+                            ),
                             const SizedBox(width: 12),
-                            Text(l10n.addTeacher,
-                                style: const TextStyle(fontWeight: FontWeight.w600)),
+                            Text(
+                              l10n.addTeacher,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -367,7 +387,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
   ) {
     return Consumer<AdminDashboardProvider>(
       builder: (context, provider, child) {
-        if (provider.isLoading ) {
+        if (provider.isLoading) {
           return _buildShimmerLoading(context);
         }
 
@@ -960,7 +980,6 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                     controller: ScrollController(initialScrollOffset: 0),
                     physics: const ClampingScrollPhysics(),
                     padding: EdgeInsets.zero,
-
 
                     itemCount: _getGroupedStats(data.data).length,
                     itemBuilder: (context, index) {
@@ -1842,6 +1861,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     // Calculate total score (average of the 2 percentages)
     final score = (perf.attendance.percentage + perf.homework.percentage) / 2;
 
+    print(perf.avatar);
     Color badgeColor;
     String badgeText;
     if (rank == 1) {
@@ -1916,8 +1936,8 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                       ),
                       backgroundImage:
                           perf.avatar != null && perf.avatar!.isNotEmpty
-                              ? NetworkImage(perf.avatar!)
-                              : null,
+                          ? NetworkImage(perf.avatar!)
+                          : null,
                       child: perf.avatar != null && perf.avatar!.isNotEmpty
                           ? null
                           : Text(
@@ -2135,12 +2155,12 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
 
     String subtitle;
     if (perf.classInfo != null) {
-      final sectionPart =
-          perf.section != null ? ' - ${perf.section!.name}' : '';
-      final rollPart =
-          perf.rollNumber != null && perf.rollNumber!.isNotEmpty
-              ? ' • Roll ${perf.rollNumber}'
-              : '';
+      final sectionPart = perf.section != null
+          ? ' - ${perf.section!.name}'
+          : '';
+      final rollPart = perf.rollNumber != null && perf.rollNumber!.isNotEmpty
+          ? ' • Roll ${perf.rollNumber}'
+          : '';
       subtitle = '${perf.classInfo!.name}$sectionPart$rollPart';
     } else if (perf.rollNumber != null && perf.rollNumber!.isNotEmpty) {
       subtitle = 'Roll ${perf.rollNumber}';
@@ -2156,9 +2176,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
         );
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => const StudentPerformanceScreen(),
-          ),
+          MaterialPageRoute(builder: (_) => const StudentPerformanceScreen()),
         );
       },
       child: Card(
@@ -2211,8 +2229,8 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                       ),
                       backgroundImage:
                           perf.avatar != null && perf.avatar!.isNotEmpty
-                              ? NetworkImage(perf.avatar!)
-                              : null,
+                          ? NetworkImage(perf.avatar!)
+                          : null,
                       child: perf.avatar != null && perf.avatar!.isNotEmpty
                           ? null
                           : Text(
@@ -2295,10 +2313,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle(
-          'Top Students',
-          const SizedBox.shrink(),
-        ),
+        _buildSectionTitle('Top Students', const SizedBox.shrink()),
         const SizedBox(height: 12),
         SizedBox(
           height: 130,
@@ -2384,19 +2399,23 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
   Widget _buildShimmerLoading(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final Color shimBase =
-        isDark ? const Color(0xFF1E1E1E) : const Color(0xFFE8E8E8);
-    final Color shimHighlight =
-        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF8F8F8);
+    final Color shimBase = isDark
+        ? const Color(0xFF1E1E1E)
+        : const Color(0xFFE8E8E8);
+    final Color shimHighlight = isDark
+        ? const Color(0xFF3A3A3A)
+        : const Color(0xFFF8F8F8);
 
     // Card surface: slightly different from shimBase so it's visible as a card
 
-    final Color cardBorder =
-        isDark ? const Color(0xFF333333) : const Color(0xFFEEEEEE);
+    final Color cardBorder = isDark
+        ? const Color(0xFF333333)
+        : const Color(0xFFEEEEEE);
 
     // Line colour: the shimmer blocks that represent text / icons
-    final Color lineColor =
-        isDark ? const Color(0xFF3D3D3D) : const Color(0xFFDEDEDE);
+    final Color lineColor = isDark
+        ? const Color(0xFF3D3D3D)
+        : const Color(0xFFDEDEDE);
 
     // A thin text-line placeholder — looks like a real font line
     Widget line(double w, {double h = 11, double r = 30}) => Container(
@@ -2423,25 +2442,23 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
       required Widget child,
       EdgeInsetsGeometry padding = const EdgeInsets.all(16),
       double radius = 16,
-    }) =>
-        Container(
-          decoration: BoxDecoration(
-
-            borderRadius: BorderRadius.circular(radius),
-            border: Border.all(color: cardBorder, width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: isDark
-                    ? Colors.black.withOpacity(0.25)
-                    : Colors.black.withOpacity(0.06),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
+    }) => Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: cardBorder, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withOpacity(0.25)
+                : Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
-          padding: padding,
-          child: child,
-        );
+        ],
+      ),
+      padding: padding,
+      child: child,
+    );
 
     return Shimmer.fromColors(
       baseColor: shimBase,
@@ -2699,10 +2716,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                         // Class badge + due date
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            block(80, 22, r: 8),
-                            line(60, h: 9),
-                          ],
+                          children: [block(80, 22, r: 8), line(60, h: 9)],
                         ),
                         const SizedBox(height: 12),
                         line(200, h: 13), // title
@@ -2808,7 +2822,6 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
       ),
     );
   }
-
 }
 
 class _AdminClassStats {
@@ -2965,17 +2978,26 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                               if (subjects.isNotEmpty) ...[
                                 Container(
                                   height: 32,
-                                  constraints: const BoxConstraints(maxWidth: 80),
-                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 80,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                  ),
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: Colors.grey.shade300),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                    ),
                                   ),
                                   child: DropdownButtonHideUnderline(
                                     child: DropdownButton<String?>(
                                       value: _selectedSubjectId,
                                       isExpanded: true,
-                                      icon: const Icon(Icons.keyboard_arrow_down, size: 16),
+                                      icon: const Icon(
+                                        Icons.keyboard_arrow_down,
+                                        size: 16,
+                                      ),
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
@@ -2998,16 +3020,21 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                        ...subjects.map<DropdownMenuItem<String?>>(
-                                              (subject) => DropdownMenuItem<String?>(
-                                            value: subject['id'],
-                                            child: Text(
-                                              subject['name'] ?? '',
-                                              style: const TextStyle(fontSize: 12),
-                                              overflow: TextOverflow.ellipsis,
+                                        ...subjects
+                                            .map<DropdownMenuItem<String?>>(
+                                              (subject) =>
+                                                  DropdownMenuItem<String?>(
+                                                    value: subject['id'],
+                                                    child: Text(
+                                                      subject['name'] ?? '',
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                      ),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
                                             ),
-                                          ),
-                                        ),
                                       ],
                                     ),
                                   ),
