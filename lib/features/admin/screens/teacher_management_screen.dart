@@ -12,6 +12,7 @@ import 'package:smart_school/models/school_models.dart' hide Teacher;
 import 'package:smart_school/models/teacher_model.dart';
 import 'package:smart_school/services/notification_service.dart';
 
+import '../../../core/services/geocoding_service.dart';
 import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
 
@@ -229,267 +230,10 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                         );
                       }
 
+                      final isDark =
+                          Theme.of(context).brightness == Brightness.dark;
                       final teacher = teachers[index];
-                      final user = teacher.user;
-                      final isActive = teacher.isActive;
-
-                      return Card(
-                        elevation: 0,
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          side: BorderSide(color: Colors.grey.shade200),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 25,
-                                backgroundColor: Colors.purple.withOpacity(0.1),
-                                backgroundImage: user?.avatar != null && user!.avatar!.isNotEmpty
-                                    ? NetworkImage(user.avatar!)
-                                    : null,
-                                child: user?.avatar == null || user!.avatar!.isEmpty
-                                    ? const Icon(
-                                        Icons.person,
-                                        color: Colors.purple,
-                                        size: 30,
-                                      )
-                                    : null,
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          user?.name ?? 'No Name',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 2,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: isActive
-                                                ? Colors.green.shade50
-                                                : Colors.red.shade50,
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            isActive ? 'Active' : 'Inactive',
-                                            style: TextStyle(
-                                              color: isActive
-                                                  ? Colors.green
-                                                  : Colors.red,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Text(
-                                      teacher.designation.isEmpty
-                                          ? 'Teacher'
-                                          : teacher.designation,
-                                      style: TextStyle(fontSize: 13),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.email_outlined, size: 14),
-                                        const SizedBox(width: 4),
-                                        Expanded(
-                                          child: Text(
-                                            user?.email ?? '',
-                                            style: TextStyle(fontSize: 12),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    if (teacher.embeddedClasses.isNotEmpty) ...
-                                      [
-                                        const SizedBox(height: 2),
-                                        Row(
-                                          children: [
-                                            Icon(Icons.class_outlined, size: 14, color: Colors.purple.shade300),
-                                            const SizedBox(width: 4),
-                                            Expanded(
-                                              child: Text(
-                                                teacher.embeddedClasses.map((c) => c.name).join(', '),
-                                                style: TextStyle(fontSize: 12, color: Colors.purple.shade400),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    if (teacher.embeddedSections.isNotEmpty) ...
-                                      [
-                                        const SizedBox(height: 2),
-                                        Row(
-                                          children: [
-                                            Icon(Icons.groups_outlined, size: 14, color: Colors.teal.shade300),
-                                            const SizedBox(width: 4),
-                                            Expanded(
-                                              child: Text(
-                                                teacher.embeddedSections.map((s) => s.name).join(', '),
-                                                style: TextStyle(fontSize: 12, color: Colors.teal.shade400),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                  ],
-                                ),
-                              ),
-                              PopupMenuButton<String>(
-                                icon: const Icon(Icons.more_vert),
-                                onSelected: (value) async {
-                                  if (value == 'view') {
-                                    _showTeacherDetails(context, teacher);
-                                  } else if (value == 'notify') {
-                                    _showNotificationDialog(context, teacher);
-                                  } else if (value == 'edit') {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => AddEditTeacherScreen(
-                                          teacher: teacher,
-                                        ),
-                                      ),
-                                    ).then((_) => _fetchTeachers());
-                                  } else if (value == 'status') {
-                                    await context
-                                        .read<TeachersNotifier>()
-                                        .toggleTeacherStatus(teacher.userId);
-                                  } else if (value == 'delete') {
-                                    final l10n = AppLocalizations.of(context)!;
-                                    final confirm = await showDialog<bool>(
-                                      context: context,
-                                      builder: (ctx) => AlertDialog(
-                                        title: Text(l10n.deleteTeacher),
-                                        content: Text(
-                                          'Are you sure you want to delete this teacher?',
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(ctx, false),
-                                            child: Text(l10n.cancel),
-                                          ),
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(ctx, true),
-                                            child: Text(
-                                              l10n.delete,
-                                              style: const TextStyle(
-                                                color: Colors.red,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                    if (confirm == true) {
-                                      await context
-                                          .read<TeachersNotifier>()
-                                          .deleteTeacher(teacher.userId);
-                                    }
-                                  }
-                                },
-                                itemBuilder: (context) {
-                                  final l10n = AppLocalizations.of(context)!;
-                                  return [
-                                    PopupMenuItem(
-                                      value: 'view',
-                                      child: Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.visibility_outlined,
-                                            color: Colors.green,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(l10n.viewProfile),
-                                        ],
-                                      ),
-                                    ),
-                                    PopupMenuItem(
-                                      value: 'notify',
-                                      child: Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.notifications_active_outlined,
-                                            color: Colors.purple,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(l10n.sendNotification),
-                                        ],
-                                      ),
-                                    ),
-                                    PopupMenuItem(
-                                      value: 'edit',
-                                      child: Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.edit_outlined,
-                                            color: Colors.orange,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(l10n.editTeacher),
-                                        ],
-                                      ),
-                                    ),
-                                    PopupMenuItem(
-                                      value: 'status',
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            isActive
-                                                ? Icons.toggle_off
-                                                : Icons.toggle_on,
-                                            color: Colors.blue,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            isActive ? 'Deactivate' : 'Activate',
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    PopupMenuItem(
-                                      value: 'delete',
-                                      child: Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.delete_outline,
-                                            color: Colors.red,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(l10n.delete),
-                                        ],
-                                      ),
-                                    ),
-                                  ];
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
+                      return _buildTeacherCard(context, teacher, isDark);
                     },
                   ),
           ),
@@ -551,6 +295,560 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
         backgroundColor: Colors.purple,
 
         child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildTeacherCard(
+    BuildContext context,
+    Teacher teacher,
+    bool isDark,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final user = teacher.user;
+    final teacherName =
+        user?.name.isNotEmpty == true ? user!.name : 'No Name';
+    final teacherPhone = user?.phone?.trim() ?? '';
+    final email = user?.email?.trim() ?? '';
+    final lat = teacher.lat ?? user?.lat;
+    final lon = teacher.lon ?? user?.lon;
+    final hasLatLon = lat != null && lon != null;
+    final designation = teacher.designation.trim().isNotEmpty
+        ? teacher.designation.trim()
+        : 'Teacher';
+
+    // Classes string
+    final classesStr = teacher.embeddedClasses.isNotEmpty
+        ? teacher.embeddedClasses.map((c) => c.name).join(', ')
+        : '';
+    // Sections string
+    final sectionsStr = teacher.embeddedSections.isNotEmpty
+        ? teacher.embeddedSections.map((s) => s.name).join(', ')
+        : '';
+    // Assigned subjects count
+    final subjectCount = teacher.assignedSubjects.length;
+
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+        ),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _showTeacherDetails(context, teacher),
+        child: Padding(
+          padding: const EdgeInsets.all(14.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Header: Avatar, Name, Badges, Action Menu ──
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Hero(
+                    tag: 'teacher-avatar-${teacher.userId}',
+                    child: CircleAvatar(
+                      radius: 24,
+                      backgroundColor:
+                          AppColors.primaryAdmin.withValues(alpha: 0.12),
+                      backgroundImage: user?.avatar?.isNotEmpty == true
+                          ? NetworkImage(user!.avatar!)
+                          : null,
+                      child: user?.avatar?.isNotEmpty == true
+                          ? null
+                          : Text(
+                              teacherName.isNotEmpty
+                                  ? teacherName[0].toUpperCase()
+                                  : '?',
+                              style: const TextStyle(
+                                color: AppColors.primaryAdmin,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          teacherName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 5),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
+                          children: [
+                            // Designation Badge
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? Colors.blue.shade900
+                                        .withValues(alpha: 0.3)
+                                    : Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.badge_outlined,
+                                    size: 11,
+                                    color: isDark
+                                        ? Colors.blue.shade300
+                                        : Colors.blue.shade700,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    designation,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark
+                                          ? Colors.blue.shade300
+                                          : Colors.blue.shade700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Status Badge
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: teacher.isActive
+                                    ? (isDark
+                                        ? Colors.green.shade900
+                                            .withValues(alpha: 0.3)
+                                        : Colors.green.shade50)
+                                    : (isDark
+                                        ? Colors.red.shade900
+                                            .withValues(alpha: 0.3)
+                                        : Colors.red.shade50),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: teacher.isActive
+                                          ? Colors.green
+                                          : Colors.red,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    teacher.isActive ? 'Active' : 'Inactive',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: teacher.isActive
+                                          ? Colors.green
+                                          : Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuButton<String>(
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(Icons.more_vert, size: 20),
+                    onSelected: (value) async {
+                      if (value == 'view') {
+                        _showTeacherDetails(context, teacher);
+                      } else if (value == 'notify') {
+                        _showNotificationDialog(context, teacher);
+                      } else if (value == 'edit') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AddEditTeacherScreen(
+                              teacher: teacher,
+                            ),
+                          ),
+                        ).then((_) => _fetchTeachers());
+                      } else if (value == 'status') {
+                        await context
+                            .read<TeachersNotifier>()
+                            .toggleTeacherStatus(teacher.userId);
+                      } else if (value == 'delete') {
+                        final l10n = AppLocalizations.of(context)!;
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: Text(l10n.deleteTeacher),
+                            content: const Text(
+                              'Are you sure you want to delete this teacher?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: Text(l10n.cancel),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                ),
+                                child: Text(
+                                  l10n.delete,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirm == true && context.mounted) {
+                          await context
+                              .read<TeachersNotifier>()
+                              .deleteTeacher(teacher.userId);
+                        }
+                      }
+                    },
+                    itemBuilder: (context) {
+                      final l10n = AppLocalizations.of(context)!;
+                      return [
+                        PopupMenuItem(
+                          value: 'view',
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.visibility_outlined,
+                                color: Colors.purple,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(l10n.viewProfile),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'notify',
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.notifications_active_outlined,
+                                color: Colors.purple,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(l10n.sendNotification),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.edit_outlined,
+                                color: Colors.blue,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(l10n.editTeacher),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'status',
+                          child: Row(
+                            children: [
+                              Icon(
+                                teacher.isActive
+                                    ? Icons.block
+                                    : Icons.check_circle_outline,
+                                color: teacher.isActive
+                                    ? Colors.orange
+                                    : Colors.green,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                teacher.isActive ? 'Deactivate' : 'Activate',
+                              ),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.delete_outline,
+                                color: Colors.red,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                l10n.delete,
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ];
+                    },
+                  ),
+                ],
+              ),
+
+              // ── Academic & Subject Badges Row ──
+              if (classesStr.isNotEmpty ||
+                  sectionsStr.isNotEmpty ||
+                  subjectCount > 0) ...[
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    if (classesStr.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryAdmin
+                              .withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.school_outlined,
+                              size: 13,
+                              color: AppColors.primaryAdmin,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              classesStr,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.primaryAdmin,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (sectionsStr.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.teal.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.grid_view_rounded,
+                              size: 12,
+                              color: Colors.teal.shade700,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Sec: $sectionsStr',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.teal.shade700,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (subjectCount > 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.indigo.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.menu_book_outlined,
+                              size: 12,
+                              color: Colors.indigo.shade700,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$subjectCount ${subjectCount == 1 ? "Subject" : "Subjects"}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.indigo.shade700,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+
+              const SizedBox(height: 10),
+              Divider(
+                height: 1,
+                color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+              ),
+              const SizedBox(height: 8),
+
+              // ── Contact & Location Details ──
+              // Phone number row
+              if (teacherPhone.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 5.0),
+                  child: InkWell(
+                    onTap: () => _launchUrl('tel:$teacherPhone'),
+                    borderRadius: BorderRadius.circular(4),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.phone_outlined,
+                          size: 14,
+                          color: AppColors.primaryAdmin.withValues(alpha: 0.8),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            teacherPhone,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark
+                                  ? Colors.grey.shade300
+                                  : Colors.grey.shade800,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Icon(
+                          Icons.call_outlined,
+                          size: 13,
+                          color: Colors.grey.shade400,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              // Address / Location row
+              if (hasLatLon)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 14,
+                        color: Colors.redAccent.withValues(alpha: 0.8),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: FutureBuilder<String>(
+                          future: GeocodingService().getPlaceName(
+                            lat.toString(),
+                            lon.toString(),
+                          ),
+                          builder: (context, snapshot) {
+                            final place = snapshot.connectionState ==
+                                    ConnectionState.waiting
+                                ? 'Locating...'
+                                : (snapshot.data ??
+                                    '${lat.toStringAsFixed(3)}, ${lon.toStringAsFixed(3)}');
+                            return Text(
+                              place,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark
+                                    ? Colors.grey.shade400
+                                    : Colors.grey.shade600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              // Email row
+              if (email.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 2.0),
+                  child: InkWell(
+                    onTap: () => _launchUrl('mailto:$email'),
+                    borderRadius: BorderRadius.circular(4),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.email_outlined,
+                          size: 14,
+                          color: Colors.blue.withValues(alpha: 0.8),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            email,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark
+                                  ? Colors.grey.shade400
+                                  : Colors.grey.shade600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -876,137 +1174,125 @@ class _TeacherShimmer extends StatelessWidget {
         return Shimmer.fromColors(
           baseColor: baseColor,
           highlightColor: highlightColor,
-          child: Container(
-
+          child: Card(
+            elevation: 0,
             margin: const EdgeInsets.only(bottom: 12),
-
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              padding: const EdgeInsets.all(14.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Avatar placeholder
-                  const CircleAvatar(
-                    radius: 25,
-                    backgroundColor: Colors.white,
+                  // Top Row: Avatar + Name + Badges + menu
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const CircleAvatar(
+                        radius: 24,
+                        backgroundColor: Colors.white,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              height: 14,
+                              width: 140,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Container(
+                                  height: 16,
+                                  width: 70,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Container(
+                                  height: 16,
+                                  width: 50,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: 20,
+                        height: 20,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 16),
-                  // Text column
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Name + status badge row
-                        Row(
-                          children: [
-                            Container(
-                              height: 14,
-                              width: 120,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              height: 18,
-                              width: 52,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ],
+                  const SizedBox(height: 10),
+                  // Class, Section & Subject chips placeholder
+                  Row(
+                    children: [
+                      Container(
+                        height: 20,
+                        width: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                        const SizedBox(height: 6),
-                        // Designation line
-                        Container(
-                          height: 12,
-                          width: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        height: 20,
+                        width: 70,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                        const SizedBox(height: 6),
-                        // Email row
-                        Row(
-                          children: [
-                            Container(
-                              width: 14,
-                              height: 14,
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Container(
-                              height: 11,
-                              width: 150,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                            ),
-                          ],
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        height: 20,
+                        width: 75,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                        const SizedBox(height: 4),
-                        // Classes row
-                        Row(
-                          children: [
-                            Container(
-                              width: 14,
-                              height: 14,
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Container(
-                              height: 11,
-                              width: 110,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        // Sections row
-                        Row(
-                          children: [
-                            Container(
-                              width: 14,
-                              height: 14,
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Container(
-                              height: 11,
-                              width: 80,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Container(height: 1, color: Colors.white),
+                  const SizedBox(height: 8),
+                  // Phone line placeholder
+                  Container(
+                    height: 11,
+                    width: 170,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  // Trailing more_vert placeholder
+                  const SizedBox(height: 6),
+                  // Address line placeholder
                   Container(
-                    width: 24,
-                    height: 24,
-                    decoration: const BoxDecoration(
+                    height: 11,
+                    width: 210,
+                    decoration: BoxDecoration(
                       color: Colors.white,
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
                 ],
