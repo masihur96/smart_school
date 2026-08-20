@@ -339,6 +339,44 @@ class ExamsNotifier extends ChangeNotifier {
     }
   }
 
+  /// Fetch existing marks for a specific exam/class/subject/section.
+  /// Calls: GET /admin/marks/exam?examId=&classId=&subjectId=&sectionId=
+  /// Returns a list of mark records (each has studentId, marksObtained, totalMarks).
+  Future<List<Map<String, dynamic>>> fetchMarksForSubject({
+    required String examId,
+    required String classId,
+    required String subjectId,
+    String? sectionId,
+  }) async {
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final url =
+          '${APIPath.adminMarksExam}?examId=$examId&classId=$classId&subjectId=$subjectId&sectionId=${sectionId ?? ''}';
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        url,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final dynamic raw = response.data;
+        final List<dynamic> data = raw is List
+            ? raw
+            : (raw is Map ? (raw['data'] ?? raw['marks'] ?? []) : []);
+        return data.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+      } else {
+        log('Error fetching marks: ${response?.data}');
+        return [];
+      }
+    } catch (e) {
+      log('Error fetching marks for subject: $e');
+      return [];
+    }
+  }
+
   Future<bool> submitMarks({
     required String examId,
     required String teacherId,

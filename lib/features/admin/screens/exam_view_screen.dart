@@ -52,10 +52,68 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
             )
             .then((_) {
               if (mounted) {
-                _populateExistingMarks();
+                _fetchMarksFromAPI();
               }
             });
       });
+    }
+  }
+
+  /// Fetches marks for the currently selected exam/class/subject/section
+  /// from the API and populates the text controllers.
+  Future<void> _fetchMarksFromAPI() async {
+    if (_selectedAssignment == null) return;
+
+    final students = context.read<StudentsNotifier>().students;
+    if (students.isEmpty) return;
+
+    // Clear existing values first
+    setState(() {
+      for (var student in students) {
+        _getMarksController(student.userId).clear();
+        _getTotalMarksController(student.userId).text = '100';
+        _getRemarksController(student.userId).clear();
+      }
+    });
+
+    final marks = await context.read<ExamsNotifier>().fetchMarksForSubject(
+      examId: widget.exam.id,
+      classId: _selectedAssignment!.classId,
+      subjectId: _selectedAssignment!.subjectId,
+      sectionId: _selectedSectionId,
+    );
+
+    if (!mounted) return;
+
+    if (marks.isNotEmpty) {
+      setState(() {
+        for (final mark in marks) {
+          // The API returns a student object nested inside each mark record
+          final student = mark['student'];
+          final String? studentId =
+              student != null ? (student['id']?.toString()) : null;
+          if (studentId == null) continue;
+
+          final double marksObtained =
+              (mark['marksObtained'] as num?)?.toDouble() ?? -1;
+          final double totalMarks =
+              (mark['totalMarks'] as num?)?.toDouble() ?? 100;
+
+          if (marksObtained >= 0) {
+            _getMarksController(studentId).text =
+                marksObtained == marksObtained.toInt()
+                    ? marksObtained.toInt().toString()
+                    : marksObtained.toString();
+            _getTotalMarksController(studentId).text =
+                totalMarks == totalMarks.toInt()
+                    ? totalMarks.toInt().toString()
+                    : totalMarks.toString();
+          }
+        }
+      });
+    } else {
+      // Fallback: populate from already-cached exam results
+      _populateExistingMarks();
     }
   }
 
@@ -106,6 +164,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
       }
     });
   }
+
 
   @override
   void dispose() {
@@ -183,31 +242,30 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
       elevation: 0,
       backgroundColor: AppColors.primaryAdmin,
       actions: [
-    IconButton(
-    icon: const Icon(Icons.report_outlined),
-    onPressed: () {
-    if (students.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(
-    content: Text('No students available for this exam section.'),
-    ),
-    );
-    return;
-    }
-    Navigator.push(
-    context,
-    MaterialPageRoute(
-    builder: (context) => GenerateReportCardScreen(
-    exam: widget.exam,
-    students: students,
-    ),
-    ),
-    );
-    // Implement download functionality here
-    },
-    )
-
-    ],
+        IconButton(
+          icon: const Icon(Icons.report_outlined),
+          onPressed: () {
+            if (students.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('No students available for this exam section.'),
+                ),
+              );
+              return;
+            }
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GenerateReportCardScreen(
+                  exam: widget.exam,
+                  students: students,
+                ),
+              ),
+            );
+            // Implement download functionality here
+          },
+        ),
+      ],
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
           widget.exam.name,
@@ -825,7 +883,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        _populateExistingMarks();
+        _fetchMarksFromAPI();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
