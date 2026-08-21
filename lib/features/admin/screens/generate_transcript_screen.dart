@@ -31,6 +31,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
   String? _selectedClassId;
   String? _selectedSectionId;
   late List<Student> _currentStudents;
+  final Map<String, List<Result>> _fetchedExamResults = {};
   bool _isLoading = false;
   Uint8List? _pdfBytes;
   pdfx.PdfControllerPinch? _pdfController;
@@ -51,8 +52,45 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _generatePdf();
+      _fetchDataAndGeneratePdf();
     });
+  }
+
+  Future<void> _fetchDataAndGeneratePdf() async {
+    if (!mounted) return;
+    setState(() => _isLoading = true);
+
+    final studentsNotifier = context.read<StudentsNotifier>();
+    final examsNotifier = context.read<ExamsNotifier>();
+
+    try {
+      if (_selectedClassId != null) {
+        await studentsNotifier.fetchStudentsBySection(
+          classId: _selectedClassId!,
+          sectionId: _selectedSectionId,
+        );
+        if (mounted && studentsNotifier.students.isNotEmpty) {
+          _currentStudents = List.from(studentsNotifier.students);
+        }
+      }
+
+      final exams = examsNotifier.state;
+      for (var exam in exams) {
+        final results = await examsNotifier.fetchResultsForExam(
+          examId: exam.id,
+          classId: _selectedClassId,
+          sectionId: _selectedSectionId,
+          assignments: exam.assignments,
+        );
+        if (mounted) {
+          _fetchedExamResults[exam.id] = results;
+        }
+      }
+    } catch (_) {}
+
+    if (mounted) {
+      await _generatePdf();
+    }
   }
 
   Future<void> _generatePdf() async {
@@ -81,24 +119,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
   }
 
   void _fetchStudents() {
-    if (_selectedClassId == null) return;
-    setState(() => _isLoading = true);
-    context
-        .read<StudentsNotifier>()
-        .fetchStudentsBySection(
-          classId: _selectedClassId!,
-          sectionId: _selectedSectionId,
-        )
-        .then((_) {
-          if (mounted) {
-            setState(() {
-              _currentStudents = List.from(
-                context.read<StudentsNotifier>().students,
-              );
-            });
-            _generatePdf();
-          }
-        });
+    _fetchDataAndGeneratePdf();
   }
 
   @override
@@ -317,11 +338,24 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
       );
     }
 
+    bool matchesStudent(Result r, Student student) {
+      if (r.studentId.isNotEmpty) {
+        if (r.studentId == student.userId) return true;
+        if (student.user != null && r.studentId == student.user!.id) return true;
+        if (r.studentId == student.rollId) return true;
+      }
+      return false;
+    }
+
     for (var student in _currentStudents) {
       // Collect all results for this student across all exams
       final studentExamsWithResults = <Exam, List<Result>>{};
       for (var exam in exams) {
-        final results = exam.results.where((r) => r.studentId == student.userId).toList();
+        final allResults = [
+          ...exam.results,
+          ...?_fetchedExamResults[exam.id],
+        ];
+        final results = allResults.where((r) => matchesStudent(r, student)).toList();
         if (results.isNotEmpty) {
           studentExamsWithResults[exam] = results;
         }

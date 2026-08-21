@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/student_model.dart';
 import 'package:pdfx/pdfx.dart' as pdfx;
 
+import '../providers/exam_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
 
@@ -32,6 +34,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
   String? _selectedClassId;
   String? _selectedSectionId;
   late List<Student> _currentStudents;
+  List<Result> _fetchedResults = [];
   bool _isLoading = false;
   Uint8List? _pdfBytes;
   pdfx.PdfControllerPinch? _pdfController;
@@ -55,17 +58,56 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _generatePdf();
+      _fetchDataAndGeneratePdf();
     });
+  }
+
+  Future<void> _fetchDataAndGeneratePdf() async {
+    if (!mounted) return;
+    setState(() => _isLoading = true);
+
+    final studentsNotifier = context.read<StudentsNotifier>();
+    final examsNotifier = context.read<ExamsNotifier>();
+
+    try {
+      if (_selectedClassId != null) {
+        await studentsNotifier.fetchStudentsBySection(
+          classId: _selectedClassId!,
+          sectionId: _selectedSectionId,
+        );
+        if (mounted && studentsNotifier.students.isNotEmpty) {
+          _currentStudents = List.from(studentsNotifier.students);
+        }
+      }
+
+      final results = await examsNotifier.fetchResultsForExam(
+        examId: widget.exam.id,
+        classId: _selectedClassId,
+        sectionId: _selectedSectionId,
+        assignments: widget.exam.assignments,
+      );
+
+      if (mounted) {
+        _fetchedResults = results;
+      }
+    } catch (e) {
+      log('Error fetching report card data: $e');
+    }
+
+    if (mounted) {
+      await _generatePdf();
+    }
   }
 
   Future<void> _generatePdf() async {
     setState(() => _isLoading = true);
     final authNotifier = context.read<AuthNotifier>();
+    final subjectSetupNotifier = context.read<SubjectSetupNotifier>();
     final school = authNotifier.user?.school;
+    final allSubjects = subjectSetupNotifier.subjects;
 
     try {
-      final bytes = await _generateReportCardsPdf(PdfPageFormat.a4, school);
+      final bytes = await _generateReportCardsPdf(PdfPageFormat.a4, school, allSubjects);
       if (mounted) {
         setState(() {
           _pdfBytes = bytes;
@@ -84,24 +126,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
   }
 
   void _fetchStudents() {
-    if (_selectedClassId == null) return;
-    setState(() => _isLoading = true);
-    context
-        .read<StudentsNotifier>()
-        .fetchStudentsBySection(
-          classId: _selectedClassId!,
-          sectionId: _selectedSectionId,
-        )
-        .then((_) {
-          if (mounted) {
-            setState(() {
-              _currentStudents = List.from(
-                context.read<StudentsNotifier>().students,
-              );
-            });
-            _generatePdf();
-          }
-        });
+    _fetchDataAndGeneratePdf();
   }
 
   @override
@@ -302,6 +327,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
   Future<Uint8List> _generateReportCardsPdf(
     PdfPageFormat format,
     School? school,
+    List<Subject> allSubjects,
   ) async {
     final pdf = pw.Document();
 
@@ -344,12 +370,24 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
       );
     }
 
+    final allResults = [
+      ...widget.exam.results,
+      ..._fetchedResults,
+    ];
+
+    bool matchesStudent(Result r, Student student) {
+      if (r.studentId.isNotEmpty) {
+        if (r.studentId == student.userId) return true;
+        if (student.user != null && r.studentId == student.user!.id) return true;
+        if (r.studentId == student.rollId) return true;
+      }
+      return false;
+    }
+
     final studentTotals = <String, double>{};
     for (var student in _currentStudents) {
       double total = 0;
-      for (var r in widget.exam.results.where(
-        (r) => r.studentId == student.userId,
-      )) {
+      for (var r in allResults.where((r) => matchesStudent(r, student))) {
         total += r.marksObtained;
       }
       studentTotals[student.userId] = total;
@@ -371,8 +409,8 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
 
     for (var student in _currentStudents) {
       // Get all results for this student in the current exam
-      final studentResults = widget.exam.results
-          .where((r) => r.studentId == student.userId)
+      final studentResults = allResults
+          .where((r) => matchesStudent(r, student))
           .toList();
 
       if (studentResults.isEmpty) continue; // Skip if no marks
@@ -391,6 +429,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
             schoolAddress,
             schoolPhone,
             schoolEmail,
+            allSubjects,
           ),
         ),
       );
@@ -472,6 +511,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
               schoolAddress,
               schoolPhone,
               schoolEmail,
+              allSubjects,
             );
           },
         ),
@@ -502,6 +542,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
     String schoolAddress,
     String schoolPhone,
     String schoolEmail,
+    List<Subject> allSubjects,
   ) {
     // Calculate totals
     double totalMarksAll = 0;
@@ -704,13 +745,23 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                 : 0.0;
             final grade = _calculateGrade(percentage);
 
-            String subjectName = r.subject?.name ?? 'Unknown';
-            if (subjectName == 'Unknown' || subjectName.isEmpty) {
+            String subjectName = r.subject?.name ?? '';
+            if (subjectName.isEmpty || subjectName == 'Unknown') {
               try {
                 subjectName = widget.exam.assignments
                     .firstWhere((a) => a.subjectId == r.subjectId)
                     .subjectName;
               } catch (_) {}
+            }
+            if (subjectName.isEmpty || subjectName == 'Unknown') {
+              try {
+                subjectName = allSubjects
+                    .firstWhere((s) => s.id == r.subjectId)
+                    .name;
+              } catch (_) {}
+            }
+            if (subjectName.isEmpty) {
+              subjectName = 'Subject';
             }
 
             return [

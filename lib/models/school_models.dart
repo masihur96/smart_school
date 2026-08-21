@@ -918,36 +918,61 @@ class Result {
 
   factory Result.fromJson(Map<String, dynamic> json) {
     double parsedMarksObtained = 0.0;
-    if (json['marksObtained'] != null) {
-      if (json['marksObtained'] is String) {
-        parsedMarksObtained = double.tryParse(json['marksObtained']) ?? 0.0;
-      } else if (json['marksObtained'] is num) {
-        parsedMarksObtained = (json['marksObtained'] as num).toDouble();
+    final rawObtained = json['marksObtained'] ?? json['marks_obtained'] ?? json['marks'];
+    if (rawObtained != null) {
+      if (rawObtained is String) {
+        parsedMarksObtained = double.tryParse(rawObtained) ?? 0.0;
+      } else if (rawObtained is num) {
+        parsedMarksObtained = rawObtained.toDouble();
       }
     }
 
-    double parsedTotalMarks = 0.0;
-    if (json['totalMarks'] != null) {
-      if (json['totalMarks'] is String) {
-        parsedTotalMarks = double.tryParse(json['totalMarks']) ?? 0.0;
-      } else if (json['totalMarks'] is num) {
-        parsedTotalMarks = (json['totalMarks'] as num).toDouble();
+    double parsedTotalMarks = 100.0;
+    final rawTotal = json['totalMarks'] ?? json['total_marks'];
+    if (rawTotal != null) {
+      if (rawTotal is String) {
+        parsedTotalMarks = double.tryParse(rawTotal) ?? 100.0;
+      } else if (rawTotal is num) {
+        parsedTotalMarks = rawTotal.toDouble();
       }
     }
+
+    final String studentId = (json['student'] is Map
+            ? (json['student']['id'] ?? json['student']['uuid'] ?? json['student']['userId'] ?? json['student']['user_id'])
+            : null)?.toString() ??
+        json['studentId']?.toString() ??
+        json['student_id']?.toString() ??
+        json['student_uid']?.toString() ??
+        '';
+
+    final String? subjectId = (json['subject'] is Map
+            ? (json['subject']['id'] ?? json['subject']['uuid'])
+            : null)?.toString() ??
+        json['subjectId']?.toString() ??
+        json['subject_id']?.toString() ??
+        json['subject_uid']?.toString();
+
+    final String examId = (json['exam'] is Map
+            ? (json['exam']['id'] ?? json['exam']['uuid'])
+            : null)?.toString() ??
+        json['examId']?.toString() ??
+        json['exam_id']?.toString() ??
+        json['exam_uid']?.toString() ??
+        '';
 
     return Result(
-      id: json['id'] ?? '',
-      examId: json['examId'] ?? '',
-      studentId: json['studentId'] ?? '',
-      subjectId: json['subjectId'],
+      id: json['id']?.toString() ?? json['uuid']?.toString() ?? json['_id']?.toString() ?? '',
+      examId: examId,
+      studentId: studentId,
+      subjectId: subjectId,
       marksObtained: parsedMarksObtained,
       totalMarks: parsedTotalMarks,
-      remarks: json['remarks'] ?? '',
-      exam: json['exam'] != null ? Exam.fromJson(json['exam']) : null,
-      subject: json['subject'] != null
+      remarks: json['remarks']?.toString() ?? json['comment']?.toString() ?? '',
+      exam: json['exam'] != null && json['exam'] is Map ? Exam.fromJson(json['exam']) : null,
+      subject: json['subject'] != null && json['subject'] is Map
           ? Subject.fromJson(json['subject'])
           : null,
-      teacher: json['teacher'] != null
+      teacher: json['teacher'] != null && json['teacher'] is Map
           ? Teacher.fromJson(json['teacher'])
           : null,
     );

@@ -377,6 +377,74 @@ class ExamsNotifier extends ChangeNotifier {
     }
   }
 
+  /// Fetch all marks/results for an exam, optionally filtered by classId and sectionId.
+  Future<List<Result>> fetchResultsForExam({
+    required String examId,
+    String? classId,
+    String? sectionId,
+    List<ExamAssignment>? assignments,
+  }) async {
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No auth token found');
+
+      String url = '${APIPath.adminMarksExam}?examId=$examId';
+      if (classId != null && classId.isNotEmpty) {
+        url += '&classId=$classId';
+      }
+      if (sectionId != null && sectionId.isNotEmpty) {
+        url += '&sectionId=$sectionId';
+      }
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        url,
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      List<dynamic> rawMarks = [];
+      if (response != null && response.statusCode == 200) {
+        final dynamic raw = response.data;
+        rawMarks = raw is List
+            ? raw
+            : (raw is Map ? (raw['data'] ?? raw['marks'] ?? []) : []);
+      }
+
+      // If fetching by examId alone returned no results, fallback to fetching per subject assignment
+      if (rawMarks.isEmpty && assignments != null && assignments.isNotEmpty) {
+        final filteredAssignments = assignments.where((a) {
+          if (classId != null && classId.isNotEmpty && a.classId != classId) return false;
+          if (sectionId != null && sectionId.isNotEmpty && a.sectionId != null && a.sectionId != sectionId) return false;
+          return true;
+        }).toList();
+
+        for (final assign in filteredAssignments) {
+          final subjectMarks = await fetchMarksForSubject(
+            examId: examId,
+            classId: assign.classId,
+            subjectId: assign.subjectId,
+            sectionId: sectionId ?? assign.sectionId,
+          );
+          rawMarks.addAll(subjectMarks);
+        }
+      }
+
+      final List<Result> results = [];
+      for (final item in rawMarks) {
+        if (item is Map<String, dynamic>) {
+          results.add(Result.fromJson(item));
+        } else if (item is Map) {
+          results.add(Result.fromJson(Map<String, dynamic>.from(item)));
+        }
+      }
+      log('Fetched ${results.length} exam results for exam $examId');
+      return results;
+    } catch (e) {
+      log('Error fetching results for exam: $e');
+      return [];
+    }
+  }
+
   Future<bool> submitMarks({
     required String examId,
     required String teacherId,
