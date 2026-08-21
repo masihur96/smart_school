@@ -36,6 +36,7 @@ class StudentDashboardScreen extends StatelessWidget {
     return ZoomDrawer(
       controller: ZoomDrawerController(),
       mainScreenTapClose: true,
+      menuBackgroundColor: Colors.grey,
       style: DrawerStyle.defaultStyle,
       androidCloseOnBackTap: true,
       menuScreen: const AppDrawer(),

@@ -41,6 +41,7 @@ class TeacherDashboardScreen extends StatelessWidget {
       controller: ZoomDrawerController(),
       mainScreenTapClose: true,
       style: DrawerStyle.defaultStyle,
+      menuBackgroundColor: Colors.grey,
       androidCloseOnBackTap: true,
       menuScreen: const AppDrawer(),
       mainScreen: const TeacherDashboardContent(),
