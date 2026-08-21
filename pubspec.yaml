@@ -72,6 +72,7 @@ dependencies:
   firebase_analytics: ^12.4.5
   mobile_scanner: ^7.4.0
   syncfusion_flutter_pdfviewer: ^33.2.13
+  path_provider: ^2.1.4
   flutter_floating_bottom_bar: ^2.1.0
   flutter_zoom_drawer: ^3.2.0
   in_app_update: ^4.2.5
