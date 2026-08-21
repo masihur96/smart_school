@@ -31,12 +31,18 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
   String? _errorMessage;
   String? _localPath;
 
+  // Scroll direction — toggled by the user
+  Axis _scrollDirection = Axis.vertical;
+
   // pdfx controller — created once the file is on disk and document is opened
   PdfControllerPinch? _pdfController;
 
   // Page tracking without ever calling setState during scroll
   final ValueNotifier<int> _currentPageNotifier = ValueNotifier<int>(1);
   final ValueNotifier<int> _totalPagesNotifier = ValueNotifier<int>(0);
+  // Track scroll-axis changes so the floating bar rebuilds
+  final ValueNotifier<Axis> _scrollDirectionNotifier =
+      ValueNotifier<Axis>(Axis.vertical);
 
   @override
   void initState() {
@@ -49,6 +55,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
     _pdfController?.dispose();
     _currentPageNotifier.dispose();
     _totalPagesNotifier.dispose();
+    _scrollDirectionNotifier.dispose();
     super.dispose();
   }
 
@@ -97,6 +104,27 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
       if (kDebugMode) debugPrint('[PdfViewer] open error: $e');
       _setError('Could not open the PDF. The file may be corrupted. Tap Retry to re-download.');
     }
+  }
+
+  /// Switch between vertical (book) and horizontal (comic/magazine) scrolling.
+  /// Recreates the controller so pdfx re-layouts pages along the new axis.
+  void _toggleScrollDirection() {
+    if (_pdfController == null) return;
+    final currentPage = _currentPageNotifier.value;
+    final newAxis =
+        _scrollDirection == Axis.vertical ? Axis.horizontal : Axis.vertical;
+
+    // Dispose old controller and create a fresh one at the same page
+    _pdfController!.dispose();
+    _pdfController = PdfControllerPinch(
+      document: PdfDocument.openFile(_localPath!),
+      initialPage: currentPage,
+    );
+
+    setState(() {
+      _scrollDirection = newAxis;
+      _scrollDirectionNotifier.value = newAxis;
+    });
   }
 
   Future<String> _ensureLocalFile() async {
@@ -270,12 +298,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
         ],
       ),
       actions: [
-        if (_phase == _ViewerPhase.ready)
-          IconButton(
-            icon: const Icon(Icons.open_in_browser_rounded, size: 20),
-            tooltip: 'Open in External App',
-            onPressed: _openInBrowser,
-          ),
+        if (_phase == _ViewerPhase.ready) ..._buildAppBarActions(),
       ],
     );
   }
@@ -289,10 +312,64 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
       case _ViewerPhase.opening:
         return 'Preparing reader…';
       case _ViewerPhase.ready:
-        return 'Swipe to turn pages';
+        return _scrollDirection == Axis.horizontal
+            ? 'Swipe left/right to turn pages'
+            : 'Scroll up/down to read';
       case _ViewerPhase.error:
         return 'Error loading book';
     }
+  }
+
+  List<Widget> _buildAppBarActions() {
+    final isHorizontal = _scrollDirection == Axis.horizontal;
+    return [
+      // Scroll-direction toggle with animated label
+      Tooltip(
+        message: isHorizontal
+            ? 'Switch to Vertical Scroll'
+            : 'Switch to Horizontal Scroll',
+        child: InkWell(
+          onTap: _toggleScrollDirection,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.35), width: 1),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isHorizontal
+                      ? Icons.swap_horiz_rounded
+                      : Icons.swap_vert_rounded,
+                  size: 16,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  isHorizontal ? 'Horizontal' : 'Vertical',
+                  style: const TextStyle(
+                      fontSize: 11,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      IconButton(
+        icon: const Icon(Icons.open_in_browser_rounded, size: 20),
+        tooltip: 'Open in External App',
+        onPressed: _openInBrowser,
+      ),
+    ];
   }
 
   Widget _buildBody() {
@@ -498,9 +575,11 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
         // ── PDF View ─────────────────────────────────────────────────────
         // pdfx uses Android's native PdfRenderer API on a background thread.
         // Page rendering NEVER runs on the main thread → zero ANR risk.
-        // PageView handles fling internally with Flutter physics → no lag.
+        // PdfViewPinch supports both Axis.vertical and Axis.horizontal layouts.
         PdfViewPinch(
+          key: ValueKey(_scrollDirection), // force rebuild on axis change
           controller: _pdfController!,
+          scrollDirection: _scrollDirection,
           onDocumentLoaded: (doc) {
             // Pure ValueNotifier update — no setState, no rebuild
             _totalPagesNotifier.value = doc.pagesCount;
@@ -509,6 +588,9 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
             // Pure ValueNotifier update — no setState, no rebuild
             _currentPageNotifier.value = page;
           },
+          backgroundDecoration: const BoxDecoration(
+            color: Color(0xFF1A1A2E),
+          ),
           builders: PdfViewPinchBuilders<DefaultBuilderOptions>(
             options: const DefaultBuilderOptions(),
             documentLoaderBuilder: (_) => Center(
@@ -532,7 +614,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
         ),
 
         // ── Floating control bar ──────────────────────────────────────────
-        // Only this sub-tree updates when page changes — viewer is untouched.
+        // Only this sub-tree updates when page/axis changes — viewer untouched.
         Positioned(
           bottom: 20,
           left: 16,
@@ -540,28 +622,33 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
           child: Center(
             child: ValueListenableBuilder<int>(
               valueListenable: _currentPageNotifier,
-              builder: (_, currentPage, __) => ValueListenableBuilder<int>(
+              builder: (_, currentPage, __) =>
+                  ValueListenableBuilder<int>(
                 valueListenable: _totalPagesNotifier,
-                builder: (_, totalPages, __) => _FloatingBar(
-                  currentPage: currentPage,
-                  totalPages: totalPages,
-                  primaryColor: _primary,
-                  onPrev: currentPage > 1
-                      ? () => _pdfController?.previousPage(
-                            duration:
-                                const Duration(milliseconds: 250),
-                            curve: Curves.easeInOut,
-                          )
-                      : null,
-                  onNext: currentPage < totalPages
-                      ? () => _pdfController?.nextPage(
-                            duration:
-                                const Duration(milliseconds: 250),
-                            curve: Curves.easeInOut,
-                          )
-                      : null,
-                  onJump: _showJumpToPage,
-                  onOpenBrowser: _openInBrowser,
+                builder: (_, totalPages, __) =>
+                    ValueListenableBuilder<Axis>(
+                  valueListenable: _scrollDirectionNotifier,
+                  builder: (_, axis, __) => _FloatingBar(
+                    currentPage: currentPage,
+                    totalPages: totalPages,
+                    primaryColor: _primary,
+                    scrollDirection: axis,
+                    onPrev: currentPage > 1
+                        ? () => _pdfController?.previousPage(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOut,
+                            )
+                        : null,
+                    onNext: currentPage < totalPages
+                        ? () => _pdfController?.nextPage(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOut,
+                            )
+                        : null,
+                    onJump: _showJumpToPage,
+                    onOpenBrowser: _openInBrowser,
+                    onToggleScroll: _toggleScrollDirection,
+                  ),
                 ),
               ),
             ),
@@ -582,23 +669,36 @@ class _FloatingBar extends StatelessWidget {
   final int currentPage;
   final int totalPages;
   final Color primaryColor;
+  final Axis scrollDirection;
   final VoidCallback? onPrev;
   final VoidCallback? onNext;
   final VoidCallback onJump;
   final VoidCallback onOpenBrowser;
+  final VoidCallback onToggleScroll;
 
   const _FloatingBar({
     required this.currentPage,
     required this.totalPages,
     required this.primaryColor,
+    required this.scrollDirection,
     required this.onPrev,
     required this.onNext,
     required this.onJump,
     required this.onOpenBrowser,
+    required this.onToggleScroll,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isHorizontal = scrollDirection == Axis.horizontal;
+    // Navigation chevrons adapt to scroll axis
+    final prevIcon = isHorizontal
+        ? Icons.chevron_left_rounded
+        : Icons.keyboard_arrow_up_rounded;
+    final nextIcon = isHorizontal
+        ? Icons.chevron_right_rounded
+        : Icons.keyboard_arrow_down_rounded;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -615,11 +715,11 @@ class _FloatingBar extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _Btn(
-              icon: Icons.chevron_left_rounded,
-              size: 24,
-              onTap: onPrev),
+          // Prev page
+          _Btn(icon: prevIcon, size: 24, onTap: onPrev),
           const SizedBox(width: 2),
+
+          // Page indicator — tap to jump
           GestureDetector(
             onTap: totalPages > 0 ? onJump : null,
             child: Padding(
@@ -648,16 +748,41 @@ class _FloatingBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 2),
-          _Btn(
-              icon: Icons.chevron_right_rounded,
-              size: 24,
-              onTap: onNext),
+
+          // Next page
+          _Btn(icon: nextIcon, size: 24, onTap: onNext),
+
+          // Divider
           Container(
             height: 14,
             width: 1,
             color: Colors.white24,
             margin: const EdgeInsets.symmetric(horizontal: 6),
           ),
+
+          // Scroll-axis toggle button
+          Tooltip(
+            message: isHorizontal
+                ? 'Switch to Vertical'
+                : 'Switch to Horizontal',
+            child: _Btn(
+              icon: isHorizontal
+                  ? Icons.swap_vert_rounded
+                  : Icons.swap_horiz_rounded,
+              size: 18,
+              onTap: onToggleScroll,
+            ),
+          ),
+
+          // Divider
+          Container(
+            height: 14,
+            width: 1,
+            color: Colors.white24,
+            margin: const EdgeInsets.symmetric(horizontal: 6),
+          ),
+
+          // Open in browser
           _Btn(
               icon: Icons.open_in_browser_rounded,
               size: 18,
