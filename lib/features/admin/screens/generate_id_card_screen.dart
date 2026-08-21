@@ -9,7 +9,7 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/student_model.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:pdfx/pdfx.dart' as pdfx;
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
 
@@ -28,7 +28,13 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
   late List<Student> _currentStudents;
   bool _isLoading = false;
   Uint8List? _pdfBytes;
-  final PdfViewerController _pdfViewerController = PdfViewerController();
+  pdfx.PdfControllerPinch? _pdfController;
+
+  @override
+  void dispose() {
+    _pdfController?.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -54,6 +60,10 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
       if (mounted) {
         setState(() {
           _pdfBytes = bytes;
+          _pdfController?.dispose();
+          _pdfController = pdfx.PdfControllerPinch(
+            document: pdfx.PdfDocument.openData(bytes),
+          );
           _isLoading = false;
         });
       }
@@ -114,20 +124,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
         backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.zoom_out),
-            onPressed: () {
-              _pdfViewerController.zoomLevel = (_pdfViewerController.zoomLevel - 0.5).clamp(1.0, 3.0);
-            },
-            tooltip: 'Zoom Out',
-          ),
-          IconButton(
-            icon: const Icon(Icons.zoom_in),
-            onPressed: () {
-              _pdfViewerController.zoomLevel = (_pdfViewerController.zoomLevel + 0.5).clamp(1.0, 3.0);
-            },
-            tooltip: 'Zoom In',
-          ),
+
           IconButton(
             icon: const Icon(Icons.print),
             onPressed: () async {
@@ -158,12 +155,8 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                 ? const Center(
                     child: Text('No students selected for ID cards.'),
                   )
-                : SfPdfViewer.memory(
-                    _pdfBytes!,
-                    controller: _pdfViewerController,
-                    key: ValueKey(
-                      'idcard_${_selectedClassId}_${_selectedSectionId}_${_currentStudents.length}',
-                    ),
+                : pdfx.PdfViewPinch(
+                    controller: _pdfController!,
                   ),
           ),
         ],

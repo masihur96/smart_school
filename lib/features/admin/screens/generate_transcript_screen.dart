@@ -12,7 +12,7 @@ import 'package:smart_school/models/student_model.dart';
 import '../providers/exam_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:pdfx/pdfx.dart' as pdfx;
 
 class GenerateTranscriptScreen extends StatefulWidget {
   final List<Student> students;
@@ -33,7 +33,13 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
   late List<Student> _currentStudents;
   bool _isLoading = false;
   Uint8List? _pdfBytes;
-  final PdfViewerController _pdfViewerController = PdfViewerController();
+  pdfx.PdfControllerPinch? _pdfController;
+
+  @override
+  void dispose() {
+    _pdfController?.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -60,6 +66,10 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
       if (mounted) {
         setState(() {
           _pdfBytes = bytes;
+          _pdfController?.dispose();
+          _pdfController = pdfx.PdfControllerPinch(
+            document: pdfx.PdfDocument.openData(bytes),
+          );
           _isLoading = false;
         });
       }
@@ -120,20 +130,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.zoom_out),
-            onPressed: () {
-              _pdfViewerController.zoomLevel = (_pdfViewerController.zoomLevel - 0.5).clamp(1.0, 3.0);
-            },
-            tooltip: 'Zoom Out',
-          ),
-          IconButton(
-            icon: const Icon(Icons.zoom_in),
-            onPressed: () {
-              _pdfViewerController.zoomLevel = (_pdfViewerController.zoomLevel + 0.5).clamp(1.0, 3.0);
-            },
-            tooltip: 'Zoom In',
-          ),
+
           IconButton(
             icon: const Icon(Icons.print),
             onPressed: () async {
@@ -164,12 +161,8 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                 ? const Center(
                     child: Text('No students selected for transcripts.'),
                   )
-                : SfPdfViewer.memory(
-                    _pdfBytes!,
-                    controller: _pdfViewerController,
-                    key: ValueKey(
-                      'transcript_${_selectedClassId}_${_selectedSectionId}_${_currentStudents.length}',
-                    ),
+                : pdfx.PdfViewPinch(
+                    controller: _pdfController!,
                   ),
           ),
         ],
