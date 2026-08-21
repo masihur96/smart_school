@@ -161,43 +161,11 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
           }
 
           if (provider.error != null && provider.onlineClasses.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.cloud_off_rounded,
-                    size: 60,
-                    color: Colors.redAccent,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    provider.error!,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: provider.fetchOnlineClasses,
-                    icon: const Icon(Icons.refresh_rounded),
-                    label: const Text('Retry'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: themeColor,
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            );
+            return _buildErrorState(provider, themeColor);
           }
 
           if (provider.onlineClasses.isEmpty) {
-            return const Center(
-              child: Text(
-                'No online classes scheduled.',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
-              ),
-            );
+            return _buildEmptyState(canManageClass, themeColor);
           }
 
           return RefreshIndicator(
@@ -228,7 +196,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                     ),
                   ),
                 );
-                if (result == true && mounted) {
+                if (result == true && context.mounted) {
                   context.read<OnlineClassProvider>().fetchOnlineClasses();
                 }
               },
@@ -303,6 +271,188 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
       return Icons.groups_rounded;
     }
     return Icons.link_rounded;
+  }
+
+  // ── Error & Empty States ──────────────────────────────────────────────────
+
+  Widget _buildErrorState(OnlineClassProvider provider, Color themeColor) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return RefreshIndicator(
+      onRefresh: provider.fetchOnlineClasses,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.cloud_off_rounded,
+                      size: 48,
+                      color: Colors.redAccent,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Unable to Load Classes',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.grey.shade800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    provider.error ??
+                        'Failed to connect to the server. Please check your network connection and try again.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color:
+                          isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: provider.fetchOnlineClasses,
+                    icon: const Icon(Icons.refresh_rounded, size: 20),
+                    label: const Text(
+                      'Retry',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: themeColor,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 28,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(bool canManageClass, Color themeColor) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return RefreshIndicator(
+      onRefresh: () => context.read<OnlineClassProvider>().fetchOnlineClasses(),
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(22),
+                    decoration: BoxDecoration(
+                      color: themeColor.withValues(alpha: 0.08),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.video_camera_front_outlined,
+                      size: 52,
+                      color: themeColor,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'No Online Classes Scheduled',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.grey.shade800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    canManageClass
+                        ? 'There are currently no online classes scheduled. Tap below to schedule a new live class or pull down to refresh.'
+                        : 'There are no upcoming online classes scheduled at this time. Pull down to refresh or check back later.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color:
+                          isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                      height: 1.4,
+                    ),
+                  ),
+                  if (canManageClass) ...[
+                    const SizedBox(height: 24),
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        final result = await Navigator.push<bool>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AddEditOnlineClassScreen(
+                              isAdminOrTeacher: canManageClass,
+                            ),
+                          ),
+                        );
+                        if (result == true) {
+                          if (!mounted) return;
+                          context
+                              .read<OnlineClassProvider>()
+                              .fetchOnlineClasses();
+                        }
+                      },
+                      icon:
+                          Icon(Icons.add_rounded, size: 20, color: themeColor),
+                      label: Text(
+                        'Schedule Class',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: themeColor,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: themeColor.withValues(alpha: 0.5),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // ── Shimmer ───────────────────────────────────────────────────────────────
@@ -608,7 +758,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                             ),
                           ),
                         );
-                        if (result == true && mounted) {
+                        if (result == true && context.mounted) {
                           context
                               .read<OnlineClassProvider>()
                               .fetchOnlineClasses();
