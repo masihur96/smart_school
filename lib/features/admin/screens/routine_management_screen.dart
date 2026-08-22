@@ -16,6 +16,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../providers/routine_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
+import 'routine_pdf_preview_screen.dart';
 
 // Day order constant
 const _days = [
@@ -226,6 +227,24 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
           : AppColors.primary,
       foregroundColor: Colors.white,
       elevation: 0,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.picture_as_pdf_rounded),
+          tooltip: 'Generate / Print Routine PDF',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => RoutinePdfPreviewScreen(
+                  initialClassId: validClassId,
+                  initialSectionId: validSectionId,
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(width: 8),
+      ],
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
