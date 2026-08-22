@@ -29,14 +29,15 @@ class ClassDetailScreen extends StatefulWidget {
   final String subjectID;
   final String routineId;
   final String? sectionId;
+  final DateTime? initialDate;
 
   const ClassDetailScreen({
     super.key,
     required this.subjectID,
     required this.routineId,
-
     required this.classRoom,
     this.sectionId,
+    this.initialDate,
   });
 
   @override
@@ -46,7 +47,7 @@ class ClassDetailScreen extends StatefulWidget {
 class _ClassDetailScreenState extends State<ClassDetailScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  DateTime _selectedDate = DateTime.now();
+  late DateTime _selectedDate;
 
   // Attendance state: studentId → status
   final Map<String, AttendanceStatus> _attendanceMap = {};
@@ -55,6 +56,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
   @override
   void initState() {
     super.initState();
+    _selectedDate = widget.initialDate ?? DateTime.now();
     _tabController = TabController(length: 2, vsync: this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {

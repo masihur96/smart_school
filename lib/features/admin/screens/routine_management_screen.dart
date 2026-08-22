@@ -1,10 +1,10 @@
 import 'dart:developer';
 
-import 'package:shimmer/shimmer.dart';
-
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/screens/class_detail_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
@@ -13,6 +13,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../models/school_models.dart' hide Teacher;
 import '../../auth/providers/auth_provider.dart';
+import '../../teacher/providers/homework_provider.dart';
+import '../providers/attendance_management_provider.dart';
 import '../providers/routine_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
@@ -55,12 +57,20 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
     with SingleTickerProviderStateMixin {
   String? _selectedClassId;
   String? _selectedSectionId;
+  DateTime _selectedDate = DateTime.now();
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _days.length, vsync: this);
+    final initialDayIndex =
+        (_selectedDate.weekday - 1).clamp(0, _days.length - 1);
+    _tabController = TabController(
+      length: _days.length,
+      vsync: this,
+      initialIndex: initialDayIndex,
+    );
+    _tabController.addListener(_onTabChanged);
 
     // Try to auto-select if data is already available in the provider
     final classNotifier = context.read<ClassSetupNotifier>();
@@ -109,6 +119,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
             context.read<TeachersNotifier>().fetchTeachers(),
             context.read<RoutineNotifier>().fetchAllRoutines(schoolId),
           ]);
+          _loadCompletionData();
         }
       } else {
         log(
@@ -118,8 +129,76 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
     });
   }
 
+  void _onTabChanged() {
+    if (!_tabController.indexIsChanging) {
+      final targetWeekday = _tabController.index + 1;
+      if (_selectedDate.weekday != targetWeekday) {
+        final diff = targetWeekday - _selectedDate.weekday;
+        setState(() {
+          _selectedDate = _selectedDate.add(Duration(days: diff));
+        });
+        _loadCompletionData();
+      }
+    }
+  }
+
+  void _loadCompletionData() {
+    if (_selectedClassId == null) return;
+    context.read<AttendanceManagementProvider>().fetchStudentAttendance(
+          classId: _selectedClassId,
+          sectionId: _selectedSectionId,
+          startDate: _selectedDate,
+          endDate: _selectedDate,
+        );
+    context.read<HomeworkNotifier>().fetchAdminHomework(
+          classId: _selectedClassId,
+          sectionId: _selectedSectionId,
+          date: DateFormat('yyyy-MM-dd').format(_selectedDate),
+        );
+  }
+
+  void _changeDateBy(int days) {
+    final newDate = _selectedDate.add(Duration(days: days));
+    setState(() {
+      _selectedDate = newDate;
+      final newTabIndex = (newDate.weekday - 1).clamp(0, _days.length - 1);
+      if (_tabController.index != newTabIndex) {
+        _tabController.animateTo(newTabIndex);
+      }
+    });
+    _loadCompletionData();
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2035),
+      builder: (ctx, child) => Theme(
+        data: Theme.of(ctx).copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: AppColors.primaryAdmin,
+          ),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+        final newTabIndex = (picked.weekday - 1).clamp(0, _days.length - 1);
+        if (_tabController.index != newTabIndex) {
+          _tabController.animateTo(newTabIndex);
+        }
+      });
+      _loadCompletionData();
+    }
+  }
+
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
   }
@@ -169,10 +248,6 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
 
     final validClassId = classes.any((c) => c.id == _selectedClassId)
         ? _selectedClassId
-        : null;
-    final validSectionId =
-        filteredSections.any((s) => s.id == _selectedSectionId)
-        ? _selectedSectionId
         : null;
 
     final bool isFiltered = validClassId != null;
@@ -291,6 +366,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                       onChanged: (val) => setState(() {
                         _selectedClassId = val;
                         _selectedSectionId = null;
+                        _loadCompletionData();
                       }),
                     ),
                   ),
@@ -316,7 +392,10 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                       ],
                       onChanged: filteredSections.isEmpty
                           ? null
-                          : (val) => setState(() => _selectedSectionId = val),
+                          : (val) => setState(() {
+                                _selectedSectionId = val;
+                                _loadCompletionData();
+                              }),
                     ),
                   ),
                 ],
@@ -347,18 +426,224 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
   // ─── Timetable body ───────────────────────────────────────────────────────
 
   Widget _buildTimetableBody() {
-    return TabBarView(
-      controller: _tabController,
-      children: List.generate(_days.length, (dayIndex) {
-        final day = _days[dayIndex];
-        final color = _dayColors[dayIndex];
-        return _DayRoutineTab(
-          day: day,
-          color: color,
-          classId: _selectedClassId!,
-          sectionId: _selectedSectionId ?? '',
-        );
-      }),
+    return Column(
+      children: [
+        _buildDateSelectorBar(),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: List.generate(_days.length, (dayIndex) {
+              final day = _days[dayIndex];
+              final color = _dayColors[dayIndex];
+              return _DayRoutineTab(
+                day: day,
+                color: color,
+                classId: _selectedClassId!,
+                sectionId: _selectedSectionId ?? '',
+                selectedDate: _selectedDate,
+              );
+            }),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ─── Date Selector Bar ───────────────────────────────────────────────────
+
+  Widget _buildDateSelectorBar() {
+    final df = DateFormat('EEE, d MMM yyyy');
+    final dateStr = df.format(_selectedDate);
+    final now = DateTime.now();
+    final isToday = _selectedDate.year == now.year &&
+        _selectedDate.month == now.month &&
+        _selectedDate.day == now.day;
+
+    // Calculate completed vs total for current day's routine
+    final stateMap = context.watch<RoutineNotifier>().state;
+    final List<RoutineEntry> allEntries;
+    if (_selectedSectionId == null || _selectedSectionId!.isEmpty) {
+      allEntries = stateMap.entries
+          .where((e) => e.key.startsWith('${_selectedClassId}_'))
+          .expand((e) => e.value)
+          .toList();
+    } else {
+      final key = '${_selectedClassId}_$_selectedSectionId';
+      allEntries = stateMap[key] ?? <RoutineEntry>[];
+    }
+    final currentDay = _days[_tabController.index];
+    final dayEntries = allEntries.where((e) => e.day == currentDay).toList();
+
+    final attendanceRecords =
+        context.watch<AttendanceManagementProvider>().studentAttendance;
+
+    int completedCount = 0;
+    for (final entry in dayEntries) {
+      final hasAttendance = attendanceRecords.any((a) {
+        if (a.routineId.isNotEmpty && entry.id != null && entry.id!.isNotEmpty) {
+          return a.routineId == entry.id;
+        }
+        final matchSubject = a.subjectId == entry.subjectId;
+        final matchSection = (_selectedSectionId == null ||
+                _selectedSectionId!.isEmpty) ||
+            a.sectionId == entry.sectionId;
+        return matchSubject && matchSection;
+      });
+      if (hasAttendance) completedCount++;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      margin: const EdgeInsets.fromLTRB(16, 10, 16, 2),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(
+          color: const Color(0xFF7C3AED).withOpacity(0.12),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Previous day button
+          IconButton(
+            icon: const Icon(Icons.chevron_left_rounded, size: 22),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            tooltip: 'Previous Day',
+            onPressed: () => _changeDateBy(-1),
+          ),
+          const SizedBox(width: 4),
+
+          // Date picker button
+          Expanded(
+            child: InkWell(
+              onTap: _pickDate,
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7C3AED).withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.calendar_today_rounded,
+                      size: 15,
+                      color: Color(0xFF7C3AED),
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        dateStr,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: Color(0xFF1E1B4B),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (isToday) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF7C3AED),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text(
+                          'Today',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+
+          // Next day button
+          IconButton(
+            icon: const Icon(Icons.chevron_right_rounded, size: 22),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            tooltip: 'Next Day',
+            onPressed: () => _changeDateBy(1),
+          ),
+          const SizedBox(width: 8),
+
+          // Daily Completion summary badge
+          if (dayEntries.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+              decoration: BoxDecoration(
+                color: completedCount == dayEntries.length
+                    ? const Color(0xFFE8F5E9)
+                    : (completedCount > 0
+                        ? const Color(0xFFEDE9FE)
+                        : const Color(0xFFF1F5F9)),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: completedCount == dayEntries.length
+                      ? const Color(0xFF81C784)
+                      : (completedCount > 0
+                          ? const Color(0xFF7C3AED).withOpacity(0.3)
+                          : Colors.grey.shade300),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    completedCount == dayEntries.length
+                        ? Icons.check_circle_rounded
+                        : (completedCount > 0
+                            ? Icons.incomplete_circle_rounded
+                            : Icons.schedule_rounded),
+                    size: 13,
+                    color: completedCount == dayEntries.length
+                        ? const Color(0xFF2E7D32)
+                        : (completedCount > 0
+                            ? const Color(0xFF7C3AED)
+                            : Colors.grey.shade600),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$completedCount/${dayEntries.length} Done',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: completedCount == dayEntries.length
+                          ? const Color(0xFF2E7D32)
+                          : (completedCount > 0
+                              ? const Color(0xFF7C3AED)
+                              : Colors.grey.shade700),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -417,12 +702,14 @@ class _DayRoutineTab extends StatelessWidget {
   final Color color;
   final String classId;
   final String sectionId;
+  final DateTime selectedDate;
 
   const _DayRoutineTab({
     required this.day,
     required this.color,
     required this.classId,
     required this.sectionId,
+    required this.selectedDate,
   });
 
   @override
@@ -430,6 +717,13 @@ class _DayRoutineTab extends StatelessWidget {
     final routineNotifier = context.watch<RoutineNotifier>();
     final isLoading = routineNotifier.isLoading;
     final stateMap = routineNotifier.state;
+
+    // Attendance and Homework watchers
+    final attendanceProvider = context.watch<AttendanceManagementProvider>();
+    final homeworkNotifier = context.watch<HomeworkNotifier>();
+
+    final studentAttendance = attendanceProvider.studentAttendance;
+    final homeworkRecords = homeworkNotifier.homeworkRecords;
 
     // ── Shimmer skeleton while loading ─────────────────────────────────────
     if (isLoading) {
@@ -474,12 +768,10 @@ class _DayRoutineTab extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.only(top: 10, bottom: 20),
       itemCount: entries.length,
       itemBuilder: (context, index) {
         final entry = entries[index];
-        // Find global index for delete
-        final globalIndex = allEntries.indexOf(entry);
 
         final subjectName = context
             .read<SubjectSetupNotifier>()
@@ -501,6 +793,53 @@ class _DayRoutineTab extends StatelessWidget {
         );
         final teacherName = teacher.user?.name ?? 'Unknown Teacher';
 
+        // ── Detect Attendance completion ─────────────────────────────────
+        final entryAttendance = studentAttendance.where((a) {
+          if (a.routineId.isNotEmpty &&
+              entry.id != null &&
+              entry.id!.isNotEmpty) {
+            return a.routineId == entry.id;
+          }
+          final matchSubject = a.subjectId == entry.subjectId;
+          final matchSection = (entry.sectionId == null ||
+                  entry.sectionId!.isEmpty) ||
+              a.sectionId == entry.sectionId;
+          return matchSubject && matchSection;
+        }).toList();
+
+        final bool isAttendanceDone = entryAttendance.isNotEmpty;
+        final int presentCount = entryAttendance
+            .where((a) => a.status.toLowerCase() == 'present')
+            .length;
+        final int absentCount = entryAttendance
+            .where((a) => a.status.toLowerCase() == 'absent')
+            .length;
+        final int lateCount = entryAttendance
+            .where((a) => a.status.toLowerCase() == 'late')
+            .length;
+        final int leaveCount = entryAttendance
+            .where((a) => a.status.toLowerCase() == 'leave')
+            .length;
+
+        // ── Detect Homework completion ───────────────────────────────────
+        final entryHomework = homeworkRecords.where((h) {
+          final matchSubject = h.subjectId == entry.subjectId;
+          final matchSection = (entry.sectionId == null ||
+                  entry.sectionId!.isEmpty) ||
+              h.sectionId == entry.sectionId;
+          final matchDate = (h.createdAt.year == selectedDate.year &&
+                  h.createdAt.month == selectedDate.month &&
+                  h.createdAt.day == selectedDate.day) ||
+              (h.dueDate.year == selectedDate.year &&
+                  h.dueDate.month == selectedDate.month &&
+                  h.dueDate.day == selectedDate.day);
+          return matchSubject && matchSection && matchDate;
+        }).toList();
+
+        final bool isHomeworkDone = entryHomework.isNotEmpty;
+        final String? homeworkTitle =
+            isHomeworkDone ? entryHomework.first.title : null;
+
         return GestureDetector(
           onTap: () {
             Navigator.push(
@@ -514,6 +853,7 @@ class _DayRoutineTab extends StatelessWidget {
                   routineId: entry.id ?? "",
                   sectionId: entry.sectionId,
                   subjectID: entry.subjectId,
+                  initialDate: selectedDate,
                 ),
               ),
             );
@@ -523,8 +863,26 @@ class _DayRoutineTab extends StatelessWidget {
             subjectName: subjectName,
             teacherName: teacherName,
             accentColor: color,
-            onView: () =>
-                _viewEntry(context, entry, subjectName, teacherName, color),
+            selectedDate: selectedDate,
+            isAttendanceDone: isAttendanceDone,
+            presentCount: presentCount,
+            absentCount: absentCount,
+            lateCount: lateCount,
+            leaveCount: leaveCount,
+            isHomeworkDone: isHomeworkDone,
+            homeworkTitle: homeworkTitle,
+            onView: () => _viewEntry(
+              context,
+              entry,
+              subjectName,
+              teacherName,
+              color,
+              isAttendanceDone,
+              presentCount,
+              absentCount,
+              isHomeworkDone,
+              homeworkTitle,
+            ),
             onEdit: () => _editEntry(context, classId, sectionId, entry),
             onDelete: () => _deleteEntry(context, classId, sectionId, entry),
           ),
@@ -536,113 +894,115 @@ class _DayRoutineTab extends StatelessWidget {
   // ── Shimmer skeleton ────────────────────────────────────────────────────
   Widget _buildShimmerSkeleton(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final Color shimBase =
-        isDark ? const Color(0xFF1E1E1E) : const Color(0xFFE8E8E8);
-    final Color shimHighlight =
-        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF8F8F8);
-    final Color lineColor =
-        isDark ? const Color(0xFF3D3D3D) : const Color(0xFFDEDEDE);
-    final Color cardBorder =
-        isDark ? const Color(0xFF333333) : const Color(0xFFEEEEEE);
+    final Color shimBase = isDark
+        ? const Color(0xFF1E1E1E)
+        : const Color(0xFFE8E8E8);
+    final Color shimHighlight = isDark
+        ? const Color(0xFF3A3A3A)
+        : const Color(0xFFF8F8F8);
+    final Color lineColor = isDark
+        ? const Color(0xFF3D3D3D)
+        : const Color(0xFFDEDEDE);
+    final Color cardBorder = isDark
+        ? const Color(0xFF333333)
+        : const Color(0xFFEEEEEE);
 
     // Thin rounded text-line placeholder
     Widget line(double w, {double h = 11, double r = 30}) => Container(
-          width: w,
-          height: h,
-          decoration: BoxDecoration(
-            color: lineColor,
-            borderRadius: BorderRadius.circular(r),
-          ),
-        );
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        color: lineColor,
+        borderRadius: BorderRadius.circular(r),
+      ),
+    );
 
     // Solid block (avatar, icon, badge)
     Widget block(double w, double h, {double r = 8}) => Container(
-          width: w,
-          height: h,
-          decoration: BoxDecoration(
-            color: lineColor,
-            borderRadius: BorderRadius.circular(r),
-          ),
-        );
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        color: lineColor,
+        borderRadius: BorderRadius.circular(r),
+      ),
+    );
 
     // One skeleton card that mirrors _RoutineEntryCard
     Widget skeletonCard() => Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: cardBorder, width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: isDark
-                    ? Colors.black.withOpacity(0.25)
-                    : Colors.black.withOpacity(0.06),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: cardBorder, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withOpacity(0.25)
+                : Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              // ── Time column skeleton ──────────────────────
+              Container(
+                width: 90,
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                decoration: BoxDecoration(
+                  color: lineColor.withOpacity(0.25),
+                  border: Border(right: BorderSide(color: cardBorder)),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    line(48, h: 16, r: 8), // start time
+                    const SizedBox(height: 8),
+                    block(1, 14, r: 1), // divider tick
+                    const SizedBox(height: 8),
+                    line(38, h: 12, r: 8), // end time
+                  ],
+                ),
+              ),
+              // ── Content column skeleton ───────────────────
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Subject name + 3-dot menu
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          line(140, h: 14, r: 8),
+                          block(20, 20, r: 10),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      // Teacher icon + name
+                      Row(
+                        children: [
+                          block(14, 14, r: 7),
+                          const SizedBox(width: 6),
+                          line(100, h: 11),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      // Room badge
+                      block(80, 22, r: 6),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: IntrinsicHeight(
-              child: Row(
-                children: [
-                  // ── Time column skeleton ──────────────────────
-                  Container(
-                    width: 90,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    decoration: BoxDecoration(
-                      color: lineColor.withOpacity(0.25),
-                      border: Border(
-                        right: BorderSide(color: cardBorder),
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        line(48, h: 16, r: 8),   // start time
-                        const SizedBox(height: 8),
-                        block(1, 14, r: 1),        // divider tick
-                        const SizedBox(height: 8),
-                        line(38, h: 12, r: 8),   // end time
-                      ],
-                    ),
-                  ),
-                  // ── Content column skeleton ───────────────────
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Subject name + 3-dot menu
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              line(140, h: 14, r: 8),
-                              block(20, 20, r: 10),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          // Teacher icon + name
-                          Row(
-                            children: [
-                              block(14, 14, r: 7),
-                              const SizedBox(width: 6),
-                              line(100, h: 11),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          // Room badge
-                          block(80, 22, r: 6),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
+        ),
+      ),
+    );
 
     return Shimmer.fromColors(
       baseColor: shimBase,
@@ -662,7 +1022,13 @@ class _DayRoutineTab extends StatelessWidget {
     String subjectName,
     String teacherName,
     Color color,
+    bool isAttendanceDone,
+    int presentCount,
+    int absentCount,
+    bool isHomeworkDone,
+    String? homeworkTitle,
   ) {
+    final df = DateFormat('dd MMM yyyy');
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -682,7 +1048,11 @@ class _DayRoutineTab extends StatelessWidget {
             const SizedBox(height: 12),
             _detailRow(Icons.person_outline_rounded, 'Teacher', teacherName),
             const SizedBox(height: 12),
-            _detailRow(Icons.calendar_today_outlined, 'Day', entry.day),
+            _detailRow(
+              Icons.calendar_today_outlined,
+              'Day & Date',
+              '${entry.day} (${df.format(selectedDate)})',
+            ),
             const SizedBox(height: 12),
             _detailRow(
               Icons.access_time_rounded,
@@ -697,12 +1067,56 @@ class _DayRoutineTab extends StatelessWidget {
                 entry.roomNumber!,
               ),
             ],
+            const SizedBox(height: 12),
+            _detailRow(
+              Icons.how_to_reg_rounded,
+              'Attendance Status',
+              isAttendanceDone
+                  ? 'Completed ($presentCount Present, $absentCount Absent)'
+                  : 'Pending (Not Taken)',
+            ),
+            const SizedBox(height: 12),
+            _detailRow(
+              Icons.assignment_outlined,
+              'Homework Status',
+              isHomeworkDone
+                  ? 'Assigned: ${homeworkTitle ?? "Yes"}'
+                  : 'None Assigned',
+            ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text(AppLocalizations.of(context)!.close),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryAdmin,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ClassDetailScreen(
+                    classRoom: ClassRoom(
+                      id: classId,
+                      name: entry.classEntity?.name ?? "",
+                    ),
+                    routineId: entry.id ?? "",
+                    sectionId: entry.sectionId,
+                    subjectID: entry.subjectId,
+                    initialDate: selectedDate,
+                  ),
+                ),
+              );
+            },
+            child: const Text('Manage Class'),
           ),
         ],
       ),
@@ -711,21 +1125,24 @@ class _DayRoutineTab extends StatelessWidget {
 
   Widget _detailRow(IconData icon, String label, String value) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon, size: 18, color: Colors.grey[600]),
         const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(color: Colors.grey[500], fontSize: 11),
-            ),
-            Text(
-              value,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-            ),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(color: Colors.grey[500], fontSize: 11),
+              ),
+              Text(
+                value,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -780,8 +1197,6 @@ class _DayRoutineTab extends StatelessWidget {
                 );
               } else {
                 // Fallback for entries not yet synced/without ID (if any)
-                // Need global index which we don't have easily here,
-                // but usually all will have IDs now.
               }
             },
             child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
@@ -801,6 +1216,14 @@ class _RoutineEntryCard extends StatelessWidget {
   final String subjectName;
   final String teacherName;
   final Color accentColor;
+  final DateTime selectedDate;
+  final bool isAttendanceDone;
+  final int presentCount;
+  final int absentCount;
+  final int lateCount;
+  final int leaveCount;
+  final bool isHomeworkDone;
+  final String? homeworkTitle;
   final VoidCallback onDelete;
   final VoidCallback onEdit;
   final VoidCallback onView;
@@ -810,6 +1233,14 @@ class _RoutineEntryCard extends StatelessWidget {
     required this.subjectName,
     required this.teacherName,
     required this.accentColor,
+    required this.selectedDate,
+    required this.isAttendanceDone,
+    this.presentCount = 0,
+    this.absentCount = 0,
+    this.lateCount = 0,
+    this.leaveCount = 0,
+    required this.isHomeworkDone,
+    this.homeworkTitle,
     required this.onDelete,
     required this.onEdit,
     required this.onView,
@@ -818,19 +1249,37 @@ class _RoutineEntryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(
+          color: isAttendanceDone
+              ? const Color(0xFF81C784).withOpacity(0.4)
+              : Colors.grey.withOpacity(0.15),
+          width: isAttendanceDone ? 1.5 : 1,
+        ),
+      ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         child: IntrinsicHeight(
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Time Indicator side
               Container(
-                width: 90,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                width: 88,
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
                 decoration: BoxDecoration(
-                  color: accentColor.withOpacity(0.05),
+                  color: isAttendanceDone
+                      ? const Color(0xFFE8F5E9).withOpacity(0.6)
+                      : accentColor.withOpacity(0.06),
                   border: Border(
-                    right: BorderSide(color: accentColor.withOpacity(0.1)),
+                    right: BorderSide(
+                      color: isAttendanceDone
+                          ? const Color(0xFFA5D6A7).withOpacity(0.5)
+                          : accentColor.withOpacity(0.12),
+                    ),
                   ),
                 ),
                 child: Column(
@@ -838,9 +1287,9 @@ class _RoutineEntryCard extends StatelessWidget {
                   children: [
                     Text(
                       entry.startTime.split(' ')[0],
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 15,
                       ),
                     ),
                     Text(
@@ -850,20 +1299,22 @@ class _RoutineEntryCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
+                        color: Colors.grey[600],
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Container(
                       width: 1,
-                      height: 12,
+                      height: 10,
                       color: accentColor.withOpacity(0.5),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Text(
                       entry.endTime.split(' ')[0],
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
+                        color: Colors.grey[700],
                       ),
                     ),
                   ],
@@ -872,43 +1323,50 @@ class _RoutineEntryCard extends StatelessWidget {
               // Main Content
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Top Row: Subject Name + Completion Symbol/Badge + 3-Dot Menu
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Expanded(
                             child: Text(
                               subjectName,
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 17,
-
-                                letterSpacing: -0.5,
+                                fontSize: 16,
+                                letterSpacing: -0.3,
                               ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          const SizedBox(width: 6),
+                          _buildStatusBadge(),
                           _buildActionsMenu(),
                         ],
                       ),
                       const SizedBox(height: 6),
+                      // Teacher Info & Attachment
                       Row(
                         children: [
+                          Icon(
+                            Icons.person_outline_rounded,
+                            size: 14,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(width: 5),
                           Expanded(
-                            child: Row(
-                              children: [
-                                Icon(Icons.person_outline_rounded, size: 14),
-                                const SizedBox(width: 6),
-                                Text(
-                                  teacherName,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
+                            child: Text(
+                              teacherName,
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[800],
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           if (entry.fileUrl != null)
@@ -921,7 +1379,7 @@ class _RoutineEntryCard extends StatelessWidget {
                               },
                               icon: const Icon(
                                 Icons.attach_file_rounded,
-                                size: 20,
+                                size: 18,
                                 color: AppColors.primaryAdmin,
                               ),
                               tooltip: 'View Attachment',
@@ -930,38 +1388,148 @@ class _RoutineEntryCard extends StatelessWidget {
                             ),
                         ],
                       ),
-                      if (entry.roomNumber != null) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF1F5F9),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.meeting_room_outlined,
-                                size: 12,
-                                color: Colors.grey,
+                      const SizedBox(height: 8),
+
+                      // Status Symbols & Badges Row (Attendance, Homework, Room)
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [
+                          // ── Attendance Symbol Chip ──
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3.5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isAttendanceDone
+                                  ? const Color(0xFFE8F5E9)
+                                  : const Color(0xFFFFF1F2),
+                              borderRadius: BorderRadius.circular(7),
+                              border: Border.all(
+                                color: isAttendanceDone
+                                    ? const Color(0xFFA5D6A7)
+                                    : const Color(0xFFFECDD3),
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Room: ${entry.roomNumber}',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  isAttendanceDone
+                                      ? Icons.how_to_reg_rounded
+                                      : Icons.person_off_outlined,
+                                  size: 12,
+                                  color: isAttendanceDone
+                                      ? const Color(0xFF2E7D32)
+                                      : const Color(0xFFE11D48),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  isAttendanceDone
+                                      ? (presentCount + absentCount > 0
+                                          ? 'Attendance: $presentCount P / $absentCount A'
+                                          : 'Attendance: Done')
+                                      : 'Attendance: Pending',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: isAttendanceDone
+                                        ? const Color(0xFF2E7D32)
+                                        : const Color(0xFFE11D48),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // ── Homework Symbol Chip ──
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3.5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isHomeworkDone
+                                  ? const Color(0xFFEEF2FF)
+                                  : const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(7),
+                              border: Border.all(
+                                color: isHomeworkDone
+                                    ? const Color(0xFFC7D2FE)
+                                    : const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  isHomeworkDone
+                                      ? Icons.assignment_turned_in_rounded
+                                      : Icons.assignment_outlined,
+                                  size: 12,
+                                  color: isHomeworkDone
+                                      ? const Color(0xFF4338CA)
+                                      : Colors.grey.shade500,
+                                ),
+                                const SizedBox(width: 4),
+                                ConstrainedBox(
+                                  constraints: const BoxConstraints(maxWidth: 120),
+                                  child: Text(
+                                    isHomeworkDone
+                                        ? 'HW: ${homeworkTitle ?? "Added"}'
+                                        : 'No HW',
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w600,
+                                      color: isHomeworkDone
+                                          ? const Color(0xFF4338CA)
+                                          : Colors.grey.shade600,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // ── Room Badge (if available) ──
+                          if (entry.roomNumber != null &&
+                              entry.roomNumber!.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 3.5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF1F5F9),
+                                borderRadius: BorderRadius.circular(7),
+                                border: Border.all(
+                                  color: const Color(0xFFE2E8F0),
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                      ],
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.meeting_room_outlined,
+                                    size: 11,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    'Room ${entry.roomNumber}',
+                                    style: TextStyle(
+                                      color: Colors.grey.shade700,
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -971,6 +1539,94 @@ class _RoutineEntryCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildStatusBadge() {
+    if (isAttendanceDone) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE8F5E9),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF81C784)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.check_circle_rounded,
+              size: 12,
+              color: Color(0xFF2E7D32),
+            ),
+            const SizedBox(width: 3),
+            Text(
+              isHomeworkDone ? 'Done + HW' : 'Done',
+              style: const TextStyle(
+                color: Color(0xFF2E7D32),
+                fontSize: 10.5,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (isHomeworkDone) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE0F2FE),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF7DD3FC)),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.assignment_turned_in_rounded,
+              size: 12,
+              color: Color(0xFF0284C7),
+            ),
+            const SizedBox(width: 3),
+            Text(
+              'HW Added',
+              style: TextStyle(
+                color: Color(0xFF0284C7),
+                fontSize: 10.5,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF7ED),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFFDBA74)),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.schedule_rounded,
+              size: 12,
+              color: Color(0xFFEA580C),
+            ),
+            const SizedBox(width: 3),
+            Text(
+              'Pending',
+              style: TextStyle(
+                color: Color(0xFFEA580C),
+                fontSize: 10.5,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   Widget _buildActionsMenu() {
