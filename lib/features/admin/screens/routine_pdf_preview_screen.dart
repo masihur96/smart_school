@@ -32,7 +32,7 @@ class RoutinePdfPreviewScreen extends StatefulWidget {
 
 class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
   String? _selectedClassId;
-  String? _selectedSectionId;
+  String? _selectedSectionFilter;
   RoutinePdfLayout _selectedLayout = RoutinePdfLayout.dayByDay;
 
   bool _isLoading = false;
@@ -40,17 +40,13 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
   pdfx.PdfControllerPinch? _pdfController;
   int _pageCount = 0;
   int _currentPage = 1;
+  int _totalGroupsCount = 0;
 
   @override
   void initState() {
     super.initState();
     _selectedClassId = widget.initialClassId;
-    _selectedSectionId = widget.initialSectionId;
-
-    final classNotifier = context.read<ClassSetupNotifier>();
-    if (_selectedClassId == null && classNotifier.classes.isNotEmpty) {
-      _selectedClassId = classNotifier.classes.first.id;
-    }
+    _selectedSectionFilter = widget.initialSectionId;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _generatePdf();
@@ -83,46 +79,187 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
       final teachers = teacherNotifier.teachers;
       final routineState = routineNotifier.state;
 
-      // Resolve class name
-      final matchedClass = classes.firstWhere(
-        (c) => c.id == _selectedClassId,
-        orElse: () => ClassRoom(id: '', name: 'Selected Class'),
-      );
-      final className = matchedClass.name.isNotEmpty
-          ? matchedClass.name
-          : (_selectedClassId ?? 'General');
+      final groups = <ClassSectionRoutineGroup>[];
 
-      // Resolve section name
-      String? sectionName;
-      if (_selectedSectionId != null && _selectedSectionId!.isNotEmpty) {
-        final matchedSection = sections.firstWhere(
-          (s) => s.id == _selectedSectionId,
-          orElse: () => Section(id: '', name: '', classId: ''),
+      if (_selectedClassId == null) {
+        // ── ALL CLASSES SELECTED ─────────────────────────────────────────────
+        for (final cls in classes) {
+          final classSections =
+              sections.where((s) => s.classId == cls.id).toList();
+
+          if (classSections.isNotEmpty) {
+            bool addedForClass = false;
+            for (final sec in classSections) {
+              // If a section filter is set (e.g. 'Boys', 'Girls', 'A'), match section name
+              if (_selectedSectionFilter != null &&
+                  _selectedSectionFilter!.isNotEmpty) {
+                final matchByName =
+                    sec.name.trim().toLowerCase() ==
+                    _selectedSectionFilter!.trim().toLowerCase();
+                final matchById = sec.id == _selectedSectionFilter;
+                if (!matchByName && !matchById) {
+                  continue;
+                }
+              }
+
+              final key = '${cls.id}_${sec.id}';
+              final entries = routineState[key] ?? [];
+
+              if (entries.isNotEmpty) {
+                groups.add(
+                  ClassSectionRoutineGroup(
+                    className: cls.name,
+                    sectionName: sec.name,
+                    entries: entries,
+                  ),
+                );
+                addedForClass = true;
+              }
+            }
+
+            // If section filter is not set and no section-keyed entries, check general class entries
+            if (!addedForClass && _selectedSectionFilter == null) {
+              final generalEntries = routineState.entries
+                  .where((e) => e.key == '${cls.id}_' || e.key == cls.id)
+                  .expand((e) => e.value)
+                  .toList();
+              if (generalEntries.isNotEmpty) {
+                groups.add(
+                  ClassSectionRoutineGroup(
+                    className: cls.name,
+                    sectionName: 'All Sections',
+                    entries: generalEntries,
+                  ),
+                );
+              }
+            }
+          } else {
+            // Class without separate sections
+            if (_selectedSectionFilter == null) {
+              final entries = routineState.entries
+                  .where((e) => e.key.startsWith('${cls.id}_') || e.key == cls.id)
+                  .expand((e) => e.value)
+                  .toList();
+              if (entries.isNotEmpty) {
+                groups.add(
+                  ClassSectionRoutineGroup(
+                    className: cls.name,
+                    sectionName: 'All Sections',
+                    entries: entries,
+                  ),
+                );
+              }
+            }
+          }
+        }
+
+        // If no groups matched from formal classes list, fallback to any existing routine keys
+        if (groups.isEmpty && _selectedSectionFilter == null) {
+          for (final entry in routineState.entries) {
+            if (entry.value.isNotEmpty) {
+              final firstItem = entry.value.first;
+              final cName = firstItem.classEntity?.name ?? 'Class';
+              final sName = firstItem.sectionEntity?.name ?? 'Section';
+              groups.add(
+                ClassSectionRoutineGroup(
+                  className: cName,
+                  sectionName: sName,
+                  entries: entry.value,
+                ),
+              );
+            }
+          }
+        }
+      } else {
+        // ── SPECIFIC CLASS SELECTED ──────────────────────────────────────────
+        final cls = classes.firstWhere(
+          (c) => c.id == _selectedClassId,
+          orElse: () => ClassRoom(id: _selectedClassId!, name: 'Selected Class'),
         );
-        if (matchedSection.name.isNotEmpty) {
-          sectionName = matchedSection.name;
+        final classSections =
+            sections.where((s) => s.classId == _selectedClassId).toList();
+
+        if (_selectedSectionFilter != null &&
+            _selectedSectionFilter!.isNotEmpty) {
+          // Specific Section selected
+          final sec = classSections.firstWhere(
+            (s) =>
+                s.id == _selectedSectionFilter ||
+                s.name.trim().toLowerCase() ==
+                    _selectedSectionFilter!.trim().toLowerCase(),
+            orElse: () => Section(
+              id: _selectedSectionFilter!,
+              name: _selectedSectionFilter!,
+              classId: _selectedClassId!,
+            ),
+          );
+
+          final key = '${_selectedClassId}_${sec.id}';
+          final entries = routineState[key] ??
+              routineState.entries
+                  .where((e) => e.key == key)
+                  .expand((e) => e.value)
+                  .toList();
+
+          groups.add(
+            ClassSectionRoutineGroup(
+              className: cls.name,
+              sectionName: sec.name,
+              entries: entries,
+            ),
+          );
+        } else {
+          // "All Sections" of this specific class
+          if (classSections.isNotEmpty) {
+            bool addedAny = false;
+            for (final sec in classSections) {
+              final key = '${_selectedClassId}_${sec.id}';
+              final entries = routineState[key] ?? [];
+              if (entries.isNotEmpty) {
+                groups.add(
+                  ClassSectionRoutineGroup(
+                    className: cls.name,
+                    sectionName: sec.name,
+                    entries: entries,
+                  ),
+                );
+                addedAny = true;
+              }
+            }
+            if (!addedAny) {
+              final allEntries = routineState.entries
+                  .where((e) => e.key.startsWith('${_selectedClassId}_'))
+                  .expand((e) => e.value)
+                  .toList();
+              groups.add(
+                ClassSectionRoutineGroup(
+                  className: cls.name,
+                  sectionName: 'All Sections',
+                  entries: allEntries,
+                ),
+              );
+            }
+          } else {
+            final allEntries = routineState.entries
+                  .where((e) => e.key.startsWith('${_selectedClassId}_'))
+                  .expand((e) => e.value)
+                  .toList();
+            groups.add(
+              ClassSectionRoutineGroup(
+                className: cls.name,
+                sectionName: 'All Sections',
+                entries: allEntries,
+              ),
+            );
+          }
         }
       }
 
-      // Filter entries
-      final List<RoutineEntry> filteredEntries;
-      if (_selectedClassId == null || _selectedClassId!.isEmpty) {
-        filteredEntries = routineState.values.expand((list) => list).toList();
-      } else if (_selectedSectionId == null || _selectedSectionId!.isEmpty) {
-        filteredEntries = routineState.entries
-            .where((e) => e.key.startsWith('${_selectedClassId}_'))
-            .expand((e) => e.value)
-            .toList();
-      } else {
-        final key = '${_selectedClassId}_$_selectedSectionId';
-        filteredEntries = routineState[key] ?? <RoutineEntry>[];
-      }
+      _totalGroupsCount = groups.length;
 
       final bytes = await ClassRoutinePdfHelper.generateRoutinePdfBytes(
         school: school,
-        className: className,
-        sectionName: sectionName,
-        entries: filteredEntries,
+        groups: groups,
         subjects: subjects,
         teachers: teachers,
         layout: _selectedLayout,
@@ -155,9 +292,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
 
   Future<void> _printPdf() async {
     if (_pdfBytes == null) return;
-    final cleanClass = (_selectedClassId ?? 'Class').replaceAll(' ', '_');
-    final filename =
-        'Class_Routine_${cleanClass}_${DateFormat('yyyyMMdd').format(DateTime.now())}.pdf';
+    final filename = _getFilename();
 
     await Printing.layoutPdf(
       onLayout: (format) async => _pdfBytes!,
@@ -167,11 +302,16 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
 
   Future<void> _sharePdf() async {
     if (_pdfBytes == null) return;
-    final cleanClass = (_selectedClassId ?? 'Class').replaceAll(' ', '_');
-    final filename =
-        'Class_Routine_${cleanClass}_${DateFormat('yyyyMMdd').format(DateTime.now())}.pdf';
+    final filename = _getFilename();
 
     await Printing.sharePdf(bytes: _pdfBytes!, filename: filename);
+  }
+
+  String _getFilename() {
+    final classPart = _selectedClassId == null ? 'All_Classes' : 'Class_$_selectedClassId';
+    final secPart = _selectedSectionFilter == null ? 'All_Sections' : 'Section_$_selectedSectionFilter';
+    final timestamp = DateFormat('yyyyMMdd_HHmm').format(DateTime.now());
+    return 'Routine_${classPart}_${secPart}_$timestamp.pdf';
   }
 
   @override
@@ -186,27 +326,25 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
         .toList();
 
     final allSections = context.watch<SectionSetupNotifier>().sections;
-    final filteredSections = allSections
-        .where((s) => s.classId == _selectedClassId)
-        .fold<Map<String, Section>>({}, (map, s) {
-          map[s.id] = s;
-          return map;
-        })
-        .values
-        .toList();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Routine PDF Preview',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              _selectedClassId == null
+                  ? (_selectedSectionFilter != null
+                      ? '${_selectedSectionFilter!} Routine (All Classes)'
+                      : 'All Classes Routine')
+                  : 'Class Routine Preview',
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
             Text(
-              'Official Academic Timetable',
-              style: TextStyle(fontSize: 12, color: Colors.white70),
+              _totalGroupsCount > 0
+                  ? '$_totalGroupsCount schedule ${_totalGroupsCount == 1 ? 'section' : 'sections'} included'
+                  : 'Official Academic Timetable',
+              style: const TextStyle(fontSize: 11.5, color: Colors.white70),
             ),
           ],
         ),
@@ -232,7 +370,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
       body: Column(
         children: [
           // Filter & Layout Controls
-          _buildFilterBar(classes, filteredSections),
+          _buildFilterBar(classes, allSections),
 
           // Main PDF Previewer
           Expanded(
@@ -265,7 +403,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                         ),
                         const SizedBox(height: 12),
                         const Text(
-                          'Select a class above to generate the routine.',
+                          'No routine preview available.',
                           style: TextStyle(color: Colors.grey),
                         ),
                         const SizedBox(height: 12),
@@ -301,8 +439,72 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
 
   Widget _buildFilterBar(
     List<ClassRoom> classes,
-    List<Section> filteredSections,
+    List<Section> allSections,
   ) {
+    // Determine section items depending on whether a class is selected or "All Classes"
+    final List<DropdownMenuItem<String?>> sectionDropdownItems = [];
+
+    sectionDropdownItems.add(
+      const DropdownMenuItem<String?>(
+        value: null,
+        child: Text(
+          'All Sections',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+
+    if (_selectedClassId == null) {
+      // "All Classes" is selected: show distinct section names across all sections (e.g. Boys, Girls, A, B...)
+      final distinctSectionNames = allSections
+          .map((s) => s.name.trim())
+          .where((name) => name.isNotEmpty)
+          .toSet()
+          .toList()
+        ..sort();
+
+      for (final secName in distinctSectionNames) {
+        sectionDropdownItems.add(
+          DropdownMenuItem<String?>(
+            value: secName,
+            child: Text(
+              secName,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+          ),
+        );
+      }
+    } else {
+      // Specific Class selected: show sections belonging to that class
+      final classSections = allSections
+          .where((s) => s.classId == _selectedClassId)
+          .fold<Map<String, Section>>({}, (map, s) {
+            map[s.id] = s;
+            return map;
+          })
+          .values
+          .toList();
+
+      for (final sec in classSections) {
+        sectionDropdownItems.add(
+          DropdownMenuItem<String?>(
+            value: sec.id,
+            child: Text(
+              sec.name,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+          ),
+        );
+      }
+    }
+
+    // Validate current section filter value against dropdown options
+    final validSectionValues = sectionDropdownItems.map((i) => i.value).toSet();
+    final effectiveSectionValue =
+        validSectionValues.contains(_selectedSectionFilter)
+            ? _selectedSectionFilter
+            : null;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -337,29 +539,47 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                           ? _selectedClassId
                           : null,
                       hint: const Text(
-                        'Select Class',
-                        style: TextStyle(fontSize: 13),
+                        'All Classes',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryAdmin,
+                        ),
                       ),
                       isExpanded: true,
-                      icon: const Icon(Icons.arrow_drop_down, color: AppColors.primaryAdmin),
-                      items: classes
-                          .map(
-                            (c) => DropdownMenuItem(
-                              value: c.id,
-                              child: Text(
-                                c.name,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                      icon: const Icon(
+                        Icons.arrow_drop_down,
+                        color: AppColors.primaryAdmin,
+                      ),
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text(
+                            'All Classes',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryAdmin,
+                            ),
+                          ),
+                        ),
+                        ...classes.map(
+                          (c) => DropdownMenuItem<String?>(
+                            value: c.id,
+                            child: Text(
+                              c.name,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                          )
-                          .toList(),
+                          ),
+                        ),
+                      ],
                       onChanged: (val) {
                         setState(() {
                           _selectedClassId = val;
-                          _selectedSectionId = null;
+                          _selectedSectionFilter = null; // Reset section filter
                         });
                         _generatePdf();
                       },
@@ -382,40 +602,15 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String?>(
-                      value: filteredSections.any((s) => s.id == _selectedSectionId)
-                          ? _selectedSectionId
-                          : null,
-                      hint: Text(
-                        filteredSections.isEmpty
-                            ? 'All Sections'
-                            : 'All Sections',
-                        style: const TextStyle(fontSize: 13),
-                      ),
+                      value: effectiveSectionValue,
                       isExpanded: true,
-                      icon: const Icon(Icons.arrow_drop_down, color: AppColors.primaryAdmin),
-                      items: [
-                        const DropdownMenuItem(
-                          value: null,
-                          child: Text(
-                            'All Sections',
-                            style: TextStyle(fontSize: 13),
-                          ),
-                        ),
-                        ...filteredSections.map(
-                          (s) => DropdownMenuItem(
-                            value: s.id,
-                            child: Text(
-                              s.name,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      icon: const Icon(
+                        Icons.arrow_drop_down,
+                        color: AppColors.primaryAdmin,
+                      ),
+                      items: sectionDropdownItems,
                       onChanged: (val) {
-                        setState(() => _selectedSectionId = val);
+                        setState(() => _selectedSectionFilter = val);
                         _generatePdf();
                       },
                     ),
