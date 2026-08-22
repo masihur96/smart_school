@@ -42,9 +42,14 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
   int _currentPage = 1;
   int _totalGroupsCount = 0;
 
+  final TransformationController _transformationController =
+      TransformationController();
+  double _currentZoomLevel = 1.0;
+
   @override
   void initState() {
     super.initState();
+    _transformationController.addListener(_onTransformationChanged);
     _selectedClassId = widget.initialClassId;
     _selectedSectionFilter = widget.initialSectionId;
 
@@ -53,10 +58,40 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
     });
   }
 
+  void _onTransformationChanged() {
+    final scale = _transformationController.value.getMaxScaleOnAxis();
+    if ((scale - _currentZoomLevel).abs() > 0.02) {
+      setState(() {
+        _currentZoomLevel = scale;
+      });
+    }
+  }
+
   @override
   void dispose() {
+    _transformationController.removeListener(_onTransformationChanged);
+    _transformationController.dispose();
     _pdfController?.dispose();
     super.dispose();
+  }
+
+  void _zoomIn() {
+    final target = (_currentZoomLevel * 1.25).clamp(0.5, 5.0);
+    _setZoom(target);
+  }
+
+  void _zoomOut() {
+    final target = (_currentZoomLevel / 1.25).clamp(0.5, 5.0);
+    _setZoom(target);
+  }
+
+  void _resetZoom() {
+    _setZoom(1.0);
+  }
+
+  void _setZoom(double scale) {
+    final matrix = Matrix4.identity()..scale(scale);
+    _transformationController.value = matrix;
   }
 
   Future<void> _generatePdf() async {
@@ -90,7 +125,6 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
           if (classSections.isNotEmpty) {
             bool addedForClass = false;
             for (final sec in classSections) {
-              // If a section filter is set (e.g. 'Boys', 'Girls', 'A'), match section name
               if (_selectedSectionFilter != null &&
                   _selectedSectionFilter!.isNotEmpty) {
                 final matchByName =
@@ -117,7 +151,6 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
               }
             }
 
-            // If section filter is not set and no section-keyed entries, check general class entries
             if (!addedForClass && _selectedSectionFilter == null) {
               final generalEntries = routineState.entries
                   .where((e) => e.key == '${cls.id}_' || e.key == cls.id)
@@ -134,7 +167,6 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
               }
             }
           } else {
-            // Class without separate sections
             if (_selectedSectionFilter == null) {
               final entries = routineState.entries
                   .where((e) => e.key.startsWith('${cls.id}_') || e.key == cls.id)
@@ -153,7 +185,6 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
           }
         }
 
-        // If no groups matched from formal classes list, fallback to any existing routine keys
         if (groups.isEmpty && _selectedSectionFilter == null) {
           for (final entry in routineState.entries) {
             if (entry.value.isNotEmpty) {
@@ -181,7 +212,6 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
 
         if (_selectedSectionFilter != null &&
             _selectedSectionFilter!.isNotEmpty) {
-          // Specific Section selected
           final sec = classSections.firstWhere(
             (s) =>
                 s.id == _selectedSectionFilter ||
@@ -209,7 +239,6 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
             ),
           );
         } else {
-          // "All Sections" of this specific class
           if (classSections.isNotEmpty) {
             bool addedAny = false;
             for (final sec in classSections) {
@@ -277,6 +306,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
           _currentPage = 1;
           _isLoading = false;
         });
+        _resetZoom();
       }
     } catch (e, st) {
       log('Error generating routine PDF: $e\n$st');
@@ -374,7 +404,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
           // Filter & Layout Controls
           _buildFilterBar(classes, allSections),
 
-          // Main PDF Previewer
+          // Main PDF Previewer with Interactive Zoom & Navigation
           Expanded(
             child: _isLoading
                 ? const Center(
@@ -423,14 +453,32 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                   )
                 : Container(
                     color: const Color(0xFFF1F5F9),
-                    child: pdfx.PdfViewPinch(
-                      controller: _pdfController!,
-                      onPageChanged: (page) {
-                        setState(() => _currentPage = page);
-                      },
-                      onDocumentLoaded: (document) {
-                        setState(() => _pageCount = document.pagesCount);
-                      },
+                    child: Stack(
+                      children: [
+                        // PDF Canvas
+                        Positioned.fill(
+                          child: InteractiveViewer(
+                            transformationController: _transformationController,
+                            minScale: 0.5,
+                            maxScale: 5.0,
+                            child: pdfx.PdfViewPinch(
+                              controller: _pdfController!,
+                              onPageChanged: (page) {
+                                setState(() => _currentPage = page);
+                              },
+                              onDocumentLoaded: (document) {
+                                setState(() => _pageCount = document.pagesCount);
+                              },
+                            ),
+                          ),
+                        ),
+
+                        // Floating Page Navigator (Left Bottom)
+                        _buildFloatingPageControls(),
+
+                        // Floating Zoom Controls (Right Bottom)
+                        _buildFloatingZoomControls(),
+                      ],
                     ),
                   ),
           ),
@@ -439,11 +487,187 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
     );
   }
 
+  Widget _buildFloatingZoomControls() {
+    return Positioned(
+      bottom: 16,
+      right: 16,
+      child: Material(
+        color: Colors.transparent,
+        elevation: 6,
+        borderRadius: BorderRadius.circular(30),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1B4B).withOpacity(0.92),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: Colors.white.withOpacity(0.18), width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.25),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Zoom Out Button
+              IconButton(
+                icon: const Icon(
+                  Icons.remove_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                tooltip: 'Zoom Out',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+                onPressed: _currentZoomLevel > 0.55 ? _zoomOut : null,
+              ),
+
+              // Zoom Level Indicator (Tap to Reset)
+              InkWell(
+                onTap: _resetZoom,
+                borderRadius: BorderRadius.circular(6),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  child: Text(
+                    '${(_currentZoomLevel * 100).toInt()}%',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ),
+              ),
+
+              // Zoom In Button
+              IconButton(
+                icon: const Icon(
+                  Icons.add_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                tooltip: 'Zoom In',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+                onPressed: _currentZoomLevel < 4.8 ? _zoomIn : null,
+              ),
+
+              // Divider
+              Container(
+                height: 16,
+                width: 1,
+                color: Colors.white.withOpacity(0.25),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+              ),
+
+              // Fit to Screen Button
+              IconButton(
+                icon: const Icon(
+                  Icons.fit_screen_rounded,
+                  color: Colors.white,
+                  size: 17,
+                ),
+                tooltip: 'Reset Zoom (100%)',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+                onPressed:
+                    (_currentZoomLevel - 1.0).abs() > 0.05 ? _resetZoom : null,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFloatingPageControls() {
+    if (_pageCount <= 1) return const SizedBox.shrink();
+    return Positioned(
+      bottom: 16,
+      left: 16,
+      child: Material(
+        color: Colors.transparent,
+        elevation: 6,
+        borderRadius: BorderRadius.circular(30),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1B4B).withOpacity(0.92),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: Colors.white.withOpacity(0.18), width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.25),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.chevron_left_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                tooltip: 'Previous Page',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+                onPressed: _currentPage > 1
+                    ? () {
+                        _pdfController?.previousPage(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    : null,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  '$_currentPage / $_pageCount',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.chevron_right_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                tooltip: 'Next Page',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+                onPressed: _currentPage < _pageCount
+                    ? () {
+                        _pdfController?.nextPage(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    : null,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFilterBar(
     List<ClassRoom> classes,
     List<Section> allSections,
   ) {
-    // Determine section items depending on whether a class is selected or "All Classes"
     final List<DropdownMenuItem<String?>> sectionDropdownItems = [];
 
     sectionDropdownItems.add(
@@ -457,7 +681,6 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
     );
 
     if (_selectedClassId == null) {
-      // "All Classes" is selected: show distinct section names across all sections (e.g. Boys, Girls, A, B...)
       final distinctSectionNames = allSections
           .map((s) => s.name.trim())
           .where((name) => name.isNotEmpty)
@@ -477,7 +700,6 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
         );
       }
     } else {
-      // Specific Class selected: show sections belonging to that class
       final classSections = allSections
           .where((s) => s.classId == _selectedClassId)
           .fold<Map<String, Section>>({}, (map, s) {
@@ -500,7 +722,6 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
       }
     }
 
-    // Validate current section filter value against dropdown options
     final validSectionValues = sectionDropdownItems.map((i) => i.value).toSet();
     final effectiveSectionValue =
         validSectionValues.contains(_selectedSectionFilter)
@@ -521,10 +742,8 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
       ),
       child: Column(
         children: [
-          // Dropdowns Row
           Row(
             children: [
-              // Class Picker
               Expanded(
                 flex: 5,
                 child: Container(
@@ -581,7 +800,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                       onChanged: (val) {
                         setState(() {
                           _selectedClassId = val;
-                          _selectedSectionFilter = null; // Reset section filter
+                          _selectedSectionFilter = null;
                         });
                         _generatePdf();
                       },
@@ -590,8 +809,6 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                 ),
               ),
               const SizedBox(width: 10),
-
-              // Section Picker
               Expanded(
                 flex: 5,
                 child: Container(
@@ -627,7 +844,6 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
           // Layout Switcher Strip
           Row(
             children: [
-              // Segmented Buttons for Layout
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
@@ -657,7 +873,6 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                 ),
               ),
 
-              // Page Counter Indicator
               if (_pageCount > 0) ...[
                 const SizedBox(width: 8),
                 Container(
