@@ -39,6 +39,8 @@ class ClassRoutinePdfHelper {
     required List<Subject> subjects,
     required List<Teacher> teachers,
     RoutinePdfLayout layout = RoutinePdfLayout.dayByDay,
+    bool isAllClassesMode = false,
+    String? sectionFilterName,
     String? academicYear,
   }) async {
     final pdf = pw.Document();
@@ -48,12 +50,23 @@ class ClassRoutinePdfHelper {
     final italicFont = await PdfGoogleFonts.robotoItalic();
     final mediumFont = await PdfGoogleFonts.robotoMedium();
 
+    pw.Font? bengaliFont;
+    pw.Font? bengaliBold;
+    try {
+      bengaliFont = await PdfGoogleFonts.hindSiliguriRegular();
+      bengaliBold = await PdfGoogleFonts.hindSiliguriBold();
+    } catch (_) {}
+
     final theme = pw.ThemeData.withFont(
       base: font,
       bold: boldFont,
       italic: italicFont,
       boldItalic: boldFont,
-      fontFallback: [mediumFont],
+      fontFallback: [
+        if (bengaliFont != null) bengaliFont,
+        if (bengaliBold != null) bengaliBold,
+        mediumFont,
+      ],
     );
 
     pw.ImageProvider? schoolLogo;
@@ -66,17 +79,34 @@ class ClassRoutinePdfHelper {
     }
 
     if (layout == RoutinePdfLayout.weeklyGrid) {
-      _buildWeeklyGridDocument(
-        pdf: pdf,
-        theme: theme,
-        school: school,
-        schoolLogo: schoolLogo,
-        groups: groups,
-        subjects: subjects,
-        teachers: teachers,
-        academicYear: academicYear,
-      );
+      if (isAllClassesMode) {
+        // ── ALL CLASSES MASTER TIMETABLE GRID (Rows: Classes, Cols: Periods per Day)
+        _buildAllClassesWeeklyGridDocument(
+          pdf: pdf,
+          theme: theme,
+          school: school,
+          schoolLogo: schoolLogo,
+          groups: groups,
+          subjects: subjects,
+          teachers: teachers,
+          sectionFilterName: sectionFilterName,
+          academicYear: academicYear,
+        );
+      } else {
+        // ── SINGLE CLASS WEEKLY GRID (Rows: Days, Cols: Periods)
+        _buildSingleClassWeeklyGridDocument(
+          pdf: pdf,
+          theme: theme,
+          school: school,
+          schoolLogo: schoolLogo,
+          groups: groups,
+          subjects: subjects,
+          teachers: teachers,
+          academicYear: academicYear,
+        );
+      }
     } else {
+      // ── DAY-BY-DAY DETAILED SCHEDULE
       _buildDayByDayDocument(
         pdf: pdf,
         theme: theme,
@@ -115,15 +145,17 @@ class ClassRoutinePdfHelper {
       subjects: subjects,
       teachers: teachers,
       layout: layout,
+      isAllClassesMode: false,
       academicYear: academicYear,
     );
   }
 
   // ───────────────────────────────────────────────────────────────────────────
-  // DAY-BY-DAY DETAILED SCHEDULE LAYOUT (MultiPage)
+  // 1. ALL CLASSES MASTER WEEKLY GRID LAYOUT (Landscape A4)
+  // Rows = Classes / Sections, Columns = Periods (1st, 2nd, 3rd, 4th, 5th...)
   // ───────────────────────────────────────────────────────────────────────────
 
-  static void _buildDayByDayDocument({
+  static void _buildAllClassesWeeklyGridDocument({
     required pw.Document pdf,
     required pw.ThemeData theme,
     required School? school,
@@ -131,402 +163,7 @@ class ClassRoutinePdfHelper {
     required List<ClassSectionRoutineGroup> groups,
     required List<Subject> subjects,
     required List<Teacher> teachers,
-    String? academicYear,
-  }) {
-    final primaryColor = PdfColor.fromHex('#1E1B4B'); // Deep Navy
-    final accentColor = PdfColor.fromHex('#4F46E5'); // Indigo Accent
-    final bgTint = PdfColor.fromHex('#F8FAFC'); // Slate 50
-    final borderTint = PdfColor.fromHex('#E2E8F0'); // Slate 200
-
-    if (groups.isEmpty) {
-      pdf.addPage(
-        pw.Page(
-          pageFormat: PdfPageFormat.a4,
-          margin: const pw.EdgeInsets.all(32),
-          theme: theme,
-          build: (context) => pw.Center(
-            child: pw.Column(
-              mainAxisAlignment: pw.MainAxisAlignment.center,
-              children: [
-                _buildInstitutionalHeader(
-                  school: school,
-                  schoolLogo: schoolLogo,
-                  primaryColor: primaryColor,
-                  accentColor: accentColor,
-                  bgTint: bgTint,
-                  borderTint: borderTint,
-                ),
-                pw.SizedBox(height: 40),
-                pw.Text(
-                  'No Routine Entries Scheduled',
-                  style: pw.TextStyle(
-                    fontSize: 16,
-                    fontWeight: pw.FontWeight.bold,
-                    color: primaryColor,
-                  ),
-                ),
-                pw.SizedBox(height: 6),
-                pw.Text(
-                  'No routine entries were found matching the selected class and section criteria.',
-                  style: const pw.TextStyle(
-                    fontSize: 11,
-                    color: PdfColors.grey600,
-                  ),
-                  textAlign: pw.TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-      return;
-    }
-
-    for (final group in groups) {
-      final className = group.className;
-      final sectionName = group.sectionName;
-      final entries = group.entries;
-
-      // Group and sort entries by day
-      final dayEntriesMap = <String, List<RoutineEntry>>{};
-      for (final day in weekDays) {
-        final dayList = entries
-            .where((e) => e.day.toLowerCase() == day.toLowerCase())
-            .toList();
-        dayList.sort(
-          (a, b) => _parseTimeToMinutes(
-            a.startTime,
-          ).compareTo(_parseTimeToMinutes(b.startTime)),
-        );
-        if (dayList.isNotEmpty) {
-          dayEntriesMap[day] = dayList;
-        }
-      }
-
-      final totalWeeklyClasses = entries.length;
-      final activeDaysCount = dayEntriesMap.keys.length;
-
-      // Collect distinct subjects count
-      final distinctSubjects = <String>{};
-      for (final e in entries) {
-        final name = _resolveSubjectName(e, subjects);
-        distinctSubjects.add(name);
-      }
-
-      pdf.addPage(
-        pw.MultiPage(
-          pageFormat: PdfPageFormat.a4,
-          margin: const pw.EdgeInsets.symmetric(horizontal: 28, vertical: 24),
-          theme: theme,
-          header: (pw.Context context) {
-            if (context.pageNumber > 1) {
-              return pw.Container(
-                margin: const pw.EdgeInsets.only(bottom: 12),
-                padding: const pw.EdgeInsets.only(bottom: 6),
-                decoration: const pw.BoxDecoration(
-                  border: pw.Border(
-                    bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
-                  ),
-                ),
-                child: pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Text(
-                      '${school?.name ?? 'Smart School'} - Class Routine',
-                      style: pw.TextStyle(
-                        fontSize: 9,
-                        fontWeight: pw.FontWeight.bold,
-                        color: primaryColor,
-                      ),
-                    ),
-                    pw.Text(
-                      'Class: $className ${sectionName != null && sectionName.isNotEmpty ? '($sectionName)' : ''}',
-                      style: const pw.TextStyle(
-                        fontSize: 9,
-                        color: PdfColors.grey700,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-            return pw.SizedBox.shrink();
-          },
-          footer: (pw.Context context) => _buildFooter(context, primaryColor),
-          build: (pw.Context context) {
-            return [
-              // 1. Institution Header
-              _buildInstitutionalHeader(
-                school: school,
-                schoolLogo: schoolLogo,
-                primaryColor: primaryColor,
-                accentColor: accentColor,
-                bgTint: bgTint,
-                borderTint: borderTint,
-              ),
-              pw.SizedBox(height: 12),
-
-              // 2. Class & Schedule Metadata Banner
-              _buildMetadataBanner(
-                className: className,
-                sectionName: sectionName,
-                academicYear: academicYear,
-                totalWeeklyClasses: totalWeeklyClasses,
-                activeDaysCount: activeDaysCount,
-                totalSubjectsCount: distinctSubjects.length,
-                primaryColor: primaryColor,
-                accentColor: accentColor,
-                bgTint: bgTint,
-                borderTint: borderTint,
-              ),
-              pw.SizedBox(height: 16),
-
-              // 3. Day-by-Day Routine Tables
-              if (dayEntriesMap.isEmpty)
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(28),
-                  alignment: pw.Alignment.center,
-                  decoration: pw.BoxDecoration(
-                    color: bgTint,
-                    border: pw.Border.all(color: borderTint),
-                    borderRadius: const pw.BorderRadius.all(
-                      pw.Radius.circular(8),
-                    ),
-                  ),
-                  child: pw.Column(
-                    children: [
-                      pw.Text(
-                        'No Routine Entries Scheduled for $className ($sectionName)',
-                        style: pw.TextStyle(
-                          fontSize: 13,
-                          fontWeight: pw.FontWeight.bold,
-                          color: primaryColor,
-                        ),
-                      ),
-                      pw.SizedBox(height: 4),
-                      pw.Text(
-                        'There are currently no class routine entries added for this section.',
-                        style: const pw.TextStyle(
-                          fontSize: 10,
-                          color: PdfColors.grey600,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                ...dayEntriesMap.entries.map((entry) {
-                  final dayName = entry.key;
-                  final dayEntries = entry.value;
-                  final dayColor = _getDayPdfColor(dayName);
-
-                  return pw.Container(
-                    margin: const pw.EdgeInsets.only(bottom: 14),
-                    decoration: pw.BoxDecoration(
-                      border: pw.Border.all(color: borderTint, width: 0.8),
-                      borderRadius: const pw.BorderRadius.all(
-                        pw.Radius.circular(6),
-                      ),
-                    ),
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-                      children: [
-                        // Day Header Bar
-                        pw.Container(
-                          padding: const pw.EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: pw.BoxDecoration(
-                            color: dayColor,
-                            borderRadius: const pw.BorderRadius.vertical(
-                              top: pw.Radius.circular(5),
-                            ),
-                          ),
-                          child: pw.Row(
-                            mainAxisAlignment:
-                                pw.MainAxisAlignment.spaceBetween,
-                            children: [
-                              pw.Text(
-                                dayName.toUpperCase(),
-                                style: pw.TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: pw.FontWeight.bold,
-                                  color: PdfColors.white,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              pw.Text(
-                                '${dayEntries.length} ${dayEntries.length == 1 ? 'Period' : 'Periods'}',
-                                style: pw.TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: pw.FontWeight.bold,
-                                  color: PdfColors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Day Periods Table
-                        pw.Table(
-                          border: pw.TableBorder(
-                            horizontalInside: pw.BorderSide(
-                              color: borderTint,
-                              width: 0.5,
-                            ),
-                          ),
-                          columnWidths: const {
-                            0: pw.FlexColumnWidth(1.0), // Period #
-                            1: pw.FlexColumnWidth(2.5), // Time Slot
-                            2: pw.FlexColumnWidth(3.8), // Subject
-                            3: pw.FlexColumnWidth(3.5), // Teacher
-                            4: pw.FlexColumnWidth(1.8), // Room
-                            5: pw.FlexColumnWidth(1.6), // Duration
-                          },
-                          children: [
-                            // Table Sub-header
-                            pw.TableRow(
-                              decoration: pw.BoxDecoration(color: bgTint),
-                              children: [
-                                _buildTableHeaderCell(
-                                  '#',
-                                  align: pw.TextAlign.center,
-                                ),
-                                _buildTableHeaderCell(
-                                  'TIME SLOT',
-                                  align: pw.TextAlign.left,
-                                ),
-                                _buildTableHeaderCell(
-                                  'SUBJECT',
-                                  align: pw.TextAlign.left,
-                                ),
-                                _buildTableHeaderCell(
-                                  'TEACHER',
-                                  align: pw.TextAlign.left,
-                                ),
-                                _buildTableHeaderCell(
-                                  'ROOM',
-                                  align: pw.TextAlign.center,
-                                ),
-                                _buildTableHeaderCell(
-                                  'DURATION',
-                                  align: pw.TextAlign.right,
-                                ),
-                              ],
-                            ),
-                            // Table Rows
-                            ...dayEntries.asMap().entries.map((rowItem) {
-                              final idx = rowItem.key;
-                              final r = rowItem.value;
-                              final isEven = idx % 2 == 0;
-                              final subjectName = _resolveSubjectName(
-                                r,
-                                subjects,
-                              );
-                              final teacherName = _resolveTeacherName(
-                                r,
-                                teachers,
-                              );
-                              final duration = _calculateDuration(
-                                r.startTime,
-                                r.endTime,
-                              );
-
-                              return pw.TableRow(
-                                decoration: pw.BoxDecoration(
-                                  color: isEven ? PdfColors.white : bgTint,
-                                ),
-                                children: [
-                                  _buildTableCell(
-                                    '${idx + 1}',
-                                    align: pw.TextAlign.center,
-                                    isBold: true,
-                                    textColor: PdfColors.grey700,
-                                  ),
-                                  _buildTableCell(
-                                    '${r.startTime} - ${r.endTime}',
-                                    isBold: true,
-                                    textColor: primaryColor,
-                                  ),
-                                  _buildTableCell(
-                                    subjectName,
-                                    isBold: true,
-                                    textColor: PdfColors.grey900,
-                                  ),
-                                  _buildTableCell(
-                                    teacherName,
-                                    textColor: PdfColors.grey800,
-                                  ),
-                                  _buildTableCell(
-                                    r.roomNumber != null &&
-                                            r.roomNumber!.isNotEmpty
-                                        ? r.roomNumber!
-                                        : '-',
-                                    align: pw.TextAlign.center,
-                                    isTag:
-                                        r.roomNumber != null &&
-                                        r.roomNumber!.isNotEmpty,
-                                  ),
-                                  _buildTableCell(
-                                    duration.isNotEmpty ? duration : '-',
-                                    align: pw.TextAlign.right,
-                                    textColor: PdfColors.grey600,
-                                  ),
-                                ],
-                              );
-                            }),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-
-              pw.SizedBox(height: 12),
-
-              // 4. Subject Summary & Faculty Allocation Breakdown
-              if (distinctSubjects.isNotEmpty) ...[
-                _buildSubjectFacultySummary(
-                  entries: entries,
-                  subjects: subjects,
-                  teachers: teachers,
-                  primaryColor: primaryColor,
-                  accentColor: accentColor,
-                  bgTint: bgTint,
-                  borderTint: borderTint,
-                ),
-                pw.SizedBox(height: 14),
-              ],
-
-              // 5. General Instructions & Notes Box
-              _buildInstructionsBox(
-                primaryColor: primaryColor,
-                bgTint: bgTint,
-                borderTint: borderTint,
-              ),
-              pw.SizedBox(height: 24),
-
-              // 6. Signatures Area
-              _buildSignaturesBlock(primaryColor: primaryColor),
-            ];
-          },
-        ),
-      );
-    }
-  }
-
-  // ───────────────────────────────────────────────────────────────────────────
-  // WEEKLY MATRIX GRID LAYOUT (Landscape A4)
-  // ───────────────────────────────────────────────────────────────────────────
-
-  static void _buildWeeklyGridDocument({
-    required pw.Document pdf,
-    required pw.ThemeData theme,
-    required School? school,
-    required pw.ImageProvider? schoolLogo,
-    required List<ClassSectionRoutineGroup> groups,
-    required List<Subject> subjects,
-    required List<Teacher> teachers,
+    String? sectionFilterName,
     String? academicYear,
   }) {
     final primaryColor = PdfColor.fromHex('#1E1B4B');
@@ -564,7 +201,7 @@ class ClassRoutinePdfHelper {
                 ),
                 pw.SizedBox(height: 6),
                 pw.Text(
-                  'No routine entries were found matching the selected class and section criteria.',
+                  'No routine entries found matching the selected class and section criteria.',
                   style: const pw.TextStyle(
                     fontSize: 11,
                     color: PdfColors.grey600,
@@ -578,12 +215,453 @@ class ClassRoutinePdfHelper {
       return;
     }
 
+    // Identify active days across all groups
+    final activeDays = weekDays.where((day) {
+      return groups.any(
+        (g) => g.entries.any((e) => e.day.toLowerCase() == day.toLowerCase()),
+      );
+    }).toList();
+
+    if (activeDays.isEmpty) {
+      activeDays.addAll([
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+      ]);
+    }
+
+    // For each active day, generate a master timetable matrix page
+    for (final day in activeDays) {
+      final dayColor = _getDayPdfColor(day);
+
+      // Groups that have entries for this day
+      final dayGroups = groups
+          .where(
+            (g) =>
+                g.entries.any((e) => e.day.toLowerCase() == day.toLowerCase()),
+          )
+          .toList();
+
+      // If no entries on this day, fallback to all groups
+      final displayGroups = dayGroups.isNotEmpty ? dayGroups : groups;
+
+      // Extract all distinct time slots for this day, sorted chronologically
+      final timeSlotSet = <String>{};
+      for (final g in displayGroups) {
+        for (final e in g.entries.where(
+          (e) => e.day.toLowerCase() == day.toLowerCase(),
+        )) {
+          timeSlotSet.add('${e.startTime} - ${e.endTime}');
+        }
+      }
+      final sortedTimeSlots = timeSlotSet.toList()
+        ..sort((a, b) {
+          final startA = a.split('-').first.trim();
+          final startB = b.split('-').first.trim();
+          return _parseTimeToMinutes(
+            startA,
+          ).compareTo(_parseTimeToMinutes(startB));
+        });
+
+      // Split groups into chunks of 8 classes per page to prevent vertical overflow
+      final int chunkSize = 8;
+      final int totalChunks = (displayGroups.length / chunkSize).ceil().clamp(
+        1,
+        999,
+      );
+
+      for (int chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+        final startIdx = chunkIndex * chunkSize;
+        final endIdx = (startIdx + chunkSize).clamp(0, displayGroups.length);
+        final currentChunkGroups = displayGroups.sublist(startIdx, endIdx);
+
+        pdf.addPage(
+          pw.Page(
+            pageFormat: PdfPageFormat.a4.landscape,
+            margin: const pw.EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+            theme: theme,
+            build: (pw.Context context) {
+              return pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                children: [
+                  // 1. Institution Header
+                  _buildInstitutionalHeader(
+                    school: school,
+                    schoolLogo: schoolLogo,
+                    primaryColor: primaryColor,
+                    accentColor: accentColor,
+                    bgTint: bgTint,
+                    borderTint: borderTint,
+                    isLandscape: true,
+                    customSubtitle: 'ALL CLASSES MASTER TIMETABLE',
+                  ),
+                  pw.SizedBox(height: 6),
+
+                  // 2. Day & Filter Metadata Strip
+                  _buildAllClassesDayBanner(
+                    day: day,
+                    dayColor: dayColor,
+                    sectionFilterName: sectionFilterName,
+                    totalClassesCount: displayGroups.length,
+                    periodsCount: sortedTimeSlots.length,
+                    academicYear: academicYear,
+                    pageChunkInfo: totalChunks > 1
+                        ? 'Part ${chunkIndex + 1} of $totalChunks'
+                        : null,
+                    primaryColor: primaryColor,
+                    accentColor: accentColor,
+                    bgTint: bgTint,
+                    borderTint: borderTint,
+                  ),
+                  pw.SizedBox(height: 8),
+
+                  // 3. The Master All-Class Matrix Grid Table
+                  if (sortedTimeSlots.isEmpty)
+                    pw.Expanded(
+                      child: pw.Center(
+                        child: pw.Text(
+                          'No periods scheduled on $day.',
+                          style: pw.TextStyle(
+                            fontSize: 13,
+                            fontWeight: pw.FontWeight.bold,
+                            color: primaryColor,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    pw.Expanded(
+                      child: pw.Table(
+                        border: pw.TableBorder.all(
+                          color: borderTint,
+                          width: 0.8,
+                        ),
+                        columnWidths: {
+                          0: const pw.FlexColumnWidth(
+                            2.0,
+                          ), // Class / Section column
+                          for (int i = 0; i < sortedTimeSlots.length; i++)
+                            (i + 1): const pw.FlexColumnWidth(2.6),
+                        },
+                        children: [
+                          // ── HEADER ROW: CLASS / PERIOD 1 / PERIOD 2 / PERIOD 3...
+                          pw.TableRow(
+                            decoration: pw.BoxDecoration(color: primaryColor),
+                            children: [
+                              pw.Container(
+                                padding: const pw.EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 6,
+                                ),
+                                alignment: pw.Alignment.center,
+                                child: pw.Column(
+                                  mainAxisAlignment:
+                                      pw.MainAxisAlignment.center,
+                                  children: [
+                                    pw.Text(
+                                      'CLASS / SECTION',
+                                      style: pw.TextStyle(
+                                        color: PdfColors.white,
+                                        fontWeight: pw.FontWeight.bold,
+                                        fontSize: 8,
+                                      ),
+                                    ),
+                                    pw.SizedBox(height: 1),
+                                    pw.Text(
+                                      'শ্রেনি / শাখা',
+                                      style: const pw.TextStyle(
+                                        color: PdfColors.grey300,
+                                        fontSize: 6.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              ...sortedTimeSlots.asMap().entries.map((
+                                slotItem,
+                              ) {
+                                final pIndex = slotItem.key;
+                                final slotStr = slotItem.value;
+                                return pw.Container(
+                                  padding: const pw.EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 5,
+                                  ),
+                                  alignment: pw.Alignment.center,
+                                  child: pw.Column(
+                                    mainAxisAlignment:
+                                        pw.MainAxisAlignment.center,
+                                    children: [
+                                      pw.Text(
+                                        _getPeriodOrdinal(pIndex).toUpperCase(),
+                                        style: pw.TextStyle(
+                                          color: PdfColors.white,
+                                          fontWeight: pw.FontWeight.bold,
+                                          fontSize: 8,
+                                        ),
+                                      ),
+                                      pw.SizedBox(height: 1),
+                                      pw.Text(
+                                        slotStr,
+                                        style: const pw.TextStyle(
+                                          color: PdfColors.grey300,
+                                          fontSize: 6.5,
+                                        ),
+                                        textAlign: pw.TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }),
+                            ],
+                          ),
+
+                          // ── DATA ROWS: EACH CLASS & SECTION
+                          ...currentChunkGroups.asMap().entries.map((rowItem) {
+                            final rowIdx = rowItem.key;
+                            final group = rowItem.value;
+                            final isEvenRow = rowIdx % 2 == 0;
+
+                            return pw.TableRow(
+                              children: [
+                                // Class / Section Name Column
+                                pw.Container(
+                                  padding: const pw.EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 6,
+                                  ),
+                                  alignment: pw.Alignment.center,
+                                  decoration: pw.BoxDecoration(
+                                    color: isEvenRow
+                                        ? PdfColor.fromHex('#F1F5F9')
+                                        : PdfColor.fromHex('#E2E8F0'),
+                                  ),
+                                  child: pw.Column(
+                                    mainAxisAlignment:
+                                        pw.MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        pw.CrossAxisAlignment.center,
+                                    children: [
+                                      pw.Text(
+                                        group.className,
+                                        style: pw.TextStyle(
+                                          fontWeight: pw.FontWeight.bold,
+                                          fontSize: 8.5,
+                                          color: primaryColor,
+                                        ),
+                                        textAlign: pw.TextAlign.center,
+                                        maxLines: 2,
+                                      ),
+                                      if (group.sectionName != null &&
+                                          group.sectionName!.isNotEmpty &&
+                                          group.sectionName !=
+                                              'All Sections') ...[
+                                        pw.SizedBox(height: 2),
+                                        pw.Container(
+                                          padding:
+                                              const pw.EdgeInsets.symmetric(
+                                                horizontal: 5,
+                                                vertical: 1.5,
+                                              ),
+                                          decoration: pw.BoxDecoration(
+                                            color: accentColor,
+                                            borderRadius:
+                                                const pw.BorderRadius.all(
+                                                  pw.Radius.circular(3),
+                                                ),
+                                          ),
+                                          child: pw.Text(
+                                            group.sectionName!,
+                                            style: pw.TextStyle(
+                                              fontSize: 6.5,
+                                              color: PdfColors.white,
+                                              fontWeight: pw.FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+
+                                // Period Cells for this Class
+                                ...sortedTimeSlots.map((slot) {
+                                  // Match entry for this group, day, and time slot
+                                  final slotStartMin = _parseTimeToMinutes(
+                                    slot.split('-').first.trim(),
+                                  );
+
+                                  final match = group.entries.firstWhere(
+                                    (e) =>
+                                        e.day.toLowerCase() ==
+                                            day.toLowerCase() &&
+                                        ('${e.startTime} - ${e.endTime}' ==
+                                                slot ||
+                                            _parseTimeToMinutes(e.startTime) ==
+                                                slotStartMin),
+                                    orElse: () => RoutineEntry(
+                                      day: '',
+                                      startTime: '',
+                                      endTime: '',
+                                      subjectId: '',
+                                      teacherId: '',
+                                    ),
+                                  );
+
+                                  if (match.subjectId.isEmpty) {
+                                    return pw.Container(
+                                      padding: const pw.EdgeInsets.all(4),
+                                      alignment: pw.Alignment.center,
+                                      decoration: pw.BoxDecoration(
+                                        color: isEvenRow
+                                            ? PdfColors.white
+                                            : bgTint,
+                                      ),
+                                      child: pw.Text(
+                                        '--',
+                                        style: const pw.TextStyle(
+                                          color: PdfColors.grey400,
+                                          fontSize: 9,
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+                                  final subName = _resolveSubjectName(
+                                    match,
+                                    subjects,
+                                  );
+                                  final teachName = _resolveTeacherName(
+                                    match,
+                                    teachers,
+                                  );
+
+                                  return pw.Container(
+                                    padding: const pw.EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                      vertical: 4,
+                                    ),
+                                    decoration: pw.BoxDecoration(
+                                      color: isEvenRow
+                                          ? PdfColors.white
+                                          : bgTint,
+                                    ),
+                                    child: pw.Column(
+                                      mainAxisAlignment:
+                                          pw.MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          pw.CrossAxisAlignment.center,
+                                      children: [
+                                        // Subject Name (Line 1, Bold)
+                                        pw.Text(
+                                          subName,
+                                          style: pw.TextStyle(
+                                            fontSize: 7.5,
+                                            fontWeight: pw.FontWeight.bold,
+                                            color: primaryColor,
+                                          ),
+                                          textAlign: pw.TextAlign.center,
+                                          maxLines: 2,
+                                        ),
+                                        pw.SizedBox(height: 2),
+                                        // Teacher Name (Line 2, Italic/Subtext)
+                                        pw.Text(
+                                          teachName,
+                                          style: const pw.TextStyle(
+                                            fontSize: 6.5,
+                                            color: PdfColors.grey800,
+                                          ),
+                                          textAlign: pw.TextAlign.center,
+                                          maxLines: 1,
+                                        ),
+                                        // Room Number (Optional, Line 3)
+                                        if (match.roomNumber != null &&
+                                            match.roomNumber!.isNotEmpty) ...[
+                                          pw.SizedBox(height: 1.5),
+                                          pw.Container(
+                                            padding:
+                                                const pw.EdgeInsets.symmetric(
+                                                  horizontal: 3.5,
+                                                  vertical: 1,
+                                                ),
+                                            decoration: pw.BoxDecoration(
+                                              color: PdfColor.fromHex(
+                                                '#E2E8F0',
+                                              ),
+                                              borderRadius:
+                                                  const pw.BorderRadius.all(
+                                                    pw.Radius.circular(2),
+                                                  ),
+                                            ),
+                                            child: pw.Text(
+                                              'Rm ${match.roomNumber}',
+                                              style: pw.TextStyle(
+                                                fontSize: 5.5,
+                                                color: PdfColors.grey800,
+                                                fontWeight: pw.FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  );
+                                }),
+                              ],
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+
+                  pw.SizedBox(height: 6),
+
+                  // 4. Signatures Area
+                  _buildSignaturesBlock(
+                    primaryColor: primaryColor,
+                    isLandscape: true,
+                  ),
+
+                  pw.SizedBox(height: 2),
+
+                  // 5. Footer
+                  _buildFooter(context, primaryColor),
+                ],
+              );
+            },
+          ),
+        );
+      }
+    }
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // 2. SINGLE CLASS WEEKLY GRID LAYOUT (Landscape A4)
+  // Rows = Days, Columns = Periods
+  // ───────────────────────────────────────────────────────────────────────────
+
+  static void _buildSingleClassWeeklyGridDocument({
+    required pw.Document pdf,
+    required pw.ThemeData theme,
+    required School? school,
+    required pw.ImageProvider? schoolLogo,
+    required List<ClassSectionRoutineGroup> groups,
+    required List<Subject> subjects,
+    required List<Teacher> teachers,
+    String? academicYear,
+  }) {
+    final primaryColor = PdfColor.fromHex('#1E1B4B');
+    final accentColor = PdfColor.fromHex('#4F46E5');
+    final bgTint = PdfColor.fromHex('#F8FAFC');
+    final borderTint = PdfColor.fromHex('#CBD5E1');
+
     for (final group in groups) {
       final className = group.className;
       final sectionName = group.sectionName;
       final entries = group.entries;
 
-      // Extract distinct time slots for this group, sorted chronologically
       final timeSlotSet = <String>{};
       for (final e in entries) {
         timeSlotSet.add('${e.startTime} - ${e.endTime}');
@@ -597,7 +675,6 @@ class ClassRoutinePdfHelper {
           ).compareTo(_parseTimeToMinutes(startB));
         });
 
-      // Active days for this group
       final activeDays = weekDays.where((day) {
         return entries.any((e) => e.day.toLowerCase() == day.toLowerCase());
       }).toList();
@@ -605,13 +682,12 @@ class ClassRoutinePdfHelper {
       pdf.addPage(
         pw.Page(
           pageFormat: PdfPageFormat.a4.landscape,
-          margin: const pw.EdgeInsets.all(24),
+          margin: const pw.EdgeInsets.all(22),
           theme: theme,
           build: (pw.Context context) {
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.stretch,
               children: [
-                // Header
                 _buildInstitutionalHeader(
                   school: school,
                   schoolLogo: schoolLogo,
@@ -622,8 +698,6 @@ class ClassRoutinePdfHelper {
                   isLandscape: true,
                 ),
                 pw.SizedBox(height: 8),
-
-                // Metadata strip
                 _buildMetadataBanner(
                   className: className,
                   sectionName: sectionName,
@@ -638,8 +712,6 @@ class ClassRoutinePdfHelper {
                   isCompact: true,
                 ),
                 pw.SizedBox(height: 10),
-
-                // Weekly Grid Table
                 if (sortedTimeSlots.isEmpty)
                   pw.Expanded(
                     child: pw.Center(
@@ -658,7 +730,6 @@ class ClassRoutinePdfHelper {
                     child: pw.Table(
                       border: pw.TableBorder.all(color: borderTint, width: 0.8),
                       children: [
-                        // Header row: Days / Slots
                         pw.TableRow(
                           decoration: pw.BoxDecoration(color: primaryColor),
                           children: [
@@ -677,32 +748,44 @@ class ClassRoutinePdfHelper {
                                 ),
                               ),
                             ),
-                            ...sortedTimeSlots.map((slot) {
+                            ...sortedTimeSlots.asMap().entries.map((slotItem) {
+                              final pIdx = slotItem.key;
+                              final slotStr = slotItem.value;
                               return pw.Container(
                                 padding: const pw.EdgeInsets.symmetric(
                                   horizontal: 4,
                                   vertical: 6,
                                 ),
                                 alignment: pw.Alignment.center,
-                                child: pw.Text(
-                                  slot,
-                                  style: pw.TextStyle(
-                                    color: PdfColors.white,
-                                    fontWeight: pw.FontWeight.bold,
-                                    fontSize: 7.5,
-                                  ),
-                                  textAlign: pw.TextAlign.center,
+                                child: pw.Column(
+                                  children: [
+                                    pw.Text(
+                                      _getPeriodOrdinal(pIdx).toUpperCase(),
+                                      style: pw.TextStyle(
+                                        color: PdfColors.white,
+                                        fontWeight: pw.FontWeight.bold,
+                                        fontSize: 7.5,
+                                      ),
+                                    ),
+                                    pw.SizedBox(height: 1),
+                                    pw.Text(
+                                      slotStr,
+                                      style: const pw.TextStyle(
+                                        color: PdfColors.grey300,
+                                        fontSize: 6.5,
+                                      ),
+                                      textAlign: pw.TextAlign.center,
+                                    ),
+                                  ],
                                 ),
                               );
                             }),
                           ],
                         ),
-                        // Data rows for each active day
                         ...activeDays.map((day) {
                           final dayColor = _getDayPdfColor(day);
                           return pw.TableRow(
                             children: [
-                              // Day column cell
                               pw.Container(
                                 padding: const pw.EdgeInsets.symmetric(
                                   horizontal: 6,
@@ -719,7 +802,6 @@ class ClassRoutinePdfHelper {
                                   ),
                                 ),
                               ),
-                              // Time slot cells
                               ...sortedTimeSlots.map((slot) {
                                 final slotEntry = entries.firstWhere(
                                   (e) =>
@@ -829,21 +911,393 @@ class ClassRoutinePdfHelper {
                       ],
                     ),
                   ),
-
                 pw.SizedBox(height: 8),
-
-                // Signatures Area
                 _buildSignaturesBlock(
                   primaryColor: primaryColor,
                   isLandscape: true,
                 ),
-
                 pw.SizedBox(height: 4),
-
-                // Footer
                 _buildFooter(context, primaryColor),
               ],
             );
+          },
+        ),
+      );
+    }
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // 3. DAY-BY-DAY DETAILED SCHEDULE LAYOUT (MultiPage)
+  // ───────────────────────────────────────────────────────────────────────────
+
+  static void _buildDayByDayDocument({
+    required pw.Document pdf,
+    required pw.ThemeData theme,
+    required School? school,
+    required pw.ImageProvider? schoolLogo,
+    required List<ClassSectionRoutineGroup> groups,
+    required List<Subject> subjects,
+    required List<Teacher> teachers,
+    String? academicYear,
+  }) {
+    final primaryColor = PdfColor.fromHex('#1E1B4B');
+    final accentColor = PdfColor.fromHex('#4F46E5');
+    final bgTint = PdfColor.fromHex('#F8FAFC');
+    final borderTint = PdfColor.fromHex('#E2E8F0');
+
+    if (groups.isEmpty) {
+      pdf.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.all(32),
+          theme: theme,
+          build: (context) => pw.Center(
+            child: pw.Column(
+              mainAxisAlignment: pw.MainAxisAlignment.center,
+              children: [
+                _buildInstitutionalHeader(
+                  school: school,
+                  schoolLogo: schoolLogo,
+                  primaryColor: primaryColor,
+                  accentColor: accentColor,
+                  bgTint: bgTint,
+                  borderTint: borderTint,
+                ),
+                pw.SizedBox(height: 40),
+                pw.Text(
+                  'No Routine Entries Scheduled',
+                  style: pw.TextStyle(
+                    fontSize: 16,
+                    fontWeight: pw.FontWeight.bold,
+                    color: primaryColor,
+                  ),
+                ),
+                pw.SizedBox(height: 6),
+                pw.Text(
+                  'No routine entries were found matching the selected class and section criteria.',
+                  style: const pw.TextStyle(
+                    fontSize: 11,
+                    color: PdfColors.grey600,
+                  ),
+                  textAlign: pw.TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+
+    for (final group in groups) {
+      final className = group.className;
+      final sectionName = group.sectionName;
+      final entries = group.entries;
+
+      final dayEntriesMap = <String, List<RoutineEntry>>{};
+      for (final day in weekDays) {
+        final dayList = entries
+            .where((e) => e.day.toLowerCase() == day.toLowerCase())
+            .toList();
+        dayList.sort(
+          (a, b) => _parseTimeToMinutes(
+            a.startTime,
+          ).compareTo(_parseTimeToMinutes(b.startTime)),
+        );
+        if (dayList.isNotEmpty) {
+          dayEntriesMap[day] = dayList;
+        }
+      }
+
+      final totalWeeklyClasses = entries.length;
+      final activeDaysCount = dayEntriesMap.keys.length;
+
+      final distinctSubjects = <String>{};
+      for (final e in entries) {
+        final name = _resolveSubjectName(e, subjects);
+        distinctSubjects.add(name);
+      }
+
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+          theme: theme,
+          header: (pw.Context context) {
+            if (context.pageNumber > 1) {
+              return pw.Container(
+                margin: const pw.EdgeInsets.only(bottom: 12),
+                padding: const pw.EdgeInsets.only(bottom: 6),
+                decoration: const pw.BoxDecoration(
+                  border: pw.Border(
+                    bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
+                  ),
+                ),
+                child: pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text(
+                      '${school?.name ?? 'Smart School'} - Class Routine',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                        color: primaryColor,
+                      ),
+                    ),
+                    pw.Text(
+                      'Class: $className ${sectionName != null && sectionName.isNotEmpty ? '($sectionName)' : ''}',
+                      style: const pw.TextStyle(
+                        fontSize: 9,
+                        color: PdfColors.grey700,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+            return pw.SizedBox.shrink();
+          },
+          footer: (pw.Context context) => _buildFooter(context, primaryColor),
+          build: (pw.Context context) {
+            return [
+              _buildInstitutionalHeader(
+                school: school,
+                schoolLogo: schoolLogo,
+                primaryColor: primaryColor,
+                accentColor: accentColor,
+                bgTint: bgTint,
+                borderTint: borderTint,
+              ),
+              pw.SizedBox(height: 12),
+              _buildMetadataBanner(
+                className: className,
+                sectionName: sectionName,
+                academicYear: academicYear,
+                totalWeeklyClasses: totalWeeklyClasses,
+                activeDaysCount: activeDaysCount,
+                totalSubjectsCount: distinctSubjects.length,
+                primaryColor: primaryColor,
+                accentColor: accentColor,
+                bgTint: bgTint,
+                borderTint: borderTint,
+              ),
+              pw.SizedBox(height: 16),
+              if (dayEntriesMap.isEmpty)
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(28),
+                  alignment: pw.Alignment.center,
+                  decoration: pw.BoxDecoration(
+                    color: bgTint,
+                    border: pw.Border.all(color: borderTint),
+                    borderRadius: const pw.BorderRadius.all(
+                      pw.Radius.circular(8),
+                    ),
+                  ),
+                  child: pw.Column(
+                    children: [
+                      pw.Text(
+                        'No Routine Entries Scheduled for $className ($sectionName)',
+                        style: pw.TextStyle(
+                          fontSize: 13,
+                          fontWeight: pw.FontWeight.bold,
+                          color: primaryColor,
+                        ),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        'There are currently no class routine entries added for this section.',
+                        style: const pw.TextStyle(
+                          fontSize: 10,
+                          color: PdfColors.grey600,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                ...dayEntriesMap.entries.map((entry) {
+                  final dayName = entry.key;
+                  final dayEntries = entry.value;
+                  final dayColor = _getDayPdfColor(dayName);
+
+                  return pw.Container(
+                    margin: const pw.EdgeInsets.only(bottom: 14),
+                    decoration: pw.BoxDecoration(
+                      border: pw.Border.all(color: borderTint, width: 0.8),
+                      borderRadius: const pw.BorderRadius.all(
+                        pw.Radius.circular(6),
+                      ),
+                    ),
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                      children: [
+                        pw.Container(
+                          padding: const pw.EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: pw.BoxDecoration(
+                            color: dayColor,
+                            borderRadius: const pw.BorderRadius.vertical(
+                              top: pw.Radius.circular(5),
+                            ),
+                          ),
+                          child: pw.Row(
+                            mainAxisAlignment:
+                                pw.MainAxisAlignment.spaceBetween,
+                            children: [
+                              pw.Text(
+                                dayName.toUpperCase(),
+                                style: pw.TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: pw.FontWeight.bold,
+                                  color: PdfColors.white,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              pw.Text(
+                                '${dayEntries.length} ${dayEntries.length == 1 ? 'Period' : 'Periods'}',
+                                style: pw.TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: pw.FontWeight.bold,
+                                  color: PdfColors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        pw.Table(
+                          border: pw.TableBorder(
+                            horizontalInside: pw.BorderSide(
+                              color: borderTint,
+                              width: 0.5,
+                            ),
+                          ),
+                          columnWidths: const {
+                            0: pw.FlexColumnWidth(1.0),
+                            1: pw.FlexColumnWidth(2.5),
+                            2: pw.FlexColumnWidth(3.8),
+                            3: pw.FlexColumnWidth(3.5),
+                            4: pw.FlexColumnWidth(1.8),
+                            5: pw.FlexColumnWidth(1.6),
+                          },
+                          children: [
+                            pw.TableRow(
+                              decoration: pw.BoxDecoration(color: bgTint),
+                              children: [
+                                _buildTableHeaderCell(
+                                  '#',
+                                  align: pw.TextAlign.center,
+                                ),
+                                _buildTableHeaderCell(
+                                  'TIME SLOT',
+                                  align: pw.TextAlign.left,
+                                ),
+                                _buildTableHeaderCell(
+                                  'SUBJECT',
+                                  align: pw.TextAlign.left,
+                                ),
+                                _buildTableHeaderCell(
+                                  'TEACHER',
+                                  align: pw.TextAlign.left,
+                                ),
+                                _buildTableHeaderCell(
+                                  'ROOM',
+                                  align: pw.TextAlign.center,
+                                ),
+                                _buildTableHeaderCell(
+                                  'DURATION',
+                                  align: pw.TextAlign.right,
+                                ),
+                              ],
+                            ),
+                            ...dayEntries.asMap().entries.map((rowItem) {
+                              final idx = rowItem.key;
+                              final r = rowItem.value;
+                              final isEven = idx % 2 == 0;
+                              final subjectName = _resolveSubjectName(
+                                r,
+                                subjects,
+                              );
+                              final teacherName = _resolveTeacherName(
+                                r,
+                                teachers,
+                              );
+                              final duration = _calculateDuration(
+                                r.startTime,
+                                r.endTime,
+                              );
+
+                              return pw.TableRow(
+                                decoration: pw.BoxDecoration(
+                                  color: isEven ? PdfColors.white : bgTint,
+                                ),
+                                children: [
+                                  _buildTableCell(
+                                    '${idx + 1}',
+                                    align: pw.TextAlign.center,
+                                    isBold: true,
+                                    textColor: PdfColors.grey700,
+                                  ),
+                                  _buildTableCell(
+                                    '${r.startTime} - ${r.endTime}',
+                                    isBold: true,
+                                    textColor: primaryColor,
+                                  ),
+                                  _buildTableCell(
+                                    subjectName,
+                                    isBold: true,
+                                    textColor: PdfColors.grey900,
+                                  ),
+                                  _buildTableCell(
+                                    teacherName,
+                                    textColor: PdfColors.grey800,
+                                  ),
+                                  _buildTableCell(
+                                    r.roomNumber != null &&
+                                            r.roomNumber!.isNotEmpty
+                                        ? r.roomNumber!
+                                        : '-',
+                                    align: pw.TextAlign.center,
+                                    isTag:
+                                        r.roomNumber != null &&
+                                        r.roomNumber!.isNotEmpty,
+                                  ),
+                                  _buildTableCell(
+                                    duration.isNotEmpty ? duration : '-',
+                                    align: pw.TextAlign.right,
+                                    textColor: PdfColors.grey600,
+                                  ),
+                                ],
+                              );
+                            }),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              pw.SizedBox(height: 12),
+              if (distinctSubjects.isNotEmpty) ...[
+                _buildSubjectFacultySummary(
+                  entries: entries,
+                  subjects: subjects,
+                  teachers: teachers,
+                  primaryColor: primaryColor,
+                  accentColor: accentColor,
+                  bgTint: bgTint,
+                  borderTint: borderTint,
+                ),
+                pw.SizedBox(height: 14),
+              ],
+              _buildInstructionsBox(
+                primaryColor: primaryColor,
+                bgTint: bgTint,
+                borderTint: borderTint,
+              ),
+              pw.SizedBox(height: 24),
+              _buildSignaturesBlock(primaryColor: primaryColor),
+            ];
           },
         ),
       );
@@ -862,6 +1316,7 @@ class ClassRoutinePdfHelper {
     required PdfColor bgTint,
     required PdfColor borderTint,
     bool isLandscape = false,
+    String? customSubtitle,
   }) {
     final schoolName = school?.name.isNotEmpty == true
         ? school!.name
@@ -876,16 +1331,16 @@ class ClassRoutinePdfHelper {
         // Logo / Emblem
         if (schoolLogo != null)
           pw.Container(
-            height: isLandscape ? 40 : 48,
-            width: isLandscape ? 40 : 48,
-            margin: const pw.EdgeInsets.only(right: 12),
+            height: isLandscape ? 38 : 46,
+            width: isLandscape ? 38 : 46,
+            margin: const pw.EdgeInsets.only(right: 10),
             child: pw.Image(schoolLogo),
           )
         else
           pw.Container(
-            height: isLandscape ? 40 : 46,
-            width: isLandscape ? 40 : 46,
-            margin: const pw.EdgeInsets.only(right: 12),
+            height: isLandscape ? 36 : 44,
+            width: isLandscape ? 36 : 44,
+            margin: const pw.EdgeInsets.only(right: 10),
             decoration: pw.BoxDecoration(
               gradient: pw.LinearGradient(
                 colors: [primaryColor, accentColor],
@@ -899,7 +1354,7 @@ class ClassRoutinePdfHelper {
                 schoolName.isNotEmpty ? schoolName[0].toUpperCase() : 'S',
                 style: pw.TextStyle(
                   color: PdfColors.white,
-                  fontSize: isLandscape ? 18 : 22,
+                  fontSize: isLandscape ? 16 : 20,
                   fontWeight: pw.FontWeight.bold,
                 ),
               ),
@@ -915,7 +1370,7 @@ class ClassRoutinePdfHelper {
                 schoolName.toUpperCase(),
                 style: pw.TextStyle(
                   fontWeight: pw.FontWeight.bold,
-                  fontSize: isLandscape ? 13 : 15,
+                  fontSize: isLandscape ? 12.5 : 14.5,
                   color: primaryColor,
                   letterSpacing: 0.3,
                 ),
@@ -967,7 +1422,7 @@ class ClassRoutinePdfHelper {
                 ),
               ),
               pw.Text(
-                'OFFICIAL CLASS ROUTINE',
+                customSubtitle ?? 'OFFICIAL CLASS ROUTINE',
                 style: pw.TextStyle(
                   fontSize: 6.5,
                   fontWeight: pw.FontWeight.bold,
@@ -978,6 +1433,112 @@ class ClassRoutinePdfHelper {
           ),
         ),
       ],
+    );
+  }
+
+  static pw.Widget _buildAllClassesDayBanner({
+    required String day,
+    required PdfColor dayColor,
+    required String? sectionFilterName,
+    required int totalClassesCount,
+    required int periodsCount,
+    required String? academicYear,
+    required String? pageChunkInfo,
+    required PdfColor primaryColor,
+    required PdfColor accentColor,
+    required PdfColor bgTint,
+    required PdfColor borderTint,
+  }) {
+    final effectiveYear =
+        academicYear ?? DateFormat('yyyy').format(DateTime.now());
+    final effectiveDate = DateFormat('dd MMMM yyyy').format(DateTime.now());
+    final sectionDisplay =
+        (sectionFilterName != null && sectionFilterName.isNotEmpty)
+        ? 'Section: $sectionFilterName'
+        : 'All Sections';
+
+    return pw.Container(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: pw.BoxDecoration(
+        color: bgTint,
+        border: pw.Border.all(color: borderTint, width: 0.8),
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+      ),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          // Day Badge & Section Badge
+          pw.Row(
+            children: [
+              pw.Container(
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3.5,
+                ),
+                decoration: pw.BoxDecoration(
+                  color: dayColor,
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(3),
+                  ),
+                ),
+                child: pw.Text(
+                  day.toUpperCase(),
+                  style: pw.TextStyle(
+                    fontSize: 8.5,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.white,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+              pw.SizedBox(width: 6),
+              pw.Container(
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 3.5,
+                ),
+                decoration: pw.BoxDecoration(
+                  color: primaryColor,
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(3),
+                  ),
+                ),
+                child: pw.Text(
+                  sectionDisplay.toUpperCase(),
+                  style: pw.TextStyle(
+                    fontSize: 8,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.white,
+                  ),
+                ),
+              ),
+              if (pageChunkInfo != null) ...[
+                pw.SizedBox(width: 6),
+                pw.Text(
+                  '($pageChunkInfo)',
+                  style: const pw.TextStyle(
+                    fontSize: 7.5,
+                    color: PdfColors.grey700,
+                  ),
+                ),
+              ],
+            ],
+          ),
+
+          // Metadata pills
+          pw.Row(
+            children: [
+              _buildMetaPill('Total Classes', '$totalClassesCount', borderTint),
+              pw.SizedBox(width: 6),
+              _buildMetaPill('Periods', '$periodsCount Slots', borderTint),
+              pw.SizedBox(width: 6),
+              _buildMetaPill('Session', effectiveYear, borderTint),
+              pw.SizedBox(width: 6),
+              _buildMetaPill('Date', effectiveDate, borderTint),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -1011,7 +1572,6 @@ class ClassRoutinePdfHelper {
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          // Class & Section
           pw.Row(
             children: [
               pw.Container(
@@ -1057,8 +1617,6 @@ class ClassRoutinePdfHelper {
               ),
             ],
           ),
-
-          // Academic Year & Effective Date
           pw.Row(
             children: [
               _buildMetaPill('Academic Year', effectiveYear, borderTint),
@@ -1186,7 +1744,6 @@ class ClassRoutinePdfHelper {
     required PdfColor bgTint,
     required PdfColor borderTint,
   }) {
-    // Subject -> {TeacherName, Count, Room}
     final summaryMap = <String, Map<String, dynamic>>{};
     for (final e in entries) {
       final subName = _resolveSubjectName(e, subjects);
@@ -1331,7 +1888,7 @@ class ClassRoutinePdfHelper {
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       crossAxisAlignment: pw.CrossAxisAlignment.end,
       children: [
-        _buildSignatureLine('Class Teacher', isLandscape: isLandscape),
+        _buildSignatureLine('Class In-Charge', isLandscape: isLandscape),
         _buildSignatureLine('Academic Coordinator', isLandscape: isLandscape),
         _buildSignatureLine(
           'Principal / Headmaster',
@@ -1353,7 +1910,7 @@ class ClassRoutinePdfHelper {
       children: [
         if (hasSeal) ...[
           pw.Container(
-            height: isLandscape ? 24 : 30,
+            height: isLandscape ? 22 : 28,
             width: isLandscape ? 50 : 60,
             alignment: pw.Alignment.center,
             decoration: pw.BoxDecoration(
@@ -1369,9 +1926,9 @@ class ClassRoutinePdfHelper {
               style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey500),
             ),
           ),
-          pw.SizedBox(height: 4),
+          pw.SizedBox(height: 3),
         ] else
-          pw.SizedBox(height: isLandscape ? 28 : 34),
+          pw.SizedBox(height: isLandscape ? 25 : 32),
         pw.Container(width: lineWidth, height: 0.8, color: PdfColors.grey800),
         pw.SizedBox(height: 3),
         pw.Text(
@@ -1391,8 +1948,8 @@ class ClassRoutinePdfHelper {
       'dd MMM yyyy, hh:mm a',
     ).format(DateTime.now());
     return pw.Container(
-      margin: const pw.EdgeInsets.only(top: 8),
-      padding: const pw.EdgeInsets.only(top: 6),
+      margin: const pw.EdgeInsets.only(top: 6),
+      padding: const pw.EdgeInsets.only(top: 4),
       decoration: const pw.BoxDecoration(
         border: pw.Border(
           top: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
@@ -1417,6 +1974,19 @@ class ClassRoutinePdfHelper {
   // ───────────────────────────────────────────────────────────────────────────
   // HELPER UTILITIES
   // ───────────────────────────────────────────────────────────────────────────
+
+  static String _getPeriodOrdinal(int index) {
+    final n = index + 1;
+    if (n == 1) return '1st Period';
+    if (n == 2) return '2nd Period';
+    if (n == 3) return '3rd Period';
+    if (n == 4) return '4th Period';
+    if (n == 5) return '5th Period';
+    if (n == 6) return '6th Period';
+    if (n == 7) return '7th Period';
+    if (n == 8) return '8th Period';
+    return '${n}th Period';
+  }
 
   static int _parseTimeToMinutes(String timeStr) {
     if (timeStr.isEmpty) return 0;

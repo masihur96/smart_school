@@ -263,6 +263,8 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
         subjects: subjects,
         teachers: teachers,
         layout: _selectedLayout,
+        isAllClassesMode: _selectedClassId == null,
+        sectionFilterName: _selectedSectionFilter,
       );
 
       if (mounted) {
