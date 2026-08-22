@@ -31,11 +31,11 @@ class _StudentAttendanceManagementScreenState
   String? _selectedClassId;
   String? _selectedSectionId;
   String? _selectedSubjectId;
+  String _selectedStatus = 'ALL';
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
     _fetchInitialData();
   }
 
@@ -44,24 +44,6 @@ class _StudentAttendanceManagementScreenState
     _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      final provider = context.read<AttendanceManagementProvider>();
-      if (!provider.isLoading && provider.page < provider.totalPages) {
-        provider.fetchStudentAttendance(
-          name: _searchController.text,
-          startDate: _startDate,
-          endDate: _endDate,
-          classId: _selectedClassId,
-          sectionId: _selectedSectionId,
-          subjectId: _selectedSubjectId,
-          page: provider.page + 1,
-        );
-      }
-    }
   }
 
   void _fetchInitialData() {
@@ -88,6 +70,7 @@ class _StudentAttendanceManagementScreenState
       sectionId: _selectedSectionId,
       subjectId: _selectedSubjectId,
       page: page,
+      limit: 100,
     );
   }
 
@@ -120,6 +103,7 @@ class _StudentAttendanceManagementScreenState
     final subjectProvider = context.watch<SubjectSetupNotifier>();
 
     final user = context.read<AuthNotifier>().user;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final filteredSections = _selectedClassId == null
         ? sectionProvider.sections
@@ -133,6 +117,27 @@ class _StudentAttendanceManagementScreenState
               .where((s) => s.classId == _selectedClassId)
               .toList();
 
+    final allRecords = attendanceProvider.studentAttendance;
+    final filteredAttendance = _selectedStatus == 'ALL'
+        ? allRecords
+        : allRecords
+              .where((r) => r.status.trim().toUpperCase() == _selectedStatus)
+              .toList();
+
+    final totalCount = allRecords.length;
+    final presentCount = allRecords
+        .where((r) => r.status.trim().toUpperCase() == 'PRESENT')
+        .length;
+    final absentCount = allRecords
+        .where((r) => r.status.trim().toUpperCase() == 'ABSENT')
+        .length;
+    final lateCount = allRecords
+        .where((r) => r.status.trim().toUpperCase() == 'LATE')
+        .length;
+    final leaveCount = allRecords
+        .where((r) => r.status.trim().toUpperCase() == 'LEAVE')
+        .length;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -144,7 +149,7 @@ class _StudentAttendanceManagementScreenState
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            onPressed: () => _exportToPdf(context),
+            onPressed: () => _exportToPdf(context, filteredAttendance),
             icon: const Icon(Icons.picture_as_pdf),
             tooltip: "Export PDF",
           ),
@@ -154,7 +159,6 @@ class _StudentAttendanceManagementScreenState
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-
             child: Column(
               children: [
                 Row(
@@ -261,7 +265,19 @@ class _StudentAttendanceManagementScreenState
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
+
+                // Status Filter Chips
+                _buildStatusFilters(
+                  allCount: totalCount,
+                  presentCount: presentCount,
+                  absentCount: absentCount,
+                  lateCount: lateCount,
+                  leaveCount: leaveCount,
+                  isDark: isDark,
+                ),
+
+                const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -275,7 +291,9 @@ class _StudentAttendanceManagementScreenState
                       ),
                     ),
                     Text(
-                      "Total: ${attendanceProvider.total}",
+                      _selectedStatus == 'ALL'
+                          ? "Total: ${attendanceProvider.total}"
+                          : "Showing: ${filteredAttendance.length} / ${allRecords.length}",
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
@@ -285,35 +303,53 @@ class _StudentAttendanceManagementScreenState
           ),
           Expanded(
             child: attendanceProvider.isLoading
-                ? _AttendanceShimmer(
-                    isDark: Theme.of(context).brightness == Brightness.dark,
-                  )
+                ? _AttendanceShimmer(isDark: isDark)
                 : attendanceProvider.error != null
                 ? Center(child: Text("Error: ${attendanceProvider.error}"))
                 : attendanceProvider.studentAttendance.isEmpty
                 ? const Center(child: Text("No records found"))
+                : filteredAttendance.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.filter_alt_off_outlined,
+                          size: 48,
+                          color: Colors.grey.shade400,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          "No $_selectedStatus records found",
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? Colors.grey.shade300
+                                : Colors.grey.shade700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _selectedStatus = 'ALL';
+                            });
+                          },
+                          icon: const Icon(Icons.clear_all, size: 18),
+                          label: const Text("Show All"),
+                        ),
+                      ],
+                    ),
+                  )
                 : RefreshIndicator(
                     onRefresh: () async => _fetchData(),
                     child: ListView.builder(
                       controller: _scrollController,
-                      itemCount:
-                          attendanceProvider.studentAttendance.length +
-                          (attendanceProvider.isLoading ? 1 : 0),
+                      itemCount: filteredAttendance.length,
                       padding: const EdgeInsets.all(16),
                       itemBuilder: (context, index) {
-                        if (index ==
-                            attendanceProvider.studentAttendance.length) {
-                          return const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        }
-                        final record =
-                            attendanceProvider.studentAttendance[index];
-                        final isDark =
-                            Theme.of(context).brightness == Brightness.dark;
+                        final record = filteredAttendance[index];
                         return _buildAttendanceCard(context, record, isDark);
                       },
                     ),
@@ -324,14 +360,157 @@ class _StudentAttendanceManagementScreenState
     );
   }
 
-  Future<void> _exportToPdf(BuildContext context) async {
-    final attendanceProvider = context.read<AttendanceManagementProvider>();
+  Widget _buildStatusFilters({
+    required int allCount,
+    required int presentCount,
+    required int absentCount,
+    required int lateCount,
+    required int leaveCount,
+    required bool isDark,
+  }) {
+    final statusItems = [
+      {
+        'key': 'ALL',
+        'label': 'ALL',
+        'count': allCount,
+        'color': AppColors.primaryAdmin,
+        'icon': Icons.grid_view_rounded,
+      },
+      {
+        'key': 'PRESENT',
+        'label': 'PRESENT',
+        'count': presentCount,
+        'color': const Color(0xFF10B981),
+        'icon': Icons.check_circle_rounded,
+      },
+      {
+        'key': 'ABSENT',
+        'label': 'ABSENT',
+        'count': absentCount,
+        'color': const Color(0xFFEF4444),
+        'icon': Icons.cancel_rounded,
+      },
+      {
+        'key': 'LATE',
+        'label': 'LATE',
+        'count': lateCount,
+        'color': const Color(0xFF3B82F6),
+        'icon': Icons.schedule_rounded,
+      },
+      {
+        'key': 'LEAVE',
+        'label': 'LEAVE',
+        'count': leaveCount,
+        'color': const Color(0xFFF59E0B),
+        'icon': Icons.event_busy_rounded,
+      },
+    ];
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: statusItems.map((item) {
+          final key = item['key'] as String;
+          final label = item['label'] as String;
+          final count = item['count'] as int;
+          final color = item['color'] as Color;
+          final icon = item['icon'] as IconData;
+          final isSelected = _selectedStatus == key;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  _selectedStatus = key;
+                });
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? color
+                      : (isDark
+                            ? color.withValues(alpha: 0.15)
+                            : color.withValues(alpha: 0.08)),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected ? color : color.withValues(alpha: 0.35),
+                    width: isSelected ? 1.5 : 1.0,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 14,
+                      color: isSelected ? Colors.white : color,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.w600,
+                        color: isSelected ? Colors.white : color,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 1.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Colors.white.withValues(alpha: 0.25)
+                            : (isDark
+                                  ? Colors.grey.shade800
+                                  : Colors.grey.shade200),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        count.toString(),
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected
+                              ? Colors.white
+                              : (isDark
+                                    ? Colors.grey.shade300
+                                    : Colors.grey.shade800),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Future<void> _exportToPdf(
+    BuildContext context,
+    List<PeriodAttendance> attendanceToExport,
+  ) async {
     final authProvider = context.read<AuthNotifier>();
     final classProvider = context.read<ClassSetupNotifier>();
     final sectionProvider = context.read<SectionSetupNotifier>();
     final subjectProvider = context.read<SubjectSetupNotifier>();
 
-    if (attendanceProvider.studentAttendance.isEmpty) {
+    if (attendanceToExport.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No attendance records to export")),
       );
@@ -365,7 +544,7 @@ class _StudentAttendanceManagementScreenState
 
     try {
       await StudentAttendancePdfHelper.generateAttendancePdf(
-        attendanceList: attendanceProvider.studentAttendance,
+        attendanceList: attendanceToExport,
         schoolName: authProvider.user?.school?.name ?? "Smart School",
         className: className,
         sectionName: sectionName,
@@ -816,12 +995,9 @@ class _AttendanceShimmer extends StatelessWidget {
         return Shimmer.fromColors(
           baseColor: baseColor,
           highlightColor: highlightColor,
-          child: Card(
-            elevation: 0,
+          child: Container(
             margin: const EdgeInsets.only(bottom: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
+
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               child: Row(
