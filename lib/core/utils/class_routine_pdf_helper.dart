@@ -152,7 +152,7 @@ class ClassRoutinePdfHelper {
   // ───────────────────────────────────────────────────────────────────────────
   // 1. ALL CLASSES MASTER WEEKLY GRID LAYOUT (Landscape A4)
   // Unified Weekly Timetable: Rows = Classes, Columns = Periods (1st, 2nd, 3rd, 4th, 5th...)
-  // No weekday splitting, no section tags.
+  // Times formatted as HH:MM AM/PM (No seconds).
   // ───────────────────────────────────────────────────────────────────────────
 
   static void _buildAllClassesWeeklyGridDocument({
@@ -215,7 +215,7 @@ class ClassRoutinePdfHelper {
       return;
     }
 
-    // Group entries by unique Class Name (unifying sections and multi-entries)
+    // Group entries by unique Class Name
     final Map<String, List<RoutineEntry>> classEntriesMap = {};
     for (final group in groups) {
       final name = group.className.trim();
@@ -224,12 +224,15 @@ class ClassRoutinePdfHelper {
 
     final classNames = classEntriesMap.keys.toList();
 
-    // Extract all distinct time slots across all classes, sorted chronologically
+    // Extract all distinct formatted time slots across all classes, sorted chronologically
     final timeSlotSet = <String>{};
     for (final entries in classEntriesMap.values) {
       for (final e in entries) {
         if (e.startTime.isNotEmpty && e.endTime.isNotEmpty) {
-          timeSlotSet.add('${e.startTime} - ${e.endTime}');
+          final slotStr = formatSlotDisplay(e.startTime, e.endTime);
+          if (slotStr.isNotEmpty) {
+            timeSlotSet.add(slotStr);
+          }
         }
       }
     }
@@ -243,7 +246,7 @@ class ClassRoutinePdfHelper {
         ).compareTo(_parseTimeToMinutes(startB));
       });
 
-    // Split classes into chunks of 8 per page to maintain optimal cell padding and readability
+    // Split classes into chunks of 8 per page to maintain optimal spacing
     const int chunkSize = 8;
     final int totalChunks = (classNames.length / chunkSize).ceil().clamp(
       1,
@@ -277,7 +280,7 @@ class ClassRoutinePdfHelper {
                 ),
                 pw.SizedBox(height: 6),
 
-                // 2. Clean Master Metadata Banner (No Weekday, No Section)
+                // 2. Clean Master Metadata Banner
                 _buildMasterTimetableBanner(
                   totalClassesCount: classNames.length,
                   periodsCount: sortedTimeSlots.length,
@@ -394,7 +397,7 @@ class ClassRoutinePdfHelper {
 
                           return pw.TableRow(
                             children: [
-                              // Class Name Column (No Section)
+                              // Class Name Column
                               pw.Container(
                                 padding: const pw.EdgeInsets.symmetric(
                                   horizontal: 6,
@@ -427,7 +430,10 @@ class ClassRoutinePdfHelper {
                                 final matchingEntries = clsEntries
                                     .where(
                                       (e) =>
-                                          '${e.startTime} - ${e.endTime}' ==
+                                          formatSlotDisplay(
+                                                e.startTime,
+                                                e.endTime,
+                                              ) ==
                                               slot ||
                                           _parseTimeToMinutes(e.startTime) ==
                                               slotStartMin,
@@ -453,7 +459,6 @@ class ClassRoutinePdfHelper {
                                   );
                                 }
 
-                                // Collect unique subjects & teachers (supporting combined classes e.g. Bangla / Nazera, Jisan)
                                 final subList = <String>[];
                                 final teachList = <String>[];
                                 final roomList = <String>[];
@@ -603,7 +608,10 @@ class ClassRoutinePdfHelper {
 
       final timeSlotSet = <String>{};
       for (final e in entries) {
-        timeSlotSet.add('${e.startTime} - ${e.endTime}');
+        final slotStr = formatSlotDisplay(e.startTime, e.endTime);
+        if (slotStr.isNotEmpty) {
+          timeSlotSet.add(slotStr);
+        }
       }
       final sortedTimeSlots = timeSlotSet.toList()
         ..sort((a, b) {
@@ -742,11 +750,21 @@ class ClassRoutinePdfHelper {
                                 ),
                               ),
                               ...sortedTimeSlots.map((slot) {
+                                final slotStartMin = _parseTimeToMinutes(
+                                  slot.split('-').first.trim(),
+                                );
+
                                 final slotEntry = entries.firstWhere(
                                   (e) =>
                                       e.day.toLowerCase() ==
                                           day.toLowerCase() &&
-                                      '${e.startTime} - ${e.endTime}' == slot,
+                                      (formatSlotDisplay(
+                                                e.startTime,
+                                                e.endTime,
+                                              ) ==
+                                              slot ||
+                                          _parseTimeToMinutes(e.startTime) ==
+                                              slotStartMin),
                                   orElse: () => RoutineEntry(
                                     day: '',
                                     startTime: '',
@@ -1179,7 +1197,7 @@ class ClassRoutinePdfHelper {
                                     textColor: PdfColors.grey700,
                                   ),
                                   _buildTableCell(
-                                    '${r.startTime} - ${r.endTime}',
+                                    formatSlotDisplay(r.startTime, r.endTime),
                                     isBold: true,
                                     textColor: primaryColor,
                                   ),
@@ -1852,8 +1870,65 @@ class ClassRoutinePdfHelper {
   }
 
   // ───────────────────────────────────────────────────────────────────────────
-  // HELPER UTILITIES
+  // TIME & HELPER UTILITIES
   // ───────────────────────────────────────────────────────────────────────────
+
+  /// Formats a time string into 12-Hour format (HH:mm AM/PM) without seconds.
+  /// Examples:
+  /// - "09:00:00" -> "09:00 AM"
+  /// - "14:30:00" -> "02:30 PM"
+  /// - "09:00:00 AM" -> "09:00 AM"
+  /// - "02:45:00 PM" -> "02:45 PM"
+  static String formatTimeDisplay(String timeStr) {
+    if (timeStr.isEmpty) return '';
+    try {
+      final clean = timeStr.trim();
+      final upper = clean.toUpperCase();
+      final isPm = upper.contains('PM');
+      final isAm = upper.contains('AM');
+
+      final numOnly = clean.replaceAll(RegExp(r'[^\d:]'), '').trim();
+      final parts = numOnly.split(':');
+      if (parts.isEmpty || parts[0].isEmpty) return timeStr;
+
+      int hour = int.parse(parts[0]);
+      int minute = parts.length > 1 ? int.parse(parts[1]) : 0;
+
+      String period = '';
+      if (isPm || isAm) {
+        period = isPm ? 'PM' : 'AM';
+        if (hour > 12) hour -= 12;
+        if (hour == 0) hour = 12;
+      } else {
+        if (hour >= 12) {
+          period = 'PM';
+          if (hour > 12) hour -= 12;
+        } else {
+          period = 'AM';
+          if (hour == 0) hour = 12;
+        }
+      }
+
+      final hStr = hour.toString().padLeft(2, '0');
+      final mStr = minute.toString().padLeft(2, '0');
+
+      return '$hStr:$mStr $period';
+    } catch (_) {
+      return timeStr;
+    }
+  }
+
+  /// Formats a start and end time pair into a clean time slot (e.g. "09:00 AM - 09:45 AM").
+  static String formatSlotDisplay(String startTime, String endTime) {
+    final start = formatTimeDisplay(startTime);
+    final end = formatTimeDisplay(endTime);
+    if (start.isNotEmpty && end.isNotEmpty) {
+      return '$start - $end';
+    } else if (start.isNotEmpty) {
+      return start;
+    }
+    return '';
+  }
 
   static String _getPeriodOrdinal(int index) {
     final n = index + 1;
@@ -1872,15 +1947,20 @@ class ClassRoutinePdfHelper {
     if (timeStr.isEmpty) return 0;
     try {
       final clean = timeStr.trim();
-      final parts = clean.split(' ');
-      final hm = parts[0].split(':');
-      int h = int.parse(hm[0]);
-      int m = hm.length > 1 ? int.parse(hm[1]) : 0;
-      if (parts.length > 1) {
-        final period = parts[1].toUpperCase();
-        if (period == 'PM' && h < 12) h += 12;
-        if (period == 'AM' && h == 12) h = 0;
-      }
+      final upper = clean.toUpperCase();
+      final isPm = upper.contains('PM');
+      final isAm = upper.contains('AM');
+
+      final numOnly = clean.replaceAll(RegExp(r'[^\d:]'), '').trim();
+      final parts = numOnly.split(':');
+      if (parts.isEmpty || parts[0].isEmpty) return 0;
+
+      int h = int.parse(parts[0]);
+      int m = parts.length > 1 ? int.parse(parts[1]) : 0;
+
+      if (isPm && h < 12) h += 12;
+      if (isAm && h == 12) h = 0;
+
       return h * 60 + m;
     } catch (_) {
       return 0;
