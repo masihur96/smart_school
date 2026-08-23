@@ -528,8 +528,8 @@ class _CreateAttendanceBottomSheetState
     extends State<_CreateAttendanceBottomSheet> {
   Teacher? _selectedTeacher;
   DateTime _selectedDate = DateTime.now();
-  TimeOfDay _startTime = const TimeOfDay(hour: 8, minute: 0);
-  TimeOfDay _endTime = const TimeOfDay(hour: 14, minute: 0);
+  TimeOfDay? _startTime = const TimeOfDay(hour: 8, minute: 0);
+  TimeOfDay? _endTime;
   String _selectedStatus = 'clock-in';
 
   final List<String> _statuses = [
@@ -563,9 +563,12 @@ class _CreateAttendanceBottomSheetState
   }
 
   Future<void> _selectTime(BuildContext context, bool isStart) async {
+    final initialTime = isStart
+        ? (_startTime ?? const TimeOfDay(hour: 8, minute: 0))
+        : (_endTime ?? const TimeOfDay(hour: 14, minute: 0));
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: isStart ? _startTime : _endTime,
+      initialTime: initialTime,
     );
     if (picked != null) {
       setState(() {
@@ -589,24 +592,26 @@ class _CreateAttendanceBottomSheetState
     // Format date as YYYY-MM-DD
     final formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
 
-    // Format startTime and endTime as ISO strings
-    final startDateTime = DateTime(
-      _selectedDate.year,
-      _selectedDate.month,
-      _selectedDate.day,
-      _startTime.hour,
-      _startTime.minute,
-    );
-    final endDateTime = DateTime(
-      _selectedDate.year,
-      _selectedDate.month,
-      _selectedDate.day,
-      _endTime.hour,
-      _endTime.minute,
-    );
+    // Format startTime and endTime as ISO strings if present
+    final String? startIsoString = _startTime != null
+        ? DateTime(
+            _selectedDate.year,
+            _selectedDate.month,
+            _selectedDate.day,
+            _startTime!.hour,
+            _startTime!.minute,
+          ).toUtc().toIso8601String()
+        : null;
 
-    final startIsoString = startDateTime.toUtc().toIso8601String();
-    final endIsoString = endDateTime.toUtc().toIso8601String();
+    final String? endIsoString = _endTime != null
+        ? DateTime(
+            _selectedDate.year,
+            _selectedDate.month,
+            _selectedDate.day,
+            _endTime!.hour,
+            _endTime!.minute,
+          ).toUtc().toIso8601String()
+        : null;
 
     await context.read<AttendanceManagementProvider>().createTeacherAttendance(
       teacherId: _selectedTeacher!.userId,
@@ -705,6 +710,19 @@ class _CreateAttendanceBottomSheetState
                   if (newValue != null) {
                     setState(() {
                       _selectedStatus = newValue;
+                      if (_selectedStatus == 'absent' || _selectedStatus == 'leave') {
+                        _startTime = null;
+                        _endTime = null;
+                      } else if (_selectedStatus == 'clock-in') {
+                        _startTime ??= const TimeOfDay(hour: 8, minute: 0);
+                        _endTime = null;
+                      } else if (_selectedStatus == 'clock-out') {
+                        _startTime ??= const TimeOfDay(hour: 8, minute: 0);
+                        _endTime ??= const TimeOfDay(hour: 14, minute: 0);
+                      } else if (_selectedStatus == 'present') {
+                        _startTime ??= const TimeOfDay(hour: 8, minute: 0);
+                        _endTime ??= const TimeOfDay(hour: 14, minute: 0);
+                      }
                     });
                   }
                 },
@@ -731,55 +749,100 @@ class _CreateAttendanceBottomSheetState
                 ),
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => _selectTime(context, true),
-                      child: InputDecorator(
-                        decoration: InputDecoration(
-                          labelText: "Start Time",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+              if (_selectedStatus == 'absent' || _selectedStatus == 'leave')
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, color: Colors.grey.shade600, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          "Start & End times are not required for ${_selectedStatus.toUpperCase()}.",
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 13,
                           ),
-                          filled: true,
-                          fillColor: Colors.grey[50],
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(_startTime.format(context)),
-                            const Icon(Icons.access_time, size: 20),
-                          ],
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => _selectTime(context, true),
+                        child: InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: "Start Time",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                            suffixIcon: _startTime != null
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear, size: 18),
+                                    onPressed: () =>
+                                        setState(() => _startTime = null),
+                                  )
+                                : const Icon(Icons.access_time, size: 20),
+                          ),
+                          child: Text(
+                            _startTime != null
+                                ? _startTime!.format(context)
+                                : "Not set",
+                            style: TextStyle(
+                              color: _startTime != null
+                                  ? Colors.black87
+                                  : Colors.grey,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => _selectTime(context, false),
-                      child: InputDecorator(
-                        decoration: InputDecoration(
-                          labelText: "End Time",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => _selectTime(context, false),
+                        child: InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: "End Time",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                            suffixIcon: _endTime != null
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear, size: 18),
+                                    onPressed: () =>
+                                        setState(() => _endTime = null),
+                                  )
+                                : const Icon(Icons.access_time, size: 20),
                           ),
-                          filled: true,
-                          fillColor: Colors.grey[50],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(_endTime.format(context)),
-                            const Icon(Icons.access_time, size: 20),
-                          ],
+                          child: Text(
+                            _endTime != null
+                                ? _endTime!.format(context)
+                                : "Not set",
+                            style: TextStyle(
+                              color: _endTime != null
+                                  ? Colors.black87
+                                  : Colors.grey,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: isCreating ? null : _submit,

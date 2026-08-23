@@ -148,9 +148,9 @@ class AttendanceManagementProvider extends ChangeNotifier {
     required String teacherId,
     required String date,
     required String status,
-    required String startTime,
-    required String endTime,
-    required String time,
+    String? startTime,
+    String? endTime,
+    String? time,
   }) async {
     _isLoading = true;
     _error = null;
@@ -158,13 +158,13 @@ class AttendanceManagementProvider extends ChangeNotifier {
 
     try {
       final token = await StorageService.getToken();
-      final body = {
+      final body = <String, dynamic>{
         "teacherId": teacherId,
         "date": date,
         "status": status,
-        "startTime": startTime,
-        "endTime": endTime,
-        "time": time,
+        if (startTime != null) "startTime": startTime,
+        if (endTime != null) "endTime": endTime,
+        if (time != null) "time": time,
       };
 
       log("Creating teacher attendance with body: $body");
