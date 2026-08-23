@@ -52,9 +52,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (value == null || value.isEmpty) {
       return 'Please enter your password';
     }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters';
-    }
+
     return null;
   }
 
@@ -63,9 +61,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return 'Please enter your phone number';
     }
     final cleanPhone = value.trim().replaceAll(RegExp(r'[\s-]'), '');
-    final phoneRegex = RegExp(
-      r'^\+?[0-9]{10,15}$',
-    );
+    final phoneRegex = RegExp(r'^\+?[0-9]{10,15}$');
     if (!phoneRegex.hasMatch(cleanPhone)) {
       return 'Please enter a valid phone number';
     }
@@ -104,7 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       final success = await context.read<AuthNotifier>().register(
         name: name,
-        email: email,
+        email: email.toLowerCase(),
         password: password,
         role: role,
         schoolId: const Uuid().v4(),
@@ -218,6 +214,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   textInputAction: TextInputAction.next,
                   validator: _validateEmail,
                 ),
+
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _phoneController,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone Number',
+                    prefixIcon: Icon(Icons.phone_outlined),
+                  ),
+                  keyboardType: TextInputType.phone,
+                  textInputAction: TextInputAction.done,
+                  validator: _validatePhone,
+                ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
@@ -240,17 +248,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   obscureText: !_isPasswordVisible,
                   textInputAction: TextInputAction.next,
                   validator: _validatePassword,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _phoneController,
-                  decoration: const InputDecoration(
-                    labelText: 'Phone Number',
-                    prefixIcon: Icon(Icons.phone_outlined),
-                  ),
-                  keyboardType: TextInputType.phone,
-                  textInputAction: TextInputAction.done,
-                  validator: _validatePhone,
                 ),
                 const SizedBox(height: 16),
                 Row(
