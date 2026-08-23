@@ -6,6 +6,7 @@ import 'package:smart_school/features/teacher/providers/attendance_provider.dart
 import 'package:smart_school/features/teacher/screens/homework_details_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
+import '../../../core/utils/class_routine_pdf_helper.dart';
 import '../../../models/school_models.dart';
 import '../../../models/student_model.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -1495,7 +1496,12 @@ class _PeriodSelector extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: ChoiceChip(
-              label: Text('${routine.startTime} - ${routine.endTime}'),
+              label: Text(
+                ClassRoutinePdfHelper.formatSlotDisplay(
+                  routine.startTime,
+                  routine.endTime,
+                ),
+              ),
               selected: isSelected,
               onSelected: (selected) {
                 onChanged(selected ? routine.id : null);

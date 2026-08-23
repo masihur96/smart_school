@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/core/utils/class_routine_pdf_helper.dart';
 import 'package:smart_school/core/utils/student_attendance_pdf_helper.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/models/period_attendance_model.dart';
@@ -831,16 +832,19 @@ class _StudentAttendanceManagementScreenState
                     value: teacherName,
                     isDark: isDark,
                   ),
-                  if (startTime.isNotEmpty || endTime.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    _buildDetailItem(
-                      icon: Icons.schedule_outlined,
-                      iconColor: Colors.blue,
-                      label: 'Time Slot',
-                      value: '$startTime - $endTime',
-                      isDark: isDark,
-                    ),
-                  ],
+                    if (startTime.isNotEmpty || endTime.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      _buildDetailItem(
+                        icon: Icons.schedule_outlined,
+                        iconColor: Colors.blue,
+                        label: 'Time Slot',
+                        value: ClassRoutinePdfHelper.formatSlotDisplay(
+                          startTime,
+                          endTime,
+                        ),
+                        isDark: isDark,
+                      ),
+                    ],
                   if (roomNumber.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     _buildDetailItem(

@@ -45,6 +45,46 @@ const _dayColors = [
   Color(0xFF7C3AED), // Sun – purple
 ];
 
+/// Formats a time string (e.g. "14:00:00", "14:00", "09:00:00") into a 12-hour format with AM/PM (e.g. "02:00 PM", "09:00 AM").
+String _formatTime12Hour(String? timeStr) {
+  if (timeStr == null || timeStr.trim().isEmpty) return '';
+  try {
+    final clean = timeStr.trim();
+    final upper = clean.toUpperCase();
+    final isPm = upper.contains('PM');
+    final isAm = upper.contains('AM');
+
+    final numOnly = clean.replaceAll(RegExp(r'[^\d:]'), '').trim();
+    final parts = numOnly.split(':');
+    if (parts.isEmpty || parts[0].isEmpty) return timeStr;
+
+    int hour = int.parse(parts[0]);
+    int minute = parts.length > 1 ? int.parse(parts[1]) : 0;
+
+    String period = '';
+    if (isPm || isAm) {
+      period = isPm ? 'PM' : 'AM';
+      if (hour > 12) hour -= 12;
+      if (hour == 0) hour = 12;
+    } else {
+      if (hour >= 12) {
+        period = 'PM';
+        if (hour > 12) hour -= 12;
+      } else {
+        period = 'AM';
+        if (hour == 0) hour = 12;
+      }
+    }
+
+    final hStr = hour.toString().padLeft(2, '0');
+    final mStr = minute.toString().padLeft(2, '0');
+
+    return '$hStr:$mStr $period';
+  } catch (_) {
+    return timeStr;
+  }
+}
+
 class RoutineManagementScreen extends StatefulWidget {
   const RoutineManagementScreen({super.key});
 
@@ -63,8 +103,10 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
   @override
   void initState() {
     super.initState();
-    final initialDayIndex =
-        (_selectedDate.weekday - 1).clamp(0, _days.length - 1);
+    final initialDayIndex = (_selectedDate.weekday - 1).clamp(
+      0,
+      _days.length - 1,
+    );
     _tabController = TabController(
       length: _days.length,
       vsync: this,
@@ -145,16 +187,16 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
   void _loadCompletionData() {
     if (_selectedClassId == null) return;
     context.read<AttendanceManagementProvider>().fetchStudentAttendance(
-          classId: _selectedClassId,
-          sectionId: _selectedSectionId,
-          startDate: _selectedDate,
-          endDate: _selectedDate,
-        );
+      classId: _selectedClassId,
+      sectionId: _selectedSectionId,
+      startDate: _selectedDate,
+      endDate: _selectedDate,
+    );
     context.read<HomeworkNotifier>().fetchAdminHomework(
-          classId: _selectedClassId,
-          sectionId: _selectedSectionId,
-          date: DateFormat('yyyy-MM-dd').format(_selectedDate),
-        );
+      classId: _selectedClassId,
+      sectionId: _selectedSectionId,
+      date: DateFormat('yyyy-MM-dd').format(_selectedDate),
+    );
   }
 
   void _changeDateBy(int days) {
@@ -177,9 +219,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
       lastDate: DateTime(2035),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.light(
-            primary: AppColors.primaryAdmin,
-          ),
+          colorScheme: const ColorScheme.light(primary: AppColors.primaryAdmin),
         ),
         child: child!,
       ),
@@ -393,9 +433,9 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                       onChanged: filteredSections.isEmpty
                           ? null
                           : (val) => setState(() {
-                                _selectedSectionId = val;
-                                _loadCompletionData();
-                              }),
+                              _selectedSectionId = val;
+                              _loadCompletionData();
+                            }),
                     ),
                   ),
                 ],
@@ -455,7 +495,8 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
     final df = DateFormat('EEE, d MMM yyyy');
     final dateStr = df.format(_selectedDate);
     final now = DateTime.now();
-    final isToday = _selectedDate.year == now.year &&
+    final isToday =
+        _selectedDate.year == now.year &&
         _selectedDate.month == now.month &&
         _selectedDate.day == now.day;
 
@@ -474,18 +515,21 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
     final currentDay = _days[_tabController.index];
     final dayEntries = allEntries.where((e) => e.day == currentDay).toList();
 
-    final attendanceRecords =
-        context.watch<AttendanceManagementProvider>().studentAttendance;
+    final attendanceRecords = context
+        .watch<AttendanceManagementProvider>()
+        .studentAttendance;
 
     int completedCount = 0;
     for (final entry in dayEntries) {
       final hasAttendance = attendanceRecords.any((a) {
-        if (a.routineId.isNotEmpty && entry.id != null && entry.id!.isNotEmpty) {
+        if (a.routineId.isNotEmpty &&
+            entry.id != null &&
+            entry.id!.isNotEmpty) {
           return a.routineId == entry.id;
         }
         final matchSubject = a.subjectId == entry.subjectId;
-        final matchSection = (_selectedSectionId == null ||
-                _selectedSectionId!.isEmpty) ||
+        final matchSection =
+            (_selectedSectionId == null || _selectedSectionId!.isEmpty) ||
             a.sectionId == entry.sectionId;
         return matchSubject && matchSection;
       });
@@ -505,9 +549,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
             offset: const Offset(0, 2),
           ),
         ],
-        border: Border.all(
-          color: const Color(0xFF7C3AED).withOpacity(0.12),
-        ),
+        border: Border.all(color: const Color(0xFF7C3AED).withOpacity(0.12)),
       ),
       child: Row(
         children: [
@@ -527,7 +569,10 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
               onTap: _pickDate,
               borderRadius: BorderRadius.circular(10),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF7C3AED).withOpacity(0.08),
                   borderRadius: BorderRadius.circular(10),
@@ -599,15 +644,15 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                 color: completedCount == dayEntries.length
                     ? const Color(0xFFE8F5E9)
                     : (completedCount > 0
-                        ? const Color(0xFFEDE9FE)
-                        : const Color(0xFFF1F5F9)),
+                          ? const Color(0xFFEDE9FE)
+                          : const Color(0xFFF1F5F9)),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: completedCount == dayEntries.length
                       ? const Color(0xFF81C784)
                       : (completedCount > 0
-                          ? const Color(0xFF7C3AED).withOpacity(0.3)
-                          : Colors.grey.shade300),
+                            ? const Color(0xFF7C3AED).withOpacity(0.3)
+                            : Colors.grey.shade300),
                 ),
               ),
               child: Row(
@@ -617,14 +662,14 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                     completedCount == dayEntries.length
                         ? Icons.check_circle_rounded
                         : (completedCount > 0
-                            ? Icons.incomplete_circle_rounded
-                            : Icons.schedule_rounded),
+                              ? Icons.incomplete_circle_rounded
+                              : Icons.schedule_rounded),
                     size: 13,
                     color: completedCount == dayEntries.length
                         ? const Color(0xFF2E7D32)
                         : (completedCount > 0
-                            ? const Color(0xFF7C3AED)
-                            : Colors.grey.shade600),
+                              ? const Color(0xFF7C3AED)
+                              : Colors.grey.shade600),
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -635,8 +680,8 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                       color: completedCount == dayEntries.length
                           ? const Color(0xFF2E7D32)
                           : (completedCount > 0
-                              ? const Color(0xFF7C3AED)
-                              : Colors.grey.shade700),
+                                ? const Color(0xFF7C3AED)
+                                : Colors.grey.shade700),
                     ),
                   ),
                 ],
@@ -801,8 +846,8 @@ class _DayRoutineTab extends StatelessWidget {
             return a.routineId == entry.id;
           }
           final matchSubject = a.subjectId == entry.subjectId;
-          final matchSection = (entry.sectionId == null ||
-                  entry.sectionId!.isEmpty) ||
+          final matchSection =
+              (entry.sectionId == null || entry.sectionId!.isEmpty) ||
               a.sectionId == entry.sectionId;
           return matchSubject && matchSection;
         }).toList();
@@ -824,10 +869,11 @@ class _DayRoutineTab extends StatelessWidget {
         // ── Detect Homework completion ───────────────────────────────────
         final entryHomework = homeworkRecords.where((h) {
           final matchSubject = h.subjectId == entry.subjectId;
-          final matchSection = (entry.sectionId == null ||
-                  entry.sectionId!.isEmpty) ||
+          final matchSection =
+              (entry.sectionId == null || entry.sectionId!.isEmpty) ||
               h.sectionId == entry.sectionId;
-          final matchDate = (h.createdAt.year == selectedDate.year &&
+          final matchDate =
+              (h.createdAt.year == selectedDate.year &&
                   h.createdAt.month == selectedDate.month &&
                   h.createdAt.day == selectedDate.day) ||
               (h.dueDate.year == selectedDate.year &&
@@ -837,8 +883,9 @@ class _DayRoutineTab extends StatelessWidget {
         }).toList();
 
         final bool isHomeworkDone = entryHomework.isNotEmpty;
-        final String? homeworkTitle =
-            isHomeworkDone ? entryHomework.first.title : null;
+        final String? homeworkTitle = isHomeworkDone
+            ? entryHomework.first.title
+            : null;
 
         return GestureDetector(
           onTap: () {
@@ -1057,7 +1104,7 @@ class _DayRoutineTab extends StatelessWidget {
             _detailRow(
               Icons.access_time_rounded,
               'Duration',
-              '${entry.startTime} - ${entry.endTime}',
+              '${_formatTime12Hour(entry.startTime)} - ${_formatTime12Hour(entry.endTime)}',
             ),
             if (entry.roomNumber != null) ...[
               const SizedBox(height: 12),
@@ -1139,7 +1186,10 @@ class _DayRoutineTab extends StatelessWidget {
               ),
               Text(
                 value,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
               ),
             ],
           ),
@@ -1268,8 +1318,11 @@ class _RoutineEntryCard extends StatelessWidget {
             children: [
               // Time Indicator side
               Container(
-                width: 88,
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+                width: 90,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 4,
+                ),
                 decoration: BoxDecoration(
                   color: isAttendanceDone
                       ? const Color(0xFFE8F5E9).withOpacity(0.6)
@@ -1286,21 +1339,13 @@ class _RoutineEntryCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      entry.startTime.split(' ')[0],
+                      _formatTime12Hour(entry.startTime),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                        fontSize: 12.5,
+                        letterSpacing: -0.2,
                       ),
-                    ),
-                    Text(
-                      entry.startTime.split(' ').length > 1
-                          ? entry.startTime.split(' ')[1]
-                          : '',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[600],
-                      ),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 6),
                     Container(
@@ -1310,12 +1355,14 @@ class _RoutineEntryCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      entry.endTime.split(' ')[0],
+                      _formatTime12Hour(entry.endTime),
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        fontSize: 12,
+                        fontSize: 11,
                         color: Colors.grey[700],
+                        letterSpacing: -0.2,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
@@ -1428,8 +1475,8 @@ class _RoutineEntryCard extends StatelessWidget {
                                 Text(
                                   isAttendanceDone
                                       ? (presentCount + absentCount > 0
-                                          ? 'Attendance: $presentCount P / $absentCount A'
-                                          : 'Attendance: Done')
+                                            ? 'Attendance: $presentCount P / $absentCount A'
+                                            : 'Attendance: Done')
                                       : 'Attendance: Pending',
                                   style: TextStyle(
                                     fontSize: 10.5,
@@ -1474,7 +1521,9 @@ class _RoutineEntryCard extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 4),
                                 ConstrainedBox(
-                                  constraints: const BoxConstraints(maxWidth: 120),
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 120,
+                                  ),
                                   child: Text(
                                     isHomeworkDone
                                         ? 'HW: ${homeworkTitle ?? "Added"}'
@@ -1609,11 +1658,7 @@ class _RoutineEntryCard extends StatelessWidget {
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.schedule_rounded,
-              size: 12,
-              color: Color(0xFFEA580C),
-            ),
+            Icon(Icons.schedule_rounded, size: 12, color: Color(0xFFEA580C)),
             const SizedBox(width: 3),
             Text(
               'Pending',
@@ -1732,15 +1777,23 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
 
   TimeOfDay _parseTime(String timeStr) {
     try {
-      final parts = timeStr.trim().split(' ');
-      final timeParts = parts[0].split(':');
-      int hour = int.parse(timeParts[0]);
-      int minute = int.parse(timeParts[1]);
-      if (parts.length > 1 && parts[1].toUpperCase() == 'PM' && hour < 12) {
+      final clean = timeStr.trim();
+      final upper = clean.toUpperCase();
+      final isPm = upper.contains('PM');
+      final isAm = upper.contains('AM');
+
+      final numOnly = clean.replaceAll(RegExp(r'[^\d:]'), '').trim();
+      final parts = numOnly.split(':');
+      if (parts.isEmpty || parts[0].isEmpty) {
+        return const TimeOfDay(hour: 9, minute: 0);
+      }
+
+      int hour = int.parse(parts[0]);
+      int minute = parts.length > 1 ? int.parse(parts[1]) : 0;
+
+      if (isPm && hour < 12) {
         hour += 12;
-      } else if (parts.length > 1 &&
-          parts[1].toUpperCase() == 'AM' &&
-          hour == 12) {
+      } else if (isAm && hour == 12) {
         hour = 0;
       }
       return TimeOfDay(hour: hour, minute: minute);
