@@ -22,6 +22,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
@@ -33,6 +34,49 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isNavigating = false;
 
   final BiometricService _biometricService = BiometricService();
+
+  String? _validateEmailOrPhone(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter your email or phone number';
+    }
+
+    final trimmed = value.trim();
+
+    // Regular expression for validating email address
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+
+    // Regular expression for validating phone number (e.g. +8801..., 01..., 10 to 15 digits)
+    final phoneRegex = RegExp(
+      r'^\+?[0-9]{10,15}$',
+    );
+
+    final cleanPhone = trimmed.replaceAll(RegExp(r'[\s-]'), '');
+    final isEmail = emailRegex.hasMatch(trimmed);
+    final isPhone = phoneRegex.hasMatch(cleanPhone);
+
+    if (!isEmail && !isPhone) {
+      if (trimmed.contains('@')) {
+        return 'Please enter a valid email address';
+      } else if (RegExp(r'^[0-9+]').hasMatch(trimmed)) {
+        return 'Please enter a valid phone number';
+      }
+      return 'Please enter a valid email or phone number';
+    }
+
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your password';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
 
   @override
   void initState() {
@@ -156,6 +200,8 @@ class _LoginScreenState extends State<LoginScreen> {
   // Does NOT navigate — navigation is handled reactively in build().
 
   Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) return;
+
     final authNotifier = context.read<AuthNotifier>();
     await authNotifier.login(
       _emailController.text.trim(),
@@ -234,82 +280,93 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: SizedBox(
-                    height: 100,
-                    width: 100,
-                    child: Image.asset(
-                      "assets/icon/icon.png",
-                      fit: BoxFit.cover,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: SizedBox(
+                      height: 100,
+                      width: 100,
+                      child: Image.asset(
+                        "assets/icon/icon.png",
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'SchoolCare',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Welcome back! Please login to continue.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 40),
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email or Phone',
-                  prefixIcon: Icon(Icons.email_outlined),
-                ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () => setState(
-                      () => _isPasswordVisible = !_isPasswordVisible,
-                    ),
+                const SizedBox(height: 16),
+                Text(
+                  'SchoolCare',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                obscureText: !_isPasswordVisible,
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: authNotifier.isLoading ? null : _login,
-                      child: (authNotifier.isLoading && !_isBiometricLoading)
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : Text(AppLocalizations.of(context)!.loginButton, style: const TextStyle(fontSize: 18)),
+                const SizedBox(height: 8),
+                Text(
+                  'Welcome back! Please login to continue.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 40),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email or Phone',
+                    prefixIcon: Icon(Icons.email_outlined),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  validator: _validateEmailOrPhone,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () => setState(
+                        () => _isPasswordVisible = !_isPasswordVisible,
+                      ),
                     ),
                   ),
-                  if (_canUseBiometrics) ...[
-                    const SizedBox(width: 12),
-                    SizedBox(
-                      width: 52,
-                      height: 52,
-                      child: _isBiometricLoading
+                  obscureText: !_isPasswordVisible,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) {
+                    if (!authNotifier.isLoading) {
+                      _login();
+                    }
+                  },
+                  validator: _validatePassword,
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: authNotifier.isLoading ? null : _login,
+                        child: (authNotifier.isLoading && !_isBiometricLoading)
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : Text(AppLocalizations.of(context)!.loginButton, style: const TextStyle(fontSize: 18)),
+                      ),
+                    ),
+                    if (_canUseBiometrics) ...[
+                      const SizedBox(width: 12),
+                      SizedBox(
+                        width: 52,
+                        height: 52,
+                        child: _isBiometricLoading
                           ? const Padding(
                               padding: EdgeInsets.all(10.0),
                               child: CircularProgressIndicator(
@@ -323,31 +380,32 @@ class _LoginScreenState extends State<LoginScreen> {
                               icon: const Icon(Icons.fingerprint, size: 40),
                               tooltip: 'Login with biometrics',
                             ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Don't have an account?",
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                      ),
+                      child: const Text(
+                        'Register',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ],
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Don't have an account?",
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                    ),
-                    child: const Text(
-                      'Register',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
 
@@ -11,7 +12,6 @@ import '../../../core/constants/api_path.dart';
 import '../../../models/user_model.dart';
 import '../../../services/notification_service.dart';
 import '../../super_admin/models/subscription_model.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import '../domain/usecases/change_password_usecase.dart';
 import '../domain/usecases/get_profile_usecase.dart';
 import '../domain/usecases/login_usecase.dart';
@@ -45,7 +45,6 @@ class AuthNotifier extends ChangeNotifier {
   bool get isSubscriptionValid {
     if (_adminSubscription == null) return false;
     if (!_adminSubscription!.isActive) return false;
-
 
     try {
       final endDate = DateTime.parse(_adminSubscription!.endDate);
@@ -99,17 +98,17 @@ class AuthNotifier extends ChangeNotifier {
         }
 
         unawaited(
-          FirebaseAnalytics.instance.setUserId(id: _user!.id).catchError(
-            (e) => log('setUserId error: $e'),
-          ),
+          FirebaseAnalytics.instance
+              .setUserId(id: _user!.id)
+              .catchError((e) => log('setUserId error: $e')),
         );
 
         // FCM topic subscription & token registration are fire-and-forget.
         // They do NOT block navigation out of the splash screen.
         unawaited(
-          NotificationService().subscribeToUserTopics(_user!).catchError(
-            (e) => log('subscribeToUserTopics error: $e'),
-          ),
+          NotificationService()
+              .subscribeToUserTopics(_user!)
+              .catchError((e) => log('subscribeToUserTopics error: $e')),
         );
         unawaited(
           NotificationService().registerTokenToBackend().catchError(
@@ -135,7 +134,7 @@ class AuthNotifier extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await loginUseCase(email, password);
+      await loginUseCase(email.toLowerCase(), password);
 
       // Fetch full profile after login
       final profile = await getProfileUseCase();
@@ -171,22 +170,22 @@ class AuthNotifier extends ChangeNotifier {
       }
 
       unawaited(
-        FirebaseAnalytics.instance.setUserId(id: _user!.id).catchError(
-          (e) => log('setUserId error: $e'),
-        ),
+        FirebaseAnalytics.instance
+            .setUserId(id: _user!.id)
+            .catchError((e) => log('setUserId error: $e')),
       );
       unawaited(
-        FirebaseAnalytics.instance.logLogin(loginMethod: 'email').catchError(
-          (e) => log('logLogin error: $e'),
-        ),
+        FirebaseAnalytics.instance
+            .logLogin(loginMethod: 'email')
+            .catchError((e) => log('logLogin error: $e')),
       );
 
       // FCM topic subscription & token registration are fire-and-forget.
       // They do NOT block the login response.
       unawaited(
-        NotificationService().subscribeToUserTopics(_user!).catchError(
-          (e) => log('subscribeToUserTopics error: $e'),
-        ),
+        NotificationService()
+            .subscribeToUserTopics(_user!)
+            .catchError((e) => log('subscribeToUserTopics error: $e')),
       );
       unawaited(
         NotificationService().registerTokenToBackend().catchError(
@@ -226,12 +225,12 @@ class AuthNotifier extends ChangeNotifier {
         schoolId: schoolId,
         phone: phone,
       );
-      
+
       if (success) {
         unawaited(
-          FirebaseAnalytics.instance.logSignUp(signUpMethod: 'email').catchError(
-            (e) => log('logSignUp error: $e'),
-          ),
+          FirebaseAnalytics.instance
+              .logSignUp(signUpMethod: 'email')
+              .catchError((e) => log('logSignUp error: $e')),
         );
       }
 
@@ -259,14 +258,14 @@ class AuthNotifier extends ChangeNotifier {
     notifyListeners();
 
     unawaited(
-      FirebaseAnalytics.instance.logEvent(name: 'logout').catchError(
-        (e) => log('logEvent logout error: $e'),
-      ),
+      FirebaseAnalytics.instance
+          .logEvent(name: 'logout')
+          .catchError((e) => log('logEvent logout error: $e')),
     );
     unawaited(
-      FirebaseAnalytics.instance.setUserId(id: null).catchError(
-        (e) => log('setUserId null error: $e'),
-      ),
+      FirebaseAnalytics.instance
+          .setUserId(id: null)
+          .catchError((e) => log('setUserId null error: $e')),
     );
 
     // Clear local storage immediately to prevent race conditions with new logins.
@@ -385,14 +384,11 @@ class AuthNotifier extends ChangeNotifier {
           : (rawData is Map ? (rawData['data'] ?? []) : []);
 
       // Find the free plan
-      final freePlanJson = dataList.firstWhere(
-        (json) {
-          final price = json['pricePerMonth']?.toString() ?? '0';
-          final name = (json['name'] ?? '').toString().toLowerCase();
-          return price == '0' || name.contains('free');
-        },
-        orElse: () => null,
-      );
+      final freePlanJson = dataList.firstWhere((json) {
+        final price = json['pricePerMonth']?.toString() ?? '0';
+        final name = (json['name'] ?? '').toString().toLowerCase();
+        return price == '0' || name.contains('free');
+      }, orElse: () => null);
 
       if (freePlanJson == null) {
         log('No free pricing plan found');
@@ -567,10 +563,7 @@ class AuthNotifier extends ChangeNotifier {
       final response = await DataProvider().performRequest(
         'DELETE',
         APIPath.deleteAdminUser(_user!.id),
-        header: {
-          'Authorization': 'Bearer $token',
-          'accept': '*/*',
-        },
+        header: {'Authorization': 'Bearer $token', 'accept': '*/*'},
       );
 
       if (response != null &&
