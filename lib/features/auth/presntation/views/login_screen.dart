@@ -147,7 +147,10 @@ class _LoginScreenState extends State<LoginScreen> {
     switch (role) {
       case UserRole.admin:
         if (authNotifier.user!.school == null) {
-          dashboard = const AdminRegisterSchoolScreen();
+          dashboard = AdminRegisterSchoolScreen(
+            initialEmail: authNotifier.user?.email,
+            initialPhone: authNotifier.user?.phone,
+          );
         } else {
           dashboard = authNotifier.isSubscriptionValid
               ? const AdminDashboardScreen()

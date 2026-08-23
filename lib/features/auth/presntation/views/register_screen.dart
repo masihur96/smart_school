@@ -124,7 +124,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) => const AdminRegisterSchoolScreen(),
+              builder: (_) => AdminRegisterSchoolScreen(
+                initialEmail: email,
+                initialPhone: phone,
+              ),
             ),
           );
         }

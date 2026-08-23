@@ -72,7 +72,10 @@ class _SplashScreenState extends State<SplashScreen>
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
-                builder: (context) => const AdminRegisterSchoolScreen(),
+                builder: (context) => AdminRegisterSchoolScreen(
+                  initialEmail: user.email,
+                  initialPhone: user.phone,
+                ),
               ),
               (Route<dynamic> route) => false,
             );
