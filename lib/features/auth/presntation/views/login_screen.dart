@@ -48,9 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     // Regular expression for validating phone number (e.g. +8801..., 01..., 10 to 15 digits)
-    final phoneRegex = RegExp(
-      r'^\+?[0-9]{10,15}$',
-    );
+    final phoneRegex = RegExp(r'^\+?[0-9]{10,15}$');
 
     final cleanPhone = trimmed.replaceAll(RegExp(r'[\s-]'), '');
     final isEmail = emailRegex.hasMatch(trimmed);
@@ -71,9 +69,6 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter your password';
-    }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters';
     }
     return null;
   }
@@ -357,8 +352,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: ElevatedButton(
                         onPressed: authNotifier.isLoading ? null : _login,
                         child: (authNotifier.isLoading && !_isBiometricLoading)
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : Text(AppLocalizations.of(context)!.loginButton, style: const TextStyle(fontSize: 18)),
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : Text(
+                                AppLocalizations.of(context)!.loginButton,
+                                style: const TextStyle(fontSize: 18),
+                              ),
                       ),
                     ),
                     if (_canUseBiometrics) ...[
@@ -367,19 +367,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: 52,
                         height: 52,
                         child: _isBiometricLoading
-                          ? const Padding(
-                              padding: EdgeInsets.all(10.0),
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
+                            ? const Padding(
+                                padding: EdgeInsets.all(10.0),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                ),
+                              )
+                            : IconButton(
+                                onPressed: authNotifier.isLoading
+                                    ? null
+                                    : _biometricLogin,
+                                icon: const Icon(Icons.fingerprint, size: 40),
+                                tooltip: 'Login with biometrics',
                               ),
-                            )
-                          : IconButton(
-                              onPressed: authNotifier.isLoading
-                                  ? null
-                                  : _biometricLogin,
-                              icon: const Icon(Icons.fingerprint, size: 40),
-                              tooltip: 'Login with biometrics',
-                            ),
                       ),
                     ],
                   ],
@@ -395,7 +395,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextButton(
                       onPressed: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const RegisterScreen(),
+                        ),
                       ),
                       child: const Text(
                         'Register',

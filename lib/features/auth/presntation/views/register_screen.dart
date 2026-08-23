@@ -1,12 +1,12 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/screens/register_school_screen.dart';
+import 'package:smart_school/features/auth/presntation/views/webview_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
-import 'package:flutter/gestures.dart';
-import 'package:smart_school/features/auth/presntation/views/webview_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -25,6 +25,53 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isPasswordVisible = false;
   bool _termsAccepted = false;
 
+  String? _validateName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter your name';
+    }
+    if (value.trim().length < 2) {
+      return 'Name must be at least 2 characters';
+    }
+    return null;
+  }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter your email';
+    }
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+    if (!emailRegex.hasMatch(value.trim())) {
+      return 'Please enter a valid email address';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your password';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
+
+  String? _validatePhone(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter your phone number';
+    }
+    final cleanPhone = value.trim().replaceAll(RegExp(r'[\s-]'), '');
+    final phoneRegex = RegExp(
+      r'^\+?[0-9]{10,15}$',
+    );
+    if (!phoneRegex.hasMatch(cleanPhone)) {
+      return 'Please enter a valid phone number';
+    }
+    return null;
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -39,7 +86,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!_termsAccepted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please accept the Terms & Conditions and Privacy Policy'),
+          content: Text(
+            'Please accept the Terms & Conditions and Privacy Policy',
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -61,22 +110,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
         schoolId: const Uuid().v4(),
         phone: phone,
       );
-      
+
       if (mounted && success) {
         // Auto Login
         await context.read<AuthNotifier>().login(email, password);
-        
+
         if (mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.registrationSuccessful),
+              content: Text(
+                AppLocalizations.of(context)!.registrationSuccessful,
+              ),
             ),
           );
-          
+
           // Navigate to Register School Screen
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => const AdminRegisterSchoolScreen()),
+            MaterialPageRoute(
+              builder: (_) => const AdminRegisterSchoolScreen(),
+            ),
           );
         }
       }
@@ -151,9 +204,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: 'Full Name',
                     prefixIcon: Icon(Icons.person_outline),
                   ),
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Please enter your name'
-                      : null,
+                  textInputAction: TextInputAction.next,
+                  validator: _validateName,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -163,9 +215,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) => value == null || !value.contains('@')
-                      ? 'Please enter a valid email'
-                      : null,
+                  textInputAction: TextInputAction.next,
+                  validator: _validateEmail,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -187,9 +238,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   obscureText: !_isPasswordVisible,
-                  validator: (value) => value == null || value.length < 6
-                      ? 'Password must be at least 6 characters'
-                      : null,
+                  textInputAction: TextInputAction.next,
+                  validator: _validatePassword,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -199,9 +249,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     prefixIcon: Icon(Icons.phone_outlined),
                   ),
                   keyboardType: TextInputType.phone,
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Please enter your phone number'
-                      : null,
+                  textInputAction: TextInputAction.done,
+                  validator: _validatePhone,
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -238,7 +287,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => const WebviewScreen(
-                                        url: 'https://school-care-web.vercel.app/terms',
+                                        url:
+                                            'https://school-care-web.vercel.app/terms',
                                         title: 'Terms & Conditions',
                                       ),
                                     ),
@@ -258,7 +308,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => const WebviewScreen(
-                                        url: 'https://school-care-web.vercel.app/privacy',
+                                        url:
+                                            'https://school-care-web.vercel.app/privacy',
                                         title: 'Privacy Policy',
                                       ),
                                     ),
