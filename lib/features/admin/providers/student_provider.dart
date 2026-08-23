@@ -50,13 +50,16 @@ class StudentsNotifier extends ChangeNotifier {
     bool loadMore = false,
   }) async {
     if (loadMore) {
-      if (_isLoadingMore || !_hasMore) return;
+      if (_isLoadingMore || _isLoading || !_hasMore) return;
       _isLoadingMore = true;
       _currentPage++;
     } else {
+      if (_isLoading) return;
       _isLoading = true;
       _currentPage = 1;
       _hasMore = true;
+      _students.clear();
+      _dbService.students.clear();
     }
     notifyListeners();
 
@@ -70,8 +73,9 @@ class StudentsNotifier extends ChangeNotifier {
         'limit': '10',
       };
       if (classId != null && classId.isNotEmpty) query['classId'] = classId;
-      if (sectionId != null && sectionId.isNotEmpty)
+      if (sectionId != null && sectionId.isNotEmpty) {
         query['sectionId'] = sectionId;
+      }
       if (isActive != null) query['isActive'] = isActive.toString();
       if (search != null && search.isNotEmpty) query['search'] = search;
 
@@ -97,11 +101,6 @@ class StudentsNotifier extends ChangeNotifier {
 
         _totalCount = responseTotal;
 
-        if (data.length < 10 ||
-            (loadMore && _students.length + data.length >= responseTotal)) {
-          _hasMore = false;
-        }
-
         if (!loadMore) {
           _dbService.students.clear();
         }
@@ -109,15 +108,30 @@ class StudentsNotifier extends ChangeNotifier {
         for (var item in data) {
           try {
             final parsedStudent = Student.fromJson(item);
-            if (parsedStudent.isDeleted)
+            if (parsedStudent.isDeleted) {
               continue; // Filter out soft-deleted students
+            }
 
-            _dbService.students.add(parsedStudent);
-          } catch (e, stacktrace) {
+            if (loadMore) {
+              final exists = _dbService.students.any(
+                (s) => s.userId == parsedStudent.userId,
+              );
+              if (!exists) {
+                _dbService.students.add(parsedStudent);
+              }
+            } else {
+              _dbService.students.add(parsedStudent);
+            }
+          } catch (e) {
             log("Error parsing student: $e");
           }
         }
         _students = [..._dbService.students];
+
+        if (data.length < 10 || _students.length >= _totalCount) {
+          _hasMore = false;
+        }
+
         log(
           "Total students in notifier: ${_students.length}. Provided classId: $classId",
         );
@@ -127,6 +141,9 @@ class StudentsNotifier extends ChangeNotifier {
       }
     } catch (e) {
       log("Error fetching students: $e");
+      if (loadMore && _currentPage > 1) {
+        _currentPage--;
+      }
       _hasMore = false;
     } finally {
       if (loadMore) {

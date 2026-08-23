@@ -60,10 +60,11 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
   }
 
   void _onScroll() {
+    if (!_scrollController.hasClients) return;
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       final notifier = context.read<StudentsNotifier>();
-      if (!notifier.isLoadingMore && notifier.hasMore) {
+      if (!notifier.isLoadingMore && !notifier.isLoading && notifier.hasMore) {
         notifier.fetchStudents(
           classId: _selectedClassId,
           sectionId: _selectedSectionId,
@@ -84,6 +85,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
   }
 
   void _applyFilters() {
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(0);
+    }
     context.read<StudentsNotifier>().fetchStudents(
       classId: _selectedClassId,
       sectionId: _selectedSectionId,
@@ -95,13 +99,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
   @override
   Widget build(BuildContext context) {
     final studentsNotifier = context.watch<StudentsNotifier>();
-    final students = List.of(studentsNotifier.students)
-      ..sort((a, b) {
-        final aRoll = int.tryParse(a.rollId);
-        final bRoll = int.tryParse(b.rollId);
-        if (aRoll != null && bRoll != null) return aRoll.compareTo(bRoll);
-        return a.rollId.compareTo(b.rollId);
-      });
+    final students = studentsNotifier.students;
     final classes = context.watch<ClassSetupNotifier>().classes;
     final sections = context.watch<SectionSetupNotifier>().sections;
 
@@ -378,24 +376,27 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                       )
                     : ListView.builder(
                         physics: const AlwaysScrollableScrollPhysics(),
-                      controller: _scrollController,
-                      itemCount:
-                          students.length + (studentsNotifier.hasMore ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        if (index == students.length) {
-                          return const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        }
-                        final isDark =
-                            Theme.of(context).brightness == Brightness.dark;
-                        final student = students[index];
-                        return _buildStudentCard(context, student, isDark);
-                      },
-                    ),
+                        controller: _scrollController,
+                        itemCount:
+                            students.length +
+                            (studentsNotifier.isLoadingMore ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index == students.length) {
+                            return const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColors.primaryAdmin,
+                                ),
+                              ),
+                            );
+                          }
+                          final isDark =
+                              Theme.of(context).brightness == Brightness.dark;
+                          final student = students[index];
+                          return _buildStudentCard(context, student, isDark);
+                        },
+                      ),
               ),
             ),
           ],
@@ -467,14 +468,16 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
   ) {
     final l10n = AppLocalizations.of(context)!;
     final user = student.user;
-    final studentName = user?.name.isNotEmpty == true ? user!.name : 'Unknown';
+    final studentName =
+        (user != null && user.name.isNotEmpty) ? user.name : 'Unknown';
     final studentPhone = user?.phone?.trim() ?? '';
     final guardianPhone = student.guardianContact.trim();
-    final email = user?.email?.trim() ?? '';
-    final hasLatLon = user?.lat != null && user?.lon != null;
-    final hasAddressText = user?.designation != null &&
-        user!.designation!.trim().isNotEmpty &&
-        user.designation!.trim().toLowerCase() != 'student';
+    final email = user?.email.trim() ?? '';
+    final hasLatLon = user != null && user.lat != null && user.lon != null;
+    final designation = user?.designation?.trim();
+    final hasAddressText = designation != null &&
+        designation.isNotEmpty &&
+        designation.toLowerCase() != 'student';
 
     // Classes string
     final classesStr = student.embeddedClasses.isNotEmpty
@@ -486,6 +489,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
         : '';
 
     return Card(
+      key: ValueKey(student.userId),
       margin: const EdgeInsets.symmetric(vertical: 6),
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -946,8 +950,8 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                         child: hasLatLon
                             ? FutureBuilder<String>(
                                 future: GeocodingService().getPlaceName(
-                                  user!.lat!.toString(),
-                                  user.lon!.toString(),
+                                  user.lat.toString(),
+                                  user.lon.toString(),
                                 ),
                                 builder: (context, snapshot) {
                                   final place = snapshot.connectionState ==
@@ -969,7 +973,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                 },
                               )
                             : Text(
-                                user!.designation!.trim(),
+                                user?.designation?.trim() ?? '',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: isDark
