@@ -826,13 +826,17 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
   ) {
     final Map<String, _AdminClassStats> map = {};
     for (var r in records) {
-      if (!map.containsKey(r.className)) {
-        map[r.className] = _AdminClassStats(
+      final key = r.sectionName.isNotEmpty
+          ? '${r.className}__${r.sectionName}'
+          : r.className;
+      if (!map.containsKey(key)) {
+        map[key] = _AdminClassStats(
           className: r.className,
+          sectionName: r.sectionName,
           records: [],
         );
       }
-      map[r.className]!.records.add(r);
+      map[key]!.records.add(r);
     }
     return map.values.toList();
   }
@@ -2827,6 +2831,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
 
 class _AdminClassStats {
   final String className;
+  final String sectionName;
   final List<StudentAttendanceRecord> records;
 
   int get present =>
@@ -2839,7 +2844,19 @@ class _AdminClassStats {
   int get total => present + absent + leave + late;
   double get attendanceRate => total == 0 ? 0 : (present / total) * 100;
 
-  _AdminClassStats({required this.className, required this.records});
+  String get effectiveSectionName {
+    if (sectionName.isNotEmpty) return sectionName;
+    for (final r in records) {
+      if (r.sectionName.isNotEmpty) return r.sectionName;
+    }
+    return '';
+  }
+
+  _AdminClassStats({
+    required this.className,
+    this.sectionName = '',
+    required this.records,
+  });
 }
 
 class _AdminClassPerformanceCardWithSubjectDropdown extends StatefulWidget {
@@ -2968,6 +2985,7 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                             children: [
                               Expanded(
                                 child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       stats.className,
@@ -2977,6 +2995,18 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
+                                    if (stats.effectiveSectionName.isNotEmpty) ...[
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Section: ${stats.effectiveSectionName}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),

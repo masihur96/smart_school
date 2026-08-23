@@ -112,6 +112,7 @@ class StudentAttendanceRecord {
   final String status;
   final String date;
   final String className;
+  final String sectionName;
   final String? subjectId;
   final String? subjectName;
 
@@ -124,11 +125,49 @@ class StudentAttendanceRecord {
     required this.status,
     required this.date,
     required this.className,
+    this.sectionName = '',
     this.subjectId,
     this.subjectName,
   });
 
   factory StudentAttendanceRecord.fromJson(Map<String, dynamic> json) {
+    String extractSectionName(Map<String, dynamic> j) {
+      if (j['section'] is Map && j['section']['name'] != null) {
+        return j['section']['name'].toString();
+      }
+      if (j['sectionInfo'] is Map && j['sectionInfo']['name'] != null) {
+        return j['sectionInfo']['name'].toString();
+      }
+      if (j['sectionName'] != null && j['sectionName'].toString().isNotEmpty) {
+        return j['sectionName'].toString();
+      }
+      if (j['section'] != null && j['section'] is String) {
+        return j['section'].toString();
+      }
+      if (j['student'] is Map) {
+        final s = j['student'] as Map<String, dynamic>;
+        if (s['section'] is Map && s['section']['name'] != null) {
+          return s['section']['name'].toString();
+        }
+        if (s['sectionInfo'] is Map && s['sectionInfo']['name'] != null) {
+          return s['sectionInfo']['name'].toString();
+        }
+        if (s['sectionName'] != null && s['sectionName'].toString().isNotEmpty) {
+          return s['sectionName'].toString();
+        }
+        if (s['section'] != null && s['section'] is String) {
+          return s['section'].toString();
+        }
+        if (s['sections'] is List && (s['sections'] as List).isNotEmpty) {
+          final firstSec = (s['sections'] as List).first;
+          if (firstSec is Map && firstSec['name'] != null) {
+            return firstSec['name'].toString();
+          }
+        }
+      }
+      return '';
+    }
+
     return StudentAttendanceRecord(
       id: json['id'] ?? '',
       studentId: json['studentId'] ?? '',
@@ -137,9 +176,10 @@ class StudentAttendanceRecord {
       designation: json['student']?['designation'] ?? '',
       status: json['status'] ?? '',
       date: json['date'] ?? '',
-      className: json['class']?['name'] ?? '',
+      className: json['class']?['name'] ?? json['className'] ?? json['classInfo']?['name'] ?? '',
+      sectionName: extractSectionName(json),
       subjectId: json['subjectId'],
-      subjectName: json['subject']?['name'],
+      subjectName: json['subject']?['name'] ?? json['subjectInfo']?['name'],
     );
   }
 }
