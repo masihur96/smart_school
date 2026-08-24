@@ -42,6 +42,61 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
 
   bool get isEditing => widget.teacher != null;
 
+  String? _validateName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter full name';
+    }
+    if (value.trim().length < 2) {
+      return 'Name must be at least 2 characters';
+    }
+    return null;
+  }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter email address';
+    }
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+    if (!emailRegex.hasMatch(value.trim())) {
+      return 'Please enter a valid email address';
+    }
+    return null;
+  }
+
+  String? _validatePhone(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter phone number';
+    }
+    final cleanPhone = value.trim().replaceAll(RegExp(r'[\s-]'), '');
+    final phoneRegex = RegExp(r'^\+?[0-9]{10,15}$');
+    if (!phoneRegex.hasMatch(cleanPhone)) {
+      return 'Please enter a valid phone number';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (!isEditing) {
+      if (value == null || value.isEmpty) {
+        return 'Please enter password';
+      }
+    } else {
+      if (value == null || value.isEmpty) {
+        return 'Please enter password';
+      }
+    }
+    return null;
+  }
+
+  String? _validateDesignation(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter designation';
+    }
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -211,7 +266,8 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
           print(teacherNotifier.totalCount);
           print(studentNotifier.totalCount);
 
-          int totalUser = teacherNotifier.totalCount+ studentNotifier.totalCount;
+          int totalUser =
+              teacherNotifier.totalCount + studentNotifier.totalCount;
           print(totalUser);
 
           if (totalUser >= maxStudents) {
@@ -232,11 +288,10 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
         if (isEditing) {
           await teacherNotifier.updateTeacherOnAPI(
             userId: widget.teacher!.userId,
-            name: _nameController.text,
-            email: _emailController.text,
-            phone: _phoneController.text,
-
-            designation: _designationController.text,
+            name: _nameController.text.trim(),
+            email: _emailController.text.trim().toLowerCase(),
+            phone: _phoneController.text.trim(),
+            designation: _designationController.text.trim(),
             lat: double.tryParse(_latController.text),
             lon: double.tryParse(_lonController.text),
             radius: double.tryParse(_radiusController.text),
@@ -244,13 +299,12 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
           );
         } else {
           await teacherNotifier.addTeacherToAPI(
-            name: _nameController.text,
-            email: _emailController.text,
+            name: _nameController.text.trim(),
+            email: _emailController.text.trim().toLowerCase(),
             password: _passwordController.text,
             schoolId: schoolId,
-            phone: _phoneController.text,
-
-            designation: _designationController.text,
+            phone: _phoneController.text.trim(),
+            designation: _designationController.text.trim(),
             lat: double.tryParse(_latController.text),
             lon: double.tryParse(_lonController.text),
             radius: double.tryParse(_radiusController.text),
@@ -383,12 +437,13 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                       decoration: InputDecoration(
                         labelText: 'Full Name',
                         prefixIcon: const Icon(Icons.person),
+                        hintText: 'e.g. Dr. John Doe',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      validator: (val) =>
-                          val!.isEmpty ? 'Please enter name' : null,
+                      textInputAction: TextInputAction.next,
+                      validator: _validateName,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -396,13 +451,14 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                       decoration: InputDecoration(
                         labelText: 'Email Address',
                         prefixIcon: const Icon(Icons.email),
+                        hintText: 'e.g. teacher@school.edu',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       keyboardType: TextInputType.emailAddress,
-                      validator: (val) =>
-                          val!.isEmpty ? 'Please enter email' : null,
+                      textInputAction: TextInputAction.next,
+                      validator: _validateEmail,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -410,12 +466,14 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                       decoration: InputDecoration(
                         labelText: 'Phone Number',
                         prefixIcon: const Icon(Icons.phone),
+                        hintText: 'e.g. +8801712345678',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                      ),keyboardType: TextInputType.phone,
-                      validator: (val) =>
-                          val!.isEmpty ? 'Please enter phone' : null,
+                      ),
+                      keyboardType: TextInputType.phone,
+                      textInputAction: TextInputAction.next,
+                      validator: _validatePhone,
                     ),
                   ],
                 ),
@@ -442,6 +500,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                     decoration: InputDecoration(
                       labelText: 'Password',
                       prefixIcon: const Icon(Icons.security),
+                      hintText: 'At least 6 characters',
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword
@@ -457,9 +516,10 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                    ),keyboardType: TextInputType.visiblePassword,
-                    validator: (val) =>
-                        val!.length < 6 ? 'Password too short' : null,
+                    ),
+                    keyboardType: TextInputType.visiblePassword,
+                    textInputAction: TextInputAction.next,
+                    validator: _validatePassword,
                   ),
                 ),
               ),
@@ -485,12 +545,13 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                       decoration: InputDecoration(
                         labelText: 'Designation',
                         prefixIcon: const Icon(Icons.badge_outlined),
+                        hintText: 'e.g. Senior Lecturer, Mathematics',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      validator: (val) =>
-                          val!.isEmpty ? 'Please enter designation' : null,
+                      textInputAction: TextInputAction.next,
+                      validator: _validateDesignation,
                     ),
                     const SizedBox(height: 16),
                   ],
