@@ -135,41 +135,43 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
             child: Column(
               children: [
                 // Search bar
-                TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    labelText: l10n.searchByName,
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() => _searchQuery = '');
-                              _fetchTeachers();
-                            },
-                          )
-                        : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                  ),
-                  onChanged: (val) {
-                    setState(() => _searchQuery = val.trim());
-                    if (_debounce?.isActive ?? false) _debounce!.cancel();
-                    _debounce = Timer(
-                      const Duration(milliseconds: 500),
-                      _fetchTeachers,
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
                 Row(
                   children: [
+                    Expanded(
+                      flex: 2,
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          labelText: l10n.searchByName,
+                          prefixIcon: const Icon(Icons.search),
+                          suffixIcon: _searchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() => _searchQuery = '');
+                                    _fetchTeachers();
+                                  },
+                                )
+                              : null,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
+                        onChanged: (val) {
+                          setState(() => _searchQuery = val.trim());
+                          if (_debounce?.isActive ?? false) _debounce!.cancel();
+                          _debounce = Timer(
+                            const Duration(milliseconds: 500),
+                            _fetchTeachers,
+                          );
+                        },
+                      ),
+                    ),
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         decoration: InputDecoration(
@@ -184,7 +186,9 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                         ),
                         value: _selectedStatus,
                         items: ['All', 'Active', 'Inactive']
-                            .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                            .map(
+                              (s) => DropdownMenuItem(value: s, child: Text(s)),
+                            )
                             .toList(),
                         onChanged: (val) {
                           setState(() => _selectedStatus = val);
