@@ -18,6 +18,7 @@ import '../providers/attendance_management_provider.dart';
 import '../providers/routine_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'routine_pdf_preview_screen.dart';
 
 // Day order constant
@@ -2713,7 +2714,7 @@ class _TeacherAvatar extends StatelessWidget {
     return CircleAvatar(
       radius: size / 2,
       backgroundColor: const Color(0xFF7C3AED).withOpacity(0.12),
-      backgroundImage: hasAvatar ? NetworkImage(avatar!) : null,
+      backgroundImage: hasAvatar ? CachedNetworkImageProvider(avatar!) : null,
       onBackgroundImageError: hasAvatar ? (_, __) {} : null,
       child: hasAvatar
           ? null

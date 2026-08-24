@@ -5,6 +5,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/utils/pdf_image_helper.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/student_model.dart';
@@ -312,7 +313,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
     pw.ImageProvider? schoolLogo;
     if (schoolLogoUrl.isNotEmpty) {
       try {
-        schoolLogo = await networkImage(schoolLogoUrl);
+        schoolLogo = await PdfImageHelper.getCachedImageProvider(schoolLogoUrl);
       } catch (e) {
         // Fallback
       }

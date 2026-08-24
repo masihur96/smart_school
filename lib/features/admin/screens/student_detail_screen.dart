@@ -8,6 +8,7 @@ import 'package:smart_school/features/admin/screens/generate_id_card_screen.dart
 import 'package:smart_school/features/admin/screens/generate_tc_screen.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/student_model.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class StudentDetailScreen extends StatelessWidget {
   final Student student;
@@ -74,7 +75,7 @@ class StudentDetailScreen extends StatelessWidget {
                         backgroundColor: Colors.purple,
                         backgroundImage: (student.user?.avatar?.startsWith('http://') == true ||
                                 student.user?.avatar?.startsWith('https://') == true)
-                            ? NetworkImage(student.user!.avatar!)
+                            ? CachedNetworkImageProvider(student.user!.avatar!)
                             : null,
                         onBackgroundImageError: (student.user?.avatar?.startsWith('http://') == true ||
                                 student.user?.avatar?.startsWith('https://') == true)

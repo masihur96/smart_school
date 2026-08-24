@@ -17,6 +17,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/services/geocoding_service.dart';
 import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class TeacherManagementScreen extends StatefulWidget {
   const TeacherManagementScreen({super.key});
@@ -403,7 +404,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                       backgroundImage:
                           (user?.avatar?.startsWith('http://') == true ||
                               user?.avatar?.startsWith('https://') == true)
-                          ? NetworkImage(user!.avatar!)
+                          ? CachedNetworkImageProvider(user!.avatar!)
                           : null,
                       onBackgroundImageError:
                           (user?.avatar?.startsWith('http://') == true ||
@@ -953,7 +954,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                     backgroundImage:
                         (user?.avatar?.startsWith('http://') == true ||
                             user?.avatar?.startsWith('https://') == true)
-                        ? NetworkImage(user!.avatar!)
+                        ? CachedNetworkImageProvider(user!.avatar!)
                         : null,
                     onBackgroundImageError:
                         (user?.avatar?.startsWith('http://') == true ||

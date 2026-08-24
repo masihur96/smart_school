@@ -11,6 +11,7 @@ import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/user_model.dart';
 
 import '../../../auth/providers/auth_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -469,7 +470,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       backgroundImage: _imageFile != null
                           ? FileImage(_imageFile!)
                           : (user.avatar != null
-                                    ? NetworkImage(user.avatar!)
+                                    ? CachedNetworkImageProvider(user.avatar!)
                                     : null)
                                 as ImageProvider?,
                       child: (_imageFile == null && user.avatar == null)

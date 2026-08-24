@@ -6,6 +6,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:smart_school/models/school_models.dart' hide Teacher;
 import 'package:smart_school/models/teacher_model.dart';
+import 'pdf_image_helper.dart';
 
 enum RoutinePdfLayout { dayByDay, weeklyGrid }
 
@@ -72,7 +73,7 @@ class ClassRoutinePdfHelper {
     pw.ImageProvider? schoolLogo;
     if (school?.avatar != null && school!.avatar.isNotEmpty) {
       try {
-        schoolLogo = await networkImage(school.avatar);
+        schoolLogo = await PdfImageHelper.getCachedImageProvider(school.avatar);
       } catch (_) {
         schoolLogo = null;
       }

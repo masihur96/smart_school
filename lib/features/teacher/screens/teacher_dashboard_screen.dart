@@ -31,6 +31,7 @@ import 'mark_entry_screen.dart';
 import 'teacher_attendance_screen.dart';
 import 'teacher_exam_screen.dart';
 import 'teacher_routine_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class TeacherDashboardScreen extends StatelessWidget {
   const TeacherDashboardScreen({super.key});
@@ -522,7 +523,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                 radius: 25,
                 backgroundColor: Colors.purple,
                 backgroundImage: user.avatar?.isNotEmpty == true
-                    ? NetworkImage(user.avatar!)
+                    ? CachedNetworkImageProvider(user.avatar!)
                     : null,
                 child: user.avatar?.isNotEmpty == true
                     ? null

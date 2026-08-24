@@ -16,6 +16,7 @@ import 'package:smart_school/features/profile/presentation/screens/profile_scree
 import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../core/services/geocoding_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/notification_icon_button.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -1941,7 +1942,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                       ),
                       backgroundImage:
                           perf.avatar != null && perf.avatar!.isNotEmpty
-                          ? NetworkImage(perf.avatar!)
+                          ? CachedNetworkImageProvider(perf.avatar!)
                           : null,
                       child: perf.avatar != null && perf.avatar!.isNotEmpty
                           ? null
@@ -2234,7 +2235,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                       ),
                       backgroundImage:
                           perf.avatar != null && perf.avatar!.isNotEmpty
-                          ? NetworkImage(perf.avatar!)
+                          ? CachedNetworkImageProvider(perf.avatar!)
                           : null,
                       child: perf.avatar != null && perf.avatar!.isNotEmpty
                           ? null

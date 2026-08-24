@@ -8,6 +8,7 @@ import 'package:smart_school/features/admin/providers/student_provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/student_model.dart';
 import 'package:smart_school/services/sms_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class BulkSmsScreen extends StatefulWidget {
   const BulkSmsScreen({super.key});
@@ -1173,7 +1174,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                 radius: 20,
                 backgroundColor: AppColors.primaryAdmin.withValues(alpha: 0.1),
                 backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
-                    ? NetworkImage(avatarUrl)
+                    ? CachedNetworkImageProvider(avatarUrl)
                     : null,
                 child: (avatarUrl == null || avatarUrl.isEmpty)
                     ? Text(

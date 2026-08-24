@@ -1690,7 +1690,7 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                                           0xFF7C3AED,
                                         ).withOpacity(0.12),
                                         backgroundImage: avatar.isNotEmpty
-                                            ? NetworkImage(avatar)
+                                            ? CachedNetworkImageProvider(avatar)
                                             : null,
                                         child: avatar.isEmpty
                                             ? Text(

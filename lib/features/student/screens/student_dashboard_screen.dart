@@ -27,6 +27,7 @@ import 'student_attendance_screen.dart';
 import 'student_homework_screen.dart';
 import 'student_result_screen.dart';
 import 'student_routine_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class StudentDashboardScreen extends StatelessWidget {
   const StudentDashboardScreen({super.key});
@@ -441,7 +442,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                 radius: 25,
                 backgroundColor: Colors.purple,
                 backgroundImage: user?.avatar?.isNotEmpty == true
-                    ? NetworkImage(user?.avatar ?? "")
+                    ? CachedNetworkImageProvider(user?.avatar ?? "")
                     : null,
                 child: user?.avatar?.isNotEmpty == true
                     ? null

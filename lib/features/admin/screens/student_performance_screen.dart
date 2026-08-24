@@ -4,6 +4,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/models/admin_dashboard_model.dart';
 import 'package:smart_school/features/admin/providers/student_performance_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class StudentPerformanceScreen extends StatefulWidget {
   const StudentPerformanceScreen({super.key});
@@ -829,7 +830,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                             backgroundColor: color.withValues(alpha: 0.12),
                             backgroundImage:
                                 perf.avatar != null && perf.avatar!.isNotEmpty
-                                    ? NetworkImage(perf.avatar!)
+                                    ? CachedNetworkImageProvider(perf.avatar!)
                                     : null,
                             child: perf.avatar != null && perf.avatar!.isNotEmpty
                                 ? null
@@ -1226,7 +1227,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                 backgroundColor: color.withValues(alpha: 0.12),
                 backgroundImage:
                     perf.avatar != null && perf.avatar!.isNotEmpty
-                        ? NetworkImage(perf.avatar!)
+                        ? CachedNetworkImageProvider(perf.avatar!)
                         : null,
                 child: perf.avatar != null && perf.avatar!.isNotEmpty
                     ? null

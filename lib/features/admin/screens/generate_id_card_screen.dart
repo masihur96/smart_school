@@ -6,12 +6,14 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/core/utils/pdf_image_helper.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/student_model.dart';
 import 'package:pdfx/pdfx.dart' as pdfx;
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
+
 
 class GenerateIdCardScreen extends StatefulWidget {
   final List<Student> students;
@@ -298,7 +300,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
     pw.ImageProvider? schoolLogo;
     if (schoolLogoUrl.isNotEmpty) {
       try {
-        schoolLogo = await networkImage(schoolLogoUrl);
+        schoolLogo = await PdfImageHelper.getCachedImageProvider(schoolLogoUrl);
       } catch (e) {
         // Fallback
       }
@@ -316,7 +318,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
       final avatarUrl = student.user?.avatar ?? '';
       if (avatarUrl.isNotEmpty) {
         try {
-          avatars[student.userId] = await networkImage(avatarUrl);
+          avatars[student.userId] = await PdfImageHelper.getCachedImageProvider(avatarUrl);
         } catch (e) {
           // Fallback
         }

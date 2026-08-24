@@ -8,6 +8,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../data/models/issued_book.dart';
 import '../providers/library_book_provider.dart';
 import 'book_detail_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class IssuedBooksScreen extends StatefulWidget {
   final String comeFrom;
@@ -756,7 +757,7 @@ class _AdminStudentInfoBox extends StatelessWidget {
           CircleAvatar(
             radius: 14,
             backgroundColor: const Color(0xFF1A3C6E).withOpacity(0.12),
-            backgroundImage: hasAvatar ? NetworkImage(avatar) : null,
+            backgroundImage: hasAvatar ? CachedNetworkImageProvider(avatar) : null,
             child: !hasAvatar
                 ? Text(
                     initial,

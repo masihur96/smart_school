@@ -12,6 +12,7 @@ import '../../../models/student_model.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
 import 'admin_pricing_plan_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class AddEditStudentScreen extends StatefulWidget {
   final Student? student;
@@ -362,7 +363,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                         final ImageProvider? avatarImage = _imageFile != null
                             ? FileImage(_imageFile!)
                             : (hasValidNetworkImage
-                                ? NetworkImage(_existingImageUrl!)
+                                ? CachedNetworkImageProvider(_existingImageUrl!)
                                 : null);
 
                         return CircleAvatar(

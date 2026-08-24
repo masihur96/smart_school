@@ -19,6 +19,7 @@ import '../../../core/services/geocoding_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class StudentManagementScreen extends StatefulWidget {
   final bool hideAppBar;
@@ -527,7 +528,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                       ),
                       backgroundImage: (user?.avatar?.startsWith('http://') == true ||
                               user?.avatar?.startsWith('https://') == true)
-                          ? NetworkImage(user!.avatar!)
+                          ? CachedNetworkImageProvider(user!.avatar!)
                           : null,
                       onBackgroundImageError: (user?.avatar?.startsWith('http://') == true ||
                               user?.avatar?.startsWith('https://') == true)

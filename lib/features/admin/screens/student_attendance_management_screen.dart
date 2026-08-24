@@ -13,6 +13,7 @@ import 'package:smart_school/models/school_models.dart';
 
 import '../../auth/providers/auth_provider.dart';
 import '../providers/attendance_management_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class StudentAttendanceManagementScreen extends StatefulWidget {
   const StudentAttendanceManagementScreen({super.key});
@@ -628,7 +629,7 @@ class _StudentAttendanceManagementScreenState
             radius: 22,
             backgroundColor: statusColor.withValues(alpha: 0.12),
             backgroundImage: studentAvatar != null && studentAvatar.isNotEmpty
-                ? NetworkImage(studentAvatar)
+                ? CachedNetworkImageProvider(studentAvatar)
                 : null,
             child: studentAvatar != null && studentAvatar.isNotEmpty
                 ? null
