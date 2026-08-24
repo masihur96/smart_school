@@ -26,14 +26,12 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
   final _phoneController = TextEditingController();
   final _aboutController = TextEditingController();
   final _rollIdController = TextEditingController();
 
-  /// Multi-select state
-  List<String> _selectedClassIds = [];
-  List<String> _selectedSectionIds = [];
+  String? _selectedClassId;
+  String? _selectedSectionId;
 
   bool _obscurePassword = true;
   bool _isLoading = false;
@@ -97,10 +95,11 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
       if (value == null || value.isEmpty) {
         return 'Please enter password';
       }
-    } else {
-      if (value == null || value.isEmpty) {
-        return 'Please enter password';
+      if (value.length < 6) {
+        return 'Password must be at least 6 characters';
       }
+    } else if (value != null && value.isNotEmpty && value.length < 6) {
+      return 'Password must be at least 6 characters';
     }
     return null;
   }
@@ -117,9 +116,37 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
       _rollIdController.text = s.rollId;
       _existingImageUrl = s.user?.avatar;
 
-      if (s.classId.isNotEmpty) _selectedClassIds = [s.classId];
-      if (s.sectionId.isNotEmpty) _selectedSectionIds = [s.sectionId];
+      if (s.classId.isNotEmpty) {
+        _selectedClassId = s.classId;
+      } else if (s.user?.classIds.isNotEmpty == true) {
+        _selectedClassId = s.user!.classIds.first;
+      }
+
+      if (s.sectionId.isNotEmpty) {
+        _selectedSectionId = s.sectionId;
+      } else if (s.user?.sectionIds.isNotEmpty == true) {
+        _selectedSectionId = s.user!.sectionIds.first;
+      }
     }
+
+    // Auto-fetch classes and sections if not already in memory
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = context.read<AuthNotifier>().user;
+      final schoolId = user?.schoolId ?? '';
+      final classNotifier = context.read<ClassSetupNotifier>();
+      final sectionNotifier = context.read<SectionSetupNotifier>();
+
+      if (classNotifier.classes.isEmpty && !classNotifier.isLoading) {
+        if (schoolId.isNotEmpty) {
+          classNotifier.fetchClasses(schoolId);
+        } else {
+          classNotifier.fetchSchoolData();
+        }
+      }
+      if (sectionNotifier.sections.isEmpty && !sectionNotifier.isLoading) {
+        sectionNotifier.fetchSections();
+      }
+    });
   }
 
   Future<void> _pickImage() async {
@@ -163,7 +190,6 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-
     _phoneController.dispose();
     _aboutController.dispose();
     _rollIdController.dispose();
@@ -201,331 +227,6 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     );
   }
 
-  // ─── Multi-select bottom sheet for classes ──────────────────────────────────
-
-  Future<void> _showClassPicker(List<ClassRoom> classes) async {
-    final tempSelected = List<String>.from(_selectedClassIds);
-
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setModal) {
-            return DraggableScrollableSheet(
-              expand: false,
-              initialChildSize: 0.55,
-              maxChildSize: 0.85,
-              builder: (_, scrollCtrl) => Column(
-                children: [
-                  // Handle bar
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 12),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.class_, color: Colors.purple),
-                        const SizedBox(width: 8),
-                        const Expanded(
-                          child: Text(
-                            'Select Classes',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(ctx),
-                          child: const Text(
-                            'Done',
-                            style: TextStyle(color: Colors.purple),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  Expanded(
-                    child: ListView.builder(
-                      controller: scrollCtrl,
-                      itemCount: classes.length,
-                      itemBuilder: (_, i) {
-                        final cls = classes[i];
-                        final isSelected = tempSelected.contains(cls.id);
-                        return CheckboxListTile(
-                          activeColor: Colors.purple,
-                          value: isSelected,
-                          title: Text(cls.name),
-                          secondary: CircleAvatar(
-                            backgroundColor: Colors.purple.withOpacity(0.1),
-                            child: Text(
-                              cls.name.isNotEmpty
-                                  ? cls.name[0].toUpperCase()
-                                  : '?',
-                              style: const TextStyle(
-                                color: Colors.purple,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          onChanged: (checked) {
-                            setModal(() {
-                              if (checked == true) {
-                                tempSelected.add(cls.id);
-                              } else {
-                                tempSelected.remove(cls.id);
-                                // Also remove sections that belong to this class
-                                final allSections = context
-                                    .read<SectionSetupNotifier>()
-                                    .sections;
-                                final sectionIdsForClass = allSections
-                                    .where((s) => s.classId == cls.id)
-                                    .map((s) => s.id)
-                                    .toSet();
-                                _selectedSectionIds.removeWhere(
-                                  (id) => sectionIdsForClass.contains(id),
-                                );
-                              }
-                            });
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-
-    setState(() {
-      _selectedClassIds = tempSelected;
-      // clean up orphan sections
-      final allSections = context.read<SectionSetupNotifier>().sections;
-      _selectedSectionIds = _selectedSectionIds.where((sid) {
-        final section = allSections.firstWhere(
-          (s) => s.id == sid,
-          orElse: () => Section(id: '', classId: '', name: ''),
-        );
-        return _selectedClassIds.contains(section.classId);
-      }).toList();
-    });
-  }
-
-  // ─── Multi-select bottom sheet for sections ─────────────────────────────────
-
-  Future<void> _showSectionPicker(List<Section> filteredSections) async {
-    if (_selectedClassIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one class first')),
-      );
-      return;
-    }
-
-    final tempSelected = List<String>.from(_selectedSectionIds);
-
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setModal) {
-            return DraggableScrollableSheet(
-              expand: false,
-              initialChildSize: 0.55,
-              maxChildSize: 0.85,
-              builder: (_, scrollCtrl) => Column(
-                children: [
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 12),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.meeting_room, color: Colors.purple),
-                        const SizedBox(width: 8),
-                        const Expanded(
-                          child: Text(
-                            'Select Sections',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(ctx),
-                          child: const Text(
-                            'Done',
-                            style: TextStyle(color: Colors.purple),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  filteredSections.isEmpty
-                      ? const Expanded(
-                          child: Center(
-                            child: Text(
-                              'No sections available for selected classes',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ),
-                        )
-                      : Expanded(
-                          child: ListView.builder(
-                            controller: scrollCtrl,
-                            itemCount: filteredSections.length,
-                            itemBuilder: (_, i) {
-                              final sec = filteredSections[i];
-                              final isSelected = tempSelected.contains(sec.id);
-                              return CheckboxListTile(
-                                activeColor: Colors.purple,
-                                value: isSelected,
-                                title: Text(sec.name),
-                                subtitle: Text(
-                                  'Class: ${_classNameForId(context.read<ClassSetupNotifier>().classes, sec.classId)}',
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                                secondary: CircleAvatar(
-                                  backgroundColor: Colors.purple.withOpacity(
-                                    0.1,
-                                  ),
-                                  child: Text(
-                                    sec.name.isNotEmpty
-                                        ? sec.name[0].toUpperCase()
-                                        : '?',
-                                    style: const TextStyle(
-                                      color: Colors.purple,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                onChanged: (checked) {
-                                  setModal(() {
-                                    if (checked == true) {
-                                      tempSelected.add(sec.id);
-                                    } else {
-                                      tempSelected.remove(sec.id);
-                                    }
-                                  });
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-
-    setState(() => _selectedSectionIds = tempSelected);
-  }
-
-  String _classNameForId(List<ClassRoom> classes, String classId) {
-    try {
-      return classes.firstWhere((c) => c.id == classId).name;
-    } catch (_) {
-      return classId;
-    }
-  }
-
-  // ─── Build chip display for selected items ──────────────────────────────────
-
-  Widget _buildMultiSelectField({
-    required String label,
-    required IconData icon,
-    required List<String> selectedIds,
-    required List<String> Function(String id) getLabel,
-    required VoidCallback onTap,
-    required String? Function(List<String> val) validator,
-  }) {
-    return FormField<List<String>>(
-      initialValue: selectedIds,
-      validator: (_) => validator(selectedIds),
-      builder: (state) {
-        return GestureDetector(
-          onTap: () async {
-            await Future.microtask(onTap);
-            state.didChange(selectedIds);
-          },
-          child: InputDecorator(
-            decoration: InputDecoration(
-              labelText: label,
-              prefixIcon: Icon(icon),
-              errorText: state.errorText,
-              suffixIcon: const Icon(Icons.arrow_drop_down),
-            ),
-            child: selectedIds.isEmpty
-                ? Text(
-                    'Tap to select $label',
-                    style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
-                  )
-                : Wrap(
-                    spacing: 6,
-                    runSpacing: 4,
-                    children: selectedIds.map((id) {
-                      final labels = getLabel(id);
-                      final displayLabel = labels.isNotEmpty
-                          ? labels.first
-                          : id;
-                      return Chip(
-                        label: Text(
-                          displayLabel,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        backgroundColor: Colors.purple.withOpacity(0.12),
-                        labelStyle: const TextStyle(color: Colors.purple),
-                        deleteIcon: const Icon(
-                          Icons.close,
-                          size: 14,
-                          color: Colors.purple,
-                        ),
-                        onDeleted: () {
-                          setState(() {
-                            selectedIds.remove(id);
-                          });
-                          state.didChange(selectedIds);
-                        },
-                        visualDensity: VisualDensity.compact,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      );
-                    }).toList(),
-                  ),
-          ),
-        );
-      },
-    );
-  }
-
   void _save() async {
     if (_formKey.currentState!.validate()) {
       if (widget.student == null) {
@@ -552,6 +253,13 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
       final user = context.read<AuthNotifier>().user;
       final schoolId = user?.schoolId ?? '';
 
+      final selectedClassIds = _selectedClassId != null && _selectedClassId!.isNotEmpty
+          ? [_selectedClassId!]
+          : <String>[];
+      final selectedSectionIds = _selectedSectionId != null && _selectedSectionId!.isNotEmpty
+          ? [_selectedSectionId!]
+          : <String>[];
+
       try {
         if (widget.student != null) {
           await context.read<StudentsNotifier>().updateStudentToAPI(
@@ -560,8 +268,8 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             email: _emailController.text.trim().toLowerCase(),
             password: _passwordController.text,
             phone: _phoneController.text.trim(),
-            classIds: _selectedClassIds,
-            sectionIds: _selectedSectionIds,
+            classIds: selectedClassIds,
+            sectionIds: selectedSectionIds,
             rollId: _rollIdController.text.trim(),
             designation: _aboutController.text.trim(),
             imageFile: _imageFile,
@@ -574,8 +282,8 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             role: 'student',
             schoolId: schoolId,
             phone: _phoneController.text.trim(),
-            classIds: _selectedClassIds,
-            sectionIds: _selectedSectionIds,
+            classIds: selectedClassIds,
+            sectionIds: selectedSectionIds,
             rollId: _rollIdController.text.trim(),
             designation: _aboutController.text.trim(),
             imageFile: _imageFile,
@@ -605,15 +313,20 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final classes = context.watch<ClassSetupNotifier>().classes;
-    final allSections = context.watch<SectionSetupNotifier>().sections;
+    final classNotifier = context.watch<ClassSetupNotifier>();
+    final sectionNotifier = context.watch<SectionSetupNotifier>();
+    final classes = classNotifier.classes;
+    final allSections = sectionNotifier.sections;
 
-    // Sections filtered to only those belonging to the selected classes
-    final filteredSections = _selectedClassIds.isEmpty
+    final isClassesLoading = classNotifier.isLoading;
+    final isSectionsLoading = sectionNotifier.isLoading;
+
+    // Sections filtered to only those belonging to the selected class
+    final filteredSections = _selectedClassId == null || _selectedClassId!.isEmpty
         ? <Section>[]
         : allSections
-              .where((s) => _selectedClassIds.contains(s.classId))
-              .toList();
+            .where((s) => s.classId == _selectedClassId)
+            .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -688,39 +401,114 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             ),
             const SizedBox(height: 16),
 
-            // ── Multi-select: Class ───────────────────────────────────────────
-            _buildMultiSelectField(
-              label: 'Class',
-              icon: Icons.class_,
-              selectedIds: _selectedClassIds,
-              getLabel: (id) {
-                try {
-                  return [classes.firstWhere((c) => c.id == id).name];
-                } catch (_) {
-                  return [id];
-                }
-              },
-              onTap: () => _showClassPicker(classes),
+            // ── Class Dropdown ───────────────────────────────────────────────
+            DropdownButtonFormField<String>(
+              value: classes.any((c) => c.id == _selectedClassId)
+                  ? _selectedClassId
+                  : null,
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: 'Class',
+                prefixIcon: const Icon(Icons.class_),
+                hintText: isClassesLoading
+                    ? 'Loading classes...'
+                    : (classes.isEmpty ? 'No classes available' : 'Select Class'),
+                suffixIcon: isClassesLoading
+                    ? const Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.purple,
+                          ),
+                        ),
+                      )
+                    : null,
+              ),
+              items: classes.map((c) {
+                return DropdownMenuItem<String>(
+                  value: c.id,
+                  child: Text(c.name),
+                );
+              }).toList(),
+              onChanged: isClassesLoading
+                  ? null
+                  : (val) {
+                      setState(() {
+                        _selectedClassId = val;
+                        // Reset section if it does not belong to the selected class
+                        if (_selectedSectionId != null) {
+                          final currentSection = allSections.firstWhere(
+                            (s) => s.id == _selectedSectionId,
+                            orElse: () => Section(id: '', classId: '', name: ''),
+                          );
+                          if (currentSection.classId != val) {
+                            _selectedSectionId = null;
+                          }
+                        }
+                      });
+                    },
               validator: (val) =>
-                  val.isEmpty ? 'Please select at least one class' : null,
+                  (val == null || val.isEmpty) ? 'Please select a class' : null,
             ),
             const SizedBox(height: 16),
 
-            // ── Multi-select: Section ─────────────────────────────────────────
-            _buildMultiSelectField(
-              label: 'Section',
-              icon: Icons.meeting_room,
-              selectedIds: _selectedSectionIds,
-              getLabel: (id) {
-                try {
-                  return [filteredSections.firstWhere((s) => s.id == id).name];
-                } catch (_) {
-                  return [id];
+            // ── Section Dropdown ─────────────────────────────────────────────
+            DropdownButtonFormField<String>(
+              value: filteredSections.any((s) => s.id == _selectedSectionId)
+                  ? _selectedSectionId
+                  : null,
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: 'Section',
+                prefixIcon: const Icon(Icons.meeting_room),
+                hintText: _selectedClassId == null
+                    ? 'Select a class first'
+                    : (isSectionsLoading
+                        ? 'Loading sections...'
+                        : (filteredSections.isEmpty
+                            ? 'No sections in this class'
+                            : 'Select Section')),
+                suffixIcon: isSectionsLoading
+                    ? const Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.purple,
+                          ),
+                        ),
+                      )
+                    : null,
+              ),
+              items: filteredSections.map((s) {
+                return DropdownMenuItem<String>(
+                  value: s.id,
+                  child: Text(s.name),
+                );
+              }).toList(),
+              onChanged: (_selectedClassId == null ||
+                      isSectionsLoading ||
+                      filteredSections.isEmpty)
+                  ? null
+                  : (val) {
+                      setState(() {
+                        _selectedSectionId = val;
+                      });
+                    },
+              validator: (val) {
+                if (_selectedClassId == null) {
+                  return 'Please select class first';
                 }
+                if (filteredSections.isNotEmpty && (val == null || val.isEmpty)) {
+                  return 'Please select a section';
+                }
+                return null;
               },
-              onTap: () => _showSectionPicker(filteredSections),
-              validator: (val) =>
-                  val.isEmpty ? 'Please select at least one section' : null,
             ),
             const SizedBox(height: 16),
 
@@ -823,3 +611,4 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     );
   }
 }
+
