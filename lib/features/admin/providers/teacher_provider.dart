@@ -34,16 +34,20 @@ class TeachersNotifier extends ChangeNotifier {
     String? classId,
     String? sectionId,
     bool? isActive,
+    String? search,
     bool loadMore = false,
   }) async {
     if (loadMore) {
-      if (_isLoadingMore || !_hasMore) return;
+      if (_isLoadingMore || _isLoading || !_hasMore) return;
       _isLoadingMore = true;
       _currentPage++;
     } else {
+      if (_isLoading) return;
       _isLoading = true;
       _currentPage = 1;
       _hasMore = true;
+      _teachers.clear();
+      _dbService.teachers.clear();
     }
     notifyListeners();
 
@@ -57,9 +61,11 @@ class TeachersNotifier extends ChangeNotifier {
         'limit': '10',
       };
       if (classId != null && classId.isNotEmpty) query['classId'] = classId;
-      if (sectionId != null && sectionId.isNotEmpty)
+      if (sectionId != null && sectionId.isNotEmpty) {
         query['sectionId'] = sectionId;
+      }
       if (isActive != null) query['isActive'] = isActive.toString();
+      if (search != null && search.isNotEmpty) query['search'] = search;
 
       final response = await DataProvider().performRequest(
         'GET',
@@ -80,11 +86,6 @@ class TeachersNotifier extends ChangeNotifier {
 
         _totalCount = responseTotal;
 
-        if (data.length < 10 ||
-            (loadMore && _teachers.length + data.length >= responseTotal)) {
-          _hasMore = false;
-        }
-
         if (!loadMore) {
           _dbService.teachers.clear();
         }
@@ -93,19 +94,35 @@ class TeachersNotifier extends ChangeNotifier {
           try {
             final teacher = Teacher.fromJson(item);
             if (!teacher.isDeleted) {
-              _dbService.teachers.add(teacher);
+              if (loadMore) {
+                final exists = _dbService.teachers.any(
+                  (t) => t.userId == teacher.userId,
+                );
+                if (!exists) {
+                  _dbService.teachers.add(teacher);
+                }
+              } else {
+                _dbService.teachers.add(teacher);
+              }
             }
           } catch (e) {
             log("Error parsing teacher: $e");
           }
         }
         _teachers = [..._dbService.teachers];
+
+        if (data.length < 10 || _teachers.length >= _totalCount) {
+          _hasMore = false;
+        }
       } else {
         log("Error fetching teachers: ${response?.data}");
         _hasMore = false;
       }
     } catch (e) {
       log("Error fetching teachers: $e");
+      if (loadMore && _currentPage > 1) {
+        _currentPage--;
+      }
       _hasMore = false;
     } finally {
       if (loadMore) {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -29,6 +31,9 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
   String? _selectedClass;
   String? _selectedSection;
   String? _selectedStatus = 'All';
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -58,31 +63,42 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
 
   @override
   void dispose() {
+    _searchController.dispose();
+    _debounce?.cancel();
     _scrollController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
+    if (!_scrollController.hasClients) return;
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
-      context.read<TeachersNotifier>().fetchTeachers(
-        loadMore: true,
-        classId: _selectedClass,
-        sectionId: _selectedSection,
-        isActive: _selectedStatus == 'Active'
-            ? true
-            : (_selectedStatus == 'Inactive' ? false : null),
-      );
+      final notifier = context.read<TeachersNotifier>();
+      if (!notifier.isLoadingMore && !notifier.isLoading && notifier.hasMore) {
+        notifier.fetchTeachers(
+          loadMore: true,
+          classId: _selectedClass,
+          sectionId: _selectedSection,
+          isActive: _selectedStatus == 'Active'
+              ? true
+              : (_selectedStatus == 'Inactive' ? false : null),
+          search: _searchQuery.isEmpty ? null : _searchQuery,
+        );
+      }
     }
   }
 
   void _fetchTeachers() {
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(0);
+    }
     context.read<TeachersNotifier>().fetchTeachers(
       classId: _selectedClass,
       sectionId: _selectedSection,
       isActive: _selectedStatus == 'Active'
           ? true
           : (_selectedStatus == 'Inactive' ? false : null),
+      search: _searchQuery.isEmpty ? null : _searchQuery,
     );
   }
 
@@ -118,23 +134,85 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
             ),
             child: Column(
               children: [
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
+                // Search bar
+                TextField(
+                  controller: _searchController,
                   decoration: InputDecoration(
-                    labelText: 'Status',
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                    labelText: l10n.searchByName,
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                              _fetchTeachers();
+                            },
+                          )
+                        : null,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                   ),
-                  value: _selectedStatus,
-                  items: ['All', 'Active', 'Inactive']
-                      .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                      .toList(),
                   onChanged: (val) {
-                    setState(() => _selectedStatus = val);
-                    _fetchTeachers();
+                    setState(() => _searchQuery = val.trim());
+                    if (_debounce?.isActive ?? false) _debounce!.cancel();
+                    _debounce = Timer(
+                      const Duration(milliseconds: 500),
+                      _fetchTeachers,
+                    );
                   },
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText: 'Status',
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        value: _selectedStatus,
+                        items: ['All', 'Active', 'Inactive']
+                            .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                            .toList(),
+                        onChanged: (val) {
+                          setState(() => _selectedStatus = val);
+                          _fetchTeachers();
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          l10n.total,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '${context.watch<TeachersNotifier>().totalCount}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -142,53 +220,67 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
 
           // Teachers List
           Expanded(
-            child: isLoading
-                ? _TeacherShimmer(
-                    isDark: Theme.of(context).brightness == Brightness.dark,
-                  )
-                : teachers.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+            child: RefreshIndicator(
+              onRefresh: () async {
+                _fetchTeachers();
+              },
+              child: isLoading && teachers.isEmpty
+                  ? _TeacherShimmer(
+                      isDark: Theme.of(context).brightness == Brightness.dark,
+                    )
+                  : teachers.isEmpty
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       children: [
-                        Icon(
-                          Icons.person_off_outlined,
-                          size: 64,
-                          color: Colors.grey.shade400,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No teachers found',
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 16,
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.4,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.person_off_outlined,
+                                  size: 64,
+                                  color: Colors.grey.shade400,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No teachers found',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
-                    ),
-                  )
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: teachers.length + (isLoadingMore ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index == teachers.length) {
-                        return const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.purple,
+                    )
+                  : ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: teachers.length + (isLoadingMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == teachers.length) {
+                          return const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.purple,
+                              ),
                             ),
-                          ),
-                        );
-                      }
+                          );
+                        }
 
-                      final isDark =
-                          Theme.of(context).brightness == Brightness.dark;
-                      final teacher = teachers[index];
-                      return _buildTeacherCard(context, teacher, isDark);
-                    },
-                  ),
+                        final isDark =
+                            Theme.of(context).brightness == Brightness.dark;
+                        final teacher = teachers[index];
+                        return _buildTeacherCard(context, teacher, isDark);
+                      },
+                    ),
+            ),
           ),
         ],
       ),
