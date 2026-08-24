@@ -104,6 +104,13 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     return null;
   }
 
+  bool _isValidImageUrl(String? url) {
+    if (url == null) return false;
+    final trimmed = url.trim();
+    if (trimmed.isEmpty) return false;
+    return trimmed.startsWith('http://') || trimmed.startsWith('https://');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -114,7 +121,8 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
       _phoneController.text = s.user?.phone ?? s.guardianContact;
       _aboutController.text = s.user?.designation ?? '';
       _rollIdController.text = s.rollId;
-      _existingImageUrl = s.user?.avatar;
+      final avatar = s.user?.avatar?.trim();
+      _existingImageUrl = _isValidImageUrl(avatar) ? avatar : null;
 
       if (s.classId.isNotEmpty) {
         _selectedClassId = s.classId;
@@ -348,22 +356,33 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 children: [
                   GestureDetector(
                     onTap: _pickImage,
-                    child: CircleAvatar(
-                      radius: 60,
-                      backgroundColor: Colors.purple.withOpacity(0.1),
-                      backgroundImage: _imageFile != null
-                          ? FileImage(_imageFile!)
-                          : (_existingImageUrl != null
-                                    ? NetworkImage(_existingImageUrl!)
-                                    : null)
-                                as ImageProvider?,
-                      child: (_imageFile == null && _existingImageUrl == null)
-                          ? const Icon(
-                              Icons.person_add_alt_1,
-                              size: 40,
-                              color: Colors.purple,
-                            )
-                          : null,
+                    child: Builder(
+                      builder: (context) {
+                        final hasValidNetworkImage = _isValidImageUrl(_existingImageUrl);
+                        final ImageProvider? avatarImage = _imageFile != null
+                            ? FileImage(_imageFile!)
+                            : (hasValidNetworkImage
+                                ? NetworkImage(_existingImageUrl!)
+                                : null);
+
+                        return CircleAvatar(
+                          radius: 60,
+                          backgroundColor: Colors.purple.withOpacity(0.1),
+                          backgroundImage: avatarImage,
+                          onBackgroundImageError: avatarImage != null
+                              ? (_, __) {
+                                  // Gracefully handle broken or unreachable URLs
+                                }
+                              : null,
+                          child: (_imageFile == null && !hasValidNetworkImage)
+                              ? const Icon(
+                                  Icons.person_add_alt_1,
+                                  size: 40,
+                                  color: Colors.purple,
+                                )
+                              : null,
+                        );
+                      },
                     ),
                   ),
                   Positioned(

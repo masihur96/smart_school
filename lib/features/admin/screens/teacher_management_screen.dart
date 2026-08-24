@@ -355,10 +355,16 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                       radius: 24,
                       backgroundColor:
                           AppColors.primaryAdmin.withValues(alpha: 0.12),
-                      backgroundImage: user?.avatar?.isNotEmpty == true
+                      backgroundImage: (user?.avatar?.startsWith('http://') == true ||
+                              user?.avatar?.startsWith('https://') == true)
                           ? NetworkImage(user!.avatar!)
                           : null,
-                      child: user?.avatar?.isNotEmpty == true
+                      onBackgroundImageError: (user?.avatar?.startsWith('http://') == true ||
+                              user?.avatar?.startsWith('https://') == true)
+                          ? (_, __) {}
+                          : null,
+                      child: (user?.avatar?.startsWith('http://') == true ||
+                              user?.avatar?.startsWith('https://') == true)
                           ? null
                           : Text(
                               teacherName.isNotEmpty
@@ -894,10 +900,16 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                   CircleAvatar(
                     radius: 30,
                     backgroundColor: Colors.purple.withOpacity(0.1),
-                    backgroundImage: user?.avatar != null && user!.avatar!.isNotEmpty
-                        ? NetworkImage(user.avatar!)
+                    backgroundImage: (user?.avatar?.startsWith('http://') == true ||
+                            user?.avatar?.startsWith('https://') == true)
+                        ? NetworkImage(user!.avatar!)
                         : null,
-                    child: user?.avatar == null || user!.avatar!.isEmpty
+                    onBackgroundImageError: (user?.avatar?.startsWith('http://') == true ||
+                            user?.avatar?.startsWith('https://') == true)
+                        ? (_, __) {}
+                        : null,
+                    child: (user?.avatar?.startsWith('http://') != true &&
+                            user?.avatar?.startsWith('https://') != true)
                         ? const Icon(
                             Icons.person,
                             color: Colors.purple,

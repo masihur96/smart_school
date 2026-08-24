@@ -1,21 +1,20 @@
 import 'dart:async';
 
-import 'package:shimmer/shimmer.dart';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/screens/add_edit_student_screen.dart';
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
-import 'package:smart_school/features/admin/screens/student_detail_screen.dart';
 import 'package:smart_school/features/admin/screens/generate_id_card_screen.dart';
 import 'package:smart_school/features/admin/screens/generate_transcript_screen.dart';
+import 'package:smart_school/features/admin/screens/student_detail_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/student_model.dart';
 import 'package:smart_school/services/notification_service.dart';
-
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../../core/services/geocoding_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
@@ -47,13 +46,15 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
       final user = context.read<AuthNotifier>().user;
       final schoolId = user?.schoolId ?? '';
 
-      if (schoolId.isNotEmpty && context.read<ClassSetupNotifier>().classes.isEmpty) {
+      if (schoolId.isNotEmpty &&
+          context.read<ClassSetupNotifier>().classes.isEmpty) {
         context.read<ClassSetupNotifier>().fetchClasses(schoolId);
       }
       if (context.read<SectionSetupNotifier>().sections.isEmpty) {
         context.read<SectionSetupNotifier>().fetchSections();
       }
-      if (context.read<StudentsNotifier>().students.isEmpty && !context.read<StudentsNotifier>().isLoading) {
+      if (context.read<StudentsNotifier>().students.isEmpty &&
+          !context.read<StudentsNotifier>().isLoading) {
         context.read<StudentsNotifier>().fetchStudents();
       }
     });
@@ -116,16 +117,17 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                   onPressed: () {
                     if (students.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('No students to generate transcripts.')),
+                        const SnackBar(
+                          content: Text('No students to generate transcripts.'),
+                        ),
                       );
                       return;
                     }
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => GenerateTranscriptScreen(
-                          students: students,
-                        ),
+                        builder: (_) =>
+                            GenerateTranscriptScreen(students: students),
                       ),
                     );
                   },
@@ -135,16 +137,17 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                   onPressed: () {
                     if (students.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('No students to generate ID cards.')),
+                        const SnackBar(
+                          content: Text('No students to generate ID cards.'),
+                        ),
                       );
                       return;
                     }
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => GenerateIdCardScreen(
-                          students: students,
-                        ),
+                        builder: (_) =>
+                            GenerateIdCardScreen(students: students),
                       ),
                     );
                   },
@@ -350,10 +353,10 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                   }
                   context.read<SectionSetupNotifier>().fetchSections();
                   await context.read<StudentsNotifier>().fetchStudents(
-                        classId: _selectedClassId,
-                        sectionId: _selectedSectionId,
-                        isActive: _selectedStatus,
-                        search: _searchQuery.isEmpty ? null : _searchQuery,
+                    classId: _selectedClassId,
+                    sectionId: _selectedSectionId,
+                    isActive: _selectedStatus,
+                    search: _searchQuery.isEmpty ? null : _searchQuery,
                   );
                 },
                 child: studentsNotifier.isLoading && students.isEmpty
@@ -461,21 +464,19 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
     );
   }
 
-  Widget _buildStudentCard(
-    BuildContext context,
-    Student student,
-    bool isDark,
-  ) {
+  Widget _buildStudentCard(BuildContext context, Student student, bool isDark) {
     final l10n = AppLocalizations.of(context)!;
     final user = student.user;
-    final studentName =
-        (user != null && user.name.isNotEmpty) ? user.name : 'Unknown';
+    final studentName = (user != null && user.name.isNotEmpty)
+        ? user.name
+        : 'Unknown';
     final studentPhone = user?.phone?.trim() ?? '';
     final guardianPhone = student.guardianContact.trim();
     final email = user?.email.trim() ?? '';
     final hasLatLon = user != null && user.lat != null && user.lon != null;
     final designation = user?.designation?.trim();
-    final hasAddressText = designation != null &&
+    final hasAddressText =
+        designation != null &&
         designation.isNotEmpty &&
         designation.toLowerCase() != 'student';
 
@@ -521,12 +522,19 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                     tag: 'student-avatar-${student.userId}',
                     child: CircleAvatar(
                       radius: 24,
-                      backgroundColor:
-                          AppColors.primaryAdmin.withValues(alpha: 0.12),
-                      backgroundImage: user?.avatar?.isNotEmpty == true
+                      backgroundColor: AppColors.primaryAdmin.withValues(
+                        alpha: 0.12,
+                      ),
+                      backgroundImage: (user?.avatar?.startsWith('http://') == true ||
+                              user?.avatar?.startsWith('https://') == true)
                           ? NetworkImage(user!.avatar!)
                           : null,
-                      child: user?.avatar?.isNotEmpty == true
+                      onBackgroundImageError: (user?.avatar?.startsWith('http://') == true ||
+                              user?.avatar?.startsWith('https://') == true)
+                          ? (_, __) {}
+                          : null,
+                      child: (user?.avatar?.startsWith('http://') == true ||
+                              user?.avatar?.startsWith('https://') == true)
                           ? null
                           : Text(
                               studentName.isNotEmpty
@@ -568,8 +576,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: isDark
-                                      ? Colors.blue.shade900
-                                          .withValues(alpha: 0.3)
+                                      ? Colors.blue.shade900.withValues(
+                                          alpha: 0.3,
+                                        )
                                       : Colors.blue.shade50,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
@@ -593,13 +602,15 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                               decoration: BoxDecoration(
                                 color: student.isActive
                                     ? (isDark
-                                        ? Colors.green.shade900
-                                            .withValues(alpha: 0.3)
-                                        : Colors.green.shade50)
+                                          ? Colors.green.shade900.withValues(
+                                              alpha: 0.3,
+                                            )
+                                          : Colors.green.shade50)
                                     : (isDark
-                                        ? Colors.red.shade900
-                                            .withValues(alpha: 0.3)
-                                        : Colors.red.shade50),
+                                          ? Colors.red.shade900.withValues(
+                                              alpha: 0.3,
+                                            )
+                                          : Colors.red.shade50),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Row(
@@ -657,9 +668,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                           ),
                         ).then((_) => _applyFilters());
                       } else if (value == 'status') {
-                        context
-                            .read<StudentsNotifier>()
-                            .toggleStudentStatus(student.userId);
+                        context.read<StudentsNotifier>().toggleStudentStatus(
+                          student.userId,
+                        );
                       } else if (value == 'delete') {
                         showDialog(
                           context: context,
@@ -752,9 +763,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                student.isActive
-                                    ? 'Deactivate'
-                                    : 'Activate',
+                                student.isActive ? 'Deactivate' : 'Activate',
                               ),
                             ],
                           ),
@@ -796,8 +805,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryAdmin
-                              .withValues(alpha: 0.08),
+                          color: AppColors.primaryAdmin.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Row(
@@ -954,11 +962,12 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                   user.lon.toString(),
                                 ),
                                 builder: (context, snapshot) {
-                                  final place = snapshot.connectionState ==
+                                  final place =
+                                      snapshot.connectionState ==
                                           ConnectionState.waiting
                                       ? 'Locating...'
                                       : (snapshot.data ??
-                                          '${user.lat?.toStringAsFixed(3)}, ${user.lon?.toStringAsFixed(3)}');
+                                            '${user.lat?.toStringAsFixed(3)}, ${user.lon?.toStringAsFixed(3)}');
                                   return Text(
                                     place,
                                     style: TextStyle(
@@ -1152,12 +1161,8 @@ class _StudentShimmer extends StatelessWidget {
         return Shimmer.fromColors(
           baseColor: baseColor,
           highlightColor: highlightColor,
-          child: Card(
+          child: Container(
             margin: const EdgeInsets.symmetric(vertical: 6),
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
             child: Padding(
               padding: const EdgeInsets.all(14.0),
               child: Column(

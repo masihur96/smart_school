@@ -72,10 +72,16 @@ class StudentDetailScreen extends StatelessWidget {
                       CircleAvatar(
                         radius: 60,
                         backgroundColor: Colors.purple,
-                        backgroundImage: student.user?.avatar?.isNotEmpty == true
+                        backgroundImage: (student.user?.avatar?.startsWith('http://') == true ||
+                                student.user?.avatar?.startsWith('https://') == true)
                             ? NetworkImage(student.user!.avatar!)
                             : null,
-                        child: student.user?.avatar?.isNotEmpty == true
+                        onBackgroundImageError: (student.user?.avatar?.startsWith('http://') == true ||
+                                student.user?.avatar?.startsWith('https://') == true)
+                            ? (_, __) {}
+                            : null,
+                        child: (student.user?.avatar?.startsWith('http://') == true ||
+                                student.user?.avatar?.startsWith('https://') == true)
                             ? null
                             : Text(
                           student.user?.name.isNotEmpty == true
