@@ -470,7 +470,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       backgroundImage: _imageFile != null
                           ? FileImage(_imageFile!)
                           : (user.avatar != null
-                                    ? CachedNetworkImageProvider(user.avatar!)
+                                    ? CachedNetworkImageProvider(
+                                        user.avatar!,
+                                        cacheKey: user.avatar!.split('?').first,
+                                      )
                                     : null)
                                 as ImageProvider?,
                       child: (_imageFile == null && user.avatar == null)

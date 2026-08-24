@@ -283,7 +283,7 @@ class _AcademicBooksDashboardScreenState
       // Refresh
       final auth = context.read<AuthNotifier>();
       final schoolId = auth.user?.schoolId ?? '';
-      context.read<AcademicBookNotifier>().fetchBooks(schoolId: schoolId);
+      context.read<AcademicBookNotifier>().fetchBooks(schoolId: schoolId, force: true);
       if (schoolId.isNotEmpty) {
         context.read<ClassSetupNotifier>().fetchClasses(schoolId);
       }

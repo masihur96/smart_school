@@ -544,15 +544,15 @@ class _IssuedBookCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Book cover
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  issuedBook.book.coverImageUrl,
+                child: CachedNetworkImage(
+                  imageUrl: issuedBook.book.coverImageUrl,
+                  cacheKey: issuedBook.book.coverImageUrl.split('?').first,
                   width: 58,
                   height: 96,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorWidget: (_, __, ___) => Container(
                     width: 58,
                     height: 96,
                     color: const Color(0xFFE5E7EB),
@@ -562,13 +562,11 @@ class _IssuedBookCard extends StatelessWidget {
                       size: 24,
                     ),
                   ),
-                  loadingBuilder: (_, child, progress) => progress == null
-                      ? child
-                      : Container(
-                          width: 58,
-                          height: 96,
-                          color: const Color(0xFFF3F4F6),
-                        ),
+                  placeholder: (_, __) => Container(
+                    width: 58,
+                    height: 96,
+                    color: const Color(0xFFF3F4F6),
+                  ),
                 ),
               ),
               const SizedBox(width: 14),
@@ -757,7 +755,10 @@ class _AdminStudentInfoBox extends StatelessWidget {
           CircleAvatar(
             radius: 14,
             backgroundColor: const Color(0xFF1A3C6E).withOpacity(0.12),
-            backgroundImage: hasAvatar ? CachedNetworkImageProvider(avatar) : null,
+            backgroundImage: hasAvatar ? CachedNetworkImageProvider(
+                avatar,
+                cacheKey: avatar.split('?').first,
+              ) : null,
             child: !hasAvatar
                 ? Text(
                     initial,

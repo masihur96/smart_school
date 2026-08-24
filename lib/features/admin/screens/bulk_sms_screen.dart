@@ -1174,7 +1174,10 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                 radius: 20,
                 backgroundColor: AppColors.primaryAdmin.withValues(alpha: 0.1),
                 backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
-                    ? CachedNetworkImageProvider(avatarUrl)
+                    ? CachedNetworkImageProvider(
+                        avatarUrl,
+                        cacheKey: avatarUrl.split('?').first,
+                      )
                     : null,
                 child: (avatarUrl == null || avatarUrl.isEmpty)
                     ? Text(

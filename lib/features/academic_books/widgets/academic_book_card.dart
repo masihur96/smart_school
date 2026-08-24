@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../models/academic_book.dart';
 
@@ -74,10 +75,11 @@ class AcademicBookCard extends StatelessWidget {
               fit: StackFit.expand,
               children: [
                 if (hasCover)
-                  Image.network(
-                    book.coverImageUrl,
+                  CachedNetworkImage(
+                    imageUrl: book.coverImageUrl,
+                    cacheKey: book.coverImageUrl.split('?').first,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    errorWidget: (_, __, ___) => const SizedBox.shrink(),
                   ),
                 if (hasCover)
                   Container(
@@ -397,10 +399,11 @@ class AcademicBookListTile extends StatelessWidget {
             ),
             clipBehavior: Clip.hardEdge,
             child: hasCover
-                ? Image.network(
-                    book.coverImageUrl,
+                ? CachedNetworkImage(
+                    imageUrl: book.coverImageUrl,
+                    cacheKey: book.coverImageUrl.split('?').first,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Icon(
+                    errorWidget: (_, __, ___) => const Icon(
                       Icons.picture_as_pdf_rounded,
                       color: Colors.white,
                       size: 24,

@@ -629,7 +629,10 @@ class _StudentAttendanceManagementScreenState
             radius: 22,
             backgroundColor: statusColor.withValues(alpha: 0.12),
             backgroundImage: studentAvatar != null && studentAvatar.isNotEmpty
-                ? CachedNetworkImageProvider(studentAvatar)
+                ? CachedNetworkImageProvider(
+                    studentAvatar,
+                    cacheKey: studentAvatar.split('?').first,
+                  )
                 : null,
             child: studentAvatar != null && studentAvatar.isNotEmpty
                 ? null

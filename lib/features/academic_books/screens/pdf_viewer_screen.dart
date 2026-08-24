@@ -128,7 +128,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
   }
 
   Future<String> _ensureLocalFile() async {
-    final tempDir = await getTemporaryDirectory();
+    final tempDir = await getApplicationDocumentsDirectory();
     final baseUrl = widget.pdfUrl.split('?').first;
     final sanitized = baseUrl.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
     final key = sanitized.length > 48

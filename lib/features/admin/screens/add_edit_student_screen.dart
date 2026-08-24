@@ -363,7 +363,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                         final ImageProvider? avatarImage = _imageFile != null
                             ? FileImage(_imageFile!)
                             : (hasValidNetworkImage
-                                ? CachedNetworkImageProvider(_existingImageUrl!)
+                                ? CachedNetworkImageProvider(
+                                    _existingImageUrl!,
+                                    cacheKey: _existingImageUrl!.split('?').first,
+                                  )
                                 : null);
 
                         return CircleAvatar(

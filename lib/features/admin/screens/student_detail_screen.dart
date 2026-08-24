@@ -75,7 +75,10 @@ class StudentDetailScreen extends StatelessWidget {
                         backgroundColor: Colors.purple,
                         backgroundImage: (student.user?.avatar?.startsWith('http://') == true ||
                                 student.user?.avatar?.startsWith('https://') == true)
-                            ? CachedNetworkImageProvider(student.user!.avatar!)
+                            ? CachedNetworkImageProvider(
+                                student.user!.avatar!,
+                                cacheKey: student.user!.avatar!.split('?').first,
+                              )
                             : null,
                         onBackgroundImageError: (student.user?.avatar?.startsWith('http://') == true ||
                                 student.user?.avatar?.startsWith('https://') == true)

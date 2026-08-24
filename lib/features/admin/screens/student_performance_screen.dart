@@ -830,7 +830,10 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                             backgroundColor: color.withValues(alpha: 0.12),
                             backgroundImage:
                                 perf.avatar != null && perf.avatar!.isNotEmpty
-                                    ? CachedNetworkImageProvider(perf.avatar!)
+                                    ? CachedNetworkImageProvider(
+                                        perf.avatar!,
+                                        cacheKey: perf.avatar!.split('?').first,
+                                      )
                                     : null,
                             child: perf.avatar != null && perf.avatar!.isNotEmpty
                                 ? null
@@ -1227,7 +1230,10 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                 backgroundColor: color.withValues(alpha: 0.12),
                 backgroundImage:
                     perf.avatar != null && perf.avatar!.isNotEmpty
-                        ? CachedNetworkImageProvider(perf.avatar!)
+                        ? CachedNetworkImageProvider(
+                            perf.avatar!,
+                            cacheKey: perf.avatar!.split('?').first,
+                          )
                         : null,
                 child: perf.avatar != null && perf.avatar!.isNotEmpty
                     ? null

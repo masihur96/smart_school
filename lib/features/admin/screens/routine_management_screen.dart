@@ -2714,7 +2714,10 @@ class _TeacherAvatar extends StatelessWidget {
     return CircleAvatar(
       radius: size / 2,
       backgroundColor: const Color(0xFF7C3AED).withOpacity(0.12),
-      backgroundImage: hasAvatar ? CachedNetworkImageProvider(avatar!) : null,
+      backgroundImage: hasAvatar ? CachedNetworkImageProvider(
+          avatar!,
+          cacheKey: avatar!.split('?').first,
+        ) : null,
       onBackgroundImageError: hasAvatar ? (_, __) {} : null,
       child: hasAvatar
           ? null

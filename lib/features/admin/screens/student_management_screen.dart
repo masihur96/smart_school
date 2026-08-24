@@ -528,7 +528,10 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                       ),
                       backgroundImage: (user?.avatar?.startsWith('http://') == true ||
                               user?.avatar?.startsWith('https://') == true)
-                          ? CachedNetworkImageProvider(user!.avatar!)
+                          ? CachedNetworkImageProvider(
+                              user!.avatar!,
+                              cacheKey: user!.avatar!.split('?').first,
+                            )
                           : null,
                       onBackgroundImageError: (user?.avatar?.startsWith('http://') == true ||
                               user?.avatar?.startsWith('https://') == true)

@@ -523,7 +523,10 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                 radius: 25,
                 backgroundColor: Colors.purple,
                 backgroundImage: user.avatar?.isNotEmpty == true
-                    ? CachedNetworkImageProvider(user.avatar!)
+                    ? CachedNetworkImageProvider(
+                        user.avatar!,
+                        cacheKey: user.avatar!.split('?').first,
+                      )
                     : null,
                 child: user.avatar?.isNotEmpty == true
                     ? null

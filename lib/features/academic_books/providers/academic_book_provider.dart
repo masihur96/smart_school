@@ -22,7 +22,10 @@ class AcademicBookNotifier extends ChangeNotifier {
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
 
-  Future<void> fetchBooks({String? schoolId, String? classId}) async {
+  Future<void> fetchBooks({String? schoolId, String? classId, bool force = false}) async {
+    // Skip if already loaded and not forced (prevents repeated egress on navigation)
+    if (!force && _books.isNotEmpty) return;
+
     _isLoading = true;
     _error = null;
     notifyListeners();

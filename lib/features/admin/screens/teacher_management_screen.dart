@@ -404,7 +404,10 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                       backgroundImage:
                           (user?.avatar?.startsWith('http://') == true ||
                               user?.avatar?.startsWith('https://') == true)
-                          ? CachedNetworkImageProvider(user!.avatar!)
+                          ? CachedNetworkImageProvider(
+                              user!.avatar!,
+                              cacheKey: user!.avatar!.split('?').first,
+                            )
                           : null,
                       onBackgroundImageError:
                           (user?.avatar?.startsWith('http://') == true ||
@@ -954,7 +957,10 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                     backgroundImage:
                         (user?.avatar?.startsWith('http://') == true ||
                             user?.avatar?.startsWith('https://') == true)
-                        ? CachedNetworkImageProvider(user!.avatar!)
+                        ? CachedNetworkImageProvider(
+                            user!.avatar!,
+                            cacheKey: user!.avatar!.split('?').first,
+                          )
                         : null,
                     onBackgroundImageError:
                         (user?.avatar?.startsWith('http://') == true ||
