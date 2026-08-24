@@ -40,6 +40,71 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   File? _imageFile;
   String? _existingImageUrl;
 
+  String? _validateName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter student name';
+    }
+    if (value.trim().length < 2) {
+      return 'Name must be at least 2 characters';
+    }
+    return null;
+  }
+
+  String? _validateRollId(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter roll number';
+    }
+    return null;
+  }
+
+  String? _validateAbout(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter about / description for student';
+    }
+    if (value.trim().length < 3) {
+      return 'About must be at least 3 characters';
+    }
+    return null;
+  }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter email address';
+    }
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+    if (!emailRegex.hasMatch(value.trim())) {
+      return 'Please enter a valid email address';
+    }
+    return null;
+  }
+
+  String? _validatePhone(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter phone number';
+    }
+    final cleanPhone = value.trim().replaceAll(RegExp(r'[\s-]'), '');
+    final phoneRegex = RegExp(r'^\+?[0-9]{10,15}$');
+    if (!phoneRegex.hasMatch(cleanPhone)) {
+      return 'Please enter a valid phone number';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (widget.student == null) {
+      if (value == null || value.isEmpty) {
+        return 'Please enter password';
+      }
+    } else {
+      if (value == null || value.isEmpty) {
+        return 'Please enter password';
+      }
+    }
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -48,6 +113,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
       _nameController.text = s.user?.name ?? '';
       _emailController.text = s.user?.email ?? '';
       _phoneController.text = s.user?.phone ?? s.guardianContact;
+      _aboutController.text = s.user?.designation ?? '';
       _rollIdController.text = s.rollId;
       _existingImageUrl = s.user?.avatar;
 
@@ -221,10 +287,9 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                               } else {
                                 tempSelected.remove(cls.id);
                                 // Also remove sections that belong to this class
-                                final allSections =
-                                    context
-                                        .read<SectionSetupNotifier>()
-                                        .sections;
+                                final allSections = context
+                                    .read<SectionSetupNotifier>()
+                                    .sections;
                                 final sectionIdsForClass = allSections
                                     .where((s) => s.classId == cls.id)
                                     .map((s) => s.id)
@@ -348,8 +413,9 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                                   style: const TextStyle(fontSize: 12),
                                 ),
                                 secondary: CircleAvatar(
-                                  backgroundColor:
-                                      Colors.purple.withOpacity(0.1),
+                                  backgroundColor: Colors.purple.withOpacity(
+                                    0.1,
+                                  ),
                                   child: Text(
                                     sec.name.isNotEmpty
                                         ? sec.name[0].toUpperCase()
@@ -428,8 +494,9 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                     runSpacing: 4,
                     children: selectedIds.map((id) {
                       final labels = getLabel(id);
-                      final displayLabel =
-                          labels.isNotEmpty ? labels.first : id;
+                      final displayLabel = labels.isNotEmpty
+                          ? labels.first
+                          : id;
                       return Chip(
                         label: Text(
                           displayLabel,
@@ -467,8 +534,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
         final studentNotifier = context.read<StudentsNotifier>();
         final teacherNotifier = context.read<TeachersNotifier>();
 
-        int totalUser =
-            teacherNotifier.totalCount + studentNotifier.totalCount;
+        int totalUser = teacherNotifier.totalCount + studentNotifier.totalCount;
 
         if (adminSubscription != null &&
             adminSubscription.pricingPlan != null) {
@@ -490,28 +556,28 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
         if (widget.student != null) {
           await context.read<StudentsNotifier>().updateStudentToAPI(
             userId: widget.student!.userId,
-            name: _nameController.text,
-            email: _emailController.text,
+            name: _nameController.text.trim(),
+            email: _emailController.text.trim().toLowerCase(),
             password: _passwordController.text,
-            phone: _phoneController.text,
+            phone: _phoneController.text.trim(),
             classIds: _selectedClassIds,
             sectionIds: _selectedSectionIds,
-            rollId: _rollIdController.text,
-            designation: _aboutController.text,
+            rollId: _rollIdController.text.trim(),
+            designation: _aboutController.text.trim(),
             imageFile: _imageFile,
           );
         } else {
           await context.read<StudentsNotifier>().addStudentToAPI(
-            name: _nameController.text,
-            email: _emailController.text,
+            name: _nameController.text.trim(),
+            email: _emailController.text.trim().toLowerCase(),
             password: _passwordController.text,
             role: 'student',
             schoolId: schoolId,
-            phone: _phoneController.text,
+            phone: _phoneController.text.trim(),
             classIds: _selectedClassIds,
             sectionIds: _selectedSectionIds,
-            rollId: _rollIdController.text,
-            designation: _aboutController.text,
+            rollId: _rollIdController.text.trim(),
+            designation: _aboutController.text.trim(),
             imageFile: _imageFile,
           );
         }
@@ -546,8 +612,8 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     final filteredSections = _selectedClassIds.isEmpty
         ? <Section>[]
         : allSections
-            .where((s) => _selectedClassIds.contains(s.classId))
-            .toList();
+              .where((s) => _selectedClassIds.contains(s.classId))
+              .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -615,8 +681,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
               decoration: const InputDecoration(
                 labelText: 'Full Name',
                 prefixIcon: Icon(Icons.person),
+                hintText: 'e.g. John Doe',
               ),
-              validator: (val) => val!.isEmpty ? 'Please enter name' : null,
+              textInputAction: TextInputAction.next,
+              validator: _validateName,
             ),
             const SizedBox(height: 16),
 
@@ -645,9 +713,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
               selectedIds: _selectedSectionIds,
               getLabel: (id) {
                 try {
-                  return [
-                    filteredSections.firstWhere((s) => s.id == id).name,
-                  ];
+                  return [filteredSections.firstWhere((s) => s.id == id).name];
                 } catch (_) {
                   return [id];
                 }
@@ -663,10 +729,11 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
               decoration: const InputDecoration(
                 labelText: 'Roll Number',
                 prefixIcon: Icon(Icons.numbers),
+                hintText: 'e.g. 101',
               ),
               keyboardType: TextInputType.number,
-              validator: (val) =>
-                  val!.isEmpty ? 'Please enter roll number' : null,
+              textInputAction: TextInputAction.next,
+              validator: _validateRollId,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -674,7 +741,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
               decoration: const InputDecoration(
                 labelText: 'About (e.g. About Student)',
                 prefixIcon: Icon(Icons.badge),
+                hintText: 'e.g. Student Bio or Notes',
               ),
+              textInputAction: TextInputAction.next,
+              validator: _validateAbout,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -682,8 +752,11 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
               decoration: const InputDecoration(
                 labelText: 'Email Address',
                 prefixIcon: Icon(Icons.email),
+                hintText: 'e.g. student@school.edu',
               ),
-              validator: (val) => val!.isEmpty ? 'Please enter email' : null,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              validator: _validateEmail,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -691,9 +764,11 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
               decoration: const InputDecoration(
                 labelText: 'Phone',
                 prefixIcon: Icon(Icons.phone),
+                hintText: 'e.g. +8801712345678',
               ),
               keyboardType: TextInputType.phone,
-              validator: (val) => val!.isEmpty ? 'Required' : null,
+              textInputAction: TextInputAction.next,
+              validator: _validatePhone,
             ),
 
             const SizedBox(height: 16),
@@ -705,6 +780,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                     ? 'Password (leave blank to keep current)'
                     : 'Password',
                 prefixIcon: const Icon(Icons.lock),
+                hintText: 'At least 6 characters',
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -717,12 +793,8 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 ),
               ),
               keyboardType: TextInputType.visiblePassword,
-              validator: (val) {
-                if (widget.student == null && (val == null || val.isEmpty)) {
-                  return 'Please enter password';
-                }
-                return null;
-              },
+              textInputAction: TextInputAction.done,
+              validator: _validatePassword,
             ),
 
             const SizedBox(height: 32),
