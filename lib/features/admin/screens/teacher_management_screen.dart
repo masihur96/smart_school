@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/student_provider.dart';
 import 'package:smart_school/features/admin/screens/add_edit_teacher_screen.dart';
@@ -11,6 +10,7 @@ import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart' hide Teacher;
 import 'package:smart_school/models/teacher_model.dart';
 import 'package:smart_school/services/notification_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/services/geocoding_service.dart';
 import '../providers/setup_provider.dart';
@@ -89,8 +89,6 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
   @override
   Widget build(BuildContext context) {
     final teachers = context.watch<TeachersNotifier>().teachers;
-    final classes = context.watch<ClassSetupNotifier>().classes;
-    final sections = context.watch<SectionSetupNotifier>().sections;
     final isLoading = context.watch<TeachersNotifier>().isLoading;
     final isLoadingMore = context.watch<TeachersNotifier>().isLoadingMore;
 
@@ -120,51 +118,6 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
             ),
             child: Column(
               children: [
-                // Row(
-                //   children: [
-                //     Expanded(
-                //       child: DropdownButtonFormField<String>(
-                //         decoration: InputDecoration(
-                //           labelText: 'Class',
-                //           contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                //           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                //         ),
-                //         items: [
-                //           const DropdownMenuItem(value: null, child: Text('All')),
-                //           ...classes.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))),
-                //         ],
-                //         onChanged: (val) {
-                //           setState(() {
-                //             _selectedClass = val;
-                //             _selectedSection = null; // Reset section when class changes
-                //           });
-                //           _fetchTeachers();
-                //         },
-                //       ),
-                //     ),
-                //     const SizedBox(width: 12),
-                //     Expanded(
-                //       child: DropdownButtonFormField<String>(
-                //         decoration: InputDecoration(
-                //           labelText: 'Section',
-                //           contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                //           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                //         ),
-                //         value: _selectedSection,
-                //         items: [
-                //           const DropdownMenuItem(value: null, child: Text('All')),
-                //           ...sections
-                //               .where((s) => s.classId == _selectedClass)
-                //               .map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))),
-                //         ],
-                //         onChanged: (val) {
-                //           setState(() => _selectedSection = val);
-                //           _fetchTeachers();
-                //         },
-                //       ),
-                //     ),
-                //   ],
-                // ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   decoration: InputDecoration(
@@ -299,15 +252,10 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
     );
   }
 
-  Widget _buildTeacherCard(
-    BuildContext context,
-    Teacher teacher,
-    bool isDark,
-  ) {
+  Widget _buildTeacherCard(BuildContext context, Teacher teacher, bool isDark) {
     final l10n = AppLocalizations.of(context)!;
     final user = teacher.user;
-    final teacherName =
-        user?.name.isNotEmpty == true ? user!.name : 'No Name';
+    final teacherName = user?.name.isNotEmpty == true ? user!.name : 'No Name';
     final teacherPhone = user?.phone?.trim() ?? '';
     final email = user?.email?.trim() ?? '';
     final lat = teacher.lat ?? user?.lat;
@@ -353,17 +301,21 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                     tag: 'teacher-avatar-${teacher.userId}',
                     child: CircleAvatar(
                       radius: 24,
-                      backgroundColor:
-                          AppColors.primaryAdmin.withValues(alpha: 0.12),
-                      backgroundImage: (user?.avatar?.startsWith('http://') == true ||
+                      backgroundColor: AppColors.primaryAdmin.withValues(
+                        alpha: 0.12,
+                      ),
+                      backgroundImage:
+                          (user?.avatar?.startsWith('http://') == true ||
                               user?.avatar?.startsWith('https://') == true)
                           ? NetworkImage(user!.avatar!)
                           : null,
-                      onBackgroundImageError: (user?.avatar?.startsWith('http://') == true ||
+                      onBackgroundImageError:
+                          (user?.avatar?.startsWith('http://') == true ||
                               user?.avatar?.startsWith('https://') == true)
                           ? (_, __) {}
                           : null,
-                      child: (user?.avatar?.startsWith('http://') == true ||
+                      child:
+                          (user?.avatar?.startsWith('http://') == true ||
                               user?.avatar?.startsWith('https://') == true)
                           ? null
                           : Text(
@@ -405,8 +357,9 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                               ),
                               decoration: BoxDecoration(
                                 color: isDark
-                                    ? Colors.blue.shade900
-                                        .withValues(alpha: 0.3)
+                                    ? Colors.blue.shade900.withValues(
+                                        alpha: 0.3,
+                                      )
                                     : Colors.blue.shade50,
                                 borderRadius: BorderRadius.circular(6),
                               ),
@@ -443,13 +396,15 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                               decoration: BoxDecoration(
                                 color: teacher.isActive
                                     ? (isDark
-                                        ? Colors.green.shade900
-                                            .withValues(alpha: 0.3)
-                                        : Colors.green.shade50)
+                                          ? Colors.green.shade900.withValues(
+                                              alpha: 0.3,
+                                            )
+                                          : Colors.green.shade50)
                                     : (isDark
-                                        ? Colors.red.shade900
-                                            .withValues(alpha: 0.3)
-                                        : Colors.red.shade50),
+                                          ? Colors.red.shade900.withValues(
+                                              alpha: 0.3,
+                                            )
+                                          : Colors.red.shade50),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Row(
@@ -496,9 +451,8 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => AddEditTeacherScreen(
-                              teacher: teacher,
-                            ),
+                            builder: (_) =>
+                                AddEditTeacherScreen(teacher: teacher),
                           ),
                         ).then((_) => _fetchTeachers());
                       } else if (value == 'status') {
@@ -533,9 +487,9 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                           ),
                         );
                         if (confirm == true && context.mounted) {
-                          await context
-                              .read<TeachersNotifier>()
-                              .deleteTeacher(teacher.userId);
+                          await context.read<TeachersNotifier>().deleteTeacher(
+                            teacher.userId,
+                          );
                         }
                       }
                     },
@@ -643,8 +597,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryAdmin
-                              .withValues(alpha: 0.08),
+                          color: AppColors.primaryAdmin.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Row(
@@ -797,11 +750,12 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                             lon.toString(),
                           ),
                           builder: (context, snapshot) {
-                            final place = snapshot.connectionState ==
+                            final place =
+                                snapshot.connectionState ==
                                     ConnectionState.waiting
                                 ? 'Locating...'
                                 : (snapshot.data ??
-                                    '${lat.toStringAsFixed(3)}, ${lon.toStringAsFixed(3)}');
+                                      '${lat.toStringAsFixed(3)}, ${lon.toStringAsFixed(3)}');
                             return Text(
                               place,
                               style: TextStyle(
@@ -900,15 +854,18 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                   CircleAvatar(
                     radius: 30,
                     backgroundColor: Colors.purple.withOpacity(0.1),
-                    backgroundImage: (user?.avatar?.startsWith('http://') == true ||
+                    backgroundImage:
+                        (user?.avatar?.startsWith('http://') == true ||
                             user?.avatar?.startsWith('https://') == true)
                         ? NetworkImage(user!.avatar!)
                         : null,
-                    onBackgroundImageError: (user?.avatar?.startsWith('http://') == true ||
+                    onBackgroundImageError:
+                        (user?.avatar?.startsWith('http://') == true ||
                             user?.avatar?.startsWith('https://') == true)
                         ? (_, __) {}
                         : null,
-                    child: (user?.avatar?.startsWith('http://') != true &&
+                    child:
+                        (user?.avatar?.startsWith('http://') != true &&
                             user?.avatar?.startsWith('https://') != true)
                         ? const Icon(
                             Icons.person,
@@ -1031,10 +988,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    color: Colors.grey.shade500,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
                 ),
                 Text(
                   value,
@@ -1134,7 +1088,9 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                             Navigator.pop(ctx);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(l10n.notificationSentSuccessfully),
+                                content: Text(
+                                  l10n.notificationSentSuccessfully,
+                                ),
                               ),
                             );
                           }
@@ -1186,12 +1142,9 @@ class _TeacherShimmer extends StatelessWidget {
         return Shimmer.fromColors(
           baseColor: baseColor,
           highlightColor: highlightColor,
-          child: Card(
-            elevation: 0,
+          child: Container(
             margin: const EdgeInsets.only(bottom: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
+
             child: Padding(
               padding: const EdgeInsets.all(14.0),
               child: Column(
