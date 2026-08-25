@@ -818,11 +818,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     final isCurrentUserAdmin = authProvider.user?.role == UserRole.admin;
+    // Only allow role changes when there will still be at least one admin remaining
+    final canChangeRole = isCurrentUserAdmin && admins.length > 1;
 
     return Card(
       child: Column(
         children: admins
-            .map((admin) => _buildAdminTile(context, admin, isCurrentUserAdmin))
+            .map((admin) => _buildAdminTile(context, admin, canChangeRole))
             .toList(),
       ),
     );
