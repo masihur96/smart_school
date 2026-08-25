@@ -2112,7 +2112,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
             ),
             const SizedBox(height: 12),
             SizedBox(
-              height: 130, // Fixed height matching teacher cards
+              height: 170, 
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: list.length,
@@ -2139,12 +2139,16 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     StudentPerformance perf,
     int rank,
   ) {
-    // Calculate total score (average of the 3 percentages)
-    final score =
-        (perf.attendance.percentage +
-            perf.homework.percentage +
-            perf.exams.percentage) /
-        3;
+    // Smart average — only count metrics that actually have data
+    double _calcScore() {
+      double total = 0;
+      int count = 0;
+      if (perf.attendance.totalWorkingDays > 0) { total += perf.attendance.percentage; count++; }
+      if (perf.homework.totalAssigned > 0) { total += perf.homework.percentage; count++; }
+      if (perf.exams.totalMaximumMarks > 0) { total += perf.exams.percentage; count++; }
+      return count > 0 ? total / count : 0;
+    }
+    final score = _calcScore();
 
     Color badgeColor;
     String badgeText;
@@ -2284,7 +2288,33 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
+                // Raw data numbers row: attendance days / homework count / exam marks
+                Row(
+                  children: [
+                    _perfStatChip(
+                      perf.attendance.totalWorkingDays > 0
+                          ? '${perf.attendance.presentDays}/${perf.attendance.totalWorkingDays}d'
+                          : 'N/A',
+                      perf.attendance.totalWorkingDays > 0 ? Colors.green : Colors.grey.shade400,
+                    ),
+                    const SizedBox(width: 5),
+                    _perfStatChip(
+                      perf.homework.totalAssigned > 0
+                          ? '${perf.homework.totalDone}/${perf.homework.totalAssigned}hw'
+                          : 'N/A',
+                      perf.homework.totalAssigned > 0 ? Colors.blue : Colors.grey.shade400,
+                    ),
+                    const SizedBox(width: 5),
+                    _perfStatChip(
+                      perf.exams.totalMaximumMarks > 0
+                          ? '${perf.exams.totalMarksObtained.toStringAsFixed(0)}/${perf.exams.totalMaximumMarks.toStringAsFixed(0)}m'
+                          : 'N/A',
+                      perf.exams.totalMaximumMarks > 0 ? Colors.purple : Colors.grey.shade400,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
                 // Mini progress bars for Att, HW, Exam
                 Row(
                   children: [
@@ -2321,6 +2351,28 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     );
   }
 
+  Widget _perfStatChip(String label, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+
   Widget _buildPerformanceShimmer() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2328,7 +2380,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
         _buildSectionTitle('Top Students', const SizedBox.shrink()),
         const SizedBox(height: 12),
         SizedBox(
-          height: 130,
+          height: 170,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: 4,

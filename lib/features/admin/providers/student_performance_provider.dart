@@ -90,9 +90,26 @@ class StudentPerformanceProvider extends ChangeNotifier {
   List<String> get studentNames =>
       _allPerformances.map((p) => p.name).toList()..sort();
 
-  double _score(StudentPerformance p) =>
-      (p.attendance.percentage + p.homework.percentage + p.exams.percentage) /
-      3;
+  double _score(StudentPerformance p) {
+    double total = 0;
+    int count = 0;
+    // Only include attendance if working days were tracked
+    if (p.attendance.totalWorkingDays > 0) {
+      total += p.attendance.percentage;
+      count++;
+    }
+    // Only include homework if assignments were given
+    if (p.homework.totalAssigned > 0) {
+      total += p.homework.percentage;
+      count++;
+    }
+    // Only include exams if there were marks to evaluate
+    if (p.exams.totalMaximumMarks > 0) {
+      total += p.exams.percentage;
+      count++;
+    }
+    return count > 0 ? total / count : 0;
+  }
 
   // ── UI filter setters (no re-fetch) ────────────────────────────────────
 

@@ -62,9 +62,23 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
     super.dispose();
   }
 
-  double _score(StudentPerformance p) =>
-      (p.attendance.percentage + p.homework.percentage + p.exams.percentage) /
-      3;
+  double _score(StudentPerformance p) {
+    double total = 0;
+    int count = 0;
+    if (p.attendance.totalWorkingDays > 0) {
+      total += p.attendance.percentage;
+      count++;
+    }
+    if (p.homework.totalAssigned > 0) {
+      total += p.homework.percentage;
+      count++;
+    }
+    if (p.exams.totalMaximumMarks > 0) {
+      total += p.exams.percentage;
+      count++;
+    }
+    return count > 0 ? total / count : 0;
+  }
 
   Color _gradeColor(double s) {
     if (s >= 80) return const Color(0xFF10B981);
@@ -936,6 +950,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                         detail2:
                             '${perf.attendance.totalWorkingDays} working days',
                         color: const Color(0xFF10B981),
+                        hasData: perf.attendance.totalWorkingDays > 0,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -947,6 +962,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                         detail1: '${perf.homework.totalDone} done',
                         detail2: '${perf.homework.totalAssigned} assigned',
                         color: const Color(0xFF3B82F6),
+                        hasData: perf.homework.totalAssigned > 0,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -960,6 +976,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                         detail2:
                             '/ ${perf.exams.totalMaximumMarks.toStringAsFixed(0)} total',
                         color: const Color(0xFFEF4444),
+                        hasData: perf.exams.totalMaximumMarks > 0,
                       ),
                     ),
                   ],
@@ -1002,13 +1019,15 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
     required String detail1,
     required String detail2,
     required Color color,
+    bool hasData = true,
   }) {
+    final displayColor = hasData ? color : Colors.grey.shade400;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.06),
+        color: displayColor.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        border: Border.all(color: displayColor.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1018,48 +1037,69 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
               Container(
                 padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.15),
+                  color: displayColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 13, color: color),
+                child: Icon(icon, size: 13, color: displayColor),
               ),
               const Spacer(),
-              Text(
-                '${percentage.toStringAsFixed(0)}%',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: color,
+              if (!hasData)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    'No data',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                )
+              else
+                Text(
+                  '${percentage.toStringAsFixed(0)}%',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: hasData ? null : Colors.grey.shade500,
+            ),
           ),
           const SizedBox(height: 6),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
-              value: percentage / 100,
+              value: hasData ? percentage / 100 : 0,
               minHeight: 4,
-              backgroundColor: color.withValues(alpha: 0.12),
-              valueColor: AlwaysStoppedAnimation<Color>(color),
+              backgroundColor: displayColor.withValues(alpha: 0.12),
+              valueColor: AlwaysStoppedAnimation<Color>(displayColor),
             ),
           ),
           const SizedBox(height: 6),
           Text(
-            detail1,
+            hasData ? detail1 : 'Not recorded',
             style: TextStyle(
               fontSize: 9,
-              color: Colors.grey.shade600,
+              color: hasData ? Colors.grey.shade600 : Colors.grey.shade400,
               fontWeight: FontWeight.w500,
             ),
           ),
           Text(
-            detail2,
+            hasData ? detail2 : 'this month',
             style: TextStyle(fontSize: 9, color: Colors.grey.shade400),
           ),
         ],
@@ -1287,6 +1327,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                             'Att',
                             perf.attendance.percentage,
                             const Color(0xFF10B981),
+                            hasData: perf.attendance.totalWorkingDays > 0,
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -1295,6 +1336,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                             'HW',
                             perf.homework.percentage,
                             const Color(0xFF3B82F6),
+                            hasData: perf.homework.totalAssigned > 0,
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -1303,6 +1345,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                             'Exam',
                             perf.exams.percentage,
                             const Color(0xFFEF4444),
+                            hasData: perf.exams.totalMaximumMarks > 0,
                           ),
                         ),
                       ],
@@ -1356,7 +1399,8 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
     );
   }
 
-  Widget _miniBar(String label, double value, Color color) {
+  Widget _miniBar(String label, double value, Color color, {bool hasData = true}) {
+    final displayColor = hasData ? color : Colors.grey.shade400;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1372,10 +1416,10 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
             ),
             const Spacer(),
             Text(
-              '${value.toStringAsFixed(0)}%',
+              hasData ? '${value.toStringAsFixed(0)}%' : 'N/A',
               style: TextStyle(
                 fontSize: 9,
-                color: color,
+                color: displayColor,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -1385,10 +1429,10 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
         ClipRRect(
           borderRadius: BorderRadius.circular(3),
           child: LinearProgressIndicator(
-            value: value / 100,
+            value: hasData ? value / 100 : 0,
             minHeight: 4,
-            backgroundColor: color.withValues(alpha: 0.1),
-            valueColor: AlwaysStoppedAnimation<Color>(color),
+            backgroundColor: displayColor.withValues(alpha: 0.1),
+            valueColor: AlwaysStoppedAnimation<Color>(displayColor),
           ),
         ),
       ],
