@@ -42,6 +42,12 @@ class AuthNotifier extends ChangeNotifier {
   Subscription? _adminSubscription;
   Subscription? get adminSubscription => _adminSubscription;
 
+  List<User> _admins = [];
+  List<User> get admins => _admins;
+
+  bool _isLoadingAdmins = false;
+  bool get isLoadingAdmins => _isLoadingAdmins;
+
   bool get isSubscriptionValid {
     if (_adminSubscription == null) return false;
     if (!_adminSubscription!.isActive) return false;
@@ -412,6 +418,48 @@ class AuthNotifier extends ChangeNotifier {
   String formatIso(DateTime date) {
     final iso = date.toUtc().toIso8601String();
     return iso.contains('.') ? iso.split('.').first + '.000Z' : iso + '.000Z';
+  }
+
+  Future<void> fetchAdmins() async {
+    if (_user?.schoolId == null) return;
+    _isLoadingAdmins = true;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) return;
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        APIPath.fetchUsers,
+        query: {'role': 'admin', 'limit': '50'},
+        header: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final dynamic rawData = response.data['data'];
+        final List<dynamic> data = rawData is List
+            ? rawData
+            : (rawData is Map ? (rawData['data'] ?? []) : []);
+
+        _admins = data
+            .map((item) {
+              try {
+                return User.fromJson(item);
+              } catch (e) {
+                log('Error parsing admin: $e');
+                return null;
+              }
+            })
+            .whereType<User>()
+            .toList();
+      }
+    } catch (e) {
+      log('Error fetching admins: $e');
+    } finally {
+      _isLoadingAdmins = false;
+      notifyListeners();
+    }
   }
 
   void clearError() {

@@ -43,6 +43,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _schoolNameController = TextEditingController(text: user?.school?.name);
     _schoolPhoneController = TextEditingController(text: user?.school?.phone);
     _schoolAddressController = TextEditingController(text: user?.school?.address);
+
+    // Fetch admins for the organization section
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthNotifier>().fetchAdmins();
+    });
   }
 
   @override
@@ -411,6 +416,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // ]),
 
                   const SizedBox(height: 24),
+                  _buildSectionHeader('Organization Admins'),
+                  _buildAdminsSection(context, authProvider),
+
+                  const SizedBox(height: 24),
                   _buildSectionHeader(l10n.accountMetadata),
                   _buildInfoCard(context, [
                     _buildInfoTile(
@@ -771,6 +780,112 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: Colors.grey[500],
               fontSize: 12,
               fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdminsSection(BuildContext context, AuthNotifier authProvider) {
+    if (authProvider.isLoadingAdmins) {
+      return const Card(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
+    final admins = authProvider.admins;
+
+    if (admins.isEmpty) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              Icon(Icons.admin_panel_settings_outlined, color: Colors.grey[400], size: 20),
+              const SizedBox(width: 12),
+              Text(
+                'No admins found',
+                style: TextStyle(color: Colors.grey[500], fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Card(
+      child: Column(
+        children: admins.map((admin) => _buildAdminTile(context, admin)).toList(),
+      ),
+    );
+  }
+
+  Widget _buildAdminTile(BuildContext context, User admin) {
+    final bool isActive = admin.isActive ?? false;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          // Avatar
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: AppColors.primary.withOpacity(0.1),
+            backgroundImage: (admin.avatar != null && admin.avatar!.isNotEmpty)
+                ? CachedNetworkImageProvider(
+                    admin.avatar!,
+                    cacheKey: admin.avatar!.split('?').first,
+                  )
+                : null,
+            child: (admin.avatar == null || admin.avatar!.isEmpty)
+                ? Text(
+                    admin.name.isNotEmpty ? admin.name[0].toUpperCase() : '?',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                      fontSize: 16,
+                    ),
+                  )
+                : null,
+          ),
+          const SizedBox(width: 12),
+          // Name & email
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  admin.name,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  admin.email,
+                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          // Active badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: (isActive ? Colors.green : Colors.red).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              isActive ? 'Active' : 'Inactive',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: isActive ? Colors.green[700] : Colors.red[700],
+              ),
             ),
           ),
         ],
