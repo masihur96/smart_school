@@ -40,6 +40,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
   bool _isLoading = false;
   File? _imageFile;
   String? _existingImageUrl;
+  String _selectedRole = 'teacher';
 
   bool get isEditing => widget.teacher != null;
 
@@ -80,12 +81,17 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
 
   String? _validatePassword(String? value) {
     if (!isEditing) {
+      // Required when adding a new user
       if (value == null || value.isEmpty) {
         return 'Please enter password';
       }
+      if (value.length < 6) {
+        return 'Password must be at least 6 characters';
+      }
     } else {
-      if (value == null || value.isEmpty) {
-        return 'Please enter password';
+      // Optional when editing — only validate if the user typed something
+      if (value != null && value.isNotEmpty && value.length < 6) {
+        return 'Password must be at least 6 characters';
       }
     }
     return null;
@@ -120,6 +126,8 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
       _radiusController.text = teacher.radius?.toString() ?? '';
       final avatar = teacher.user?.avatar?.trim();
       _existingImageUrl = _isValidImageUrl(avatar) ? avatar : null;
+      // Pre-select the role from the existing teacher data
+      _selectedRole = teacher.user?.role.name ?? 'teacher';
     }
   }
 
@@ -301,6 +309,10 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             email: _emailController.text.trim().toLowerCase(),
             phone: _phoneController.text.trim(),
             designation: _designationController.text.trim(),
+            role: _selectedRole,
+            password: _passwordController.text.trim().isNotEmpty
+                ? _passwordController.text.trim()
+                : null,
             lat: double.tryParse(_latController.text),
             lon: double.tryParse(_lonController.text),
             radius: double.tryParse(_radiusController.text),
@@ -311,6 +323,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             name: _nameController.text.trim(),
             email: _emailController.text.trim().toLowerCase(),
             password: _passwordController.text,
+            role: _selectedRole,
             schoolId: schoolId,
             phone: _phoneController.text.trim(),
             designation: _designationController.text.trim(),
@@ -495,6 +508,53 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                       textInputAction: TextInputAction.next,
                       validator: _validatePhone,
                     ),
+                    const SizedBox(height: 16),
+                    // Role Selector
+                    DropdownButtonFormField<String>(
+                      value: _selectedRole,
+                      decoration: InputDecoration(
+                        labelText: 'Role',
+                        prefixIcon: const Icon(Icons.admin_panel_settings_outlined),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'teacher',
+                          child: Row(
+                            children: [
+                              Icon(Icons.school_outlined, size: 20, color: Colors.purple),
+                              SizedBox(width: 8),
+                              Text('Teacher'),
+                            ],
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'admin',
+                          child: Row(
+                            children: [
+                              Icon(Icons.manage_accounts_outlined, size: 20, color: Colors.purple),
+                              SizedBox(width: 8),
+                              Text('Admin'),
+                            ],
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _selectedRole = value;
+                          });
+                        }
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please select a role';
+                        }
+                        return null;
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -502,49 +562,49 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
             const SizedBox(height: 24),
 
             // Account Security Section
-            if (!isEditing) ...[
-              _buildSectionHeader(
-                context,
-                'Account Security',
-                Icons.lock_outline,
+            _buildSectionHeader(
+              context,
+              isEditing ? 'Change Password' : 'Account Security',
+              Icons.lock_outline,
+            ),
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: TextFormField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: const Icon(Icons.security),
-                      hintText: 'At least 6 characters',
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextFormField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
+                    labelText: isEditing ? 'New Password (optional)' : 'Password',
+                    prefixIcon: const Icon(Icons.security),
+                    hintText: isEditing
+                        ? 'Leave blank to keep current password'
+                        : 'At least 6 characters',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
                     ),
-                    keyboardType: TextInputType.visiblePassword,
-                    textInputAction: TextInputAction.next,
-                    validator: _validatePassword,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
+                  keyboardType: TextInputType.visiblePassword,
+                  textInputAction: TextInputAction.next,
+                  validator: _validatePassword,
                 ),
               ),
-              const SizedBox(height: 24),
-            ],
+            ),
+            const SizedBox(height: 24),
 
             // Professional Details Section
             _buildSectionHeader(
