@@ -1905,8 +1905,8 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
         // Update the existing entry for the primary day.
         final String updateDay =
             orderedSelectedDays.contains(widget.existingEntry!.day)
-                ? widget.existingEntry!.day
-                : orderedSelectedDays.first;
+            ? widget.existingEntry!.day
+            : orderedSelectedDays.first;
 
         final updatedEntry = RoutineEntry(
           id: widget.existingEntry!.id,
@@ -1934,8 +1934,9 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
         );
 
         // Add additional selected days as new routine entries
-        final additionalDays =
-            orderedSelectedDays.where((d) => d != updateDay).toList();
+        final additionalDays = orderedSelectedDays
+            .where((d) => d != updateDay)
+            .toList();
         for (final day in additionalDays) {
           final newEntry = RoutineEntry(
             classId: widget.classId,
@@ -1994,11 +1995,11 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
         final count = _selectedDays.length;
         final msg = _isEditMode
             ? (count == 1
-                ? AppLocalizations.of(context)!.routineEntryAdded
-                : '$count routine entries updated & saved successfully!')
+                  ? AppLocalizations.of(context)!.routineEntryAdded
+                  : '$count routine entries updated & saved successfully!')
             : (count == 1
-                ? AppLocalizations.of(context)!.routineEntryAdded
-                : '$count routine entries saved successfully!');
+                  ? AppLocalizations.of(context)!.routineEntryAdded
+                  : '$count routine entries saved successfully!');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(msg), backgroundColor: Colors.green),
         );
@@ -2035,7 +2036,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
           children: [
             // Drag handle
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),                                              v
+              padding: const EdgeInsets.symmetric(vertical: 12),
               child: Container(
                 width: 40,
                 height: 4,
@@ -2079,8 +2080,8 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                       Text(
                         _isEditMode
                             ? (_selectedDays.length > 1
-                                ? 'Update and apply to selected days'
-                                : 'Update the details below')
+                                  ? 'Update and apply to selected days'
+                                  : 'Update the details below')
                             : 'Select days & fill in the details',
                         style: const TextStyle(fontSize: 12),
                       ),
@@ -2201,9 +2202,8 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           GestureDetector(
-                            onTap: () => setState(
-                              () => _selectedDays = Set.from(_days),
-                            ),
+                            onTap: () =>
+                                setState(() => _selectedDays = Set.from(_days)),
                             child: const Text(
                               'Select All',
                               style: TextStyle(
