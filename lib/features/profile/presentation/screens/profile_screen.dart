@@ -386,20 +386,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                   ]),
 
-                  const SizedBox(height: 24),
-                  _buildSectionHeader(l10n.security),
-                  _buildInfoCard(context, [
-                    _buildInteractiveTile(
-                      context,
-                      icon: Icons.lock_reset_rounded,
-                      label: l10n.changePassword,
-                      subtitle: l10n.securityDescription,
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        RouteGenerator.changePasswordRoute,
-                      ),
-                    ),
-                  ]),
+                  // const SizedBox(height: 24),
+                  // _buildSectionHeader(l10n.security),
+                  // _buildInfoCard(context, [
+                  //   _buildInteractiveTile(
+                  //     context,
+                  //     icon: Icons.lock_reset_rounded,
+                  //     label: l10n.changePassword,
+                  //     subtitle: l10n.securityDescription,
+                  //     onTap: () => Navigator.pushNamed(
+                  //       context,
+                  //       RouteGenerator.changePasswordRoute,
+                  //     ),
+                  //   ),
+                  // ]),
 
                   const SizedBox(height: 24),
                   _buildSectionHeader(l10n.accountMetadata),
