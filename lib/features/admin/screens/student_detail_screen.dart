@@ -1,5 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/features/admin/providers/student_provider.dart';
@@ -8,7 +8,7 @@ import 'package:smart_school/features/admin/screens/generate_id_card_screen.dart
 import 'package:smart_school/features/admin/screens/generate_tc_screen.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/student_model.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class StudentDetailScreen extends StatelessWidget {
   final Student student;
@@ -22,16 +22,20 @@ class StudentDetailScreen extends StatelessWidget {
 
     final className = student.embeddedClasses.isNotEmpty
         ? student.embeddedClasses.map((c) => c.name).join(', ')
-        : classes.firstWhere(
-              (c) => c.id == student.classId,
-              orElse: () => ClassRoom(id: '', name: 'Unknown'),
-            ).name;
+        : classes
+              .firstWhere(
+                (c) => c.id == student.classId,
+                orElse: () => ClassRoom(id: '', name: 'Unknown'),
+              )
+              .name;
     final sectionName = student.embeddedSections.isNotEmpty
         ? student.embeddedSections.map((s) => s.name).join(', ')
-        : sections.firstWhere(
-              (s) => s.id == student.sectionId,
-              orElse: () => Section(id: '', name: 'Unknown', classId: ''),
-            ).name;
+        : sections
+              .firstWhere(
+                (s) => s.id == student.sectionId,
+                orElse: () => Section(id: '', name: 'Unknown', classId: ''),
+              )
+              .name;
 
     return Scaffold(
       body: CustomScrollView(
@@ -70,30 +74,50 @@ class StudentDetailScreen extends StatelessWidget {
                     children: [
                       Spacer(),
                       SizedBox(height: 30),
-                      CircleAvatar(
-                        radius: 60,
-                        backgroundColor: Colors.purple,
-                        backgroundImage: (student.user?.avatar?.startsWith('http://') == true ||
-                                student.user?.avatar?.startsWith('https://') == true)
-                            ? CachedNetworkImageProvider(
-                                student.user!.avatar!,
-                                cacheKey: student.user!.avatar!.split('?').first,
-                              )
-                            : null,
-                        onBackgroundImageError: (student.user?.avatar?.startsWith('http://') == true ||
-                                student.user?.avatar?.startsWith('https://') == true)
-                            ? (_, __) {}
-                            : null,
-                        child: (student.user?.avatar?.startsWith('http://') == true ||
-                                student.user?.avatar?.startsWith('https://') == true)
-                            ? null
-                            : Text(
-                          student.user?.name.isNotEmpty == true
-                              ? student.user!.name[0].toUpperCase()
-                              : '?',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                      GestureDetector(
+                        onTap: () => _showAvatarZoom(context),
+                        child: Hero(
+                          tag: 'student-avatar-${student.userId}',
+                          child: CircleAvatar(
+                            radius: 60,
+                            backgroundColor: Colors.purple,
+                            backgroundImage:
+                                (student.user?.avatar?.startsWith('http://') ==
+                                        true ||
+                                    student.user?.avatar
+                                            ?.startsWith('https://') ==
+                                        true)
+                                ? CachedNetworkImageProvider(
+                                    student.user!.avatar!,
+                                    cacheKey: student.user!.avatar!
+                                        .split('?')
+                                        .first,
+                                  )
+                                : null,
+                            onBackgroundImageError:
+                                (student.user?.avatar?.startsWith('http://') ==
+                                        true ||
+                                    student.user?.avatar
+                                            ?.startsWith('https://') ==
+                                        true)
+                                ? (_, __) {}
+                                : null,
+                            child:
+                                (student.user?.avatar?.startsWith('http://') ==
+                                        true ||
+                                    student.user?.avatar
+                                            ?.startsWith('https://') ==
+                                        true)
+                                ? null
+                                : Text(
+                                    student.user?.name.isNotEmpty == true
+                                        ? student.user!.name[0].toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
@@ -205,9 +229,8 @@ class StudentDetailScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => GenerateIdCardScreen(
-                              students: [student],
-                            ),
+                            builder: (context) =>
+                                GenerateIdCardScreen(students: [student]),
                           ),
                         );
                       },
@@ -241,7 +264,10 @@ class StudentDetailScreen extends StatelessWidget {
                           ),
                         );
                       },
-                      icon: const Icon(Icons.document_scanner, color: Colors.white),
+                      icon: const Icon(
+                        Icons.document_scanner,
+                        color: Colors.white,
+                      ),
                       label: const Text(
                         'Generate Transfer Certificate (TC)',
                         style: TextStyle(color: Colors.white),
@@ -279,6 +305,94 @@ class StudentDetailScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showAvatarZoom(BuildContext context) {
+    final hasImage =
+        student.user?.avatar?.startsWith('http://') == true ||
+        student.user?.avatar?.startsWith('https://') == true;
+
+    final TransformationController transformationController =
+        TransformationController();
+    TapDownDetails? doubleTapDetails;
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.black87,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.zero,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            GestureDetector(
+              onDoubleTapDown: (details) => doubleTapDetails = details,
+              onDoubleTap: () {
+                if (transformationController.value != Matrix4.identity()) {
+                  transformationController.value = Matrix4.identity();
+                } else {
+                  final position = doubleTapDetails!.localPosition;
+                  transformationController.value = Matrix4.identity()
+                    ..translate(-position.dx * 2, -position.dy * 2)
+                    ..scale(3.0);
+                }
+              },
+              child: InteractiveViewer(
+                transformationController: transformationController,
+                panEnabled: true,
+                minScale: 1.0,
+                maxScale: 5.0,
+                child: Hero(
+                  tag: 'student-avatar-${student.userId}',
+                  child: hasImage
+                      ? CachedNetworkImage(
+                          imageUrl: student.user!.avatar!,
+                          cacheKey: student.user!.avatar!.split('?').first,
+                          fit: BoxFit.contain,
+                          placeholder: (_, __) => const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          ),
+                          errorWidget: (_, __, ___) => _buildAvatarFallback(),
+                        )
+                      : _buildAvatarFallback(),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 40,
+              right: 16,
+              child: IconButton(
+                onPressed: () => Navigator.pop(ctx),
+                icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.black45,
+                  shape: const CircleBorder(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatarFallback() {
+    return CircleAvatar(
+      radius: 100,
+      backgroundColor: Colors.purple,
+      child: Text(
+        student.user?.name.isNotEmpty == true
+            ? student.user!.name[0].toUpperCase()
+            : '?',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 80,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
