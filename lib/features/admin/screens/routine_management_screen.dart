@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -18,7 +19,6 @@ import '../providers/attendance_management_provider.dart';
 import '../providers/routine_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'routine_pdf_preview_screen.dart';
 
 // Day order constant
@@ -1211,7 +1211,9 @@ class _DayRoutineTab extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => _AddRoutineEntrySheet(
         classId: classId,
-        sectionId: sectionId,
+        sectionId: (entry.sectionId != null && entry.sectionId!.isNotEmpty)
+            ? entry.sectionId!
+            : sectionId,
         initialDay: entry.day,
         existingEntry: entry,
       ),
@@ -1750,7 +1752,6 @@ class _AddRoutineEntrySheet extends StatefulWidget {
 }
 
 class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
-  // For add mode we support multiple days; for edit mode only one day.
   late Set<String> _selectedDays;
   String? _subjectId;
   String? _teacherId;
@@ -1895,13 +1896,23 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
           )
           .name;
 
+      final orderedSelectedDays = _days
+          .where((d) => _selectedDays.contains(d))
+          .toList();
+
       if (_isEditMode) {
-        // Edit: only one day is relevant
-        final entry = RoutineEntry(
+        // In edit mode:
+        // Update the existing entry for the primary day.
+        final String updateDay =
+            orderedSelectedDays.contains(widget.existingEntry!.day)
+                ? widget.existingEntry!.day
+                : orderedSelectedDays.first;
+
+        final updatedEntry = RoutineEntry(
           id: widget.existingEntry!.id,
           classId: widget.classId,
           schoolId: schoolId,
-          day: _selectedDays.first,
+          day: updateDay,
           startTime: _formatTime(_startTime),
           endTime: _formatTime(_endTime),
           subjectId: _subjectId!,
@@ -1911,22 +1922,46 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
               ? null
               : _roomController.text.trim(),
         );
-        log('Calling updateRoutineOnAPI from UI');
+
+        log('Calling updateRoutineOnAPI from UI for day: $updateDay');
         await context.read<RoutineNotifier>().updateRoutineOnAPI(
           widget.classId,
           widget.sectionId,
-          entry,
+          updatedEntry,
           className: className,
           sectionName: sectionName,
           receiverUuids: teacherIds,
         );
+
+        // Add additional selected days as new routine entries
+        final additionalDays =
+            orderedSelectedDays.where((d) => d != updateDay).toList();
+        for (final day in additionalDays) {
+          final newEntry = RoutineEntry(
+            classId: widget.classId,
+            schoolId: schoolId,
+            day: day,
+            startTime: _formatTime(_startTime),
+            endTime: _formatTime(_endTime),
+            subjectId: _subjectId!,
+            teacherId: _teacherId!,
+            sectionId: widget.sectionId,
+            roomNumber: _roomController.text.trim().isEmpty
+                ? null
+                : _roomController.text.trim(),
+          );
+          log('Calling addRoutineToAPI for additional day: $day');
+          await context.read<RoutineNotifier>().addRoutineToAPI(
+            widget.classId,
+            widget.sectionId,
+            newEntry,
+            className: className,
+            sectionName: sectionName,
+            receiverUuids: teacherIds,
+          );
+        }
       } else {
         // Add: create one entry per selected day
-        // Sort days in calendar order for consistent processing
-        final orderedSelectedDays = _days
-            .where((d) => _selectedDays.contains(d))
-            .toList();
-
         for (final day in orderedSelectedDays) {
           final entry = RoutineEntry(
             classId: widget.classId,
@@ -1958,10 +1993,12 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
         Navigator.pop(context);
         final count = _selectedDays.length;
         final msg = _isEditMode
-            ? AppLocalizations.of(context)!.routineEntryAdded
+            ? (count == 1
+                ? AppLocalizations.of(context)!.routineEntryAdded
+                : '$count routine entries updated & saved successfully!')
             : (count == 1
-                  ? AppLocalizations.of(context)!.routineEntryAdded
-                  : '$count routine entries saved successfully!');
+                ? AppLocalizations.of(context)!.routineEntryAdded
+                : '$count routine entries saved successfully!');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(msg), backgroundColor: Colors.green),
         );
@@ -2041,7 +2078,9 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                       ),
                       Text(
                         _isEditMode
-                            ? 'Update the details below'
+                            ? (_selectedDays.length > 1
+                                ? 'Update and apply to selected days'
+                                : 'Update the details below')
                             : 'Select days & fill in the details',
                         style: const TextStyle(fontSize: 12),
                       ),
@@ -2068,29 +2107,27 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                             icon: Icons.calendar_today_outlined,
                             label: 'Select Day',
                           ),
-                          if (!_isEditMode) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF7C3AED).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                _selectedDays.isEmpty
-                                    ? 'None selected'
-                                    : '${_selectedDays.length} selected',
-                                style: const TextStyle(
-                                  color: Color(0xFF7C3AED),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF7C3AED).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              _selectedDays.isEmpty
+                                  ? 'None selected'
+                                  : '${_selectedDays.length} selected',
+                              style: const TextStyle(
+                                color: Color(0xFF7C3AED),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                          ],
+                          ),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -2106,18 +2143,12 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                             final color = _dayColors[i];
                             return GestureDetector(
                               onTap: () => setState(() {
-                                if (_isEditMode) {
-                                  // Edit mode: single selection
-                                  _selectedDays = {d};
-                                } else {
-                                  // Add mode: toggle multi-selection
-                                  if (isSelected && _selectedDays.length > 1) {
-                                    _selectedDays = Set.from(_selectedDays)
-                                      ..remove(d);
-                                  } else if (!isSelected) {
-                                    _selectedDays = Set.from(_selectedDays)
-                                      ..add(d);
-                                  }
+                                if (isSelected && _selectedDays.length > 1) {
+                                  _selectedDays = Set.from(_selectedDays)
+                                    ..remove(d);
+                                } else if (!isSelected) {
+                                  _selectedDays = Set.from(_selectedDays)
+                                    ..add(d);
                                 }
                               }),
                               child: AnimatedContainer(
@@ -2140,8 +2171,8 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    if (isSelected && !_isEditMode) ...[
-                                      Icon(
+                                    if (isSelected) ...[
+                                      const Icon(
                                         Icons.check_rounded,
                                         size: 13,
                                         color: Colors.white,
@@ -2165,40 +2196,42 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                           },
                         ),
                       ),
-                      if (!_isEditMode) ...[
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            GestureDetector(
-                              onTap: () => setState(
-                                () => _selectedDays = Set.from(_days),
-                              ),
-                              child: const Text(
-                                'Select All',
-                                style: TextStyle(
-                                  color: Color(0xFF7C3AED),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: () => setState(
+                              () => _selectedDays = Set.from(_days),
+                            ),
+                            child: const Text(
+                              'Select All',
+                              style: TextStyle(
+                                color: Color(0xFF7C3AED),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                            GestureDetector(
-                              onTap: () => setState(
-                                () => _selectedDays = {widget.initialDay},
-                              ),
-                              child: Text(
-                                'Reset',
-                                style: TextStyle(
-                                  color: Colors.grey[500],
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                          ),
+                          GestureDetector(
+                            onTap: () => setState(
+                              () => _selectedDays = {
+                                _isEditMode
+                                    ? widget.existingEntry!.day
+                                    : widget.initialDay,
+                              },
+                            ),
+                            child: Text(
+                              'Reset',
+                              style: TextStyle(
+                                color: Colors.grey[500],
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 24),
 
                       // ── Subject ──
@@ -2354,7 +2387,9 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                                       const SizedBox(width: 8),
                                       Text(
                                         _isEditMode
-                                            ? 'Update Entry'
+                                            ? (_selectedDays.length > 1
+                                                  ? 'Update & Save ${_selectedDays.length} Entries'
+                                                  : 'Update Entry')
                                             : (_selectedDays.length > 1
                                                   ? 'Save ${_selectedDays.length} Entries'
                                                   : 'Save Entry'),
@@ -2714,10 +2749,12 @@ class _TeacherAvatar extends StatelessWidget {
     return CircleAvatar(
       radius: size / 2,
       backgroundColor: const Color(0xFF7C3AED).withOpacity(0.12),
-      backgroundImage: hasAvatar ? CachedNetworkImageProvider(
-          avatar!,
-          cacheKey: avatar!.split('?').first,
-        ) : null,
+      backgroundImage: hasAvatar
+          ? CachedNetworkImageProvider(
+              avatar!,
+              cacheKey: avatar!.split('?').first,
+            )
+          : null,
       onBackgroundImageError: hasAvatar ? (_, __) {} : null,
       child: hasAvatar
           ? null
