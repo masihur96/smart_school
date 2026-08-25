@@ -2035,7 +2035,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
           children: [
             // Drag handle
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 12),                                              v
               child: Container(
                 width: 40,
                 height: 4,
