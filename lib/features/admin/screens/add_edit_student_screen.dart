@@ -31,8 +31,8 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   final _aboutController = TextEditingController();
   final _rollIdController = TextEditingController();
 
-  String? _selectedClassId;
-  String? _selectedSectionId;
+  final List<String> _selectedClassIds = [];
+  final List<String> _selectedSectionIds = [];
 
   bool _obscurePassword = true;
   bool _isLoading = false;
@@ -125,16 +125,18 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
       final avatar = s.user?.avatar?.trim();
       _existingImageUrl = _isValidImageUrl(avatar) ? avatar : null;
 
-      if (s.classId.isNotEmpty) {
-        _selectedClassId = s.classId;
-      } else if (s.user?.classIds.isNotEmpty == true) {
-        _selectedClassId = s.user!.classIds.first;
+      // Load existing class IDs
+      if (s.user?.classIds.isNotEmpty == true) {
+        _selectedClassIds.addAll(s.user!.classIds);
+      } else if (s.classId.isNotEmpty) {
+        _selectedClassIds.add(s.classId);
       }
 
-      if (s.sectionId.isNotEmpty) {
-        _selectedSectionId = s.sectionId;
-      } else if (s.user?.sectionIds.isNotEmpty == true) {
-        _selectedSectionId = s.user!.sectionIds.first;
+      // Load existing section IDs
+      if (s.user?.sectionIds.isNotEmpty == true) {
+        _selectedSectionIds.addAll(s.user!.sectionIds);
+      } else if (s.sectionId.isNotEmpty) {
+        _selectedSectionIds.add(s.sectionId);
       }
     }
 
@@ -262,12 +264,8 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
       final user = context.read<AuthNotifier>().user;
       final schoolId = user?.schoolId ?? '';
 
-      final selectedClassIds = _selectedClassId != null && _selectedClassId!.isNotEmpty
-          ? [_selectedClassId!]
-          : <String>[];
-      final selectedSectionIds = _selectedSectionId != null && _selectedSectionId!.isNotEmpty
-          ? [_selectedSectionId!]
-          : <String>[];
+      final selectedClassIds = List<String>.from(_selectedClassIds);
+      final selectedSectionIds = List<String>.from(_selectedSectionIds);
 
       try {
         if (widget.student != null) {
@@ -330,11 +328,11 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     final isClassesLoading = classNotifier.isLoading;
     final isSectionsLoading = sectionNotifier.isLoading;
 
-    // Sections filtered to only those belonging to the selected class
-    final filteredSections = _selectedClassId == null || _selectedClassId!.isEmpty
+    // Sections filtered to those belonging to ANY selected class
+    final filteredSections = _selectedClassIds.isEmpty
         ? <Section>[]
         : allSections
-            .where((s) => s.classId == _selectedClassId)
+            .where((s) => _selectedClassIds.contains(s.classId))
             .toList();
 
     return Scaffold(
@@ -424,114 +422,63 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             ),
             const SizedBox(height: 16),
 
-            // ── Class Dropdown ───────────────────────────────────────────────
-            DropdownButtonFormField<String>(
-              value: classes.any((c) => c.id == _selectedClassId)
-                  ? _selectedClassId
+            // ── Multi-Select Class Picker ────────────────────────────────────
+            _MultiSelectField(
+              label: 'Class',
+              icon: Icons.class_,
+              isLoading: isClassesLoading,
+              emptyHint: classes.isEmpty ? 'No classes available' : 'Select Classes',
+              allItems: classes.map((c) => _SelectItem(id: c.id, name: c.name)).toList(),
+              selectedIds: _selectedClassIds,
+              onChanged: (ids) {
+                setState(() {
+                  _selectedClassIds
+                    ..clear()
+                    ..addAll(ids);
+                  // Remove sections that no longer belong to any selected class
+                  _selectedSectionIds.removeWhere(
+                    (sid) => !allSections
+                        .any((s) => s.id == sid && ids.contains(s.classId)),
+                  );
+                });
+              },
+              validator: (_) => _selectedClassIds.isEmpty
+                  ? 'Please select at least one class'
                   : null,
-              isExpanded: true,
-              decoration: InputDecoration(
-                labelText: 'Class',
-                prefixIcon: const Icon(Icons.class_),
-                hintText: isClassesLoading
-                    ? 'Loading classes...'
-                    : (classes.isEmpty ? 'No classes available' : 'Select Class'),
-                suffixIcon: isClassesLoading
-                    ? const Padding(
-                        padding: EdgeInsets.all(12.0),
-                        child: SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.purple,
-                          ),
-                        ),
-                      )
-                    : null,
-              ),
-              items: classes.map((c) {
-                return DropdownMenuItem<String>(
-                  value: c.id,
-                  child: Text(c.name),
-                );
-              }).toList(),
-              onChanged: isClassesLoading
-                  ? null
-                  : (val) {
-                      setState(() {
-                        _selectedClassId = val;
-                        // Reset section if it does not belong to the selected class
-                        if (_selectedSectionId != null) {
-                          final currentSection = allSections.firstWhere(
-                            (s) => s.id == _selectedSectionId,
-                            orElse: () => Section(id: '', classId: '', name: ''),
-                          );
-                          if (currentSection.classId != val) {
-                            _selectedSectionId = null;
-                          }
-                        }
-                      });
-                    },
-              validator: (val) =>
-                  (val == null || val.isEmpty) ? 'Please select a class' : null,
             ),
             const SizedBox(height: 16),
 
-            // ── Section Dropdown ─────────────────────────────────────────────
-            DropdownButtonFormField<String>(
-              value: filteredSections.any((s) => s.id == _selectedSectionId)
-                  ? _selectedSectionId
-                  : null,
-              isExpanded: true,
-              decoration: InputDecoration(
-                labelText: 'Section',
-                prefixIcon: const Icon(Icons.meeting_room),
-                hintText: _selectedClassId == null
-                    ? 'Select a class first'
-                    : (isSectionsLoading
-                        ? 'Loading sections...'
-                        : (filteredSections.isEmpty
-                            ? 'No sections in this class'
-                            : 'Select Section')),
-                suffixIcon: isSectionsLoading
-                    ? const Padding(
-                        padding: EdgeInsets.all(12.0),
-                        child: SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.purple,
-                          ),
-                        ),
-                      )
-                    : null,
-              ),
-              items: filteredSections.map((s) {
-                return DropdownMenuItem<String>(
-                  value: s.id,
-                  child: Text(s.name),
-                );
-              }).toList(),
-              onChanged: (_selectedClassId == null ||
-                      isSectionsLoading ||
-                      filteredSections.isEmpty)
-                  ? null
-                  : (val) {
-                      setState(() {
-                        _selectedSectionId = val;
-                      });
-                    },
-              validator: (val) {
-                if (_selectedClassId == null) {
+            // ── Multi-Select Section Picker ──────────────────────────────────
+            _MultiSelectField(
+              label: 'Section',
+              icon: Icons.meeting_room,
+              isLoading: isSectionsLoading,
+              emptyHint: _selectedClassIds.isEmpty
+                  ? 'Select a class first'
+                  : (filteredSections.isEmpty
+                      ? 'No sections in selected class(es)'
+                      : 'Select Sections'),
+              allItems: filteredSections
+                  .map((s) => _SelectItem(id: s.id, name: s.name))
+                  .toList(),
+              selectedIds: _selectedSectionIds,
+              onChanged: (ids) {
+                setState(() {
+                  _selectedSectionIds
+                    ..clear()
+                    ..addAll(ids);
+                });
+              },
+              validator: (_) {
+                if (_selectedClassIds.isEmpty) {
                   return 'Please select class first';
                 }
-                if (filteredSections.isNotEmpty && (val == null || val.isEmpty)) {
-                  return 'Please select a section';
+                if (filteredSections.isNotEmpty && _selectedSectionIds.isEmpty) {
+                  return 'Please select at least one section';
                 }
                 return null;
               },
+              enabled: _selectedClassIds.isNotEmpty,
             ),
             const SizedBox(height: 16),
 
@@ -635,3 +582,255 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   }
 }
 
+// ── Helper data class ────────────────────────────────────────────────────────
+class _SelectItem {
+  final String id;
+  final String name;
+  const _SelectItem({required this.id, required this.name});
+}
+
+// ── Reusable multi-select field widget ───────────────────────────────────────
+class _MultiSelectField extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isLoading;
+  final String emptyHint;
+  final List<_SelectItem> allItems;
+  final List<String> selectedIds;
+  final ValueChanged<List<String>> onChanged;
+  final FormFieldValidator<List<String>>? validator;
+  final bool enabled;
+
+  const _MultiSelectField({
+    required this.label,
+    required this.icon,
+    required this.isLoading,
+    required this.emptyHint,
+    required this.allItems,
+    required this.selectedIds,
+    required this.onChanged,
+    this.validator,
+    this.enabled = true,
+  });
+
+  void _openBottomSheet(BuildContext context) {
+    final tempSelected = List<String>.from(selectedIds);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setModalState) {
+            return DraggableScrollableSheet(
+              initialChildSize: 0.55,
+              minChildSize: 0.35,
+              maxChildSize: 0.85,
+              expand: false,
+              builder: (_, scrollController) {
+                return Column(
+                  children: [
+                    // Handle bar
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    // Title row
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 4),
+                      child: Row(
+                        children: [
+                          Icon(icon, color: Colors.purple),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Select $label',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Spacer(),
+                          TextButton(
+                            onPressed: () {
+                              setModalState(() => tempSelected.clear());
+                            },
+                            child: const Text(
+                              'Clear',
+                              style: TextStyle(color: Colors.purple),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    // List
+                    Expanded(
+                      child: allItems.isEmpty
+                          ? Center(
+                              child: Text(
+                                emptyHint,
+                                style: TextStyle(color: Colors.grey.shade500),
+                              ),
+                            )
+                          : ListView.builder(
+                              controller: scrollController,
+                              itemCount: allItems.length,
+                              itemBuilder: (_, i) {
+                                final item = allItems[i];
+                                final isChecked =
+                                    tempSelected.contains(item.id);
+                                return CheckboxListTile(
+                                  value: isChecked,
+                                  title: Text(item.name),
+                                  activeColor: Colors.purple,
+                                  onChanged: (checked) {
+                                    setModalState(() {
+                                      if (checked == true) {
+                                        tempSelected.add(item.id);
+                                      } else {
+                                        tempSelected.remove(item.id);
+                                      }
+                                    });
+                                  },
+                                );
+                              },
+                            ),
+                    ),
+                    // Confirm button
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.purple,
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: () {
+                              onChanged(List<String>.from(tempSelected));
+                              Navigator.pop(ctx);
+                            },
+                            child: Text(
+                              'Confirm (${tempSelected.length} selected)',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedNames = allItems
+        .where((item) => selectedIds.contains(item.id))
+        .map((item) => item.name)
+        .toList();
+
+    return FormField<List<String>>(
+      initialValue: selectedIds,
+      validator: validator,
+      builder: (field) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            GestureDetector(
+              onTap: (enabled && !isLoading && allItems.isNotEmpty)
+                  ? () => _openBottomSheet(context)
+                  : null,
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: label,
+                  prefixIcon: Icon(icon),
+                  hintText: emptyHint,
+                  suffixIcon: isLoading
+                      ? const Padding(
+                          padding: EdgeInsets.all(12.0),
+                          child: SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.purple,
+                            ),
+                          ),
+                        )
+                      : Icon(
+                          Icons.arrow_drop_down,
+                          color: enabled ? Colors.purple : Colors.grey,
+                        ),
+                  errorText: field.errorText,
+                  enabled: enabled && !isLoading,
+                ),
+                isEmpty: selectedNames.isEmpty,
+                child: selectedNames.isEmpty
+                    ? Text(
+                        emptyHint,
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 14,
+                        ),
+                      )
+                    : Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: selectedNames.map((name) {
+                          return Chip(
+                            label: Text(
+                              name,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            backgroundColor:
+                                Colors.purple.withOpacity(0.12),
+                            side: BorderSide(
+                              color: Colors.purple.withOpacity(0.4),
+                            ),
+                            deleteIconColor: Colors.purple,
+                            onDeleted: () {
+                              final item = allItems.firstWhere(
+                                  (i) => i.name == name);
+                              final newIds = List<String>.from(selectedIds)
+                                ..remove(item.id);
+                              onChanged(newIds);
+                            },
+                            padding: EdgeInsets.zero,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                          );
+                        }).toList(),
+                      ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
