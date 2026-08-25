@@ -78,6 +78,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
+        foregroundColor: Colors.white,
+        backgroundColor: AppColors.primary,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),

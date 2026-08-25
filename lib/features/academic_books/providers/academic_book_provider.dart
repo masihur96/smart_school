@@ -13,11 +13,13 @@ class AcademicBookNotifier extends ChangeNotifier {
   List<AcademicBook> _books = [];
   bool _isLoading = false;
   bool _isUploading = false;
+  double _uploadProgress = 0; // 0.0 – 1.0
   String? _error;
 
   List<AcademicBook> get books => _books;
   bool get isLoading => _isLoading;
   bool get isUploading => _isUploading;
+  double get uploadProgress => _uploadProgress;
   String? get error => _error;
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
@@ -80,6 +82,7 @@ class AcademicBookNotifier extends ChangeNotifier {
 
   Future<String?> uploadPdf(File file) async {
     _isUploading = true;
+    _uploadProgress = 0;
     notifyListeners();
 
     try {
@@ -93,23 +96,40 @@ class AcademicBookNotifier extends ChangeNotifier {
         ),
       });
 
-      final response = await DataProvider().performRequest(
-        'POST',
-        '${APIPath.baseUrl}/general/upload',
-        header: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'multipart/form-data',
-        },
-        data: formData,
+      // Use a dedicated Dio instance with a generous send timeout (5 min)
+      // so that large PDFs don't hit the global 30-second limit.
+      final dio = Dio(
+        BaseOptions(
+          sendTimeout: const Duration(minutes: 5),
+          receiveTimeout: const Duration(minutes: 2),
+        ),
       );
 
-      if (response != null &&
-          (response.statusCode == 200 || response.statusCode == 201)) {
+      final response = await dio.post(
+        '${APIPath.baseUrl}/general/upload',
+        data: formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+        onSendProgress: (sent, total) {
+          if (total > 0) {
+            _uploadProgress = sent / total;
+            notifyListeners();
+          }
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final url = response.data['data']?['url'] as String?;
         log('AcademicBookNotifier: PDF uploaded → $url');
+        _uploadProgress = 1.0;
+        notifyListeners();
         return url;
       } else {
-        log('AcademicBookNotifier: PDF upload failed ${response?.data}');
+        log('AcademicBookNotifier: PDF upload failed ${response.data}');
         return null;
       }
     } catch (e) {
@@ -117,6 +137,7 @@ class AcademicBookNotifier extends ChangeNotifier {
       return null;
     } finally {
       _isUploading = false;
+      _uploadProgress = 0;
       notifyListeners();
     }
   }

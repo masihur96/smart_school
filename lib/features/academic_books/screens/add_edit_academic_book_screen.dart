@@ -306,6 +306,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
     final classNotifier = context.watch<ClassSetupNotifier>();
     final bookNotifier = context.watch<AcademicBookNotifier>();
     final isUploading = bookNotifier.isUploading;
+    final uploadProgress = bookNotifier.uploadProgress;
     final isBusy = _isSaving || isUploading || _isUploadingCover;
 
     return Scaffold(
@@ -533,6 +534,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
                     (_pdfFile != null ||
                         (_pdfUrl != null && _pdfUrl!.isNotEmpty))
                     ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Container(
                             padding: const EdgeInsets.all(10),
@@ -550,6 +552,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   _pdfFileName ?? 'PDF Selected',
@@ -558,7 +561,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
                                     fontWeight: FontWeight.w700,
                                     color: Color(0xFF111827),
                                   ),
-                                  maxLines: 2,
+                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 2),
@@ -568,10 +571,13 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
                                     fontSize: 11,
                                     color: Color(0xFF6B7280),
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
                           ),
+                          const SizedBox(width: 8),
                           const Icon(
                             Icons.check_circle_rounded,
                             color: Color(0xFF10B981),
@@ -580,6 +586,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
                         ],
                       )
                     : Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
                             padding: const EdgeInsets.all(14),
@@ -614,6 +621,39 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
                       ),
               ),
             ),
+
+            // ── PDF upload progress bar ──────────────────────────────────────
+            if (isUploading) ...[  
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: LinearProgressIndicator(
+                        value: uploadProgress > 0 ? uploadProgress : null,
+                        backgroundColor: const Color(0xFFE5E7EB),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color(0xFF2563EB),
+                        ),
+                        minHeight: 6,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    uploadProgress > 0
+                        ? '${(uploadProgress * 100).toStringAsFixed(0)}%'
+                        : 'Uploading…',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF2563EB),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 32),
 
             // ── Submit ────────────────────────────────────────────────────────

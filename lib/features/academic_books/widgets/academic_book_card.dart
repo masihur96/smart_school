@@ -111,53 +111,59 @@ class AcademicBookCard extends StatelessWidget {
                 // PDF icon + subject badge
                 Padding(
                   padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(10),
+                  child: ClipRect(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(
+                                Icons.picture_as_pdf_rounded,
+                                color: Colors.white,
+                                size: 22,
+                              ),
                             ),
-                            child: const Icon(
-                              Icons.picture_as_pdf_rounded,
+                            const Spacer(),
+                            if (isAdmin)
+                              _AdminMenu(
+                                onEdit: onEdit,
+                                onDelete: onDelete,
+                              ),
+                          ],
+                        ),
+                        const Spacer(),
+                        // Class badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            book.className.isNotEmpty
+                                ? book.className
+                                : 'Academic Book',
+                            style: const TextStyle(
                               color: Colors.white,
-                              size: 22,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.4,
                             ),
-                          ),
-                          const Spacer(),
-                          if (isAdmin)
-                            _AdminMenu(
-                              onEdit: onEdit,
-                              onDelete: onDelete,
-                            ),
-                        ],
-                      ),
-                      const Spacer(),
-                      // Class badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.25),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          book.className.isNotEmpty
-                              ? book.className
-                              : 'Academic Book',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.4,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
