@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:smart_school/core/utils/image_compress_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 
@@ -104,16 +105,20 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
     );
     if (picked == null) return;
 
-    final file = File(picked.path);
+    // Compress to under 50 KB before upload
+    final File compressedFile = await ImageCompressUtils.compressToUnder50KB(
+      File(picked.path),
+    );
+
     if (!mounted) return;
     setState(() {
-      _coverImageFile = file;
+      _coverImageFile = compressedFile;
       _coverImageUrl = null; // clear old url while uploading
       _isUploadingCover = true;
     });
 
     // Auto-upload immediately after pick
-    final uploaded = await notifier.uploadImage(file);
+    final uploaded = await notifier.uploadImage(compressedFile);
 
     if (mounted) {
       setState(() {

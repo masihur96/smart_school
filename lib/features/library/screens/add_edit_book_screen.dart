@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:smart_school/core/utils/image_compress_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/network/data_provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
@@ -142,15 +145,19 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source);
+    final pickedFile = await picker.pickImage(source: source, imageQuality: 85);
     if (pickedFile != null) {
       setState(() => _isLoading = true);
       try {
+        // Compress to under 50 KB before upload
+        final File compressed = await ImageCompressUtils.compressToUnder50KB(
+          File(pickedFile.path),
+        );
         final token = await StorageService.getToken();
         final uploadFormData = FormData.fromMap({
           'file': await MultipartFile.fromFile(
-            pickedFile.path,
-            filename: pickedFile.path.split('/').last,
+            compressed.path,
+            filename: compressed.path.split('/').last,
           ),
         });
 

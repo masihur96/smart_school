@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:smart_school/core/utils/image_compress_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/features/admin/providers/student_provider.dart';
 import 'package:smart_school/features/admin/providers/teacher_provider.dart';
@@ -186,11 +187,15 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     if (source != null) {
       final pickedFile = await picker.pickImage(
         source: source,
-        imageQuality: 50,
+        imageQuality: 85,
       );
       if (pickedFile != null) {
+        // Compress to under 50 KB before upload
+        final File compressed = await ImageCompressUtils.compressToUnder50KB(
+          File(pickedFile.path),
+        );
         setState(() {
-          _imageFile = File(pickedFile.path);
+          _imageFile = compressed;
         });
       }
     }

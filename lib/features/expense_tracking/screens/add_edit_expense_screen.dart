@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:smart_school/core/utils/image_compress_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -261,9 +262,12 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
       final picker = ImagePicker();
       final picked = await picker.pickImage(source: source, imageQuality: 85);
       if (picked != null) {
-        final file = File(picked.path);
-        final name = picked.name;
-        await _uploadPickedFile(file, name);
+        // Compress image to under 50 KB before upload
+        final File compressed = await ImageCompressUtils.compressToUnder50KB(
+          File(picked.path),
+        );
+        final name = compressed.path.split('/').last;
+        await _uploadPickedFile(compressed, name);
       }
     } catch (e) {
       log('Error picking image: $e');

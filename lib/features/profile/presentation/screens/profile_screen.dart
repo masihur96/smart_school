@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:smart_school/core/utils/image_compress_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/route_generator.dart';
@@ -80,15 +81,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (source != null) {
       final pickedFile = await picker.pickImage(
         source: source,
-        imageQuality: 50,
+        imageQuality: 85,
       );
       if (pickedFile != null) {
+        // Compress to under 50 KB before upload
+        final File compressed = await ImageCompressUtils.compressToUnder50KB(
+          File(pickedFile.path),
+        );
         setState(() {
-          _imageFile = File(pickedFile.path);
+          _imageFile = compressed;
         });
 
         final auth = context.read<AuthNotifier>();
-        final success = await auth.uploadProfileImage(File(pickedFile.path));
+        final success = await auth.uploadProfileImage(compressed);
 
         if (success && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -135,11 +140,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (source != null) {
       final pickedFile = await picker.pickImage(
         source: source,
-        imageQuality: 50,
+        imageQuality: 85,
       );
       if (pickedFile != null) {
+        // Compress to under 50 KB before upload
+        final File compressed = await ImageCompressUtils.compressToUnder50KB(
+          File(pickedFile.path),
+        );
         final auth = context.read<AuthNotifier>();
-        final success = await auth.uploadSchoolProfileImage(File(pickedFile.path));
+        final success = await auth.uploadSchoolProfileImage(compressed);
 
         if (success && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
