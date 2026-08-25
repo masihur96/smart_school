@@ -462,6 +462,36 @@ class AuthNotifier extends ChangeNotifier {
     }
   }
 
+  Future<bool> changeUserRole(String userId, String newRole) async {
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await DataProvider().performRequest(
+        'PUT',
+        '${APIPath.fetchUsers}/$userId',
+        header: {'Authorization': 'Bearer $token'},
+        data: {'role': newRole},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        log('User $userId role changed to $newRole');
+        await fetchAdmins();
+        return true;
+      } else {
+        _error = 'Failed to change role: ${response?.statusCode}';
+        log('Error changing role: ${response?.data}');
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error: $e';
+      log('Exception changing role: $e');
+      notifyListeners();
+      return false;
+    }
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();

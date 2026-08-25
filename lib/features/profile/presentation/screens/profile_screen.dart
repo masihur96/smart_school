@@ -817,14 +817,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
+    final isCurrentUserAdmin = authProvider.user?.role == UserRole.admin;
+
     return Card(
       child: Column(
-        children: admins.map((admin) => _buildAdminTile(context, admin)).toList(),
+        children: admins
+            .map((admin) => _buildAdminTile(context, admin, isCurrentUserAdmin))
+            .toList(),
       ),
     );
   }
 
-  Widget _buildAdminTile(BuildContext context, User admin) {
+  Widget _buildAdminTile(BuildContext context, User admin, bool canChangeRole) {
     final bool isActive = admin.isActive ?? false;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -872,6 +876,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
+          const SizedBox(width: 8),
           // Active badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -887,6 +892,103 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 color: isActive ? Colors.green[700] : Colors.red[700],
               ),
             ),
+          ),
+          // Change role button (admin only)
+          if (canChangeRole) ...[
+            const SizedBox(width: 4),
+            Tooltip(
+              message: 'Change to Teacher',
+              child: IconButton(
+                icon: const Icon(Icons.swap_horiz_rounded, size: 20),
+                color: Colors.orange,
+                onPressed: () => _showChangeRoleDialog(context, admin),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  void _showChangeRoleDialog(BuildContext context, User admin) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: const [
+            Icon(Icons.swap_horiz_rounded, color: Colors.orange, size: 24),
+            SizedBox(width: 8),
+            Text(
+              'Change Role',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: RichText(
+          text: TextSpan(
+            style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.5),
+            children: [
+              const TextSpan(text: 'Change '),
+              TextSpan(
+                text: admin.name,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const TextSpan(
+                text: '\'s role from ',
+              ),
+              const TextSpan(
+                text: 'Admin',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple,
+                ),
+              ),
+              const TextSpan(text: ' to '),
+              const TextSpan(
+                text: 'Teacher',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange,
+                ),
+              ),
+              const TextSpan(text: '?\n\nThis will remove their admin privileges.'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
+          ),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.check_rounded, size: 18),
+            label: const Text('Confirm'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final auth = context.read<AuthNotifier>();
+              final messenger = ScaffoldMessenger.of(context);
+              final success = await auth.changeUserRole(admin.id, 'teacher');
+              if (mounted) {
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? '${admin.name} is now a Teacher'
+                          : auth.error ?? 'Failed to change role',
+                    ),
+                    backgroundColor: success ? Colors.green : Colors.red,
+                  ),
+                );
+              }
+            },
           ),
         ],
       ),
