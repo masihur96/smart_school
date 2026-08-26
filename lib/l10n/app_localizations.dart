@@ -4073,7 +4073,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteBookTitle.
   ///
   /// In en, this message translates to:
-  /// **'Delete Book'**
+  /// **'Delete Book?'**
   String get deleteBookTitle;
 
   /// No description provided for @deleteBookConfirmation.
@@ -4645,6 +4645,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Urgent: Due to unavoidable circumstances, classes for today are suspended. Please arrange to pick up your child.'**
   String get templateEmergencyAlertText;
+
+  /// No description provided for @schoolWalletAndExpensesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'School Wallet & Expenses'**
+  String get schoolWalletAndExpensesTitle;
+
+  /// No description provided for @retryFetching.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry Fetching'**
+  String get retryFetching;
+
+  /// No description provided for @noMatchingTransactionsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching transactions found.'**
+  String get noMatchingTransactionsFound;
+
+  /// No description provided for @noIncomeRecordsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No fee / income records found.'**
+  String get noIncomeRecordsFound;
+
+  /// No description provided for @noExpenseRecordsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No expense records found.'**
+  String get noExpenseRecordsFound;
+
+  /// No description provided for @noRecentTransactionsRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent transactions recorded.'**
+  String get noRecentTransactionsRecorded;
+
+  /// No description provided for @tapToAddTransactionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap \"+ Add Money\" or \"- Add Expense\" to record a transaction.'**
+  String get tapToAddTransactionHint;
+
+  /// No description provided for @netBalanceMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Balance • {month} {year}'**
+  String netBalanceMonth(String month, String year);
+
+  /// No description provided for @netBalanceYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Balance • FY {year}'**
+  String netBalanceYear(String year);
+
+  /// No description provided for @availableTreasuryBalanceAllTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Treasury Balance (All-Time)'**
+  String get availableTreasuryBalanceAllTime;
+
+  /// No description provided for @thisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This Month'**
+  String get thisMonth;
+
+  /// No description provided for @thisYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This Year'**
+  String get thisYear;
+
+  /// No description provided for @fyYear.
+  ///
+  /// In en, this message translates to:
+  /// **'FY {year}'**
+  String fyYear(String year);
+
+  /// No description provided for @allTimeTab.
+  ///
+  /// In en, this message translates to:
+  /// **'All-Time'**
+  String get allTimeTab;
+
+  /// No description provided for @surplus.
+  ///
+  /// In en, this message translates to:
+  /// **'Surplus'**
+  String get surplus;
+
+  /// No description provided for @balanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced'**
+  String get balanced;
+
+  /// No description provided for @deficit.
+  ///
+  /// In en, this message translates to:
+  /// **'Deficit'**
+  String get deficit;
+
+  /// No description provided for @totalInflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Inflow'**
+  String get totalInflow;
+
+  /// No description provided for @totalOutflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Outflow'**
+  String get totalOutflow;
+
+  /// No description provided for @recentTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Transactions'**
+  String get recentTransactions;
+
+  /// No description provided for @recordsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Records'**
+  String recordsCount(int count);
+
+  /// No description provided for @searchTransactionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by title, category, voucher...'**
+  String get searchTransactionsHint;
+
+  /// No description provided for @allTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'All Transactions'**
+  String get allTransactions;
+
+  /// No description provided for @feesAndIncomeFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Fees & Income'**
+  String get feesAndIncomeFilter;
+
+  /// No description provided for @expensesFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'- Expenses'**
+  String get expensesFilter;
+
+  /// No description provided for @addExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Expense'**
+  String get addExpense;
+
+  /// No description provided for @addMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Money'**
+  String get addMoney;
+
+  /// No description provided for @academicBooksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Books'**
+  String get academicBooksTitle;
+
+  /// No description provided for @academicBooksSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital soft copies by class & subject'**
+  String get academicBooksSubtitle;
+
+  /// No description provided for @deleteBookConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{title}\" will be permanently removed.'**
+  String deleteBookConfirmMessage(String title);
+
+  /// No description provided for @noPdfAvailableForBook.
+  ///
+  /// In en, this message translates to:
+  /// **'No PDF available for this book'**
+  String get noPdfAvailableForBook;
+
+  /// No description provided for @searchBooksOrSubjectsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search books or subjects…'**
+  String get searchBooksOrSubjectsHint;
+
+  /// No description provided for @addBookButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Book'**
+  String get addBookButton;
+
+  /// No description provided for @totalBooksStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Books'**
+  String get totalBooksStat;
+
+  /// No description provided for @classesStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes'**
+  String get classesStat;
+
+  /// No description provided for @subjectsStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Subjects'**
+  String get subjectsStat;
+
+  /// No description provided for @noBooksFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Books Found'**
+  String get noBooksFoundTitle;
+
+  /// No description provided for @noBooksMatchSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'No books match your search.'**
+  String get noBooksMatchSearch;
+
+  /// No description provided for @noAcademicBooksUploadedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No academic books have been uploaded yet.'**
+  String get noAcademicBooksUploadedYet;
 }
 
 class _AppLocalizationsDelegate

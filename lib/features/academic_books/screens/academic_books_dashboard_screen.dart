@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/models/user_model.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../admin/providers/setup_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/academic_book.dart';
@@ -67,11 +68,13 @@ class _AcademicBooksDashboardScreenState
   // ── Class name resolver ───────────────────────────────────────────────────
 
   String _resolveClassName(
+    BuildContext context,
     String classId,
     List<dynamic> classes,
     List<AcademicBook> allBooks,
   ) {
-    if (classId == 'all') return 'All Classes';
+    final l10n = AppLocalizations.of(context)!;
+    if (classId == 'all') return l10n.allClasses;
     for (final c in classes) {
       if (c.id == classId && (c.name as String).isNotEmpty) {
         return c.name;
@@ -82,7 +85,7 @@ class _AcademicBooksDashboardScreenState
         return b.className;
       }
     }
-    return 'Class ($classId)';
+    return '${l10n.classLabel} ($classId)';
   }
 
   // ── Role theme color resolver ─────────────────────────────────────────────
@@ -122,17 +125,10 @@ class _AcademicBooksDashboardScreenState
     }).toList();
   }
 
-  // ── Admin check ────────────────────────────────────────────────────────────
-
-  bool _isAdmin(BuildContext context) {
-    final user = context.read<AuthNotifier>().user;
-    return user != null &&
-        (user.role == UserRole.admin || user.role == UserRole.superadmin);
-  }
-
   // ── Delete confirmation ────────────────────────────────────────────────────
 
   Future<void> _confirmDelete(BuildContext context, AcademicBook book) async {
+    final l10n = AppLocalizations.of(context)!;
     final notifier = context.read<AcademicBookNotifier>();
 
     final confirm = await showDialog<bool>(
@@ -157,9 +153,9 @@ class _AcademicBooksDashboardScreenState
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Delete Book?',
-                style: TextStyle(
+              Text(
+                l10n.deleteBookTitle,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF111827),
@@ -167,7 +163,7 @@ class _AcademicBooksDashboardScreenState
               ),
               const SizedBox(height: 8),
               Text(
-                '"${book.title}" will be permanently removed.',
+                l10n.deleteBookConfirmMessage(book.title),
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
               ),
@@ -185,9 +181,9 @@ class _AcademicBooksDashboardScreenState
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                      child: Text(
+                        l10n.cancel,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
                   ),
@@ -204,9 +200,9 @@ class _AcademicBooksDashboardScreenState
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      child: const Text(
-                        'Delete',
-                        style: TextStyle(fontWeight: FontWeight.w700),
+                      child: Text(
+                        l10n.delete,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                     ),
                   ),
@@ -229,12 +225,13 @@ class _AcademicBooksDashboardScreenState
   // ── Navigate ───────────────────────────────────────────────────────────────
 
   void _openPdf(AcademicBook book) {
+    final l10n = AppLocalizations.of(context)!;
     if (book.pdfUrl.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text(
-            'No PDF available for this book',
-            style: TextStyle(fontWeight: FontWeight.w600),
+          content: Text(
+            l10n.noPdfAvailableForBook,
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           backgroundColor: const Color(0xFFEF4444),
           behavior: SnackBarBehavior.floating,
@@ -294,6 +291,7 @@ class _AcademicBooksDashboardScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final authNotifier = context.watch<AuthNotifier>();
     final user = authNotifier.user;
     final isAdmin =
@@ -310,7 +308,7 @@ class _AcademicBooksDashboardScreenState
     // ── Build Class Options from Response & ClassNotifier ────────────────
     final Set<String> seenClassIds = {};
     final List<_DropdownOption> classOptions = [
-      const _DropdownOption(id: 'all', name: 'All Classes'),
+      _DropdownOption(id: 'all', name: l10n.allClasses),
     ];
 
     // 1. Classes extracted from the API response
@@ -321,6 +319,7 @@ class _AcademicBooksDashboardScreenState
           _DropdownOption(
             id: book.classId,
             name: _resolveClassName(
+              context,
               book.classId,
               classNotifier.classes,
               allBooks,
@@ -355,7 +354,7 @@ class _AcademicBooksDashboardScreenState
       ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
 
     final List<_DropdownOption> subjectOptions = [
-      const _DropdownOption(id: 'all', name: 'All Subjects'),
+      _DropdownOption(id: 'all', name: l10n.allSubjects),
       ...sortedSubjects.map((s) => _DropdownOption(id: s, name: s)),
     ];
 
@@ -404,6 +403,7 @@ class _AcademicBooksDashboardScreenState
             flexibleSpace: FlexibleSpaceBar(
               collapseMode: CollapseMode.parallax,
               background: _buildHeroBanner(
+                context: context,
                 headerColor: headerColor,
                 totalBooks: allBooks.length,
                 totalClasses: classOptions.length > 1
@@ -428,7 +428,7 @@ class _AcademicBooksDashboardScreenState
                   onChanged: (v) => setState(() => _searchQuery = v),
                   style: const TextStyle(fontSize: 14),
                   decoration: InputDecoration(
-                    hintText: 'Search books or subjects…',
+                    hintText: l10n.searchBooksOrSubjectsHint,
                     hintStyle: TextStyle(
                       color: Colors.grey.shade400,
                       fontSize: 14,
@@ -466,7 +466,7 @@ class _AcademicBooksDashboardScreenState
                   // ── Class Dropdown ────────────────────────
                   Expanded(
                     child: _FilterDropdown(
-                      label: 'Class',
+                      label: l10n.classLabel,
                       icon: Icons.school_rounded,
                       activeColor: const Color(0xFF1A3C6E),
                       value: effectiveClassId,
@@ -485,7 +485,7 @@ class _AcademicBooksDashboardScreenState
                   // ── Subject Dropdown ──────────────────────
                   Expanded(
                     child: _FilterDropdown(
-                      label: 'Subject',
+                      label: l10n.subjectLabel,
                       icon: Icons.auto_stories_rounded,
                       activeColor: const Color(0xFF7C3AED),
                       value: effectiveSubject,
@@ -508,7 +508,7 @@ class _AcademicBooksDashboardScreenState
               child: Row(
                 children: [
                   Text(
-                    '${filtered.length} ${filtered.length == 1 ? 'book' : 'books'} found',
+                    l10n.booksFoundCount(filtered.length),
                     style: const TextStyle(
                       fontSize: 13,
                       color: Color(0xFF6B7280),
@@ -525,9 +525,9 @@ class _AcademicBooksDashboardScreenState
                         _selectedSubject = 'all';
                         _searchQuery = '';
                       }),
-                      child: const Text(
-                        'Reset Filters',
-                        style: TextStyle(
+                      child: Text(
+                        l10n.resetFilters,
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF2563EB),
                           fontWeight: FontWeight.w600,
@@ -550,7 +550,7 @@ class _AcademicBooksDashboardScreenState
                       ),
                     )
                   : filtered.isEmpty
-                  ? _buildEmptyState()
+                  ? _buildEmptyState(context)
                   : _isGrid
                   ? _buildGrid(
                       filtered,
@@ -577,9 +577,9 @@ class _AcademicBooksDashboardScreenState
               foregroundColor: Colors.white,
               elevation: 4,
               icon: const Icon(Icons.add_rounded),
-              label: const Text(
-                'Add Book',
-                style: TextStyle(fontWeight: FontWeight.w700),
+              label: Text(
+                l10n.addBookButton,
+                style: const TextStyle(fontWeight: FontWeight.w700),
               ),
             )
           : null,
@@ -589,11 +589,13 @@ class _AcademicBooksDashboardScreenState
   // ── Hero banner ────────────────────────────────────────────────────────────
 
   Widget _buildHeroBanner({
+    required BuildContext context,
     required Color headerColor,
     required int totalBooks,
     required int totalClasses,
     required int totalSubjects,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(color: headerColor),
       child: Stack(
@@ -649,12 +651,12 @@ class _AcademicBooksDashboardScreenState
                             ),
                           ),
                           const SizedBox(width: 12),
-                          const Column(
+                          Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Academic Books',
-                                style: TextStyle(
+                                l10n.academicBooksTitle,
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 20,
                                   fontWeight: FontWeight.w800,
@@ -662,8 +664,8 @@ class _AcademicBooksDashboardScreenState
                                 ),
                               ),
                               Text(
-                                'Digital soft copies by class & subject',
-                                style: TextStyle(
+                                l10n.academicBooksSubtitle,
+                                style: const TextStyle(
                                   color: Colors.white60,
                                   fontSize: 12,
                                 ),
@@ -677,21 +679,21 @@ class _AcademicBooksDashboardScreenState
                         children: [
                           _HeroStat(
                             icon: Icons.picture_as_pdf_rounded,
-                            label: 'Total Books',
+                            label: l10n.totalBooksStat,
                             value: '$totalBooks',
                             color: Colors.white,
                           ),
                           const SizedBox(width: 12),
                           _HeroStat(
                             icon: Icons.class_rounded,
-                            label: 'Classes',
+                            label: l10n.classesStat,
                             value: '$totalClasses',
                             color: const Color(0xFF34D399),
                           ),
                           const SizedBox(width: 12),
                           _HeroStat(
                             icon: Icons.subject_rounded,
-                            label: 'Subjects',
+                            label: l10n.subjectsStat,
                             value: '$totalSubjects',
                             color: const Color(0xFF60A5FA),
                           ),
@@ -730,6 +732,7 @@ class _AcademicBooksDashboardScreenState
         final displayBook = rawBook.className.isEmpty
             ? rawBook.copyWith(
                 className: _resolveClassName(
+                  context,
                   rawBook.classId,
                   classes,
                   allBooks,
@@ -764,6 +767,7 @@ class _AcademicBooksDashboardScreenState
         final displayBook = rawBook.className.isEmpty
             ? rawBook.copyWith(
                 className: _resolveClassName(
+                  context,
                   rawBook.classId,
                   classes,
                   allBooks,
@@ -783,7 +787,8 @@ class _AcademicBooksDashboardScreenState
 
   // ── Empty state ────────────────────────────────────────────────────────────
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -804,9 +809,9 @@ class _AcademicBooksDashboardScreenState
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'No Books Found',
-              style: TextStyle(
+            Text(
+              l10n.noBooksFoundTitle,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
                 color: Color(0xFF374151),
@@ -815,8 +820,8 @@ class _AcademicBooksDashboardScreenState
             const SizedBox(height: 8),
             Text(
               _searchQuery.isNotEmpty
-                  ? 'No books match your search.'
-                  : 'No academic books have been uploaded yet.',
+                  ? l10n.noBooksMatchSearch
+                  : l10n.noAcademicBooksUploadedYet,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,

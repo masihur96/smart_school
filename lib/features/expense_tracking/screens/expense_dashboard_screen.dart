@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/expense_model.dart';
 import '../providers/expense_provider.dart';
@@ -58,11 +59,12 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'School Wallet & Expenses',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        title: Text(
+          l10n.schoolWalletAndExpensesTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
@@ -153,7 +155,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                                     .fetchTransactions(schoolId: schoolId);
                               },
                               icon: const Icon(Icons.refresh_rounded, size: 16),
-                              label: const Text('Retry Fetching'),
+                              label: Text(l10n.retryFetching),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primaryAdmin,
                                 foregroundColor: Colors.white,
@@ -196,13 +198,13 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                             const SizedBox(height: 12),
                             Text(
                               _searchQuery.isNotEmpty
-                                  ? 'No matching transactions found.'
+                                  ? l10n.noMatchingTransactionsFound
                                   : (_currentFilter == TransactionFilter.income
-                                        ? 'No fee / income records found.'
+                                        ? l10n.noIncomeRecordsFound
                                         : (_currentFilter ==
                                                   TransactionFilter.expense
-                                              ? 'No expense records found.'
-                                              : 'No recent transactions recorded.')),
+                                              ? l10n.noExpenseRecordsFound
+                                              : l10n.noRecentTransactionsRecorded)),
                               style: TextStyle(
                                 fontSize: 14.5,
                                 fontWeight: FontWeight.w600,
@@ -211,7 +213,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              'Tap "+ Add Money" or "- Add Expense" to record a transaction.',
+                              l10n.tapToAddTransactionHint,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey[400],
@@ -244,7 +246,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
     BuildContext context,
     ExpenseProvider provider,
   ) {
-
+    final l10n = AppLocalizations.of(context)!;
     final allTime = provider.allTimeSummary;
     final currentMonth = provider.currentMonthSummary;
     final currentYear = provider.currentYearSummary;
@@ -258,27 +260,27 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
         final mName = currentMonth.monthName.isNotEmpty
             ? currentMonth.monthName
             : 'Month ${currentMonth.month ?? DateTime.now().month}';
-        final yName = currentMonth.year ?? DateTime.now().year;
-        periodTitle = 'Net Balance • $mName $yName';
+        final yName = (currentMonth.year ?? DateTime.now().year).toString();
+        periodTitle = l10n.netBalanceMonth(mName, yName);
         break;
       case SummaryPeriod.currentYear:
         selectedSummary = currentYear;
-        final yName = currentYear.year ?? DateTime.now().year;
-        periodTitle = 'Net Balance • FY $yName';
+        final yName = (currentYear.year ?? DateTime.now().year).toString();
+        periodTitle = l10n.netBalanceYear(yName);
         break;
       case SummaryPeriod.allTime:
       default:
         selectedSummary = allTime;
-        periodTitle = 'Available Treasury Balance (All-Time)';
+        periodTitle = l10n.availableTreasuryBalanceAllTime;
         break;
     }
 
     final monthTabLabel = currentMonth.shortMonthName.isNotEmpty
         ? '${currentMonth.shortMonthName} ${currentMonth.year ?? ''}'
-        : 'This Month';
+        : l10n.thisMonth;
     final yearTabLabel = currentYear.year != null
-        ? 'FY ${currentYear.year}'
-        : 'This Year';
+        ? l10n.fyYear(currentYear.year.toString())
+        : l10n.thisYear;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 10),
@@ -338,7 +340,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                   child: Row(
                     children: [
                       _buildPeriodTab(
-                        label: 'All-Time',
+                        label: l10n.allTimeTab,
                         period: SummaryPeriod.allTime,
                         icon: Icons.all_inclusive_rounded,
                       ),
@@ -402,8 +404,8 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                         ),
                         child: Text(
                           selectedSummary.netBalance > 0
-                              ? 'Surplus'
-                              : 'Balanced',
+                              ? l10n.surplus
+                              : l10n.balanced,
                           style: const TextStyle(
                             color: Color(0xFF34D399),
                             fontSize: 10,
@@ -424,9 +426,9 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                             color: const Color(0xFFEF4444).withOpacity(0.4),
                           ),
                         ),
-                        child: const Text(
-                          'Deficit',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.deficit,
+                          style: const TextStyle(
                             color: Color(0xFFF87171),
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -491,7 +493,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Total Inflow',
+                                    l10n.totalInflow,
                                     style: TextStyle(
                                       color: Colors.white.withOpacity(0.7),
                                       fontSize: 10.5,
@@ -546,7 +548,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Total Outflow',
+                                    l10n.totalOutflow,
                                     style: TextStyle(
                                       color: Colors.white.withOpacity(0.7),
                                       fontSize: 10.5,
@@ -639,6 +641,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
     BuildContext context,
     ExpenseProvider provider,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
       child: Column(
@@ -648,12 +651,12 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Recent Transactions',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Text(
+                l10n.recentTransactions,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Text(
-                '${provider.expenses.length} Records',
+                l10n.recordsCount(provider.expenses.length),
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey[500],
@@ -674,7 +677,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
               });
             },
             decoration: InputDecoration(
-              hintText: 'Search by title, category, voucher...',
+              hintText: l10n.searchTransactionsHint,
               hintStyle: TextStyle(fontSize: 13, color: Colors.grey[500]),
               prefixIcon: const Icon(Icons.search_rounded, size: 20),
               suffixIcon: _searchQuery.isNotEmpty
@@ -714,7 +717,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
             child: Row(
               children: [
                 _buildFilterChip(
-                  label: 'All Transactions',
+                  label: l10n.allTransactions,
                   count: provider.expenses.length,
                   isSelected: _currentFilter == TransactionFilter.all,
                   selectedColor: const Color(0xFF6750A4),
@@ -726,7 +729,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                 ),
                 const SizedBox(width: 8),
                 _buildFilterChip(
-                  label: '+ Fees & Income',
+                  label: l10n.feesAndIncomeFilter,
                   count: provider.onlyIncomes.length,
                   isSelected: _currentFilter == TransactionFilter.income,
                   selectedColor: const Color(0xFF10B981),
@@ -738,7 +741,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                 ),
                 const SizedBox(width: 8),
                 _buildFilterChip(
-                  label: '- Expenses',
+                  label: l10n.expensesFilter,
                   count: provider.onlyExpenses.length,
                   isSelected: _currentFilter == TransactionFilter.expense,
                   selectedColor: const Color(0xFFEF4444),
@@ -813,6 +816,7 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
 
   // ── Speed-Dial FAB ─────────────────────────────────────────────────────────
   Widget _buildSpeedDialFab(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -847,9 +851,9 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                         ),
                       ],
                     ),
-                    child: const Text(
-                      'Add Expense',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.addExpense,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
@@ -914,9 +918,9 @@ class _ExpenseDashboardScreenState extends State<ExpenseDashboardScreen> {
                         ),
                       ],
                     ),
-                    child: const Text(
-                      'Add Money',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.addMoney,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 13,

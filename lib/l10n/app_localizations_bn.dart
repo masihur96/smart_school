@@ -603,7 +603,7 @@ class AppLocalizationsBn extends AppLocalizations {
       'আপনার ক্লাসে এখনো কোনো হোমওয়ার্ক দেওয়া হয়নি।';
 
   @override
-  String get allSubjects => 'সকল বিষয়';
+  String get allSubjects => 'সকল বিষয়';
 
   @override
   String examinerLabel(String name) {
@@ -1122,7 +1122,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get marqueeText => 'মার্কি টেক্সট';
 
   @override
-  String get resetFilters => 'ফিল্টার রিসেট করুন';
+  String get resetFilters => 'ফিল্টার রিসেট';
 
   @override
   String get searchByName => 'নাম দিয়ে খুঁজুন';
@@ -1336,7 +1336,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get sectionLabel => 'শাখা';
 
   @override
-  String get subjectLabel => 'বিষয়';
+  String get subjectLabel => 'বিষয়';
 
   @override
   String get classLabel2 => 'ক্লাস';
@@ -2162,7 +2162,7 @@ class AppLocalizationsBn extends AppLocalizations {
   }
 
   @override
-  String get deleteBookTitle => 'বই মুছুন';
+  String get deleteBookTitle => 'বইটি মুছে ফেলবেন?';
 
   @override
   String deleteBookConfirmation(String title) {
@@ -2499,4 +2499,135 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get templateEmergencyAlertText =>
       'জরুরি: অনাকাঙ্ক্ষিত পরিস্থিতির কারণে আজকের পাঠদান স্থগিত করা হলো। আপনার সন্তানকে নিয়ে যাওয়ার ব্যবস্থা করুন।';
+
+  @override
+  String get schoolWalletAndExpensesTitle => 'স্কুল ওয়ালেট এবং খরচ';
+
+  @override
+  String get retryFetching => 'পুনরায় চেষ্টা করুন';
+
+  @override
+  String get noMatchingTransactionsFound => 'কোনো মেলানো লেনদেন পাওয়া যায়নি।';
+
+  @override
+  String get noIncomeRecordsFound => 'কোনো ফি/আয়ের রেকর্ড পাওয়া যায়নি।';
+
+  @override
+  String get noExpenseRecordsFound => 'কোনো খরচের রেকর্ড পাওয়া যায়নি।';
+
+  @override
+  String get noRecentTransactionsRecorded =>
+      'সম্প্রতি কোনো লেনদেন রেকর্ড করা হয়নি।';
+
+  @override
+  String get tapToAddTransactionHint =>
+      'লেনদেন রেকর্ড করতে \"+ টাকা যোগ করুন\" বা \"- খরচ যোগ করুন\" চাপুন।';
+
+  @override
+  String netBalanceMonth(String month, String year) {
+    return 'নিট ব্যালেন্স • $month $year';
+  }
+
+  @override
+  String netBalanceYear(String year) {
+    return 'নিট ব্যালেন্স • অর্থবছর $year';
+  }
+
+  @override
+  String get availableTreasuryBalanceAllTime =>
+      'সর্বমোট প্রাপ্ত তহবিল ব্যালেন্স';
+
+  @override
+  String get thisMonth => 'এই মাস';
+
+  @override
+  String get thisYear => 'এই বছর';
+
+  @override
+  String fyYear(String year) {
+    return 'অর্থবছর $year';
+  }
+
+  @override
+  String get allTimeTab => 'সবসময়';
+
+  @override
+  String get surplus => 'উদ্বৃত্ত';
+
+  @override
+  String get balanced => 'সমতা';
+
+  @override
+  String get deficit => 'ঘাটতি';
+
+  @override
+  String get totalInflow => 'মোট আয়';
+
+  @override
+  String get totalOutflow => 'মোট ব্যয়';
+
+  @override
+  String get recentTransactions => 'সাম্প্রতিক লেনদেনসমূহ';
+
+  @override
+  String recordsCount(int count) {
+    return '$count টি রেকর্ড';
+  }
+
+  @override
+  String get searchTransactionsHint => 'শিরোনাম, বিভাগ, ভাউচার দিয়ে খুঁজুন...';
+
+  @override
+  String get allTransactions => 'সকল লেনদেন';
+
+  @override
+  String get feesAndIncomeFilter => '+ ফি ও আয়';
+
+  @override
+  String get expensesFilter => '- খরচসমূহ';
+
+  @override
+  String get addExpense => 'খরচ যোগ করুন';
+
+  @override
+  String get addMoney => 'টাকা যোগ করুন';
+
+  @override
+  String get academicBooksTitle => 'পাঠ্যপুস্তক';
+
+  @override
+  String get academicBooksSubtitle => 'শ্রেণি ও বিষয়ভিত্তিক ডিজিটাল সফট কপি';
+
+  @override
+  String deleteBookConfirmMessage(String title) {
+    return '\"$title\" স্থায়ীভাবে মুছে ফেলা হবে।';
+  }
+
+  @override
+  String get noPdfAvailableForBook => 'এই বইটির কোনো পিডিএফ উপলব্ধ নেই';
+
+  @override
+  String get searchBooksOrSubjectsHint => 'বই বা বিষয় খুঁজুন…';
+
+  @override
+  String get addBookButton => 'বই যোগ করুন';
+
+  @override
+  String get totalBooksStat => 'মোট বই';
+
+  @override
+  String get classesStat => 'শ্রেণিসমূহ';
+
+  @override
+  String get subjectsStat => 'বিষয়সমূহ';
+
+  @override
+  String get noBooksFoundTitle => 'কোনো বই পাওয়া যায়নি';
+
+  @override
+  String get noBooksMatchSearch => 'আপনার অনুসন্ধানের সাথে কোনো বই মেলেনি।';
+
+  @override
+  String get noAcademicBooksUploadedYet =>
+      'এখনো কোনো পাঠ্যপুস্তক আপলোড করা হয়নি।';
 }

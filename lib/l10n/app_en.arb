@@ -1383,5 +1383,96 @@
   "templatePtmTitle": "PTM Meeting",
   "templatePtmText": "Dear Parent, the Parent-Teacher Meeting (PTM) is scheduled on [Date] at [Time]. Your presence is highly requested.",
   "templateEmergencyAlertTitle": "Emergency Alert",
-  "templateEmergencyAlertText": "Urgent: Due to unavoidable circumstances, classes for today are suspended. Please arrange to pick up your child."
+  "templateEmergencyAlertText": "Urgent: Due to unavoidable circumstances, classes for today are suspended. Please arrange to pick up your child.",
+  "schoolWalletAndExpensesTitle": "School Wallet & Expenses",
+  "retryFetching": "Retry Fetching",
+  "noMatchingTransactionsFound": "No matching transactions found.",
+  "noIncomeRecordsFound": "No fee / income records found.",
+  "noExpenseRecordsFound": "No expense records found.",
+  "noRecentTransactionsRecorded": "No recent transactions recorded.",
+  "tapToAddTransactionHint": "Tap \"+ Add Money\" or \"- Add Expense\" to record a transaction.",
+  "netBalanceMonth": "Net Balance • {month} {year}",
+  "@netBalanceMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "netBalanceYear": "Net Balance • FY {year}",
+  "@netBalanceYear": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "availableTreasuryBalanceAllTime": "Available Treasury Balance (All-Time)",
+  "thisMonth": "This Month",
+  "thisYear": "This Year",
+  "fyYear": "FY {year}",
+  "@fyYear": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "allTimeTab": "All-Time",
+  "surplus": "Surplus",
+  "balanced": "Balanced",
+  "deficit": "Deficit",
+  "totalInflow": "Total Inflow",
+  "totalOutflow": "Total Outflow",
+  "recentTransactions": "Recent Transactions",
+  "recordsCount": "{count} Records",
+  "@recordsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchTransactionsHint": "Search by title, category, voucher...",
+  "allTransactions": "All Transactions",
+  "feesAndIncomeFilter": "+ Fees & Income",
+  "expensesFilter": "- Expenses",
+  "addExpense": "Add Expense",
+  "addMoney": "Add Money",
+  "academicBooksTitle": "Academic Books",
+  "academicBooksSubtitle": "Digital soft copies by class & subject",
+  "deleteBookTitle": "Delete Book?",
+  "deleteBookConfirmMessage": "\"{title}\" will be permanently removed.",
+  "@deleteBookConfirmMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "noPdfAvailableForBook": "No PDF available for this book",
+  "searchBooksOrSubjectsHint": "Search books or subjects…",
+  "allClasses": "All Classes",
+  "allSubjects": "All Subjects",
+  "classLabel": "Class",
+  "subjectLabel": "Subject",
+  "booksFoundCount": "{count, plural, =1{1 book found} other{{count} books found}}",
+  "@booksFoundCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "resetFilters": "Reset Filters",
+  "addBookButton": "Add Book",
+  "totalBooksStat": "Total Books",
+  "classesStat": "Classes",
+  "subjectsStat": "Subjects",
+  "noBooksFoundTitle": "No Books Found",
+  "noBooksMatchSearch": "No books match your search.",
+  "noAcademicBooksUploadedYet": "No academic books have been uploaded yet."
 }

@@ -2162,7 +2162,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get deleteBookTitle => 'Delete Book';
+  String get deleteBookTitle => 'Delete Book?';
 
   @override
   String deleteBookConfirmation(String title) {
@@ -2501,4 +2501,134 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get templateEmergencyAlertText =>
       'Urgent: Due to unavoidable circumstances, classes for today are suspended. Please arrange to pick up your child.';
+
+  @override
+  String get schoolWalletAndExpensesTitle => 'School Wallet & Expenses';
+
+  @override
+  String get retryFetching => 'Retry Fetching';
+
+  @override
+  String get noMatchingTransactionsFound => 'No matching transactions found.';
+
+  @override
+  String get noIncomeRecordsFound => 'No fee / income records found.';
+
+  @override
+  String get noExpenseRecordsFound => 'No expense records found.';
+
+  @override
+  String get noRecentTransactionsRecorded => 'No recent transactions recorded.';
+
+  @override
+  String get tapToAddTransactionHint =>
+      'Tap \"+ Add Money\" or \"- Add Expense\" to record a transaction.';
+
+  @override
+  String netBalanceMonth(String month, String year) {
+    return 'Net Balance • $month $year';
+  }
+
+  @override
+  String netBalanceYear(String year) {
+    return 'Net Balance • FY $year';
+  }
+
+  @override
+  String get availableTreasuryBalanceAllTime =>
+      'Available Treasury Balance (All-Time)';
+
+  @override
+  String get thisMonth => 'This Month';
+
+  @override
+  String get thisYear => 'This Year';
+
+  @override
+  String fyYear(String year) {
+    return 'FY $year';
+  }
+
+  @override
+  String get allTimeTab => 'All-Time';
+
+  @override
+  String get surplus => 'Surplus';
+
+  @override
+  String get balanced => 'Balanced';
+
+  @override
+  String get deficit => 'Deficit';
+
+  @override
+  String get totalInflow => 'Total Inflow';
+
+  @override
+  String get totalOutflow => 'Total Outflow';
+
+  @override
+  String get recentTransactions => 'Recent Transactions';
+
+  @override
+  String recordsCount(int count) {
+    return '$count Records';
+  }
+
+  @override
+  String get searchTransactionsHint => 'Search by title, category, voucher...';
+
+  @override
+  String get allTransactions => 'All Transactions';
+
+  @override
+  String get feesAndIncomeFilter => '+ Fees & Income';
+
+  @override
+  String get expensesFilter => '- Expenses';
+
+  @override
+  String get addExpense => 'Add Expense';
+
+  @override
+  String get addMoney => 'Add Money';
+
+  @override
+  String get academicBooksTitle => 'Academic Books';
+
+  @override
+  String get academicBooksSubtitle => 'Digital soft copies by class & subject';
+
+  @override
+  String deleteBookConfirmMessage(String title) {
+    return '\"$title\" will be permanently removed.';
+  }
+
+  @override
+  String get noPdfAvailableForBook => 'No PDF available for this book';
+
+  @override
+  String get searchBooksOrSubjectsHint => 'Search books or subjects…';
+
+  @override
+  String get addBookButton => 'Add Book';
+
+  @override
+  String get totalBooksStat => 'Total Books';
+
+  @override
+  String get classesStat => 'Classes';
+
+  @override
+  String get subjectsStat => 'Subjects';
+
+  @override
+  String get noBooksFoundTitle => 'No Books Found';
+
+  @override
+  String get noBooksMatchSearch => 'No books match your search.';
+
+  @override
+  String get noAcademicBooksUploadedYet =>
+      'No academic books have been uploaded yet.';
 }
