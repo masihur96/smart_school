@@ -46,6 +46,50 @@ const _dayColors = [
   Color(0xFF7C3AED), // Sun – purple
 ];
 
+String _getLocalizedDayName(BuildContext context, String day) {
+  final l10n = AppLocalizations.of(context)!;
+  switch (day) {
+    case 'Monday':
+      return l10n.monday;
+    case 'Tuesday':
+      return l10n.tuesday;
+    case 'Wednesday':
+      return l10n.wednesday;
+    case 'Thursday':
+      return l10n.thursday;
+    case 'Friday':
+      return l10n.friday;
+    case 'Saturday':
+      return l10n.saturday;
+    case 'Sunday':
+      return l10n.sunday;
+    default:
+      return day;
+  }
+}
+
+String _getLocalizedDayAbbr(BuildContext context, int index) {
+  final l10n = AppLocalizations.of(context)!;
+  switch (index) {
+    case 0:
+      return l10n.mon;
+    case 1:
+      return l10n.tue;
+    case 2:
+      return l10n.wed;
+    case 3:
+      return l10n.thu;
+    case 4:
+      return l10n.fri;
+    case 5:
+      return l10n.sat;
+    case 6:
+      return l10n.sun;
+    default:
+      return _dayAbbr[index];
+  }
+}
+
 /// Formats a time string (e.g. "14:00:00", "14:00", "09:00:00") into a 12-hour format with AM/PM (e.g. "02:00 PM", "09:00 AM").
 String _formatTime12Hour(String? timeStr) {
   if (timeStr == null || timeStr.trim().isEmpty) return '';
@@ -305,9 +349,9 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
               onPressed: () => _showAddEntrySheet(context),
               backgroundColor: AppColors.primaryAdmin,
               icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text(
-                'Add Entry',
-                style: TextStyle(
+              label: Text(
+                AppLocalizations.of(context)!.addEntry,
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                 ),
@@ -326,6 +370,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
   ) {
     final user = context.read<AuthNotifier>().user;
 
+    final l10n = AppLocalizations.of(context)!;
     final validClassId = classes.any((c) => c.id == _selectedClassId)
         ? _selectedClassId
         : null;
@@ -346,7 +391,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
       actions: [
         IconButton(
           icon: const Icon(Icons.picture_as_pdf_rounded),
-          tooltip: 'Generate / Print Routine PDF',
+          tooltip: l10n.generatePrintRoutinePdfTooltip,
           onPressed: () {
             Navigator.push(
               context,
@@ -364,9 +409,9 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Class Routine',
-            style: TextStyle(
+          Text(
+            l10n.classRoutineTitle,
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 26,
               fontWeight: FontWeight.bold,
@@ -375,7 +420,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
           ),
           const SizedBox(height: 4),
           Text(
-            'Manage weekly timetable for each class',
+            l10n.classRoutineSubtitle,
             style: TextStyle(
               color: Colors.white.withOpacity(0.8),
               fontSize: 13,
@@ -394,7 +439,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                 children: [
                   Expanded(
                     child: _FilterDropdown(
-                      hint: 'Select Class',
+                      hint: l10n.selectClass,
                       value: validClassId,
                       items: classes
                           .map(
@@ -415,14 +460,14 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                   Expanded(
                     child: _FilterDropdown(
                       hint: filteredSections.isEmpty
-                          ? 'No Sections'
-                          : 'All Sections',
+                          ? l10n.noSections
+                          : l10n.allSectionsOption,
                       value: validSectionId,
                       items: [
                         if (filteredSections.isNotEmpty)
-                          const DropdownMenuItem(
+                          DropdownMenuItem(
                             value: null,
-                            child: Text('All Sections'),
+                            child: Text(l10n.allSectionsOption),
                           ),
                         ...filteredSections.map(
                           (s) => DropdownMenuItem(
@@ -458,7 +503,10 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
               ),
-              tabs: _dayAbbr.map((d) => Tab(text: d)).toList(),
+              tabs: List.generate(
+                _dayAbbr.length,
+                (i) => Tab(text: _getLocalizedDayAbbr(context, i)),
+              ),
             )
           : null,
     );
@@ -493,6 +541,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
   // ─── Date Selector Bar ───────────────────────────────────────────────────
 
   Widget _buildDateSelectorBar() {
+    final l10n = AppLocalizations.of(context)!;
     final df = DateFormat('EEE, d MMM yyyy');
     final dateStr = df.format(_selectedDate);
     final now = DateTime.now();
@@ -559,7 +608,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
             icon: const Icon(Icons.chevron_left_rounded, size: 22),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            tooltip: 'Previous Day',
+            tooltip: l10n.previousDay,
             onPressed: () => _changeDateBy(-1),
           ),
           const SizedBox(width: 4),
@@ -610,9 +659,9 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                           color: const Color(0xFF7C3AED),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Text(
-                          'Today',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.today,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -632,7 +681,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
             icon: const Icon(Icons.chevron_right_rounded, size: 22),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            tooltip: 'Next Day',
+            tooltip: l10n.nextDay,
             onPressed: () => _changeDateBy(1),
           ),
           const SizedBox(width: 8),
@@ -674,7 +723,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '$completedCount/${dayEntries.length} Done',
+                    l10n.doneCountFormat(completedCount, dayEntries.length),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -694,6 +743,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -708,13 +758,13 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
             child: const Icon(Icons.calendar_month_outlined, size: 50),
           ),
           const SizedBox(height: 20),
-          const Text(
-            'Select Class',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Text(
+            l10n.selectClass,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'Choose a class above\nto view or manage the routine.',
+            l10n.chooseClassToViewRoutine,
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey[500], height: 1.5),
           ),
@@ -801,7 +851,9 @@ class _DayRoutineTab extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'No classes on $day',
+              AppLocalizations.of(
+                context,
+              )!.noClassesOnDay(_getLocalizedDayName(context, day)),
               style: TextStyle(
                 color: Colors.grey[400],
                 fontSize: 16,
@@ -818,13 +870,14 @@ class _DayRoutineTab extends StatelessWidget {
       itemCount: entries.length,
       itemBuilder: (context, index) {
         final entry = entries[index];
+        final l10n = AppLocalizations.of(context)!;
 
         final subjectName = context
             .read<SubjectSetupNotifier>()
             .subjects
             .firstWhere(
               (s) => s.id == entry.subjectId,
-              orElse: () => Subject(id: '', name: 'Unknown Subject'),
+              orElse: () => Subject(id: '', name: l10n.unknownSubject),
             )
             .name;
 
@@ -837,7 +890,7 @@ class _DayRoutineTab extends StatelessWidget {
             sectionId: '',
           ),
         );
-        final teacherName = teacher.user?.name ?? 'Unknown Teacher';
+        final teacherName = teacher.user?.name ?? l10n.unknownTeacher;
 
         // ── Detect Attendance completion ─────────────────────────────────
         final entryAttendance = studentAttendance.where((a) {
@@ -1077,6 +1130,7 @@ class _DayRoutineTab extends StatelessWidget {
     String? homeworkTitle,
   ) {
     final df = DateFormat('dd MMM yyyy');
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -1085,58 +1139,58 @@ class _DayRoutineTab extends StatelessWidget {
           children: [
             Icon(Icons.info_outline_rounded, color: color),
             const SizedBox(width: 10),
-            Text(AppLocalizations.of(context)!.routineDetails),
+            Text(l10n.routineDetails),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _detailRow(Icons.book_outlined, 'Subject', subjectName),
+            _detailRow(Icons.book_outlined, l10n.subjectsTab, subjectName),
             const SizedBox(height: 12),
-            _detailRow(Icons.person_outline_rounded, 'Teacher', teacherName),
+            _detailRow(Icons.person_outline_rounded, l10n.teacher, teacherName),
             const SizedBox(height: 12),
             _detailRow(
               Icons.calendar_today_outlined,
-              'Day & Date',
-              '${entry.day} (${df.format(selectedDate)})',
+              l10n.dayAndDate,
+              '${_getLocalizedDayName(context, entry.day)} (${df.format(selectedDate)})',
             ),
             const SizedBox(height: 12),
             _detailRow(
               Icons.access_time_rounded,
-              'Duration',
+              l10n.duration,
               '${_formatTime12Hour(entry.startTime)} - ${_formatTime12Hour(entry.endTime)}',
             ),
             if (entry.roomNumber != null) ...[
               const SizedBox(height: 12),
               _detailRow(
                 Icons.meeting_room_outlined,
-                'Room',
+                l10n.room,
                 entry.roomNumber!,
               ),
             ],
             const SizedBox(height: 12),
             _detailRow(
               Icons.how_to_reg_rounded,
-              'Attendance Status',
+              l10n.attendanceStatus,
               isAttendanceDone
-                  ? 'Completed ($presentCount Present, $absentCount Absent)'
-                  : 'Pending (Not Taken)',
+                  ? l10n.attendanceCompletedFormat(presentCount, absentCount)
+                  : l10n.attendancePendingNotTaken,
             ),
             const SizedBox(height: 12),
             _detailRow(
               Icons.assignment_outlined,
-              'Homework Status',
+              l10n.homeworkStatus,
               isHomeworkDone
-                  ? 'Assigned: ${homeworkTitle ?? "Yes"}'
-                  : 'None Assigned',
+                  ? l10n.homeworkAssignedFormat(homeworkTitle ?? "Yes")
+                  : l10n.noneAssigned,
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(AppLocalizations.of(context)!.close),
+            child: Text(l10n.close),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -1164,7 +1218,7 @@ class _DayRoutineTab extends StatelessWidget {
                 ),
               );
             },
-            child: const Text('Manage Class'),
+            child: Text(l10n.manageClass),
           ),
         ],
       ),
@@ -1231,9 +1285,7 @@ class _DayRoutineTab extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.deleteEntry),
-        content: const Text(
-          'Are you sure you want to delete this routine entry?',
-        ),
+        content: Text(l10n.deleteRoutineConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -1394,7 +1446,7 @@ class _RoutineEntryCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 6),
-                          _buildStatusBadge(),
+                          _buildStatusBadge(context),
                           _buildActionsMenu(),
                         ],
                       ),
@@ -1432,7 +1484,9 @@ class _RoutineEntryCard extends StatelessWidget {
                                 size: 18,
                                 color: AppColors.primaryAdmin,
                               ),
-                              tooltip: 'View Attachment',
+                              tooltip: AppLocalizations.of(
+                                context,
+                              )!.viewAttachment,
                               constraints: const BoxConstraints(),
                               padding: EdgeInsets.zero,
                             ),
@@ -1478,9 +1532,18 @@ class _RoutineEntryCard extends StatelessWidget {
                                 Text(
                                   isAttendanceDone
                                       ? (presentCount + absentCount > 0
-                                            ? 'Attendance: $presentCount P / $absentCount A'
-                                            : 'Attendance: Done')
-                                      : 'Attendance: Pending',
+                                            ? AppLocalizations.of(
+                                                context,
+                                              )!.attendanceSummaryShort(
+                                                presentCount,
+                                                absentCount,
+                                              )
+                                            : AppLocalizations.of(
+                                                context,
+                                              )!.attendanceDoneShort)
+                                      : AppLocalizations.of(
+                                          context,
+                                        )!.attendancePendingShort,
                                   style: TextStyle(
                                     fontSize: 10.5,
                                     fontWeight: FontWeight.w600,
@@ -1529,8 +1592,14 @@ class _RoutineEntryCard extends StatelessWidget {
                                   ),
                                   child: Text(
                                     isHomeworkDone
-                                        ? 'HW: ${homeworkTitle ?? "Added"}'
-                                        : 'No HW',
+                                        ? AppLocalizations.of(
+                                            context,
+                                          )!.hwSummaryShort(
+                                            homeworkTitle ?? "Added",
+                                          )
+                                        : AppLocalizations.of(
+                                            context,
+                                          )!.noHwShort,
                                     style: TextStyle(
                                       fontSize: 10.5,
                                       fontWeight: FontWeight.w600,
@@ -1570,7 +1639,9 @@ class _RoutineEntryCard extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 3),
                                   Text(
-                                    'Room ${entry.roomNumber}',
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.roomNumberFormat(entry.roomNumber!),
                                     style: TextStyle(
                                       color: Colors.grey.shade700,
                                       fontSize: 10.5,
@@ -1593,7 +1664,8 @@ class _RoutineEntryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge() {
+  Widget _buildStatusBadge(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (isAttendanceDone) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -1612,7 +1684,7 @@ class _RoutineEntryCard extends StatelessWidget {
             ),
             const SizedBox(width: 3),
             Text(
-              isHomeworkDone ? 'Done + HW' : 'Done',
+              isHomeworkDone ? l10n.donePlusHw : l10n.done,
               style: const TextStyle(
                 color: Color(0xFF2E7D32),
                 fontSize: 10.5,
@@ -1630,18 +1702,18 @@ class _RoutineEntryCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFF7DD3FC)),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.assignment_turned_in_rounded,
               size: 12,
               color: Color(0xFF0284C7),
             ),
             const SizedBox(width: 3),
             Text(
-              'HW Added',
-              style: TextStyle(
+              l10n.hwAdded,
+              style: const TextStyle(
                 color: Color(0xFF0284C7),
                 fontSize: 10.5,
                 fontWeight: FontWeight.bold,
@@ -1658,14 +1730,18 @@ class _RoutineEntryCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFFFDBA74)),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.schedule_rounded, size: 12, color: Color(0xFFEA580C)),
+            const Icon(
+              Icons.schedule_rounded,
+              size: 12,
+              color: Color(0xFFEA580C),
+            ),
             const SizedBox(width: 3),
             Text(
-              'Pending',
-              style: TextStyle(
+              l10n.pending,
+              style: const TextStyle(
                 color: Color(0xFFEA580C),
                 fontSize: 10.5,
                 fontWeight: FontWeight.bold,
@@ -1860,8 +1936,10 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
 
     if (_selectedDays.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select at least one day.'),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.pleaseSelectAtLeastOneDay,
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -1900,6 +1978,8 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
           .where((d) => _selectedDays.contains(d))
           .toList();
 
+      final routineNotifier = context.read<RoutineNotifier>();
+
       if (_isEditMode) {
         // In edit mode:
         // Update the existing entry for the primary day.
@@ -1924,7 +2004,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
         );
 
         log('Calling updateRoutineOnAPI from UI for day: $updateDay');
-        await context.read<RoutineNotifier>().updateRoutineOnAPI(
+        await routineNotifier.updateRoutineOnAPI(
           widget.classId,
           widget.sectionId,
           updatedEntry,
@@ -1933,11 +2013,11 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
           receiverUuids: teacherIds,
         );
 
-        // Add additional selected days as new routine entries
         final additionalDays = orderedSelectedDays
             .where((d) => d != updateDay)
             .toList();
         for (final day in additionalDays) {
+          if (!mounted) return;
           final newEntry = RoutineEntry(
             classId: widget.classId,
             schoolId: schoolId,
@@ -1952,7 +2032,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                 : _roomController.text.trim(),
           );
           log('Calling addRoutineToAPI for additional day: $day');
-          await context.read<RoutineNotifier>().addRoutineToAPI(
+          await routineNotifier.addRoutineToAPI(
             widget.classId,
             widget.sectionId,
             newEntry,
@@ -1964,6 +2044,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
       } else {
         // Add: create one entry per selected day
         for (final day in orderedSelectedDays) {
+          if (!mounted) return;
           final entry = RoutineEntry(
             classId: widget.classId,
             schoolId: schoolId,
@@ -1978,7 +2059,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                 : _roomController.text.trim(),
           );
           log('Calling addRoutineToAPI for day: $day');
-          await context.read<RoutineNotifier>().addRoutineToAPI(
+          await routineNotifier.addRoutineToAPI(
             widget.classId,
             widget.sectionId,
             entry,
@@ -1991,15 +2072,12 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
 
       if (mounted) {
         log('Routine saved successfully, closing sheet');
+        final l10n = AppLocalizations.of(context)!;
         Navigator.pop(context);
         final count = _selectedDays.length;
         final msg = _isEditMode
-            ? (count == 1
-                  ? AppLocalizations.of(context)!.routineEntryAdded
-                  : '$count routine entries updated & saved successfully!')
-            : (count == 1
-                  ? AppLocalizations.of(context)!.routineEntryAdded
-                  : '$count routine entries saved successfully!');
+            ? l10n.routineEntriesUpdatedSuccess(count)
+            : l10n.routineEntriesSavedSuccess(count);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(msg), backgroundColor: Colors.green),
         );
@@ -2021,6 +2099,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final subjects = context.watch<SubjectSetupNotifier>().subjects;
     final teachers = context.watch<TeachersNotifier>().teachers;
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
@@ -2070,8 +2149,8 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                     children: [
                       Text(
                         _isEditMode
-                            ? 'Edit Routine Entry'
-                            : 'Add Routine Entry',
+                            ? l10n.editRoutineEntry
+                            : l10n.addRoutineEntry,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -2080,9 +2159,9 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                       Text(
                         _isEditMode
                             ? (_selectedDays.length > 1
-                                  ? 'Update and apply to selected days'
-                                  : 'Update the details below')
-                            : 'Select days & fill in the details',
+                                  ? l10n.updateApplySelectedDays
+                                  : l10n.updateDetailsBelow)
+                            : l10n.selectDaysFillDetails,
                         style: const TextStyle(fontSize: 12),
                       ),
                     ],
@@ -2104,9 +2183,9 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                       // ── Day Selector ──
                       Row(
                         children: [
-                          const _SectionLabel(
+                          _SectionLabel(
                             icon: Icons.calendar_today_outlined,
-                            label: 'Select Day',
+                            label: l10n.selectDay,
                           ),
                           const SizedBox(width: 8),
                           Container(
@@ -2120,8 +2199,8 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                             ),
                             child: Text(
                               _selectedDays.isEmpty
-                                  ? 'None selected'
-                                  : '${_selectedDays.length} selected',
+                                  ? l10n.noneSelected
+                                  : l10n.countSelected(_selectedDays.length),
                               style: const TextStyle(
                                 color: Color(0xFF7C3AED),
                                 fontSize: 11,
@@ -2181,7 +2260,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                                       const SizedBox(width: 4),
                                     ],
                                     Text(
-                                      _dayAbbr[i],
+                                      _getLocalizedDayAbbr(context, i),
                                       style: TextStyle(
                                         color: isSelected
                                             ? Colors.white
@@ -2204,9 +2283,9 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                           GestureDetector(
                             onTap: () =>
                                 setState(() => _selectedDays = Set.from(_days)),
-                            child: const Text(
-                              'Select All',
-                              style: TextStyle(
+                            child: Text(
+                              l10n.selectAll,
+                              style: const TextStyle(
                                 color: Color(0xFF7C3AED),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -2222,7 +2301,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                               },
                             ),
                             child: Text(
-                              'Reset',
+                              l10n.reset,
                               style: TextStyle(
                                 color: Colors.grey[500],
                                 fontSize: 12,
@@ -2235,9 +2314,9 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                       const SizedBox(height: 24),
 
                       // ── Subject ──
-                      const _SectionLabel(
+                      _SectionLabel(
                         icon: Icons.menu_book_rounded,
-                        label: 'Subject',
+                        label: l10n.subjectsTab,
                       ),
                       const SizedBox(height: 10),
                       _SearchableSubjectDropdown(
@@ -2250,9 +2329,9 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                       const SizedBox(height: 16),
 
                       // ── Teacher ──
-                      const _SectionLabel(
+                      _SectionLabel(
                         icon: Icons.person_outline_rounded,
-                        label: 'Teacher',
+                        label: l10n.teacher,
                       ),
                       const SizedBox(height: 10),
                       _SearchableTeacherDropdown(
@@ -2263,16 +2342,16 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                       const SizedBox(height: 24),
 
                       // ── Time ──
-                      const _SectionLabel(
+                      _SectionLabel(
                         icon: Icons.access_time_rounded,
-                        label: 'Time Slot',
+                        label: l10n.timeSlot,
                       ),
                       const SizedBox(height: 10),
                       Row(
                         children: [
                           Expanded(
                             child: _TimePicker(
-                              label: 'Start Time',
+                              label: l10n.startTime,
                               time: _startTime,
                               onTap: () => _pickTime(isStart: true),
                               accentColor: const Color(0xFF059669),
@@ -2287,7 +2366,7 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: _TimePicker(
-                              label: 'End Time',
+                              label: l10n.endTime,
                               time: _endTime,
                               onTap: () => _pickTime(isStart: false),
                               accentColor: const Color(0xFFDC2626),
@@ -2298,15 +2377,15 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                       const SizedBox(height: 20),
 
                       // ── Room Number (optional) ──
-                      const _SectionLabel(
+                      _SectionLabel(
                         icon: Icons.room_outlined,
-                        label: 'Room Number (Optional)',
+                        label: l10n.roomNumberOptional,
                       ),
                       const SizedBox(height: 10),
                       TextFormField(
                         controller: _roomController,
                         decoration: InputDecoration(
-                          hintText: 'e.g. 101, Lab-A',
+                          hintText: l10n.roomNumberHint,
                           hintStyle: TextStyle(color: Colors.grey[400]),
                           filled: true,
 
@@ -2388,11 +2467,16 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                                       Text(
                                         _isEditMode
                                             ? (_selectedDays.length > 1
-                                                  ? 'Update & Save ${_selectedDays.length} Entries'
-                                                  : 'Update Entry')
+                                                  ? l10n
+                                                      .updateSaveEntriesFormat(
+                                                        _selectedDays.length,
+                                                      )
+                                                  : l10n.updateEntry)
                                             : (_selectedDays.length > 1
-                                                  ? 'Save ${_selectedDays.length} Entries'
-                                                  : 'Save Entry'),
+                                                  ? l10n.saveEntriesFormat(
+                                                      _selectedDays.length,
+                                                    )
+                                                  : l10n.saveEntry),
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.w700,
@@ -2440,6 +2524,7 @@ class _SearchableSubjectDropdown extends StatelessWidget {
       orElse: () => null,
     );
 
+    final l10n = AppLocalizations.of(context)!;
     return DropdownSearch<dynamic>(
       items: (filter, _) => subjects
           .where((s) => s.name.toLowerCase().contains(filter.toLowerCase()))
@@ -2450,7 +2535,7 @@ class _SearchableSubjectDropdown extends StatelessWidget {
       onSelected: (s) => onChanged(s?.id as String?),
       decoratorProps: DropDownDecoratorProps(
         decoration: InputDecoration(
-          hintText: 'Choose a subject',
+          hintText: l10n.chooseSubject,
           hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -2484,7 +2569,7 @@ class _SearchableSubjectDropdown extends StatelessWidget {
         constraints: const BoxConstraints(maxHeight: 300),
         searchFieldProps: TextFieldProps(
           decoration: InputDecoration(
-            hintText: 'Search subject...',
+            hintText: l10n.searchSubject,
             hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13),
             prefixIcon: const Icon(
               Icons.search_rounded,
@@ -2552,6 +2637,7 @@ class _SearchableTeacherDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final selectedTeacher = teachers.cast<dynamic>().firstWhere(
       (t) => t.userId == selectedId,
       orElse: () => null,
@@ -2560,18 +2646,18 @@ class _SearchableTeacherDropdown extends StatelessWidget {
     return DropdownSearch<dynamic>(
       items: (filter, _) => teachers
           .where(
-            (t) => (t.user?.name ?? 'Unknown').toLowerCase().contains(
+            (t) => (t.user?.name ?? l10n.unknownTeacher).toLowerCase().contains(
               filter.toLowerCase(),
             ),
           )
           .toList(),
       selectedItem: selectedTeacher,
       compareFn: (a, b) => a?.userId == b?.userId,
-      itemAsString: (t) => t.user?.name as String? ?? 'Unknown',
+      itemAsString: (t) => t.user?.name as String? ?? l10n.unknownTeacher,
       onSelected: (t) => onChanged(t?.userId as String?),
       decoratorProps: DropDownDecoratorProps(
         decoration: InputDecoration(
-          hintText: 'Assign a teacher',
+          hintText: l10n.assignTeacher,
           hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -2601,7 +2687,7 @@ class _SearchableTeacherDropdown extends StatelessWidget {
       ),
       dropdownBuilder: (context, selectedItem) {
         if (selectedItem == null) return const SizedBox.shrink();
-        final name = selectedItem.user?.name as String? ?? 'Unknown';
+        final name = selectedItem.user?.name as String? ?? l10n.unknownTeacher;
         final avatar = selectedItem.user?.avatar as String?;
         final designation = selectedItem.designation as String? ?? '';
         return Row(
@@ -2640,7 +2726,7 @@ class _SearchableTeacherDropdown extends StatelessWidget {
         constraints: const BoxConstraints(maxHeight: 320),
         searchFieldProps: TextFieldProps(
           decoration: InputDecoration(
-            hintText: 'Search teacher...',
+            hintText: l10n.searchTeacher,
             hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13),
             prefixIcon: const Icon(
               Icons.search_rounded,
@@ -2667,7 +2753,7 @@ class _SearchableTeacherDropdown extends StatelessWidget {
           shadowColor: const Color(0xFF7C3AED).withOpacity(0.15),
         ),
         itemBuilder: (context, item, isSelected, isHighlighted) {
-          final name = item.user?.name as String? ?? 'Unknown';
+          final name = item.user?.name as String? ?? l10n.unknownTeacher;
           final avatar = item.user?.avatar as String?;
           final designation = item.designation as String? ?? '';
           return Container(
@@ -2834,47 +2920,6 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-class _StyledDropdown<T> extends StatelessWidget {
-  final String hint;
-  final T? value;
-  final List<DropdownMenuItem<T>> items;
-  final ValueChanged<T?> onChanged;
-
-  const _StyledDropdown({
-    required this.hint,
-    required this.value,
-    required this.items,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: value != null
-              ? const Color(0xFF7C3AED).withOpacity(0.4)
-              : const Color(0xFFEDE9FE),
-        ),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<T>(
-          value: value,
-          isExpanded: true,
-          hint: Text(
-            hint,
-            style: TextStyle(color: Colors.grey[400], fontSize: 14),
-          ),
-          icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF7C3AED)),
-          items: items,
-          onChanged: onChanged,
-        ),
-      ),
-    );
-  }
-}
 
 class _TimePicker extends StatelessWidget {
   final String label;

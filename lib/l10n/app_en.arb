@@ -658,5 +658,173 @@
         "type": "String"
       }
     }
+  },
+  "monday": "Monday",
+  "tuesday": "Tuesday",
+  "wednesday": "Wednesday",
+  "thursday": "Thursday",
+  "friday": "Friday",
+  "saturday": "Saturday",
+  "sunday": "Sunday",
+  "mon": "Mon",
+  "tue": "Tue",
+  "wed": "Wed",
+  "thu": "Thu",
+  "fri": "Fri",
+  "sat": "Sat",
+  "sun": "Sun",
+  "generatePrintRoutinePdfTooltip": "Generate / Print Routine PDF",
+  "classRoutineTitle": "Class Routine",
+  "classRoutineSubtitle": "Manage weekly timetable for each class",
+  "noSections": "No Sections",
+  "addEntry": "Add Entry",
+  "previousDay": "Previous Day",
+  "nextDay": "Next Day",
+  "today": "Today",
+  "doneCountFormat": "{completed}/{total} Done",
+  "@doneCountFormat": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "chooseClassToViewRoutine": "Choose a class above\nto view or manage the routine.",
+  "noClassesOnDay": "No classes on {day}",
+  "@noClassesOnDay": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownSubject": "Unknown Subject",
+  "unknownTeacher": "Unknown Teacher",
+  "teacher": "Teacher",
+  "dayAndDate": "Day & Date",
+  "duration": "Duration",
+  "room": "Room",
+  "attendanceStatus": "Attendance Status",
+  "attendanceCompletedFormat": "Completed ({present} Present, {absent} Absent)",
+  "@attendanceCompletedFormat": {
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "absent": {
+        "type": "int"
+      }
+    }
+  },
+  "attendancePendingNotTaken": "Pending (Not Taken)",
+  "homeworkStatus": "Homework Status",
+  "homeworkAssignedFormat": "Assigned: {title}",
+  "@homeworkAssignedFormat": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "manageClass": "Manage Class",
+  "deleteRoutineConfirm": "Are you sure you want to delete this routine entry?",
+  "attendanceSummaryShort": "Attendance: {present} P / {absent} A",
+  "@attendanceSummaryShort": {
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "absent": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceDoneShort": "Attendance: Done",
+  "attendancePendingShort": "Attendance: Pending",
+  "hwSummaryShort": "HW: {title}",
+  "@hwSummaryShort": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "noHwShort": "No HW",
+  "roomNumberFormat": "Room {roomNumber}",
+  "@roomNumberFormat": {
+    "placeholders": {
+      "roomNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "donePlusHw": "Done + HW",
+  "done": "Done",
+  "hwAdded": "HW Added",
+  "pending": "Pending",
+  "viewDetails": "View Details",
+  "editRoutineEntry": "Edit Routine Entry",
+  "addRoutineEntry": "Add Routine Entry",
+  "updateApplySelectedDays": "Update and apply to selected days",
+  "updateDetailsBelow": "Update the details below",
+  "selectDaysFillDetails": "Select days & fill in the details",
+  "selectDay": "Select Day",
+  "countSelected": "{count} selected",
+  "@countSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noneSelected": "None selected",
+  "selectAll": "Select All",
+  "reset": "Reset",
+  "chooseSubject": "Choose a subject",
+  "searchSubject": "Search subject...",
+  "assignTeacher": "Assign a teacher",
+  "searchTeacher": "Search teacher...",
+  "timeSlot": "Time Slot",
+  "startTime": "Start Time",
+  "endTime": "End Time",
+  "roomNumberOptional": "Room Number (Optional)",
+  "roomNumberHint": "e.g. 101, Lab-A",
+  "updateSaveEntriesFormat": "Update & Save {count} Entries",
+  "@updateSaveEntriesFormat": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "updateEntry": "Update Entry",
+  "saveEntriesFormat": "Save {count} Entries",
+  "@saveEntriesFormat": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "saveEntry": "Save Entry",
+  "pleaseSelectAtLeastOneDay": "Please select at least one day.",
+  "routineEntriesUpdatedSuccess": "{count} routine entries updated & saved successfully!",
+  "@routineEntriesUpdatedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "routineEntriesSavedSuccess": "{count} routine entries saved successfully!",
+  "@routineEntriesSavedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

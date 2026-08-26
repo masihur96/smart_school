@@ -1394,4 +1394,249 @@ class AppLocalizationsEn extends AppLocalizations {
   String errorSavingAssignments(String error) {
     return 'Error saving assignments: $error';
   }
+
+  @override
+  String get monday => 'Monday';
+
+  @override
+  String get tuesday => 'Tuesday';
+
+  @override
+  String get wednesday => 'Wednesday';
+
+  @override
+  String get thursday => 'Thursday';
+
+  @override
+  String get friday => 'Friday';
+
+  @override
+  String get saturday => 'Saturday';
+
+  @override
+  String get sunday => 'Sunday';
+
+  @override
+  String get mon => 'Mon';
+
+  @override
+  String get tue => 'Tue';
+
+  @override
+  String get wed => 'Wed';
+
+  @override
+  String get thu => 'Thu';
+
+  @override
+  String get fri => 'Fri';
+
+  @override
+  String get sat => 'Sat';
+
+  @override
+  String get sun => 'Sun';
+
+  @override
+  String get generatePrintRoutinePdfTooltip => 'Generate / Print Routine PDF';
+
+  @override
+  String get classRoutineTitle => 'Class Routine';
+
+  @override
+  String get classRoutineSubtitle => 'Manage weekly timetable for each class';
+
+  @override
+  String get noSections => 'No Sections';
+
+  @override
+  String get addEntry => 'Add Entry';
+
+  @override
+  String get previousDay => 'Previous Day';
+
+  @override
+  String get nextDay => 'Next Day';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String doneCountFormat(int completed, int total) {
+    return '$completed/$total Done';
+  }
+
+  @override
+  String get chooseClassToViewRoutine =>
+      'Choose a class above\nto view or manage the routine.';
+
+  @override
+  String noClassesOnDay(String day) {
+    return 'No classes on $day';
+  }
+
+  @override
+  String get unknownSubject => 'Unknown Subject';
+
+  @override
+  String get unknownTeacher => 'Unknown Teacher';
+
+  @override
+  String get dayAndDate => 'Day & Date';
+
+  @override
+  String get duration => 'Duration';
+
+  @override
+  String get room => 'Room';
+
+  @override
+  String get attendanceStatus => 'Attendance Status';
+
+  @override
+  String attendanceCompletedFormat(int present, int absent) {
+    return 'Completed ($present Present, $absent Absent)';
+  }
+
+  @override
+  String get attendancePendingNotTaken => 'Pending (Not Taken)';
+
+  @override
+  String get homeworkStatus => 'Homework Status';
+
+  @override
+  String homeworkAssignedFormat(String title) {
+    return 'Assigned: $title';
+  }
+
+  @override
+  String get manageClass => 'Manage Class';
+
+  @override
+  String get deleteRoutineConfirm =>
+      'Are you sure you want to delete this routine entry?';
+
+  @override
+  String attendanceSummaryShort(int present, int absent) {
+    return 'Attendance: $present P / $absent A';
+  }
+
+  @override
+  String get attendanceDoneShort => 'Attendance: Done';
+
+  @override
+  String get attendancePendingShort => 'Attendance: Pending';
+
+  @override
+  String hwSummaryShort(String title) {
+    return 'HW: $title';
+  }
+
+  @override
+  String get noHwShort => 'No HW';
+
+  @override
+  String roomNumberFormat(String roomNumber) {
+    return 'Room $roomNumber';
+  }
+
+  @override
+  String get donePlusHw => 'Done + HW';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get hwAdded => 'HW Added';
+
+  @override
+  String get pending => 'Pending';
+
+  @override
+  String get editRoutineEntry => 'Edit Routine Entry';
+
+  @override
+  String get addRoutineEntry => 'Add Routine Entry';
+
+  @override
+  String get updateApplySelectedDays => 'Update and apply to selected days';
+
+  @override
+  String get updateDetailsBelow => 'Update the details below';
+
+  @override
+  String get selectDaysFillDetails => 'Select days & fill in the details';
+
+  @override
+  String get selectDay => 'Select Day';
+
+  @override
+  String countSelected(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get noneSelected => 'None selected';
+
+  @override
+  String get selectAll => 'Select All';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String get chooseSubject => 'Choose a subject';
+
+  @override
+  String get searchSubject => 'Search subject...';
+
+  @override
+  String get assignTeacher => 'Assign a teacher';
+
+  @override
+  String get searchTeacher => 'Search teacher...';
+
+  @override
+  String get timeSlot => 'Time Slot';
+
+  @override
+  String get startTime => 'Start Time';
+
+  @override
+  String get endTime => 'End Time';
+
+  @override
+  String get roomNumberOptional => 'Room Number (Optional)';
+
+  @override
+  String get roomNumberHint => 'e.g. 101, Lab-A';
+
+  @override
+  String updateSaveEntriesFormat(int count) {
+    return 'Update & Save $count Entries';
+  }
+
+  @override
+  String get updateEntry => 'Update Entry';
+
+  @override
+  String saveEntriesFormat(int count) {
+    return 'Save $count Entries';
+  }
+
+  @override
+  String get saveEntry => 'Save Entry';
+
+  @override
+  String get pleaseSelectAtLeastOneDay => 'Please select at least one day.';
+
+  @override
+  String routineEntriesUpdatedSuccess(int count) {
+    return '$count routine entries updated & saved successfully!';
+  }
+
+  @override
+  String routineEntriesSavedSuccess(int count) {
+    return '$count routine entries saved successfully!';
+  }
 }

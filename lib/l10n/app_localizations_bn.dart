@@ -1406,4 +1406,253 @@ class AppLocalizationsBn extends AppLocalizations {
   String errorSavingAssignments(String error) {
     return 'নির্ধারণ সংরক্ষণে ত্রুটি: $error';
   }
+
+  @override
+  String get monday => 'সোমবার';
+
+  @override
+  String get tuesday => 'মঙ্গলবার';
+
+  @override
+  String get wednesday => 'বুধবার';
+
+  @override
+  String get thursday => 'বৃহস্পতিবার';
+
+  @override
+  String get friday => 'শুক্রবার';
+
+  @override
+  String get saturday => 'শনিবার';
+
+  @override
+  String get sunday => 'রবিবার';
+
+  @override
+  String get mon => 'সোম';
+
+  @override
+  String get tue => 'মঙ্গল';
+
+  @override
+  String get wed => 'বুধ';
+
+  @override
+  String get thu => 'বৃহস্পতি';
+
+  @override
+  String get fri => 'শুক্র';
+
+  @override
+  String get sat => 'শনি';
+
+  @override
+  String get sun => 'রবি';
+
+  @override
+  String get generatePrintRoutinePdfTooltip =>
+      'রুটিন পিডিএফ তৈরি / প্রিন্ট করুন';
+
+  @override
+  String get classRoutineTitle => 'ক্লাস রুটিন';
+
+  @override
+  String get classRoutineSubtitle =>
+      'প্রতিটি ক্লাসের সাপ্তাহিক সময়সূচী পরিচালনা করুন';
+
+  @override
+  String get noSections => 'কোন সেকশন নেই';
+
+  @override
+  String get addEntry => 'এন্ট্রি যোগ করুন';
+
+  @override
+  String get previousDay => 'পূর্ববর্তী দিন';
+
+  @override
+  String get nextDay => 'পরবর্তী দিন';
+
+  @override
+  String get today => 'আজ';
+
+  @override
+  String doneCountFormat(int completed, int total) {
+    return '$completed/$total সম্পন্ন';
+  }
+
+  @override
+  String get chooseClassToViewRoutine =>
+      'রুটিন দেখতে বা পরিচালনা করতে\nউপরে একটি ক্লাস নির্বাচন করুন।';
+
+  @override
+  String noClassesOnDay(String day) {
+    return '$day কোনো ক্লাস নেই';
+  }
+
+  @override
+  String get unknownSubject => 'অজানা বিষয়';
+
+  @override
+  String get unknownTeacher => 'অজানা শিক্ষক';
+
+  @override
+  String get dayAndDate => 'দিন ও তারিখ';
+
+  @override
+  String get duration => 'সময়কাল';
+
+  @override
+  String get room => 'কক্ষ';
+
+  @override
+  String get attendanceStatus => 'উপস্থিতির অবস্থা';
+
+  @override
+  String attendanceCompletedFormat(int present, int absent) {
+    return 'সম্পন্ন ($present জন উপস্থিত, $absent জন অনুপস্থিত)';
+  }
+
+  @override
+  String get attendancePendingNotTaken => 'বাকি (নেওয়া হয়নি)';
+
+  @override
+  String get homeworkStatus => 'হোমওয়ার্কের অবস্থা';
+
+  @override
+  String homeworkAssignedFormat(String title) {
+    return 'দেওয়া হয়েছে: $title';
+  }
+
+  @override
+  String get manageClass => 'ক্লাস পরিচালনা করুন';
+
+  @override
+  String get deleteRoutineConfirm =>
+      'আপনি কি নিশ্চিত যে এই রুটিন এন্ট্রিটি মুছে ফেলতে চান?';
+
+  @override
+  String attendanceSummaryShort(int present, int absent) {
+    return 'উপস্থিতি: $present উপ / $absent অনু';
+  }
+
+  @override
+  String get attendanceDoneShort => 'উপস্থিতি: সম্পন্ন';
+
+  @override
+  String get attendancePendingShort => 'উপস্থিতি: বাকি';
+
+  @override
+  String hwSummaryShort(String title) {
+    return 'হোমওয়ার্ক: $title';
+  }
+
+  @override
+  String get noHwShort => 'কোনো হোমওয়ার্ক নেই';
+
+  @override
+  String roomNumberFormat(String roomNumber) {
+    return 'কক্ষ $roomNumber';
+  }
+
+  @override
+  String get donePlusHw => 'সম্পন্ন + হোমওয়ার্ক';
+
+  @override
+  String get done => 'সম্পন্ন';
+
+  @override
+  String get hwAdded => 'হোমওয়ার্ক যোগ করা হয়েছে';
+
+  @override
+  String get pending => 'বাকি';
+
+  @override
+  String get editRoutineEntry => 'রুটিন এন্ট্রি এডিট করুন';
+
+  @override
+  String get addRoutineEntry => 'রুটিন এন্ট্রি যোগ করুন';
+
+  @override
+  String get updateApplySelectedDays =>
+      'আপডেট করুন এবং নির্বাচিত দিনগুলোতে প্রয়োগ করুন';
+
+  @override
+  String get updateDetailsBelow => 'নিচের বিবরণ আপডেট করুন';
+
+  @override
+  String get selectDaysFillDetails => 'দিন নির্বাচন করুন এবং বিবরণ পূরণ করুন';
+
+  @override
+  String get selectDay => 'দিন নির্বাচন করুন';
+
+  @override
+  String countSelected(int count) {
+    return '$count টি নির্বাচিত';
+  }
+
+  @override
+  String get noneSelected => 'কোনোটি নির্বাচিত নয়';
+
+  @override
+  String get selectAll => 'সব নির্বাচন করুন';
+
+  @override
+  String get reset => 'পুনরায় সেট করুন';
+
+  @override
+  String get chooseSubject => 'একটি বিষয় নির্বাচন করুন';
+
+  @override
+  String get searchSubject => 'বিষয় খুঁজুন...';
+
+  @override
+  String get assignTeacher => 'একজন শিক্ষক নির্ধারণ করুন';
+
+  @override
+  String get searchTeacher => 'শিক্ষক খুঁজুন...';
+
+  @override
+  String get timeSlot => 'সময় স্লট';
+
+  @override
+  String get startTime => 'শুরুর সময়';
+
+  @override
+  String get endTime => 'শেষের সময়';
+
+  @override
+  String get roomNumberOptional => 'কক্ষ নম্বর (ঐচ্ছিক)';
+
+  @override
+  String get roomNumberHint => 'যেমন ১০১, ল্যাব-এ';
+
+  @override
+  String updateSaveEntriesFormat(int count) {
+    return '$count টি এন্ট্রি আপডেট ও সেভ করুন';
+  }
+
+  @override
+  String get updateEntry => 'এন্ট্রি আপডেট করুন';
+
+  @override
+  String saveEntriesFormat(int count) {
+    return '$count টি এন্ট্রি সেভ করুন';
+  }
+
+  @override
+  String get saveEntry => 'এন্ট্রি সেভ করুন';
+
+  @override
+  String get pleaseSelectAtLeastOneDay =>
+      'অনুগ্রহ করে অন্তত একটি দিন নির্বাচন করুন।';
+
+  @override
+  String routineEntriesUpdatedSuccess(int count) {
+    return '$count টি রুটিন এন্ট্রি সফলভাবে আপডেট ও সেভ হয়েছে!';
+  }
+
+  @override
+  String routineEntriesSavedSuccess(int count) {
+    return '$count টি রুটিন এন্ট্রি সফলভাবে সেভ হয়েছে!';
+  }
 }

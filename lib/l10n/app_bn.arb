@@ -641,5 +641,173 @@
         "type": "String"
       }
     }
+  },
+  "monday": "সোমবার",
+  "tuesday": "মঙ্গলবার",
+  "wednesday": "বুধবার",
+  "thursday": "বৃহস্পতিবার",
+  "friday": "শুক্রবার",
+  "saturday": "শনিবার",
+  "sunday": "রবিবার",
+  "mon": "সোম",
+  "tue": "মঙ্গল",
+  "wed": "বুধ",
+  "thu": "বৃহস্পতি",
+  "fri": "শুক্র",
+  "sat": "শনি",
+  "sun": "রবি",
+  "generatePrintRoutinePdfTooltip": "রুটিন পিডিএফ তৈরি / প্রিন্ট করুন",
+  "classRoutineTitle": "ক্লাস রুটিন",
+  "classRoutineSubtitle": "প্রতিটি ক্লাসের সাপ্তাহিক সময়সূচী পরিচালনা করুন",
+  "noSections": "কোন সেকশন নেই",
+  "addEntry": "এন্ট্রি যোগ করুন",
+  "previousDay": "পূর্ববর্তী দিন",
+  "nextDay": "পরবর্তী দিন",
+  "today": "আজ",
+  "doneCountFormat": "{completed}/{total} সম্পন্ন",
+  "@doneCountFormat": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "chooseClassToViewRoutine": "রুটিন দেখতে বা পরিচালনা করতে\nউপরে একটি ক্লাস নির্বাচন করুন।",
+  "noClassesOnDay": "{day} কোনো ক্লাস নেই",
+  "@noClassesOnDay": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownSubject": "অজানা বিষয়",
+  "unknownTeacher": "অজানা শিক্ষক",
+  "teacher": "শিক্ষক",
+  "dayAndDate": "দিন ও তারিখ",
+  "duration": "সময়কাল",
+  "room": "কক্ষ",
+  "attendanceStatus": "উপস্থিতির অবস্থা",
+  "attendanceCompletedFormat": "সম্পন্ন ({present} জন উপস্থিত, {absent} জন অনুপস্থিত)",
+  "@attendanceCompletedFormat": {
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "absent": {
+        "type": "int"
+      }
+    }
+  },
+  "attendancePendingNotTaken": "বাকি (নেওয়া হয়নি)",
+  "homeworkStatus": "হোমওয়ার্কের অবস্থা",
+  "homeworkAssignedFormat": "দেওয়া হয়েছে: {title}",
+  "@homeworkAssignedFormat": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "manageClass": "ক্লাস পরিচালনা করুন",
+  "deleteRoutineConfirm": "আপনি কি নিশ্চিত যে এই রুটিন এন্ট্রিটি মুছে ফেলতে চান?",
+  "attendanceSummaryShort": "উপস্থিতি: {present} উপ / {absent} অনু",
+  "@attendanceSummaryShort": {
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "absent": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceDoneShort": "উপস্থিতি: সম্পন্ন",
+  "attendancePendingShort": "উপস্থিতি: বাকি",
+  "hwSummaryShort": "হোমওয়ার্ক: {title}",
+  "@hwSummaryShort": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "noHwShort": "কোনো হোমওয়ার্ক নেই",
+  "roomNumberFormat": "কক্ষ {roomNumber}",
+  "@roomNumberFormat": {
+    "placeholders": {
+      "roomNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "donePlusHw": "সম্পন্ন + হোমওয়ার্ক",
+  "done": "সম্পন্ন",
+  "hwAdded": "হোমওয়ার্ক যোগ করা হয়েছে",
+  "pending": "বাকি",
+  "viewDetails": "বিস্তারিত দেখুন",
+  "editRoutineEntry": "রুটিন এন্ট্রি এডিট করুন",
+  "addRoutineEntry": "রুটিন এন্ট্রি যোগ করুন",
+  "updateApplySelectedDays": "আপডেট করুন এবং নির্বাচিত দিনগুলোতে প্রয়োগ করুন",
+  "updateDetailsBelow": "নিচের বিবরণ আপডেট করুন",
+  "selectDaysFillDetails": "দিন নির্বাচন করুন এবং বিবরণ পূরণ করুন",
+  "selectDay": "দিন নির্বাচন করুন",
+  "countSelected": "{count} টি নির্বাচিত",
+  "@countSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noneSelected": "কোনোটি নির্বাচিত নয়",
+  "selectAll": "সব নির্বাচন করুন",
+  "reset": "পুনরায় সেট করুন",
+  "chooseSubject": "একটি বিষয় নির্বাচন করুন",
+  "searchSubject": "বিষয় খুঁজুন...",
+  "assignTeacher": "একজন শিক্ষক নির্ধারণ করুন",
+  "searchTeacher": "শিক্ষক খুঁজুন...",
+  "timeSlot": "সময় স্লট",
+  "startTime": "শুরুর সময়",
+  "endTime": "শেষের সময়",
+  "roomNumberOptional": "কক্ষ নম্বর (ঐচ্ছিক)",
+  "roomNumberHint": "যেমন ১০১, ল্যাব-এ",
+  "updateSaveEntriesFormat": "{count} টি এন্ট্রি আপডেট ও সেভ করুন",
+  "@updateSaveEntriesFormat": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "updateEntry": "এন্ট্রি আপডেট করুন",
+  "saveEntriesFormat": "{count} টি এন্ট্রি সেভ করুন",
+  "@saveEntriesFormat": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "saveEntry": "এন্ট্রি সেভ করুন",
+  "pleaseSelectAtLeastOneDay": "অনুগ্রহ করে অন্তত একটি দিন নির্বাচন করুন।",
+  "routineEntriesUpdatedSuccess": "{count} টি রুটিন এন্ট্রি সফলভাবে আপডেট ও সেভ হয়েছে!",
+  "@routineEntriesUpdatedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "routineEntriesSavedSuccess": "{count} টি রুটিন এন্ট্রি সফলভাবে সেভ হয়েছে!",
+  "@routineEntriesSavedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

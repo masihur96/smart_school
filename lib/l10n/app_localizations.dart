@@ -2725,6 +2725,444 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error saving assignments: {error}'**
   String errorSavingAssignments(String error);
+
+  /// No description provided for @monday.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get monday;
+
+  /// No description provided for @tuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get tuesday;
+
+  /// No description provided for @wednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get wednesday;
+
+  /// No description provided for @thursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get thursday;
+
+  /// No description provided for @friday.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get friday;
+
+  /// No description provided for @saturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get saturday;
+
+  /// No description provided for @sunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get sunday;
+
+  /// No description provided for @mon.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get mon;
+
+  /// No description provided for @tue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get tue;
+
+  /// No description provided for @wed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get wed;
+
+  /// No description provided for @thu.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get thu;
+
+  /// No description provided for @fri.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get fri;
+
+  /// No description provided for @sat.
+  ///
+  /// In en, this message translates to:
+  /// **'Sat'**
+  String get sat;
+
+  /// No description provided for @sun.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun'**
+  String get sun;
+
+  /// No description provided for @generatePrintRoutinePdfTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate / Print Routine PDF'**
+  String get generatePrintRoutinePdfTooltip;
+
+  /// No description provided for @classRoutineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Class Routine'**
+  String get classRoutineTitle;
+
+  /// No description provided for @classRoutineSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage weekly timetable for each class'**
+  String get classRoutineSubtitle;
+
+  /// No description provided for @noSections.
+  ///
+  /// In en, this message translates to:
+  /// **'No Sections'**
+  String get noSections;
+
+  /// No description provided for @addEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Entry'**
+  String get addEntry;
+
+  /// No description provided for @previousDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Day'**
+  String get previousDay;
+
+  /// No description provided for @nextDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Day'**
+  String get nextDay;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @doneCountFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed}/{total} Done'**
+  String doneCountFormat(int completed, int total);
+
+  /// No description provided for @chooseClassToViewRoutine.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a class above\nto view or manage the routine.'**
+  String get chooseClassToViewRoutine;
+
+  /// No description provided for @noClassesOnDay.
+  ///
+  /// In en, this message translates to:
+  /// **'No classes on {day}'**
+  String noClassesOnDay(String day);
+
+  /// No description provided for @unknownSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Subject'**
+  String get unknownSubject;
+
+  /// No description provided for @unknownTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Teacher'**
+  String get unknownTeacher;
+
+  /// No description provided for @dayAndDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Day & Date'**
+  String get dayAndDate;
+
+  /// No description provided for @duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get duration;
+
+  /// No description provided for @room.
+  ///
+  /// In en, this message translates to:
+  /// **'Room'**
+  String get room;
+
+  /// No description provided for @attendanceStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance Status'**
+  String get attendanceStatus;
+
+  /// No description provided for @attendanceCompletedFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed ({present} Present, {absent} Absent)'**
+  String attendanceCompletedFormat(int present, int absent);
+
+  /// No description provided for @attendancePendingNotTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending (Not Taken)'**
+  String get attendancePendingNotTaken;
+
+  /// No description provided for @homeworkStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework Status'**
+  String get homeworkStatus;
+
+  /// No description provided for @homeworkAssignedFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned: {title}'**
+  String homeworkAssignedFormat(String title);
+
+  /// No description provided for @manageClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Class'**
+  String get manageClass;
+
+  /// No description provided for @deleteRoutineConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this routine entry?'**
+  String get deleteRoutineConfirm;
+
+  /// No description provided for @attendanceSummaryShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance: {present} P / {absent} A'**
+  String attendanceSummaryShort(int present, int absent);
+
+  /// No description provided for @attendanceDoneShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance: Done'**
+  String get attendanceDoneShort;
+
+  /// No description provided for @attendancePendingShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance: Pending'**
+  String get attendancePendingShort;
+
+  /// No description provided for @hwSummaryShort.
+  ///
+  /// In en, this message translates to:
+  /// **'HW: {title}'**
+  String hwSummaryShort(String title);
+
+  /// No description provided for @noHwShort.
+  ///
+  /// In en, this message translates to:
+  /// **'No HW'**
+  String get noHwShort;
+
+  /// No description provided for @roomNumberFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Room {roomNumber}'**
+  String roomNumberFormat(String roomNumber);
+
+  /// No description provided for @donePlusHw.
+  ///
+  /// In en, this message translates to:
+  /// **'Done + HW'**
+  String get donePlusHw;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @hwAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'HW Added'**
+  String get hwAdded;
+
+  /// No description provided for @pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get pending;
+
+  /// No description provided for @editRoutineEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Routine Entry'**
+  String get editRoutineEntry;
+
+  /// No description provided for @addRoutineEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Routine Entry'**
+  String get addRoutineEntry;
+
+  /// No description provided for @updateApplySelectedDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Update and apply to selected days'**
+  String get updateApplySelectedDays;
+
+  /// No description provided for @updateDetailsBelow.
+  ///
+  /// In en, this message translates to:
+  /// **'Update the details below'**
+  String get updateDetailsBelow;
+
+  /// No description provided for @selectDaysFillDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Select days & fill in the details'**
+  String get selectDaysFillDetails;
+
+  /// No description provided for @selectDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Day'**
+  String get selectDay;
+
+  /// No description provided for @countSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String countSelected(int count);
+
+  /// No description provided for @noneSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'None selected'**
+  String get noneSelected;
+
+  /// No description provided for @selectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get selectAll;
+
+  /// No description provided for @reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
+
+  /// No description provided for @chooseSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a subject'**
+  String get chooseSubject;
+
+  /// No description provided for @searchSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Search subject...'**
+  String get searchSubject;
+
+  /// No description provided for @assignTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign a teacher'**
+  String get assignTeacher;
+
+  /// No description provided for @searchTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Search teacher...'**
+  String get searchTeacher;
+
+  /// No description provided for @timeSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Time Slot'**
+  String get timeSlot;
+
+  /// No description provided for @startTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Time'**
+  String get startTime;
+
+  /// No description provided for @endTime.
+  ///
+  /// In en, this message translates to:
+  /// **'End Time'**
+  String get endTime;
+
+  /// No description provided for @roomNumberOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Room Number (Optional)'**
+  String get roomNumberOptional;
+
+  /// No description provided for @roomNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 101, Lab-A'**
+  String get roomNumberHint;
+
+  /// No description provided for @updateSaveEntriesFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Update & Save {count} Entries'**
+  String updateSaveEntriesFormat(int count);
+
+  /// No description provided for @updateEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Entry'**
+  String get updateEntry;
+
+  /// No description provided for @saveEntriesFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Save {count} Entries'**
+  String saveEntriesFormat(int count);
+
+  /// No description provided for @saveEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Entry'**
+  String get saveEntry;
+
+  /// No description provided for @pleaseSelectAtLeastOneDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one day.'**
+  String get pleaseSelectAtLeastOneDay;
+
+  /// No description provided for @routineEntriesUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} routine entries updated & saved successfully!'**
+  String routineEntriesUpdatedSuccess(int count);
+
+  /// No description provided for @routineEntriesSavedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} routine entries saved successfully!'**
+  String routineEntriesSavedSuccess(int count);
 }
 
 class _AppLocalizationsDelegate
