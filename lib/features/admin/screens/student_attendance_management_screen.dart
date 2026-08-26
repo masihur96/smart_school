@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -11,9 +12,9 @@ import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/models/period_attendance_model.dart';
 import 'package:smart_school/models/school_models.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/attendance_management_provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class StudentAttendanceManagementScreen extends StatefulWidget {
   const StudentAttendanceManagementScreen({super.key});
@@ -97,8 +98,27 @@ class _StudentAttendanceManagementScreenState
     }
   }
 
+  String _getStatusLabel(BuildContext context, String? status) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (status?.toUpperCase()) {
+      case 'PRESENT':
+        return l10n.statusPresent;
+      case 'ABSENT':
+        return l10n.statusAbsent;
+      case 'LATE':
+        return l10n.statusLate;
+      case 'LEAVE':
+        return l10n.statusLeave;
+      case 'ALL':
+        return l10n.statusAll;
+      default:
+        return status ?? '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final attendanceProvider = context.watch<AttendanceManagementProvider>();
     final classProvider = context.watch<ClassSetupNotifier>();
     final sectionProvider = context.watch<SectionSetupNotifier>();
@@ -142,9 +162,9 @@ class _StudentAttendanceManagementScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Student Attendance",
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          l10n.studentAttendanceTitle,
+          style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
@@ -153,7 +173,7 @@ class _StudentAttendanceManagementScreenState
           IconButton(
             onPressed: () => _exportToPdf(context, filteredAttendance),
             icon: const Icon(Icons.picture_as_pdf),
-            tooltip: "Export PDF",
+            tooltip: l10n.exportPdf,
           ),
         ],
       ),
@@ -169,7 +189,7 @@ class _StudentAttendanceManagementScreenState
                       child: TextField(
                         controller: _searchController,
                         decoration: InputDecoration(
-                          hintText: "Search by Student Name...",
+                          hintText: l10n.searchByStudentNameHint,
                           prefixIcon: const Icon(Icons.search),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -220,7 +240,8 @@ class _StudentAttendanceManagementScreenState
                   child: Row(
                     children: [
                       _buildFilterDropdown<ClassRoom>(
-                        hint: "Class",
+                        hint: l10n.classLabel2,
+                        allHint: l10n.allClassHint,
                         value: _selectedClassId,
                         items: classProvider.classes
                             .where((c) => c.schoolId == user?.schoolId)
@@ -238,7 +259,8 @@ class _StudentAttendanceManagementScreenState
                       ),
                       const SizedBox(width: 8),
                       _buildFilterDropdown<Section>(
-                        hint: "Section",
+                        hint: l10n.sectionLabel,
+                        allHint: l10n.allSectionHint,
                         value: _selectedSectionId,
                         items: filteredSections,
                         itemLabel: (item) => item.name,
@@ -252,7 +274,8 @@ class _StudentAttendanceManagementScreenState
                       ),
                       const SizedBox(width: 8),
                       _buildFilterDropdown<Subject>(
-                        hint: "Subject",
+                        hint: l10n.subjectLabel,
+                        allHint: l10n.allSubjectHint,
                         value: _selectedSubjectId,
                         items: filteredSubjects,
                         itemLabel: (item) => item.name,
@@ -271,6 +294,7 @@ class _StudentAttendanceManagementScreenState
 
                 // Status Filter Chips
                 _buildStatusFilters(
+                  context: context,
                   allCount: totalCount,
                   presentCount: presentCount,
                   absentCount: absentCount,
@@ -285,7 +309,7 @@ class _StudentAttendanceManagementScreenState
                   children: [
                     Text(
                       (_startDate == null || _endDate == null)
-                          ? "All Dates"
+                          ? l10n.allDates
                           : "${DateFormat('MMM dd, yyyy').format(_startDate!)} - ${DateFormat('MMM dd, yyyy').format(_endDate!)}",
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
@@ -294,8 +318,11 @@ class _StudentAttendanceManagementScreenState
                     ),
                     Text(
                       _selectedStatus == 'ALL'
-                          ? "Total: ${attendanceProvider.total}"
-                          : "Showing: ${filteredAttendance.length} / ${allRecords.length}",
+                          ? l10n.totalCountFormat(attendanceProvider.total)
+                          : l10n.showingCountFormat(
+                              filteredAttendance.length,
+                              allRecords.length,
+                            ),
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
@@ -307,9 +334,13 @@ class _StudentAttendanceManagementScreenState
             child: attendanceProvider.isLoading
                 ? _AttendanceShimmer(isDark: isDark)
                 : attendanceProvider.error != null
-                ? Center(child: Text("Error: ${attendanceProvider.error}"))
+                ? Center(
+                    child: Text(
+                      l10n.errorLabel(attendanceProvider.error!),
+                    ),
+                  )
                 : attendanceProvider.studentAttendance.isEmpty
-                ? const Center(child: Text("No records found"))
+                ? Center(child: Text(l10n.noRecordsFound))
                 : filteredAttendance.isEmpty
                 ? Center(
                     child: Column(
@@ -322,7 +353,9 @@ class _StudentAttendanceManagementScreenState
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          "No $_selectedStatus records found",
+                          l10n.noStatusRecordsFound(
+                            _getStatusLabel(context, _selectedStatus),
+                          ),
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -339,7 +372,7 @@ class _StudentAttendanceManagementScreenState
                             });
                           },
                           icon: const Icon(Icons.clear_all, size: 18),
-                          label: const Text("Show All"),
+                          label: Text(l10n.showAll),
                         ),
                       ],
                     ),
@@ -363,6 +396,7 @@ class _StudentAttendanceManagementScreenState
   }
 
   Widget _buildStatusFilters({
+    required BuildContext context,
     required int allCount,
     required int presentCount,
     required int absentCount,
@@ -370,38 +404,39 @@ class _StudentAttendanceManagementScreenState
     required int leaveCount,
     required bool isDark,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     final statusItems = [
       {
         'key': 'ALL',
-        'label': 'ALL',
+        'label': l10n.statusAll,
         'count': allCount,
         'color': AppColors.primaryAdmin,
         'icon': Icons.grid_view_rounded,
       },
       {
         'key': 'PRESENT',
-        'label': 'PRESENT',
+        'label': l10n.statusPresent,
         'count': presentCount,
         'color': const Color(0xFF10B981),
         'icon': Icons.check_circle_rounded,
       },
       {
         'key': 'ABSENT',
-        'label': 'ABSENT',
+        'label': l10n.statusAbsent,
         'count': absentCount,
         'color': const Color(0xFFEF4444),
         'icon': Icons.cancel_rounded,
       },
       {
         'key': 'LATE',
-        'label': 'LATE',
+        'label': l10n.statusLate,
         'count': lateCount,
         'color': const Color(0xFF3B82F6),
         'icon': Icons.schedule_rounded,
       },
       {
         'key': 'LEAVE',
-        'label': 'LEAVE',
+        'label': l10n.statusLeave,
         'count': leaveCount,
         'color': const Color(0xFFF59E0B),
         'icon': Icons.event_busy_rounded,
@@ -507,6 +542,7 @@ class _StudentAttendanceManagementScreenState
     BuildContext context,
     List<PeriodAttendance> attendanceToExport,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     final authProvider = context.read<AuthNotifier>();
     final classProvider = context.read<ClassSetupNotifier>();
     final sectionProvider = context.read<SectionSetupNotifier>();
@@ -514,7 +550,7 @@ class _StudentAttendanceManagementScreenState
 
     if (attendanceToExport.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No attendance records to export")),
+        SnackBar(content: Text(l10n.noAttendanceRecordsToExport)),
       );
       return;
     }
@@ -556,9 +592,10 @@ class _StudentAttendanceManagementScreenState
       );
     } catch (e, stack) {
       log("Error generating PDF: $e\n$stack");
+      if (!context.mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Failed to generate PDF: $e")));
+      ).showSnackBar(SnackBar(content: Text(l10n.failedToGeneratePdf(e.toString()))));
     }
   }
 
@@ -577,6 +614,7 @@ class _StudentAttendanceManagementScreenState
     PeriodAttendance record,
     bool isDark,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final statusColor = _getStatusColor(record.status);
     final statusIcon = _getStatusIcon(record.status);
 
@@ -653,7 +691,7 @@ class _StudentAttendanceManagementScreenState
                 child: Text(
                   record.studentName.isNotEmpty
                       ? record.studentName
-                      : 'Unknown Student',
+                      : l10n.unknownStudent,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
@@ -676,7 +714,7 @@ class _StudentAttendanceManagementScreenState
                     Icon(statusIcon, size: 13, color: statusColor),
                     const SizedBox(width: 4),
                     Text(
-                      record.status.toUpperCase(),
+                      _getStatusLabel(context, record.status).toUpperCase(),
                       style: TextStyle(
                         color: statusColor,
                         fontWeight: FontWeight.bold,
@@ -720,7 +758,7 @@ class _StudentAttendanceManagementScreenState
                             const SizedBox(width: 3),
                             Text(
                               sectionName.isNotEmpty
-                                  ? '$className • Sec $sectionName'
+                                  ? l10n.classAndSectionFormat(className, sectionName)
                                   : className,
                               style: TextStyle(
                                 fontSize: 10.5,
@@ -744,7 +782,7 @@ class _StudentAttendanceManagementScreenState
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          'Roll #$rollNumber',
+                          l10n.rollNumberFormat(rollNumber),
                           style: TextStyle(
                             fontSize: 10.5,
                             color: isDark
@@ -832,7 +870,7 @@ class _StudentAttendanceManagementScreenState
                   _buildDetailItem(
                     icon: Icons.person_outline,
                     iconColor: Colors.teal,
-                    label: 'Teacher',
+                    label: l10n.teacherLabel,
                     value: teacherName,
                     isDark: isDark,
                   ),
@@ -841,7 +879,7 @@ class _StudentAttendanceManagementScreenState
                       _buildDetailItem(
                         icon: Icons.schedule_outlined,
                         iconColor: Colors.blue,
-                        label: 'Time Slot',
+                        label: l10n.timeSlot,
                         value: ClassRoutinePdfHelper.formatSlotDisplay(
                           startTime,
                           endTime,
@@ -854,7 +892,7 @@ class _StudentAttendanceManagementScreenState
                     _buildDetailItem(
                       icon: Icons.meeting_room_outlined,
                       iconColor: Colors.orange,
-                      label: 'Room',
+                      label: l10n.roomLabel,
                       value: roomNumber,
                       isDark: isDark,
                     ),
@@ -864,7 +902,7 @@ class _StudentAttendanceManagementScreenState
                     _buildDetailItem(
                       icon: Icons.tag_outlined,
                       iconColor: Colors.purple,
-                      label: 'Record ID',
+                      label: l10n.recordIdLabel,
                       value: record.id.length > 12
                           ? '${record.id.substring(0, 12)}...'
                           : record.id,
@@ -917,6 +955,7 @@ class _StudentAttendanceManagementScreenState
 
   Widget _buildFilterDropdown<T>({
     required String hint,
+    required String allHint,
     required String? value,
     required List<T> items,
     required String Function(T) itemLabel,
@@ -936,7 +975,7 @@ class _StudentAttendanceManagementScreenState
           items: [
             DropdownMenuItem<String>(
               value: null,
-              child: Text("All $hint", style: const TextStyle(fontSize: 12)),
+              child: Text(allHint, style: const TextStyle(fontSize: 12)),
             ),
             ...items.map((item) {
               return DropdownMenuItem<String>(
