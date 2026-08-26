@@ -9,6 +9,7 @@ import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/student_model.dart';
 import 'package:smart_school/services/sms_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 class BulkSmsScreen extends StatefulWidget {
   const BulkSmsScreen({super.key});
@@ -32,33 +33,28 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
   String _selectedFilterChip = 'all'; // 'all', 'selected', 'with_phone', 'no_phone'
   Timer? _debounce;
 
-  final List<Map<String, String>> _quickTemplates = [
-    {
-      'title': 'School Closed',
-      'text':
-          'Dear Parent, the school will remain closed on [Date] due to [Reason]. Regular classes will resume on [Date].',
-    },
-    {
-      'title': 'Exam Reminder',
-      'text':
-          'Dear Parent, term examinations begin on [Date]. Please ensure your child carries their admit card and arrives on time.',
-    },
-    {
-      'title': 'Fee Due Notice',
-      'text':
-          'Dear Parent, this is a reminder regarding pending school fees for [Month]. Please clear the dues at the school office.',
-    },
-    {
-      'title': 'PTM Meeting',
-      'text':
-          'Dear Parent, the Parent-Teacher Meeting (PTM) is scheduled on [Date] at [Time]. Your presence is highly requested.',
-    },
-    {
-      'title': 'Emergency Alert',
-      'text':
-          'Urgent: Due to unavoidable circumstances, classes for today are suspended. Please arrange to pick up your child.',
-    },
-  ];
+  List<Map<String, String>> _getQuickTemplates(AppLocalizations l10n) => [
+        {
+          'title': l10n.templateSchoolClosedTitle,
+          'text': l10n.templateSchoolClosedText,
+        },
+        {
+          'title': l10n.templateExamReminderTitle,
+          'text': l10n.templateExamReminderText,
+        },
+        {
+          'title': l10n.templateFeeDueTitle,
+          'text': l10n.templateFeeDueText,
+        },
+        {
+          'title': l10n.templatePtmTitle,
+          'text': l10n.templatePtmText,
+        },
+        {
+          'title': l10n.templateEmergencyAlertTitle,
+          'text': l10n.templateEmergencyAlertText,
+        },
+      ];
 
   @override
   void initState() {
@@ -113,6 +109,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
   // ── Selection Logic ────────────────────────────────────────────────────────
 
   void _toggleSelection(Student student) {
+    final l10n = AppLocalizations.of(context)!;
     if (student.guardianContact.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -123,7 +120,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  '${student.user?.name ?? 'Student'} does not have a contact number.',
+                  l10n.doesNotHaveContact(student.user?.name ?? l10n.unknownStudent),
                 ),
               ),
             ],
@@ -181,11 +178,12 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
   // ── Send Flow & Confirmation ───────────────────────────────────────────────
 
   void _handleSendPressed() {
+    final l10n = AppLocalizations.of(context)!;
     if (_selectedStudentIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           behavior: SnackBarBehavior.floating,
-          content: Text('Please select at least one student recipient.'),
+          content: Text(l10n.selectAtLeastOneStudent),
         ),
       );
       return;
@@ -194,9 +192,9 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
     final message = _messageController.text.trim();
     if (message.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           behavior: SnackBarBehavior.floating,
-          content: Text('Please enter an SMS message to broadcast.'),
+          content: Text(l10n.enterSmsMessageToBroadcast),
         ),
       );
       return;
@@ -215,9 +213,9 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
 
     if (validNumbers.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           behavior: SnackBarBehavior.floating,
-          content: Text('None of the selected students have a valid phone number.'),
+          content: Text(l10n.noSelectedStudentsHavePhone),
         ),
       );
       return;
@@ -227,6 +225,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
   }
 
   Future<void> _showConfirmationSheet(List<String> validNumbers) async {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final message = _messageController.text.trim();
     final partsPerMsg = _calculateSmsParts(message);
@@ -273,20 +272,20 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Confirm Bulk SMS Broadcast',
-                          style: TextStyle(
+                          l10n.confirmBulkSmsTitle,
+                          style: const TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
-                          'Review campaign details before sending',
-                          style: TextStyle(
+                          l10n.reviewCampaignDetails,
+                          style: const TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
                           ),
@@ -316,33 +315,37 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                   children: [
                     _buildSummaryRow(
                       icon: Icons.people_alt_rounded,
-                      label: 'Recipients',
-                      value: '${validNumbers.length} Parents/Guardians',
+                      label: l10n.recipientsLabel,
+                      value: l10n.parentsGuardiansCount(validNumbers.length),
                       color: Colors.blue,
                     ),
                     const Divider(height: 16),
                     _buildSummaryRow(
                       icon: Icons.verified_user_rounded,
-                      label: 'SMS Type',
+                      label: l10n.smsTypeLabel,
                       value: _smsType == 'Mask SMS'
-                          ? 'Masked (School Care)'
-                          : 'Normal SMS (Direct)',
+                          ? l10n.maskedSchoolCare
+                          : l10n.normalSmsDirectValue,
                       color: Colors.purple,
                     ),
                     const Divider(height: 16),
                     _buildSummaryRow(
                       icon: Icons.receipt_long_rounded,
-                      label: 'Estimated SMS Credits',
-                      value: '$totalCredits Credits ($partsPerMsg part × ${validNumbers.length} rec.)',
+                      label: l10n.estimatedSmsCredits,
+                      value: l10n.smsCreditsBreakdown(
+                        totalCredits,
+                        partsPerMsg,
+                        validNumbers.length,
+                      ),
                       color: Colors.teal,
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 14),
-              const Text(
-                'Message Preview:',
-                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
+              Text(
+                l10n.messagePreviewLabel,
+                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
               Container(
@@ -376,7 +379,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('Cancel'),
+                      child: Text(l10n.cancel),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -394,9 +397,9 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                         elevation: 0,
                       ),
                       icon: const Icon(Icons.send_rounded, size: 18),
-                      label: const Text(
-                        'Send Now',
-                        style: TextStyle(
+                      label: Text(
+                        l10n.sendNowButton,
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
@@ -418,6 +421,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
   }
 
   Future<void> _executeSendSms(List<String> numbers) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isSending = true;
     });
@@ -445,7 +449,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Bulk SMS broadcast sent to ${numbers.length} recipients!',
+                  l10n.bulkSmsSentSuccess(numbers.length),
                 ),
               ),
             ],
@@ -458,16 +462,16 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.red,
           content: Row(
             children: [
-              Icon(Icons.error_outline_rounded, color: Colors.white),
-              SizedBox(width: 8),
+              const Icon(Icons.error_outline_rounded, color: Colors.white),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Failed to send SMS. Please check credentials or API gateway.',
+                  l10n.bulkSmsSentFailed,
                 ),
               ),
             ],
@@ -528,13 +532,15 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
     } else if (cls != null) {
       return cls.name;
     }
-    return 'Class ${student.classId}';
+    final l10n = AppLocalizations.of(context)!;
+    return '${l10n.classLabel} ${student.classId}';
   }
 
   // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final classes = context.watch<ClassSetupNotifier>().classes;
     final sections = context.watch<SectionSetupNotifier>().sections;
@@ -568,23 +574,23 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
         backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: const Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Bulk SMS Broadcast',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              l10n.bulkSmsBroadcastTitle,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             Text(
-              'Reach parents & guardians instantly',
-              style: TextStyle(fontSize: 11, color: Colors.white70),
+              l10n.bulkSmsBroadcastSubtitle,
+              style: const TextStyle(fontSize: 11, color: Colors.white70),
             ),
           ],
         ),
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert_rounded),
-            tooltip: 'Selection Actions',
+            tooltip: l10n.selectionActions,
             onSelected: (val) {
               if (val == 'select_valid') {
                 _selectAllWithContact(studentsNotifier.students);
@@ -599,33 +605,33 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'select_valid',
                 child: Row(
                   children: [
-                    Icon(Icons.mark_email_read_rounded, size: 18, color: Colors.teal),
-                    SizedBox(width: 8),
-                    Text('Select All with Phone'),
+                    const Icon(Icons.mark_email_read_rounded, size: 18, color: Colors.teal),
+                    const SizedBox(width: 8),
+                    Text(l10n.selectAllWithPhone),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'select_all',
                 child: Row(
                   children: [
-                    Icon(Icons.select_all_rounded, size: 18, color: Colors.blue),
-                    SizedBox(width: 8),
-                    Text('Select All Visible'),
+                    const Icon(Icons.select_all_rounded, size: 18, color: Colors.blue),
+                    const SizedBox(width: 8),
+                    Text(l10n.selectAllVisible),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'clear',
                 child: Row(
                   children: [
-                    Icon(Icons.deselect_rounded, size: 18, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('Clear Selection'),
+                    const Icon(Icons.deselect_rounded, size: 18, color: Colors.red),
+                    const SizedBox(width: 8),
+                    Text(l10n.clearSelection),
                   ],
                 ),
               ),
@@ -656,7 +662,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                   children: [
                     Expanded(
                       child: _buildStatBadge(
-                        label: 'Total',
+                        label: l10n.statTotal,
                         value: '$totalStudents',
                         icon: Icons.groups_rounded,
                         color: Colors.blue,
@@ -666,7 +672,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: _buildStatBadge(
-                        label: 'Selected',
+                        label: l10n.statSelected,
                         value: '${_selectedStudentIds.length}',
                         icon: Icons.check_circle_outline_rounded,
                         color: AppColors.primaryAdmin,
@@ -676,7 +682,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: _buildStatBadge(
-                        label: 'SMS Ready',
+                        label: l10n.statSmsReady,
                         value: '$studentsWithPhone',
                         icon: Icons.phone_in_talk_rounded,
                         color: Colors.teal,
@@ -687,7 +693,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: _buildStatBadge(
-                          label: 'Missing',
+                          label: l10n.statMissing,
                           value: '$missingPhoneCount',
                           icon: Icons.phonelink_erase_rounded,
                           color: Colors.orange,
@@ -703,7 +709,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Search student by name or roll...',
+                    hintText: l10n.searchStudentByRollHint,
                     hintStyle: TextStyle(
                       fontSize: 13,
                       color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
@@ -768,15 +774,15 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                             value: _selectedClassId,
                             hint: Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.school_outlined,
                                   size: 16,
                                   color: AppColors.primaryAdmin,
                                 ),
                                 const SizedBox(width: 6),
-                                const Text(
-                                  'All Classes',
-                                  style: TextStyle(fontSize: 12),
+                                Text(
+                                  l10n.allClasses,
+                                  style: const TextStyle(fontSize: 12),
                                 ),
                               ],
                             ),
@@ -785,11 +791,11 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                               size: 18,
                             ),
                             items: [
-                              const DropdownMenuItem<String>(
+                              DropdownMenuItem<String>(
                                 value: null,
                                 child: Text(
-                                  'All Classes',
-                                  style: TextStyle(fontSize: 12.5),
+                                  l10n.allClasses,
+                                  style: const TextStyle(fontSize: 12.5),
                                 ),
                               ),
                               ...classes.map(
@@ -835,15 +841,15 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                             value: _selectedSectionId,
                             hint: Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.grid_view_rounded,
                                   size: 16,
                                   color: AppColors.primaryAdmin,
                                 ),
                                 const SizedBox(width: 6),
-                                const Text(
-                                  'All Sections',
-                                  style: TextStyle(fontSize: 12),
+                                Text(
+                                  l10n.allSections,
+                                  style: const TextStyle(fontSize: 12),
                                 ),
                               ],
                             ),
@@ -852,11 +858,11 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                               size: 18,
                             ),
                             items: [
-                              const DropdownMenuItem<String>(
+                              DropdownMenuItem<String>(
                                 value: null,
                                 child: Text(
-                                  'All Sections',
-                                  style: TextStyle(fontSize: 12.5),
+                                  l10n.allSections,
+                                  style: const TextStyle(fontSize: 12.5),
                                 ),
                               ),
                               ...sections
@@ -895,20 +901,20 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                   child: Row(
                     children: [
                       _buildFilterChip(
-                        label: 'All ($totalStudents)',
+                        label: l10n.filterChipAllCount(totalStudents),
                         chipKey: 'all',
                         isDark: isDark,
                       ),
                       const SizedBox(width: 6),
                       _buildFilterChip(
-                        label: 'Selected (${_selectedStudentIds.length})',
+                        label: l10n.filterChipSelectedCount(_selectedStudentIds.length),
                         chipKey: 'selected',
                         isDark: isDark,
                         badgeColor: AppColors.primaryAdmin,
                       ),
                       const SizedBox(width: 6),
                       _buildFilterChip(
-                        label: 'With Phone ($studentsWithPhone)',
+                        label: l10n.filterChipWithPhoneCount(studentsWithPhone),
                         chipKey: 'with_phone',
                         isDark: isDark,
                         badgeColor: Colors.teal,
@@ -916,7 +922,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                       if (missingPhoneCount > 0) ...[
                         const SizedBox(width: 6),
                         _buildFilterChip(
-                          label: 'No Phone ($missingPhoneCount)',
+                          label: l10n.filterChipNoPhoneCount(missingPhoneCount),
                           chipKey: 'no_phone',
                           isDark: isDark,
                           badgeColor: Colors.orange,
@@ -952,8 +958,8 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                           const SizedBox(height: 12),
                           Text(
                             _selectedFilterChip == 'selected'
-                                ? 'No students selected yet.'
-                                : 'No students found matching filter.',
+                                ? l10n.noStudentsSelectedYet
+                                : l10n.noStudentsMatchingFilter,
                             style: const TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: 14,
@@ -971,7 +977,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                                 elevation: 0,
                               ),
                               icon: const Icon(Icons.select_all_rounded, size: 16),
-                              label: const Text('Select All with Phone'),
+                              label: Text(l10n.selectAllWithPhone),
                             ),
                         ],
                       ),
@@ -1128,10 +1134,11 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
     Student student,
     bool isDark,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final isSelected = _selectedStudentIds.contains(student.userId);
     final hasContact = student.guardianContact.isNotEmpty;
     final classSection = _getClassSectionText(context, student);
-    final name = student.user?.name ?? 'Unknown Student';
+    final name = student.user?.name ?? l10n.unknownStudent;
     final avatarUrl = student.user?.avatar;
 
     return Card(
@@ -1243,7 +1250,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              'Roll #${student.rollId}',
+                              l10n.rollLabel(student.rollId),
                               style: TextStyle(
                                 fontSize: 10.5,
                                 fontWeight: FontWeight.w600,
@@ -1273,7 +1280,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                           child: Text(
                             hasContact
                                 ? student.guardianContact
-                                : 'No contact number registered',
+                                : l10n.noContactNumberRegistered,
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: hasContact
@@ -1309,6 +1316,9 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
     int maxSinglePart,
     int studentsWithPhone,
   ) {
+    final l10n = AppLocalizations.of(context)!;
+    final quickTemplates = _getQuickTemplates(l10n);
+
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
       decoration: BoxDecoration(
@@ -1353,14 +1363,14 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                         fontWeight: FontWeight.bold,
                         color: isDark ? Colors.white : Colors.black87,
                       ),
-                      items: const [
+                      items: [
                         DropdownMenuItem(
                           value: 'Normal SMS',
-                          child: Text('Normal SMS (Direct)'),
+                          child: Text(l10n.normalSmsDirect),
                         ),
                         DropdownMenuItem(
                           value: 'Mask SMS',
-                          child: Text('Mask SMS (School Care)'),
+                          child: Text(l10n.maskSmsCare),
                         ),
                       ],
                       onChanged: (val) {
@@ -1375,11 +1385,11 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
 
                 // Quick Templates Button
                 PopupMenuButton<Map<String, String>>(
-                  tooltip: 'Insert Quick Template',
+                  tooltip: l10n.quickTemplateInsertTooltip,
                   onSelected: (template) {
                     _messageController.text = template['text'] ?? '';
                   },
-                  itemBuilder: (context) => _quickTemplates.map((t) {
+                  itemBuilder: (context) => quickTemplates.map((t) {
                     return PopupMenuItem(
                       value: t,
                       child: Column(
@@ -1416,17 +1426,17 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                         color: AppColors.primaryAdmin.withValues(alpha: 0.2),
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.dashboard_customize_outlined,
                           size: 15,
                           color: AppColors.primaryAdmin,
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
-                          'Templates',
-                          style: TextStyle(
+                          l10n.quickTemplatesTitle,
+                          style: const TextStyle(
                             fontSize: 11.5,
                             fontWeight: FontWeight.bold,
                             color: AppColors.primaryAdmin,
@@ -1447,7 +1457,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
               minLines: 2,
               style: const TextStyle(fontSize: 13),
               decoration: InputDecoration(
-                hintText: 'Type your message or pick a template above...',
+                hintText: l10n.typeMessageHint,
                 hintStyle: TextStyle(
                   fontSize: 12.5,
                   color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
@@ -1485,7 +1495,7 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${_selectedStudentIds.length} Selected recipient(s)',
+                  l10n.selectedRecipientsCount(_selectedStudentIds.length),
                   style: TextStyle(
                     fontSize: 11.5,
                     fontWeight: FontWeight.w600,
@@ -1503,7 +1513,11 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                     ),
                     const SizedBox(width: 3),
                     Text(
-                      '${_messageController.text.length}/$maxSinglePart chars ($smsParts SMS)',
+                      l10n.charsAndSmsCount(
+                        _messageController.text.length,
+                        maxSinglePart,
+                        smsParts,
+                      ),
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -1545,8 +1559,8 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
                   : const Icon(Icons.send_rounded, size: 18),
               label: Text(
                 _isSending
-                    ? 'Broadcasting SMS...'
-                    : 'Send Bulk SMS (${_selectedStudentIds.length})',
+                    ? l10n.broadcastingSms
+                    : l10n.sendBulkSmsButton(_selectedStudentIds.length),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,

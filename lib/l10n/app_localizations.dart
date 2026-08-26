@@ -4321,6 +4321,330 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rescan'**
   String get rescanButton;
+
+  /// No description provided for @bulkSmsBroadcastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk SMS Broadcast'**
+  String get bulkSmsBroadcastTitle;
+
+  /// No description provided for @bulkSmsBroadcastSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach parents & guardians instantly'**
+  String get bulkSmsBroadcastSubtitle;
+
+  /// No description provided for @selectionActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Selection Actions'**
+  String get selectionActions;
+
+  /// No description provided for @selectAllWithPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All with Phone'**
+  String get selectAllWithPhone;
+
+  /// No description provided for @selectAllVisible.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All Visible'**
+  String get selectAllVisible;
+
+  /// No description provided for @clearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Selection'**
+  String get clearSelection;
+
+  /// No description provided for @statTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get statTotal;
+
+  /// No description provided for @statSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get statSelected;
+
+  /// No description provided for @statSmsReady.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS Ready'**
+  String get statSmsReady;
+
+  /// No description provided for @statMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing'**
+  String get statMissing;
+
+  /// No description provided for @searchStudentByRollHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search student by name or roll...'**
+  String get searchStudentByRollHint;
+
+  /// No description provided for @filterChipAllCount.
+  ///
+  /// In en, this message translates to:
+  /// **'All ({count})'**
+  String filterChipAllCount(int count);
+
+  /// No description provided for @filterChipSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected ({count})'**
+  String filterChipSelectedCount(int count);
+
+  /// No description provided for @filterChipWithPhoneCount.
+  ///
+  /// In en, this message translates to:
+  /// **'With Phone ({count})'**
+  String filterChipWithPhoneCount(int count);
+
+  /// No description provided for @filterChipNoPhoneCount.
+  ///
+  /// In en, this message translates to:
+  /// **'No Phone ({count})'**
+  String filterChipNoPhoneCount(int count);
+
+  /// No description provided for @noStudentsSelectedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No students selected yet.'**
+  String get noStudentsSelectedYet;
+
+  /// No description provided for @noStudentsMatchingFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No students found matching filter.'**
+  String get noStudentsMatchingFilter;
+
+  /// No description provided for @noContactNumberRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'No contact number registered'**
+  String get noContactNumberRegistered;
+
+  /// No description provided for @doesNotHaveContact.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} does not have a contact number.'**
+  String doesNotHaveContact(String name);
+
+  /// No description provided for @normalSmsDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal SMS (Direct)'**
+  String get normalSmsDirect;
+
+  /// No description provided for @maskSmsCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Mask SMS (School Care)'**
+  String get maskSmsCare;
+
+  /// No description provided for @maskedSchoolCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Masked (School Care)'**
+  String get maskedSchoolCare;
+
+  /// No description provided for @normalSmsDirectValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal SMS (Direct)'**
+  String get normalSmsDirectValue;
+
+  /// No description provided for @quickTemplatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Templates'**
+  String get quickTemplatesTitle;
+
+  /// No description provided for @quickTemplateInsertTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert Quick Template'**
+  String get quickTemplateInsertTooltip;
+
+  /// No description provided for @typeMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your message or pick a template above...'**
+  String get typeMessageHint;
+
+  /// No description provided for @selectedRecipientsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Selected recipient(s)'**
+  String selectedRecipientsCount(int count);
+
+  /// No description provided for @charsAndSmsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{chars}/{maxChars} chars ({parts} SMS)'**
+  String charsAndSmsCount(int chars, int maxChars, int parts);
+
+  /// No description provided for @broadcastingSms.
+  ///
+  /// In en, this message translates to:
+  /// **'Broadcasting SMS...'**
+  String get broadcastingSms;
+
+  /// No description provided for @sendBulkSmsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Bulk SMS ({count})'**
+  String sendBulkSmsButton(int count);
+
+  /// No description provided for @confirmBulkSmsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Bulk SMS Broadcast'**
+  String get confirmBulkSmsTitle;
+
+  /// No description provided for @reviewCampaignDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Review campaign details before sending'**
+  String get reviewCampaignDetails;
+
+  /// No description provided for @recipientsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipients'**
+  String get recipientsLabel;
+
+  /// No description provided for @parentsGuardiansCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Parents/Guardians'**
+  String parentsGuardiansCount(int count);
+
+  /// No description provided for @smsTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS Type'**
+  String get smsTypeLabel;
+
+  /// No description provided for @estimatedSmsCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated SMS Credits'**
+  String get estimatedSmsCredits;
+
+  /// No description provided for @smsCreditsBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'{totalCredits} Credits ({partsPerMsg} part × {recipients} rec.)'**
+  String smsCreditsBreakdown(int totalCredits, int partsPerMsg, int recipients);
+
+  /// No description provided for @messagePreviewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Message Preview:'**
+  String get messagePreviewLabel;
+
+  /// No description provided for @sendNowButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Now'**
+  String get sendNowButton;
+
+  /// No description provided for @selectAtLeastOneStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one student recipient.'**
+  String get selectAtLeastOneStudent;
+
+  /// No description provided for @enterSmsMessageToBroadcast.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an SMS message to broadcast.'**
+  String get enterSmsMessageToBroadcast;
+
+  /// No description provided for @noSelectedStudentsHavePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'None of the selected students have a valid phone number.'**
+  String get noSelectedStudentsHavePhone;
+
+  /// No description provided for @bulkSmsSentSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk SMS broadcast sent to {count} recipients!'**
+  String bulkSmsSentSuccess(int count);
+
+  /// No description provided for @bulkSmsSentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send SMS. Please check credentials or API gateway.'**
+  String get bulkSmsSentFailed;
+
+  /// No description provided for @templateSchoolClosedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'School Closed'**
+  String get templateSchoolClosedTitle;
+
+  /// No description provided for @templateSchoolClosedText.
+  ///
+  /// In en, this message translates to:
+  /// **'Dear Parent, the school will remain closed on [Date] due to [Reason]. Regular classes will resume on [Date].'**
+  String get templateSchoolClosedText;
+
+  /// No description provided for @templateExamReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Reminder'**
+  String get templateExamReminderTitle;
+
+  /// No description provided for @templateExamReminderText.
+  ///
+  /// In en, this message translates to:
+  /// **'Dear Parent, term examinations begin on [Date]. Please ensure your child carries their admit card and arrives on time.'**
+  String get templateExamReminderText;
+
+  /// No description provided for @templateFeeDueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee Due Notice'**
+  String get templateFeeDueTitle;
+
+  /// No description provided for @templateFeeDueText.
+  ///
+  /// In en, this message translates to:
+  /// **'Dear Parent, this is a reminder regarding pending school fees for [Month]. Please clear the dues at the school office.'**
+  String get templateFeeDueText;
+
+  /// No description provided for @templatePtmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'PTM Meeting'**
+  String get templatePtmTitle;
+
+  /// No description provided for @templatePtmText.
+  ///
+  /// In en, this message translates to:
+  /// **'Dear Parent, the Parent-Teacher Meeting (PTM) is scheduled on [Date] at [Time]. Your presence is highly requested.'**
+  String get templatePtmText;
+
+  /// No description provided for @templateEmergencyAlertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency Alert'**
+  String get templateEmergencyAlertTitle;
+
+  /// No description provided for @templateEmergencyAlertText.
+  ///
+  /// In en, this message translates to:
+  /// **'Urgent: Due to unavoidable circumstances, classes for today are suspended. Please arrange to pick up your child.'**
+  String get templateEmergencyAlertText;
 }
 
 class _AppLocalizationsDelegate

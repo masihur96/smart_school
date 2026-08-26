@@ -2304,4 +2304,201 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rescanButton => 'Rescan';
+
+  @override
+  String get bulkSmsBroadcastTitle => 'Bulk SMS Broadcast';
+
+  @override
+  String get bulkSmsBroadcastSubtitle => 'Reach parents & guardians instantly';
+
+  @override
+  String get selectionActions => 'Selection Actions';
+
+  @override
+  String get selectAllWithPhone => 'Select All with Phone';
+
+  @override
+  String get selectAllVisible => 'Select All Visible';
+
+  @override
+  String get clearSelection => 'Clear Selection';
+
+  @override
+  String get statTotal => 'Total';
+
+  @override
+  String get statSelected => 'Selected';
+
+  @override
+  String get statSmsReady => 'SMS Ready';
+
+  @override
+  String get statMissing => 'Missing';
+
+  @override
+  String get searchStudentByRollHint => 'Search student by name or roll...';
+
+  @override
+  String filterChipAllCount(int count) {
+    return 'All ($count)';
+  }
+
+  @override
+  String filterChipSelectedCount(int count) {
+    return 'Selected ($count)';
+  }
+
+  @override
+  String filterChipWithPhoneCount(int count) {
+    return 'With Phone ($count)';
+  }
+
+  @override
+  String filterChipNoPhoneCount(int count) {
+    return 'No Phone ($count)';
+  }
+
+  @override
+  String get noStudentsSelectedYet => 'No students selected yet.';
+
+  @override
+  String get noStudentsMatchingFilter => 'No students found matching filter.';
+
+  @override
+  String get noContactNumberRegistered => 'No contact number registered';
+
+  @override
+  String doesNotHaveContact(String name) {
+    return '$name does not have a contact number.';
+  }
+
+  @override
+  String get normalSmsDirect => 'Normal SMS (Direct)';
+
+  @override
+  String get maskSmsCare => 'Mask SMS (School Care)';
+
+  @override
+  String get maskedSchoolCare => 'Masked (School Care)';
+
+  @override
+  String get normalSmsDirectValue => 'Normal SMS (Direct)';
+
+  @override
+  String get quickTemplatesTitle => 'Templates';
+
+  @override
+  String get quickTemplateInsertTooltip => 'Insert Quick Template';
+
+  @override
+  String get typeMessageHint => 'Type your message or pick a template above...';
+
+  @override
+  String selectedRecipientsCount(int count) {
+    return '$count Selected recipient(s)';
+  }
+
+  @override
+  String charsAndSmsCount(int chars, int maxChars, int parts) {
+    return '$chars/$maxChars chars ($parts SMS)';
+  }
+
+  @override
+  String get broadcastingSms => 'Broadcasting SMS...';
+
+  @override
+  String sendBulkSmsButton(int count) {
+    return 'Send Bulk SMS ($count)';
+  }
+
+  @override
+  String get confirmBulkSmsTitle => 'Confirm Bulk SMS Broadcast';
+
+  @override
+  String get reviewCampaignDetails => 'Review campaign details before sending';
+
+  @override
+  String get recipientsLabel => 'Recipients';
+
+  @override
+  String parentsGuardiansCount(int count) {
+    return '$count Parents/Guardians';
+  }
+
+  @override
+  String get smsTypeLabel => 'SMS Type';
+
+  @override
+  String get estimatedSmsCredits => 'Estimated SMS Credits';
+
+  @override
+  String smsCreditsBreakdown(
+    int totalCredits,
+    int partsPerMsg,
+    int recipients,
+  ) {
+    return '$totalCredits Credits ($partsPerMsg part × $recipients rec.)';
+  }
+
+  @override
+  String get messagePreviewLabel => 'Message Preview:';
+
+  @override
+  String get sendNowButton => 'Send Now';
+
+  @override
+  String get selectAtLeastOneStudent =>
+      'Please select at least one student recipient.';
+
+  @override
+  String get enterSmsMessageToBroadcast =>
+      'Please enter an SMS message to broadcast.';
+
+  @override
+  String get noSelectedStudentsHavePhone =>
+      'None of the selected students have a valid phone number.';
+
+  @override
+  String bulkSmsSentSuccess(int count) {
+    return 'Bulk SMS broadcast sent to $count recipients!';
+  }
+
+  @override
+  String get bulkSmsSentFailed =>
+      'Failed to send SMS. Please check credentials or API gateway.';
+
+  @override
+  String get templateSchoolClosedTitle => 'School Closed';
+
+  @override
+  String get templateSchoolClosedText =>
+      'Dear Parent, the school will remain closed on [Date] due to [Reason]. Regular classes will resume on [Date].';
+
+  @override
+  String get templateExamReminderTitle => 'Exam Reminder';
+
+  @override
+  String get templateExamReminderText =>
+      'Dear Parent, term examinations begin on [Date]. Please ensure your child carries their admit card and arrives on time.';
+
+  @override
+  String get templateFeeDueTitle => 'Fee Due Notice';
+
+  @override
+  String get templateFeeDueText =>
+      'Dear Parent, this is a reminder regarding pending school fees for [Month]. Please clear the dues at the school office.';
+
+  @override
+  String get templatePtmTitle => 'PTM Meeting';
+
+  @override
+  String get templatePtmText =>
+      'Dear Parent, the Parent-Teacher Meeting (PTM) is scheduled on [Date] at [Time]. Your presence is highly requested.';
+
+  @override
+  String get templateEmergencyAlertTitle => 'Emergency Alert';
+
+  @override
+  String get templateEmergencyAlertText =>
+      'Urgent: Due to unavoidable circumstances, classes for today are suspended. Please arrange to pick up your child.';
 }

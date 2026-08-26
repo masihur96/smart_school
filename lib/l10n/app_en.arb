@@ -1240,5 +1240,148 @@
   "studentIdLabel": "Student ID",
   "nameLabel": "Name",
   "barcodeLabel": "Barcode",
-  "rescanButton": "Rescan"
+  "rescanButton": "Rescan",
+  "bulkSmsBroadcastTitle": "Bulk SMS Broadcast",
+  "bulkSmsBroadcastSubtitle": "Reach parents & guardians instantly",
+  "selectionActions": "Selection Actions",
+  "selectAllWithPhone": "Select All with Phone",
+  "selectAllVisible": "Select All Visible",
+  "clearSelection": "Clear Selection",
+  "statTotal": "Total",
+  "statSelected": "Selected",
+  "statSmsReady": "SMS Ready",
+  "statMissing": "Missing",
+  "searchStudentByRollHint": "Search student by name or roll...",
+  "filterChipAllCount": "All ({count})",
+  "@filterChipAllCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filterChipSelectedCount": "Selected ({count})",
+  "@filterChipSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filterChipWithPhoneCount": "With Phone ({count})",
+  "@filterChipWithPhoneCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filterChipNoPhoneCount": "No Phone ({count})",
+  "@filterChipNoPhoneCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noStudentsSelectedYet": "No students selected yet.",
+  "noStudentsMatchingFilter": "No students found matching filter.",
+  "noContactNumberRegistered": "No contact number registered",
+  "doesNotHaveContact": "{name} does not have a contact number.",
+  "@doesNotHaveContact": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "normalSmsDirect": "Normal SMS (Direct)",
+  "maskSmsCare": "Mask SMS (School Care)",
+  "maskedSchoolCare": "Masked (School Care)",
+  "normalSmsDirectValue": "Normal SMS (Direct)",
+  "quickTemplatesTitle": "Templates",
+  "quickTemplateInsertTooltip": "Insert Quick Template",
+  "typeMessageHint": "Type your message or pick a template above...",
+  "selectedRecipientsCount": "{count} Selected recipient(s)",
+  "@selectedRecipientsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "charsAndSmsCount": "{chars}/{maxChars} chars ({parts} SMS)",
+  "@charsAndSmsCount": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      },
+      "maxChars": {
+        "type": "int"
+      },
+      "parts": {
+        "type": "int"
+      }
+    }
+  },
+  "broadcastingSms": "Broadcasting SMS...",
+  "sendBulkSmsButton": "Send Bulk SMS ({count})",
+  "@sendBulkSmsButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "confirmBulkSmsTitle": "Confirm Bulk SMS Broadcast",
+  "reviewCampaignDetails": "Review campaign details before sending",
+  "recipientsLabel": "Recipients",
+  "parentsGuardiansCount": "{count} Parents/Guardians",
+  "@parentsGuardiansCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "smsTypeLabel": "SMS Type",
+  "estimatedSmsCredits": "Estimated SMS Credits",
+  "smsCreditsBreakdown": "{totalCredits} Credits ({partsPerMsg} part × {recipients} rec.)",
+  "@smsCreditsBreakdown": {
+    "placeholders": {
+      "totalCredits": {
+        "type": "int"
+      },
+      "partsPerMsg": {
+        "type": "int"
+      },
+      "recipients": {
+        "type": "int"
+      }
+    }
+  },
+  "messagePreviewLabel": "Message Preview:",
+  "sendNowButton": "Send Now",
+  "selectAtLeastOneStudent": "Please select at least one student recipient.",
+  "enterSmsMessageToBroadcast": "Please enter an SMS message to broadcast.",
+  "noSelectedStudentsHavePhone": "None of the selected students have a valid phone number.",
+  "bulkSmsSentSuccess": "Bulk SMS broadcast sent to {count} recipients!",
+  "@bulkSmsSentSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkSmsSentFailed": "Failed to send SMS. Please check credentials or API gateway.",
+  "templateSchoolClosedTitle": "School Closed",
+  "templateSchoolClosedText": "Dear Parent, the school will remain closed on [Date] due to [Reason]. Regular classes will resume on [Date].",
+  "templateExamReminderTitle": "Exam Reminder",
+  "templateExamReminderText": "Dear Parent, term examinations begin on [Date]. Please ensure your child carries their admit card and arrives on time.",
+  "templateFeeDueTitle": "Fee Due Notice",
+  "templateFeeDueText": "Dear Parent, this is a reminder regarding pending school fees for [Month]. Please clear the dues at the school office.",
+  "templatePtmTitle": "PTM Meeting",
+  "templatePtmText": "Dear Parent, the Parent-Teacher Meeting (PTM) is scheduled on [Date] at [Time]. Your presence is highly requested.",
+  "templateEmergencyAlertTitle": "Emergency Alert",
+  "templateEmergencyAlertText": "Urgent: Due to unavoidable circumstances, classes for today are suspended. Please arrange to pick up your child."
 }

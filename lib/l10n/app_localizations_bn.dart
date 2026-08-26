@@ -2298,4 +2298,205 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get rescanButton => 'পুনরায় স্ক্যান করুন';
+
+  @override
+  String get bulkSmsBroadcastTitle => 'বাল্ক এসএমএস ব্রডকাস্ট';
+
+  @override
+  String get bulkSmsBroadcastSubtitle => 'অভিভাবকদের সাথে সাথে বার্তা পাঠান';
+
+  @override
+  String get selectionActions => 'নির্বাচন সংক্রান্ত কাজ';
+
+  @override
+  String get selectAllWithPhone => 'ফোন নম্বরযুক্ত সকলকে নির্বাচন করুন';
+
+  @override
+  String get selectAllVisible => 'দৃশ্যমান সকলকে নির্বাচন করুন';
+
+  @override
+  String get clearSelection => 'নির্বাচন বাতিল করুন';
+
+  @override
+  String get statTotal => 'মোট';
+
+  @override
+  String get statSelected => 'নির্বাচিত';
+
+  @override
+  String get statSmsReady => 'এসএমএস প্রস্তুত';
+
+  @override
+  String get statMissing => 'অনুপস্থিত';
+
+  @override
+  String get searchStudentByRollHint => 'নাম বা রোল দিয়ে শিক্ষার্থী খুঁজুন...';
+
+  @override
+  String filterChipAllCount(int count) {
+    return 'সকল ($count)';
+  }
+
+  @override
+  String filterChipSelectedCount(int count) {
+    return 'নির্বাচিত ($count)';
+  }
+
+  @override
+  String filterChipWithPhoneCount(int count) {
+    return 'ফোনসহ ($count)';
+  }
+
+  @override
+  String filterChipNoPhoneCount(int count) {
+    return 'ফোনবিহীন ($count)';
+  }
+
+  @override
+  String get noStudentsSelectedYet =>
+      'এখনো কোনো শিক্ষার্থী নির্বাচন করা হয়নি।';
+
+  @override
+  String get noStudentsMatchingFilter =>
+      'ফিল্টারের সাথে মেলে এমন কোনো শিক্ষার্থী পাওয়া যায়নি।';
+
+  @override
+  String get noContactNumberRegistered => 'কোনো পরিচিতি নম্বর নিবন্ধিত নেই';
+
+  @override
+  String doesNotHaveContact(String name) {
+    return '$name এর কোনো পরিচিতি নম্বর নেই।';
+  }
+
+  @override
+  String get normalSmsDirect => 'সাধারণ এসএমএস (সরাসরি)';
+
+  @override
+  String get maskSmsCare => 'মাস্কড এসএমএস (স্কুল কেয়ার)';
+
+  @override
+  String get maskedSchoolCare => 'মাস্কড (স্কুল কেয়ার)';
+
+  @override
+  String get normalSmsDirectValue => 'সাধারণ এসএমএস (সরাসরি)';
+
+  @override
+  String get quickTemplatesTitle => 'টেমপ্লেট';
+
+  @override
+  String get quickTemplateInsertTooltip => 'দ্রুত টেমপ্লেট যোগ করুন';
+
+  @override
+  String get typeMessageHint =>
+      'বার্তা লিখুন অথবা উপরের টেমপ্লেট নির্বাচন করুন...';
+
+  @override
+  String selectedRecipientsCount(int count) {
+    return '$count জন নির্বাচিত গ্রাহক';
+  }
+
+  @override
+  String charsAndSmsCount(int chars, int maxChars, int parts) {
+    return '$chars/$maxChars অক্ষর ($parts টি এসএমএস)';
+  }
+
+  @override
+  String get broadcastingSms => 'এসএমএস পাঠানো হচ্ছে...';
+
+  @override
+  String sendBulkSmsButton(int count) {
+    return 'বাল্ক এসএমএস পাঠান ($count)';
+  }
+
+  @override
+  String get confirmBulkSmsTitle => 'বাল্ক এসএমএস বার্তা নিশ্চিত করুন';
+
+  @override
+  String get reviewCampaignDetails =>
+      'পাঠানোর আগে বার্তার বিবরণ পর্যালোচনা করুন';
+
+  @override
+  String get recipientsLabel => 'প্রাপকবৃন্দ';
+
+  @override
+  String parentsGuardiansCount(int count) {
+    return '$count জন অভিভাবক';
+  }
+
+  @override
+  String get smsTypeLabel => 'এসএমএস ধরন';
+
+  @override
+  String get estimatedSmsCredits => 'আনুমানিক এসএমএস ক্রেডিট';
+
+  @override
+  String smsCreditsBreakdown(
+    int totalCredits,
+    int partsPerMsg,
+    int recipients,
+  ) {
+    return '$totalCredits টি ক্রেডিট ($partsPerMsg অংশ × $recipients জন)';
+  }
+
+  @override
+  String get messagePreviewLabel => 'বার্তার বিবরণী:';
+
+  @override
+  String get sendNowButton => 'এখনই পাঠান';
+
+  @override
+  String get selectAtLeastOneStudent =>
+      'অনুগ্রহ করে অন্তত একজন শিক্ষার্থী নির্বাচন করুন।';
+
+  @override
+  String get enterSmsMessageToBroadcast =>
+      'অনুগ্রহ করে পাঠানোর জন্য একটি এসএমএস লিখুন।';
+
+  @override
+  String get noSelectedStudentsHavePhone =>
+      'নির্বাচিত কোনো শিক্ষার্থীর বৈধ ফোন নম্বর নেই।';
+
+  @override
+  String bulkSmsSentSuccess(int count) {
+    return '$count জন গ্রাহকের কাছে বাল্ক এসএমএস পাঠানো হয়েছে!';
+  }
+
+  @override
+  String get bulkSmsSentFailed =>
+      'এসএমএস পাঠাতে ব্যর্থ হয়েছে। শংসাপত্র বা এপিআই গেটওয়ে পরীক্ষা করুন।';
+
+  @override
+  String get templateSchoolClosedTitle => 'বিদ্যালয় বন্ধ';
+
+  @override
+  String get templateSchoolClosedText =>
+      'প্রিয় অভিভাবক, [কারণ]-এর কারণে [তারিখ] বিদ্যালয়ে পাঠদান বন্ধ থাকবে। [তারিখ] হতে পুনরায় পাঠদান শুরু হবে।';
+
+  @override
+  String get templateExamReminderTitle => 'পরীক্ষার রিমাইন্ডার';
+
+  @override
+  String get templateExamReminderText =>
+      'প্রিয় অভিভাবক, [তারিখ] থেকে সাময়িক পরীক্ষা শুরু হচ্ছে। অনুগ্রহ করে প্রবেশপত্র সাথে রাখা এবং সময়মত উপস্থিতি নিশ্চিত করুন।';
+
+  @override
+  String get templateFeeDueTitle => 'ফি বকেয়া নোটিশ';
+
+  @override
+  String get templateFeeDueText =>
+      'প্রিয় অভিভাবক, [মাস]-এর বকেয়া স্কুল ফি পরিশোধের স্মারক পত্র। অনুগ্রহ করে বিদ্যালয়ের অফিসে ফি পরিশোধ করুন।';
+
+  @override
+  String get templatePtmTitle => 'অভিভাবক সভা';
+
+  @override
+  String get templatePtmText =>
+      'প্রিয় অভিভাবক, আগামী [তারিখ] সকাল [সময়]-এ শিক্ষক-অভিভাবক সভা অনুষ্ঠিত হবে। আপনার উপস্থিতি বিশেষভাবে কাম্য।';
+
+  @override
+  String get templateEmergencyAlertTitle => 'জরুরি সতর্কবার্তা';
+
+  @override
+  String get templateEmergencyAlertText =>
+      'জরুরি: অনাকাঙ্ক্ষিত পরিস্থিতির কারণে আজকের পাঠদান স্থগিত করা হলো। আপনার সন্তানকে নিয়ে যাওয়ার ব্যবস্থা করুন।';
 }
