@@ -562,5 +562,11 @@
   "monthNov": "Nov",
   "monthDec": "Dec",
   "attLabel": "Att",
-  "hwLabel": "HW"
+  "hwLabel": "HW",
+  "onlineClasses": "Online Classes",
+  "library": "Library",
+  "bulkSms": "Bulk SMS",
+  "expenseTracking": "Expense Tracking",
+  "academicBooks": "Academic Books",
+  "globalDashboard": "Global Dashboard"
 }

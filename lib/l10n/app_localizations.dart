@@ -2401,6 +2401,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'HW'**
   String get hwLabel;
+
+  /// No description provided for @onlineClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Online Classes'**
+  String get onlineClasses;
+
+  /// No description provided for @library.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get library;
+
+  /// No description provided for @bulkSms.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk SMS'**
+  String get bulkSms;
+
+  /// No description provided for @expenseTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense Tracking'**
+  String get expenseTracking;
+
+  /// No description provided for @academicBooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Books'**
+  String get academicBooks;
+
+  /// No description provided for @globalDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Global Dashboard'**
+  String get globalDashboard;
 }
 
 class _AppLocalizationsDelegate

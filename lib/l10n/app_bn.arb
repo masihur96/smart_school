@@ -545,5 +545,11 @@
   "monthNov": "নভে",
   "monthDec": "ডিসে",
   "attLabel": "উপস্থি",
-  "hwLabel": "হোমওয়া"
+  "hwLabel": "হোমওয়া",
+  "onlineClasses": "অনলাইন ক্লাস",
+  "library": "লাইব্রেরি",
+  "bulkSms": "বাল্ক এসএমএস",
+  "expenseTracking": "ব্যয় ট্র্যাকিং",
+  "academicBooks": "একাডেমিক বই",
+  "globalDashboard": "গ্লোবাল ড্যাশবোর্ড"
 }

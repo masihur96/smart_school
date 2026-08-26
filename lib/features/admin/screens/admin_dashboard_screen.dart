@@ -78,21 +78,6 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
   bool _teacherPerfFetched = false;
   bool _studentPerfFetched = false;
 
-  final List<String> _months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-
   @override
   void initState() {
     super.initState();

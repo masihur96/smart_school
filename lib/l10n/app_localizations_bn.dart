@@ -1232,4 +1232,22 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get hwLabel => 'হোমওয়া';
+
+  @override
+  String get onlineClasses => 'অনলাইন ক্লাস';
+
+  @override
+  String get library => 'লাইব্রেরি';
+
+  @override
+  String get bulkSms => 'বাল্ক এসএমএস';
+
+  @override
+  String get expenseTracking => 'ব্যয় ট্র্যাকিং';
+
+  @override
+  String get academicBooks => 'একাডেমিক বই';
+
+  @override
+  String get globalDashboard => 'গ্লোবাল ড্যাশবোর্ড';
 }

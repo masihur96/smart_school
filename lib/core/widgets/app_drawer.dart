@@ -193,13 +193,13 @@ class AppDrawer extends StatelessWidget {
           MaterialPageRoute(builder: (_) => ExamManagementScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.video_call, 'Online Classes', () {
+      _buildDrawerItem(Icons.video_call, l10n.onlineClasses, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const OnlineClassListScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.local_library, 'Library', () {
+      _buildDrawerItem(Icons.local_library, l10n.library, () {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -207,19 +207,19 @@ class AppDrawer extends StatelessWidget {
           ),
         );
       }, context),
-      _buildDrawerItem(Icons.sms_outlined, "Bulk SMS", () {
+      _buildDrawerItem(Icons.sms_outlined, l10n.bulkSms, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => BulkSmsScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.account_balance_wallet, "Expense Tracking", () {
+      _buildDrawerItem(Icons.account_balance_wallet, l10n.expenseTracking, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => ExpenseDashboardScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.menu_book_rounded, "Academic Books", () {
+      _buildDrawerItem(Icons.menu_book_rounded, l10n.academicBooks, () {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -270,13 +270,13 @@ class AppDrawer extends StatelessWidget {
           MaterialPageRoute(builder: (_) => const TeacherExamScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.video_call, 'Online Classes', () {
+      _buildDrawerItem(Icons.video_call, l10n.onlineClasses, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const OnlineClassListScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.local_library, 'Library', () {
+      _buildDrawerItem(Icons.local_library, l10n.library, () {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -284,7 +284,7 @@ class AppDrawer extends StatelessWidget {
           ),
         );
       }, context),
-      _buildDrawerItem(Icons.menu_book_rounded, "Academic Books", () {
+      _buildDrawerItem(Icons.menu_book_rounded, l10n.academicBooks, () {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -338,13 +338,13 @@ class AppDrawer extends StatelessWidget {
           MaterialPageRoute(builder: (_) => StudentResultScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.video_call, 'Online Classes', () {
+      _buildDrawerItem(Icons.video_call, l10n.onlineClasses, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const OnlineClassListScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.local_library, 'Library', () {
+      _buildDrawerItem(Icons.local_library, l10n.library, () {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -352,7 +352,7 @@ class AppDrawer extends StatelessWidget {
           ),
         );
       }, context),
-      _buildDrawerItem(Icons.menu_book_rounded, "Academic Books", () {
+      _buildDrawerItem(Icons.menu_book_rounded, l10n.academicBooks, () {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -373,7 +373,7 @@ class AppDrawer extends StatelessWidget {
   List<Widget> _buildSuperAdminItems(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return [
-      _buildDrawerItem(Icons.admin_panel_settings, 'Global Dashboard', () {
+      _buildDrawerItem(Icons.admin_panel_settings, l10n.globalDashboard, () {
         // Since we are likely already here or navigating back
         Navigator.of(context).pop();
       }, context),

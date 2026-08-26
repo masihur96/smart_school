@@ -1220,4 +1220,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hwLabel => 'HW';
+
+  @override
+  String get onlineClasses => 'Online Classes';
+
+  @override
+  String get library => 'Library';
+
+  @override
+  String get bulkSms => 'Bulk SMS';
+
+  @override
+  String get expenseTracking => 'Expense Tracking';
+
+  @override
+  String get academicBooks => 'Academic Books';
+
+  @override
+  String get globalDashboard => 'Global Dashboard';
 }
