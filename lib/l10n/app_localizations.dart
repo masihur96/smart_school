@@ -2437,6 +2437,294 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Global Dashboard'**
   String get globalDashboard;
+
+  /// No description provided for @classAndSubjectSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Class & Subject Setup'**
+  String get classAndSubjectSetup;
+
+  /// No description provided for @classesTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes'**
+  String get classesTab;
+
+  /// No description provided for @sectionsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Sections'**
+  String get sectionsTab;
+
+  /// No description provided for @subjectsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Subjects'**
+  String get subjectsTab;
+
+  /// No description provided for @noClassesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No classes yet'**
+  String get noClassesYet;
+
+  /// No description provided for @noSectionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No sections yet'**
+  String get noSectionsYet;
+
+  /// No description provided for @noSubjectsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No subjects yet'**
+  String get noSubjectsYet;
+
+  /// No description provided for @tapPlusToAddOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to add one'**
+  String get tapPlusToAddOne;
+
+  /// No description provided for @noneAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'None assigned'**
+  String get noneAssigned;
+
+  /// No description provided for @addClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Class'**
+  String get addClass;
+
+  /// No description provided for @editClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Class'**
+  String get editClass;
+
+  /// No description provided for @addSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Section'**
+  String get addSection;
+
+  /// No description provided for @editSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Section'**
+  String get editSection;
+
+  /// No description provided for @addSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Subject'**
+  String get addSubject;
+
+  /// No description provided for @editSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Subject'**
+  String get editSubject;
+
+  /// No description provided for @update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get update;
+
+  /// No description provided for @className.
+  ///
+  /// In en, this message translates to:
+  /// **'Class Name'**
+  String get className;
+
+  /// No description provided for @descriptionOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get descriptionOptional;
+
+  /// No description provided for @selectClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Class'**
+  String get selectClass;
+
+  /// No description provided for @sectionNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Section Name (e.g. A)'**
+  String get sectionNameHint;
+
+  /// No description provided for @subjectNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject Name (e.g. Mathematics)'**
+  String get subjectNameHint;
+
+  /// No description provided for @subjectCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject Code (e.g. MATH101)'**
+  String get subjectCodeHint;
+
+  /// No description provided for @classDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Class Details'**
+  String get classDetails;
+
+  /// No description provided for @sectionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Section Details'**
+  String get sectionDetails;
+
+  /// No description provided for @subjectDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject Details'**
+  String get subjectDetails;
+
+  /// No description provided for @description.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get description;
+
+  /// No description provided for @code.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get code;
+
+  /// No description provided for @sectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Section'**
+  String get sectionLabel;
+
+  /// No description provided for @classLabel2.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get classLabel2;
+
+  /// No description provided for @deleteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{label}\"?\nThis action cannot be undone.'**
+  String deleteConfirmMessage(String label);
+
+  /// No description provided for @classAddedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Class added successfully'**
+  String get classAddedSuccessfully;
+
+  /// No description provided for @classUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Class updated successfully'**
+  String get classUpdatedSuccessfully;
+
+  /// No description provided for @failedToAddClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add class'**
+  String get failedToAddClass;
+
+  /// No description provided for @failedToUpdateClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update class'**
+  String get failedToUpdateClass;
+
+  /// No description provided for @sectionAddedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Section added successfully'**
+  String get sectionAddedSuccessfully;
+
+  /// No description provided for @sectionUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Section updated successfully'**
+  String get sectionUpdatedSuccessfully;
+
+  /// No description provided for @failedToAddSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add section'**
+  String get failedToAddSection;
+
+  /// No description provided for @failedToUpdateSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update section'**
+  String get failedToUpdateSection;
+
+  /// No description provided for @subjectAddedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject added successfully'**
+  String get subjectAddedSuccessfully;
+
+  /// No description provided for @subjectUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject updated successfully'**
+  String get subjectUpdatedSuccessfully;
+
+  /// No description provided for @failedToAddSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add subject'**
+  String get failedToAddSubject;
+
+  /// No description provided for @failedToUpdateSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update subject'**
+  String get failedToUpdateSubject;
+
+  /// No description provided for @deletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} deleted successfully'**
+  String deletedSuccessfully(String label);
+
+  /// No description provided for @failedToDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete {label}'**
+  String failedToDelete(String label);
+
+  /// No description provided for @saveAssignments.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Assignments'**
+  String get saveAssignments;
+
+  /// No description provided for @assignTeachersTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Teachers to {sectionName}'**
+  String assignTeachersTo(String sectionName);
+
+  /// No description provided for @updatedTeachersForSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated teachers for Section {sectionName}'**
+  String updatedTeachersForSection(String sectionName);
+
+  /// No description provided for @errorSavingAssignments.
+  ///
+  /// In en, this message translates to:
+  /// **'Error saving assignments: {error}'**
+  String errorSavingAssignments(String error);
 }
 
 class _AppLocalizationsDelegate

@@ -551,5 +551,95 @@
   "bulkSms": "বাল্ক এসএমএস",
   "expenseTracking": "ব্যয় ট্র্যাকিং",
   "academicBooks": "একাডেমিক বই",
-  "globalDashboard": "গ্লোবাল ড্যাশবোর্ড"
+  "globalDashboard": "গ্লোবাল ড্যাশবোর্ড",
+  "classAndSubjectSetup": "ক্লাস ও বিষয় সেটআপ",
+  "classesTab": "ক্লাসগুলি",
+  "sectionsTab": "শাখাগুলি",
+  "subjectsTab": "বিষয়গুলি",
+  "noClassesYet": "এখনও কোনো ক্লাস নেই",
+  "noSectionsYet": "এখনও কোনো শাখা নেই",
+  "noSubjectsYet": "এখনও কোনো বিষয় নেই",
+  "tapPlusToAddOne": "যোগ করতে + চাপুন",
+  "noneAssigned": "কেউ নির্ধারিত নেই",
+  "addClass": "ক্লাস যোগ করুন",
+  "editClass": "ক্লাস সম্পাদনা",
+  "addSection": "শাখা যোগ করুন",
+  "editSection": "শাখা সম্পাদনা",
+  "addSubject": "বিষয় যোগ করুন",
+  "editSubject": "বিষয় সম্পাদনা",
+  "update": "আপডেট করুন",
+  "className": "ক্লাসের নাম",
+  "descriptionOptional": "বিবরণ (ঐচ্ছিক)",
+  "selectClass": "ক্লাস নির্বাচন করুন",
+  "sectionNameHint": "শাখার নাম (যেমন: ক)",
+  "subjectNameHint": "বিষয়ের নাম (যেমন: গণিত)",
+  "subjectCodeHint": "বিষয়ের কোড (যেমন: MATH101)",
+  "classDetails": "ক্লাসের বিবরণ",
+  "sectionDetails": "শাখার বিবরণ",
+  "subjectDetails": "বিষয়ের বিবরণ",
+  "description": "বিবরণ",
+  "code": "কোড",
+  "sectionLabel": "শাখা",
+  "classLabel2": "ক্লাস",
+  "deleteConfirmMessage": "আপনি কি নিশ্চিত যে \"{label}\" মুছতে চান?\nএই পদক্ষেপ পূর্বাবস্থায় ফেরানো যাবে না।",
+  "@deleteConfirmMessage": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "classAddedSuccessfully": "ক্লাস সফলভাবে যোগ করা হয়েছে",
+  "classUpdatedSuccessfully": "ক্লাস সফলভাবে আপডেট হয়েছে",
+  "failedToAddClass": "ক্লাস যোগ করতে ব্যর্থ হয়েছে",
+  "failedToUpdateClass": "ক্লাস আপডেট করতে ব্যর্থ হয়েছে",
+  "sectionAddedSuccessfully": "শাখা সফলভাবে যোগ করা হয়েছে",
+  "sectionUpdatedSuccessfully": "শাখা সফলভাবে আপডেট হয়েছে",
+  "failedToAddSection": "শাখা যোগ করতে ব্যর্থ হয়েছে",
+  "failedToUpdateSection": "শাখা আপডেট করতে ব্যর্থ হয়েছে",
+  "subjectAddedSuccessfully": "বিষয় সফলভাবে যোগ করা হয়েছে",
+  "subjectUpdatedSuccessfully": "বিষয় সফলভাবে আপডেট হয়েছে",
+  "failedToAddSubject": "বিষয় যোগ করতে ব্যর্থ হয়েছে",
+  "failedToUpdateSubject": "বিষয় আপডেট করতে ব্যর্থ হয়েছে",
+  "deletedSuccessfully": "{label} সফলভাবে মুছে ফেলা হয়েছে",
+  "@deletedSuccessfully": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToDelete": "{label} মুছতে ব্যর্থ হয়েছে",
+  "@failedToDelete": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "saveAssignments": "নির্ধারণ সংরক্ষণ করুন",
+  "assignTeachersTo": "{sectionName} শাখায় শিক্ষক নির্ধারণ করুন",
+  "@assignTeachersTo": {
+    "placeholders": {
+      "sectionName": {
+        "type": "String"
+      }
+    }
+  },
+  "updatedTeachersForSection": "{sectionName} শাখার শিক্ষক আপডেট হয়েছে",
+  "@updatedTeachersForSection": {
+    "placeholders": {
+      "sectionName": {
+        "type": "String"
+      }
+    }
+  },
+  "errorSavingAssignments": "নির্ধারণ সংরক্ষণে ত্রুটি: {error}",
+  "@errorSavingAssignments": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

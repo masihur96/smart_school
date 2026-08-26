@@ -1250,4 +1250,160 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get globalDashboard => 'গ্লোবাল ড্যাশবোর্ড';
+
+  @override
+  String get classAndSubjectSetup => 'ক্লাস ও বিষয় সেটআপ';
+
+  @override
+  String get classesTab => 'ক্লাসগুলি';
+
+  @override
+  String get sectionsTab => 'শাখাগুলি';
+
+  @override
+  String get subjectsTab => 'বিষয়গুলি';
+
+  @override
+  String get noClassesYet => 'এখনও কোনো ক্লাস নেই';
+
+  @override
+  String get noSectionsYet => 'এখনও কোনো শাখা নেই';
+
+  @override
+  String get noSubjectsYet => 'এখনও কোনো বিষয় নেই';
+
+  @override
+  String get tapPlusToAddOne => 'যোগ করতে + চাপুন';
+
+  @override
+  String get noneAssigned => 'কেউ নির্ধারিত নেই';
+
+  @override
+  String get addClass => 'ক্লাস যোগ করুন';
+
+  @override
+  String get editClass => 'ক্লাস সম্পাদনা';
+
+  @override
+  String get addSection => 'শাখা যোগ করুন';
+
+  @override
+  String get editSection => 'শাখা সম্পাদনা';
+
+  @override
+  String get addSubject => 'বিষয় যোগ করুন';
+
+  @override
+  String get editSubject => 'বিষয় সম্পাদনা';
+
+  @override
+  String get update => 'আপডেট করুন';
+
+  @override
+  String get className => 'ক্লাসের নাম';
+
+  @override
+  String get descriptionOptional => 'বিবরণ (ঐচ্ছিক)';
+
+  @override
+  String get selectClass => 'ক্লাস নির্বাচন করুন';
+
+  @override
+  String get sectionNameHint => 'শাখার নাম (যেমন: ক)';
+
+  @override
+  String get subjectNameHint => 'বিষয়ের নাম (যেমন: গণিত)';
+
+  @override
+  String get subjectCodeHint => 'বিষয়ের কোড (যেমন: MATH101)';
+
+  @override
+  String get classDetails => 'ক্লাসের বিবরণ';
+
+  @override
+  String get sectionDetails => 'শাখার বিবরণ';
+
+  @override
+  String get subjectDetails => 'বিষয়ের বিবরণ';
+
+  @override
+  String get description => 'বিবরণ';
+
+  @override
+  String get code => 'কোড';
+
+  @override
+  String get sectionLabel => 'শাখা';
+
+  @override
+  String get classLabel2 => 'ক্লাস';
+
+  @override
+  String deleteConfirmMessage(String label) {
+    return 'আপনি কি নিশ্চিত যে \"$label\" মুছতে চান?\nএই পদক্ষেপ পূর্বাবস্থায় ফেরানো যাবে না।';
+  }
+
+  @override
+  String get classAddedSuccessfully => 'ক্লাস সফলভাবে যোগ করা হয়েছে';
+
+  @override
+  String get classUpdatedSuccessfully => 'ক্লাস সফলভাবে আপডেট হয়েছে';
+
+  @override
+  String get failedToAddClass => 'ক্লাস যোগ করতে ব্যর্থ হয়েছে';
+
+  @override
+  String get failedToUpdateClass => 'ক্লাস আপডেট করতে ব্যর্থ হয়েছে';
+
+  @override
+  String get sectionAddedSuccessfully => 'শাখা সফলভাবে যোগ করা হয়েছে';
+
+  @override
+  String get sectionUpdatedSuccessfully => 'শাখা সফলভাবে আপডেট হয়েছে';
+
+  @override
+  String get failedToAddSection => 'শাখা যোগ করতে ব্যর্থ হয়েছে';
+
+  @override
+  String get failedToUpdateSection => 'শাখা আপডেট করতে ব্যর্থ হয়েছে';
+
+  @override
+  String get subjectAddedSuccessfully => 'বিষয় সফলভাবে যোগ করা হয়েছে';
+
+  @override
+  String get subjectUpdatedSuccessfully => 'বিষয় সফলভাবে আপডেট হয়েছে';
+
+  @override
+  String get failedToAddSubject => 'বিষয় যোগ করতে ব্যর্থ হয়েছে';
+
+  @override
+  String get failedToUpdateSubject => 'বিষয় আপডেট করতে ব্যর্থ হয়েছে';
+
+  @override
+  String deletedSuccessfully(String label) {
+    return '$label সফলভাবে মুছে ফেলা হয়েছে';
+  }
+
+  @override
+  String failedToDelete(String label) {
+    return '$label মুছতে ব্যর্থ হয়েছে';
+  }
+
+  @override
+  String get saveAssignments => 'নির্ধারণ সংরক্ষণ করুন';
+
+  @override
+  String assignTeachersTo(String sectionName) {
+    return '$sectionName শাখায় শিক্ষক নির্ধারণ করুন';
+  }
+
+  @override
+  String updatedTeachersForSection(String sectionName) {
+    return '$sectionName শাখার শিক্ষক আপডেট হয়েছে';
+  }
+
+  @override
+  String errorSavingAssignments(String error) {
+    return 'নির্ধারণ সংরক্ষণে ত্রুটি: $error';
+  }
 }

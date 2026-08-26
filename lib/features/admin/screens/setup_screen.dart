@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/constants/api_path.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../configs/network/data_provider.dart';
 import '../../../models/school_models.dart';
@@ -81,6 +82,7 @@ class _SetupScreenState extends State<SetupScreen>
 
   PreferredSizeWidget _buildAppBar() {
     final user = context.read<AuthNotifier>().user;
+    final l10n = AppLocalizations.of(context)!;
     return PreferredSize(
       preferredSize: const Size.fromHeight(120),
       child: Container(
@@ -88,8 +90,8 @@ class _SetupScreenState extends State<SetupScreen>
           color: user?.role.name.toLowerCase() == "admin"
               ? AppColors.primaryAdmin
               : AppColors.primary,
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
-          boxShadow: [
+          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+          boxShadow: const [
             BoxShadow(
               color: Color(0x446C3CE1),
               blurRadius: 16,
@@ -115,10 +117,10 @@ class _SetupScreenState extends State<SetupScreen>
                       ),
                       onPressed: () => Navigator.maybePop(context),
                     ),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Class & Subject Setup',
-                        style: TextStyle(
+                        l10n.classAndSubjectSetup,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -144,10 +146,10 @@ class _SetupScreenState extends State<SetupScreen>
                   fontWeight: FontWeight.w400,
                   fontSize: 14,
                 ),
-                tabs: const [
-                  Tab(text: 'Classes'),
-                  Tab(text: 'Sections'),
-                  Tab(text: 'Subjects'),
+                tabs: [
+                  Tab(text: l10n.classesTab),
+                  Tab(text: l10n.sectionsTab),
+                  Tab(text: l10n.subjectsTab),
                 ],
               ),
             ],
@@ -169,11 +171,12 @@ class _ClassTab extends StatelessWidget {
     final notifier = context.watch<ClassSetupNotifier>();
     final classes = notifier.classes;
     final user = context.read<AuthNotifier>().user;
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: notifier.isLoading
           ? const _LoadingView()
           : classes.isEmpty
-          ? const _EmptyView(label: 'No classes yet')
+          ? _EmptyView(label: l10n.noClassesYet)
           : ListView.builder(
               // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               itemCount: classes.length,
@@ -202,19 +205,15 @@ class _ClassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: Column(
         children: [
           // ── Header strip ──
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              // gradient: LinearGradient(
-              //   colors: _kClassGrad,
-              //   begin: Alignment.centerLeft,
-              //   end: Alignment.centerRight,
-              // ),
-              borderRadius: const BorderRadius.vertical(
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.vertical(
                 top: Radius.circular(18),
               ),
             ),
@@ -253,7 +252,7 @@ class _ClassCard extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 12),
                     child: Text(
                       classRoom.description,
-                      style: TextStyle(fontSize: 13, height: 1.5),
+                      style: const TextStyle(fontSize: 13, height: 1.5),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -265,7 +264,7 @@ class _ClassCard extends StatelessWidget {
                     // View
                     _ActionChip(
                       icon: Icons.visibility_outlined,
-                      label: 'View',
+                      label: l10n.view,
                       color: _kPrimary,
                       onTap: () => Navigator.push(
                         context,
@@ -279,11 +278,10 @@ class _ClassCard extends StatelessWidget {
                     // Edit
                     _ActionChip(
                       icon: Icons.edit_outlined,
-                      label: 'Edit',
+                      label: l10n.edit,
                       color: const Color(0xFF0EA5E9),
                       onTap: () {
                         final user = context.read<AuthNotifier>().user;
-
 
                         _showAddEditClassDialog(
                           context,
@@ -296,7 +294,7 @@ class _ClassCard extends StatelessWidget {
                     // Delete
                     _ActionChip(
                       icon: Icons.delete_outline,
-                      label: 'Delete',
+                      label: l10n.delete,
                       color: const Color(0xFFEF4444),
                       onTap: () => _confirmDelete(
                         context,
@@ -335,6 +333,7 @@ class _SectionTabState extends State<_SectionTab> {
     final notifier = context.watch<SectionSetupNotifier>();
     final classes = context.watch<ClassSetupNotifier>().classes;
     final user = context.read<AuthNotifier>().user;
+    final l10n = AppLocalizations.of(context)!;
 
     // Filter sections by school first, then by selected class
     final sections = notifier.sections.where((s) {
@@ -368,7 +367,7 @@ class _SectionTabState extends State<_SectionTab> {
                 ),
                 Expanded(
                   child: sections.isEmpty
-                      ? const _EmptyView(label: 'No sections yet')
+                      ? _EmptyView(label: l10n.noSectionsYet)
                       : ListView.builder(
                           itemCount: sections.length,
                           itemBuilder: (ctx, i) =>
@@ -392,9 +391,10 @@ class _SectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final classes = context.watch<ClassSetupNotifier>().classes;
+    final l10n = AppLocalizations.of(context)!;
     final classObj = classes.firstWhere(
       (c) => c.id == section.classId,
-      orElse: () => ClassRoom(id: '', name: 'Unknown'),
+      orElse: () => ClassRoom(id: '', name: l10n.unknown),
     );
     final className = classObj.name;
     final teachers = context.watch<TeachersNotifier>().teachers;
@@ -408,13 +408,8 @@ class _SectionCard extends StatelessWidget {
           // ── Header strip ──
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              // gradient: LinearGradient(
-              //   colors: _kSectionGrad,
-              //   begin: Alignment.centerLeft,
-              //   end: Alignment.centerRight,
-              // ),
-              borderRadius: const BorderRadius.vertical(
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.vertical(
                 top: Radius.circular(18),
               ),
             ),
@@ -428,7 +423,6 @@ class _SectionCard extends StatelessWidget {
                   ),
                   child: const Icon(
                     Icons.tab_outlined,
-                    // color: Colors.white,
                     size: 20,
                   ),
                 ),
@@ -438,7 +432,7 @@ class _SectionCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Section ${section.name}',
+                        '${l10n.sectionLabel} ${section.name}',
                         style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
@@ -446,7 +440,7 @@ class _SectionCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Text(className, style: TextStyle(fontSize: 12)),
+                      Text(className, style: const TextStyle(fontSize: 12)),
                     ],
                   ),
                 ),
@@ -460,7 +454,7 @@ class _SectionCard extends StatelessWidget {
               children: [
                 _InfoRow(
                   icon: Icons.class_outlined,
-                  label: 'Class',
+                  label: l10n.classLabel2,
                   value: className,
                 ),
                 const SizedBox(height: 12),
@@ -475,9 +469,9 @@ class _SectionCard extends StatelessWidget {
 
                     Expanded(
                       child: assignedTeachers.isEmpty
-                          ? const Text(
-                              'None assigned',
-                              style: TextStyle(
+                          ? Text(
+                              l10n.noneAssigned,
+                              style: const TextStyle(
                                 fontSize: 13,
                                 fontStyle: FontStyle.italic,
                                 color: _kTextMid,
@@ -523,18 +517,18 @@ class _SectionCard extends StatelessWidget {
                           color: _kPrimary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.manage_accounts,
                               size: 14,
                               color: _kPrimary,
                             ),
-                            SizedBox(width: 4),
+                            const SizedBox(width: 4),
                             Text(
-                              'Manage',
-                              style: TextStyle(
+                              l10n.manage,
+                              style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                                 color: _kPrimary,
@@ -551,7 +545,7 @@ class _SectionCard extends StatelessWidget {
                   children: [
                     _ActionChip(
                       icon: Icons.visibility_outlined,
-                      label: 'View',
+                      label: l10n.view,
                       color: const Color(0xFF0EA5E9),
                       onTap: () {
                         if (classObj.id.isNotEmpty) {
@@ -572,7 +566,7 @@ class _SectionCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     _ActionChip(
                       icon: Icons.edit_outlined,
-                      label: 'Edit',
+                      label: l10n.edit,
                       color: const Color(0xFF8B5CF6),
                       onTap: () =>
                           _showAddEditSectionDialog(context, existing: section),
@@ -580,11 +574,11 @@ class _SectionCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     _ActionChip(
                       icon: Icons.delete_outline,
-                      label: 'Delete',
+                      label: l10n.delete,
                       color: const Color(0xFFEF4444),
                       onTap: () => _confirmDelete(
                         context,
-                        label: 'Section ${section.name}',
+                        label: '${l10n.sectionLabel} ${section.name}',
                         onConfirm: () => context
                             .read<SectionSetupNotifier>()
                             .deleteSection(section.id),
@@ -619,6 +613,7 @@ class _SubjectTabState extends State<_SubjectTab> {
     final notifier = context.watch<SubjectSetupNotifier>();
     final classes = context.watch<ClassSetupNotifier>().classes;
     final user = context.read<AuthNotifier>().user;
+    final l10n = AppLocalizations.of(context)!;
 
     // Filter by school then by selected class
     final subjects = notifier.subjects.where((s) {
@@ -647,7 +642,7 @@ class _SubjectTabState extends State<_SubjectTab> {
                 ),
                 Expanded(
                   child: subjects.isEmpty
-                      ? const _EmptyView(label: 'No subjects yet')
+                      ? _EmptyView(label: l10n.noSubjectsYet)
                       : ListView.builder(
                           itemCount: subjects.length,
                           itemBuilder: (ctx, i) =>
@@ -671,10 +666,11 @@ class _SubjectCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final classes = context.watch<ClassSetupNotifier>().classes;
+    final l10n = AppLocalizations.of(context)!;
     final className = classes
         .firstWhere(
           (c) => c.id == subject.classId,
-          orElse: () => ClassRoom(id: '', name: 'Unknown'),
+          orElse: () => ClassRoom(id: '', name: l10n.unknown),
         )
         .name;
 
@@ -684,8 +680,8 @@ class _SubjectCard extends StatelessWidget {
           // ── Header strip ──
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.vertical(
                 top: Radius.circular(18),
               ),
             ),
@@ -713,7 +709,7 @@ class _SubjectCard extends StatelessWidget {
                         ),
                       ),
                       if (subject.code.isNotEmpty)
-                        Text(subject.code, style: TextStyle(fontSize: 12)),
+                        Text(subject.code, style: const TextStyle(fontSize: 12)),
                     ],
                   ),
                 ),
@@ -746,7 +742,7 @@ class _SubjectCard extends StatelessWidget {
               children: [
                 _InfoRow(
                   icon: Icons.class_outlined,
-                  label: 'Class',
+                  label: l10n.classLabel2,
                   value: className,
                 ),
                 const Divider(color: _kDivider, height: 24),
@@ -754,7 +750,7 @@ class _SubjectCard extends StatelessWidget {
                   children: [
                     _ActionChip(
                       icon: Icons.visibility_outlined,
-                      label: 'View',
+                      label: l10n.view,
                       color: const Color(0xFF10B981),
                       onTap: () =>
                           _showViewSubjectDialog(context, subject, className),
@@ -762,7 +758,7 @@ class _SubjectCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     _ActionChip(
                       icon: Icons.edit_outlined,
-                      label: 'Edit',
+                      label: l10n.edit,
                       color: const Color(0xFF0EA5E9),
                       onTap: () =>
                           _showAddEditSubjectDialog(context, existing: subject),
@@ -770,7 +766,7 @@ class _SubjectCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     _ActionChip(
                       icon: Icons.delete_outline,
-                      label: 'Delete',
+                      label: l10n.delete,
                       color: const Color(0xFFEF4444),
                       onTap: () => _confirmDelete(
                         context,
@@ -809,6 +805,7 @@ class _ClassFilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       color: _kBg,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -817,7 +814,7 @@ class _ClassFilterBar extends StatelessWidget {
         child: Row(
           children: [
             _FilterChip(
-              label: 'All',
+              label: l10n.all,
               isSelected: selectedClassId == null,
               accentColor: accentColor,
               onTap: () => onSelected(null),
@@ -1088,6 +1085,7 @@ class _EmptyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1100,7 +1098,7 @@ class _EmptyView extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               color: _kTextMid,
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -1108,7 +1106,7 @@ class _EmptyView extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Tap + to add one',
+            l10n.tapPlusToAddOne,
             style: TextStyle(color: _kTextMid.withOpacity(0.6), fontSize: 13),
           ),
         ],
@@ -1126,6 +1124,7 @@ Future<void> _showStyledDialog({
   required String confirmLabel,
   required VoidCallback? onConfirm,
 }) async {
+  final l10n = AppLocalizations.of(context)!;
   await showDialog<void>(
     context: context,
     builder: (ctx) => Dialog(
@@ -1138,9 +1137,9 @@ Future<void> _showStyledDialog({
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.primaryAdmin,
-              borderRadius: const BorderRadius.vertical(
+              borderRadius: BorderRadius.vertical(
                 top: Radius.circular(24),
               ),
             ),
@@ -1170,7 +1169,7 @@ Future<void> _showStyledDialog({
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Cancel'),
+                    child: Text(l10n.cancel),
                   ),
                 ),
                 if (onConfirm != null) ...[
@@ -1285,28 +1284,29 @@ void _showAddEditClassDialog(
   required String schoolId,
   ClassRoom? existing,
 }) {
+  final l10n = AppLocalizations.of(context)!;
   final isEdit = existing != null;
   final nameCtrl = TextEditingController(text: existing?.name ?? '');
   final descCtrl = TextEditingController(text: existing?.description ?? '');
 
   _showStyledDialog(
     context: context,
-    title: isEdit ? 'Edit Class' : 'Add Class',
+    title: isEdit ? l10n.editClass : l10n.addClass,
     gradientColors: _kClassGrad,
-    confirmLabel: isEdit ? 'Update' : 'Add',
+    confirmLabel: isEdit ? l10n.update : l10n.add,
     body: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         TextField(
           controller: nameCtrl,
-          decoration: _inputDec('Class Name', icon: Icons.class_outlined),
+          decoration: _inputDec(l10n.className, icon: Icons.class_outlined),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: descCtrl,
           maxLines: 2,
           decoration: _inputDec(
-            'Description (optional)',
+            l10n.descriptionOptional,
             icon: Icons.notes_outlined,
           ),
         ),
@@ -1335,12 +1335,12 @@ void _showAddEditClassDialog(
           if (success) {
             _showSuccessSnackBar(
               context,
-              'Class ${isEdit ? 'updated' : 'added'} successfully',
+              isEdit ? l10n.classUpdatedSuccessfully : l10n.classAddedSuccessfully,
             );
           } else {
             _showErrorSnackBar(
               context,
-              'Failed to ${isEdit ? 'update' : 'add'} class',
+              isEdit ? l10n.failedToUpdateClass : l10n.failedToAddClass,
             );
           }
         }
@@ -1353,6 +1353,7 @@ void _showAddEditClassDialog(
 //  Dialog: Add / Edit Section
 // ═══════════════════════════════════════════════════════════
 void _showAddEditSectionDialog(BuildContext context, {Section? existing}) {
+  final l10n = AppLocalizations.of(context)!;
   final isEdit = existing != null;
   final classes = context.read<ClassSetupNotifier>().classes;
   String? selectedClassId = existing?.classId;
@@ -1360,16 +1361,16 @@ void _showAddEditSectionDialog(BuildContext context, {Section? existing}) {
 
   _showStyledDialog(
     context: context,
-    title: isEdit ? 'Edit Section' : 'Add Section',
+    title: isEdit ? l10n.editSection : l10n.addSection,
     gradientColors: _kSectionGrad,
-    confirmLabel: isEdit ? 'Update' : 'Add',
+    confirmLabel: isEdit ? l10n.update : l10n.add,
     body: StatefulBuilder(
       builder: (ctx, setState) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           DropdownButtonFormField<String>(
             value: selectedClassId,
-            decoration: _inputDec('Select Class', icon: Icons.class_outlined),
+            decoration: _inputDec(l10n.selectClass, icon: Icons.class_outlined),
             items: classes
                 .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
                 .toList(),
@@ -1379,7 +1380,7 @@ void _showAddEditSectionDialog(BuildContext context, {Section? existing}) {
           TextField(
             controller: nameCtrl,
             decoration: _inputDec(
-              'Section Name (e.g. A)',
+              l10n.sectionNameHint,
               icon: Icons.tab_outlined,
             ),
           ),
@@ -1391,7 +1392,7 @@ void _showAddEditSectionDialog(BuildContext context, {Section? existing}) {
         bool success;
         if (isEdit) {
           success = await context.read<SectionSetupNotifier>().updateSection(
-            existing!.id,
+            existing.id,
             selectedClassId!,
             nameCtrl.text.trim(),
           );
@@ -1406,12 +1407,12 @@ void _showAddEditSectionDialog(BuildContext context, {Section? existing}) {
           if (success) {
             _showSuccessSnackBar(
               context,
-              'Section ${isEdit ? 'updated' : 'added'} successfully',
+              isEdit ? l10n.sectionUpdatedSuccessfully : l10n.sectionAddedSuccessfully,
             );
           } else {
             _showErrorSnackBar(
               context,
-              'Failed to ${isEdit ? 'update' : 'add'} section',
+              isEdit ? l10n.failedToUpdateSection : l10n.failedToAddSection,
             );
           }
         }
@@ -1424,6 +1425,7 @@ void _showAddEditSectionDialog(BuildContext context, {Section? existing}) {
 //  Dialog: Add / Edit Subject
 // ═══════════════════════════════════════════════════════════
 void _showAddEditSubjectDialog(BuildContext context, {Subject? existing}) {
+  final l10n = AppLocalizations.of(context)!;
   final isEdit = existing != null;
   final classes = context.read<ClassSetupNotifier>().classes;
   final user = context.read<AuthNotifier>().user;
@@ -1433,16 +1435,16 @@ void _showAddEditSubjectDialog(BuildContext context, {Subject? existing}) {
 
   _showStyledDialog(
     context: context,
-    title: isEdit ? 'Edit Subject' : 'Add Subject',
+    title: isEdit ? l10n.editSubject : l10n.addSubject,
     gradientColors: _kSubjectGrad,
-    confirmLabel: isEdit ? 'Update' : 'Add',
+    confirmLabel: isEdit ? l10n.update : l10n.add,
     body: StatefulBuilder(
       builder: (ctx, setState) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           DropdownButtonFormField<String>(
             value: selectedClassId,
-            decoration: _inputDec('Select Class', icon: Icons.class_outlined),
+            decoration: _inputDec(l10n.selectClass, icon: Icons.class_outlined),
             items: classes
                 .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
                 .toList(),
@@ -1452,7 +1454,7 @@ void _showAddEditSubjectDialog(BuildContext context, {Subject? existing}) {
           TextField(
             controller: nameCtrl,
             decoration: _inputDec(
-              'Subject Name (e.g. Mathematics)',
+              l10n.subjectNameHint,
               icon: Icons.book_outlined,
             ),
           ),
@@ -1460,7 +1462,7 @@ void _showAddEditSubjectDialog(BuildContext context, {Subject? existing}) {
           TextField(
             controller: codeCtrl,
             decoration: _inputDec(
-              'Subject Code (e.g. MATH101)',
+              l10n.subjectCodeHint,
               icon: Icons.qr_code_outlined,
             ),
           ),
@@ -1474,7 +1476,7 @@ void _showAddEditSubjectDialog(BuildContext context, {Subject? existing}) {
         bool success;
         if (isEdit) {
           success = await context.read<SubjectSetupNotifier>().updateSubject(
-            existing!.id,
+            existing.id,
             nameCtrl.text.trim(),
             codeCtrl.text.trim(),
             selectedClassId!,
@@ -1493,12 +1495,12 @@ void _showAddEditSubjectDialog(BuildContext context, {Subject? existing}) {
           if (success) {
             _showSuccessSnackBar(
               context,
-              'Subject ${isEdit ? 'updated' : 'added'} successfully',
+              isEdit ? l10n.subjectUpdatedSuccessfully : l10n.subjectAddedSuccessfully,
             );
           } else {
             _showErrorSnackBar(
               context,
-              'Failed to ${isEdit ? 'update' : 'add'} subject',
+              isEdit ? l10n.failedToUpdateSubject : l10n.failedToAddSubject,
             );
           }
         }
@@ -1511,9 +1513,10 @@ void _showAddEditSubjectDialog(BuildContext context, {Subject? existing}) {
 //  Dialog: View Class Details
 // ═══════════════════════════════════════════════════════════
 void _showViewClassDialog(BuildContext context, ClassRoom classRoom) {
+  final l10n = AppLocalizations.of(context)!;
   _showStyledDialog(
     context: context,
-    title: 'Class Details',
+    title: l10n.classDetails,
     gradientColors: _kClassGrad,
     confirmLabel: '',
     onConfirm: null,
@@ -1522,14 +1525,14 @@ void _showViewClassDialog(BuildContext context, ClassRoom classRoom) {
       children: [
         _DetailRow(
           icon: Icons.class_outlined,
-          label: 'Class Name',
+          label: l10n.className,
           value: classRoom.name,
         ),
         if (classRoom.description.isNotEmpty) ...[
           const SizedBox(height: 8),
           _DetailRow(
             icon: Icons.notes_outlined,
-            label: 'Description',
+            label: l10n.description,
             value: classRoom.description,
           ),
         ],
@@ -1546,24 +1549,23 @@ void _showViewSectionDialog(
   Section section,
   String className,
 ) {
+  final l10n = AppLocalizations.of(context)!;
   _showStyledDialog(
     context: context,
-    title: 'Section Details',
+    title: l10n.sectionDetails,
     gradientColors: _kSectionGrad,
     confirmLabel: '',
     onConfirm: null,
     body: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _DetailRow(icon: Icons.tag, label: 'Section', value: section.name),
+        _DetailRow(icon: Icons.tag, label: l10n.sectionLabel, value: section.name),
         const SizedBox(height: 8),
         _DetailRow(
           icon: Icons.class_outlined,
-          label: 'Class',
+          label: l10n.classLabel2,
           value: className,
         ),
-        // const SizedBox(height: 8),
-        // _DetailRow(icon: Icons.key, label: 'ID', value: section.id),
       ],
     ),
   );
@@ -1577,9 +1579,10 @@ void _showViewSubjectDialog(
   Subject subject,
   String className,
 ) {
+  final l10n = AppLocalizations.of(context)!;
   _showStyledDialog(
     context: context,
-    title: 'Subject Details',
+    title: l10n.subjectDetails,
     gradientColors: _kSubjectGrad,
     confirmLabel: '',
     onConfirm: null,
@@ -1588,19 +1591,19 @@ void _showViewSubjectDialog(
       children: [
         _DetailRow(
           icon: Icons.book_outlined,
-          label: 'Subject',
+          label: l10n.subject,
           value: subject.name,
         ),
         const SizedBox(height: 8),
         _DetailRow(
           icon: Icons.qr_code_outlined,
-          label: 'Code',
+          label: l10n.code,
           value: subject.code.isEmpty ? '-' : subject.code,
         ),
         const SizedBox(height: 8),
         _DetailRow(
           icon: Icons.class_outlined,
-          label: 'Class',
+          label: l10n.classLabel2,
           value: className,
         ),
         const SizedBox(height: 8),
@@ -1683,6 +1686,7 @@ void _confirmDelete(
   required String label,
   required Future<bool> Function() onConfirm,
 }) {
+  final l10n = AppLocalizations.of(context)!;
   showDialog<void>(
     context: context,
     builder: (ctx) => AlertDialog(
@@ -1694,13 +1698,13 @@ void _confirmDelete(
           color: Color(0xFFEF4444),
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.white, size: 22),
-            SizedBox(width: 10),
+            const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 22),
+            const SizedBox(width: 10),
             Text(
-              'Delete',
-              style: TextStyle(
+              l10n.delete,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -1712,14 +1716,14 @@ void _confirmDelete(
       content: Padding(
         padding: const EdgeInsets.only(top: 8),
         child: Text(
-          'Are you sure you want to delete "$label"?\nThis action cannot be undone.',
+          l10n.deleteConfirmMessage(label),
           style: const TextStyle(color: _kTextMid, fontSize: 14, height: 1.5),
         ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx),
-          child: const Text('Cancel', style: TextStyle(color: _kTextMid)),
+          child: Text(l10n.cancel, style: const TextStyle(color: _kTextMid)),
         ),
         ElevatedButton(
           onPressed: () async {
@@ -1727,9 +1731,9 @@ void _confirmDelete(
             final success = await onConfirm();
             if (context.mounted) {
               if (success) {
-                _showSuccessSnackBar(context, '$label deleted successfully');
+                _showSuccessSnackBar(context, l10n.deletedSuccessfully(label));
               } else {
-                _showErrorSnackBar(context, 'Failed to delete $label');
+                _showErrorSnackBar(context, l10n.failedToDelete(label));
               }
             }
           },
@@ -1740,7 +1744,7 @@ void _confirmDelete(
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          child: const Text('Delete'),
+          child: Text(l10n.delete),
         ),
       ],
     ),
@@ -1819,16 +1823,18 @@ class _AssignSectionTeachersSheetState
       }
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         Navigator.pop(context);
         _showSuccessSnackBar(
           context,
-          'Updated teachers for Section ${widget.section.name}',
+          l10n.updatedTeachersForSection(widget.section.name),
         );
         teachersNotifier.fetchTeachers();
       }
     } catch (e) {
       if (mounted) {
-        _showErrorSnackBar(context, 'Error saving assignments: $e');
+        final l10n = AppLocalizations.of(context)!;
+        _showErrorSnackBar(context, l10n.errorSavingAssignments(e.toString()));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -1838,6 +1844,7 @@ class _AssignSectionTeachersSheetState
   @override
   Widget build(BuildContext context) {
     final teachers = context.watch<TeachersNotifier>().teachers;
+    final l10n = AppLocalizations.of(context)!;
 
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.85,
@@ -1862,7 +1869,7 @@ class _AssignSectionTeachersSheetState
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Assign Teachers to ${widget.section.name}',
+                    l10n.assignTeachersTo(widget.section.name),
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -1870,9 +1877,9 @@ class _AssignSectionTeachersSheetState
                   ),
                   TextButton(
                     onPressed: _isSaving ? null : () => Navigator.pop(context),
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: _kTextMid),
+                    child: Text(
+                      l10n.cancel,
+                      style: const TextStyle(color: _kTextMid),
                     ),
                   ),
                 ],
@@ -1886,7 +1893,7 @@ class _AssignSectionTeachersSheetState
                 separatorBuilder: (_, __) => const SizedBox(height: 8),
                 itemBuilder: (ctx, i) {
                   final teacher = teachers[i];
-                  final name = teacher.user?.name ?? 'Unknown';
+                  final name = teacher.user?.name ?? l10n.unknown;
                   final isSelected = _selectedIds.contains(teacher.userId);
                   final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
 
@@ -1991,9 +1998,9 @@ class _AssignSectionTeachersSheetState
                       )
                     : Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: const Text(
-                          'Save Assignments',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.saveAssignments,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),

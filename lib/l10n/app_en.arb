@@ -568,5 +568,95 @@
   "bulkSms": "Bulk SMS",
   "expenseTracking": "Expense Tracking",
   "academicBooks": "Academic Books",
-  "globalDashboard": "Global Dashboard"
+  "globalDashboard": "Global Dashboard",
+  "classAndSubjectSetup": "Class & Subject Setup",
+  "classesTab": "Classes",
+  "sectionsTab": "Sections",
+  "subjectsTab": "Subjects",
+  "noClassesYet": "No classes yet",
+  "noSectionsYet": "No sections yet",
+  "noSubjectsYet": "No subjects yet",
+  "tapPlusToAddOne": "Tap + to add one",
+  "noneAssigned": "None assigned",
+  "addClass": "Add Class",
+  "editClass": "Edit Class",
+  "addSection": "Add Section",
+  "editSection": "Edit Section",
+  "addSubject": "Add Subject",
+  "editSubject": "Edit Subject",
+  "update": "Update",
+  "className": "Class Name",
+  "descriptionOptional": "Description (optional)",
+  "selectClass": "Select Class",
+  "sectionNameHint": "Section Name (e.g. A)",
+  "subjectNameHint": "Subject Name (e.g. Mathematics)",
+  "subjectCodeHint": "Subject Code (e.g. MATH101)",
+  "classDetails": "Class Details",
+  "sectionDetails": "Section Details",
+  "subjectDetails": "Subject Details",
+  "description": "Description",
+  "code": "Code",
+  "sectionLabel": "Section",
+  "classLabel2": "Class",
+  "deleteConfirmMessage": "Are you sure you want to delete \"{label}\"?\nThis action cannot be undone.",
+  "@deleteConfirmMessage": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "classAddedSuccessfully": "Class added successfully",
+  "classUpdatedSuccessfully": "Class updated successfully",
+  "failedToAddClass": "Failed to add class",
+  "failedToUpdateClass": "Failed to update class",
+  "sectionAddedSuccessfully": "Section added successfully",
+  "sectionUpdatedSuccessfully": "Section updated successfully",
+  "failedToAddSection": "Failed to add section",
+  "failedToUpdateSection": "Failed to update section",
+  "subjectAddedSuccessfully": "Subject added successfully",
+  "subjectUpdatedSuccessfully": "Subject updated successfully",
+  "failedToAddSubject": "Failed to add subject",
+  "failedToUpdateSubject": "Failed to update subject",
+  "deletedSuccessfully": "{label} deleted successfully",
+  "@deletedSuccessfully": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToDelete": "Failed to delete {label}",
+  "@failedToDelete": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "saveAssignments": "Save Assignments",
+  "assignTeachersTo": "Assign Teachers to {sectionName}",
+  "@assignTeachersTo": {
+    "placeholders": {
+      "sectionName": {
+        "type": "String"
+      }
+    }
+  },
+  "updatedTeachersForSection": "Updated teachers for Section {sectionName}",
+  "@updatedTeachersForSection": {
+    "placeholders": {
+      "sectionName": {
+        "type": "String"
+      }
+    }
+  },
+  "errorSavingAssignments": "Error saving assignments: {error}",
+  "@errorSavingAssignments": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

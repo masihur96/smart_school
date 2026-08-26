@@ -1238,4 +1238,160 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get globalDashboard => 'Global Dashboard';
+
+  @override
+  String get classAndSubjectSetup => 'Class & Subject Setup';
+
+  @override
+  String get classesTab => 'Classes';
+
+  @override
+  String get sectionsTab => 'Sections';
+
+  @override
+  String get subjectsTab => 'Subjects';
+
+  @override
+  String get noClassesYet => 'No classes yet';
+
+  @override
+  String get noSectionsYet => 'No sections yet';
+
+  @override
+  String get noSubjectsYet => 'No subjects yet';
+
+  @override
+  String get tapPlusToAddOne => 'Tap + to add one';
+
+  @override
+  String get noneAssigned => 'None assigned';
+
+  @override
+  String get addClass => 'Add Class';
+
+  @override
+  String get editClass => 'Edit Class';
+
+  @override
+  String get addSection => 'Add Section';
+
+  @override
+  String get editSection => 'Edit Section';
+
+  @override
+  String get addSubject => 'Add Subject';
+
+  @override
+  String get editSubject => 'Edit Subject';
+
+  @override
+  String get update => 'Update';
+
+  @override
+  String get className => 'Class Name';
+
+  @override
+  String get descriptionOptional => 'Description (optional)';
+
+  @override
+  String get selectClass => 'Select Class';
+
+  @override
+  String get sectionNameHint => 'Section Name (e.g. A)';
+
+  @override
+  String get subjectNameHint => 'Subject Name (e.g. Mathematics)';
+
+  @override
+  String get subjectCodeHint => 'Subject Code (e.g. MATH101)';
+
+  @override
+  String get classDetails => 'Class Details';
+
+  @override
+  String get sectionDetails => 'Section Details';
+
+  @override
+  String get subjectDetails => 'Subject Details';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get code => 'Code';
+
+  @override
+  String get sectionLabel => 'Section';
+
+  @override
+  String get classLabel2 => 'Class';
+
+  @override
+  String deleteConfirmMessage(String label) {
+    return 'Are you sure you want to delete \"$label\"?\nThis action cannot be undone.';
+  }
+
+  @override
+  String get classAddedSuccessfully => 'Class added successfully';
+
+  @override
+  String get classUpdatedSuccessfully => 'Class updated successfully';
+
+  @override
+  String get failedToAddClass => 'Failed to add class';
+
+  @override
+  String get failedToUpdateClass => 'Failed to update class';
+
+  @override
+  String get sectionAddedSuccessfully => 'Section added successfully';
+
+  @override
+  String get sectionUpdatedSuccessfully => 'Section updated successfully';
+
+  @override
+  String get failedToAddSection => 'Failed to add section';
+
+  @override
+  String get failedToUpdateSection => 'Failed to update section';
+
+  @override
+  String get subjectAddedSuccessfully => 'Subject added successfully';
+
+  @override
+  String get subjectUpdatedSuccessfully => 'Subject updated successfully';
+
+  @override
+  String get failedToAddSubject => 'Failed to add subject';
+
+  @override
+  String get failedToUpdateSubject => 'Failed to update subject';
+
+  @override
+  String deletedSuccessfully(String label) {
+    return '$label deleted successfully';
+  }
+
+  @override
+  String failedToDelete(String label) {
+    return 'Failed to delete $label';
+  }
+
+  @override
+  String get saveAssignments => 'Save Assignments';
+
+  @override
+  String assignTeachersTo(String sectionName) {
+    return 'Assign Teachers to $sectionName';
+  }
+
+  @override
+  String updatedTeachersForSection(String sectionName) {
+    return 'Updated teachers for Section $sectionName';
+  }
+
+  @override
+  String errorSavingAssignments(String error) {
+    return 'Error saving assignments: $error';
+  }
 }
