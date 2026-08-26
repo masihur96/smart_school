@@ -32,6 +32,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
       context.read<OnlineClassProvider>().fetchOnlineClasses();
       if (schoolId.isNotEmpty) {
         context.read<ClassSetupNotifier>().fetchClasses(schoolId);
+        context.read<SubjectSetupNotifier>().fetchSubjects(schoolId);
       }
       context.read<SectionSetupNotifier>().fetchSections();
     });
