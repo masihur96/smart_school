@@ -521,5 +521,46 @@
       }
     }
   },
-  "egLabel": "e.g."
+  "egLabel": "e.g.",
+  "monthlyAttendanceOverview": "Monthly Attendance Overview",
+  "yearLabel": "Year {year}",
+  "@yearLabel": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "topTeachers": "Top Teachers ({month})",
+  "@topTeachers": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "topStudents": "Top Students ({month})",
+  "@topStudents": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "teacherPerformance": "Teacher Performance",
+  "student": "Student",
+  "monthJan": "Jan",
+  "monthFeb": "Feb",
+  "monthMar": "Mar",
+  "monthApr": "Apr",
+  "monthMay": "May",
+  "monthJun": "Jun",
+  "monthJul": "Jul",
+  "monthAug": "Aug",
+  "monthSep": "Sep",
+  "monthOct": "Oct",
+  "monthNov": "Nov",
+  "monthDec": "Dec",
+  "attLabel": "Att",
+  "hwLabel": "HW"
 }

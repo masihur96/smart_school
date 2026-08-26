@@ -1154,4 +1154,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get egLabel => 'e.g.';
+
+  @override
+  String get monthlyAttendanceOverview => 'Monthly Attendance Overview';
+
+  @override
+  String yearLabel(int year) {
+    return 'Year $year';
+  }
+
+  @override
+  String topTeachers(String month) {
+    return 'Top Teachers ($month)';
+  }
+
+  @override
+  String topStudents(String month) {
+    return 'Top Students ($month)';
+  }
+
+  @override
+  String get teacherPerformance => 'Teacher Performance';
+
+  @override
+  String get student => 'Student';
+
+  @override
+  String get monthJan => 'Jan';
+
+  @override
+  String get monthFeb => 'Feb';
+
+  @override
+  String get monthMar => 'Mar';
+
+  @override
+  String get monthApr => 'Apr';
+
+  @override
+  String get monthMay => 'May';
+
+  @override
+  String get monthJun => 'Jun';
+
+  @override
+  String get monthJul => 'Jul';
+
+  @override
+  String get monthAug => 'Aug';
+
+  @override
+  String get monthSep => 'Sep';
+
+  @override
+  String get monthOct => 'Oct';
+
+  @override
+  String get monthNov => 'Nov';
+
+  @override
+  String get monthDec => 'Dec';
+
+  @override
+  String get attLabel => 'Att';
+
+  @override
+  String get hwLabel => 'HW';
 }

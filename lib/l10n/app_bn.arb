@@ -504,5 +504,46 @@
   "unpublishedOption": "অপ্রকাশিত",
   "noExamsFound": "কোন পরীক্ষা পাওয়া যায়নি",
   "assignmentCountLabel": "{count} টি অ্যাসাইনমেন্ট",
-  "egLabel": "যেমন"
+  "egLabel": "যেমন",
+  "monthlyAttendanceOverview": "মাসিক উপস্থিতি ওভারভিউ",
+  "yearLabel": "বছর {year}",
+  "@yearLabel": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "topTeachers": "সেরা শিক্ষকগণ ({month})",
+  "@topTeachers": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "topStudents": "সেরা শিক্ষার্থীগণ ({month})",
+  "@topStudents": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "teacherPerformance": "শিক্ষক পারফরম্যান্স",
+  "student": "শিক্ষার্থী",
+  "monthJan": "জান",
+  "monthFeb": "ফেব",
+  "monthMar": "মার",
+  "monthApr": "এপ্রি",
+  "monthMay": "মে",
+  "monthJun": "জুন",
+  "monthJul": "জুলা",
+  "monthAug": "আগ",
+  "monthSep": "সেপ",
+  "monthOct": "অক্টো",
+  "monthNov": "নভে",
+  "monthDec": "ডিসে",
+  "attLabel": "উপস্থি",
+  "hwLabel": "হোমওয়া"
 }

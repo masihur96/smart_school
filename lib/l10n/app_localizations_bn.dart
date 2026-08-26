@@ -1166,4 +1166,70 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get egLabel => 'যেমন';
+
+  @override
+  String get monthlyAttendanceOverview => 'মাসিক উপস্থিতি ওভারভিউ';
+
+  @override
+  String yearLabel(int year) {
+    return 'বছর $year';
+  }
+
+  @override
+  String topTeachers(String month) {
+    return 'সেরা শিক্ষকগণ ($month)';
+  }
+
+  @override
+  String topStudents(String month) {
+    return 'সেরা শিক্ষার্থীগণ ($month)';
+  }
+
+  @override
+  String get teacherPerformance => 'শিক্ষক পারফরম্যান্স';
+
+  @override
+  String get student => 'শিক্ষার্থী';
+
+  @override
+  String get monthJan => 'জান';
+
+  @override
+  String get monthFeb => 'ফেব';
+
+  @override
+  String get monthMar => 'মার';
+
+  @override
+  String get monthApr => 'এপ্রি';
+
+  @override
+  String get monthMay => 'মে';
+
+  @override
+  String get monthJun => 'জুন';
+
+  @override
+  String get monthJul => 'জুলা';
+
+  @override
+  String get monthAug => 'আগ';
+
+  @override
+  String get monthSep => 'সেপ';
+
+  @override
+  String get monthOct => 'অক্টো';
+
+  @override
+  String get monthNov => 'নভে';
+
+  @override
+  String get monthDec => 'ডিসে';
+
+  @override
+  String get attLabel => 'উপস্থি';
+
+  @override
+  String get hwLabel => 'হোমওয়া';
 }

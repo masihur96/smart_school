@@ -548,6 +548,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
   }
 
   Widget _buildMonthlyAttendanceChart(MonthlyAttendanceOverview data) {
+    final l10n = AppLocalizations.of(context)!;
     List<FlSpot> spots = [];
     for (int i = 0; i < data.data.length; i++) {
       spots.add(
@@ -583,14 +584,14 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Monthly Attendance Overview',
-                      style: TextStyle(
+                    Text(
+                      l10n.monthlyAttendanceOverview,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text('Year ${data.year}', style: TextStyle(fontSize: 12)),
+                    Text(l10n.yearLabel(data.year), style: const TextStyle(fontSize: 12)),
                   ],
                 ),
               ],
@@ -626,27 +627,26 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                         reservedSize: 30,
                         interval: 1,
                         getTitlesWidget: (value, meta) {
-                          const months = [
-                            'Jan',
-                            'Feb',
-                            'Mar',
-                            'Apr',
-                            'May',
-                            'Jun',
-                            'Jul',
-                            'Aug',
-                            'Sep',
-                            'Oct',
-                            'Nov',
-                            'Dec',
+                          final months = [
+                            l10n.monthJan,
+                            l10n.monthFeb,
+                            l10n.monthMar,
+                            l10n.monthApr,
+                            l10n.monthMay,
+                            l10n.monthJun,
+                            l10n.monthJul,
+                            l10n.monthAug,
+                            l10n.monthSep,
+                            l10n.monthOct,
+                            l10n.monthNov,
+                            l10n.monthDec,
                           ];
                           if (value.toInt() >= 1 && value.toInt() <= 12) {
                             return Padding(
                               padding: const EdgeInsets.only(top: 8.0),
                               child: Text(
                                 months[value.toInt() - 1],
-                                style: TextStyle(
-                                  // color: Colors.grey[600],
+                                style: const TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -715,19 +715,19 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                     touchTooltipData: LineTouchTooltipData(
                       getTooltipItems: (touchedSpots) {
                         return touchedSpots.map((LineBarSpot touchedSpot) {
-                          const months = [
-                            'Jan',
-                            'Feb',
-                            'Mar',
-                            'Apr',
-                            'May',
-                            'Jun',
-                            'Jul',
-                            'Aug',
-                            'Sep',
-                            'Oct',
-                            'Nov',
-                            'Dec',
+                          final months = [
+                            l10n.monthJan,
+                            l10n.monthFeb,
+                            l10n.monthMar,
+                            l10n.monthApr,
+                            l10n.monthMay,
+                            l10n.monthJun,
+                            l10n.monthJul,
+                            l10n.monthAug,
+                            l10n.monthSep,
+                            l10n.monthOct,
+                            l10n.monthNov,
+                            l10n.monthDec,
                           ];
                           final monthStr = months[touchedSpot.x.toInt() - 1];
                           return LineTooltipItem(
@@ -1378,7 +1378,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                   padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
                   child: Center(
                     child: Text(
-                      'No records for today',
+                      l10n.noRecordsForToday,
                       style: TextStyle(color: Colors.grey[400], fontSize: 12),
                     ),
                   ),
@@ -1765,6 +1765,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
 
   // ── Teacher Performance Preview (from Provider) ────────────────────────────────────────────────
   Widget _buildTeacherPerformancePreview(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<TeacherPerformanceProvider>(
       builder: (context, provider, _) {
         // Lazy fetch — trigger exactly once when this section first renders.
@@ -1785,7 +1786,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSectionTitle(
-                'Teacher Performance',
+                l10n.teacherPerformance,
                 const SizedBox.shrink(),
               ),
               const SizedBox(height: 12),
@@ -1811,11 +1812,17 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
         final list = provider.filteredPerformances.take(10).toList();
         if (list.isEmpty) return const SizedBox.shrink();
 
+        final localizedMonths = [
+          l10n.monthJan, l10n.monthFeb, l10n.monthMar, l10n.monthApr,
+          l10n.monthMay, l10n.monthJun, l10n.monthJul, l10n.monthAug,
+          l10n.monthSep, l10n.monthOct, l10n.monthNov, l10n.monthDec,
+        ];
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSectionTitle(
-              'Top Teachers (${_months[provider.selectedMonth - 1]})',
+              l10n.topTeachers(localizedMonths[provider.selectedMonth - 1]),
               InkWell(
                 onTap: () {
                   Navigator.push(
@@ -1826,8 +1833,8 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                   );
                 },
                 child: Text(
-                  'View All',
-                  style: TextStyle(
+                  l10n.viewAll,
+                  style: const TextStyle(
                     color: AppColors.primaryAdmin,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
@@ -1863,6 +1870,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     int rank,
     BuildContext context,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final provider = context.read<TeacherPerformanceProvider>();
     // Calculate total score (average of the 2 percentages)
     final score = (perf.attendance.percentage + perf.homework.percentage) / 2;
@@ -1977,7 +1985,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                           Text(
                             perf.designation.isNotEmpty
                                 ? perf.designation
-                                : 'Teacher',
+                                : l10n.teacher,
                             style: TextStyle(
                               fontSize: 10,
                               color: Colors.grey.shade500,
@@ -1996,7 +2004,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                   children: [
                     Expanded(
                       child: _miniProgressBar(
-                        'Att',
+                        l10n.attLabel,
                         perf.attendance.percentage,
                         Colors.green,
                       ),
@@ -2004,7 +2012,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                     const SizedBox(width: 12),
                     Expanded(
                       child: _miniProgressBar(
-                        'HW',
+                        l10n.hwLabel,
                         perf.homework.percentage,
                         Colors.blue,
                       ),
@@ -2059,6 +2067,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
   }
 
   Widget _buildStudentPerformancePreview(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<StudentPerformanceProvider>(
       builder: (context, perfProvider, _) {
         // Lazy fetch — trigger exactly once when this section first renders.
@@ -2086,11 +2095,17 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
           return _buildPerformanceEmpty(context);
         }
 
+        final localizedMonths = [
+          l10n.monthJan, l10n.monthFeb, l10n.monthMar, l10n.monthApr,
+          l10n.monthMay, l10n.monthJun, l10n.monthJul, l10n.monthAug,
+          l10n.monthSep, l10n.monthOct, l10n.monthNov, l10n.monthDec,
+        ];
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSectionTitle(
-              'Top Students (${_months[perfProvider.selectedMonth - 1]})',
+              l10n.topStudents(localizedMonths[perfProvider.selectedMonth - 1]),
               InkWell(
                 onTap: () {
                   Navigator.push(
@@ -2101,8 +2116,8 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                   );
                 },
                 child: Text(
-                  'View All',
-                  style: TextStyle(
+                  l10n.viewAll,
+                  style: const TextStyle(
                     color: AppColors.primaryAdmin,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
@@ -2112,7 +2127,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
             ),
             const SizedBox(height: 12),
             SizedBox(
-              height: 170, 
+              height: 170,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: list.length,
@@ -2139,6 +2154,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     StudentPerformance perf,
     int rank,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     // Smart average — only count metrics that actually have data
     double _calcScore() {
       double total = 0;
@@ -2178,7 +2194,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     } else if (perf.rollNumber != null && perf.rollNumber!.isNotEmpty) {
       subtitle = 'Roll ${perf.rollNumber}';
     } else {
-      subtitle = 'Student';
+      subtitle = l10n.student;
     }
 
     return GestureDetector(

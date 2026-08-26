@@ -2281,6 +2281,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'e.g.'**
   String get egLabel;
+
+  /// No description provided for @monthlyAttendanceOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Attendance Overview'**
+  String get monthlyAttendanceOverview;
+
+  /// No description provided for @yearLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Year {year}'**
+  String yearLabel(int year);
+
+  /// No description provided for @topTeachers.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Teachers ({month})'**
+  String topTeachers(String month);
+
+  /// No description provided for @topStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Students ({month})'**
+  String topStudents(String month);
+
+  /// No description provided for @teacherPerformance.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Performance'**
+  String get teacherPerformance;
+
+  /// No description provided for @student.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get student;
+
+  /// No description provided for @monthJan.
+  ///
+  /// In en, this message translates to:
+  /// **'Jan'**
+  String get monthJan;
+
+  /// No description provided for @monthFeb.
+  ///
+  /// In en, this message translates to:
+  /// **'Feb'**
+  String get monthFeb;
+
+  /// No description provided for @monthMar.
+  ///
+  /// In en, this message translates to:
+  /// **'Mar'**
+  String get monthMar;
+
+  /// No description provided for @monthApr.
+  ///
+  /// In en, this message translates to:
+  /// **'Apr'**
+  String get monthApr;
+
+  /// No description provided for @monthMay.
+  ///
+  /// In en, this message translates to:
+  /// **'May'**
+  String get monthMay;
+
+  /// No description provided for @monthJun.
+  ///
+  /// In en, this message translates to:
+  /// **'Jun'**
+  String get monthJun;
+
+  /// No description provided for @monthJul.
+  ///
+  /// In en, this message translates to:
+  /// **'Jul'**
+  String get monthJul;
+
+  /// No description provided for @monthAug.
+  ///
+  /// In en, this message translates to:
+  /// **'Aug'**
+  String get monthAug;
+
+  /// No description provided for @monthSep.
+  ///
+  /// In en, this message translates to:
+  /// **'Sep'**
+  String get monthSep;
+
+  /// No description provided for @monthOct.
+  ///
+  /// In en, this message translates to:
+  /// **'Oct'**
+  String get monthOct;
+
+  /// No description provided for @monthNov.
+  ///
+  /// In en, this message translates to:
+  /// **'Nov'**
+  String get monthNov;
+
+  /// No description provided for @monthDec.
+  ///
+  /// In en, this message translates to:
+  /// **'Dec'**
+  String get monthDec;
+
+  /// No description provided for @attLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Att'**
+  String get attLabel;
+
+  /// No description provided for @hwLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'HW'**
+  String get hwLabel;
 }
 
 class _AppLocalizationsDelegate
