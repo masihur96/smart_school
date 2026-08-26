@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import '../data/models/book.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -83,7 +84,9 @@ class BookCard extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        book.isAvailable ? 'Available' : 'Issued',
+                        book.isAvailable
+                            ? AppLocalizations.of(context)!.availableLabel
+                            : AppLocalizations.of(context)!.issuedLabel,
                         style: TextStyle(
                           fontSize: 12,
                           color: book.isAvailable ? Colors.green[700] : Colors.red[700],

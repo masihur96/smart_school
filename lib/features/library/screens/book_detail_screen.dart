@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/student_model.dart';
 import '../../../models/user_model.dart';
@@ -55,19 +56,20 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
   // ── Delete book handler ────────────────────────────────────────────────────
   Future<void> _onDeleteBook(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Color(0xFFDC2626)),
-            SizedBox(width: 8),
+            const Icon(Icons.warning_amber_rounded, color: Color(0xFFDC2626)),
+            const SizedBox(width: 8),
             Text(
-              'Delete Book',
-              style: TextStyle(
+              l10n.deleteBookTitle,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF111827),
@@ -76,15 +78,15 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           ],
         ),
         content: Text(
-          'Are you sure you want to delete "${_book.title}"? This action cannot be undone.',
+          l10n.deleteBookConfirmation(_book.title),
           style: const TextStyle(fontSize: 14, color: Color(0xFF4B5563)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Color(0xFF6B7280)),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(color: Color(0xFF6B7280)),
             ),
           ),
           ElevatedButton(
@@ -97,7 +99,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -126,14 +128,14 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          content: const Row(
+          content: Row(
             children: [
-              Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 18),
-              SizedBox(width: 10),
+              const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 18),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Book deleted successfully!',
-                  style: TextStyle(color: Colors.white, fontSize: 13),
+                  l10n.bookDeletedSuccess,
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
                 ),
               ),
             ],
@@ -184,6 +186,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
 
   Future<String?> _showMethodPicker(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return showModalBottomSheet<String>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -206,9 +209,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Issue Book To',
-              style: TextStyle(
+            Text(
+              l10n.issueBookToTitle,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
                 color: Color(0xFF111827),
@@ -216,7 +219,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'How would you like to identify the student?',
+              l10n.howIdentifyStudent,
               style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
             ),
             const SizedBox(height: 20),
@@ -227,16 +230,16 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   _MethodTile(
                     icon: Icons.qr_code_scanner_rounded,
                     color: const Color(0xFF2563EB),
-                    title: 'Scan ID Card',
-                    subtitle: 'Use the camera to scan student\'s barcode',
+                    title: l10n.scanIdCardTitle,
+                    subtitle: l10n.scanIdCardSubtitle,
                     onTap: () => Navigator.pop(sheetCtx, 'scan'),
                   ),
                   const SizedBox(height: 10),
                   _MethodTile(
                     icon: Icons.people_alt_rounded,
                     color: const Color(0xFF7C3AED),
-                    title: 'Select Student',
-                    subtitle: 'Search and pick from the student list',
+                    title: l10n.selectStudentTitle,
+                    subtitle: l10n.selectStudentSubtitle,
                     onTap: () => Navigator.pop(sheetCtx, 'select'),
                   ),
                 ],
@@ -294,6 +297,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
   // ── Due-date picker ────────────────────────────────────────────────────────
   Future<DateTime?> _pickDueDate(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     // Default: 14 days from today
     DateTime selected = now.add(const Duration(days: 14));
@@ -324,9 +328,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  const Text(
-                    'Set Due Date',
-                    style: TextStyle(
+                  Text(
+                    l10n.setDueDateTitle,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF111827),
@@ -334,7 +338,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Choose when the book must be returned',
+                    l10n.chooseWhenReturn,
                     style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
                   ),
                   const SizedBox(height: 20),
@@ -370,7 +374,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                 ),
                               ),
                               child: Text(
-                                '+$days days',
+                                l10n.plusDays(days),
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
@@ -421,9 +425,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Due Date',
-                                  style: TextStyle(
+                                Text(
+                                  l10n.dueDate,
+                                  style: const TextStyle(
                                     fontSize: 11,
                                     color: Color(0xFF9CA3AF),
                                     fontWeight: FontWeight.w500,
@@ -464,9 +468,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                         ),
                         elevation: 0,
                       ),
-                      child: const Text(
-                        'Confirm & Issue',
-                        style: TextStyle(
+                      child: Text(
+                        l10n.confirmAndIssue,
+                        style: const TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
                         ),
@@ -551,6 +555,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     ScanResult result, {
     DateTime? dueDate,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -576,9 +581,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Book Issued!',
-                style: TextStyle(
+              Text(
+                l10n.bookIssuedSuccessTitle,
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF111827),
@@ -586,7 +591,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               ),
               const SizedBox(height: 6),
               Text(
-                '"${_book.title}" has been successfully assigned.',
+                l10n.bookIssuedSuccessMessage(_book.title),
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
               ),
@@ -604,20 +609,20 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   children: [
                     _DialogInfoRow(
                       icon: Icons.person_rounded,
-                      label: 'Student',
+                      label: l10n.studentLabel,
                       value: result.studentName,
                     ),
                     const SizedBox(height: 8),
                     _DialogInfoRow(
                       icon: Icons.badge_rounded,
-                      label: 'ID',
+                      label: l10n.idLabel,
                       value: result.studentId,
                     ),
                     if (dueDate != null) ...[
                       const SizedBox(height: 8),
                       _DialogInfoRow(
                         icon: Icons.event_rounded,
-                        label: 'Due',
+                        label: l10n.dueLabel,
                         value: DateFormat('MMM d, yyyy').format(dueDate),
                       ),
                     ],
@@ -641,9 +646,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Done',
-                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                  child: Text(
+                    l10n.done,
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
                   ),
                 ),
               ),
@@ -657,6 +662,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   // ─────────────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final user = context.watch<AuthNotifier>().user;
     final isAdmin = user?.role == UserRole.admin || user?.role == UserRole.superadmin;
 
@@ -681,12 +687,12 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               if (isAdmin) ...[
                 IconButton(
                   icon: const Icon(Icons.edit_outlined, color: Colors.white),
-                  tooltip: 'Edit Book',
+                  tooltip: l10n.editBookTitle,
                   onPressed: () => _onEditBook(context),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline_rounded, color: Colors.white),
-                  tooltip: 'Delete Book',
+                  tooltip: l10n.deleteBookTitle,
                   onPressed: () => _onDeleteBook(context),
                 ),
                 const SizedBox(width: 4),
@@ -825,9 +831,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   const SizedBox(height: 20),
 
                   // Description
-                  const Text(
-                    'Description',
-                    style: TextStyle(
+                  Text(
+                    l10n.descriptionLabel,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF111827),
@@ -837,7 +843,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   Text(
                     _book.description.isNotEmpty
                         ? _book.description
-                        : 'No description available for this book.',
+                        : l10n.noDescriptionAvailable,
                     style: const TextStyle(
                       fontSize: 14,
                       color: Color(0xFF6B7280),
@@ -904,6 +910,7 @@ class _IssueButtonState extends State<_IssueButton>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ScaleTransition(
       scale: _scale,
       child: GestureDetector(
@@ -930,12 +937,12 @@ class _IssueButtonState extends State<_IssueButton>
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(Icons.assignment_rounded, color: Colors.white, size: 20),
-              SizedBox(width: 10),
+            children: [
+              const Icon(Icons.assignment_rounded, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
               Text(
-                'Request Issue',
-                style: TextStyle(
+                l10n.requestIssueButton,
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
@@ -952,6 +959,7 @@ class _IssueButtonState extends State<_IssueButton>
 class _UnavailableButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       height: 56,
       decoration: BoxDecoration(
@@ -961,12 +969,12 @@ class _UnavailableButton extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(Icons.block_rounded, color: Color(0xFF9CA3AF), size: 20),
-          SizedBox(width: 10),
+        children: [
+          const Icon(Icons.block_rounded, color: Color(0xFF9CA3AF), size: 20),
+          const SizedBox(width: 10),
           Text(
-            'Book Currently Unavailable',
-            style: TextStyle(
+            l10n.bookCurrentlyUnavailable,
+            style: const TextStyle(
               color: Color(0xFF9CA3AF),
               fontWeight: FontWeight.w600,
               fontSize: 15,
@@ -984,6 +992,7 @@ class _DetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1001,14 +1010,14 @@ class _DetailCard extends StatelessWidget {
         children: [
           _DetailRow(
             icon: Icons.category_rounded,
-            label: 'Category',
+            label: l10n.categoryLabel,
             value: book.category,
             color: const Color(0xFF2563EB),
           ),
           const Divider(height: 20),
           _DetailRow(
             icon: Icons.qr_code_rounded,
-            label: 'ISBN',
+            label: l10n.isbnNumberLabel,
             value: book.isbn,
             color: const Color(0xFF7C3AED),
           ),
@@ -1017,8 +1026,8 @@ class _DetailCard extends StatelessWidget {
             icon: book.isAvailable
                 ? Icons.check_circle_rounded
                 : Icons.cancel_rounded,
-            label: 'Status',
-            value: book.isAvailable ? 'Available' : 'Not Available',
+            label: l10n.statusLabel,
+            value: book.isAvailable ? l10n.statusAvailable : l10n.statusNotAvailable,
             color: book.isAvailable
                 ? const Color(0xFF10B981)
                 : const Color(0xFFEF4444),
@@ -1089,6 +1098,7 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -1112,7 +1122,7 @@ class _StatusBadge extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(
-            isAvailable ? 'Available' : 'Unavailable',
+            isAvailable ? l10n.statusAvailable : l10n.statusNotAvailable,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -1260,8 +1270,6 @@ class _MethodTile extends StatelessWidget {
 
 // ─── Select student bottom sheet ─────────────────────────────────────────────
 
-// ─── Select student bottom sheet ─────────────────────────────────────────────
-
 class _SelectStudentSheet extends StatefulWidget {
   const _SelectStudentSheet();
 
@@ -1338,6 +1346,7 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final classes = context.watch<ClassSetupNotifier>().classes;
     final allSections = context.watch<SectionSetupNotifier>().sections;
 
@@ -1376,10 +1385,10 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Select Student',
-                        style: TextStyle(
+                        l10n.selectStudentTitle,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF111827),
@@ -1434,9 +1443,9 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                           child: DropdownButton<String?>(
                             value: _selectedClassId,
                             isExpanded: true,
-                            hint: const Text(
-                              'All Classes',
-                              style: TextStyle(
+                            hint: Text(
+                              l10n.allClasses,
+                              style: const TextStyle(
                                 fontSize: 13,
                                 color: Color(0xFF6B7280),
                               ),
@@ -1446,11 +1455,11 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                               size: 18,
                             ),
                             items: [
-                              const DropdownMenuItem<String?>(
+                              DropdownMenuItem<String?>(
                                 value: null,
                                 child: Text(
-                                  'All Classes',
-                                  style: TextStyle(
+                                  l10n.allClasses,
+                                  style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -1496,9 +1505,9 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                           child: DropdownButton<String?>(
                             value: _selectedSectionId,
                             isExpanded: true,
-                            hint: const Text(
-                              'All Sections',
-                              style: TextStyle(
+                            hint: Text(
+                              l10n.allSections,
+                              style: const TextStyle(
                                 fontSize: 13,
                                 color: Color(0xFF6B7280),
                               ),
@@ -1508,11 +1517,11 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                               size: 18,
                             ),
                             items: [
-                              const DropdownMenuItem<String?>(
+                              DropdownMenuItem<String?>(
                                 value: null,
                                 child: Text(
-                                  'All Sections',
-                                  style: TextStyle(
+                                  l10n.allSections,
+                                  style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -1558,7 +1567,7 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                     onChanged: _onSearchChanged,
                     style: const TextStyle(fontSize: 14),
                     decoration: InputDecoration(
-                      hintText: 'Search student name from server…',
+                      hintText: l10n.searchStudentHint,
                       hintStyle: TextStyle(
                         color: Colors.grey.shade400,
                         fontSize: 13,
@@ -1600,7 +1609,7 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    '$displayCount student${displayCount == 1 ? '' : 's'} found',
+                    l10n.studentsFoundCount(displayCount),
                     style: const TextStyle(
                       fontSize: 12,
                       color: Color(0xFF9CA3AF),
@@ -1626,7 +1635,7 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                                 ),
                                 const SizedBox(height: 10),
                                 Text(
-                                  'No students found',
+                                  l10n.noStudentsFound,
                                   style: TextStyle(
                                     color: Colors.grey.shade400,
                                     fontSize: 14,
@@ -1655,13 +1664,13 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                               }
 
                               final s = students[i];
-                              final name = s.user?.name ?? 'Unknown';
+                              final name = s.user?.name ?? l10n.unknownStudent;
                               final avatar = s.user?.avatar ?? '';
                               final roll = s.rollId.isNotEmpty
-                                  ? 'Roll: ${s.rollId}'
+                                  ? l10n.rollLabel(s.rollId)
                                   : '';
                               final cls = s.className != null
-                                  ? ' · Class ${s.className}'
+                                  ? ' · ${l10n.classLabel} ${s.className}'
                                   : '';
 
                               return GestureDetector(

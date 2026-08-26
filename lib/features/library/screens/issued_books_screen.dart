@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/user_model.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -31,6 +32,7 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<LibraryBookNotifier>(
       builder: (context, notifier, _) {
         // ── Loading ────────────────────────────────────────────────────────
@@ -105,7 +107,7 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
                 // All: Show sections
                 if (overdue.isNotEmpty) ...[
                   _SectionHeader(
-                    label: 'Overdue',
+                    label: l10n.sectionOverdue,
                     count: overdue.length,
                     color: const Color(0xFFEF4444),
                     icon: Icons.warning_rounded,
@@ -121,7 +123,7 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
                 ],
                 if (active.isNotEmpty) ...[
                   _SectionHeader(
-                    label: 'Currently Issued',
+                    label: l10n.sectionCurrentlyIssued,
                     count: active.length,
                     color: const Color(0xFF2563EB),
                     icon: Icons.bookmark_rounded,
@@ -137,7 +139,7 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
                 ],
                 if (returned.isNotEmpty) ...[
                   _SectionHeader(
-                    label: 'Returned History',
+                    label: l10n.sectionReturnedHistory,
                     count: returned.length,
                     color: const Color(0xFF10B981),
                     icon: Icons.check_circle_rounded,
@@ -166,12 +168,13 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
     required int overdueCount,
     required int returnedCount,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     final filters = [
-      {'label': 'All', 'count': totalCount, 'color': const Color(0xFF1A3C6E)},
-      {'label': 'Issued', 'count': activeCount, 'color': const Color(0xFF2563EB)},
+      {'key': 'All', 'label': l10n.filterAll, 'count': totalCount, 'color': const Color(0xFF1A3C6E)},
+      {'key': 'Issued', 'label': l10n.filterIssued, 'count': activeCount, 'color': const Color(0xFF2563EB)},
       if (overdueCount > 0)
-        {'label': 'Overdue', 'count': overdueCount, 'color': const Color(0xFFEF4444)},
-      {'label': 'Returned', 'count': returnedCount, 'color': const Color(0xFF10B981)},
+        {'key': 'Overdue', 'label': l10n.filterOverdue, 'count': overdueCount, 'color': const Color(0xFFEF4444)},
+      {'key': 'Returned', 'label': l10n.filterReturned, 'count': returnedCount, 'color': const Color(0xFF10B981)},
     ];
 
     return SizedBox(
@@ -182,15 +185,16 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final filter = filters[index];
+          final key = filter['key'] as String;
           final label = filter['label'] as String;
           final count = filter['count'] as int;
           final color = filter['color'] as Color;
-          final isSelected = _selectedFilter == label;
+          final isSelected = _selectedFilter == key;
 
           return GestureDetector(
             onTap: () {
               setState(() {
-                _selectedFilter = label;
+                _selectedFilter = key;
               });
             },
             child: AnimatedContainer(
@@ -250,7 +254,16 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
     );
   }
 
-  Widget _buildNoResultsForFilter(String filter) {
+  Widget _buildNoResultsForFilter(String filterKey) {
+    final l10n = AppLocalizations.of(context)!;
+    final filterLabel = filterKey == 'Issued'
+        ? l10n.filterIssued
+        : filterKey == 'Overdue'
+        ? l10n.filterOverdue
+        : filterKey == 'Returned'
+        ? l10n.filterReturned
+        : l10n.filterAll;
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 40),
       alignment: Alignment.center,
@@ -259,7 +272,7 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
           Icon(Icons.filter_alt_off_rounded, size: 40, color: Colors.grey.shade300),
           const SizedBox(height: 8),
           Text(
-            'No $filter books found',
+            l10n.noFilteredBooksFound(filterLabel),
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey.shade500,
@@ -345,6 +358,7 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
   // ── Error state ───────────────────────────────────────────────────────────
 
   Widget _buildError(LibraryBookNotifier notifier) {
+    final l10n = AppLocalizations.of(context)!;
     return RefreshIndicator(
       onRefresh: () => notifier.fetchIssuedBooks(),
       child: ListView(
@@ -363,7 +377,7 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    notifier.issuedError ?? 'Something went wrong',
+                    notifier.issuedError ?? l10n.somethingWentWrong,
                     style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
                     textAlign: TextAlign.center,
                   ),
@@ -371,7 +385,7 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
                   TextButton.icon(
                     onPressed: () => notifier.fetchIssuedBooks(),
                     icon: const Icon(Icons.refresh_rounded),
-                    label: const Text('Retry'),
+                    label: Text(l10n.retry),
                   ),
                 ],
               ),
@@ -385,6 +399,7 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
   // ── Empty state ───────────────────────────────────────────────────────────
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -403,9 +418,9 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'No Books Issued',
-            style: TextStyle(
+          Text(
+            l10n.noBooksIssuedTitle,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: Color(0xFF374151),
@@ -413,12 +428,12 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            'All books are currently available.',
+            l10n.noBooksIssuedSubtitle,
             style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
           ),
           const SizedBox(height: 4),
           Text(
-            'Pull down to refresh',
+            l10n.pullToRefresh,
             style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
           ),
         ],
@@ -494,6 +509,7 @@ class _IssuedBookCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final user = context.watch<AuthNotifier>().user;
     final isAdmin = comeFrom == 'admin' ||
         user?.role == UserRole.admin ||
@@ -662,23 +678,23 @@ class _IssuedBookCard extends StatelessWidget {
                       children: [
                         _DateRow(
                           icon: Icons.calendar_today_rounded,
-                          label: 'Issue Date',
+                          label: l10n.issueDate,
                           value: fmt.format(issuedBook.issueDate),
                           color: const Color(0xFF6B7280),
                         ),
                         if (isReturned) ...[
                           _DateRow(
                             icon: Icons.check_circle_outline_rounded,
-                            label: 'Return Date',
+                            label: l10n.returnDate,
                             value: fmt.format(issuedBook.returnDate!),
                             color: const Color(0xFF059669),
                           ),
                         ] else ...[
                           _DateRow(
                             icon: isOverdue
-                               ? Icons.event_busy_rounded
+                                ? Icons.event_busy_rounded
                                 : Icons.event_available_rounded,
-                            label: 'Due Date',
+                            label: l10n.dueDate,
                             value: fmt.format(issuedBook.dueDate),
                             color: isOverdue
                                 ? const Color(0xFFEF4444)
@@ -686,8 +702,8 @@ class _IssuedBookCard extends StatelessWidget {
                           ),
                           _DateRow(
                             icon: Icons.assignment_return_outlined,
-                            label: 'Return Date',
-                            value: 'Pending',
+                            label: l10n.returnDate,
+                            value: l10n.pendingStatus,
                             color: const Color(0xFF9CA3AF),
                           ),
                         ],
@@ -731,11 +747,12 @@ class _AdminStudentInfoBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final avatar = issuedBook.studentAvatar;
     final hasAvatar = avatar != null && avatar.startsWith('http');
     final studentName = issuedBook.studentName.isNotEmpty
         ? issuedBook.studentName
-        : 'Unknown Student';
+        : l10n.unknownStudent;
     final initial =
         studentName.isNotEmpty ? studentName[0].toUpperCase() : 'S';
     final className = issuedBook.studentClassName;
@@ -811,7 +828,7 @@ class _AdminStudentInfoBox extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            'Class: $className',
+                            '${l10n.classLabel}: $className',
                             style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
@@ -830,7 +847,7 @@ class _AdminStudentInfoBox extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            'Sec: $sectionName',
+                            '${l10n.sectionLabelShort}: $sectionName',
                             style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
@@ -880,6 +897,7 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     Color bg;
     Color fg;
     String label;
@@ -888,17 +906,17 @@ class _StatusBadge extends StatelessWidget {
     if (isReturned) {
       bg = const Color(0xFF10B981).withOpacity(0.12);
       fg = const Color(0xFF059669);
-      label = 'Returned';
+      label = l10n.filterReturned;
       icon = Icons.check_circle_outline_rounded;
     } else if (isOverdue) {
       bg = const Color(0xFFEF4444).withOpacity(0.12);
       fg = const Color(0xFFDC2626);
-      label = 'Overdue';
+      label = l10n.filterOverdue;
       icon = Icons.warning_amber_rounded;
     } else {
       bg = const Color(0xFF2563EB).withOpacity(0.12);
       fg = const Color(0xFF2563EB);
-      label = 'Issued';
+      label = l10n.filterIssued;
       icon = Icons.bookmark_outline_rounded;
     }
 
@@ -974,6 +992,7 @@ class _ReturnedChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final fmt = DateFormat('MMM dd, yyyy');
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
@@ -992,7 +1011,7 @@ class _ReturnedChip extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            'Returned on ${fmt.format(returnDate)}',
+            l10n.returnedOn(fmt.format(returnDate)),
             style: const TextStyle(
               fontSize: 10,
               color: Color(0xFF059669),
@@ -1013,13 +1032,14 @@ class _CountdownChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final color = isOverdue ? const Color(0xFFEF4444) : const Color(0xFF10B981);
     final bgColor = color.withOpacity(0.08);
     final text = isOverdue
-        ? '$daysLeft ${daysLeft == 1 ? 'day' : 'days'} overdue'
+        ? l10n.daysOverdue(daysLeft)
         : daysLeft == 0
-        ? 'Due today!'
-        : '$daysLeft ${daysLeft == 1 ? 'day' : 'days'} remaining';
+        ? l10n.dueToday
+        : l10n.daysRemaining(daysLeft);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
@@ -1059,22 +1079,26 @@ class _ReturnButton extends StatelessWidget {
   const _ReturnButton({required this.issuedBook});
 
   Future<void> _handleReturn(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Return Book',
-          style: TextStyle(fontWeight: FontWeight.w700),
+        title: Text(
+          l10n.returnBookTitle,
+          style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         content: Text(
-          'Are you sure you want to mark "${issuedBook.book.title}" as returned by ${issuedBook.studentName}?',
+          l10n.returnBookConfirmation(
+            issuedBook.book.title,
+            issuedBook.studentName,
+          ),
           style: const TextStyle(fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            child: Text(l10n.cancel, style: const TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -1085,7 +1109,7 @@ class _ReturnButton extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text('Return Book'),
+            child: Text(l10n.returnBookButton),
           ),
         ],
       ),
@@ -1114,18 +1138,18 @@ class _ReturnButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          content: const Row(
+          content: Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.check_circle_outline_rounded,
                 color: Colors.white,
                 size: 18,
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Book marked as returned successfully!',
-                  style: TextStyle(color: Colors.white, fontSize: 13),
+                  l10n.bookReturnedSuccess,
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
                 ),
               ),
             ],
@@ -1166,6 +1190,7 @@ class _ReturnButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return InkWell(
       onTap: () => _handleReturn(context),
       borderRadius: BorderRadius.circular(8),
@@ -1176,18 +1201,18 @@ class _ReturnButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.assignment_return_rounded,
               size: 13,
               color: Color(0xFF059669),
             ),
-            SizedBox(width: 4),
+            const SizedBox(width: 4),
             Text(
-              'Mark as Returned',
-              style: TextStyle(
+              l10n.markAsReturned,
+              style: const TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF059669),

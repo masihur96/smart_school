@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../data/models/book.dart';
 import '../providers/library_book_provider.dart';
@@ -267,6 +268,7 @@ class _BookListScreenState extends State<BookListScreen> {
   }
 
   Widget _buildErrorBanner(LibraryBookNotifier notifier) {
+    final l10n = AppLocalizations.of(context)!;
     return Expanded(
       child: Center(
         child: Column(
@@ -279,7 +281,7 @@ class _BookListScreenState extends State<BookListScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              notifier.error ?? 'Something went wrong',
+              notifier.error ?? l10n.somethingWentWrong,
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey.shade500,
@@ -291,7 +293,7 @@ class _BookListScreenState extends State<BookListScreen> {
             TextButton.icon(
               onPressed: () => notifier.fetchBooks(),
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Retry'),
+              label: Text(l10n.retry),
             ),
           ],
         ),
@@ -300,6 +302,7 @@ class _BookListScreenState extends State<BookListScreen> {
   }
 
   Widget _buildSearchAndFilter(LibraryBookNotifier notifier) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
       child: Row(
@@ -315,7 +318,7 @@ class _BookListScreenState extends State<BookListScreen> {
                 onChanged: (v) => setState(() => _searchQuery = v),
                 style: const TextStyle(fontSize: 14),
                 decoration: InputDecoration(
-                  hintText: 'Search title or author…',
+                  hintText: l10n.searchBookHint,
                   hintStyle: TextStyle(
                     color: Colors.grey.shade400,
                     fontSize: 14,
@@ -358,8 +361,8 @@ class _BookListScreenState extends State<BookListScreen> {
   }
 
   Widget _buildCategoryChips(List<String> categories) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
-      // color: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: SizedBox(
         height: 34,
@@ -370,6 +373,7 @@ class _BookListScreenState extends State<BookListScreen> {
           separatorBuilder: (_, __) => const SizedBox(width: 8),
           itemBuilder: (context, i) {
             final cat = categories[i];
+            final displayLabel = cat == 'All' ? l10n.categoryAll : cat;
             final selected = _selectedCategory == cat;
             return GestureDetector(
               onTap: () => setState(() => _selectedCategory = cat),
@@ -391,7 +395,7 @@ class _BookListScreenState extends State<BookListScreen> {
                   ),
                 ),
                 child: Text(
-                  cat,
+                  displayLabel,
                   style: TextStyle(
                     color: selected ? Colors.white : const Color(0xFF6B7280),
                     fontSize: 12,
@@ -407,13 +411,16 @@ class _BookListScreenState extends State<BookListScreen> {
   }
 
   Widget _buildResultsHeader(int count) {
+    final l10n = AppLocalizations.of(context)!;
+    final catDisplayLabel =
+        _selectedCategory == 'All' ? l10n.categoryAll : _selectedCategory;
+
     return Container(
-      // color: const Color(0xFFF4F6FB),
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
       child: Row(
         children: [
           Text(
-            '$count ${count == 1 ? 'book' : 'books'} found',
+            l10n.booksFoundCount(count),
             style: const TextStyle(
               fontSize: 13,
               color: Color(0xFF6B7280),
@@ -437,7 +444,7 @@ class _BookListScreenState extends State<BookListScreen> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  _selectedCategory,
+                  catDisplayLabel,
                   style: const TextStyle(
                     fontSize: 11,
                     color: Color(0xFF1A3C6E),
@@ -500,6 +507,7 @@ class _BookListScreenState extends State<BookListScreen> {
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -507,7 +515,7 @@ class _BookListScreenState extends State<BookListScreen> {
           Icon(Icons.search_off_rounded, size: 64, color: Colors.grey.shade300),
           const SizedBox(height: 12),
           Text(
-            'No books found',
+            l10n.noBooksFound,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -516,7 +524,7 @@ class _BookListScreenState extends State<BookListScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Try a different search or category',
+            l10n.tryDifferentSearch,
             style: TextStyle(fontSize: 13, color: Colors.grey.shade400),
           ),
         ],
@@ -685,6 +693,7 @@ class _AvailabilityBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
@@ -708,7 +717,7 @@ class _AvailabilityBadge extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text(
-            isAvailable ? 'Available' : 'Issued',
+            isAvailable ? l10n.availableLabel : l10n.issuedLabel,
             style: TextStyle(
               fontSize: 10,
               color: isAvailable

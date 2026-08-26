@@ -10,6 +10,7 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
 import 'package:smart_school/features/library/data/models/book.dart';
 import 'package:smart_school/features/library/providers/library_book_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
 class AddEditBookScreen extends StatefulWidget {
@@ -70,10 +71,11 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
   }
 
   void _saveBook() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
       if (_selectedCategory == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a category')),
+          SnackBar(content: Text(l10n.selectCategoryError)),
         );
         return;
       }
@@ -110,8 +112,8 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
               ),
               content: Text(
                 widget.book == null
-                    ? 'Book added successfully!'
-                    : 'Book updated successfully!',
+                    ? l10n.bookAddedSuccess
+                    : l10n.bookUpdatedSuccess,
                 style: const TextStyle(color: Colors.white),
               ),
             ),
@@ -144,6 +146,7 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
+    final l10n = AppLocalizations.of(context)!;
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source, imageQuality: 85);
     if (pickedFile != null) {
@@ -188,7 +191,7 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('Failed to upload image: $e')));
+          ).showSnackBar(SnackBar(content: Text(l10n.failedToUploadImage(e.toString()))));
         }
       } finally {
         if (mounted) {
@@ -199,6 +202,7 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
   }
 
   void _showImageOptions() {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -214,7 +218,7 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
                   Icons.auto_awesome,
                   color: AppColors.primary,
                 ),
-                title: const Text('Generate Random Cover'),
+                title: Text(l10n.generateRandomCover),
                 onTap: () {
                   Navigator.pop(context);
                   final randomId = const Uuid().v4().substring(0, 8);
@@ -227,7 +231,7 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
                   Icons.photo_library,
                   color: AppColors.primary,
                 ),
-                title: const Text('Pick from Gallery'),
+                title: Text(l10n.pickFromGallery),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.gallery);
@@ -235,7 +239,7 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt, color: AppColors.primary),
-                title: const Text('Take a Photo'),
+                title: Text(l10n.takeAPhoto),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.camera);
@@ -250,9 +254,10 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.book == null ? 'Add Book' : 'Edit Book'),
+        title: Text(widget.book == null ? l10n.addBookTitle : l10n.editBookTitle),
         backgroundColor: widget.isAdminOrTeacher
             ? AppColors.primaryAdmin
             : AppColors.primaryTeacher,
@@ -264,52 +269,52 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionTitle('Basic Details'),
+              _buildSectionTitle(l10n.basicDetails),
               const SizedBox(height: 12),
               _buildTextField(
                 controller: _titleController,
-                label: 'Book Title',
-                hint: 'e.g., Fundamentals of Physics',
+                label: l10n.bookTitleLabel,
+                hint: l10n.bookTitleHint,
                 icon: Icons.menu_book,
                 validator: (val) =>
-                    val == null || val.isEmpty ? 'Title is required' : null,
+                    val == null || val.isEmpty ? l10n.titleRequired : null,
               ),
               const SizedBox(height: 16),
               _buildTextField(
                 controller: _authorController,
-                label: 'Author Name',
-                hint: 'e.g., David Halliday',
+                label: l10n.authorNameLabel,
+                hint: l10n.authorNameHint,
                 icon: Icons.person_outline,
                 validator: (val) =>
-                    val == null || val.isEmpty ? 'Author is required' : null,
+                    val == null || val.isEmpty ? l10n.authorRequired : null,
               ),
               const SizedBox(height: 16),
               _buildTextField(
                 controller: _isbnController,
-                label: 'ISBN Number',
-                hint: 'e.g., 978-0471320005',
+                label: l10n.isbnNumberLabel,
+                hint: l10n.isbnNumberHint,
                 icon: Icons.qr_code,
                 validator: (val) =>
-                    val == null || val.isEmpty ? 'ISBN is required' : null,
+                    val == null || val.isEmpty ? l10n.isbnRequired : null,
               ),
               const SizedBox(height: 24),
-              _buildSectionTitle('Additional Info'),
+              _buildSectionTitle(l10n.additionalInfo),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 value: _selectedCategory,
-                decoration: _buildInputDecoration('Category', Icons.category),
+                decoration: _buildInputDecoration(l10n.categoryLabel, Icons.category),
                 items: _categories.map((c) {
                   return DropdownMenuItem(value: c, child: Text(c));
                 }).toList(),
                 onChanged: (val) => setState(() => _selectedCategory = val),
                 validator: (val) =>
-                    val == null ? 'Please select a category' : null,
+                    val == null ? l10n.selectCategoryError : null,
               ),
               const SizedBox(height: 16),
               _buildTextField(
                 controller: _coverImageController,
-                label: 'Cover Image URL or Path',
-                hint: 'https://example.com/image.jpg',
+                label: l10n.coverImageLabel,
+                hint: l10n.coverImageHint,
                 icon: Icons.image_outlined,
                 suffixIcon: IconButton(
                   icon: const Icon(
@@ -321,15 +326,15 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
                 ),
                 validator: (val) {
                   if (val == null || val.isEmpty)
-                    return 'Cover image is required';
+                    return l10n.coverImageRequired;
                   return null;
                 },
               ),
               const SizedBox(height: 16),
               _buildTextField(
                 controller: _descriptionController,
-                label: 'Description',
-                hint: 'Optional book description',
+                label: l10n.descriptionLabel,
+                hint: l10n.descriptionHint,
                 icon: Icons.description_outlined,
                 maxLines: 3,
               ),
@@ -356,9 +361,9 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text(
-                          'Save Book',
-                          style: TextStyle(
+                      : Text(
+                          l10n.saveBookButton,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,

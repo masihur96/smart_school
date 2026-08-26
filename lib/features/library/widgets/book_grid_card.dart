@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../data/models/book.dart';
 
@@ -42,6 +43,7 @@ class _BookGridCardState extends State<BookGridCard>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final book = widget.book;
     return ScaleTransition(
       scale: _scaleAnim,
@@ -170,7 +172,7 @@ class _BookGridCardState extends State<BookGridCard>
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Text(
-                              'View details',
+                              l10n.viewDetails,
                               style: TextStyle(
                                 fontSize: 10,
                                 color: const Color(0xFF2563EB).withOpacity(0.7),
@@ -204,6 +206,7 @@ class _PillBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -222,7 +225,7 @@ class _PillBadge extends StatelessWidget {
         ],
       ),
       child: Text(
-        isAvailable ? 'Available' : 'Issued',
+        isAvailable ? l10n.availableLabel : l10n.issuedLabel,
         style: const TextStyle(
           color: Colors.white,
           fontSize: 9,

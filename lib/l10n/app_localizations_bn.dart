@@ -60,7 +60,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get save => 'সংরক্ষণ করুন';
 
   @override
-  String get cancel => 'বাতিল করুন';
+  String get cancel => 'বাতিল';
 
   @override
   String get passwordChangedSuccess => 'পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে';
@@ -227,7 +227,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get marqueeMessage => 'মার্কি বার্তা';
 
   @override
-  String get allClasses => 'সব ক্লাস';
+  String get allClasses => 'সকল শ্রেণি';
 
   @override
   String get schoolPerformance => 'স্কুল পারফরম্যান্স';
@@ -682,7 +682,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get inactiveOnly => 'শুধু নিষ্ক্রিয়';
 
   @override
-  String get noStudentsFound => 'কোনো শিক্ষার্থী পাওয়া যায়নি।';
+  String get noStudentsFound => 'কোনো শিক্ষার্থী পাওয়া যায়নি';
 
   @override
   String rollLabel(String roll) {
@@ -838,7 +838,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get updateStatusAndComment => 'অবস্থা ও মন্তব্য আপডেট করুন';
 
   @override
-  String get pendingStatus => 'অপেক্ষমান';
+  String get pendingStatus => 'বাকি আছে';
 
   @override
   String get doneStatus => 'সম্পন্ন';
@@ -1046,7 +1046,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get assignHomework => 'হোমওয়ার্ক নির্ধারণ করুন';
 
   @override
-  String get classLabel => 'শ্রেণী';
+  String get classLabel => 'শ্রেণি';
 
   @override
   String get section => 'শাখা';
@@ -1282,7 +1282,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get addClass => 'ক্লাস যোগ করুন';
 
   @override
-  String get editClass => 'ক্লাস সম্পাদনা';
+  String get editClass => 'ক্লাস সম্পাদনা করুন';
 
   @override
   String get addSection => 'শাখা যোগ করুন';
@@ -1334,6 +1334,9 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get sectionLabel => 'শাখা';
+
+  @override
+  String get subjectLabel => 'বিষয়';
 
   @override
   String get classLabel2 => 'ক্লাস';
@@ -1655,4 +1658,644 @@ class AppLocalizationsBn extends AppLocalizations {
   String routineEntriesSavedSuccess(int count) {
     return '$count টি রুটিন এন্ট্রি সফলভাবে সেভ হয়েছে!';
   }
+
+  @override
+  String get studentAttendanceTitle => 'শিক্ষার্থীদের উপস্থিতি';
+
+  @override
+  String get exportPdf => 'পিডিএফ এক্সপোর্ট';
+
+  @override
+  String get searchByStudentNameHint => 'শিক্ষার্থীর নাম দিয়ে খুঁজুন...';
+
+  @override
+  String get allClassHint => 'সকল ক্লাস';
+
+  @override
+  String get allSectionHint => 'সকল সেকশন';
+
+  @override
+  String get allSubjectHint => 'সকল বিষয়';
+
+  @override
+  String get allDates => 'সকল তারিখ';
+
+  @override
+  String totalCountFormat(int total) {
+    return 'মোট: $total';
+  }
+
+  @override
+  String showingCountFormat(int count, int total) {
+    return 'দেখাচ্ছে: $count / $total';
+  }
+
+  @override
+  String get noRecordsFound => 'কোন রেকর্ড পাওয়া যায়নি';
+
+  @override
+  String noStatusRecordsFound(String status) {
+    return 'কোন $status রেকর্ড পাওয়া যায়নি';
+  }
+
+  @override
+  String get showAll => 'সব দেখুন';
+
+  @override
+  String get statusAll => 'সব';
+
+  @override
+  String get statusPresent => 'উপস্থিত';
+
+  @override
+  String get statusAbsent => 'অনুপস্থিত';
+
+  @override
+  String get statusLate => 'বিলম্বিত';
+
+  @override
+  String get statusLeave => 'ছুটি';
+
+  @override
+  String get noAttendanceRecordsToExport =>
+      'এক্সপোর্ট করার মতো কোন উপস্থিতি রেকর্ড নেই';
+
+  @override
+  String failedToGeneratePdf(String error) {
+    return 'পিডিএফ তৈরি করতে ব্যর্থ হয়েছে: $error';
+  }
+
+  @override
+  String get unknownStudent => 'অজানা শিক্ষার্থী';
+
+  @override
+  String classAndSectionFormat(String className, String sectionName) {
+    return '$className • সেকশন $sectionName';
+  }
+
+  @override
+  String rollNumberFormat(String rollNumber) {
+    return 'রোল #$rollNumber';
+  }
+
+  @override
+  String get teacherLabel => 'শিক্ষক';
+
+  @override
+  String get roomLabel => 'কক্ষ';
+
+  @override
+  String get recordIdLabel => 'রেকর্ড আইডি';
+
+  @override
+  String get teacherAttendanceTitle => 'শিক্ষক উপস্থিতি';
+
+  @override
+  String get searchByTeacherNameHint => 'শিক্ষকের নাম দিয়ে খুঁজুন...';
+
+  @override
+  String dateRangeFormat(String start, String end) {
+    return 'তারিখ: $start থেকে $end';
+  }
+
+  @override
+  String get dateAllTime => 'তারিখ: সর্বকালীন';
+
+  @override
+  String resultsForFormat(String query) {
+    return '\'$query\' এর ফলাফল';
+  }
+
+  @override
+  String get statusClockIn => 'ক্লক-ইন';
+
+  @override
+  String get statusClockOut => 'ক্লক-আউট';
+
+  @override
+  String get statusUnknown => 'অজানা';
+
+  @override
+  String get inTime => 'প্রবেশের সময়';
+
+  @override
+  String get outTime => 'প্রস্থানের সময়';
+
+  @override
+  String get locationLabel => 'অবস্থান';
+
+  @override
+  String get fetchingLabel => 'আনা হচ্ছে...';
+
+  @override
+  String get invalidCoords => 'অকার্যকর স্থানাঙ্ক';
+
+  @override
+  String get notSet => 'সেট করা হয়নি';
+
+  @override
+  String get createAttendance => 'উপস্থিতি তৈরি করুন';
+
+  @override
+  String get pleaseSelectTeacher => 'অনুগ্রহ করে একজন শিক্ষক নির্বাচন করুন';
+
+  @override
+  String get attendanceCreatedSuccess => 'উপস্থিতি সফলভাবে তৈরি হয়েছে';
+
+  @override
+  String get selectTeacher => 'শিক্ষক নির্বাচন করুন';
+
+  @override
+  String get statusLabel => 'অবস্থা';
+
+  @override
+  String get dateLabel => 'তারিখ';
+
+  @override
+  String get startTimeLabel => 'শুরুর সময়';
+
+  @override
+  String get endTimeLabel => 'শেষের সময়';
+
+  @override
+  String timeNotRequiredInfo(String status) {
+    return '$status এর জন্য শুরু ও শেষের সময় আবশ্যক নয়।';
+  }
+
+  @override
+  String get submitButton => 'জমা দিন';
+
+  @override
+  String get onlineClassesTitle => 'অনলাইন ক্লাসসমূহ';
+
+  @override
+  String get deleteClassTitle => 'ক্লাস মুছুন';
+
+  @override
+  String get deleteClassConfirmation =>
+      'আপনি কি নিশ্চিত যে আপনি এই ক্লাসটি মুছতে চান?';
+
+  @override
+  String get classDeletedSuccess => 'ক্লাস সফলভাবে মোছা হয়েছে';
+
+  @override
+  String get failedToDeleteClass => 'ক্লাস মুছতে ব্যর্থ হয়েছে';
+
+  @override
+  String couldNotLaunchUrl(String url) {
+    return '$url চালু করা যায়নি';
+  }
+
+  @override
+  String get allClassesAndSections => 'সকল ক্লাস ও সেকশন';
+
+  @override
+  String get newClass => 'নতুন ক্লাস';
+
+  @override
+  String minutesAgo(int count) {
+    return '$count মিনিট আগে';
+  }
+
+  @override
+  String hoursAgo(int count) {
+    return '$count ঘণ্টা আগে';
+  }
+
+  @override
+  String get yesterday => 'গতকাল';
+
+  @override
+  String daysAgo(int count) {
+    return '$count দিন আগে';
+  }
+
+  @override
+  String inMinutes(int count) {
+    return '$count মিনিটে';
+  }
+
+  @override
+  String inHours(int count) {
+    return '$count ঘণ্টায়';
+  }
+
+  @override
+  String get tomorrow => 'আগামীকাল';
+
+  @override
+  String inDays(int count) {
+    return '$count দিনে';
+  }
+
+  @override
+  String get googleMeet => 'গুগল মিট';
+
+  @override
+  String get zoom => 'জুম';
+
+  @override
+  String get msTeams => 'এমএস টিমস';
+
+  @override
+  String get webex => 'ওয়েবেক্স';
+
+  @override
+  String get onlineMeeting => 'অনলাইন মিটিং';
+
+  @override
+  String get unableToLoadClasses => 'ক্লাস লোড করতে অক্ষম';
+
+  @override
+  String get unableToLoadClassesMessage =>
+      'সার্ভারে সংযোগ করতে ব্যর্থ হয়েছে। আপনার নেটওয়ার্ক সংযোগ পরীক্ষা করুন এবং পুনরায় চেষ্টা করুন।';
+
+  @override
+  String get noOnlineClassesScheduled => 'কোনো অনলাইন ক্লাস নির্ধারিত নেই';
+
+  @override
+  String get noOnlineClassesAdminMessage =>
+      'বর্তমানে কোনো অনলাইন ক্লাস নির্ধারিত নেই। নতুন একটি লাইভ ক্লাস নির্ধারণ করতে নিচে ট্যাপ করুন অথবা রিফ্রেশ করতে নিচে টানুন।';
+
+  @override
+  String get noOnlineClassesStudentMessage =>
+      'এই মুহূর্তে কোনো আগামী অনলাইন ক্লাস নির্ধারিত নেই। রিফ্রেশ করতে নিচে টানুন অথবা পরে আবার দেখুন।';
+
+  @override
+  String get scheduleClass => 'ক্লাস নির্ধারণ করুন';
+
+  @override
+  String get statusLiveNow => 'এখন লাইভ';
+
+  @override
+  String get statusUpcoming => 'আসন্ন';
+
+  @override
+  String get statusEnded => 'সম্পন্ন';
+
+  @override
+  String get statusLive => 'লাইভ';
+
+  @override
+  String get classEnded => 'ক্লাস শেষ হয়েছে';
+
+  @override
+  String get joinLiveClass => 'লাইভ ক্লাসে যোগ দিন';
+
+  @override
+  String get joinMeeting => 'মিটিংয়ে যোগ দিন';
+
+  @override
+  String get newBook => 'নতুন বই';
+
+  @override
+  String get allBooksTab => '📚  সকল বই';
+
+  @override
+  String get issuedTab => '🔖  বিতরণকৃত';
+
+  @override
+  String get schoolLibrary => 'স্কুল লাইব্রেরি';
+
+  @override
+  String get manageBooksSubtitle => 'বই পরিচালনা ও ইস্যু ট্র্যাক করুন';
+
+  @override
+  String get totalLabel => 'মোট';
+
+  @override
+  String get availableLabel => 'উপলব্ধ';
+
+  @override
+  String get issuedLabel => 'বিতরণকৃত';
+
+  @override
+  String get returnedLabel => 'ফেরত দেওয়া';
+
+  @override
+  String get overdueLabel => 'মেয়াদোত্তীর্ণ';
+
+  @override
+  String get searchBookHint => 'শিরোনাম বা লেখক অনুসন্ধান করুন…';
+
+  @override
+  String get categoryAll => 'সকল';
+
+  @override
+  String booksFoundCount(int count) {
+    return '$count টি বই পাওয়া গেছে';
+  }
+
+  @override
+  String get noBooksFound => 'কোনো বই পাওয়া যায়নি';
+
+  @override
+  String get tryDifferentSearch =>
+      'অন্য কোনো অনুসন্ধান বা বিভাগ দিয়ে চেষ্টা করুন';
+
+  @override
+  String get somethingWentWrong => 'কিছু ভুল হয়েছে';
+
+  @override
+  String get filterAll => 'সকল';
+
+  @override
+  String get filterIssued => 'বিতরণকৃত';
+
+  @override
+  String get filterOverdue => 'মেয়াদোত্তীর্ণ';
+
+  @override
+  String get filterReturned => 'ফেরত দেওয়া';
+
+  @override
+  String noFilteredBooksFound(String filter) {
+    return 'কোনো $filter বই পাওয়া যায়নি';
+  }
+
+  @override
+  String get noBooksIssuedTitle => 'কোনো বই ইস্যু করা হয়নি';
+
+  @override
+  String get noBooksIssuedSubtitle => 'সমস্ত বই বর্তমানে উপলব্ধ রয়েছে।';
+
+  @override
+  String get pullToRefresh => 'রিফ্রেশ করতে নিচে টানুন';
+
+  @override
+  String get sectionOverdue => 'মেয়াদোত্তীর্ণ';
+
+  @override
+  String get sectionCurrentlyIssued => 'বর্তমানে ইস্যুকৃত';
+
+  @override
+  String get sectionReturnedHistory => 'ফেরতের ইতিহাস';
+
+  @override
+  String get sectionLabelShort => 'শাখা';
+
+  @override
+  String get issueDate => 'ইস্যুর তারিখ';
+
+  @override
+  String get returnDate => 'ফেরতের তারিখ';
+
+  @override
+  String get dueDate => 'মেয়াদ শেষের তারিখ';
+
+  @override
+  String returnedOn(String date) {
+    return '$date তারিখে ফেরত দেওয়া হয়েছে';
+  }
+
+  @override
+  String daysOverdue(int count) {
+    return '$count দিন মেয়াদোত্তীর্ণ';
+  }
+
+  @override
+  String get dueToday => 'আজই মেয়াদ শেষ!';
+
+  @override
+  String daysRemaining(int count) {
+    return '$count দিন বাকি আছে';
+  }
+
+  @override
+  String get returnBookTitle => 'বই ফেরত দিন';
+
+  @override
+  String returnBookConfirmation(String title, String student) {
+    return 'আপনি কি নিশ্চিত যে \"$title\" বইটি $student ফেরত দিয়েছে বলে চিহ্নিত করতে চান?';
+  }
+
+  @override
+  String get returnBookButton => 'বই ফেরত নিন';
+
+  @override
+  String get markAsReturned => 'ফেরত হিসেবে চিহ্নিত করুন';
+
+  @override
+  String get bookReturnedSuccess => 'বই সফলভাবে ফেরত হিসেবে চিহ্নিত করা হয়েছে!';
+
+  @override
+  String get addBookTitle => 'বই যোগ করুন';
+
+  @override
+  String get editBookTitle => 'বই সম্পাদনা করুন';
+
+  @override
+  String get basicDetails => 'মৌলিক তথ্য';
+
+  @override
+  String get bookTitleLabel => 'বইয়ের শিরোনাম';
+
+  @override
+  String get bookTitleHint => 'যেমন, পদার্থবিজ্ঞানের মূলনীতি';
+
+  @override
+  String get titleRequired => 'শিরোনাম প্রয়োজন';
+
+  @override
+  String get authorNameLabel => 'লেখকের নাম';
+
+  @override
+  String get authorNameHint => 'যেমন, ডেভিড হ্যালিডে';
+
+  @override
+  String get authorRequired => 'লেখক প্রয়োজন';
+
+  @override
+  String get isbnNumberLabel => 'আইএসবিএন (ISBN) নম্বর';
+
+  @override
+  String get isbnNumberHint => 'যেমন, 978-0471320005';
+
+  @override
+  String get isbnRequired => 'আইএসবিএন প্রয়োজন';
+
+  @override
+  String get additionalInfo => 'অতিরিক্ত তথ্য';
+
+  @override
+  String get categoryLabel => 'বিভাগ (Category)';
+
+  @override
+  String get selectCategoryError => 'দয়া করে একটি বিভাগ নির্বাচন করুন';
+
+  @override
+  String get coverImageLabel => 'কভার ছবির ইউআরএল বা পাথ';
+
+  @override
+  String get coverImageHint => 'https://example.com/image.jpg';
+
+  @override
+  String get coverImageRequired => 'কভার ছবি প্রয়োজন';
+
+  @override
+  String get descriptionLabel => 'বিবরণ';
+
+  @override
+  String get descriptionHint => 'ঐচ্ছিক বইয়ের বিবরণ';
+
+  @override
+  String get saveBookButton => 'বই সংরক্ষণ করুন';
+
+  @override
+  String get bookAddedSuccess => 'বই সফলভাবে যোগ করা হয়েছে!';
+
+  @override
+  String get bookUpdatedSuccess => 'বই সফলভাবে আপডেট করা হয়েছে!';
+
+  @override
+  String get generateRandomCover => 'র‍্যান্ডম কভার তৈরি করুন';
+
+  @override
+  String get pickFromGallery => 'গ্যালারি থেকে নির্বাচন করুন';
+
+  @override
+  String get takeAPhoto => 'ছবি তুলুন';
+
+  @override
+  String failedToUploadImage(String error) {
+    return 'ছবি আপলোড করতে ব্যর্থ হয়েছে: $error';
+  }
+
+  @override
+  String get deleteBookTitle => 'বই মুছুন';
+
+  @override
+  String deleteBookConfirmation(String title) {
+    return 'আপনি কি নিশ্চিত যে আপনি \"$title\" বইটি মুছে ফেলতে চান? এই কাজটি বাতিল করা যাবে না।';
+  }
+
+  @override
+  String get bookDeletedSuccess => 'বই সফলভাবে মুছে ফেলা হয়েছে!';
+
+  @override
+  String get issueBookToTitle => 'বই ইস্যু করুন';
+
+  @override
+  String get howIdentifyStudent => 'আপনি কীভাবে শিক্ষার্থীকে সনাক্ত করতে চান?';
+
+  @override
+  String get scanIdCardTitle => 'আইডি কার্ড স্ক্যান করুন';
+
+  @override
+  String get scanIdCardSubtitle =>
+      'শিক্ষার্থীর বারকোড স্ক্যান করতে ক্যামেরা ব্যবহার করুন';
+
+  @override
+  String get selectStudentTitle => 'শিক্ষার্থী নির্বাচন করুন';
+
+  @override
+  String get selectStudentSubtitle =>
+      'শিক্ষার্থীদের তালিকা থেকে অনুসন্ধান করে বেছে নিন';
+
+  @override
+  String get setDueDateTitle => 'ফেরতের তারিখ নির্ধারণ করুন';
+
+  @override
+  String get chooseWhenReturn => 'বইটি কখন ফেরত দিতে হবে তা বেছে নিন';
+
+  @override
+  String plusDays(int count) {
+    return '+$count দিন';
+  }
+
+  @override
+  String get confirmAndIssue => 'নিশ্চিত করুন এবং ইস্যু করুন';
+
+  @override
+  String get bookIssuedSuccessTitle => 'বই ইস্যু করা হয়েছে!';
+
+  @override
+  String bookIssuedSuccessMessage(String title) {
+    return '\"$title\" সফলভাবে বরাদ্দ করা হয়েছে।';
+  }
+
+  @override
+  String get studentLabel => 'শিক্ষার্থী';
+
+  @override
+  String get idLabel => 'আইডি';
+
+  @override
+  String get dueLabel => 'মেয়াদ';
+
+  @override
+  String get doneButton => 'সম্পন্ন';
+
+  @override
+  String get descriptionHeader => 'বিবরণ';
+
+  @override
+  String get noDescriptionAvailable => 'এই বইটির কোনো বিবরণ উপলব্ধ নেই।';
+
+  @override
+  String get requestIssueButton => 'ইস্যুর অনুরোধ করুন';
+
+  @override
+  String get bookCurrentlyUnavailable => 'বইটি বর্তমানে অনুপলব্ধ';
+
+  @override
+  String get statusAvailable => 'উপলব্ধ';
+
+  @override
+  String get statusUnavailable => 'অনুপলব্ধ';
+
+  @override
+  String get statusNotAvailable => 'অনুপলব্ধ';
+
+  @override
+  String get searchStudentHint => 'সার্ভার থেকে শিক্ষার্থীর নাম খুঁজুন…';
+
+  @override
+  String studentsFoundCount(int count) {
+    return '$count জন শিক্ষার্থী পাওয়া গেছে';
+  }
+
+  @override
+  String get bookRequestsTitle => 'বইয়ের অনুরোধ';
+
+  @override
+  String get noPendingBookRequests => 'কোনো পেন্ডিং বইয়ের অনুরোধ নেই।';
+
+  @override
+  String get requestDeclined => 'অনুরোধ প্রত্যাখ্যান করা হয়েছে।';
+
+  @override
+  String get requestAccepted => 'অনুরোধ গৃহীত হয়েছে!';
+
+  @override
+  String get declineButton => 'প্রত্যাখ্যান করুন';
+
+  @override
+  String get acceptButton => 'গ্রহণ করুন';
+
+  @override
+  String get scanIdCardScreenTitle => 'আইডি কার্ড স্ক্যান করুন';
+
+  @override
+  String get pointCameraInstruction =>
+      'শিক্ষার্থীর আইডি কার্ডের বারকোডে\nক্যামেরাটি ধরুন';
+
+  @override
+  String get idCardScannedTitle => 'আইডি কার্ড স্ক্যান করা হয়েছে!';
+
+  @override
+  String get confirmStudentDetailsMessage =>
+      'অনুগ্রহ করে নিচে শিক্ষার্থীর বিবরণ নিশ্চিত করুন।';
+
+  @override
+  String get studentIdLabel => 'শিক্ষার্থী আইডি';
+
+  @override
+  String get nameLabel => 'নাম';
+
+  @override
+  String get barcodeLabel => 'বারকোড';
+
+  @override
+  String get rescanButton => 'পুনরায় স্ক্যান করুন';
 }

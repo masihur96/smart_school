@@ -580,6 +580,7 @@
   "description": "বিবরণ",
   "code": "কোড",
   "sectionLabel": "শাখা",
+  "subjectLabel": "বিষয়",
   "classLabel2": "ক্লাস",
   "deleteConfirmMessage": "আপনি কি নিশ্চিত যে \"{label}\" মুছতে চান?\nএই পদক্ষেপ পূর্বাবস্থায় ফেরানো যাবে না।",
   "@deleteConfirmMessage": {
@@ -809,5 +810,331 @@
         "type": "int"
       }
     }
-  }
+  },
+  "studentAttendanceTitle": "শিক্ষার্থীদের উপস্থিতি",
+  "exportPdf": "পিডিএফ এক্সপোর্ট",
+  "searchByStudentNameHint": "শিক্ষার্থীর নাম দিয়ে খুঁজুন...",
+  "allClassHint": "সকল ক্লাস",
+  "allSectionHint": "সকল সেকশন",
+  "allSubjectHint": "সকল বিষয়",
+  "allDates": "সকল তারিখ",
+  "totalCountFormat": "মোট: {total}",
+  "@totalCountFormat": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "showingCountFormat": "দেখাচ্ছে: {count} / {total}",
+  "@showingCountFormat": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "noRecordsFound": "কোন রেকর্ড পাওয়া যায়নি",
+  "noStatusRecordsFound": "কোন {status} রেকর্ড পাওয়া যায়নি",
+  "@noStatusRecordsFound": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "showAll": "সব দেখুন",
+  "statusAll": "সব",
+  "statusPresent": "উপস্থিত",
+  "statusAbsent": "অনুপস্থিত",
+  "statusLate": "বিলম্বিত",
+  "statusLeave": "ছুটি",
+  "noAttendanceRecordsToExport": "এক্সপোর্ট করার মতো কোন উপস্থিতি রেকর্ড নেই",
+  "failedToGeneratePdf": "পিডিএফ তৈরি করতে ব্যর্থ হয়েছে: {error}",
+  "@failedToGeneratePdf": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownStudent": "অজানা শিক্ষার্থী",
+  "classAndSectionFormat": "{className} • সেকশন {sectionName}",
+  "@classAndSectionFormat": {
+    "placeholders": {
+      "className": {
+        "type": "String"
+      },
+      "sectionName": {
+        "type": "String"
+      }
+    }
+  },
+  "rollNumberFormat": "রোল #{rollNumber}",
+  "@rollNumberFormat": {
+    "placeholders": {
+      "rollNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "teacherLabel": "শিক্ষক",
+  "roomLabel": "কক্ষ",
+  "recordIdLabel": "রেকর্ড আইডি",
+  "teacherAttendanceTitle": "শিক্ষক উপস্থিতি",
+  "searchByTeacherNameHint": "শিক্ষকের নাম দিয়ে খুঁজুন...",
+  "dateRangeFormat": "তারিখ: {start} থেকে {end}",
+  "@dateRangeFormat": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "dateAllTime": "তারিখ: সর্বকালীন",
+  "resultsForFormat": "'{query}' এর ফলাফল",
+  "@resultsForFormat": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownTeacher": "অজানা শিক্ষক",
+  "statusClockIn": "ক্লক-ইন",
+  "statusClockOut": "ক্লক-আউট",
+  "statusUnknown": "অজানা",
+  "inTime": "প্রবেশের সময়",
+  "outTime": "প্রস্থানের সময়",
+  "locationLabel": "অবস্থান",
+  "fetchingLabel": "আনা হচ্ছে...",
+  "invalidCoords": "অকার্যকর স্থানাঙ্ক",
+  "notSet": "সেট করা হয়নি",
+  "createAttendance": "উপস্থিতি তৈরি করুন",
+  "pleaseSelectTeacher": "অনুগ্রহ করে একজন শিক্ষক নির্বাচন করুন",
+  "attendanceCreatedSuccess": "উপস্থিতি সফলভাবে তৈরি হয়েছে",
+  "selectTeacher": "শিক্ষক নির্বাচন করুন",
+  "statusLabel": "অবস্থা",
+  "dateLabel": "তারিখ",
+  "startTimeLabel": "শুরুর সময়",
+  "endTimeLabel": "শেষের সময়",
+  "timeNotRequiredInfo": "{status} এর জন্য শুরু ও শেষের সময় আবশ্যক নয়।",
+  "@timeNotRequiredInfo": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "submitButton": "জমা দিন",
+  "onlineClassesTitle": "অনলাইন ক্লাসসমূহ",
+  "deleteClassTitle": "ক্লাস মুছুন",
+  "deleteClassConfirmation": "আপনি কি নিশ্চিত যে আপনি এই ক্লাসটি মুছতে চান?",
+  "cancel": "বাতিল",
+  "delete": "মুছুন",
+  "classDeletedSuccess": "ক্লাস সফলভাবে মোছা হয়েছে",
+  "failedToDeleteClass": "ক্লাস মুছতে ব্যর্থ হয়েছে",
+  "couldNotLaunchUrl": "{url} চালু করা যায়নি",
+  "@couldNotLaunchUrl": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "allClassesAndSections": "সকল ক্লাস ও সেকশন",
+  "newClass": "নতুন ক্লাস",
+  "minutesAgo": "{count} মিনিট আগে",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count} ঘণ্টা আগে",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yesterday": "গতকাল",
+  "daysAgo": "{count} দিন আগে",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inMinutes": "{count} মিনিটে",
+  "@inMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inHours": "{count} ঘণ্টায়",
+  "@inHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tomorrow": "আগামীকাল",
+  "inDays": "{count} দিনে",
+  "@inDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "googleMeet": "গুগল মিট",
+  "zoom": "জুম",
+  "msTeams": "এমএস টিমস",
+  "webex": "ওয়েবেক্স",
+  "onlineMeeting": "অনলাইন মিটিং",
+  "unableToLoadClasses": "ক্লাস লোড করতে অক্ষম",
+  "unableToLoadClassesMessage": "সার্ভারে সংযোগ করতে ব্যর্থ হয়েছে। আপনার নেটওয়ার্ক সংযোগ পরীক্ষা করুন এবং পুনরায় চেষ্টা করুন।",
+  "retry": "পুনরায় চেষ্টা করুন",
+  "noOnlineClassesScheduled": "কোনো অনলাইন ক্লাস নির্ধারিত নেই",
+  "noOnlineClassesAdminMessage": "বর্তমানে কোনো অনলাইন ক্লাস নির্ধারিত নেই। নতুন একটি লাইভ ক্লাস নির্ধারণ করতে নিচে ট্যাপ করুন অথবা রিফ্রেশ করতে নিচে টানুন।",
+  "noOnlineClassesStudentMessage": "এই মুহূর্তে কোনো আগামী অনলাইন ক্লাস নির্ধারিত নেই। রিফ্রেশ করতে নিচে টানুন অথবা পরে আবার দেখুন।",
+  "scheduleClass": "ক্লাস নির্ধারণ করুন",
+  "statusLiveNow": "এখন লাইভ",
+  "statusUpcoming": "আসন্ন",
+  "statusEnded": "সম্পন্ন",
+  "editClass": "ক্লাস সম্পাদনা করুন",
+  "statusLive": "লাইভ",
+  "classEnded": "ক্লাস শেষ হয়েছে",
+  "joinLiveClass": "লাইভ ক্লাসে যোগ দিন",
+  "joinMeeting": "মিটিংয়ে যোগ দিন",
+  "newBook": "নতুন বই",
+  "allBooksTab": "📚  সকল বই",
+  "issuedTab": "🔖  বিতরণকৃত",
+  "schoolLibrary": "স্কুল লাইব্রেরি",
+  "manageBooksSubtitle": "বই পরিচালনা ও ইস্যু ট্র্যাক করুন",
+  "totalLabel": "মোট",
+  "availableLabel": "উপলব্ধ",
+  "issuedLabel": "বিতরণকৃত",
+  "returnedLabel": "ফেরত দেওয়া",
+  "overdueLabel": "মেয়াদোত্তীর্ণ",
+  "viewDetails": "বিস্তারিত দেখুন",
+  "searchBookHint": "শিরোনাম বা লেখক অনুসন্ধান করুন…",
+  "categoryAll": "সকল",
+  "booksFoundCount": "{count} টি বই পাওয়া গেছে",
+  "noBooksFound": "কোনো বই পাওয়া যায়নি",
+  "tryDifferentSearch": "অন্য কোনো অনুসন্ধান বা বিভাগ দিয়ে চেষ্টা করুন",
+  "somethingWentWrong": "কিছু ভুল হয়েছে",
+  "filterAll": "সকল",
+  "filterIssued": "বিতরণকৃত",
+  "filterOverdue": "মেয়াদোত্তীর্ণ",
+  "filterReturned": "ফেরত দেওয়া",
+  "noFilteredBooksFound": "কোনো {filter} বই পাওয়া যায়নি",
+  "noBooksIssuedTitle": "কোনো বই ইস্যু করা হয়নি",
+  "noBooksIssuedSubtitle": "সমস্ত বই বর্তমানে উপলব্ধ রয়েছে।",
+  "pullToRefresh": "রিফ্রেশ করতে নিচে টানুন",
+  "sectionOverdue": "মেয়াদোত্তীর্ণ",
+  "sectionCurrentlyIssued": "বর্তমানে ইস্যুকৃত",
+  "sectionReturnedHistory": "ফেরতের ইতিহাস",
+  "classLabel": "শ্রেণি",
+  "sectionLabelShort": "শাখা",
+  "issueDate": "ইস্যুর তারিখ",
+  "returnDate": "ফেরতের তারিখ",
+  "dueDate": "মেয়াদ শেষের তারিখ",
+  "pendingStatus": "বাকি আছে",
+  "returnedOn": "{date} তারিখে ফেরত দেওয়া হয়েছে",
+  "daysOverdue": "{count} দিন মেয়াদোত্তীর্ণ",
+  "dueToday": "আজই মেয়াদ শেষ!",
+  "daysRemaining": "{count} দিন বাকি আছে",
+  "returnBookTitle": "বই ফেরত দিন",
+  "returnBookConfirmation": "আপনি কি নিশ্চিত যে \"{title}\" বইটি {student} ফেরত দিয়েছে বলে চিহ্নিত করতে চান?",
+  "returnBookButton": "বই ফেরত নিন",
+  "markAsReturned": "ফেরত হিসেবে চিহ্নিত করুন",
+  "bookReturnedSuccess": "বই সফলভাবে ফেরত হিসেবে চিহ্নিত করা হয়েছে!",
+  "unknownStudent": "অজানা শিক্ষার্থী",
+  "addBookTitle": "বই যোগ করুন",
+  "editBookTitle": "বই সম্পাদনা করুন",
+  "basicDetails": "মৌলিক তথ্য",
+  "bookTitleLabel": "বইয়ের শিরোনাম",
+  "bookTitleHint": "যেমন, পদার্থবিজ্ঞানের মূলনীতি",
+  "titleRequired": "শিরোনাম প্রয়োজন",
+  "authorNameLabel": "লেখকের নাম",
+  "authorNameHint": "যেমন, ডেভিড হ্যালিডে",
+  "authorRequired": "লেখক প্রয়োজন",
+  "isbnNumberLabel": "আইএসবিএন (ISBN) নম্বর",
+  "isbnNumberHint": "যেমন, 978-0471320005",
+  "isbnRequired": "আইএসবিএন প্রয়োজন",
+  "additionalInfo": "অতিরিক্ত তথ্য",
+  "categoryLabel": "বিভাগ (Category)",
+  "selectCategoryError": "দয়া করে একটি বিভাগ নির্বাচন করুন",
+  "coverImageLabel": "কভার ছবির ইউআরএল বা পাথ",
+  "coverImageHint": "https://example.com/image.jpg",
+  "coverImageRequired": "কভার ছবি প্রয়োজন",
+  "descriptionLabel": "বিবরণ",
+  "descriptionHint": "ঐচ্ছিক বইয়ের বিবরণ",
+  "saveBookButton": "বই সংরক্ষণ করুন",
+  "bookAddedSuccess": "বই সফলভাবে যোগ করা হয়েছে!",
+  "bookUpdatedSuccess": "বই সফলভাবে আপডেট করা হয়েছে!",
+  "generateRandomCover": "র‍্যান্ডম কভার তৈরি করুন",
+  "pickFromGallery": "গ্যালারি থেকে নির্বাচন করুন",
+  "takeAPhoto": "ছবি তুলুন",
+  "failedToUploadImage": "ছবি আপলোড করতে ব্যর্থ হয়েছে: {error}",
+  "deleteBookTitle": "বই মুছুন",
+  "deleteBookConfirmation": "আপনি কি নিশ্চিত যে আপনি \"{title}\" বইটি মুছে ফেলতে চান? এই কাজটি বাতিল করা যাবে না।",
+  "bookDeletedSuccess": "বই সফলভাবে মুছে ফেলা হয়েছে!",
+  "issueBookToTitle": "বই ইস্যু করুন",
+  "howIdentifyStudent": "আপনি কীভাবে শিক্ষার্থীকে সনাক্ত করতে চান?",
+  "scanIdCardTitle": "আইডি কার্ড স্ক্যান করুন",
+  "scanIdCardSubtitle": "শিক্ষার্থীর বারকোড স্ক্যান করতে ক্যামেরা ব্যবহার করুন",
+  "selectStudentTitle": "শিক্ষার্থী নির্বাচন করুন",
+  "selectStudentSubtitle": "শিক্ষার্থীদের তালিকা থেকে অনুসন্ধান করে বেছে নিন",
+  "setDueDateTitle": "ফেরতের তারিখ নির্ধারণ করুন",
+  "chooseWhenReturn": "বইটি কখন ফেরত দিতে হবে তা বেছে নিন",
+  "plusDays": "+{count} দিন",
+  "confirmAndIssue": "নিশ্চিত করুন এবং ইস্যু করুন",
+  "bookIssuedSuccessTitle": "বই ইস্যু করা হয়েছে!",
+  "bookIssuedSuccessMessage": "\"{title}\" সফলভাবে বরাদ্দ করা হয়েছে।",
+  "studentLabel": "শিক্ষার্থী",
+  "idLabel": "আইডি",
+  "dueLabel": "মেয়াদ",
+  "doneButton": "সম্পন্ন",
+  "descriptionHeader": "বিবরণ",
+  "noDescriptionAvailable": "এই বইটির কোনো বিবরণ উপলব্ধ নেই।",
+  "requestIssueButton": "ইস্যুর অনুরোধ করুন",
+  "bookCurrentlyUnavailable": "বইটি বর্তমানে অনুপলব্ধ",
+  "statusAvailable": "উপলব্ধ",
+  "statusUnavailable": "অনুপলব্ধ",
+  "statusNotAvailable": "অনুপলব্ধ",
+  "allClasses": "সকল শ্রেণি",
+  "allSections": "সকল শাখা",
+  "searchStudentHint": "সার্ভার থেকে শিক্ষার্থীর নাম খুঁজুন…",
+  "studentsFoundCount": "{count} জন শিক্ষার্থী পাওয়া গেছে",
+  "noStudentsFound": "কোনো শিক্ষার্থী পাওয়া যায়নি",
+  "rollLabel": "রোল: {roll}",
+  "bookRequestsTitle": "বইয়ের অনুরোধ",
+  "noPendingBookRequests": "কোনো পেন্ডিং বইয়ের অনুরোধ নেই।",
+  "requestDeclined": "অনুরোধ প্রত্যাখ্যান করা হয়েছে।",
+  "requestAccepted": "অনুরোধ গৃহীত হয়েছে!",
+  "declineButton": "প্রত্যাখ্যান করুন",
+  "acceptButton": "গ্রহণ করুন",
+  "scanIdCardScreenTitle": "আইডি কার্ড স্ক্যান করুন",
+  "pointCameraInstruction": "শিক্ষার্থীর আইডি কার্ডের বারকোডে\nক্যামেরাটি ধরুন",
+  "idCardScannedTitle": "আইডি কার্ড স্ক্যান করা হয়েছে!",
+  "confirmStudentDetailsMessage": "অনুগ্রহ করে নিচে শিক্ষার্থীর বিবরণ নিশ্চিত করুন।",
+  "studentIdLabel": "শিক্ষার্থী আইডি",
+  "nameLabel": "নাম",
+  "barcodeLabel": "বারকোড",
+  "rescanButton": "পুনরায় স্ক্যান করুন"
 }

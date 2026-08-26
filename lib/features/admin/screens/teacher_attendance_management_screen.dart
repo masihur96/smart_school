@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/utils/teacher_attendance_pdf_helper.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../models/teacher_model.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/attendance_management_provider.dart';
@@ -59,20 +60,39 @@ class _TeacherAttendanceManagementScreenState
     }
   }
 
+  String _getStatusLabel(BuildContext context, String? status) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (status?.toLowerCase()) {
+      case 'clock-in':
+        return l10n.statusClockIn;
+      case 'clock-out':
+        return l10n.statusClockOut;
+      case 'present':
+        return l10n.statusPresent;
+      case 'absent':
+        return l10n.statusAbsent;
+      case 'leave':
+        return l10n.statusLeave;
+      default:
+        return status?.toUpperCase() ?? l10n.statusUnknown;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final provider = context.watch<AttendanceManagementProvider>();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Teacher Attendance"),
+        title: Text(l10n.teacherAttendanceTitle),
         backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
             onPressed: () => _exportToPdf(context),
             icon: const Icon(Icons.picture_as_pdf),
-            tooltip: "Export PDF",
+            tooltip: l10n.exportPdf,
           ),
         ],
       ),
@@ -80,7 +100,6 @@ class _TeacherAttendanceManagementScreenState
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-
             child: Column(
               children: [
                 Row(
@@ -89,7 +108,7 @@ class _TeacherAttendanceManagementScreenState
                       child: TextField(
                         controller: _searchController,
                         decoration: InputDecoration(
-                          hintText: "Search by Teacher Name...",
+                          hintText: l10n.searchByTeacherNameHint,
                           prefixIcon: const Icon(Icons.search),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -107,7 +126,7 @@ class _TeacherAttendanceManagementScreenState
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E1B4B).withOpacity(0.1),
+                          color: const Color(0xFF1E1B4B).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(Icons.calendar_today),
@@ -121,8 +140,11 @@ class _TeacherAttendanceManagementScreenState
                   children: [
                     Text(
                       _selectedDateRange != null
-                          ? "Date: ${DateFormat('yyyy-MM-dd').format(_selectedDateRange!.start)} to ${DateFormat('yyyy-MM-dd').format(_selectedDateRange!.end)}"
-                          : "Date: All Time",
+                          ? l10n.dateRangeFormat(
+                              DateFormat('yyyy-MM-dd').format(_selectedDateRange!.start),
+                              DateFormat('yyyy-MM-dd').format(_selectedDateRange!.end),
+                            )
+                          : l10n.dateAllTime,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.grey,
@@ -130,7 +152,7 @@ class _TeacherAttendanceManagementScreenState
                     ),
                     if (_searchController.text.isNotEmpty)
                       Text(
-                        "Results for '${_searchController.text}'",
+                        l10n.resultsForFormat(_searchController.text),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.blue,
@@ -145,9 +167,9 @@ class _TeacherAttendanceManagementScreenState
             child: provider.isLoading
                 ? _TeacherAttendanceShimmer(isDark: Theme.of(context).brightness == Brightness.dark)
                 : provider.error != null
-                ? Center(child: Text("Error: ${provider.error}"))
+                ? Center(child: Text(l10n.errorLabel(provider.error!)))
                 : provider.teacherAttendance.isEmpty
-                ? const Center(child: Text("No records found"))
+                ? Center(child: Text(l10n.noRecordsFound))
                 : RefreshIndicator(
                     onRefresh: () async => _fetchData(),
                     child: ListView.builder(
@@ -182,7 +204,7 @@ class _TeacherAttendanceManagementScreenState
                               ListTile(
                                 contentPadding: EdgeInsets.zero,
                                 leading: CircleAvatar(
-                                  backgroundColor: Colors.blue.withOpacity(0.1),
+                                  backgroundColor: Colors.blue.withValues(alpha: 0.1),
                                   child: Text(
                                     (record['teacher']?['name'] ??
                                             record['teacherName'] ??
@@ -199,7 +221,7 @@ class _TeacherAttendanceManagementScreenState
                                   record['teacher']?['name'] ??
                                       record['teacherName'] ??
                                       record['name'] ??
-                                      "Unknown Teacher",
+                                      l10n.unknownTeacher,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -210,7 +232,7 @@ class _TeacherAttendanceManagementScreenState
                                     Text(
                                       record['teacher']?['designation'] ??
                                           record['designation'] ??
-                                          "Teacher",
+                                          l10n.teacherLabel,
                                     ),
                                     const SizedBox(height: 4),
                                     Row(
@@ -233,14 +255,11 @@ class _TeacherAttendanceManagementScreenState
                                   decoration: BoxDecoration(
                                     color: _getStatusColor(
                                       status,
-                                    ).withOpacity(0.1),
+                                    ).withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text(
-                                    record['status']
-                                            ?.toString()
-                                            .toUpperCase() ??
-                                        "UNKNOWN",
+                                    _getStatusLabel(context, status),
                                     style: TextStyle(
                                       color: _getStatusColor(status),
                                       fontWeight: FontWeight.bold,
@@ -255,7 +274,7 @@ class _TeacherAttendanceManagementScreenState
                                   Expanded(
                                     child: _buildDetailItem(
                                       Icons.login,
-                                      "In Time",
+                                      l10n.inTime,
                                       formatDate(inTime),
                                       Colors.green,
                                     ),
@@ -263,7 +282,7 @@ class _TeacherAttendanceManagementScreenState
                                   Expanded(
                                     child: _buildDetailItem(
                                       Icons.logout,
-                                      "Out Time",
+                                      l10n.outTime,
                                       outTime == null || outTime == "--:--"
                                           ? "N/A"
                                           : formatDate(outTime),
@@ -272,8 +291,9 @@ class _TeacherAttendanceManagementScreenState
                                   ),
                                   Expanded(
                                     child: _buildLocationDetailItem(
+                                      context,
                                       Icons.location_on,
-                                      "Location",
+                                      l10n.locationLabel,
                                       record['lat']?.toString(),
                                       record['lon']?.toString(),
                                       Colors.orange,
@@ -296,7 +316,7 @@ class _TeacherAttendanceManagementScreenState
         backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
-        label: const Text("Create Attendance"),
+        label: Text(l10n.createAttendance),
       ),
     );
   }
@@ -321,12 +341,13 @@ class _TeacherAttendanceManagementScreenState
   }
 
   Future<void> _exportToPdf(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final provider = context.read<AttendanceManagementProvider>();
     final authProvider = context.read<AuthNotifier>();
 
     if (provider.teacherAttendance.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No attendance records to export")),
+        SnackBar(content: Text(l10n.noAttendanceRecordsToExport)),
       );
       return;
     }
@@ -340,9 +361,10 @@ class _TeacherAttendanceManagementScreenState
       );
     } catch (e, stack) {
       log("Error generating PDF: $e\n$stack");
+      if (!context.mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Failed to generate PDF: $e")));
+      ).showSnackBar(SnackBar(content: Text(l10n.failedToGeneratePdf(e.toString()))));
     }
   }
 
@@ -377,6 +399,7 @@ class _TeacherAttendanceManagementScreenState
   }
 
   Widget _buildLocationDetailItem(
+    BuildContext context,
     IconData icon,
     String label,
     String? lat,
@@ -446,7 +469,7 @@ class _LocationAddressText extends StatefulWidget {
 }
 
 class _LocationAddressTextState extends State<_LocationAddressText> {
-  String _address = 'Fetching...';
+  String? _address;
 
   @override
   void initState() {
@@ -492,7 +515,7 @@ class _LocationAddressTextState extends State<_LocationAddressText> {
       } else {
         if (mounted) {
           setState(() {
-            _address = 'Invalid coords';
+            _address = null; // Will show localized fallback in build
           });
         }
       }
@@ -507,8 +530,10 @@ class _LocationAddressTextState extends State<_LocationAddressText> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final displayText = _address ?? (double.tryParse(widget.lat) == null ? l10n.invalidCoords : l10n.fetchingLabel);
     return Text(
-      _address,
+      displayText,
       style: widget.style,
       textAlign: TextAlign.center,
       overflow: TextOverflow.ellipsis,
@@ -548,6 +573,24 @@ class _CreateAttendanceBottomSheetState
     });
   }
 
+  String _getStatusLabel(BuildContext context, String status) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (status.toLowerCase()) {
+      case 'clock-in':
+        return l10n.statusClockIn;
+      case 'clock-out':
+        return l10n.statusClockOut;
+      case 'present':
+        return l10n.statusPresent;
+      case 'absent':
+        return l10n.statusAbsent;
+      case 'leave':
+        return l10n.statusLeave;
+      default:
+        return status.toUpperCase();
+    }
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -582,10 +625,11 @@ class _CreateAttendanceBottomSheetState
   }
 
   void _submit() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_selectedTeacher == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Please select a teacher")));
+      ).showSnackBar(SnackBar(content: Text(l10n.pleaseSelectTeacher)));
       return;
     }
 
@@ -625,13 +669,14 @@ class _CreateAttendanceBottomSheetState
     if (mounted) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Attendance created successfully")),
+        SnackBar(content: Text(l10n.attendanceCreatedSuccess)),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final teachersProvider = context.watch<TeachersNotifier>();
     final isCreating = context.watch<AttendanceManagementProvider>().isLoading;
 
@@ -653,9 +698,9 @@ class _CreateAttendanceBottomSheetState
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    "Create Attendance",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.createAttendance,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
@@ -669,7 +714,7 @@ class _CreateAttendanceBottomSheetState
               else
                 DropdownButtonFormField<Teacher>(
                   decoration: InputDecoration(
-                    labelText: "Select Teacher",
+                    labelText: l10n.selectTeacher,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -680,7 +725,7 @@ class _CreateAttendanceBottomSheetState
                   items: teachersProvider.teachers.map((Teacher teacher) {
                     return DropdownMenuItem<Teacher>(
                       value: teacher,
-                      child: Text(teacher.user?.name ?? "Unknown"),
+                      child: Text(teacher.user?.name ?? l10n.unknownTeacher),
                     );
                   }).toList(),
                   onChanged: (Teacher? newValue) {
@@ -692,7 +737,7 @@ class _CreateAttendanceBottomSheetState
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(
-                  labelText: "Status",
+                  labelText: l10n.statusLabel,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -703,7 +748,7 @@ class _CreateAttendanceBottomSheetState
                 items: _statuses.map((String status) {
                   return DropdownMenuItem<String>(
                     value: status,
-                    child: Text(status.toUpperCase()),
+                    child: Text(_getStatusLabel(context, status)),
                   );
                 }).toList(),
                 onChanged: (String? newValue) {
@@ -732,7 +777,7 @@ class _CreateAttendanceBottomSheetState
                 onTap: () => _selectDate(context),
                 child: InputDecorator(
                   decoration: InputDecoration(
-                    labelText: "Date",
+                    labelText: l10n.dateLabel,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -763,7 +808,7 @@ class _CreateAttendanceBottomSheetState
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          "Start & End times are not required for ${_selectedStatus.toUpperCase()}.",
+                          l10n.timeNotRequiredInfo(_getStatusLabel(context, _selectedStatus)),
                           style: TextStyle(
                             color: Colors.grey.shade700,
                             fontSize: 13,
@@ -781,7 +826,7 @@ class _CreateAttendanceBottomSheetState
                         onTap: () => _selectTime(context, true),
                         child: InputDecorator(
                           decoration: InputDecoration(
-                            labelText: "Start Time",
+                            labelText: l10n.startTimeLabel,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -798,7 +843,7 @@ class _CreateAttendanceBottomSheetState
                           child: Text(
                             _startTime != null
                                 ? _startTime!.format(context)
-                                : "Not set",
+                                : l10n.notSet,
                             style: TextStyle(
                               color: _startTime != null
                                   ? Colors.black87
@@ -814,7 +859,7 @@ class _CreateAttendanceBottomSheetState
                         onTap: () => _selectTime(context, false),
                         child: InputDecorator(
                           decoration: InputDecoration(
-                            labelText: "End Time",
+                            labelText: l10n.endTimeLabel,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -831,7 +876,7 @@ class _CreateAttendanceBottomSheetState
                           child: Text(
                             _endTime != null
                                 ? _endTime!.format(context)
-                                : "Not set",
+                                : l10n.notSet,
                             style: TextStyle(
                               color: _endTime != null
                                   ? Colors.black87
@@ -863,9 +908,9 @@ class _CreateAttendanceBottomSheetState
                           strokeWidth: 2,
                         ),
                       )
-                    : const Text(
-                        "Submit",
-                        style: TextStyle(
+                    : Text(
+                        l10n.submitButton,
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),

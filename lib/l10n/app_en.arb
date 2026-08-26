@@ -597,6 +597,7 @@
   "description": "Description",
   "code": "Code",
   "sectionLabel": "Section",
+  "subjectLabel": "Subject",
   "classLabel2": "Class",
   "deleteConfirmMessage": "Are you sure you want to delete \"{label}\"?\nThis action cannot be undone.",
   "@deleteConfirmMessage": {
@@ -826,5 +827,418 @@
         "type": "int"
       }
     }
-  }
+  },
+  "studentAttendanceTitle": "Student Attendance",
+  "exportPdf": "Export PDF",
+  "searchByStudentNameHint": "Search by Student Name...",
+  "allClassHint": "All Class",
+  "allSectionHint": "All Section",
+  "allSubjectHint": "All Subject",
+  "allDates": "All Dates",
+  "totalCountFormat": "Total: {total}",
+  "@totalCountFormat": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "showingCountFormat": "Showing: {count} / {total}",
+  "@showingCountFormat": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "noRecordsFound": "No records found",
+  "noStatusRecordsFound": "No {status} records found",
+  "@noStatusRecordsFound": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "showAll": "Show All",
+  "statusAll": "ALL",
+  "statusPresent": "PRESENT",
+  "statusAbsent": "ABSENT",
+  "statusLate": "LATE",
+  "statusLeave": "LEAVE",
+  "noAttendanceRecordsToExport": "No attendance records to export",
+  "failedToGeneratePdf": "Failed to generate PDF: {error}",
+  "@failedToGeneratePdf": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownStudent": "Unknown Student",
+  "classAndSectionFormat": "{className} • Sec {sectionName}",
+  "@classAndSectionFormat": {
+    "placeholders": {
+      "className": {
+        "type": "String"
+      },
+      "sectionName": {
+        "type": "String"
+      }
+    }
+  },
+  "rollNumberFormat": "Roll #{rollNumber}",
+  "@rollNumberFormat": {
+    "placeholders": {
+      "rollNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "teacherLabel": "Teacher",
+  "roomLabel": "Room",
+  "recordIdLabel": "Record ID",
+  "teacherAttendanceTitle": "Teacher Attendance",
+  "searchByTeacherNameHint": "Search by Teacher Name...",
+  "dateRangeFormat": "Date: {start} to {end}",
+  "@dateRangeFormat": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "dateAllTime": "Date: All Time",
+  "resultsForFormat": "Results for '{query}'",
+  "@resultsForFormat": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownTeacher": "Unknown Teacher",
+  "statusClockIn": "CLOCK-IN",
+  "statusClockOut": "CLOCK-OUT",
+  "statusUnknown": "UNKNOWN",
+  "inTime": "In Time",
+  "outTime": "Out Time",
+  "locationLabel": "Location",
+  "fetchingLabel": "Fetching...",
+  "invalidCoords": "Invalid coords",
+  "notSet": "Not set",
+  "createAttendance": "Create Attendance",
+  "pleaseSelectTeacher": "Please select a teacher",
+  "attendanceCreatedSuccess": "Attendance created successfully",
+  "selectTeacher": "Select Teacher",
+  "statusLabel": "Status",
+  "dateLabel": "Date",
+  "startTimeLabel": "Start Time",
+  "endTimeLabel": "End Time",
+  "timeNotRequiredInfo": "Start & End times are not required for {status}.",
+  "@timeNotRequiredInfo": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "submitButton": "Submit",
+  "onlineClassesTitle": "Online Classes",
+  "deleteClassTitle": "Delete Class",
+  "deleteClassConfirmation": "Are you sure you want to delete this class?",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "classDeletedSuccess": "Class deleted successfully",
+  "failedToDeleteClass": "Failed to delete class",
+  "couldNotLaunchUrl": "Could not launch {url}",
+  "@couldNotLaunchUrl": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "allClassesAndSections": "All Classes & Sections",
+  "newClass": "New Class",
+  "minutesAgo": "{count}m ago",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count}h ago",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yesterday": "Yesterday",
+  "daysAgo": "{count}d ago",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inMinutes": "in {count}m",
+  "@inMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inHours": "in {count}h",
+  "@inHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tomorrow": "Tomorrow",
+  "inDays": "in {count}d",
+  "@inDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "googleMeet": "Google Meet",
+  "zoom": "Zoom",
+  "msTeams": "MS Teams",
+  "webex": "Webex",
+  "onlineMeeting": "Online Meeting",
+  "unableToLoadClasses": "Unable to Load Classes",
+  "unableToLoadClassesMessage": "Failed to connect to the server. Please check your network connection and try again.",
+  "retry": "Retry",
+  "noOnlineClassesScheduled": "No Online Classes Scheduled",
+  "noOnlineClassesAdminMessage": "There are currently no online classes scheduled. Tap below to schedule a new live class or pull down to refresh.",
+  "noOnlineClassesStudentMessage": "There are no upcoming online classes scheduled at this time. Pull down to refresh or check back later.",
+  "scheduleClass": "Schedule Class",
+  "statusLiveNow": "LIVE NOW",
+  "statusUpcoming": "Upcoming",
+  "statusEnded": "Ended",
+  "editClass": "Edit Class",
+  "statusLive": "LIVE",
+  "classEnded": "Class Ended",
+  "joinLiveClass": "Join Live Class",
+  "joinMeeting": "Join Meeting",
+  "newBook": "New Book",
+  "allBooksTab": "📚  All Books",
+  "issuedTab": "🔖  Issued",
+  "schoolLibrary": "School Library",
+  "manageBooksSubtitle": "Manage books & track issues",
+  "totalLabel": "Total",
+  "availableLabel": "Available",
+  "issuedLabel": "Issued",
+  "returnedLabel": "Returned",
+  "overdueLabel": "Overdue",
+  "viewDetails": "View details",
+  "searchBookHint": "Search title or author…",
+  "categoryAll": "All",
+  "booksFoundCount": "{count, plural, =1{1 book found} other{{count} books found}}",
+  "@booksFoundCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noBooksFound": "No books found",
+  "tryDifferentSearch": "Try a different search or category",
+  "somethingWentWrong": "Something went wrong",
+  "filterAll": "All",
+  "filterIssued": "Issued",
+  "filterOverdue": "Overdue",
+  "filterReturned": "Returned",
+  "noFilteredBooksFound": "No {filter} books found",
+  "@noFilteredBooksFound": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
+  "noBooksIssuedTitle": "No Books Issued",
+  "noBooksIssuedSubtitle": "All books are currently available.",
+  "pullToRefresh": "Pull down to refresh",
+  "sectionOverdue": "Overdue",
+  "sectionCurrentlyIssued": "Currently Issued",
+  "sectionReturnedHistory": "Returned History",
+  "classLabel": "Class",
+  "sectionLabelShort": "Sec",
+  "issueDate": "Issue Date",
+  "returnDate": "Return Date",
+  "dueDate": "Due Date",
+  "pendingStatus": "Pending",
+  "returnedOn": "Returned on {date}",
+  "@returnedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "daysOverdue": "{count, plural, =1{1 day overdue} other{{count} days overdue}}",
+  "@daysOverdue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dueToday": "Due today!",
+  "daysRemaining": "{count, plural, =1{1 day remaining} other{{count} days remaining}}",
+  "@daysRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "returnBookTitle": "Return Book",
+  "returnBookConfirmation": "Are you sure you want to mark \"{title}\" as returned by {student}?",
+  "@returnBookConfirmation": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "student": {
+        "type": "String"
+      }
+    }
+  },
+  "returnBookButton": "Return Book",
+  "markAsReturned": "Mark as Returned",
+  "bookReturnedSuccess": "Book marked as returned successfully!",
+  "unknownStudent": "Unknown Student",
+  "addBookTitle": "Add Book",
+  "editBookTitle": "Edit Book",
+  "basicDetails": "Basic Details",
+  "bookTitleLabel": "Book Title",
+  "bookTitleHint": "e.g., Fundamentals of Physics",
+  "titleRequired": "Title is required",
+  "authorNameLabel": "Author Name",
+  "authorNameHint": "e.g., David Halliday",
+  "authorRequired": "Author is required",
+  "isbnNumberLabel": "ISBN Number",
+  "isbnNumberHint": "e.g., 978-0471320005",
+  "isbnRequired": "ISBN is required",
+  "additionalInfo": "Additional Info",
+  "categoryLabel": "Category",
+  "selectCategoryError": "Please select a category",
+  "coverImageLabel": "Cover Image URL or Path",
+  "coverImageHint": "https://example.com/image.jpg",
+  "coverImageRequired": "Cover image is required",
+  "descriptionLabel": "Description",
+  "descriptionHint": "Optional book description",
+  "saveBookButton": "Save Book",
+  "bookAddedSuccess": "Book added successfully!",
+  "bookUpdatedSuccess": "Book updated successfully!",
+  "generateRandomCover": "Generate Random Cover",
+  "pickFromGallery": "Pick from Gallery",
+  "takeAPhoto": "Take a Photo",
+  "failedToUploadImage": "Failed to upload image: {error}",
+  "@failedToUploadImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteBookTitle": "Delete Book",
+  "deleteBookConfirmation": "Are you sure you want to delete \"{title}\"? This action cannot be undone.",
+  "@deleteBookConfirmation": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "bookDeletedSuccess": "Book deleted successfully!",
+  "issueBookToTitle": "Issue Book To",
+  "howIdentifyStudent": "How would you like to identify the student?",
+  "scanIdCardTitle": "Scan ID Card",
+  "scanIdCardSubtitle": "Use the camera to scan student's barcode",
+  "selectStudentTitle": "Select Student",
+  "selectStudentSubtitle": "Search and pick from the student list",
+  "setDueDateTitle": "Set Due Date",
+  "chooseWhenReturn": "Choose when the book must be returned",
+  "plusDays": "+{count} days",
+  "@plusDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "confirmAndIssue": "Confirm & Issue",
+  "bookIssuedSuccessTitle": "Book Issued!",
+  "bookIssuedSuccessMessage": "\"{title}\" has been successfully assigned.",
+  "@bookIssuedSuccessMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "studentLabel": "Student",
+  "idLabel": "ID",
+  "dueLabel": "Due",
+  "doneButton": "Done",
+  "descriptionHeader": "Description",
+  "noDescriptionAvailable": "No description available for this book.",
+  "requestIssueButton": "Request Issue",
+  "bookCurrentlyUnavailable": "Book Currently Unavailable",
+  "statusAvailable": "Available",
+  "statusUnavailable": "Unavailable",
+  "statusNotAvailable": "Not Available",
+  "allClasses": "All Classes",
+  "allSections": "All Sections",
+  "searchStudentHint": "Search student name from server…",
+  "studentsFoundCount": "{count, plural, =1{1 student found} other{{count} students found}}",
+  "@studentsFoundCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noStudentsFound": "No students found",
+  "rollLabel": "Roll: {roll}",
+  "@rollLabel": {
+    "placeholders": {
+      "roll": {
+        "type": "String"
+      }
+    }
+  },
+  "bookRequestsTitle": "Book Requests",
+  "noPendingBookRequests": "No pending book requests.",
+  "requestDeclined": "Request declined.",
+  "requestAccepted": "Request accepted!",
+  "declineButton": "Decline",
+  "acceptButton": "Accept",
+  "scanIdCardScreenTitle": "Scan ID Card",
+  "pointCameraInstruction": "Point the camera at the student's\nID card barcode",
+  "idCardScannedTitle": "ID Card Scanned!",
+  "confirmStudentDetailsMessage": "Please confirm the student details below.",
+  "studentIdLabel": "Student ID",
+  "nameLabel": "Name",
+  "barcodeLabel": "Barcode",
+  "rescanButton": "Rescan"
 }

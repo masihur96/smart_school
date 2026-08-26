@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/library/screens/add_edit_book_screen.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/user_model.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -55,6 +56,7 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final notifier = context.watch<LibraryBookNotifier>();
     final user = context.watch<AuthNotifier>().user;
     final isAdmin =
@@ -87,9 +89,9 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                   ? AppColors.primaryTeacher
                   : AppColors.primaryStudent,
               icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text(
-                'New Book',
-                style: TextStyle(
+              label: Text(
+                l10n.newBook,
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
@@ -119,6 +121,7 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
             flexibleSpace: FlexibleSpaceBar(
               collapseMode: CollapseMode.parallax,
               background: _buildHeroBanner(
+                context: context,
                 totalBooks: totalBooks,
                 availableBooks: availableBooks,
                 issuedCount: issuedCount,
@@ -144,9 +147,9 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
-                  tabs: const [
-                    Tab(text: '📚  All Books'),
-                    Tab(text: '🔖  Issued'),
+                  tabs: [
+                    Tab(text: l10n.allBooksTab),
+                    Tab(text: l10n.issuedTab),
                   ],
                 ),
               ),
@@ -165,12 +168,14 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
   }
 
   Widget _buildHeroBanner({
+    required BuildContext context,
     required int totalBooks,
     required int availableBooks,
     required int issuedCount,
     required int returnedCount,
     required int overdueCount,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     return Stack(
       children: [
         // Decorative circles
@@ -213,7 +218,7 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                   children: [
                     Row(
                       children: [
-                        SizedBox(width: 30),
+                        const SizedBox(width: 30),
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
@@ -227,9 +232,9 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                           ),
                         ),
                         const SizedBox(width: 12),
-                        const Text(
-                          'School Library',
-                          style: TextStyle(
+                        Text(
+                          l10n.schoolLibrary,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 22,
                             fontWeight: FontWeight.w800,
@@ -242,7 +247,7 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                     Padding(
                       padding: const EdgeInsets.only(left: 2),
                       child: Text(
-                        'Manage books & track issues',
+                        l10n.manageBooksSubtitle,
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.75),
                           fontSize: 13,
@@ -256,21 +261,21 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                         children: [
                           _StatChip(
                             icon: Icons.book_rounded,
-                            label: 'Total',
+                            label: l10n.totalLabel,
                             value: '$totalBooks',
                             color: Colors.white,
                           ),
                           const SizedBox(width: 10),
                           _StatChip(
                             icon: Icons.check_circle_rounded,
-                            label: 'Available',
+                            label: l10n.availableLabel,
                             value: '$availableBooks',
                             color: const Color(0xFF34D399),
                           ),
                           const SizedBox(width: 10),
                           _StatChip(
                             icon: Icons.bookmark_rounded,
-                            label: 'Issued',
+                            label: l10n.issuedLabel,
                             value: '$issuedCount',
                             color: const Color(0xFF60A5FA),
                           ),
@@ -278,7 +283,7 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                             const SizedBox(width: 10),
                             _StatChip(
                               icon: Icons.assignment_turned_in_rounded,
-                              label: 'Returned',
+                              label: l10n.returnedLabel,
                               value: '$returnedCount',
                               color: const Color(0xFF34D399),
                             ),
@@ -287,7 +292,7 @@ class _LibraryDashboardScreenState extends State<LibraryDashboardScreen>
                             const SizedBox(width: 10),
                             _StatChip(
                               icon: Icons.warning_rounded,
-                              label: 'Overdue',
+                              label: l10n.overdueLabel,
                               value: '$overdueCount',
                               color: const Color(0xFFFBBF24),
                             ),

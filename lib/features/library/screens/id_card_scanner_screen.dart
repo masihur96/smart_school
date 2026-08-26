@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 /// Result returned after a successful scan + confirmation.
 class ScanResult {
@@ -64,14 +65,14 @@ class _IdCardScannerScreenState extends State<IdCardScannerScreen>
   /// Expected format from a student ID card barcode:
   ///   "ID:<studentId>|NAME:<studentName>"
   /// Falls back gracefully for plain IDs or QR-style JSON.
-  _ParsedStudent _parseBarcode(String raw) {
+  _ParsedStudent _parseBarcode(String raw, AppLocalizations l10n) {
     // Format 1: "ID:abc123|NAME:John Doe"
     if (raw.contains('ID:') && raw.contains('NAME:')) {
       final idMatch = RegExp(r'ID:([^|]+)').firstMatch(raw);
       final nameMatch = RegExp(r'NAME:([^|]+)').firstMatch(raw);
       return _ParsedStudent(
         id: idMatch?.group(1)?.trim() ?? raw,
-        name: nameMatch?.group(1)?.trim() ?? 'Unknown',
+        name: nameMatch?.group(1)?.trim() ?? l10n.unknownStudent,
         raw: raw,
       );
     }
@@ -85,7 +86,7 @@ class _IdCardScannerScreenState extends State<IdCardScannerScreen>
         if (idMatch != null) {
           return _ParsedStudent(
             id: idMatch.group(1)!,
-            name: nameMatch?.group(1) ?? 'Unknown',
+            name: nameMatch?.group(1) ?? l10n.unknownStudent,
             raw: raw,
           );
         }
@@ -93,7 +94,7 @@ class _IdCardScannerScreenState extends State<IdCardScannerScreen>
     }
 
     // Fallback: treat the whole barcode as the student ID
-    return _ParsedStudent(id: raw, name: 'Unknown Student', raw: raw);
+    return _ParsedStudent(id: raw, name: l10n.unknownStudent, raw: raw);
   }
 
   void _onBarcodeDetected(BarcodeCapture capture) async {
@@ -107,9 +108,10 @@ class _IdCardScannerScreenState extends State<IdCardScannerScreen>
     setState(() => _processingResult = true);
     await _scannerCtrl.stop();
 
-    final parsed = _parseBarcode(raw);
-
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+    final parsed = _parseBarcode(raw, l10n);
+
     _showConfirmationSheet(parsed);
   }
 
@@ -143,6 +145,7 @@ class _IdCardScannerScreenState extends State<IdCardScannerScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -177,9 +180,9 @@ class _IdCardScannerScreenState extends State<IdCardScannerScreen>
                   ),
                   const Spacer(),
                   // Title
-                  const Text(
-                    'Scan ID Card',
-                    style: TextStyle(
+                  Text(
+                    l10n.scanIdCardScreenTitle,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
@@ -227,10 +230,10 @@ class _IdCardScannerScreenState extends State<IdCardScannerScreen>
                     color: Colors.black54,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Text(
-                    'Point the camera at the student\'s\nID card barcode',
+                  child: Text(
+                    l10n.pointCameraInstruction,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
                       height: 1.5,
@@ -489,6 +492,7 @@ class _ConfirmationSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -522,9 +526,9 @@ class _ConfirmationSheet extends StatelessWidget {
                 color: Color(0xFF10B981), size: 32),
           ),
           const SizedBox(height: 12),
-          const Text(
-            'ID Card Scanned!',
-            style: TextStyle(
+          Text(
+            l10n.idCardScannedTitle,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
               color: Color(0xFF111827),
@@ -532,7 +536,7 @@ class _ConfirmationSheet extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Please confirm the student details below.',
+            l10n.confirmStudentDetailsMessage,
             style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
           ),
           const SizedBox(height: 20),
@@ -550,22 +554,22 @@ class _ConfirmationSheet extends StatelessWidget {
               children: [
                 _InfoRow(
                   icon: Icons.badge_rounded,
-                  label: 'Student ID',
+                  label: l10n.studentIdLabel,
                   value: student.id,
                   color: const Color(0xFF2563EB),
                 ),
                 const Divider(height: 20),
                 _InfoRow(
                   icon: Icons.person_rounded,
-                  label: 'Name',
+                  label: l10n.nameLabel,
                   value: student.name,
                   color: const Color(0xFF1A3C6E),
                 ),
-                if (student.name == 'Unknown Student') ...[
+                if (student.name == l10n.unknownStudent) ...[
                   const Divider(height: 20),
                   _InfoRow(
                     icon: Icons.qr_code_rounded,
-                    label: 'Barcode',
+                    label: l10n.barcodeLabel,
                     value: student.raw.length > 40
                         ? '${student.raw.substring(0, 40)}…'
                         : student.raw,
@@ -587,7 +591,7 @@ class _ConfirmationSheet extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onRescan,
                     icon: const Icon(Icons.refresh_rounded, size: 18),
-                    label: const Text('Rescan'),
+                    label: Text(l10n.rescanButton),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       foregroundColor: const Color(0xFF6B7280),
@@ -604,7 +608,7 @@ class _ConfirmationSheet extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: onConfirm,
                     icon: const Icon(Icons.check_circle_rounded, size: 18),
-                    label: const Text('Confirm & Issue'),
+                    label: Text(l10n.confirmAndIssue),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF1A3C6E),
                       foregroundColor: Colors.white,

@@ -679,7 +679,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inactiveOnly => 'Inactive Only';
 
   @override
-  String get noStudentsFound => 'No students found.';
+  String get noStudentsFound => 'No students found';
 
   @override
   String rollLabel(String roll) {
@@ -690,7 +690,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteStudent => 'Delete Student';
 
   @override
-  String get viewDetails => 'View Details';
+  String get viewDetails => 'View details';
 
   @override
   String get edit => 'Edit';
@@ -1324,6 +1324,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionLabel => 'Section';
 
   @override
+  String get subjectLabel => 'Subject';
+
+  @override
   String get classLabel2 => 'Class';
 
   @override
@@ -1639,4 +1642,666 @@ class AppLocalizationsEn extends AppLocalizations {
   String routineEntriesSavedSuccess(int count) {
     return '$count routine entries saved successfully!';
   }
+
+  @override
+  String get studentAttendanceTitle => 'Student Attendance';
+
+  @override
+  String get exportPdf => 'Export PDF';
+
+  @override
+  String get searchByStudentNameHint => 'Search by Student Name...';
+
+  @override
+  String get allClassHint => 'All Class';
+
+  @override
+  String get allSectionHint => 'All Section';
+
+  @override
+  String get allSubjectHint => 'All Subject';
+
+  @override
+  String get allDates => 'All Dates';
+
+  @override
+  String totalCountFormat(int total) {
+    return 'Total: $total';
+  }
+
+  @override
+  String showingCountFormat(int count, int total) {
+    return 'Showing: $count / $total';
+  }
+
+  @override
+  String get noRecordsFound => 'No records found';
+
+  @override
+  String noStatusRecordsFound(String status) {
+    return 'No $status records found';
+  }
+
+  @override
+  String get showAll => 'Show All';
+
+  @override
+  String get statusAll => 'ALL';
+
+  @override
+  String get statusPresent => 'PRESENT';
+
+  @override
+  String get statusAbsent => 'ABSENT';
+
+  @override
+  String get statusLate => 'LATE';
+
+  @override
+  String get statusLeave => 'LEAVE';
+
+  @override
+  String get noAttendanceRecordsToExport => 'No attendance records to export';
+
+  @override
+  String failedToGeneratePdf(String error) {
+    return 'Failed to generate PDF: $error';
+  }
+
+  @override
+  String get unknownStudent => 'Unknown Student';
+
+  @override
+  String classAndSectionFormat(String className, String sectionName) {
+    return '$className • Sec $sectionName';
+  }
+
+  @override
+  String rollNumberFormat(String rollNumber) {
+    return 'Roll #$rollNumber';
+  }
+
+  @override
+  String get teacherLabel => 'Teacher';
+
+  @override
+  String get roomLabel => 'Room';
+
+  @override
+  String get recordIdLabel => 'Record ID';
+
+  @override
+  String get teacherAttendanceTitle => 'Teacher Attendance';
+
+  @override
+  String get searchByTeacherNameHint => 'Search by Teacher Name...';
+
+  @override
+  String dateRangeFormat(String start, String end) {
+    return 'Date: $start to $end';
+  }
+
+  @override
+  String get dateAllTime => 'Date: All Time';
+
+  @override
+  String resultsForFormat(String query) {
+    return 'Results for \'$query\'';
+  }
+
+  @override
+  String get statusClockIn => 'CLOCK-IN';
+
+  @override
+  String get statusClockOut => 'CLOCK-OUT';
+
+  @override
+  String get statusUnknown => 'UNKNOWN';
+
+  @override
+  String get inTime => 'In Time';
+
+  @override
+  String get outTime => 'Out Time';
+
+  @override
+  String get locationLabel => 'Location';
+
+  @override
+  String get fetchingLabel => 'Fetching...';
+
+  @override
+  String get invalidCoords => 'Invalid coords';
+
+  @override
+  String get notSet => 'Not set';
+
+  @override
+  String get createAttendance => 'Create Attendance';
+
+  @override
+  String get pleaseSelectTeacher => 'Please select a teacher';
+
+  @override
+  String get attendanceCreatedSuccess => 'Attendance created successfully';
+
+  @override
+  String get selectTeacher => 'Select Teacher';
+
+  @override
+  String get statusLabel => 'Status';
+
+  @override
+  String get dateLabel => 'Date';
+
+  @override
+  String get startTimeLabel => 'Start Time';
+
+  @override
+  String get endTimeLabel => 'End Time';
+
+  @override
+  String timeNotRequiredInfo(String status) {
+    return 'Start & End times are not required for $status.';
+  }
+
+  @override
+  String get submitButton => 'Submit';
+
+  @override
+  String get onlineClassesTitle => 'Online Classes';
+
+  @override
+  String get deleteClassTitle => 'Delete Class';
+
+  @override
+  String get deleteClassConfirmation =>
+      'Are you sure you want to delete this class?';
+
+  @override
+  String get classDeletedSuccess => 'Class deleted successfully';
+
+  @override
+  String get failedToDeleteClass => 'Failed to delete class';
+
+  @override
+  String couldNotLaunchUrl(String url) {
+    return 'Could not launch $url';
+  }
+
+  @override
+  String get allClassesAndSections => 'All Classes & Sections';
+
+  @override
+  String get newClass => 'New Class';
+
+  @override
+  String minutesAgo(int count) {
+    return '${count}m ago';
+  }
+
+  @override
+  String hoursAgo(int count) {
+    return '${count}h ago';
+  }
+
+  @override
+  String get yesterday => 'Yesterday';
+
+  @override
+  String daysAgo(int count) {
+    return '${count}d ago';
+  }
+
+  @override
+  String inMinutes(int count) {
+    return 'in ${count}m';
+  }
+
+  @override
+  String inHours(int count) {
+    return 'in ${count}h';
+  }
+
+  @override
+  String get tomorrow => 'Tomorrow';
+
+  @override
+  String inDays(int count) {
+    return 'in ${count}d';
+  }
+
+  @override
+  String get googleMeet => 'Google Meet';
+
+  @override
+  String get zoom => 'Zoom';
+
+  @override
+  String get msTeams => 'MS Teams';
+
+  @override
+  String get webex => 'Webex';
+
+  @override
+  String get onlineMeeting => 'Online Meeting';
+
+  @override
+  String get unableToLoadClasses => 'Unable to Load Classes';
+
+  @override
+  String get unableToLoadClassesMessage =>
+      'Failed to connect to the server. Please check your network connection and try again.';
+
+  @override
+  String get noOnlineClassesScheduled => 'No Online Classes Scheduled';
+
+  @override
+  String get noOnlineClassesAdminMessage =>
+      'There are currently no online classes scheduled. Tap below to schedule a new live class or pull down to refresh.';
+
+  @override
+  String get noOnlineClassesStudentMessage =>
+      'There are no upcoming online classes scheduled at this time. Pull down to refresh or check back later.';
+
+  @override
+  String get scheduleClass => 'Schedule Class';
+
+  @override
+  String get statusLiveNow => 'LIVE NOW';
+
+  @override
+  String get statusUpcoming => 'Upcoming';
+
+  @override
+  String get statusEnded => 'Ended';
+
+  @override
+  String get statusLive => 'LIVE';
+
+  @override
+  String get classEnded => 'Class Ended';
+
+  @override
+  String get joinLiveClass => 'Join Live Class';
+
+  @override
+  String get joinMeeting => 'Join Meeting';
+
+  @override
+  String get newBook => 'New Book';
+
+  @override
+  String get allBooksTab => '📚  All Books';
+
+  @override
+  String get issuedTab => '🔖  Issued';
+
+  @override
+  String get schoolLibrary => 'School Library';
+
+  @override
+  String get manageBooksSubtitle => 'Manage books & track issues';
+
+  @override
+  String get totalLabel => 'Total';
+
+  @override
+  String get availableLabel => 'Available';
+
+  @override
+  String get issuedLabel => 'Issued';
+
+  @override
+  String get returnedLabel => 'Returned';
+
+  @override
+  String get overdueLabel => 'Overdue';
+
+  @override
+  String get searchBookHint => 'Search title or author…';
+
+  @override
+  String get categoryAll => 'All';
+
+  @override
+  String booksFoundCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count books found',
+      one: '1 book found',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noBooksFound => 'No books found';
+
+  @override
+  String get tryDifferentSearch => 'Try a different search or category';
+
+  @override
+  String get somethingWentWrong => 'Something went wrong';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get filterIssued => 'Issued';
+
+  @override
+  String get filterOverdue => 'Overdue';
+
+  @override
+  String get filterReturned => 'Returned';
+
+  @override
+  String noFilteredBooksFound(String filter) {
+    return 'No $filter books found';
+  }
+
+  @override
+  String get noBooksIssuedTitle => 'No Books Issued';
+
+  @override
+  String get noBooksIssuedSubtitle => 'All books are currently available.';
+
+  @override
+  String get pullToRefresh => 'Pull down to refresh';
+
+  @override
+  String get sectionOverdue => 'Overdue';
+
+  @override
+  String get sectionCurrentlyIssued => 'Currently Issued';
+
+  @override
+  String get sectionReturnedHistory => 'Returned History';
+
+  @override
+  String get sectionLabelShort => 'Sec';
+
+  @override
+  String get issueDate => 'Issue Date';
+
+  @override
+  String get returnDate => 'Return Date';
+
+  @override
+  String get dueDate => 'Due Date';
+
+  @override
+  String returnedOn(String date) {
+    return 'Returned on $date';
+  }
+
+  @override
+  String daysOverdue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days overdue',
+      one: '1 day overdue',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dueToday => 'Due today!';
+
+  @override
+  String daysRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days remaining',
+      one: '1 day remaining',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get returnBookTitle => 'Return Book';
+
+  @override
+  String returnBookConfirmation(String title, String student) {
+    return 'Are you sure you want to mark \"$title\" as returned by $student?';
+  }
+
+  @override
+  String get returnBookButton => 'Return Book';
+
+  @override
+  String get markAsReturned => 'Mark as Returned';
+
+  @override
+  String get bookReturnedSuccess => 'Book marked as returned successfully!';
+
+  @override
+  String get addBookTitle => 'Add Book';
+
+  @override
+  String get editBookTitle => 'Edit Book';
+
+  @override
+  String get basicDetails => 'Basic Details';
+
+  @override
+  String get bookTitleLabel => 'Book Title';
+
+  @override
+  String get bookTitleHint => 'e.g., Fundamentals of Physics';
+
+  @override
+  String get titleRequired => 'Title is required';
+
+  @override
+  String get authorNameLabel => 'Author Name';
+
+  @override
+  String get authorNameHint => 'e.g., David Halliday';
+
+  @override
+  String get authorRequired => 'Author is required';
+
+  @override
+  String get isbnNumberLabel => 'ISBN Number';
+
+  @override
+  String get isbnNumberHint => 'e.g., 978-0471320005';
+
+  @override
+  String get isbnRequired => 'ISBN is required';
+
+  @override
+  String get additionalInfo => 'Additional Info';
+
+  @override
+  String get categoryLabel => 'Category';
+
+  @override
+  String get selectCategoryError => 'Please select a category';
+
+  @override
+  String get coverImageLabel => 'Cover Image URL or Path';
+
+  @override
+  String get coverImageHint => 'https://example.com/image.jpg';
+
+  @override
+  String get coverImageRequired => 'Cover image is required';
+
+  @override
+  String get descriptionLabel => 'Description';
+
+  @override
+  String get descriptionHint => 'Optional book description';
+
+  @override
+  String get saveBookButton => 'Save Book';
+
+  @override
+  String get bookAddedSuccess => 'Book added successfully!';
+
+  @override
+  String get bookUpdatedSuccess => 'Book updated successfully!';
+
+  @override
+  String get generateRandomCover => 'Generate Random Cover';
+
+  @override
+  String get pickFromGallery => 'Pick from Gallery';
+
+  @override
+  String get takeAPhoto => 'Take a Photo';
+
+  @override
+  String failedToUploadImage(String error) {
+    return 'Failed to upload image: $error';
+  }
+
+  @override
+  String get deleteBookTitle => 'Delete Book';
+
+  @override
+  String deleteBookConfirmation(String title) {
+    return 'Are you sure you want to delete \"$title\"? This action cannot be undone.';
+  }
+
+  @override
+  String get bookDeletedSuccess => 'Book deleted successfully!';
+
+  @override
+  String get issueBookToTitle => 'Issue Book To';
+
+  @override
+  String get howIdentifyStudent =>
+      'How would you like to identify the student?';
+
+  @override
+  String get scanIdCardTitle => 'Scan ID Card';
+
+  @override
+  String get scanIdCardSubtitle => 'Use the camera to scan student\'s barcode';
+
+  @override
+  String get selectStudentTitle => 'Select Student';
+
+  @override
+  String get selectStudentSubtitle => 'Search and pick from the student list';
+
+  @override
+  String get setDueDateTitle => 'Set Due Date';
+
+  @override
+  String get chooseWhenReturn => 'Choose when the book must be returned';
+
+  @override
+  String plusDays(int count) {
+    return '+$count days';
+  }
+
+  @override
+  String get confirmAndIssue => 'Confirm & Issue';
+
+  @override
+  String get bookIssuedSuccessTitle => 'Book Issued!';
+
+  @override
+  String bookIssuedSuccessMessage(String title) {
+    return '\"$title\" has been successfully assigned.';
+  }
+
+  @override
+  String get studentLabel => 'Student';
+
+  @override
+  String get idLabel => 'ID';
+
+  @override
+  String get dueLabel => 'Due';
+
+  @override
+  String get doneButton => 'Done';
+
+  @override
+  String get descriptionHeader => 'Description';
+
+  @override
+  String get noDescriptionAvailable =>
+      'No description available for this book.';
+
+  @override
+  String get requestIssueButton => 'Request Issue';
+
+  @override
+  String get bookCurrentlyUnavailable => 'Book Currently Unavailable';
+
+  @override
+  String get statusAvailable => 'Available';
+
+  @override
+  String get statusUnavailable => 'Unavailable';
+
+  @override
+  String get statusNotAvailable => 'Not Available';
+
+  @override
+  String get searchStudentHint => 'Search student name from server…';
+
+  @override
+  String studentsFoundCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students found',
+      one: '1 student found',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bookRequestsTitle => 'Book Requests';
+
+  @override
+  String get noPendingBookRequests => 'No pending book requests.';
+
+  @override
+  String get requestDeclined => 'Request declined.';
+
+  @override
+  String get requestAccepted => 'Request accepted!';
+
+  @override
+  String get declineButton => 'Decline';
+
+  @override
+  String get acceptButton => 'Accept';
+
+  @override
+  String get scanIdCardScreenTitle => 'Scan ID Card';
+
+  @override
+  String get pointCameraInstruction =>
+      'Point the camera at the student\'s\nID card barcode';
+
+  @override
+  String get idCardScannedTitle => 'ID Card Scanned!';
+
+  @override
+  String get confirmStudentDetailsMessage =>
+      'Please confirm the student details below.';
+
+  @override
+  String get studentIdLabel => 'Student ID';
+
+  @override
+  String get nameLabel => 'Name';
+
+  @override
+  String get barcodeLabel => 'Barcode';
+
+  @override
+  String get rescanButton => 'Rescan';
 }

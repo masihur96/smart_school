@@ -1385,7 +1385,7 @@ abstract class AppLocalizations {
   /// No description provided for @noStudentsFound.
   ///
   /// In en, this message translates to:
-  /// **'No students found.'**
+  /// **'No students found'**
   String get noStudentsFound;
 
   /// No description provided for @rollLabel.
@@ -1403,7 +1403,7 @@ abstract class AppLocalizations {
   /// No description provided for @viewDetails.
   ///
   /// In en, this message translates to:
-  /// **'View Details'**
+  /// **'View details'**
   String get viewDetails;
 
   /// No description provided for @edit.
@@ -2606,6 +2606,12 @@ abstract class AppLocalizations {
   /// **'Section'**
   String get sectionLabel;
 
+  /// No description provided for @subjectLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get subjectLabel;
+
   /// No description provided for @classLabel2.
   ///
   /// In en, this message translates to:
@@ -3163,6 +3169,1158 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} routine entries saved successfully!'**
   String routineEntriesSavedSuccess(int count);
+
+  /// No description provided for @studentAttendanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Attendance'**
+  String get studentAttendanceTitle;
+
+  /// No description provided for @exportPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Export PDF'**
+  String get exportPdf;
+
+  /// No description provided for @searchByStudentNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by Student Name...'**
+  String get searchByStudentNameHint;
+
+  /// No description provided for @allClassHint.
+  ///
+  /// In en, this message translates to:
+  /// **'All Class'**
+  String get allClassHint;
+
+  /// No description provided for @allSectionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'All Section'**
+  String get allSectionHint;
+
+  /// No description provided for @allSubjectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'All Subject'**
+  String get allSubjectHint;
+
+  /// No description provided for @allDates.
+  ///
+  /// In en, this message translates to:
+  /// **'All Dates'**
+  String get allDates;
+
+  /// No description provided for @totalCountFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Total: {total}'**
+  String totalCountFormat(int total);
+
+  /// No description provided for @showingCountFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing: {count} / {total}'**
+  String showingCountFormat(int count, int total);
+
+  /// No description provided for @noRecordsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No records found'**
+  String get noRecordsFound;
+
+  /// No description provided for @noStatusRecordsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No {status} records found'**
+  String noStatusRecordsFound(String status);
+
+  /// No description provided for @showAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show All'**
+  String get showAll;
+
+  /// No description provided for @statusAll.
+  ///
+  /// In en, this message translates to:
+  /// **'ALL'**
+  String get statusAll;
+
+  /// No description provided for @statusPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'PRESENT'**
+  String get statusPresent;
+
+  /// No description provided for @statusAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'ABSENT'**
+  String get statusAbsent;
+
+  /// No description provided for @statusLate.
+  ///
+  /// In en, this message translates to:
+  /// **'LATE'**
+  String get statusLate;
+
+  /// No description provided for @statusLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'LEAVE'**
+  String get statusLeave;
+
+  /// No description provided for @noAttendanceRecordsToExport.
+  ///
+  /// In en, this message translates to:
+  /// **'No attendance records to export'**
+  String get noAttendanceRecordsToExport;
+
+  /// No description provided for @failedToGeneratePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to generate PDF: {error}'**
+  String failedToGeneratePdf(String error);
+
+  /// No description provided for @unknownStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Student'**
+  String get unknownStudent;
+
+  /// No description provided for @classAndSectionFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'{className} • Sec {sectionName}'**
+  String classAndSectionFormat(String className, String sectionName);
+
+  /// No description provided for @rollNumberFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Roll #{rollNumber}'**
+  String rollNumberFormat(String rollNumber);
+
+  /// No description provided for @teacherLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher'**
+  String get teacherLabel;
+
+  /// No description provided for @roomLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Room'**
+  String get roomLabel;
+
+  /// No description provided for @recordIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Record ID'**
+  String get recordIdLabel;
+
+  /// No description provided for @teacherAttendanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Attendance'**
+  String get teacherAttendanceTitle;
+
+  /// No description provided for @searchByTeacherNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by Teacher Name...'**
+  String get searchByTeacherNameHint;
+
+  /// No description provided for @dateRangeFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Date: {start} to {end}'**
+  String dateRangeFormat(String start, String end);
+
+  /// No description provided for @dateAllTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Date: All Time'**
+  String get dateAllTime;
+
+  /// No description provided for @resultsForFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Results for \'{query}\''**
+  String resultsForFormat(String query);
+
+  /// No description provided for @statusClockIn.
+  ///
+  /// In en, this message translates to:
+  /// **'CLOCK-IN'**
+  String get statusClockIn;
+
+  /// No description provided for @statusClockOut.
+  ///
+  /// In en, this message translates to:
+  /// **'CLOCK-OUT'**
+  String get statusClockOut;
+
+  /// No description provided for @statusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'UNKNOWN'**
+  String get statusUnknown;
+
+  /// No description provided for @inTime.
+  ///
+  /// In en, this message translates to:
+  /// **'In Time'**
+  String get inTime;
+
+  /// No description provided for @outTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Out Time'**
+  String get outTime;
+
+  /// No description provided for @locationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get locationLabel;
+
+  /// No description provided for @fetchingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching...'**
+  String get fetchingLabel;
+
+  /// No description provided for @invalidCoords.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid coords'**
+  String get invalidCoords;
+
+  /// No description provided for @notSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get notSet;
+
+  /// No description provided for @createAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Attendance'**
+  String get createAttendance;
+
+  /// No description provided for @pleaseSelectTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a teacher'**
+  String get pleaseSelectTeacher;
+
+  /// No description provided for @attendanceCreatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance created successfully'**
+  String get attendanceCreatedSuccess;
+
+  /// No description provided for @selectTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Teacher'**
+  String get selectTeacher;
+
+  /// No description provided for @statusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get statusLabel;
+
+  /// No description provided for @dateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get dateLabel;
+
+  /// No description provided for @startTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Time'**
+  String get startTimeLabel;
+
+  /// No description provided for @endTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'End Time'**
+  String get endTimeLabel;
+
+  /// No description provided for @timeNotRequiredInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Start & End times are not required for {status}.'**
+  String timeNotRequiredInfo(String status);
+
+  /// No description provided for @submitButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submitButton;
+
+  /// No description provided for @onlineClassesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Online Classes'**
+  String get onlineClassesTitle;
+
+  /// No description provided for @deleteClassTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Class'**
+  String get deleteClassTitle;
+
+  /// No description provided for @deleteClassConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this class?'**
+  String get deleteClassConfirmation;
+
+  /// No description provided for @classDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Class deleted successfully'**
+  String get classDeletedSuccess;
+
+  /// No description provided for @failedToDeleteClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete class'**
+  String get failedToDeleteClass;
+
+  /// No description provided for @couldNotLaunchUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not launch {url}'**
+  String couldNotLaunchUrl(String url);
+
+  /// No description provided for @allClassesAndSections.
+  ///
+  /// In en, this message translates to:
+  /// **'All Classes & Sections'**
+  String get allClassesAndSections;
+
+  /// No description provided for @newClass.
+  ///
+  /// In en, this message translates to:
+  /// **'New Class'**
+  String get newClass;
+
+  /// No description provided for @minutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}m ago'**
+  String minutesAgo(int count);
+
+  /// No description provided for @hoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}h ago'**
+  String hoursAgo(int count);
+
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// No description provided for @daysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}d ago'**
+  String daysAgo(int count);
+
+  /// No description provided for @inMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'in {count}m'**
+  String inMinutes(int count);
+
+  /// No description provided for @inHours.
+  ///
+  /// In en, this message translates to:
+  /// **'in {count}h'**
+  String inHours(int count);
+
+  /// No description provided for @tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get tomorrow;
+
+  /// No description provided for @inDays.
+  ///
+  /// In en, this message translates to:
+  /// **'in {count}d'**
+  String inDays(int count);
+
+  /// No description provided for @googleMeet.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Meet'**
+  String get googleMeet;
+
+  /// No description provided for @zoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom'**
+  String get zoom;
+
+  /// No description provided for @msTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'MS Teams'**
+  String get msTeams;
+
+  /// No description provided for @webex.
+  ///
+  /// In en, this message translates to:
+  /// **'Webex'**
+  String get webex;
+
+  /// No description provided for @onlineMeeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Online Meeting'**
+  String get onlineMeeting;
+
+  /// No description provided for @unableToLoadClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to Load Classes'**
+  String get unableToLoadClasses;
+
+  /// No description provided for @unableToLoadClassesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to connect to the server. Please check your network connection and try again.'**
+  String get unableToLoadClassesMessage;
+
+  /// No description provided for @noOnlineClassesScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'No Online Classes Scheduled'**
+  String get noOnlineClassesScheduled;
+
+  /// No description provided for @noOnlineClassesAdminMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'There are currently no online classes scheduled. Tap below to schedule a new live class or pull down to refresh.'**
+  String get noOnlineClassesAdminMessage;
+
+  /// No description provided for @noOnlineClassesStudentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no upcoming online classes scheduled at this time. Pull down to refresh or check back later.'**
+  String get noOnlineClassesStudentMessage;
+
+  /// No description provided for @scheduleClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule Class'**
+  String get scheduleClass;
+
+  /// No description provided for @statusLiveNow.
+  ///
+  /// In en, this message translates to:
+  /// **'LIVE NOW'**
+  String get statusLiveNow;
+
+  /// No description provided for @statusUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get statusUpcoming;
+
+  /// No description provided for @statusEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Ended'**
+  String get statusEnded;
+
+  /// No description provided for @statusLive.
+  ///
+  /// In en, this message translates to:
+  /// **'LIVE'**
+  String get statusLive;
+
+  /// No description provided for @classEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Class Ended'**
+  String get classEnded;
+
+  /// No description provided for @joinLiveClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Live Class'**
+  String get joinLiveClass;
+
+  /// No description provided for @joinMeeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Meeting'**
+  String get joinMeeting;
+
+  /// No description provided for @newBook.
+  ///
+  /// In en, this message translates to:
+  /// **'New Book'**
+  String get newBook;
+
+  /// No description provided for @allBooksTab.
+  ///
+  /// In en, this message translates to:
+  /// **'📚  All Books'**
+  String get allBooksTab;
+
+  /// No description provided for @issuedTab.
+  ///
+  /// In en, this message translates to:
+  /// **'🔖  Issued'**
+  String get issuedTab;
+
+  /// No description provided for @schoolLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'School Library'**
+  String get schoolLibrary;
+
+  /// No description provided for @manageBooksSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage books & track issues'**
+  String get manageBooksSubtitle;
+
+  /// No description provided for @totalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get totalLabel;
+
+  /// No description provided for @availableLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get availableLabel;
+
+  /// No description provided for @issuedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued'**
+  String get issuedLabel;
+
+  /// No description provided for @returnedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned'**
+  String get returnedLabel;
+
+  /// No description provided for @overdueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get overdueLabel;
+
+  /// No description provided for @searchBookHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search title or author…'**
+  String get searchBookHint;
+
+  /// No description provided for @categoryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get categoryAll;
+
+  /// No description provided for @booksFoundCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 book found} other{{count} books found}}'**
+  String booksFoundCount(int count);
+
+  /// No description provided for @noBooksFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No books found'**
+  String get noBooksFound;
+
+  /// No description provided for @tryDifferentSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search or category'**
+  String get tryDifferentSearch;
+
+  /// No description provided for @somethingWentWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get somethingWentWrong;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// No description provided for @filterIssued.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued'**
+  String get filterIssued;
+
+  /// No description provided for @filterOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get filterOverdue;
+
+  /// No description provided for @filterReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned'**
+  String get filterReturned;
+
+  /// No description provided for @noFilteredBooksFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No {filter} books found'**
+  String noFilteredBooksFound(String filter);
+
+  /// No description provided for @noBooksIssuedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Books Issued'**
+  String get noBooksIssuedTitle;
+
+  /// No description provided for @noBooksIssuedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All books are currently available.'**
+  String get noBooksIssuedSubtitle;
+
+  /// No description provided for @pullToRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull down to refresh'**
+  String get pullToRefresh;
+
+  /// No description provided for @sectionOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get sectionOverdue;
+
+  /// No description provided for @sectionCurrentlyIssued.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently Issued'**
+  String get sectionCurrentlyIssued;
+
+  /// No description provided for @sectionReturnedHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned History'**
+  String get sectionReturnedHistory;
+
+  /// No description provided for @sectionLabelShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sec'**
+  String get sectionLabelShort;
+
+  /// No description provided for @issueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue Date'**
+  String get issueDate;
+
+  /// No description provided for @returnDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Return Date'**
+  String get returnDate;
+
+  /// No description provided for @dueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Date'**
+  String get dueDate;
+
+  /// No description provided for @returnedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned on {date}'**
+  String returnedOn(String date);
+
+  /// No description provided for @daysOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day overdue} other{{count} days overdue}}'**
+  String daysOverdue(int count);
+
+  /// No description provided for @dueToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Due today!'**
+  String get dueToday;
+
+  /// No description provided for @daysRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day remaining} other{{count} days remaining}}'**
+  String daysRemaining(int count);
+
+  /// No description provided for @returnBookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Return Book'**
+  String get returnBookTitle;
+
+  /// No description provided for @returnBookConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to mark \"{title}\" as returned by {student}?'**
+  String returnBookConfirmation(String title, String student);
+
+  /// No description provided for @returnBookButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Return Book'**
+  String get returnBookButton;
+
+  /// No description provided for @markAsReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Returned'**
+  String get markAsReturned;
+
+  /// No description provided for @bookReturnedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Book marked as returned successfully!'**
+  String get bookReturnedSuccess;
+
+  /// No description provided for @addBookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Book'**
+  String get addBookTitle;
+
+  /// No description provided for @editBookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Book'**
+  String get editBookTitle;
+
+  /// No description provided for @basicDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Details'**
+  String get basicDetails;
+
+  /// No description provided for @bookTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Book Title'**
+  String get bookTitleLabel;
+
+  /// No description provided for @bookTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Fundamentals of Physics'**
+  String get bookTitleHint;
+
+  /// No description provided for @titleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title is required'**
+  String get titleRequired;
+
+  /// No description provided for @authorNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Author Name'**
+  String get authorNameLabel;
+
+  /// No description provided for @authorNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., David Halliday'**
+  String get authorNameHint;
+
+  /// No description provided for @authorRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Author is required'**
+  String get authorRequired;
+
+  /// No description provided for @isbnNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ISBN Number'**
+  String get isbnNumberLabel;
+
+  /// No description provided for @isbnNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., 978-0471320005'**
+  String get isbnNumberHint;
+
+  /// No description provided for @isbnRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'ISBN is required'**
+  String get isbnRequired;
+
+  /// No description provided for @additionalInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional Info'**
+  String get additionalInfo;
+
+  /// No description provided for @categoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get categoryLabel;
+
+  /// No description provided for @selectCategoryError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a category'**
+  String get selectCategoryError;
+
+  /// No description provided for @coverImageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover Image URL or Path'**
+  String get coverImageLabel;
+
+  /// No description provided for @coverImageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://example.com/image.jpg'**
+  String get coverImageHint;
+
+  /// No description provided for @coverImageRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover image is required'**
+  String get coverImageRequired;
+
+  /// No description provided for @descriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get descriptionLabel;
+
+  /// No description provided for @descriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional book description'**
+  String get descriptionHint;
+
+  /// No description provided for @saveBookButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Book'**
+  String get saveBookButton;
+
+  /// No description provided for @bookAddedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Book added successfully!'**
+  String get bookAddedSuccess;
+
+  /// No description provided for @bookUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Book updated successfully!'**
+  String get bookUpdatedSuccess;
+
+  /// No description provided for @generateRandomCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate Random Cover'**
+  String get generateRandomCover;
+
+  /// No description provided for @pickFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick from Gallery'**
+  String get pickFromGallery;
+
+  /// No description provided for @takeAPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a Photo'**
+  String get takeAPhoto;
+
+  /// No description provided for @failedToUploadImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to upload image: {error}'**
+  String failedToUploadImage(String error);
+
+  /// No description provided for @deleteBookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Book'**
+  String get deleteBookTitle;
+
+  /// No description provided for @deleteBookConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{title}\"? This action cannot be undone.'**
+  String deleteBookConfirmation(String title);
+
+  /// No description provided for @bookDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Book deleted successfully!'**
+  String get bookDeletedSuccess;
+
+  /// No description provided for @issueBookToTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue Book To'**
+  String get issueBookToTitle;
+
+  /// No description provided for @howIdentifyStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'How would you like to identify the student?'**
+  String get howIdentifyStudent;
+
+  /// No description provided for @scanIdCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan ID Card'**
+  String get scanIdCardTitle;
+
+  /// No description provided for @scanIdCardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the camera to scan student\'s barcode'**
+  String get scanIdCardSubtitle;
+
+  /// No description provided for @selectStudentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Student'**
+  String get selectStudentTitle;
+
+  /// No description provided for @selectStudentSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search and pick from the student list'**
+  String get selectStudentSubtitle;
+
+  /// No description provided for @setDueDateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Due Date'**
+  String get setDueDateTitle;
+
+  /// No description provided for @chooseWhenReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose when the book must be returned'**
+  String get chooseWhenReturn;
+
+  /// No description provided for @plusDays.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} days'**
+  String plusDays(int count);
+
+  /// No description provided for @confirmAndIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm & Issue'**
+  String get confirmAndIssue;
+
+  /// No description provided for @bookIssuedSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book Issued!'**
+  String get bookIssuedSuccessTitle;
+
+  /// No description provided for @bookIssuedSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{title}\" has been successfully assigned.'**
+  String bookIssuedSuccessMessage(String title);
+
+  /// No description provided for @studentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get studentLabel;
+
+  /// No description provided for @idLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ID'**
+  String get idLabel;
+
+  /// No description provided for @dueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get dueLabel;
+
+  /// No description provided for @doneButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get doneButton;
+
+  /// No description provided for @descriptionHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get descriptionHeader;
+
+  /// No description provided for @noDescriptionAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No description available for this book.'**
+  String get noDescriptionAvailable;
+
+  /// No description provided for @requestIssueButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Issue'**
+  String get requestIssueButton;
+
+  /// No description provided for @bookCurrentlyUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Book Currently Unavailable'**
+  String get bookCurrentlyUnavailable;
+
+  /// No description provided for @statusAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get statusAvailable;
+
+  /// No description provided for @statusUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get statusUnavailable;
+
+  /// No description provided for @statusNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Available'**
+  String get statusNotAvailable;
+
+  /// No description provided for @searchStudentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search student name from server…'**
+  String get searchStudentHint;
+
+  /// No description provided for @studentsFoundCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student found} other{{count} students found}}'**
+  String studentsFoundCount(int count);
+
+  /// No description provided for @bookRequestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book Requests'**
+  String get bookRequestsTitle;
+
+  /// No description provided for @noPendingBookRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending book requests.'**
+  String get noPendingBookRequests;
+
+  /// No description provided for @requestDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Request declined.'**
+  String get requestDeclined;
+
+  /// No description provided for @requestAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Request accepted!'**
+  String get requestAccepted;
+
+  /// No description provided for @declineButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get declineButton;
+
+  /// No description provided for @acceptButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get acceptButton;
+
+  /// No description provided for @scanIdCardScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan ID Card'**
+  String get scanIdCardScreenTitle;
+
+  /// No description provided for @pointCameraInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Point the camera at the student\'s\nID card barcode'**
+  String get pointCameraInstruction;
+
+  /// No description provided for @idCardScannedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ID Card Scanned!'**
+  String get idCardScannedTitle;
+
+  /// No description provided for @confirmStudentDetailsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm the student details below.'**
+  String get confirmStudentDetailsMessage;
+
+  /// No description provided for @studentIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student ID'**
+  String get studentIdLabel;
+
+  /// No description provided for @nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get nameLabel;
+
+  /// No description provided for @barcodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode'**
+  String get barcodeLabel;
+
+  /// No description provided for @rescanButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescan'**
+  String get rescanButton;
 }
 
 class _AppLocalizationsDelegate

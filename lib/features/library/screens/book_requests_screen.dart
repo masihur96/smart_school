@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import '../data/dummy_library_data.dart';
 
 class BookRequestsScreen extends StatefulWidget {
@@ -13,6 +14,7 @@ class BookRequestsScreen extends StatefulWidget {
 class _BookRequestsScreenState extends State<BookRequestsScreen> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final pendingRequests = DummyLibraryData.bookRequests
         .where((req) => req.status == 'pending')
         .toList();
@@ -20,13 +22,13 @@ class _BookRequestsScreenState extends State<BookRequestsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Book Requests'),
+        title: Text(l10n.bookRequestsTitle),
         backgroundColor: AppColors.primaryTeacher,
         foregroundColor: Colors.white,
         centerTitle: true,
       ),
       body: pendingRequests.isEmpty
-          ? const Center(child: Text('No pending book requests.'))
+          ? Center(child: Text(l10n.noPendingBookRequests))
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: pendingRequests.length,
@@ -90,13 +92,13 @@ class _BookRequestsScreenState extends State<BookRequestsScreen> {
                                   DummyLibraryData.declineRequest(request.id);
                                 });
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Request declined.')),
+                                  SnackBar(content: Text(l10n.requestDeclined)),
                                 );
                               },
                               style: TextButton.styleFrom(
                                 foregroundColor: Colors.red,
                               ),
-                              child: const Text('Decline'),
+                              child: Text(l10n.declineButton),
                             ),
                             const SizedBox(width: 8),
                             ElevatedButton(
@@ -105,7 +107,7 @@ class _BookRequestsScreenState extends State<BookRequestsScreen> {
                                   DummyLibraryData.acceptRequest(request.id);
                                 });
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Request accepted!')),
+                                  SnackBar(content: Text(l10n.requestAccepted)),
                                 );
                               },
                               style: ElevatedButton.styleFrom(
@@ -115,7 +117,7 @@ class _BookRequestsScreenState extends State<BookRequestsScreen> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              child: const Text('Accept'),
+                              child: Text(l10n.acceptButton),
                             ),
                           ],
                         ),

@@ -10,6 +10,7 @@ import 'package:smart_school/models/online_class_model.dart';
 import 'package:smart_school/models/user_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import 'add_edit_online_class_screen.dart';
 
 class OnlineClassListScreen extends StatefulWidget {
@@ -39,19 +40,20 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
   // ── Actions ──────────────────────────────────────────────────────────────
 
   Future<void> _deleteClass(String id) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Class'),
-        content: const Text('Are you sure you want to delete this class?'),
+        title: Text(l10n.deleteClassTitle),
+        content: Text(l10n.deleteClassConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -66,17 +68,18 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     if (!mounted) return;
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Class deleted successfully')),
+        SnackBar(content: Text(l10n.classDeletedSuccess)),
       );
     } else {
       final error = context.read<OnlineClassProvider>().error;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error ?? 'Failed to delete class')),
+        SnackBar(content: Text(error ?? l10n.failedToDeleteClass)),
       );
     }
   }
 
   Future<void> _launchURL(String urlString) async {
+    final l10n = AppLocalizations.of(context)!;
     String formattedUrl = urlString.trim();
     if (formattedUrl.isEmpty) return;
     if (!formattedUrl.startsWith('http://') &&
@@ -87,13 +90,14 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not launch $formattedUrl')),
+          SnackBar(content: Text(l10n.couldNotLaunchUrl(formattedUrl))),
         );
       }
     }
   }
 
   String _getClassSectionLabel(BuildContext context, OnlineClass oClass) {
+    final l10n = AppLocalizations.of(context)!;
     if (oClass.className != null && oClass.className!.isNotEmpty) {
       if (oClass.sectionName != null && oClass.sectionName!.isNotEmpty) {
         return '${oClass.className} (${oClass.sectionName})';
@@ -125,13 +129,14 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
       }
     }
 
-    return 'All Classes & Sections';
+    return l10n.allClassesAndSections;
   }
 
   // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final user = context.watch<AuthNotifier>().user;
     final isTeacher = user?.role == UserRole.teacher;
     final isAdmin =
@@ -150,7 +155,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Online Classes'),
+        title: Text(l10n.onlineClassesTitle),
         backgroundColor: themeColor,
         foregroundColor: Colors.white,
       ),
@@ -202,9 +207,9 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
               },
               backgroundColor: themeColor,
               icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text(
-                'New Class',
-                style: TextStyle(
+              label: Text(
+                l10n.newClass,
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
@@ -216,48 +221,50 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
-  String _getTimeAgoOrUpcoming(DateTime scheduledTime) {
+  String _getTimeAgoOrUpcoming(BuildContext context, DateTime scheduledTime) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final difference = scheduledTime.difference(now);
 
     if (difference.isNegative) {
       final pastDiff = now.difference(scheduledTime);
       if (pastDiff.inMinutes < 60) {
-        return '${pastDiff.inMinutes}m ago';
+        return l10n.minutesAgo(pastDiff.inMinutes);
       } else if (pastDiff.inHours < 24) {
-        return '${pastDiff.inHours}h ago';
+        return l10n.hoursAgo(pastDiff.inHours);
       } else if (pastDiff.inDays == 1) {
-        return 'Yesterday';
+        return l10n.yesterday;
       } else if (pastDiff.inDays < 7) {
-        return '${pastDiff.inDays}d ago';
+        return l10n.daysAgo(pastDiff.inDays);
       } else {
         return DateFormat('MMM dd').format(scheduledTime);
       }
     } else {
       if (difference.inMinutes < 60) {
-        return 'in ${difference.inMinutes}m';
+        return l10n.inMinutes(difference.inMinutes);
       } else if (difference.inHours < 24) {
-        return 'in ${difference.inHours}h';
+        return l10n.inHours(difference.inHours);
       } else if (difference.inDays == 1) {
-        return 'Tomorrow';
+        return l10n.tomorrow;
       } else if (difference.inDays < 7) {
-        return 'in ${difference.inDays}d';
+        return l10n.inDays(difference.inDays);
       } else {
         return DateFormat('MMM dd').format(scheduledTime);
       }
     }
   }
 
-  String _getPlatformLabel(String meetLink) {
+  String _getPlatformLabel(BuildContext context, String meetLink) {
+    final l10n = AppLocalizations.of(context)!;
     final lower = meetLink.toLowerCase();
-    if (lower.contains('meet.google.com')) return 'Google Meet';
-    if (lower.contains('zoom.us')) return 'Zoom';
+    if (lower.contains('meet.google.com')) return l10n.googleMeet;
+    if (lower.contains('zoom.us')) return l10n.zoom;
     if (lower.contains('teams.microsoft.com') ||
         lower.contains('teams.live.com')) {
-      return 'MS Teams';
+      return l10n.msTeams;
     }
-    if (lower.contains('webex.com')) return 'Webex';
-    return 'Online Meeting';
+    if (lower.contains('webex.com')) return l10n.webex;
+    return l10n.onlineMeeting;
   }
 
   IconData _getPlatformIcon(String meetLink) {
@@ -276,6 +283,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
   // ── Error & Empty States ──────────────────────────────────────────────────
 
   Widget _buildErrorState(OnlineClassProvider provider, Color themeColor) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return RefreshIndicator(
       onRefresh: provider.fetchOnlineClasses,
@@ -303,7 +311,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'Unable to Load Classes',
+                    l10n.unableToLoadClasses,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -312,8 +320,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    provider.error ??
-                        'Failed to connect to the server. Please check your network connection and try again.',
+                    provider.error ?? l10n.unableToLoadClassesMessage,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
@@ -326,9 +333,9 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                   ElevatedButton.icon(
                     onPressed: provider.fetchOnlineClasses,
                     icon: const Icon(Icons.refresh_rounded, size: 20),
-                    label: const Text(
-                      'Retry',
-                      style: TextStyle(
+                    label: Text(
+                      l10n.retry,
+                      style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                       ),
@@ -356,6 +363,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
   }
 
   Widget _buildEmptyState(bool canManageClass, Color themeColor) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return RefreshIndicator(
       onRefresh: () => context.read<OnlineClassProvider>().fetchOnlineClasses(),
@@ -383,7 +391,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'No Online Classes Scheduled',
+                    l10n.noOnlineClassesScheduled,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -393,8 +401,8 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                   const SizedBox(height: 8),
                   Text(
                     canManageClass
-                        ? 'There are currently no online classes scheduled. Tap below to schedule a new live class or pull down to refresh.'
-                        : 'There are no upcoming online classes scheduled at this time. Pull down to refresh or check back later.',
+                        ? l10n.noOnlineClassesAdminMessage
+                        : l10n.noOnlineClassesStudentMessage,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
@@ -425,7 +433,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                       icon:
                           Icon(Icons.add_rounded, size: 20, color: themeColor),
                       label: Text(
-                        'Schedule Class',
+                        l10n.scheduleClass,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -564,6 +572,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     bool canManageClass,
     Color themeColor,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final now = DateTime.now();
 
@@ -577,8 +586,8 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     final isPast = !isUpcoming && !isLive;
 
     final classSectionLabel = _getClassSectionLabel(context, oClass);
-    final relativeTime = _getTimeAgoOrUpcoming(oClass.scheduledTime);
-    final platformLabel = _getPlatformLabel(oClass.meetLink);
+    final relativeTime = _getTimeAgoOrUpcoming(context, oClass.scheduledTime);
+    final platformLabel = _getPlatformLabel(context, oClass.meetLink);
     final platformIcon = _getPlatformIcon(oClass.meetLink);
 
     return Card(
@@ -726,8 +735,8 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                       const SizedBox(width: 5),
                       Text(
                         isLive
-                            ? 'LIVE NOW'
-                            : (isUpcoming ? 'Upcoming' : 'Ended'),
+                            ? l10n.statusLiveNow
+                            : (isUpcoming ? l10n.statusUpcoming : l10n.statusEnded),
                         style: TextStyle(
                           color: isLive
                               ? Colors.red.shade700
@@ -768,24 +777,24 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                       }
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.edit_outlined, size: 18, color: Colors.blue),
-                            SizedBox(width: 8),
-                            Text('Edit Class'),
+                            const Icon(Icons.edit_outlined, size: 18, color: Colors.blue),
+                            const SizedBox(width: 8),
+                            Text(l10n.editClass),
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('Delete Class',
-                                style: TextStyle(color: Colors.red)),
+                            const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                            const SizedBox(width: 8),
+                            Text(l10n.deleteClassTitle,
+                                style: const TextStyle(color: Colors.red)),
                           ],
                         ),
                       ),
@@ -879,7 +888,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      isLive ? 'LIVE' : relativeTime,
+                      isLive ? l10n.statusLive : relativeTime,
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -1016,8 +1025,8 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                 ),
                 label: Text(
                   isPast
-                      ? 'Class Ended'
-                      : (isLive ? 'Join Live Class' : 'Join Meeting'),
+                      ? l10n.classEnded
+                      : (isLive ? l10n.joinLiveClass : l10n.joinMeeting),
                   style: TextStyle(
                     color: isPast
                         ? (isDark ? Colors.grey.shade500 : Colors.grey.shade500)
