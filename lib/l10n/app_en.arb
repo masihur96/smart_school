@@ -1474,5 +1474,60 @@
   "subjectsStat": "Subjects",
   "noBooksFoundTitle": "No Books Found",
   "noBooksMatchSearch": "No books match your search.",
-  "noAcademicBooksUploadedYet": "No academic books have been uploaded yet."
+  "noAcademicBooksUploadedYet": "No academic books have been uploaded yet.",
+  "failedToUpdateProfileImage": "Failed to update profile image",
+  "schoolAvatarUpdatedSuccessfully": "School avatar updated successfully",
+  "failedToUpdateSchoolAvatar": "Failed to update school avatar",
+  "failedToUpdateProfile": "Failed to update profile",
+  "schoolProfileUpdatedSuccessfully": "School profile updated successfully",
+  "failedToUpdateSchoolProfile": "Failed to update school profile",
+  "fullNameLabel": "Full Name",
+  "emailAddressLabel": "Email Address",
+  "phoneNumberLabel": "Phone Number",
+  "schoolNameLabel": "School Name",
+  "schoolEmailLabel": "School Email",
+  "schoolPhoneLabel": "School Phone",
+  "schoolAddressLabel": "School Address",
+  "accountRoleLabel": "Account Role",
+  "rollNumberLabel": "Roll Number",
+  "designationLabel": "Designation",
+  "organizationAdmins": "Organization Admins",
+  "dangerZone": "Danger Zone",
+  "notAvailable": "N/A",
+  "accountActiveStatus": "Account Active",
+  "accountInactiveStatus": "Account Inactive",
+  "noAdminsFound": "No admins found",
+  "activeStatus": "Active",
+  "inactiveStatus": "Inactive",
+  "changeToTeacherTooltip": "Change to Teacher",
+  "changeRoleTitle": "Change Role",
+  "changeRoleConfirmationMessage": "Change {name}'s role from {oldRole} to {newRole}?\n\nThis will remove their admin privileges.",
+  "@changeRoleConfirmationMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "oldRole": {
+        "type": "String"
+      },
+      "newRole": {
+        "type": "String"
+      }
+    }
+  },
+  "nowATeacherMessage": "{name} is now a Teacher",
+  "@nowATeacherMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToChangeRole": "Failed to change role",
+  "deleteAccount": "Delete Account",
+  "deleteAccountDescription": "Permanently remove your account and all data.",
+  "deleteAccountWarning": "This action is permanent and cannot be undone. All your data will be deleted from our servers.",
+  "typeDeleteToConfirm": "Type DELETE to confirm:",
+  "deleteUppercase": "DELETE",
+  "failedToDeleteAccount": "Failed to delete account"
 }

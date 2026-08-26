@@ -2631,4 +2631,121 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noAcademicBooksUploadedYet =>
       'No academic books have been uploaded yet.';
+
+  @override
+  String get failedToUpdateProfileImage => 'Failed to update profile image';
+
+  @override
+  String get schoolAvatarUpdatedSuccessfully =>
+      'School avatar updated successfully';
+
+  @override
+  String get failedToUpdateSchoolAvatar => 'Failed to update school avatar';
+
+  @override
+  String get failedToUpdateProfile => 'Failed to update profile';
+
+  @override
+  String get schoolProfileUpdatedSuccessfully =>
+      'School profile updated successfully';
+
+  @override
+  String get failedToUpdateSchoolProfile => 'Failed to update school profile';
+
+  @override
+  String get fullNameLabel => 'Full Name';
+
+  @override
+  String get emailAddressLabel => 'Email Address';
+
+  @override
+  String get phoneNumberLabel => 'Phone Number';
+
+  @override
+  String get schoolNameLabel => 'School Name';
+
+  @override
+  String get schoolEmailLabel => 'School Email';
+
+  @override
+  String get schoolPhoneLabel => 'School Phone';
+
+  @override
+  String get schoolAddressLabel => 'School Address';
+
+  @override
+  String get accountRoleLabel => 'Account Role';
+
+  @override
+  String get rollNumberLabel => 'Roll Number';
+
+  @override
+  String get designationLabel => 'Designation';
+
+  @override
+  String get organizationAdmins => 'Organization Admins';
+
+  @override
+  String get dangerZone => 'Danger Zone';
+
+  @override
+  String get notAvailable => 'N/A';
+
+  @override
+  String get accountActiveStatus => 'Account Active';
+
+  @override
+  String get accountInactiveStatus => 'Account Inactive';
+
+  @override
+  String get noAdminsFound => 'No admins found';
+
+  @override
+  String get activeStatus => 'Active';
+
+  @override
+  String get inactiveStatus => 'Inactive';
+
+  @override
+  String get changeToTeacherTooltip => 'Change to Teacher';
+
+  @override
+  String get changeRoleTitle => 'Change Role';
+
+  @override
+  String changeRoleConfirmationMessage(
+    String name,
+    String oldRole,
+    String newRole,
+  ) {
+    return 'Change $name\'s role from $oldRole to $newRole?\n\nThis will remove their admin privileges.';
+  }
+
+  @override
+  String nowATeacherMessage(String name) {
+    return '$name is now a Teacher';
+  }
+
+  @override
+  String get failedToChangeRole => 'Failed to change role';
+
+  @override
+  String get deleteAccount => 'Delete Account';
+
+  @override
+  String get deleteAccountDescription =>
+      'Permanently remove your account and all data.';
+
+  @override
+  String get deleteAccountWarning =>
+      'This action is permanent and cannot be undone. All your data will be deleted from our servers.';
+
+  @override
+  String get typeDeleteToConfirm => 'Type DELETE to confirm:';
+
+  @override
+  String get deleteUppercase => 'DELETE';
+
+  @override
+  String get failedToDeleteAccount => 'Failed to delete account';
 }

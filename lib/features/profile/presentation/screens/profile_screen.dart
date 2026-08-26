@@ -110,7 +110,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         } else if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(auth.error ?? 'Failed to update profile image'),
+              content: Text(auth.error ?? AppLocalizations.of(context)!.failedToUpdateProfileImage),
               backgroundColor: Colors.red,
             ),
           );
@@ -157,15 +157,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         if (success && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('School avatar updated successfully'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.schoolAvatarUpdatedSuccessfully),
               backgroundColor: Colors.green,
             ),
           );
         } else if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(auth.error ?? 'Failed to update school avatar'),
+              content: Text(auth.error ?? AppLocalizations.of(context)!.failedToUpdateSchoolAvatar),
               backgroundColor: Colors.red,
             ),
           );
@@ -192,7 +192,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(auth.error ?? 'Failed to update profile'),
+          content: Text(auth.error ?? AppLocalizations.of(context)!.failedToUpdateProfile),
           backgroundColor: Colors.red,
         ),
       );
@@ -210,15 +210,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (success && mounted) {
       setState(() => _isEditingSchool = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('School profile updated successfully'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.schoolProfileUpdatedSuccessfully),
           backgroundColor: Colors.green,
         ),
       );
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(auth.error ?? 'Failed to update school profile'),
+          content: Text(auth.error ?? AppLocalizations.of(context)!.failedToUpdateSchoolProfile),
           backgroundColor: Colors.red,
         ),
       );
@@ -276,7 +276,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               : Icons.edit_rounded,
                           size: 18,
                         ),
-                        label: Text(_isEditing ? 'Save' : 'Edit'),
+                        label: Text(_isEditing ? l10n.save : l10n.edit),
                         style: TextButton.styleFrom(
                           foregroundColor: _isEditing
                               ? Colors.green
@@ -289,7 +289,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _buildInfoTile(
                       context,
                       icon: Icons.person_outline_rounded,
-                      label: 'Full Name',
+                      label: l10n.fullNameLabel,
                       value: user.name,
                       isEditable: true,
                       controller: _nameController,
@@ -297,15 +297,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _buildInfoTile(
                       context,
                       icon: Icons.email_outlined,
-                      label: 'Email Address',
+                      label: l10n.emailAddressLabel,
                       value: user.email,
                       isCopyable: true,
                     ),
                     _buildInfoTile(
                       context,
                       icon: Icons.phone_android_rounded,
-                      label: 'Phone Number',
-                      value: user.phone ?? 'N/A',
+                      label: l10n.phoneNumberLabel,
+                      value: user.phone ?? l10n.notAvailable,
                       isEditable: true,
                       controller: _phoneController,
                     ),
@@ -331,7 +331,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 : Icons.edit_rounded,
                             size: 18,
                           ),
-                          label: Text(_isEditingSchool ? 'Save' : 'Edit'),
+                          label: Text(_isEditingSchool ? l10n.save : l10n.edit),
                           style: TextButton.styleFrom(
                             foregroundColor: _isEditingSchool
                                 ? Colors.green
@@ -344,8 +344,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _buildInfoTile(
                       context,
                       icon: Icons.school_outlined,
-                      label: 'School Name',
-                      value: user.school?.name ?? 'N/A',
+                      label: l10n.schoolNameLabel,
+                      value: user.school?.name ?? l10n.notAvailable,
                       isEditable: true,
                       useSchoolEditState: true,
                       controller: _schoolNameController,
@@ -357,22 +357,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _buildInfoTile(
                       context,
                       icon: Icons.school_outlined,
-                      label: 'School Email',
-                      value: user.school?.email ?? 'N/A',
+                      label: l10n.schoolEmailLabel,
+                      value: user.school?.email ?? l10n.notAvailable,
                       isCopyable: true,
                     ),
                     _buildInfoTile(
                       context,
                       icon: Icons.school_outlined,
-                      label: 'School Phone',
-                      value: user.school?.phone ?? 'N/A',
+                      label: l10n.schoolPhoneLabel,
+                      value: user.school?.phone ?? l10n.notAvailable,
                       isCopyable: true,
                     ),
                     _buildInfoTile(
                       context,
                       icon: Icons.school_outlined,
-                      label: 'School Address',
-                      value: user.school?.address ?? 'N/A',
+                      label: l10n.schoolAddressLabel,
+                      value: user.school?.address ?? l10n.notAvailable,
                       isEditable: true,
                       useSchoolEditState: true,
                       controller: _schoolAddressController,
@@ -380,14 +380,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _buildInfoTile(
                       context,
                       icon: Icons.admin_panel_settings_outlined,
-                      label: 'Account Role',
+                      label: l10n.accountRoleLabel,
                       value: user.role.name.toUpperCase(),
                     ),
                     if (user.rollNumber != null && user.rollNumber!.isNotEmpty)
                       _buildInfoTile(
                         context,
                         icon: Icons.format_list_numbered_rounded,
-                        label: 'Roll Number',
+                        label: l10n.rollNumberLabel,
                         value: user.rollNumber!,
                       ),
                     if (user.designation != null &&
@@ -395,7 +395,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildInfoTile(
                         context,
                         icon: Icons.badge_outlined,
-                        label: 'Designation',
+                        label: l10n.designationLabel,
                         value: user.designation!,
                       ),
                   ]),
@@ -416,7 +416,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // ]),
 
                   const SizedBox(height: 24),
-                  _buildSectionHeader('Organization Admins'),
+                  _buildSectionHeader(l10n.organizationAdmins),
                   _buildAdminsSection(context, authProvider),
 
                   const SizedBox(height: 24),
@@ -434,7 +434,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   if (user.role == UserRole.admin) ...
                   [
                     const SizedBox(height: 24),
-                    _buildSectionHeader('Danger Zone'),
+                    _buildSectionHeader(l10n.dangerZone),
                     _buildDangerCard(context),
                   ],
                   //
@@ -690,57 +690,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildInteractiveTile(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, size: 20),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 20,
-              color: Colors.grey[400],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildStatusSection(BuildContext context, User user) {
     final bool isActive = user.isActive ?? false;
@@ -766,7 +716,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(width: 12),
           Text(
-            isActive ? 'Account Active' : 'Account Inactive',
+            isActive ? l10n.accountActiveStatus : l10n.accountInactiveStatus,
             style: TextStyle(
               color: isActive ? Colors.green[700] : Colors.red[700],
               fontWeight: FontWeight.bold,
@@ -788,6 +738,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildAdminsSection(BuildContext context, AuthNotifier authProvider) {
+    final l10n = AppLocalizations.of(context)!;
     if (authProvider.isLoadingAdmins) {
       return const Card(
         child: Padding(
@@ -808,7 +759,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Icon(Icons.admin_panel_settings_outlined, color: Colors.grey[400], size: 20),
               const SizedBox(width: 12),
               Text(
-                'No admins found',
+                l10n.noAdminsFound,
                 style: TextStyle(color: Colors.grey[500], fontSize: 14),
               ),
             ],
@@ -831,6 +782,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildAdminTile(BuildContext context, User admin, bool canChangeRole) {
+    final l10n = AppLocalizations.of(context)!;
     final bool isActive = admin.isActive ?? false;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -887,7 +839,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              isActive ? 'Active' : 'Inactive',
+              isActive ? l10n.activeStatus : l10n.inactiveStatus,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -899,7 +851,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           if (canChangeRole) ...[
             const SizedBox(width: 4),
             Tooltip(
-              message: 'Change to Teacher',
+              message: l10n.changeToTeacherTooltip,
               child: IconButton(
                 icon: const Icon(Icons.swap_horiz_rounded, size: 20),
                 color: Colors.orange,
@@ -913,59 +865,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showChangeRoleDialog(BuildContext context, User admin) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
-          children: const [
-            Icon(Icons.swap_horiz_rounded, color: Colors.orange, size: 24),
-            SizedBox(width: 8),
+          children: [
+            const Icon(Icons.swap_horiz_rounded, color: Colors.orange, size: 24),
+            const SizedBox(width: 8),
             Text(
-              'Change Role',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              l10n.changeRoleTitle,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
         ),
-        content: RichText(
-          text: TextSpan(
-            style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.5),
-            children: [
-              const TextSpan(text: 'Change '),
-              TextSpan(
-                text: admin.name,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const TextSpan(
-                text: '\'s role from ',
-              ),
-              const TextSpan(
-                text: 'Admin',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple,
-                ),
-              ),
-              const TextSpan(text: ' to '),
-              const TextSpan(
-                text: 'Teacher',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange,
-                ),
-              ),
-              const TextSpan(text: '?\n\nThis will remove their admin privileges.'),
-            ],
-          ),
+        content: Text(
+          l10n.changeRoleConfirmationMessage(admin.name, 'Admin', 'Teacher'),
+          style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
+            child: Text(l10n.cancel, style: TextStyle(color: Colors.grey[600])),
           ),
           ElevatedButton.icon(
             icon: const Icon(Icons.check_rounded, size: 18),
-            label: const Text('Confirm'),
+            label: Text(l10n.confirm),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange,
               foregroundColor: Colors.white,
@@ -983,8 +909,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SnackBar(
                     content: Text(
                       success
-                          ? '${admin.name} is now a Teacher'
-                          : auth.error ?? 'Failed to change role',
+                          ? l10n.nowATeacherMessage(admin.name)
+                          : auth.error ?? l10n.failedToChangeRole,
                     ),
                     backgroundColor: success ? Colors.green : Colors.red,
                   ),
@@ -998,6 +924,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildDangerCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       color: Colors.red.shade50,
       shape: RoundedRectangleBorder(
@@ -1028,16 +955,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Delete Account',
-                      style: TextStyle(
+                    Text(
+                      l10n.deleteAccount,
+                      style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: Colors.red,
                       ),
                     ),
                     Text(
-                      'Permanently remove your account and all data.',
+                      l10n.deleteAccountDescription,
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.red.shade400,
@@ -1059,6 +986,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showDeleteAccountDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final confirmController = TextEditingController();
     bool confirmed = false;
 
@@ -1072,12 +1000,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
             title: Row(
-              children: const [
-                Icon(Icons.warning_amber_rounded, color: Colors.red, size: 26),
-                SizedBox(width: 8),
+              children: [
+                const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 26),
+                const SizedBox(width: 8),
                 Text(
-                  'Delete Account',
-                  style: TextStyle(
+                  l10n.deleteAccount,
+                  style: const TextStyle(
                     color: Colors.red,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1088,15 +1016,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'This action is permanent and cannot be undone. '
-                  'All your data will be deleted from our servers.',
-                  style: TextStyle(fontSize: 14),
+                Text(
+                  l10n.deleteAccountWarning,
+                  style: const TextStyle(fontSize: 14),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Type DELETE to confirm:',
-                  style: TextStyle(
+                Text(
+                  l10n.typeDeleteToConfirm,
+                  style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
@@ -1107,7 +1034,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onChanged: (v) =>
                       setModalState(() => confirmed = v.trim() == 'DELETE'),
                   decoration: InputDecoration(
-                    hintText: 'DELETE',
+                    hintText: l10n.deleteUppercase,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -1130,7 +1057,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
                 child: Text(
-                  'Cancel',
+                  l10n.cancel,
                   style: TextStyle(color: Colors.grey[600]),
                 ),
               ),
@@ -1144,7 +1071,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                auth.error ?? 'Failed to delete account',
+                                auth.error ?? l10n.failedToDeleteAccount,
                               ),
                               backgroundColor: Colors.red,
                             ),
@@ -1160,9 +1087,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text(
-                  'Delete Account',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                child: Text(
+                  l10n.deleteAccount,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -1172,68 +1099,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildLogoutButton(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () => _showLogoutDialog(context),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.red,
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFFFEE2E2), width: 1.5),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.logout_rounded, size: 20),
-            SizedBox(width: 8),
-            Text(
-              l10n.signOut,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  void _showLogoutDialog(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(l10n.signOut),
-        content: Text(l10n.signOutConfirmation),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              l10n.keepSignedIn,
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<AuthNotifier>().logout();
-            },
-            child: Text(
-              l10n.confirmSignOut,
-              style: const TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

@@ -4879,6 +4879,220 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No academic books have been uploaded yet.'**
   String get noAcademicBooksUploadedYet;
+
+  /// No description provided for @failedToUpdateProfileImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update profile image'**
+  String get failedToUpdateProfileImage;
+
+  /// No description provided for @schoolAvatarUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'School avatar updated successfully'**
+  String get schoolAvatarUpdatedSuccessfully;
+
+  /// No description provided for @failedToUpdateSchoolAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update school avatar'**
+  String get failedToUpdateSchoolAvatar;
+
+  /// No description provided for @failedToUpdateProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update profile'**
+  String get failedToUpdateProfile;
+
+  /// No description provided for @schoolProfileUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'School profile updated successfully'**
+  String get schoolProfileUpdatedSuccessfully;
+
+  /// No description provided for @failedToUpdateSchoolProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update school profile'**
+  String get failedToUpdateSchoolProfile;
+
+  /// No description provided for @fullNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get fullNameLabel;
+
+  /// No description provided for @emailAddressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Address'**
+  String get emailAddressLabel;
+
+  /// No description provided for @phoneNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number'**
+  String get phoneNumberLabel;
+
+  /// No description provided for @schoolNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'School Name'**
+  String get schoolNameLabel;
+
+  /// No description provided for @schoolEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'School Email'**
+  String get schoolEmailLabel;
+
+  /// No description provided for @schoolPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'School Phone'**
+  String get schoolPhoneLabel;
+
+  /// No description provided for @schoolAddressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'School Address'**
+  String get schoolAddressLabel;
+
+  /// No description provided for @accountRoleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Role'**
+  String get accountRoleLabel;
+
+  /// No description provided for @rollNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Roll Number'**
+  String get rollNumberLabel;
+
+  /// No description provided for @designationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Designation'**
+  String get designationLabel;
+
+  /// No description provided for @organizationAdmins.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization Admins'**
+  String get organizationAdmins;
+
+  /// No description provided for @dangerZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger Zone'**
+  String get dangerZone;
+
+  /// No description provided for @notAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'N/A'**
+  String get notAvailable;
+
+  /// No description provided for @accountActiveStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Active'**
+  String get accountActiveStatus;
+
+  /// No description provided for @accountInactiveStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Inactive'**
+  String get accountInactiveStatus;
+
+  /// No description provided for @noAdminsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No admins found'**
+  String get noAdminsFound;
+
+  /// No description provided for @activeStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get activeStatus;
+
+  /// No description provided for @inactiveStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get inactiveStatus;
+
+  /// No description provided for @changeToTeacherTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Change to Teacher'**
+  String get changeToTeacherTooltip;
+
+  /// No description provided for @changeRoleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Role'**
+  String get changeRoleTitle;
+
+  /// No description provided for @changeRoleConfirmationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Change {name}\'s role from {oldRole} to {newRole}?\n\nThis will remove their admin privileges.'**
+  String changeRoleConfirmationMessage(
+    String name,
+    String oldRole,
+    String newRole,
+  );
+
+  /// No description provided for @nowATeacherMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is now a Teacher'**
+  String nowATeacherMessage(String name);
+
+  /// No description provided for @failedToChangeRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to change role'**
+  String get failedToChangeRole;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently remove your account and all data.'**
+  String get deleteAccountDescription;
+
+  /// No description provided for @deleteAccountWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This action is permanent and cannot be undone. All your data will be deleted from our servers.'**
+  String get deleteAccountWarning;
+
+  /// No description provided for @typeDeleteToConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Type DELETE to confirm:'**
+  String get typeDeleteToConfirm;
+
+  /// No description provided for @deleteUppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'DELETE'**
+  String get deleteUppercase;
+
+  /// No description provided for @failedToDeleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete account'**
+  String get failedToDeleteAccount;
 }
 
 class _AppLocalizationsDelegate

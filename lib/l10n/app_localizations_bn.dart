@@ -2630,4 +2630,124 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get noAcademicBooksUploadedYet =>
       'এখনো কোনো পাঠ্যপুস্তক আপলোড করা হয়নি।';
+
+  @override
+  String get failedToUpdateProfileImage =>
+      'প্রোফাইল ছবি আপডেট করতে ব্যর্থ হয়েছে';
+
+  @override
+  String get schoolAvatarUpdatedSuccessfully =>
+      'স্কুলের অ্যাভাটার সফলভাবে আপডেট করা হয়েছে';
+
+  @override
+  String get failedToUpdateSchoolAvatar =>
+      'স্কুলের অ্যাভাটার আপডেট করতে ব্যর্থ হয়েছে';
+
+  @override
+  String get failedToUpdateProfile => 'প্রোফাইল আপডেট করতে ব্যর্থ হয়েছে';
+
+  @override
+  String get schoolProfileUpdatedSuccessfully =>
+      'স্কুল প্রোফাইল সফলভাবে আপডেট করা হয়েছে';
+
+  @override
+  String get failedToUpdateSchoolProfile =>
+      'স্কুল প্রোফাইল আপডেট করতে ব্যর্থ হয়েছে';
+
+  @override
+  String get fullNameLabel => 'সম্পূর্ণ নাম';
+
+  @override
+  String get emailAddressLabel => 'ইমেইল ঠিকানা';
+
+  @override
+  String get phoneNumberLabel => 'ফোন নম্বর';
+
+  @override
+  String get schoolNameLabel => 'স্কুলের নাম';
+
+  @override
+  String get schoolEmailLabel => 'স্কুলের ইমেইল';
+
+  @override
+  String get schoolPhoneLabel => 'স্কুলের ফোন নম্বর';
+
+  @override
+  String get schoolAddressLabel => 'স্কুলের ঠিকানা';
+
+  @override
+  String get accountRoleLabel => 'অ্যাকাউন্টের ভূমিকা';
+
+  @override
+  String get rollNumberLabel => 'রোল নম্বর';
+
+  @override
+  String get designationLabel => 'পদবি';
+
+  @override
+  String get organizationAdmins => 'প্রতিষ্ঠানের অ্যাডমিনবৃন্দ';
+
+  @override
+  String get dangerZone => 'বিপজ্জনক জোন';
+
+  @override
+  String get notAvailable => 'প্রযোজ্য নয়';
+
+  @override
+  String get accountActiveStatus => 'অ্যাকাউন্ট সক্রিয়';
+
+  @override
+  String get accountInactiveStatus => 'অ্যাকাউন্ট নিষ্ক্রিয়';
+
+  @override
+  String get noAdminsFound => 'কোনো অ্যাডমিন পাওয়া যায়নি';
+
+  @override
+  String get activeStatus => 'সক্রিয়';
+
+  @override
+  String get inactiveStatus => 'নিষ্ক্রিয়';
+
+  @override
+  String get changeToTeacherTooltip => 'শিক্ষক হিসেবে পরিবর্তন করুন';
+
+  @override
+  String get changeRoleTitle => 'ভূমিকা পরিবর্তন';
+
+  @override
+  String changeRoleConfirmationMessage(
+    String name,
+    String oldRole,
+    String newRole,
+  ) {
+    return '$name-এর ভূমিকা $oldRole থেকে $newRole-এ পরিবর্তন করবেন?\n\nএর ফলে তার অ্যাডমিন সুবিধা বাতিল হয়ে যাবে।';
+  }
+
+  @override
+  String nowATeacherMessage(String name) {
+    return '$name এখন একজন শিক্ষক';
+  }
+
+  @override
+  String get failedToChangeRole => 'ভূমিকা পরিবর্তন করতে ব্যর্থ হয়েছে';
+
+  @override
+  String get deleteAccount => 'অ্যাকাউন্ট মুছুন';
+
+  @override
+  String get deleteAccountDescription =>
+      'স্থায়ীভাবে আপনার অ্যাকাউন্ট এবং সমস্ত ডেটা মুছে ফেলুন।';
+
+  @override
+  String get deleteAccountWarning =>
+      'এই পদক্ষেপটি স্থায়ী এবং পূর্বাবস্থায় ফেরানো যাবে না। আপনার সমস্ত ডেটা আমাদের সার্ভার থেকে মুছে ফেলা হবে।';
+
+  @override
+  String get typeDeleteToConfirm => 'নিশ্চিত করতে DELETE টাইপ করুন:';
+
+  @override
+  String get deleteUppercase => 'DELETE';
+
+  @override
+  String get failedToDeleteAccount => 'অ্যাকাউন্ট মুছতে ব্যর্থ হয়েছে';
 }
