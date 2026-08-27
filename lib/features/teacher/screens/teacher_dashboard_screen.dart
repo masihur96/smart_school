@@ -1471,7 +1471,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
         margin: EdgeInsets.zero,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          width: screenSize(context, .52),
+          width: screenSize(context, .60),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
@@ -3167,7 +3167,7 @@ class _ClassCardListViewState extends State<_ClassCardListView> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 165,
+      height: 185,
       child: ListView.builder(
         controller: _scrollController,
         scrollDirection: Axis.horizontal,
