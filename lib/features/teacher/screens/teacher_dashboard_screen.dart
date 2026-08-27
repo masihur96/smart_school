@@ -84,7 +84,6 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
       });
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final user = context.read<AuthNotifier>().user;
       final now = DateTime.now();
       final dayName = DateFormat('EEEE').format(now);
 
@@ -108,21 +107,6 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
   void dispose() {
     _tabController.dispose();
     super.dispose();
-  }
-
-  String _getTitle(AppLocalizations l10n) {
-    switch (_selectedIndex) {
-      case 0:
-        return l10n.teacherDashboard;
-      case 1:
-        return l10n.attendance;
-      case 2:
-        return l10n.markEntry;
-      case 3:
-        return l10n.homework;
-      default:
-        return l10n.teacherDashboard;
-    }
   }
 
   @override

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:provider/provider.dart';
@@ -56,28 +57,40 @@ class AppDrawer extends StatelessWidget {
         backgroundColor: _getRoleColor(user.role),
         body: SafeArea(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               UserAccountsDrawerHeader(
                 accountName: Text(
-                  user.name,
+                  user.school?.name ?? "",
                   style: const TextStyle(color: Colors.white),
                 ),
                 accountEmail: Text(
-                  user.email,
+                  user.school?.address ?? "",
                   style: const TextStyle(color: Colors.white),
                 ),
+
                 currentAccountPicture: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: Text(
-                    user.name.isNotEmpty ? user.name[0] : '?',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: _getRoleColor(user.role),
-                    ),
-                  ),
+                  radius: 20,
+                  backgroundColor: Colors.purple,
+                  backgroundImage: user.school?.avatar.isNotEmpty == true
+                      ? CachedNetworkImageProvider(
+                          user.school?.avatar ?? "",
+                          cacheKey: user.school?.avatar.split('?').first,
+                        )
+                      : null,
+                  child: user.school?.avatar.isNotEmpty == true
+                      ? null
+                      : Text(
+                          user.school!.name.isNotEmpty
+                              ? user.school!.name[0].toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
+
                 decoration: const BoxDecoration(color: Colors.transparent),
               ),
               Expanded(
