@@ -402,18 +402,40 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
       onRefresh: () => provider.fetchTeacherDashboard(),
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 10),
-            if (data?.marqueeData != null)
-              MarqueeNotice(
-                customText: data!.marqueeData!.text,
-                color: AppColors.primaryTeacher,
-              ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 10, 0),
-              child: Column(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 10),
+              if (data?.marqueeData != null)
+                MarqueeNotice(
+                  customText: data!.marqueeData!.text,
+                  color: AppColors.primaryTeacher,
+                ),
+
+              if (classes.isNotEmpty) ...[
+                _buildSectionHeader(
+                  l10n.scheduleToday,
+                  onSeeAll: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const TeacherRoutineScreen(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                _ClassCardListView(
+                  classes: classes,
+                  buildCard: (ctx, entry) =>
+                      _buildClassCard(ctx, entry),
+                  isCurrentClass: _isCurrentClass,
+                ),
+                const SizedBox(height: 24),
+              ],
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildSectionHeader(
@@ -466,27 +488,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                     ),
                     const SizedBox(height: 24),
                   ],
-                  if (classes.isNotEmpty) ...[
-                    _buildSectionHeader(
-                      l10n.scheduleToday,
-                      onSeeAll: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const TeacherRoutineScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _ClassCardListView(
-                      classes: classes,
-                      buildCard: (ctx, entry) =>
-                          _buildClassCard(ctx, entry),
-                      isCurrentClass: _isCurrentClass,
-                    ),
-                    const SizedBox(height: 24),
-                  ],
+
                   if (data != null)
                     _buildExamsSection(context, l10n, data.recentExamList),
 
@@ -531,8 +533,8 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                   ],
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -775,37 +777,6 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                         ),
                       ),
                     ],
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () => _performSelfAttendance(
-                    context,
-                    context.read<AuthNotifier>().user,
-                    l10n,
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isClockedIn
-                        ? Colors.orange
-                        : (isClockedOut
-                              ? Colors.green.shade50
-                              : AppColors.primaryTeacher),
-                    foregroundColor: isClockedOut ? Colors.green : Colors.white,
-                    elevation: 0,
-                    shadowColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 15,
-                      vertical: 10,
-                    ),
-                  ),
-                  child: Icon(
-                    isClockedIn
-                        ? Icons.logout_outlined
-                        : (isClockedOut
-                              ? Icons.update_outlined
-                              : Icons.login_outlined),
                   ),
                 ),
               ],
