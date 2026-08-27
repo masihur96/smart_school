@@ -356,7 +356,8 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Segmented Category Selection Header ────────────────────────
-              _buildMeetingTypeSelector(primaryThemeColor, isDark),
+              if (widget.isAdminOrTeacher)
+                _buildMeetingTypeSelector(primaryThemeColor, isDark),
               const SizedBox(height: 20),
 
               // ── General Details Card ──────────────────────────────────────
