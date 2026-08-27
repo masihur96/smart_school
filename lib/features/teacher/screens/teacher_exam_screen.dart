@@ -142,7 +142,9 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
                         child: Text(
                           exam.isPublished ? 'Published' : 'Draft',
                           style:  TextStyle(
-                            color: Colors.black,
+                            color: exam.isPublished
+                                ? Colors.green
+                                : Colors.grey,
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                           ),
