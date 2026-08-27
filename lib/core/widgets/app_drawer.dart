@@ -92,6 +92,7 @@ class AppDrawer extends StatelessWidget {
                 ),
 
                 decoration: const BoxDecoration(color: Colors.transparent),
+                onDetailsPressed: () {},
               ),
               Expanded(
                 child: ListView(
