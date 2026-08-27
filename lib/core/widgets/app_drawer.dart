@@ -1,10 +1,8 @@
-import 'package:smart_school/core/widgets/zoomable_avatar.dart';
-
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
 import 'package:smart_school/features/academic_books/screens/academic_books_dashboard_screen.dart';
 import 'package:smart_school/features/admin/screens/add_edit_marquee_screen.dart';
 import 'package:smart_school/features/admin/screens/bulk_sms_screen.dart';
@@ -76,7 +74,8 @@ class AppDrawer extends StatelessWidget {
                       ? user.school!.avatar
                       : null,
                   name: user.school?.name,
-                  heroTag: 'school-avatar-${user.school?.id ?? user.school?.name ?? 'school'}',
+                  heroTag:
+                      'school-avatar-${user.school?.id ?? user.school?.name ?? 'school'}',
                   radius: 20,
                   backgroundColor: Colors.purple,
                 ),
@@ -292,7 +291,10 @@ class AppDrawer extends StatelessWidget {
       _buildDrawerItem(Icons.video_call, l10n.onlineClasses, () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const OnlineClassListScreen()),
+          MaterialPageRoute(
+            builder: (_) =>
+                const OnlineClassListScreen(isAdminOrTeacher: false),
+          ),
         );
       }, context),
       _buildDrawerItem(Icons.local_library, l10n.library, () {

@@ -337,13 +337,14 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
               : 'Schedule Teacher Meeting');
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121212) : Colors.grey.shade50,
       appBar: AppBar(
         title: Text(
           titleText,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        backgroundColor: primaryThemeColor,
+        backgroundColor: widget.isAdminOrTeacher
+            ? AppColors.primaryAdmin
+            : AppColors.primaryTeacher,
         foregroundColor: Colors.white,
         elevation: 0,
       ),

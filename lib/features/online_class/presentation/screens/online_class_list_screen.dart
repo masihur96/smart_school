@@ -345,32 +345,30 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
             );
           },
         ),
-        floatingActionButton: canManageClass
-            ? FloatingActionButton.extended(
-                onPressed: () async {
-                  final result = await Navigator.push<bool>(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddEditOnlineClassScreen(
-                        isAdminOrTeacher: canManageClass,
-                      ),
-                    ),
-                  );
-                  if (result == true && context.mounted) {
-                    context.read<OnlineClassProvider>().fetchOnlineClasses();
-                  }
-                },
-                backgroundColor: themeColor,
-                icon: const Icon(Icons.add, color: Colors.white),
-                label: Text(
-                  l10n.newClass,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () async {
+            final result = await Navigator.push<bool>(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddEditOnlineClassScreen(
+                  isAdminOrTeacher: widget.isAdminOrTeacher,
                 ),
-              )
-            : null,
+              ),
+            );
+            if (result == true && context.mounted) {
+              context.read<OnlineClassProvider>().fetchOnlineClasses();
+            }
+          },
+          backgroundColor: themeColor,
+          icon: const Icon(Icons.add, color: Colors.white),
+          label: Text(
+            l10n.newClass,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ),
     );
   }
