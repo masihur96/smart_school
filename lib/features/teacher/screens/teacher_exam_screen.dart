@@ -6,9 +6,11 @@ import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 
 import '../providers/teacher_dashboard_provider.dart';
+import 'mark_entry_screen.dart';
 
 class TeacherExamScreen extends StatefulWidget {
-  const TeacherExamScreen({super.key});
+  final bool hideAppBar;
+  const TeacherExamScreen({super.key, this.hideAppBar = false});
 
   @override
   State<TeacherExamScreen> createState() => _TeacherExamScreenState();
@@ -38,7 +40,7 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
     final exams = provider.exams;
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: widget.hideAppBar ? null : AppBar(
         title: Text(l10n?.exams ?? ""),
         backgroundColor: AppColors.primaryTeacher,
         foregroundColor: Colors.white,
@@ -98,7 +100,18 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
       margin: const EdgeInsets.only(bottom: 16),
 
       child: InkWell(
-        onTap: () => _showExamRoutines(context, exam),
+        onTap: () {
+          if (exam.isPublished) {
+            _showExamDetails(context, exam);
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MarkEntryScreen(initialExamId: exam.id),
+              ),
+            );
+          }
+        },
         borderRadius: BorderRadius.circular(24),
         child: Stack(
           children: [
@@ -221,7 +234,7 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
     );
   }
 
-  void _showExamRoutines(BuildContext context, Exam exam) {
+  void _showExamDetails(BuildContext context, Exam exam) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -247,7 +260,7 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
                 ),
               ),
               Expanded(
-                child: TeacherExamRoutineView(
+                child: TeacherExamDetailsSheet(
                   exam: exam,
                   scrollController: scrollController,
                 ),
@@ -500,6 +513,276 @@ class TeacherExamRoutineView extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class TeacherExamDetailsSheet extends StatefulWidget {
+  final Exam exam;
+  final ScrollController scrollController;
+
+  const TeacherExamDetailsSheet({
+    super.key,
+    required this.exam,
+    required this.scrollController,
+  });
+
+  @override
+  State<TeacherExamDetailsSheet> createState() => _TeacherExamDetailsSheetState();
+}
+
+class _TeacherExamDetailsSheetState extends State<TeacherExamDetailsSheet> {
+  int _selectedIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedIndex = 0),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: _selectedIndex == 0
+                            ? AppColors.primaryTeacher
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: _selectedIndex == 0
+                            ? [
+                                BoxShadow(
+                                  color: AppColors.primaryTeacher.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                )
+                              ]
+                            : null,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Routines & Syllabus',
+                        style: TextStyle(
+                          color: _selectedIndex == 0
+                              ? Colors.white
+                              : Colors.grey.shade600,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedIndex = 1),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: _selectedIndex == 1
+                            ? AppColors.primaryTeacher
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: _selectedIndex == 1
+                            ? [
+                                BoxShadow(
+                                  color: AppColors.primaryTeacher.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                )
+                              ]
+                            : null,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Results',
+                        style: TextStyle(
+                          color: _selectedIndex == 1
+                              ? Colors.white
+                              : Colors.grey.shade600,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: _selectedIndex == 0
+              ? TeacherExamRoutineView(
+                  exam: widget.exam,
+                  scrollController: widget.scrollController,
+                )
+              : TeacherExamResultsView(
+                  exam: widget.exam,
+                  scrollController: widget.scrollController,
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+class TeacherExamResultsView extends StatelessWidget {
+  final Exam exam;
+  final ScrollController scrollController;
+
+  const TeacherExamResultsView({
+    super.key,
+    required this.exam,
+    required this.scrollController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (exam.results.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.bar_chart_rounded, size: 64, color: Colors.grey[300]),
+            const SizedBox(height: 16),
+            Text(
+              'No results published yet.',
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Group results by Subject for a structured view
+    final grouped = <String, List<Result>>{};
+    for (var r in exam.results) {
+      final subjectName = r.subject?.name ?? r.subjectId ?? 'Unknown Subject';
+      grouped.putIfAbsent(subjectName, () => []).add(r);
+    }
+    final subjectNames = grouped.keys.toList()..sort();
+
+    return ListView.builder(
+      controller: scrollController,
+      padding: const EdgeInsets.all(20),
+      itemCount: subjectNames.length,
+      itemBuilder: (context, index) {
+        final subjectName = subjectNames[index];
+        final subjectResults = grouped[subjectName]!;
+        
+        return Card(
+          margin: const EdgeInsets.only(bottom: 20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          elevation: 0,
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Icon(Icons.book_outlined, color: Colors.blue.shade700),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        subjectName,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${subjectResults.length} Marks',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: subjectResults.length,
+                  separatorBuilder: (context, index) => const Divider(height: 24),
+                  itemBuilder: (context, idx) {
+                    final res = subjectResults[idx];
+                    final isPass = res.totalMarks > 0 && (res.marksObtained / res.totalMarks) >= 0.4;
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                res.studentId, // We might not have the student name easily available
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              if (res.remarks.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  res.remarks,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: isPass ? Colors.green.shade50 : Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '${res.marksObtained.toStringAsFixed(1)} / ${res.totalMarks.toStringAsFixed(1)}',
+                            style: TextStyle(
+                              color: isPass ? Colors.green.shade700 : Colors.red.shade700,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

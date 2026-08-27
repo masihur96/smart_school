@@ -12,7 +12,8 @@ import '../../../services/notification_service.dart';
 
 class MarkEntryScreen extends StatefulWidget {
   final bool hideAppBar;
-  const MarkEntryScreen({super.key, this.hideAppBar = false});
+  final String? initialExamId;
+  const MarkEntryScreen({super.key, this.hideAppBar = false, this.initialExamId});
 
   @override
   State<MarkEntryScreen> createState() => _MarkEntryScreenState();
@@ -36,7 +37,27 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final resultsNotifier = context.read<ResultsNotifier>();
       if (resultsNotifier.exams.isEmpty) {
-        resultsNotifier.loadExams();
+        resultsNotifier.loadExams().then((_) {
+          if (mounted && widget.initialExamId != null) {
+            final exam = resultsNotifier.exams.firstWhere(
+              (e) => e.id == widget.initialExamId,
+              orElse: () => resultsNotifier.exams.first,
+            );
+            if (exam.id == widget.initialExamId) {
+              setState(() => _showFilters = true);
+              _onExamChanged(exam);
+            }
+          }
+        });
+      } else if (widget.initialExamId != null) {
+        final exam = resultsNotifier.exams.firstWhere(
+          (e) => e.id == widget.initialExamId,
+          orElse: () => resultsNotifier.exams.first,
+        );
+        if (exam.id == widget.initialExamId) {
+          setState(() => _showFilters = true);
+          _onExamChanged(exam);
+        }
       }
       final sectionNotifier = context.read<SectionSetupNotifier>();
       if (sectionNotifier.sections.isEmpty) {

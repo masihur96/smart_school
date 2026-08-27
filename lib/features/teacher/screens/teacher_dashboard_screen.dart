@@ -253,7 +253,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                   : const SizedBox(),
               const SizedBox.shrink(), // Dummy for FAB gap
               _visitedTabs[3]
-                  ? const MarkEntryScreen(hideAppBar: true)
+                  ? const TeacherExamScreen(hideAppBar: true)
                   : const SizedBox(),
               _visitedTabs[4]
                   ? const HomeworkManagementScreen(hideAppBar: true)
@@ -291,8 +291,8 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                   ),
                   const Tab(child: SizedBox(width: 48)), // Gap for FAB
                   Tab(
-                    icon: const Icon(Icons.assignment_turned_in_outlined),
-                    text: l10n.marks,
+                    icon: const Icon(Icons.quiz_outlined),
+                    text: l10n.exams,
                   ),
                   Tab(
                     icon: const Icon(Icons.assignment_outlined),
