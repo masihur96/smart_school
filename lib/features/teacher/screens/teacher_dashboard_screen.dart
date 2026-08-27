@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
@@ -31,7 +32,6 @@ import 'mark_entry_screen.dart';
 import 'teacher_attendance_screen.dart';
 import 'teacher_exam_screen.dart';
 import 'teacher_routine_screen.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class TeacherDashboardScreen extends StatelessWidget {
   const TeacherDashboardScreen({super.key});
@@ -167,23 +167,61 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
             icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () => ZoomDrawer.of(context)?.toggle(),
           ),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                _getTitle(l10n),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontSize: 18,
+
+          title: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
+            },
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.purple,
+                  backgroundImage: user?.avatar?.isNotEmpty == true
+                      ? CachedNetworkImageProvider(
+                          user?.avatar ?? "",
+                          cacheKey: user?.avatar!.split('?').first,
+                        )
+                      : null,
+                  child: user?.avatar?.isNotEmpty == true
+                      ? null
+                      : Text(
+                          user?.name.isNotEmpty == true
+                              ? user!.name[0].toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
-              ),
-              Text(
-                user?.school?.name ?? 'School Name',
-                style: const TextStyle(fontSize: 12, color: Colors.white70),
-              ),
-            ],
+                const SizedBox(width: 15),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      user?.name ?? "",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                    Text(
+                      user?.designation ?? 'School Name',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           centerTitle: false,
           elevation: 0,
@@ -192,16 +230,18 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
           iconTheme: const IconThemeData(color: Colors.white70),
           actions: [
             NotificationIconButton(color: AppColors.primaryTeacher),
-            IconButton(
-              icon: const Icon(Icons.account_circle_outlined),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                );
+            GestureDetector(
+              onTap: () {
+                _showAIDoctorDialog(context);
+                // Navigate to profile screen
               },
+              child: Lottie.asset(
+                'assets/animation1.json',
+                width: 60,
+                fit: BoxFit.fill,
+                repeat: true,
+              ),
             ),
-            const SizedBox(width: 8),
           ],
         ),
         body: BottomBar(
@@ -324,15 +364,14 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildModernHeader(context, name, classes.length, user, l10n),
-
+            SizedBox(height: 10),
             if (data?.marqueeData != null)
               MarqueeNotice(
                 customText: data!.marqueeData!.text,
                 color: AppColors.primaryTeacher,
               ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              padding: const EdgeInsets.fromLTRB(20, 0, 10, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -488,105 +527,6 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
             ),
           ),
       ],
-    );
-  }
-
-  Widget _buildModernHeader(
-    BuildContext context,
-    String name,
-    int count,
-    User user,
-    AppLocalizations l10n,
-  ) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.primaryTeacher,
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.green.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.fromLTRB(25, 20, 25, 30),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundColor: Colors.purple,
-                backgroundImage: user.avatar?.isNotEmpty == true
-                    ? CachedNetworkImageProvider(
-                        user.avatar!,
-                        cacheKey: user.avatar!.split('?').first,
-                      )
-                    : null,
-                child: user.avatar?.isNotEmpty == true
-                    ? null
-                    : Text(
-                        user.name.isNotEmpty == true
-                            ? user.name[0].toUpperCase()
-                            : '?',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-              ),
-              const SizedBox(width: 15),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Welcome back,',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
-                        fontSize: 14,
-                      ),
-                    ),
-                    Text(
-                      name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    Text(
-                      user.designation ?? 'General Teacher',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  _showAIDoctorDialog(context);
-                  // Navigate to profile screen
-                },
-                child: Lottie.asset(
-                  'assets/animation1.json',
-                  width: 80,
-                  fit: BoxFit.fill,
-                  repeat: true,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/academic_books/screens/academic_books_dashboard_screen.dart';
 import 'package:smart_school/features/admin/screens/add_edit_marquee_screen.dart';
-import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
 import 'package:smart_school/features/admin/screens/bulk_sms_screen.dart';
 import 'package:smart_school/features/admin/screens/exam_management_screen.dart';
 import 'package:smart_school/features/admin/screens/notice_management_screen.dart';
@@ -17,9 +16,9 @@ import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
 import 'package:smart_school/features/expense_tracking/screens/expense_dashboard_screen.dart';
 import 'package:smart_school/features/library/screens/library_dashboard_screen.dart';
 import 'package:smart_school/features/online_class/presentation/screens/online_class_list_screen.dart';
+import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
 import 'package:smart_school/features/setting_management_screen.dart';
 import 'package:smart_school/features/student/screens/student_attendance_screen.dart';
-import 'package:smart_school/features/student/screens/student_dashboard_screen.dart';
 import 'package:smart_school/features/student/screens/student_homework_screen.dart';
 import 'package:smart_school/features/student/screens/student_notice_screen.dart';
 import 'package:smart_school/features/student/screens/student_result_screen.dart';
@@ -27,7 +26,6 @@ import 'package:smart_school/features/student/screens/student_routine_screen.dar
 import 'package:smart_school/features/teacher/screens/homework_management_screen.dart';
 import 'package:smart_school/features/teacher/screens/mark_entry_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_attendance_screen.dart';
-import 'package:smart_school/features/teacher/screens/teacher_dashboard_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_exam_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_routine_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
@@ -61,8 +59,14 @@ class AppDrawer extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               UserAccountsDrawerHeader(
-                accountName: Text(user.name, style: const TextStyle(color: Colors.white)),
-                accountEmail: Text(user.email, style: const TextStyle(color: Colors.white)),
+                accountName: Text(
+                  user.name,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                accountEmail: Text(
+                  user.email,
+                  style: const TextStyle(color: Colors.white),
+                ),
                 currentAccountPicture: CircleAvatar(
                   backgroundColor: Colors.white,
                   child: Text(
@@ -80,7 +84,8 @@ class AppDrawer extends StatelessWidget {
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: [
-                    if (user.role == UserRole.admin) ..._buildAdminItems(context),
+                    if (user.role == UserRole.admin)
+                      ..._buildAdminItems(context),
                     if (user.role == UserRole.teacher)
                       ..._buildTeacherItems(context),
                     if (user.role == UserRole.student)
@@ -95,7 +100,10 @@ class AppDrawer extends StatelessWidget {
                 leading: const Icon(Icons.logout, color: Colors.redAccent),
                 title: Text(
                   AppLocalizations.of(context)?.logout ?? 'Logout',
-                  style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 onTap: () {
                   context.read<AuthNotifier>().logout();
@@ -293,6 +301,14 @@ class AppDrawer extends StatelessWidget {
           ),
         );
       }, context),
+
+      _buildDrawerItem(Icons.account_circle_outlined, l10n.viewProfile, () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        );
+      }, context),
+
       _buildDrawerItem(Icons.settings, l10n.settings, () {
         Navigator.push(
           context,
