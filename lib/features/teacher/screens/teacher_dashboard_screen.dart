@@ -1469,245 +1469,247 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
           ),
         );
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        width: screenSize(context, .52),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isActive ? accentColor.withValues(alpha: 0.6) : Colors.transparent,
-            width: 1.8,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: accentColor.withValues(alpha: isActive ? 0.18 : 0.06),
-              blurRadius: isActive ? 16 : 8,
-              offset: const Offset(0, 4),
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          width: screenSize(context, .52),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isActive ? accentColor.withValues(alpha: 0.6) : Colors.transparent,
+              width: 1.8,
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Top accent strip ───────────────────────────────────────────
-            Container(
-              height: 5,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [accentColor, accentMid],
-                ),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(19),
+            boxShadow: [
+              BoxShadow(
+                color: accentColor.withValues(alpha: isActive ? 0.18 : 0.06),
+                blurRadius: isActive ? 16 : 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Top accent strip ───────────────────────────────────────────
+              Container(
+                height: 5,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [accentColor, accentMid],
+                  ),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(19),
+                  ),
                 ),
               ),
-            ),
 
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ── Header row: time badge + live badge ────────────────
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Time chip
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 9,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: accentLight,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-
-                            children: [
-                              Text(
-                                startAmPm,
-                                style: TextStyle(
-                                  color: accentColor,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 11,
-                                  letterSpacing: 0.2,
-                                ),
-                              ),
-                              SizedBox(width: 10,),
-                              Text(
-                                endAmPm,
-                                style: TextStyle(
-                                  color: accentColor.withValues(alpha: 0.7),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 10,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const Spacer(),
-
-                        // "NOW" badge if currently active
-                        if (isActive)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ── Header row: time badge + live badge ────────────────
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Time chip
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
+                              horizontal: 9,
+                              vertical: 5,
                             ),
                             decoration: BoxDecoration(
-                              color: accentColor,
+
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+        
                               children: [
-                                Container(
-                                  width: 5,
-                                  height: 5,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
+                                Text(
+                                  startAmPm,
+                                  style: TextStyle(
+
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 11,
+                                    letterSpacing: 0.2,
                                   ),
                                 ),
-                                const SizedBox(width: 4),
-                                const Text(
-                                  'NOW',
+                                SizedBox(width: 10,),
+                                Text(
+                                  endAmPm,
                                   style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 0.8,
+
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 10,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    // ── Subject name ───────────────────────────────────────
-                    Text(
-                      subjectName,
-                      style: TextStyle(
-                        color: accentColor,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    const SizedBox(height: 3),
-
-                    // ── Class / Section ────────────────────────────────────
-                    Text(
-                      className,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                        letterSpacing: -0.3,
-                        color: Theme.of(context).textTheme.titleLarge?.color,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    const Spacer(),
-
-                    // ── Room number (if available) ─────────────────────────
-                    if (classInfo.roomNumber != null &&
-                        classInfo.roomNumber!.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.door_front_door_outlined,
-                              size: 12,
-                              color: Colors.grey.shade500,
+        
+                          const Spacer(),
+        
+                          // "NOW" badge if currently active
+                          if (isActive)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: accentColor,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 5,
+                                    height: 5,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Text(
+                                    'NOW',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.8,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Room ${classInfo.roomNumber}',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey.shade600,
-                                fontWeight: FontWeight.w500,
+                        ],
+                      ),
+        
+                      const SizedBox(height: 12),
+        
+                      // ── Subject name ───────────────────────────────────────
+                      Text(
+                        subjectName,
+                        style: TextStyle(
+
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+        
+                      const SizedBox(height: 3),
+        
+                      // ── Class / Section ────────────────────────────────────
+                      Text(
+                        className,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                          letterSpacing: -0.3,
+                          color: Theme.of(context).textTheme.titleLarge?.color,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+        
+                      const Spacer(),
+        
+                      // ── Room number (if available) ─────────────────────────
+                      if (classInfo.roomNumber != null &&
+                          classInfo.roomNumber!.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.door_front_door_outlined,
+                                size: 12,
+                                color: Colors.grey.shade500,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Room ${classInfo.roomNumber}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+        
+                      // ── Teacher row ────────────────────────────────────────
+                      if (classInfo.teacherEntity != null)
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 9,
+                              backgroundColor: accentLight,
+                              child: Icon(
+                                Icons.person,
+                                size: 11,
+
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                classInfo.teacherEntity!.name,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
-                      ),
-
-                    // ── Teacher row ────────────────────────────────────────
-                    if (classInfo.teacherEntity != null)
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 9,
-                            backgroundColor: accentLight,
-                            child: Icon(
-                              Icons.person,
-                              size: 11,
-                              color: accentColor,
+        
+                      // ── Progress bar (only when class is active) ───────────
+                      if (isActive) ...[
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: LinearProgressIndicator(
+                                  value: progress,
+                                  minHeight: 5,
+                                  backgroundColor: accentLight,
+                                  valueColor:
+                                      AlwaysStoppedAnimation<Color>(accentColor),
+                                ),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              classInfo.teacherEntity!.name,
+                            const SizedBox(width: 6),
+                            Text(
+                              '${(progress * 100).toStringAsFixed(0)}%',
                               style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey.shade600,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                    // ── Progress bar (only when class is active) ───────────
-                    if (isActive) ...[
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: LinearProgressIndicator(
-                                value: progress,
-                                minHeight: 5,
-                                backgroundColor: accentLight,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(accentColor),
+                                fontSize: 9,
+                                color: accentColor,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '${(progress * 100).toStringAsFixed(0)}%',
-                            style: TextStyle(
-                              fontSize: 9,
-                              color: accentColor,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
