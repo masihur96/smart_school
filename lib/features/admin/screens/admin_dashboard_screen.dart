@@ -1,3 +1,5 @@
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -1928,30 +1930,15 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                 // Avatar + Name
                 Row(
                   children: [
-                    CircleAvatar(
+                    ZoomableAvatar(
+                      imageUrl: perf.avatar?.isNotEmpty == true ? perf.avatar : null,
+                      name: perf.name,
+                      heroTag: 'teacher-leaderboard-avatar-${perf.name}',
                       radius: 16,
                       backgroundColor: AppColors.primaryAdmin.withValues(
                         alpha: 0.1,
                       ),
-                      backgroundImage:
-                          perf.avatar != null && perf.avatar!.isNotEmpty
-                          ? CachedNetworkImageProvider(
-                              perf.avatar!,
-                              cacheKey: perf.avatar!.split('?').first,
-                            )
-                          : null,
-                      child: perf.avatar != null && perf.avatar!.isNotEmpty
-                          ? null
-                          : Text(
-                              perf.name.isNotEmpty
-                                  ? perf.name[0].toUpperCase()
-                                  : '?',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primaryAdmin,
-                              ),
-                            ),
+                      textColor: AppColors.primaryAdmin,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -2236,30 +2223,15 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                 // Avatar + Student Name & Subtitle
                 Row(
                   children: [
-                    CircleAvatar(
+                    ZoomableAvatar(
+                      imageUrl: perf.avatar?.isNotEmpty == true ? perf.avatar : null,
+                      name: perf.name,
+                      heroTag: 'student-leaderboard-avatar-${perf.name}',
                       radius: 16,
                       backgroundColor: AppColors.primaryAdmin.withValues(
                         alpha: 0.1,
                       ),
-                      backgroundImage:
-                          perf.avatar != null && perf.avatar!.isNotEmpty
-                          ? CachedNetworkImageProvider(
-                              perf.avatar!,
-                              cacheKey: perf.avatar!.split('?').first,
-                            )
-                          : null,
-                      child: perf.avatar != null && perf.avatar!.isNotEmpty
-                          ? null
-                          : Text(
-                              perf.name.isNotEmpty
-                                  ? perf.name[0].toUpperCase()
-                                  : '?',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primaryAdmin,
-                              ),
-                            ),
+                      textColor: AppColors.primaryAdmin,
                     ),
                     const SizedBox(width: 8),
                     Expanded(

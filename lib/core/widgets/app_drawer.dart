@@ -1,3 +1,5 @@
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
@@ -69,26 +71,14 @@ class AppDrawer extends StatelessWidget {
                   style: const TextStyle(color: Colors.white),
                 ),
 
-                currentAccountPicture: CircleAvatar(
+                currentAccountPicture: ZoomableAvatar(
+                  imageUrl: user.school?.avatar.isNotEmpty == true
+                      ? user.school!.avatar
+                      : null,
+                  name: user.school?.name,
+                  heroTag: 'school-avatar-${user.school?.id ?? user.school?.name ?? 'school'}',
                   radius: 20,
                   backgroundColor: Colors.purple,
-                  backgroundImage: user.school?.avatar.isNotEmpty == true
-                      ? CachedNetworkImageProvider(
-                          user.school?.avatar ?? "",
-                          cacheKey: user.school?.avatar.split('?').first,
-                        )
-                      : null,
-                  child: user.school?.avatar.isNotEmpty == true
-                      ? null
-                      : Text(
-                          user.school!.name.isNotEmpty
-                              ? user.school!.name[0].toUpperCase()
-                              : '?',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                 ),
 
                 decoration: const BoxDecoration(color: Colors.transparent),

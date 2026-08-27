@@ -1,3 +1,5 @@
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -1177,25 +1179,13 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
               ),
 
               // Avatar
-              CircleAvatar(
+              ZoomableAvatar(
+                imageUrl: avatarUrl?.isNotEmpty == true ? avatarUrl : null,
+                name: name,
+                heroTag: 'bulk-sms-student-${student.userId}',
                 radius: 20,
                 backgroundColor: AppColors.primaryAdmin.withValues(alpha: 0.1),
-                backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
-                    ? CachedNetworkImageProvider(
-                        avatarUrl,
-                        cacheKey: avatarUrl.split('?').first,
-                      )
-                    : null,
-                child: (avatarUrl == null || avatarUrl.isEmpty)
-                    ? Text(
-                        name.isNotEmpty ? name[0].toUpperCase() : '?',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryAdmin,
-                          fontSize: 14,
-                        ),
-                      )
-                    : null,
+                textColor: AppColors.primaryAdmin,
               ),
               const SizedBox(width: 12),
 

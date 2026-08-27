@@ -1,3 +1,5 @@
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -17,7 +19,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/services/geocoding_service.dart';
 import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 
 class TeacherManagementScreen extends StatefulWidget {
   const TeacherManagementScreen({super.key});
@@ -394,44 +396,15 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  GestureDetector(
-                    onTap: () => _showAvatarZoom(context, teacher),
-                    child: Hero(
-                      tag: 'teacher-avatar-${teacher.userId}',
-                      child: CircleAvatar(
-                        radius: 24,
-                        backgroundColor: AppColors.primaryAdmin.withValues(
-                          alpha: 0.12,
-                        ),
-                        backgroundImage:
-                            (user?.avatar?.startsWith('http://') == true ||
-                                user?.avatar?.startsWith('https://') == true)
-                            ? CachedNetworkImageProvider(
-                                user!.avatar!,
-                                cacheKey: user!.avatar!.split('?').first,
-                              )
-                            : null,
-                        onBackgroundImageError:
-                            (user?.avatar?.startsWith('http://') == true ||
-                                user?.avatar?.startsWith('https://') == true)
-                            ? (_, __) {}
-                            : null,
-                        child:
-                            (user?.avatar?.startsWith('http://') == true ||
-                                user?.avatar?.startsWith('https://') == true)
-                            ? null
-                            : Text(
-                                teacherName.isNotEmpty
-                                    ? teacherName[0].toUpperCase()
-                                    : '?',
-                                style: const TextStyle(
-                                  color: AppColors.primaryAdmin,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                              ),
-                      ),
+                  ZoomableAvatar(
+                    imageUrl: user?.avatar,
+                    name: teacherName,
+                    heroTag: 'teacher-avatar-${teacher.userId}',
+                    radius: 24,
+                    backgroundColor: AppColors.primaryAdmin.withValues(
+                      alpha: 0.12,
                     ),
+                    textColor: AppColors.primaryAdmin,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -916,92 +889,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
     );
   }
 
-  void _showAvatarZoom(BuildContext context, Teacher teacher) {
-    final user = teacher.user;
-    final hasImage =
-        user?.avatar?.startsWith('http://') == true ||
-        user?.avatar?.startsWith('https://') == true;
-    final teacherName =
-        user?.name.isNotEmpty == true ? user!.name : 'No Name';
 
-    final TransformationController transformationController =
-        TransformationController();
-    TapDownDetails? doubleTapDetails;
-
-    showDialog(
-      context: context,
-      barrierColor: Colors.black87,
-      builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: EdgeInsets.zero,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            GestureDetector(
-              onDoubleTapDown: (details) => doubleTapDetails = details,
-              onDoubleTap: () {
-                if (transformationController.value != Matrix4.identity()) {
-                  transformationController.value = Matrix4.identity();
-                } else {
-                  final position = doubleTapDetails!.localPosition;
-                  transformationController.value = Matrix4.identity()
-                    ..translate(-position.dx * 2, -position.dy * 2)
-                    ..scale(3.0);
-                }
-              },
-              child: InteractiveViewer(
-                transformationController: transformationController,
-                panEnabled: true,
-                minScale: 1.0,
-                maxScale: 5.0,
-                child: hasImage
-                    ? CachedNetworkImage(
-                        imageUrl: user!.avatar!,
-                        cacheKey: user.avatar!.split('?').first,
-                        fit: BoxFit.contain,
-                        placeholder: (_, __) => const Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                          ),
-                        ),
-                        errorWidget: (_, __, ___) =>
-                            _buildAvatarFallback(teacherName),
-                      )
-                    : _buildAvatarFallback(teacherName),
-              ),
-            ),
-            Positioned(
-              top: 40,
-              right: 16,
-              child: IconButton(
-                onPressed: () => Navigator.pop(ctx),
-                icon: const Icon(Icons.close, color: Colors.white, size: 30),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.black45,
-                  shape: const CircleBorder(),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAvatarFallback(String name) {
-    return CircleAvatar(
-      radius: 100,
-      backgroundColor: AppColors.primaryAdmin,
-      child: Text(
-        name.isNotEmpty ? name[0].toUpperCase() : '?',
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 80,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
 
   void _showTeacherDetails(BuildContext context, Teacher teacher) {
     final user = teacher.user;
@@ -1041,37 +929,13 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
             children: [
               Row(
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      _showAvatarZoom(context, teacher);
-                    },
-                    child: CircleAvatar(
-                      radius: 30,
-                      backgroundColor: Colors.purple.withOpacity(0.1),
-                      backgroundImage:
-                          (user?.avatar?.startsWith('http://') == true ||
-                              user?.avatar?.startsWith('https://') == true)
-                          ? CachedNetworkImageProvider(
-                              user!.avatar!,
-                              cacheKey: user!.avatar!.split('?').first,
-                            )
-                          : null,
-                      onBackgroundImageError:
-                          (user?.avatar?.startsWith('http://') == true ||
-                              user?.avatar?.startsWith('https://') == true)
-                          ? (_, __) {}
-                          : null,
-                      child:
-                          (user?.avatar?.startsWith('http://') != true &&
-                              user?.avatar?.startsWith('https://') != true)
-                          ? const Icon(
-                              Icons.person,
-                              color: Colors.purple,
-                              size: 35,
-                            )
-                          : null,
-                    ),
+                  ZoomableAvatar(
+                    imageUrl: user?.avatar,
+                    name: user?.name ?? 'No Name',
+                    heroTag: 'teacher-avatar-${teacher.userId}',
+                    radius: 30,
+                    backgroundColor: Colors.purple.withOpacity(0.1),
+                    textColor: Colors.purple,
                   ),
                   const SizedBox(width: 16),
                   Expanded(

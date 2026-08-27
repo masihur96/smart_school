@@ -1,6 +1,8 @@
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
+
 import 'dart:developer';
 
-import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -663,27 +665,13 @@ class _StudentAttendanceManagementScreenState
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-          leading: CircleAvatar(
+          leading: ZoomableAvatar(
+            imageUrl: studentAvatar?.isNotEmpty == true ? studentAvatar : null,
+            name: record.studentName,
+            heroTag: 'attendance-avatar-${record.studentId}',
             radius: 22,
             backgroundColor: statusColor.withValues(alpha: 0.12),
-            backgroundImage: studentAvatar != null && studentAvatar.isNotEmpty
-                ? CachedNetworkImageProvider(
-                    studentAvatar,
-                    cacheKey: studentAvatar.split('?').first,
-                  )
-                : null,
-            child: studentAvatar != null && studentAvatar.isNotEmpty
-                ? null
-                : Text(
-                    record.studentName.isNotEmpty
-                        ? record.studentName[0].toUpperCase()
-                        : '?',
-                    style: TextStyle(
-                      color: statusColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+            textColor: statusColor,
           ),
           title: Row(
             children: [

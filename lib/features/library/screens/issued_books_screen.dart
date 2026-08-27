@@ -1,3 +1,5 @@
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -753,8 +755,6 @@ class _AdminStudentInfoBox extends StatelessWidget {
     final studentName = issuedBook.studentName.isNotEmpty
         ? issuedBook.studentName
         : l10n.unknownStudent;
-    final initial =
-        studentName.isNotEmpty ? studentName[0].toUpperCase() : 'S';
     final className = issuedBook.studentClassName;
     final sectionName = issuedBook.studentSectionName;
     final phone = issuedBook.studentPhone;
@@ -769,23 +769,13 @@ class _AdminStudentInfoBox extends StatelessWidget {
       child: Row(
         children: [
           // Student Avatar
-          CircleAvatar(
+          ZoomableAvatar(
+            imageUrl: hasAvatar ? avatar : null,
+            name: studentName,
+            heroTag: 'issued-book-student-${issuedBook.studentId}',
             radius: 14,
             backgroundColor: const Color(0xFF1A3C6E).withOpacity(0.12),
-            backgroundImage: hasAvatar ? CachedNetworkImageProvider(
-                avatar,
-                cacheKey: avatar.split('?').first,
-              ) : null,
-            child: !hasAvatar
-                ? Text(
-                    initial,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1A3C6E),
-                    ),
-                  )
-                : null,
+            textColor: const Color(0xFF1A3C6E),
           ),
           const SizedBox(width: 8),
 

@@ -1,3 +1,5 @@
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
+
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -2832,26 +2834,13 @@ class _TeacherAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasAvatar = avatar != null && avatar!.isNotEmpty;
-    return CircleAvatar(
+    return ZoomableAvatar(
+      imageUrl: hasAvatar ? avatar : null,
+      name: name,
+      heroTag: 'routine-teacher-${name.hashCode}',
       radius: size / 2,
       backgroundColor: const Color(0xFF7C3AED).withOpacity(0.12),
-      backgroundImage: hasAvatar
-          ? CachedNetworkImageProvider(
-              avatar!,
-              cacheKey: avatar!.split('?').first,
-            )
-          : null,
-      onBackgroundImageError: hasAvatar ? (_, __) {} : null,
-      child: hasAvatar
-          ? null
-          : Text(
-              _initials,
-              style: TextStyle(
-                fontSize: size * 0.35,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF7C3AED),
-              ),
-            ),
+      textColor: const Color(0xFF7C3AED),
     );
   }
 }

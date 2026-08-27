@@ -1,3 +1,5 @@
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -19,7 +21,7 @@ import '../../../core/services/geocoding_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 
 class StudentManagementScreen extends StatefulWidget {
   final bool hideAppBar;
@@ -519,38 +521,15 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Hero(
-                    tag: 'student-avatar-${student.userId}',
-                    child: CircleAvatar(
-                      radius: 24,
-                      backgroundColor: AppColors.primaryAdmin.withValues(
-                        alpha: 0.12,
-                      ),
-                      backgroundImage: (user?.avatar?.startsWith('http://') == true ||
-                              user?.avatar?.startsWith('https://') == true)
-                          ? CachedNetworkImageProvider(
-                              user!.avatar!,
-                              cacheKey: user!.avatar!.split('?').first,
-                            )
-                          : null,
-                      onBackgroundImageError: (user?.avatar?.startsWith('http://') == true ||
-                              user?.avatar?.startsWith('https://') == true)
-                          ? (_, __) {}
-                          : null,
-                      child: (user?.avatar?.startsWith('http://') == true ||
-                              user?.avatar?.startsWith('https://') == true)
-                          ? null
-                          : Text(
-                              studentName.isNotEmpty
-                                  ? studentName[0].toUpperCase()
-                                  : '?',
-                              style: const TextStyle(
-                                color: AppColors.primaryAdmin,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                            ),
+                  ZoomableAvatar(
+                    imageUrl: user?.avatar,
+                    name: studentName,
+                    heroTag: 'student-avatar-${student.userId}',
+                    radius: 24,
+                    backgroundColor: AppColors.primaryAdmin.withValues(
+                      alpha: 0.12,
                     ),
+                    textColor: AppColors.primaryAdmin,
                   ),
                   const SizedBox(width: 12),
                   Expanded(

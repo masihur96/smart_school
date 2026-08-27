@@ -1,3 +1,5 @@
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
@@ -27,7 +29,6 @@ import 'student_attendance_screen.dart';
 import 'student_homework_screen.dart';
 import 'student_result_screen.dart';
 import 'student_routine_screen.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class StudentDashboardScreen extends StatelessWidget {
   const StudentDashboardScreen({super.key});
@@ -438,26 +439,12 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
         children: [
           Row(
             children: [
-              CircleAvatar(
+              ZoomableAvatar(
+                imageUrl: user?.avatar,
+                name: user?.name,
+                heroTag: 'student-dashboard-avatar-${user?.id ?? user?.name ?? 'me'}',
                 radius: 25,
                 backgroundColor: Colors.purple,
-                backgroundImage: user?.avatar?.isNotEmpty == true
-                    ? CachedNetworkImageProvider(
-                        user?.avatar ?? '',
-                        cacheKey: (user?.avatar ?? '').split('?').first,
-                      )
-                    : null,
-                child: user?.avatar?.isNotEmpty == true
-                    ? null
-                    : Text(
-                        user?.name.isNotEmpty == true
-                            ? user!.name[0].toUpperCase()
-                            : '?',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
               ),
               const SizedBox(width: 15),
               Expanded(

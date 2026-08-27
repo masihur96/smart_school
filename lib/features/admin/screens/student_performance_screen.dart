@@ -1,10 +1,12 @@
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/models/admin_dashboard_model.dart';
 import 'package:smart_school/features/admin/providers/student_performance_provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 
 class StudentPerformanceScreen extends StatefulWidget {
   const StudentPerformanceScreen({super.key});
@@ -839,28 +841,13 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                             valueColor: AlwaysStoppedAnimation<Color>(color),
                             strokeCap: StrokeCap.round,
                           ),
-                          CircleAvatar(
+                          ZoomableAvatar(
+                            imageUrl: perf.avatar?.isNotEmpty == true ? perf.avatar : null,
+                            name: perf.name,
+                            heroTag: 'student-perf-top-${perf.name}',
                             radius: 28,
                             backgroundColor: color.withValues(alpha: 0.12),
-                            backgroundImage:
-                                perf.avatar != null && perf.avatar!.isNotEmpty
-                                    ? CachedNetworkImageProvider(
-                                        perf.avatar!,
-                                        cacheKey: perf.avatar!.split('?').first,
-                                      )
-                                    : null,
-                            child: perf.avatar != null && perf.avatar!.isNotEmpty
-                                ? null
-                                : Text(
-                                    perf.name.isNotEmpty
-                                        ? perf.name[0].toUpperCase()
-                                        : '?',
-                                    style: TextStyle(
-                                      color: color,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 24,
-                                    ),
-                                  ),
+                            textColor: color,
                           ),
                         ],
                       ),
@@ -1265,26 +1252,13 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
               ),
               const SizedBox(width: 8),
               // Avatar
-              CircleAvatar(
+              ZoomableAvatar(
+                imageUrl: perf.avatar?.isNotEmpty == true ? perf.avatar : null,
+                name: perf.name,
+                heroTag: 'student-perf-list-${perf.name}',
                 radius: 22,
                 backgroundColor: color.withValues(alpha: 0.12),
-                backgroundImage:
-                    perf.avatar != null && perf.avatar!.isNotEmpty
-                        ? CachedNetworkImageProvider(
-                            perf.avatar!,
-                            cacheKey: perf.avatar!.split('?').first,
-                          )
-                        : null,
-                child: perf.avatar != null && perf.avatar!.isNotEmpty
-                    ? null
-                    : Text(
-                        perf.name.isNotEmpty ? perf.name[0].toUpperCase() : '?',
-                        style: TextStyle(
-                          color: color,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
+                textColor: color,
               ),
               const SizedBox(width: 12),
               // Name + class info

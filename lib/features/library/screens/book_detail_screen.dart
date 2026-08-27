@@ -1,3 +1,5 @@
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
+
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -1693,29 +1695,15 @@ class _SelectStudentSheetState extends State<_SelectStudentSheet> {
                                   ),
                                   child: Row(
                                     children: [
-                                      CircleAvatar(
+                                      ZoomableAvatar(
+                                        imageUrl: avatar.isNotEmpty ? avatar : null,
+                                        name: name,
+                                        heroTag: 'book-history-student-${s.userId}',
                                         radius: 22,
                                         backgroundColor: const Color(
                                           0xFF7C3AED,
                                         ).withOpacity(0.12),
-                                        backgroundImage: avatar.isNotEmpty
-                                            ? CachedNetworkImageProvider(
-                                                avatar,
-                                                cacheKey: avatar.split('?').first,
-                                              )
-                                            : null,
-                                        child: avatar.isEmpty
-                                            ? Text(
-                                                name.isNotEmpty
-                                                    ? name[0].toUpperCase()
-                                                    : '?',
-                                                style: const TextStyle(
-                                                  color: Color(0xFF7C3AED),
-                                                  fontWeight: FontWeight.w700,
-                                                  fontSize: 16,
-                                                ),
-                                              )
-                                            : null,
+                                        textColor: const Color(0xFF7C3AED),
                                       ),
                                       const SizedBox(width: 12),
                                       Expanded(
