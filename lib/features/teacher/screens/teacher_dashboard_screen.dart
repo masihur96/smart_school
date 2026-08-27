@@ -1131,47 +1131,66 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                   ],
                 ),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(Icons.class_outlined, size: 14, color: Colors.grey.shade500),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${homework.classInfo?.name ?? "--"} / ${homework.subjectInfo?.name ?? ""}',
-                      style: TextStyle(
-                        color: Colors.grey.shade700,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.class_outlined, size: 14, color: Colors.grey.shade500),
+                            const SizedBox(width: 4),
+                            Text(
+                              homework.classInfo?.name ?? "--",
+                              style: TextStyle(
+                                color: Colors.grey.shade700,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          homework.subjectInfo?.name ?? "",
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isOverdue ? Colors.red.shade50 : Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: isOverdue ? Colors.red.shade100 : Colors.green.shade100,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today_outlined,
+                            size: 11,
+                            color: isOverdue ? Colors.red.shade700 : Colors.green.shade700,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            DateFormat('dd MMM, EEEE').format(homework.dueDate),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: isOverdue ? Colors.red.shade700 : Colors.green.shade700,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: isOverdue ? Colors.red.shade50 : Colors.green.shade50,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: isOverdue ? Colors.red.shade100 : Colors.green.shade100,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        size: 11,
-                        color: isOverdue ? Colors.red.shade700 : Colors.green.shade700,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        DateFormat('dd MMM, EEEE').format(homework.dueDate),
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: isOverdue ? Colors.red.shade700 : Colors.green.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+
               ],
             ),
           ),
