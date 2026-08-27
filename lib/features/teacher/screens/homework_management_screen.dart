@@ -234,7 +234,8 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
                           },
                           child: _HomeworkCard(
                             homework: hw,
-                            subjectName: '${classObj.name} - ${subject.name}',
+                            className: classObj.name,
+                            subjectName: subject.name,
                             onView: () =>
                                 _showViewSheet(context, hw, subject.name),
                             onEdit: () => _showEditSheet(context, hw),
@@ -432,6 +433,7 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
 
 class _HomeworkCard extends StatelessWidget {
   final Homework homework;
+  final String className;
   final String subjectName;
   final VoidCallback onView;
   final VoidCallback onEdit;
@@ -439,6 +441,7 @@ class _HomeworkCard extends StatelessWidget {
 
   const _HomeworkCard({
     required this.homework,
+    required this.className,
     required this.subjectName,
     required this.onView,
     required this.onEdit,
@@ -447,145 +450,197 @@ class _HomeworkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final due = DateFormat('dd/MM/yyyy').format(homework.dueDate);
-    final isPast = homework.dueDate.isBefore(DateTime.now());
-
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColors.primaryTeacher,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.assignment_rounded,
-                color: Colors.white,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    homework.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
+    final bool isOverdue = homework.dueDate.isBefore(DateTime.now());
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.15)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onView,
+          child: Padding(
+            padding: const EdgeInsets.all(14.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryTeacher.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.assignment_outlined,
+                            size: 16,
+                            color: AppColors.primaryTeacher,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Text(
+                              homework.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                              maxLines: homework.description.isEmpty ? 2 : 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        PopupMenuButton<String>(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(Icons.more_vert, color: Colors.grey.shade500, size: 22),
+                          onSelected: (val) {
+                            if (val == 'view') {
+                              onView();
+                            } else if (val == 'edit') {
+                              onEdit();
+                            } else if (val == 'delete') {
+                              onDelete();
+                            }
+                          },
+                          itemBuilder: (_) {
+                            final l10n = AppLocalizations.of(context)!;
+                            return [
+                              PopupMenuItem(
+                                value: 'view',
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.visibility_outlined, size: 18),
+                                    const SizedBox(width: 8),
+                                    Text(l10n.view),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'edit',
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.edit_outlined, size: 18),
+                                    const SizedBox(width: 8),
+                                    Text(l10n.edit),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                                    const SizedBox(width: 8),
+                                    Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+                                  ],
+                                ),
+                              ),
+                            ];
+                          },
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    subjectName,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  if (homework.description.isNotEmpty) ...[
                     const SizedBox(height: 5),
                     Text(
                       homework.description,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                        height: 1.3,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12),
                     ),
                   ],
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.event_rounded,
-                        size: 14,
-                        color: isPast ? Colors.red[400] : Colors.grey[500],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Due: ${formatDate(due)}',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: isPast ? Colors.red[400] : Colors.grey[500],
-                          fontWeight: FontWeight.w600,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.class_outlined, size: 14, color: Colors.grey.shade500),
+                            const SizedBox(width: 4),
+                            Text(
+                              className,
+                              style: TextStyle(
+                                color: Colors.grey.shade700,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subjectName,
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isOverdue ? Colors.red.shade50 : Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: isOverdue ? Colors.red.shade100 : Colors.green.shade100,
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today_outlined,
+                            size: 11,
+                            color: isOverdue ? Colors.red.shade700 : Colors.green.shade700,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            DateFormat('dd MMM, EEEE').format(homework.dueDate),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: isOverdue ? Colors.red.shade700 : Colors.green.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert, color: Colors.grey[400], size: 20),
-              onSelected: (val) {
-                if (val == 'view') {
-                  onView();
-                } else if (val == 'edit') {
-                  onEdit();
-                } else if (val == 'delete') {
-                  onDelete();
-                }
-              },
-              itemBuilder: (_) {
-                final l10n = AppLocalizations.of(context)!;
-                return [
-                  PopupMenuItem(
-                    value: 'view',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.visibility_outlined, size: 18),
-                        const SizedBox(width: 8),
-                        Text(l10n.view),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'edit',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.edit_outlined, size: 18),
-                        const SizedBox(width: 8),
-                        Text(l10n.edit),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.delete_outline, color: Colors.red, size: 18),
-                        const SizedBox(width: 8),
-                        Text(l10n.delete, style: const TextStyle(color: Colors.red)),
-                      ],
-                    ),
-                  ),
-                ];
-              },
-            ),
-          ],
+          ),
         ),
       ),
     );
-  }
-
-  String formatDate(String? date) {
-    if (date == null || date.isEmpty) {
-      return '--';
-    }
-
-    try {
-      final parsedDate = DateFormat('dd/MM/yyyy').parse(date);
-
-      return DateFormat('dd MMM yyyy').format(parsedDate);
-    } catch (e) {
-      return '--';
-    }
   }
 }
 
