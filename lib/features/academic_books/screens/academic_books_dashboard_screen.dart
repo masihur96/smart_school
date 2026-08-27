@@ -379,7 +379,7 @@ class _AcademicBooksDashboardScreenState
       body: NestedScrollView(
         headerSliverBuilder: (context, _) => [
           SliverAppBar(
-            expandedHeight: 200,
+            expandedHeight: 160,
             floating: false,
             pinned: true,
             elevation: 0,
