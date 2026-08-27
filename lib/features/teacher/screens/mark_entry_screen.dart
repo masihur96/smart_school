@@ -262,10 +262,19 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   }
 
   Widget _buildFilterCard(ResultsNotifier notifier) {
+    final user = context.watch<AuthNotifier>().user;
+    
+    final allowedExams = notifier.exams.where((exam) {
+      if (user == null) return false;
+      return exam.assignments.any((a) => a.examinerId == user.id);
+    }).toList();
+
     final uniqueClasses = <String, String>{};
-    if (_selectedExam != null) {
+    if (_selectedExam != null && user != null) {
       for (var a in _selectedExam!.assignments) {
-        uniqueClasses[a.classId] = a.className;
+        if (a.examinerId == user.id) {
+          uniqueClasses[a.classId] = a.className;
+        }
       }
     }
 
@@ -274,7 +283,19 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
         .where((s) => s.classId == _selectedClassId)
         .toList();
 
-    final filteredSubjects = notifier.examSubjects;
+    List<Subject> filteredSubjects = [];
+    if (user != null && _selectedExam != null) {
+      final allowedSubjectIds = _selectedExam!.assignments
+          .where((a) =>
+              a.examinerId == user.id && a.classId == _selectedClassId)
+          .map((a) => a.subjectId)
+          .toSet();
+      filteredSubjects = notifier.examSubjects
+          .where((s) => allowedSubjectIds.contains(s.id))
+          .toList();
+    } else {
+      filteredSubjects = notifier.examSubjects;
+    }
 
     return Card(
       margin: const EdgeInsets.all(16),
@@ -288,13 +309,13 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
               icon: Icons.assignment_outlined,
               value: _selectedExamId,
               loading: notifier.examsLoading,
-              items: notifier.exams
+              items: allowedExams
                   .map(
                     (e) => DropdownMenuItem(value: e.id, child: Text(e.name)),
                   )
                   .toList(),
               onChanged: (id) {
-                final exam = notifier.exams.firstWhere((e) => e.id == id);
+                final exam = allowedExams.firstWhere((e) => e.id == id);
                 _onExamChanged(exam);
               },
             ),
