@@ -1391,7 +1391,6 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     }
   }
 
-  /// Returns true if the current time falls within [startTime] and [endTime] (HH:mm or HH:mm:ss strings).
   bool _isCurrentClass(String startTime, String endTime) {
     try {
       final now = TimeOfDay.now();
@@ -1407,6 +1406,33 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
       return false;
     }
   }
+
+  bool _isUpcomingClass(String startTime) {
+    try {
+      final now = TimeOfDay.now();
+      final startParts = startTime.split(':');
+      final startMinutes =
+          int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
+      final nowMinutes = now.hour * 60 + now.minute;
+      return nowMinutes < startMinutes;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  bool _isPassedClass(String endTime) {
+    try {
+      final now = TimeOfDay.now();
+      final endParts = endTime.split(':');
+      final endMinutes =
+          int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+      final nowMinutes = now.hour * 60 + now.minute;
+      return nowMinutes >= endMinutes;
+    } catch (_) {
+      return false;
+    }
+  }
+
 
   /// Returns the elapsed fraction [0.0 – 1.0] of the class period at the current time.
   double _classPeriodProgress(String startTime, String endTime) {
@@ -1438,6 +1464,8 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
         classInfo.subjectEntity?.name ?? 'Subject ${classInfo.subjectId}';
 
     final isActive = _isCurrentClass(classInfo.startTime, classInfo.endTime);
+    final isUpcoming = _isUpcomingClass(classInfo.startTime);
+    final isPassed = _isPassedClass(classInfo.endTime);
     final progress = isActive
         ? _classPeriodProgress(classInfo.startTime, classInfo.endTime)
         : 0.0;
@@ -1550,20 +1578,20 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
         
                           const Spacer(),
         
-                          // "NOW" badge if currently active
-                          if (isActive)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: accentColor,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
+                          // Status badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: accentColor,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (isActive) ...[
                                   Container(
                                     width: 5,
                                     height: 5,
@@ -1573,18 +1601,19 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                                     ),
                                   ),
                                   const SizedBox(width: 4),
-                                  const Text(
-                                    'NOW',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: 0.8,
-                                    ),
-                                  ),
                                 ],
-                              ),
+                                Text(
+                                  isActive ? 'NOW' : (isUpcoming ? 'UPCOMING' : (isPassed ? 'PASSED' : '')),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                              ],
                             ),
+                          ),
                         ],
                       ),
         
