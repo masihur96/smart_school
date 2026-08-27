@@ -385,21 +385,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     _buildInfoTile(
                       context,
-                      icon: Icons.school_outlined,
+                      icon: Icons.email_outlined,
                       label: l10n.schoolEmailLabel,
                       value: user.school?.email ?? l10n.notAvailable,
                       isCopyable: true,
                     ),
                     _buildInfoTile(
                       context,
-                      icon: Icons.school_outlined,
+                      icon: Icons.phone_outlined,
                       label: l10n.schoolPhoneLabel,
                       value: user.school?.phone ?? l10n.notAvailable,
                       isCopyable: true,
                     ),
                     _buildInfoTile(
                       context,
-                      icon: Icons.school_outlined,
+                      icon: Icons.location_on_outlined,
                       label: l10n.schoolAddressLabel,
                       value: user.school?.address ?? l10n.notAvailable,
                       isEditable: true,
@@ -444,10 +444,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   //   ),
                   // ]),
                   const SizedBox(height: 24),
-                  _buildSectionHeader(l10n.organizationAdmins),
-                  _buildAdminsSection(context, authProvider),
 
-                  const SizedBox(height: 24),
+                  if (user.role == UserRole.admin)
+                    _buildSectionHeader(l10n.organizationAdmins),
+                  if (user.role == UserRole.admin)
+                    _buildAdminsSection(context, authProvider),
+
+                  if (user.role == UserRole.admin) const SizedBox(height: 24),
                   _buildSectionHeader(l10n.accountMetadata),
                   _buildInfoCard(context, [
                     _buildInfoTile(
