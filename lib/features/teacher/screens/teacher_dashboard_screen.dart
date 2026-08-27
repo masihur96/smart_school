@@ -70,16 +70,20 @@ class TeacherDashboardContent extends StatefulWidget {
 class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final List<bool> _visitedTabs = [true, false, false, false];
+  final List<bool> _visitedTabs = [true, false, false, false, false];
 
   int get _selectedIndex => _tabController.index;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) return;
+      if (_tabController.index == 2) {
+        _tabController.index = _tabController.previousIndex;
+        return;
+      }
       setState(() {
         _visitedTabs[_tabController.index] = true;
       });
@@ -220,6 +224,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
             width: MediaQuery.of(context).size.width,
             offset: 10,
             borderRadius: BorderRadius.circular(28),
+            clip: Clip.none,
           ),
           theme: BottomBarThemeData(
             barDecoration: BoxDecoration(
@@ -236,36 +241,6 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
           ),
           scrollBehavior: const BottomBarScrollBehavior(hideOnScroll: true),
           showIcon: false,
-          child: TabBar(
-            controller: _tabController,
-            indicatorColor: AppColors.primaryTeacher,
-            labelColor: AppColors.primaryTeacher,
-            unselectedLabelColor: isDark
-                ? Colors.white54
-                : Colors.grey.shade500,
-            indicatorSize: TabBarIndicatorSize.label,
-            dividerColor: Colors.transparent,
-            labelStyle: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-            ),
-            unselectedLabelStyle: const TextStyle(fontSize: 11),
-            tabs: [
-              Tab(icon: const Icon(Icons.dashboard_outlined), text: l10n.home),
-              Tab(
-                icon: const Icon(Icons.check_circle_outline),
-                text: l10n.attendance,
-              ),
-              Tab(
-                icon: const Icon(Icons.assignment_turned_in_outlined),
-                text: l10n.marks,
-              ),
-              Tab(
-                icon: const Icon(Icons.assignment_outlined),
-                text: l10n.homework,
-              ),
-            ],
-          ),
           body: TabBarView(
             controller: _tabController,
             physics: const NeverScrollableScrollPhysics(),
@@ -276,12 +251,107 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
               _visitedTabs[1]
                   ? const TeacherAttendanceScreen(hideAppBar: true)
                   : const SizedBox(),
-              _visitedTabs[2]
+              const SizedBox.shrink(), // Dummy for FAB gap
+              _visitedTabs[3]
                   ? const MarkEntryScreen(hideAppBar: true)
                   : const SizedBox(),
-              _visitedTabs[3]
+              _visitedTabs[4]
                   ? const HomeworkManagementScreen(hideAppBar: true)
                   : const SizedBox(),
+            ],
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              TabBar(
+                controller: _tabController,
+                indicatorColor: AppColors.primaryTeacher,
+                labelColor: AppColors.primaryTeacher,
+                unselectedLabelColor: isDark
+                    ? Colors.white54
+                    : Colors.grey.shade500,
+                indicatorSize: TabBarIndicatorSize.label,
+                dividerColor: Colors.transparent,
+                labelStyle: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+                unselectedLabelStyle: const TextStyle(fontSize: 11),
+                onTap: (index) {
+                  if (index == 2) {
+                    _tabController.index = _tabController.previousIndex;
+                  }
+                },
+                tabs: [
+                  Tab(icon: const Icon(Icons.dashboard_outlined), text: l10n.home),
+                  Tab(
+                    icon: const Icon(Icons.check_circle_outline),
+                    text: l10n.attendance,
+                  ),
+                  const Tab(child: SizedBox(width: 48)), // Gap for FAB
+                  Tab(
+                    icon: const Icon(Icons.assignment_turned_in_outlined),
+                    text: l10n.marks,
+                  ),
+                  Tab(
+                    icon: const Icon(Icons.assignment_outlined),
+                    text: l10n.homework,
+                  ),
+                ],
+              ),
+              Positioned(
+                top: -16,
+                child: Consumer<TeacherDashboardProvider>(
+                  builder: (context, provider, _) {
+                    final status = provider.dashboardData?.attendanceStatus;
+                    final isClockedIn = status?.status == 'clock-in';
+                    final isClockedOut = status?.status == 'clock-out';
+
+                    return Theme(
+                      data: Theme.of(context).copyWith(useMaterial3: true),
+                      child: GestureDetector(
+                        onTap: () => _performSelfAttendance(
+                          context,
+                          context.read<AuthNotifier>().user,
+                          l10n,
+                        ),
+                        child: Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: isClockedIn
+                                ? Colors.orange
+                                : (isClockedOut
+                                      ? Colors.green.shade50
+                                      : AppColors.primaryTeacher),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.25),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                            border: isClockedOut
+                                ? Border.all(color: Colors.green.shade200, width: 2)
+                                : null,
+                          ),
+                          child: Icon(
+                            isClockedIn
+                                ? Icons.logout_outlined
+                                : (isClockedOut
+                                      ? Icons.update_outlined
+                                      : Icons.login_outlined),
+                            color: isClockedOut ? Colors.green : Colors.white,
+                            size: 26,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         ),
@@ -635,33 +705,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     );
   }
 
-  Widget _buildHeaderStat(String label, String value, IconData icon) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Icon(icon, color: Colors.white, size: 20),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 11),
-        ),
-      ],
-    );
-  }
+
 
   Widget _buildAttendanceSection(
     BuildContext context,
