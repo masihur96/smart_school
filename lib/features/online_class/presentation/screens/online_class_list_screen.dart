@@ -414,7 +414,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: filteredList.length,
-        reverse: true,
+        // reverse: true,
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () => _showMeetingDetails(
