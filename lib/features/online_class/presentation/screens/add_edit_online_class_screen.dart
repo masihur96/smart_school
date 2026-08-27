@@ -89,6 +89,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
       // Determine meeting type based on classId presence
       if (item.classId == null || item.classId!.isEmpty) {
         _meetingCategory = MeetingCategory.teacherMeeting;
+        _selectedTeacherUuids = item.participants.map((p) => p.uuid).toList();
       } else {
         _meetingCategory = MeetingCategory.onlineClass;
       }

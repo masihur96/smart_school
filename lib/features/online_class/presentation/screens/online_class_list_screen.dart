@@ -71,6 +71,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.classDeletedSuccess)));
+      context.read<OnlineClassProvider>().fetchOnlineClasses();
     } else {
       final error = context.read<OnlineClassProvider>().error;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -133,6 +134,144 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     return l10n.allClassesAndSections;
   }
 
+  void _showMeetingDetails(
+    BuildContext context,
+    OnlineClass oClass,
+    bool canManageClass,
+    Color themeColor,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.85,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (_, controller) => Container(
+          decoration: BoxDecoration(
+            color: isDark ? Colors.grey.shade900 : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 5,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  controller: controller,
+                  children: [
+                    Text(
+                      oClass.title,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(Icons.person, color: themeColor),
+                      title: const Text(
+                        'Host / Teacher',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      subtitle: Text(
+                        oClass.teacherName,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    if (oClass.description.isNotEmpty)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(Icons.description, color: themeColor),
+                        title: const Text(
+                          'Description',
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                        subtitle: Text(
+                          oClass.description,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(Icons.calendar_today, color: themeColor),
+                      title: const Text(
+                        'Date & Time',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      subtitle: Text(
+                        '${DateFormat('MMM dd, yyyy').format(oClass.scheduledTime)}\n'
+                        '${oClass.startTime != null ? (oClass.endTime != null ? '${oClass.startTime} – ${oClass.endTime}' : oClass.startTime!) : DateFormat('hh:mm a').format(oClass.scheduledTime)}',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ),
+                    if (oClass.meetLink.isNotEmpty)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(Icons.link, color: themeColor),
+                        title: const Text(
+                          'Meeting Link',
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                        subtitle: InkWell(
+                          onTap: () => _launchURL(oClass.meetLink),
+                          child: Text(
+                            oClass.meetLink,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ),
+                    const Divider(height: 30),
+                    Text(
+                      'Participants (${oClass.participants.length})',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    ...oClass.participants.map(
+                      (p) => ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: _buildAvatarCircle(p, isDark),
+                        title: Text(
+                          p.name.isNotEmpty && p.name != 'Unknown'
+                              ? p.name
+                              : 'Participant',
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
@@ -154,69 +293,145 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
       themeColor = AppColors.primaryStudent;
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.onlineClassesTitle),
-        backgroundColor: themeColor,
-        foregroundColor: Colors.white,
-      ),
-      body: Consumer<OnlineClassProvider>(
-        builder: (context, provider, _) {
-          if (provider.isLoading) {
-            return _buildShimmerLoader();
-          }
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.onlineClassesTitle),
+          backgroundColor: themeColor,
+          foregroundColor: Colors.white,
+          bottom: const TabBar(
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+            indicatorColor: Colors.white,
+            tabs: [
+              Tab(text: 'All'),
+              Tab(text: 'Class Meeting'),
+              Tab(text: 'Teacher Meeting'),
+            ],
+          ),
+        ),
+        body: Consumer<OnlineClassProvider>(
+          builder: (context, provider, _) {
+            if (provider.isLoading) {
+              return _buildShimmerLoader();
+            }
 
-          if (provider.error != null && provider.onlineClasses.isEmpty) {
-            return _buildErrorState(provider, themeColor);
-          }
+            if (provider.error != null && provider.onlineClasses.isEmpty) {
+              return _buildErrorState(provider, themeColor);
+            }
 
-          if (provider.onlineClasses.isEmpty) {
-            return _buildEmptyState(canManageClass, themeColor);
-          }
-
-          return RefreshIndicator(
-            onRefresh: provider.fetchOnlineClasses,
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: provider.onlineClasses.length,
-              itemBuilder: (context, index) {
-                return _buildOnlineClassCard(
-                  context,
-                  provider.onlineClasses[index],
-                  canManageClass,
+            return TabBarView(
+              children: [
+                _buildListForTab(
+                  provider,
                   themeColor,
-                );
-              },
+                  canManageClass,
+                  0,
+                ), // All
+                _buildListForTab(
+                  provider,
+                  themeColor,
+                  canManageClass,
+                  1,
+                ), // Class
+                _buildListForTab(
+                  provider,
+                  themeColor,
+                  canManageClass,
+                  2,
+                ), // Teacher
+              ],
+            );
+          },
+        ),
+        floatingActionButton: canManageClass
+            ? FloatingActionButton.extended(
+                onPressed: () async {
+                  final result = await Navigator.push<bool>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddEditOnlineClassScreen(
+                        isAdminOrTeacher: canManageClass,
+                      ),
+                    ),
+                  );
+                  if (result == true && context.mounted) {
+                    context.read<OnlineClassProvider>().fetchOnlineClasses();
+                  }
+                },
+                backgroundColor: themeColor,
+                icon: const Icon(Icons.add, color: Colors.white),
+                label: Text(
+                  l10n.newClass,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+            : null,
+      ),
+    );
+  }
+
+  Widget _buildListForTab(
+    OnlineClassProvider provider,
+    Color themeColor,
+    bool canManageClass,
+    int tabIndex,
+  ) {
+    List<OnlineClass> filteredList = provider.onlineClasses;
+
+    if (tabIndex == 1) {
+      // Class Meetings
+      filteredList = provider.onlineClasses
+          .where(
+            (o) =>
+                o.className != null ||
+                o.sectionName != null ||
+                o.subjectName != null,
+          )
+          .toList();
+    } else if (tabIndex == 2) {
+      // Teacher Meetings
+      filteredList = provider.onlineClasses
+          .where(
+            (o) =>
+                o.className == null &&
+                o.sectionName == null &&
+                o.subjectName == null,
+          )
+          .toList();
+    }
+
+    if (filteredList.isEmpty) {
+      return _buildEmptyState(canManageClass, themeColor);
+    }
+
+    return RefreshIndicator(
+      onRefresh: provider.fetchOnlineClasses,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: filteredList.length,
+        reverse: true,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: () => _showMeetingDetails(
+              context,
+              filteredList[index],
+              canManageClass,
+              themeColor,
+            ),
+            child: _buildOnlineClassCard(
+              context,
+              filteredList[index],
+              canManageClass,
+              themeColor,
             ),
           );
         },
       ),
-      floatingActionButton: canManageClass
-          ? FloatingActionButton.extended(
-              onPressed: () async {
-                final result = await Navigator.push<bool>(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AddEditOnlineClassScreen(
-                      isAdminOrTeacher: canManageClass,
-                    ),
-                  ),
-                );
-                if (result == true && context.mounted) {
-                  context.read<OnlineClassProvider>().fetchOnlineClasses();
-                }
-              },
-              backgroundColor: themeColor,
-              icon: const Icon(Icons.add, color: Colors.white),
-              label: Text(
-                l10n.newClass,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
-          : null,
     );
   }
 
@@ -541,6 +756,37 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
+                      const Spacer(),
+                      Container(
+                        width: 100,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Container(
+                    width: double.infinity,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ── Card ──────────────────────────────────────────────────────────────────
+
   Widget _buildOnlineClassCard(
     BuildContext context,
     OnlineClass oClass,
@@ -551,17 +797,22 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final now = DateTime.now();
 
+    // Meeting status computation
     final isUpcoming = oClass.scheduledTime.isAfter(now);
+    // Live: Started within the last 60 minutes
     final isLive =
         !isUpcoming &&
         now.isBefore(oClass.scheduledTime.add(const Duration(minutes: 60)));
+    // Past: Started more than 60 minutes ago
     final isPast = !isUpcoming && !isLive;
 
     final relativeTime = _getTimeAgoOrUpcoming(context, oClass.scheduledTime);
     final platformLabel = _getPlatformLabel(context, oClass.meetLink);
     final platformIcon = _getPlatformIcon(oClass.meetLink);
 
-    final bool isTeacherMeeting = oClass.className == null && oClass.sectionName == null;
+    // Teacher Meeting = no class/section assigned
+    final bool isTeacherMeeting =
+        oClass.className == null && oClass.sectionName == null;
 
     return Card(
       elevation: 0,
@@ -572,7 +823,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
           color: isLive
               ? Colors.red.shade300
               : (isDark ? Colors.grey.shade800 : Colors.grey.shade200),
-          width: isLive ? 1.2 : 1.0,
+          width: isLive ? 1.5 : 1.0,
         ),
       ),
       child: Padding(
@@ -580,6 +831,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── Top Row: Title + Status Badge + 3-dot Menu ──
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -597,6 +849,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 6),
+                      // Badges: Subject, Platform, Meeting Type
                       Wrap(
                         spacing: 6,
                         runSpacing: 4,
@@ -621,7 +874,9 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                             icon: isTeacherMeeting
                                 ? Icons.supervisor_account_rounded
                                 : Icons.school_rounded,
-                            label: isTeacherMeeting ? 'Teacher Meeting' : 'Class Meeting',
+                            label: isTeacherMeeting
+                                ? 'Teacher Meeting'
+                                : 'Class Meeting',
                             bgColor: isTeacherMeeting
                                 ? Colors.orange.withValues(alpha: 0.10)
                                 : Colors.teal.withValues(alpha: 0.09),
@@ -637,6 +892,9 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                     ],
                   ),
                 ),
+                const SizedBox(width: 8),
+
+                // Status badge (Live Now / Upcoming / Ended)
                 if (canManageClass)
                   PopupMenuButton<String>(
                     padding: EdgeInsets.zero,
@@ -666,7 +924,11 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                         value: 'edit',
                         child: Row(
                           children: [
-                            const Icon(Icons.edit_outlined, size: 18, color: Colors.blue),
+                            const Icon(
+                              Icons.edit_outlined,
+                              size: 18,
+                              color: Colors.blue,
+                            ),
                             const SizedBox(width: 8),
                             Text(l10n.editClass),
                           ],
@@ -676,7 +938,11 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                         value: 'delete',
                         child: Row(
                           children: [
-                            const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                            const Icon(
+                              Icons.delete_outline,
+                              size: 18,
+                              color: Colors.red,
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               l10n.deleteClassTitle,
@@ -689,7 +955,10 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                   ),
               ],
             ),
+
             const SizedBox(height: 12),
+
+            // ── Date & Time Range Box ──
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
@@ -749,17 +1018,24 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                         : (isUpcoming ? themeColor : Colors.grey.shade600),
                   ),
                   const SizedBox(width: 5),
-                  Text(
-                    DateFormat('hh:mm a').format(oClass.scheduledTime),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: isDark
-                          ? Colors.grey.shade200
-                          : Colors.grey.shade800,
+                  Expanded(
+                    child: Text(
+                      oClass.startTime != null
+                          ? (oClass.endTime != null
+                                ? '${oClass.startTime} – ${oClass.endTime}'
+                                : oClass.startTime!)
+                          : DateFormat('hh:mm a').format(oClass.scheduledTime),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: isDark
+                            ? Colors.grey.shade200
+                            : Colors.grey.shade800,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 7,
@@ -796,67 +1072,97 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
 
             const SizedBox(height: 10),
 
-            // ── Details Row: Teacher & Target Class ──
-            Row(
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
+            // ── Class / Section / Subject Info Row ──
+            if (oClass.className != null ||
+                oClass.sectionName != null ||
+                oClass.subjectName != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  children: [
+                    if (oClass.className != null) ...[
                       Icon(
-                        Icons.person_outline_rounded,
-                        size: 14,
-                        color: Colors.teal.shade600,
+                        Icons.class_outlined,
+                        size: 13,
+                        color: Colors.purple.shade400,
                       ),
-                      const SizedBox(width: 5),
+                      const SizedBox(width: 4),
+                      Text(
+                        oClass.className!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? Colors.grey.shade300
+                              : Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                    if (oClass.sectionName != null) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Text(
+                          '·',
+                          style: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.group_outlined,
+                        size: 13,
+                        color: Colors.teal.shade400,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        oClass.sectionName!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? Colors.grey.shade300
+                              : Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                    if (oClass.subjectName != null) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Text(
+                          '·',
+                          style: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.menu_book_outlined,
+                        size: 13,
+                        color: Colors.indigo.shade400,
+                      ),
+                      const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          oClass.teacherName,
+                          oClass.subjectName!,
                           style: TextStyle(
                             fontSize: 12,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                             color: isDark
                                 ? Colors.grey.shade300
                                 : Colors.grey.shade700,
                           ),
-                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
-                  ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.school_outlined,
-                        size: 14,
-                        color: AppColors.primaryAdmin,
-                      ),
-                      const SizedBox(width: 5),
-                      Expanded(
-                        child: Text(
-                          classSectionLabel,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: isDark
-                                ? Colors.grey.shade300
-                                : Colors.grey.shade700,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
 
+            // ── Description ──
             if (oClass.description.isNotEmpty) ...[
-              const SizedBox(height: 8),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(
@@ -874,16 +1180,29 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                   style: TextStyle(
                     color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                     fontSize: 12,
+                    height: 1.4,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(height: 10),
             ],
 
-            const SizedBox(height: 12),
+            // ── Participants ──
+            if (oClass.participants.isNotEmpty) ...[
+              _buildParticipantsRow(oClass.participants, isDark),
+              const SizedBox(height: 10),
+            ],
 
-            // ── Action Button: Join Meeting (Disabled if already passed) ──
+            // ── Divider ──
+            Divider(
+              height: 1,
+              color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+            ),
+            const SizedBox(height: 10),
+
+            // ── Action Button: Join Meeting ──
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -931,6 +1250,169 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // ── Participants Row ───────────────────────────────────────────────────────
+
+  Widget _buildParticipantsRow(
+    List<OnlineClassParticipant> participants,
+    bool isDark,
+  ) {
+    const int maxVisible = 4;
+    final visibleList = participants.take(maxVisible).toList();
+    final extraCount = participants.length - maxVisible;
+    final stackCount = visibleList.length + (extraCount > 0 ? 1 : 0);
+    final stackWidth = stackCount * 20.0 + 6.0;
+
+    return Row(
+      children: [
+        Icon(
+          Icons.people_outline_rounded,
+          size: 14,
+          color: Colors.grey.shade500,
+        ),
+        const SizedBox(width: 6),
+        SizedBox(
+          height: 26,
+          width: stackWidth,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              for (int i = 0; i < visibleList.length; i++)
+                Positioned(
+                  left: i * 20.0,
+                  child: _buildAvatarCircle(visibleList[i], isDark),
+                ),
+              if (extraCount > 0)
+                Positioned(
+                  left: visibleList.length * 20.0,
+                  child: Container(
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isDark
+                          ? Colors.grey.shade700
+                          : Colors.grey.shade300,
+                      border: Border.all(
+                        color: isDark ? Colors.grey.shade900 : Colors.white,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '+$extraCount',
+                        style: TextStyle(
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                          color: isDark
+                              ? Colors.grey.shade300
+                              : Colors.grey.shade700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            _participantsLabel(participants),
+            style: TextStyle(
+              fontSize: 12,
+              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAvatarCircle(OnlineClassParticipant p, bool isDark) {
+    return Container(
+      width: 26,
+      height: 26,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: isDark ? Colors.grey.shade900 : Colors.white,
+          width: 1.5,
+        ),
+      ),
+      child: ClipOval(
+        child: p.avatar != null && p.avatar!.isNotEmpty
+            ? Image.network(
+                p.avatar!,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _defaultAvatar(p.name, isDark),
+              )
+            : _defaultAvatar(p.name, isDark),
+      ),
+    );
+  }
+
+  Widget _defaultAvatar(String name, bool isDark) {
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+    return Container(
+      color: isDark ? Colors.indigo.shade900 : Colors.indigo.shade100,
+      child: Center(
+        child: Text(
+          initial,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.indigo.shade200 : Colors.indigo.shade700,
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _participantsLabel(List<OnlineClassParticipant> participants) {
+    if (participants.isEmpty) return '';
+    final named = participants
+        .where((p) => p.name.isNotEmpty && p.name != 'Unknown')
+        .toList();
+    if (named.isEmpty) return '${participants.length} participant(s)';
+    if (named.length == 1) return named[0].name;
+    if (named.length == 2) return '${named[0].name} & ${named[1].name}';
+    return '${named[0].name}, ${named[1].name} & ${named.length - 2} more';
+  }
+
+  // ── Badge Helper ──────────────────────────────────────────────────────────
+
+  Widget _buildBadge({
+    required IconData icon,
+    required String label,
+    required Color bgColor,
+    required Color textColor,
+    required Color iconColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 11, color: iconColor),
+          const SizedBox(width: 3),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+            ),
+          ),
+        ],
       ),
     );
   }
