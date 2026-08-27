@@ -1523,8 +1523,9 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                             color: accentLight,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Column(
+                          child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
+
                             children: [
                               Text(
                                 startAmPm,
@@ -1535,6 +1536,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                                   letterSpacing: 0.2,
                                 ),
                               ),
+                              SizedBox(width: 10,),
                               Text(
                                 endAmPm,
                                 style: TextStyle(
@@ -3180,7 +3182,7 @@ class _ClassCardListViewState extends State<_ClassCardListView> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 210,
+      height: 165,
       child: ListView.builder(
         controller: _scrollController,
         scrollDirection: Axis.horizontal,
