@@ -1499,7 +1499,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
         margin: EdgeInsets.zero,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          width: screenSize(context, .60),
+          width: screenSize(context, .65),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
