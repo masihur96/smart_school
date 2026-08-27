@@ -72,13 +72,6 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
   late TabController _tabController;
   final List<bool> _visitedTabs = [true, false, false, false];
 
-  /// Controller used to auto-scroll the today's class list to the active class.
-  final ScrollController _classListScrollController = ScrollController();
-
-  /// Set to true once we have scrolled to the current class, so we don't
-  /// repeat the jump on every rebuild.
-  bool _hasScrolledToCurrentClass = false;
-
   int get _selectedIndex => _tabController.index;
 
   @override
@@ -114,35 +107,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
   @override
   void dispose() {
     _tabController.dispose();
-    _classListScrollController.dispose();
     super.dispose();
-  }
-
-  /// Scrolls [_classListScrollController] to position the first active (current)
-  /// class card at the leading edge of the list.
-  void _scrollToCurrentClass(List<RoutineEntry> classes) {
-    if (_hasScrolledToCurrentClass) return;
-    if (!_classListScrollController.hasClients) return;
-
-    final activeIndex = classes.indexWhere(
-      (c) => _isCurrentClass(c.startTime, c.endTime),
-    );
-    if (activeIndex <= 0) return; // first card or none – nothing to scroll
-
-    // Each card is screenSize * 0.52 wide + 12px gap.
-    final cardWidth = MediaQuery.of(context).size.width * 0.52 + 12;
-    final targetOffset = (activeIndex * cardWidth).clamp(
-      0.0,
-      _classListScrollController.position.maxScrollExtent,
-    );
-
-    _classListScrollController.animateTo(
-      targetOffset,
-      duration: const Duration(milliseconds: 450),
-      curve: Curves.easeOutCubic,
-    );
-
-    _hasScrolledToCurrentClass = true;
   }
 
   @override
@@ -444,26 +409,11 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                       },
                     ),
                     const SizedBox(height: 12),
-                    Builder(
-                      builder: (context) {
-                        // Scroll to current class after the list has rendered.
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          _scrollToCurrentClass(classes);
-                        });
-                        return SizedBox(
-                          height: 210,
-                          child: ListView.builder(
-                            controller: _classListScrollController,
-                            scrollDirection: Axis.horizontal,
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: classes.length,
-                            itemBuilder: (context, index) => Padding(
-                              padding: const EdgeInsets.only(right: 12),
-                              child: _buildClassCard(context, classes[index]),
-                            ),
-                          ),
-                        );
-                      },
+                    _ClassCardListView(
+                      classes: classes,
+                      buildCard: (ctx, entry) =>
+                          _buildClassCard(ctx, entry),
+                      isCurrentClass: _isCurrentClass,
                     ),
                     const SizedBox(height: 24),
                   ],
@@ -3142,6 +3092,89 @@ class _ClassPerformanceCardWithSubjectDropdownState
             textAlign: TextAlign.center,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A horizontal list of class cards that auto-scrolls to the currently
+/// active class on first render. Manages its own [ScrollController] so it
+/// never affects the parent vertical scroll position.
+class _ClassCardListView extends StatefulWidget {
+  const _ClassCardListView({
+    required this.classes,
+    required this.buildCard,
+    required this.isCurrentClass,
+  });
+
+  final List<RoutineEntry> classes;
+  final Widget Function(BuildContext, RoutineEntry) buildCard;
+  final bool Function(String startTime, String endTime) isCurrentClass;
+
+  @override
+  State<_ClassCardListView> createState() => _ClassCardListViewState();
+}
+
+class _ClassCardListViewState extends State<_ClassCardListView> {
+  late final ScrollController _scrollController;
+
+  static const double _cardGap = 12.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToActiveClass());
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToActiveClass() {
+    if (!mounted || !_scrollController.hasClients) return;
+
+    final activeIndex = widget.classes.indexWhere(
+      (c) => widget.isCurrentClass(c.startTime, c.endTime),
+    );
+
+    if (activeIndex <= 0) return; // already at start or none active
+
+    // Calculate the pixel offset: each card occupies its rendered width + gap.
+    // We use the actual maxScrollExtent divided by total cards to get
+    // a per-card width that accounts for the real rendered size.
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final totalCards = widget.classes.length;
+    if (totalCards <= 1) return;
+
+    final perCardOffset = maxScroll / (totalCards - 1);
+    final targetOffset = (activeIndex * perCardOffset).clamp(
+      0.0,
+      maxScroll,
+    );
+
+    _scrollController.animateTo(
+      targetOffset,
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 210,
+      child: ListView.builder(
+        controller: _scrollController,
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: widget.classes.length,
+        itemBuilder: (ctx, index) => Padding(
+          padding: const EdgeInsets.only(right: _cardGap),
+          child: widget.buildCard(ctx, widget.classes[index]),
+        ),
       ),
     );
   }
