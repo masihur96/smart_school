@@ -20,6 +20,7 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<TeacherDashboardProvider>();
+
       if (provider.exams.isEmpty) {
         provider.fetchExams();
       }
@@ -43,8 +44,8 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
-          IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
-        ],
+          TextButton(onPressed: _refresh, child: Text(l10n?.viewAll ?? "",style: TextStyle(color: Colors.white),)),
+         ],
       ),
       body: provider.isLoading && exams.isEmpty
           ? const Center(child: CircularProgressIndicator())
@@ -88,45 +89,20 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
     final resultsCount = exam.results.length;
 
     final dateRange = exam.startDate != null && exam.endDate != null
-        ? '${DateFormat('MMM dd').format(exam.startDate!)} - ${DateFormat('MMM dd, yyyy').format(exam.endDate!)}'
+        ? '${DateFormat('MMM dd').format(exam.startDate!)} - ${DateFormat('MMM dd').format(exam.endDate!)}'
         : (exam.startDate != null
-              ? DateFormat('MMM dd, yyyy').format(exam.startDate!)
+              ? DateFormat('MMM dd').format(exam.startDate!)
               : 'N/A');
 
-    return Container(
+    return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primaryTeacher,
-            AppColors.primaryTeacher.withOpacity(0.8),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryTeacher.withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+
       child: InkWell(
         onTap: () => _showExamRoutines(context, exam),
         borderRadius: BorderRadius.circular(24),
         child: Stack(
           children: [
-            Positioned(
-              right: -30,
-              top: -30,
-              child: Icon(
-                Icons.assignment_rounded,
-                size: 150,
-                color: Colors.white.withOpacity(0.1),
-              ),
-            ),
+
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -139,7 +115,7 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
                         child: Text(
                           exam.name,
                           style: const TextStyle(
-                            color: Colors.white,
+
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.5,
@@ -155,7 +131,9 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: exam.isPublished
+                              ? Colors.green.withOpacity(0.1)
+                              : Colors.grey.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: Colors.white.withOpacity(0.3),
@@ -163,8 +141,8 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
                         ),
                         child: Text(
                           exam.isPublished ? 'Published' : 'Draft',
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style:  TextStyle(
+                            color: Colors.black,
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                           ),
@@ -177,7 +155,7 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
                     Text(
                       exam.description!,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
+
                         fontSize: 14,
                         height: 1.4,
                       ),
@@ -202,15 +180,6 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
                       ),
                     ],
                   ),
-                  if (resultsCount > 0) ...[
-                    const SizedBox(height: 12),
-                    _buildInfoBadge(
-                      Icons.check_circle_outline,
-                      '$resultsCount Results Recorded',
-                      Colors.green.shade50,
-                      Colors.green.shade900,
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -226,33 +195,26 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
     Color bgColor,
     Color textColor,
   ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: AppColors.primaryTeacher),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: TextStyle(
-              color: AppColors.primaryTeacher.withOpacity(0.8),
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
+    return Card(
+      margin: EdgeInsets.zero,
+
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: AppColors.primaryTeacher),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: AppColors.primaryTeacher.withOpacity(0.8),
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
