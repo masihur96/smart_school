@@ -68,9 +68,9 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
 
     if (!mounted) return;
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.classDeletedSuccess)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.classDeletedSuccess)));
     } else {
       final error = context.read<OnlineClassProvider>().error;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -325,8 +325,9 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
-                      color:
-                          isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                      color: isDark
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600,
                       height: 1.4,
                     ),
                   ),
@@ -407,8 +408,9 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
-                      color:
-                          isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                      color: isDark
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600,
                       height: 1.4,
                     ),
                   ),
@@ -431,8 +433,11 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                               .fetchOnlineClasses();
                         }
                       },
-                      icon:
-                          Icon(Icons.add_rounded, size: 20, color: themeColor),
+                      icon: Icon(
+                        Icons.add_rounded,
+                        size: 20,
+                        color: themeColor,
+                      ),
                       label: Text(
                         l10n.scheduleClass,
                         style: TextStyle(
@@ -581,7 +586,8 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     // Upcoming: Scheduled in the future
     final isUpcoming = oClass.scheduledTime.isAfter(now);
     // Live: Started within the last 60 minutes
-    final isLive = !isUpcoming &&
+    final isLive =
+        !isUpcoming &&
         now.isBefore(oClass.scheduledTime.add(const Duration(minutes: 60)));
     // Past: Started more than 60 minutes ago
     final isPast = !isUpcoming && !isLive;
@@ -704,19 +710,19 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                     color: isLive
                         ? Colors.red.shade50
                         : (isUpcoming
-                            ? Colors.green.shade50
-                            : (isDark
-                                ? Colors.grey.shade800
-                                : Colors.grey.shade100)),
+                              ? Colors.green.shade50
+                              : (isDark
+                                    ? Colors.grey.shade800
+                                    : Colors.grey.shade100)),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isLive
                           ? Colors.red.shade300
                           : (isUpcoming
-                              ? Colors.green.shade300
-                              : (isDark
-                                  ? Colors.grey.shade700
-                                  : Colors.grey.shade300)),
+                                ? Colors.green.shade300
+                                : (isDark
+                                      ? Colors.grey.shade700
+                                      : Colors.grey.shade300)),
                       width: 0.8,
                     ),
                   ),
@@ -737,15 +743,17 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                       Text(
                         isLive
                             ? l10n.statusLiveNow
-                            : (isUpcoming ? l10n.statusUpcoming : l10n.statusEnded),
+                            : (isUpcoming
+                                  ? l10n.statusUpcoming
+                                  : l10n.statusEnded),
                         style: TextStyle(
                           color: isLive
                               ? Colors.red.shade700
                               : (isUpcoming
-                                  ? Colors.green.shade700
-                                  : (isDark
-                                      ? Colors.grey.shade400
-                                      : Colors.grey.shade600)),
+                                    ? Colors.green.shade700
+                                    : (isDark
+                                          ? Colors.grey.shade400
+                                          : Colors.grey.shade600)),
                           fontSize: 10.5,
                           fontWeight: FontWeight.bold,
                         ),
@@ -782,7 +790,11 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                         value: 'edit',
                         child: Row(
                           children: [
-                            const Icon(Icons.edit_outlined, size: 18, color: Colors.blue),
+                            const Icon(
+                              Icons.edit_outlined,
+                              size: 18,
+                              color: Colors.blue,
+                            ),
                             const SizedBox(width: 8),
                             Text(l10n.editClass),
                           ],
@@ -792,10 +804,16 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                         value: 'delete',
                         child: Row(
                           children: [
-                            const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                            const Icon(
+                              Icons.delete_outline,
+                              size: 18,
+                              color: Colors.red,
+                            ),
                             const SizedBox(width: 8),
-                            Text(l10n.deleteClassTitle,
-                                style: const TextStyle(color: Colors.red)),
+                            Text(
+                              l10n.deleteClassTitle,
+                              style: const TextStyle(color: Colors.red),
+                            ),
                           ],
                         ),
                       ),
@@ -813,19 +831,19 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                 color: isDark
                     ? Colors.grey.shade900.withValues(alpha: 0.6)
                     : (isLive
-                        ? Colors.red.shade50.withValues(alpha: 0.5)
-                        : (isUpcoming
-                            ? themeColor.withValues(alpha: 0.05)
-                            : Colors.grey.shade100)),
+                          ? Colors.red.shade50.withValues(alpha: 0.5)
+                          : (isUpcoming
+                                ? themeColor.withValues(alpha: 0.05)
+                                : Colors.grey.shade100)),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isLive
                       ? Colors.red.shade200
                       : (isUpcoming
-                          ? themeColor.withValues(alpha: 0.15)
-                          : (isDark
-                              ? Colors.grey.shade800
-                              : Colors.grey.shade200)),
+                            ? themeColor.withValues(alpha: 0.15)
+                            : (isDark
+                                  ? Colors.grey.shade800
+                                  : Colors.grey.shade200)),
                 ),
               ),
               child: Row(
@@ -843,8 +861,9 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color:
-                          isDark ? Colors.grey.shade200 : Colors.grey.shade800,
+                      color: isDark
+                          ? Colors.grey.shade200
+                          : Colors.grey.shade800,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -870,22 +889,25 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color:
-                          isDark ? Colors.grey.shade200 : Colors.grey.shade800,
+                      color: isDark
+                          ? Colors.grey.shade200
+                          : Colors.grey.shade800,
                     ),
                   ),
                   const Spacer(),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: isLive
                           ? Colors.red
                           : (isUpcoming
-                              ? themeColor.withValues(alpha: 0.12)
-                              : (isDark
-                                  ? Colors.grey.shade800
-                                  : Colors.grey.shade200)),
+                                ? themeColor.withValues(alpha: 0.12)
+                                : (isDark
+                                      ? Colors.grey.shade800
+                                      : Colors.grey.shade200)),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -896,10 +918,10 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                         color: isLive
                             ? Colors.white
                             : (isUpcoming
-                                ? themeColor
-                                : (isDark
-                                    ? Colors.grey.shade400
-                                    : Colors.grey.shade600)),
+                                  ? themeColor
+                                  : (isDark
+                                        ? Colors.grey.shade400
+                                        : Colors.grey.shade600)),
                       ),
                     ),
                   ),
@@ -972,8 +994,10 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
               const SizedBox(height: 8),
               Container(
                 width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: isDark
                       ? Colors.grey.shade900.withValues(alpha: 0.4)
@@ -983,8 +1007,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                 child: Text(
                   oClass.description,
                   style: TextStyle(
-                    color:
-                        isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                     fontSize: 12,
                   ),
                   maxLines: 2,
@@ -1001,12 +1024,15 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
               child: ElevatedButton.icon(
                 onPressed: isPast ? null : () => _launchURL(oClass.meetLink),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      isLive ? const Color(0xFFEF4444) : themeColor,
-                  disabledBackgroundColor:
-                      isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-                  disabledForegroundColor:
-                      isDark ? Colors.grey.shade500 : Colors.grey.shade500,
+                  backgroundColor: isLive
+                      ? const Color(0xFFEF4444)
+                      : themeColor,
+                  disabledBackgroundColor: isDark
+                      ? Colors.grey.shade800
+                      : Colors.grey.shade200,
+                  disabledForegroundColor: isDark
+                      ? Colors.grey.shade500
+                      : Colors.grey.shade500,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -1017,8 +1043,8 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                   isPast
                       ? Icons.videocam_off_outlined
                       : (isLive
-                          ? Icons.videocam_rounded
-                          : Icons.video_call_rounded),
+                            ? Icons.videocam_rounded
+                            : Icons.video_call_rounded),
                   color: isPast
                       ? (isDark ? Colors.grey.shade500 : Colors.grey.shade500)
                       : Colors.white,
