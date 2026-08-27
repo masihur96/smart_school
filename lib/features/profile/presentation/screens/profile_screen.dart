@@ -1,21 +1,21 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:smart_school/core/utils/image_compress_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_school/configs/route_generator.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/core/utils/image_compress_utils.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/user_model.dart';
 
 import '../../../auth/providers/auth_provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final double initialScrollOffset;
+  const ProfileScreen({super.key, this.initialScrollOffset = 0});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -25,28 +25,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isEditing = false;
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
-  
+
   bool _isEditingSchool = false;
   late TextEditingController _schoolNameController;
   late TextEditingController _schoolPhoneController;
   late TextEditingController _schoolAddressController;
-  
+
   File? _imageFile;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+
     final user = context.read<AuthNotifier>().user;
     _nameController = TextEditingController(text: user?.name);
     _phoneController = TextEditingController(text: user?.phone);
-    
+
     _schoolNameController = TextEditingController(text: user?.school?.name);
     _schoolPhoneController = TextEditingController(text: user?.school?.phone);
-    _schoolAddressController = TextEditingController(text: user?.school?.address);
+    _schoolAddressController = TextEditingController(
+      text: user?.school?.address,
+    );
 
     // Fetch admins for the organization section
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthNotifier>().fetchAdmins();
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(
+          widget.initialScrollOffset.clamp(
+            0.0,
+            _scrollController.position.maxScrollExtent,
+          ),
+        );
+      }
     });
   }
 
@@ -57,6 +69,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _schoolNameController.dispose();
     _schoolPhoneController.dispose();
     _schoolAddressController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -110,7 +123,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         } else if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(auth.error ?? AppLocalizations.of(context)!.failedToUpdateProfileImage),
+              content: Text(
+                auth.error ??
+                    AppLocalizations.of(context)!.failedToUpdateProfileImage,
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -158,14 +174,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (success && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.schoolAvatarUpdatedSuccessfully),
+              content: Text(
+                AppLocalizations.of(context)!.schoolAvatarUpdatedSuccessfully,
+              ),
               backgroundColor: Colors.green,
             ),
           );
         } else if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(auth.error ?? AppLocalizations.of(context)!.failedToUpdateSchoolAvatar),
+              content: Text(
+                auth.error ??
+                    AppLocalizations.of(context)!.failedToUpdateSchoolAvatar,
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -192,7 +213,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(auth.error ?? AppLocalizations.of(context)!.failedToUpdateProfile),
+          content: Text(
+            auth.error ?? AppLocalizations.of(context)!.failedToUpdateProfile,
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -211,14 +234,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() => _isEditingSchool = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.schoolProfileUpdatedSuccessfully),
+          content: Text(
+            AppLocalizations.of(context)!.schoolProfileUpdatedSuccessfully,
+          ),
           backgroundColor: Colors.green,
         ),
       );
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(auth.error ?? AppLocalizations.of(context)!.failedToUpdateSchoolProfile),
+          content: Text(
+            auth.error ??
+                AppLocalizations.of(context)!.failedToUpdateSchoolProfile,
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -243,6 +271,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           _buildSliverAppBar(context, user, authProvider.isLoading),
           SliverToBoxAdapter(
@@ -349,8 +378,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       isEditable: true,
                       useSchoolEditState: true,
                       controller: _schoolNameController,
-                      avatarUrl: user.school?.avatar.isNotEmpty == true 
-                          ? user.school!.avatar 
+                      avatarUrl: user.school?.avatar.isNotEmpty == true
+                          ? user.school!.avatar
                           : null,
                       onAvatarTap: _isEditingSchool ? _pickSchoolImage : null,
                     ),
@@ -414,7 +443,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   //     ),
                   //   ),
                   // ]),
-
                   const SizedBox(height: 24),
                   _buildSectionHeader(l10n.organizationAdmins),
                   _buildAdminsSection(context, authProvider),
@@ -431,8 +459,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ]),
 
                   // Admin-only: Danger Zone
-                  if (user.role == UserRole.admin) ...
-                  [
+                  if (user.role == UserRole.admin) ...[
                     const SizedBox(height: 24),
                     _buildSectionHeader(l10n.dangerZone),
                     _buildDangerCard(context),
@@ -479,9 +506,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: GestureDetector(
-                    onTap: () {
-
-                    },
+                    onTap: () {},
                     child: CircleAvatar(
                       radius: 50,
                       backgroundColor: theme.primaryColor.withOpacity(0.1),
@@ -596,7 +621,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               clipBehavior: Clip.none,
               children: [
                 Container(
-                  padding: avatarUrl != null ? EdgeInsets.zero : const EdgeInsets.all(8),
+                  padding: avatarUrl != null
+                      ? EdgeInsets.zero
+                      : const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Theme.of(context).primaryColor.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(10),
@@ -647,7 +674,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   label,
                   style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
                 ),
-                if ((useSchoolEditState ? _isEditingSchool : _isEditing) && isEditable && controller != null)
+                if ((useSchoolEditState ? _isEditingSchool : _isEditing) &&
+                    isEditable &&
+                    controller != null)
                   TextField(
                     controller: controller,
                     style: const TextStyle(
@@ -679,7 +708,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Clipboard.setData(ClipboardData(text: value));
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(AppLocalizations.of(context)!.copiedToClipboard(label)),
+                    content: Text(
+                      AppLocalizations.of(context)!.copiedToClipboard(label),
+                    ),
                     duration: const Duration(seconds: 1),
                   ),
                 );
@@ -689,8 +720,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-
-
 
   Widget _buildStatusSection(BuildContext context, User user) {
     final bool isActive = user.isActive ?? false;
@@ -756,7 +785,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           padding: const EdgeInsets.all(20),
           child: Row(
             children: [
-              Icon(Icons.admin_panel_settings_outlined, color: Colors.grey[400], size: 20),
+              Icon(
+                Icons.admin_panel_settings_outlined,
+                color: Colors.grey[400],
+                size: 20,
+              ),
               const SizedBox(width: 12),
               Text(
                 l10n.noAdminsFound,
@@ -872,7 +905,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            const Icon(Icons.swap_horiz_rounded, color: Colors.orange, size: 24),
+            const Icon(
+              Icons.swap_horiz_rounded,
+              color: Colors.orange,
+              size: 24,
+            ),
             const SizedBox(width: 8),
             Text(
               l10n.changeRoleTitle,
@@ -882,7 +919,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         content: Text(
           l10n.changeRoleConfirmationMessage(admin.name, 'Admin', 'Teacher'),
-          style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.5),
+          style: const TextStyle(
+            fontSize: 14,
+            color: Colors.black87,
+            height: 1.5,
+          ),
         ),
         actions: [
           TextButton(
@@ -1001,7 +1042,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             title: Row(
               children: [
-                const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 26),
+                const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.red,
+                  size: 26,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   l10n.deleteAccount,
@@ -1098,6 +1143,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-
-
 }

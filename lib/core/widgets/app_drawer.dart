@@ -92,7 +92,14 @@ class AppDrawer extends StatelessWidget {
                 ),
 
                 decoration: const BoxDecoration(color: Colors.transparent),
-                onDetailsPressed: () {},
+                onDetailsPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ProfileScreen(initialScrollOffset: 500),
+                    ),
+                  );
+                },
               ),
               Expanded(
                 child: ListView(
