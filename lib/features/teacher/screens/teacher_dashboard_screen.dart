@@ -439,7 +439,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildSectionHeader(
-                    "My ${l10n.attendance}",
+                    l10n.teacherAttendance,
                     onSeeAll: () {
                       Navigator.push(
                         context,
@@ -455,7 +455,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                   const SizedBox(height: 24),
                   if (data?.myClassAttendStudents.isNotEmpty ?? false) ...[
                     _buildSectionHeader(
-                      l10n.attendance,
+                      l10n.studentAttendance,
                       onSeeAll: () {
                         Navigator.push(
                           context,
