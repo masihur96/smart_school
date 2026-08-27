@@ -293,6 +293,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
       themeColor = AppColors.primaryStudent;
     }
 
+    print(user?.role.name.toLowerCase());
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -345,30 +346,32 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
             );
           },
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () async {
-            final result = await Navigator.push<bool>(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AddEditOnlineClassScreen(
-                  isAdminOrTeacher: widget.isAdminOrTeacher,
+        floatingActionButton: user?.role.name.toLowerCase() != "student"
+            ? FloatingActionButton.extended(
+                onPressed: () async {
+                  final result = await Navigator.push<bool>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddEditOnlineClassScreen(
+                        isAdminOrTeacher: widget.isAdminOrTeacher,
+                      ),
+                    ),
+                  );
+                  if (result == true && context.mounted) {
+                    context.read<OnlineClassProvider>().fetchOnlineClasses();
+                  }
+                },
+                backgroundColor: themeColor,
+                icon: const Icon(Icons.add, color: Colors.white),
+                label: Text(
+                  l10n.newClass,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            );
-            if (result == true && context.mounted) {
-              context.read<OnlineClassProvider>().fetchOnlineClasses();
-            }
-          },
-          backgroundColor: themeColor,
-          icon: const Icon(Icons.add, color: Colors.white),
-          label: Text(
-            l10n.newClass,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+              )
+            : null,
       ),
     );
   }
