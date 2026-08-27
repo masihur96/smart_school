@@ -486,7 +486,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                         },
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 12),
                   ],
 
                   if (data != null)
@@ -1746,7 +1746,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 24),
+
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -1823,7 +1823,6 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                         child: Text(
                           exam.name,
                           style: const TextStyle(
-                            color: Colors.white,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -1832,21 +1831,20 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          exam.isPublished ? 'Published' : 'Upcoming',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                      Card(
+
+                        color: exam.isPublished
+                            ? Colors.green.shade600
+                            : Colors.orange.shade600,
+
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                          child: Text(
+                            exam.isPublished ? 'Published' : 'Upcoming',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -1855,7 +1853,6 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                   Text(
                     exam.description ?? '',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
                       fontSize: 12,
                     ),
                     maxLines: 2,
@@ -1870,14 +1867,14 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                           Text(
                             'Starts On',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.6),
+
                               fontSize: 10,
                             ),
                           ),
                           Text(
                             startDateStr,
                             style: const TextStyle(
-                              color: Colors.white,
+
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
