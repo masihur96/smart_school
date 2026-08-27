@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
+import 'package:smart_school/features/admin/providers/student_provider.dart';
+import 'package:smart_school/features/admin/providers/teacher_provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
 import 'package:smart_school/models/online_class_model.dart';
@@ -40,6 +42,8 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
   String? _selectedSectionId;
   String? _selectedSubjectId;
 
+  List<String> _selectedTeacherUuids = [];
+
   bool _isLoading = false;
 
   @override
@@ -61,6 +65,10 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
       final sectionNotifier = context.read<SectionSetupNotifier>();
       if (sectionNotifier.sections.isEmpty) {
         sectionNotifier.fetchSections();
+      }
+      final teacherProvider = context.read<TeachersNotifier>();
+      if (teacherProvider.teachers.isEmpty) {
+        teacherProvider.fetchTeachers();
       }
     });
 
@@ -224,6 +232,22 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
           ? _selectedSubjectId
           : null;
 
+      List<String>? participants = [];
+      if (_meetingCategory == MeetingCategory.onlineClass) {
+        if (classId != null) {
+          final studentProvider = context.read<StudentsNotifier>();
+          await studentProvider.fetchStudentsBySection(
+            classId: classId,
+            sectionId: sectionId,
+          );
+          participants = studentProvider.students.map((e) => e.userId).toList();
+        }
+      } else {
+        participants = _selectedTeacherUuids.isNotEmpty
+            ? _selectedTeacherUuids
+            : null;
+      }
+
       if (!isEditing) {
         final success = await context
             .read<OnlineClassProvider>()
@@ -237,6 +261,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
               classId: classId,
               sectionId: sectionId,
               subjectId: subjectId,
+              participantUuids: participants,
             );
 
         setState(() => _isLoading = false);
@@ -270,6 +295,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
               classId: classId,
               sectionId: sectionId,
               subjectId: subjectId,
+              participantUuids: participants,
             );
 
         setState(() => _isLoading = false);
@@ -303,11 +329,11 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
     final isEdit = widget.onlineClass != null;
     final titleText = isEdit
         ? (_meetingCategory == MeetingCategory.onlineClass
-            ? 'Edit Online Class'
-            : 'Edit Teacher Meeting')
+              ? 'Edit Online Class'
+              : 'Edit Teacher Meeting')
         : (_meetingCategory == MeetingCategory.onlineClass
-            ? 'Schedule Online Class'
-            : 'Schedule Teacher Meeting');
+              ? 'Schedule Online Class'
+              : 'Schedule Teacher Meeting');
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF121212) : Colors.grey.shade50,
@@ -376,18 +402,14 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                   isDark: isDark,
                   title: 'Academic Details',
                   icon: Icons.menu_book_outlined,
-                  children: [
-                    _buildAcademicDropdowns(isDark),
-                  ],
+                  children: [_buildAcademicDropdowns(isDark)],
                 )
               else
                 _buildCardSection(
                   isDark: isDark,
-                  title: 'Target Audience',
+                  title: 'Select Participants (Teachers/Staff)',
                   icon: Icons.groups_outlined,
-                  children: [
-                    _buildTeacherMeetingNotice(isDark, primaryThemeColor),
-                  ],
+                  children: [_buildTeacherSelection(isDark, primaryThemeColor)],
                 ),
               const SizedBox(height: 20),
 
@@ -400,7 +422,9 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                   _buildDateTimePicker(
                     label: 'Meeting Date',
                     value: _selectedDate != null
-                        ? DateFormat('EEEE, MMM dd, yyyy').format(_selectedDate!)
+                        ? DateFormat(
+                            'EEEE, MMM dd, yyyy',
+                          ).format(_selectedDate!)
                         : 'Select Date',
                     icon: Icons.calendar_month_rounded,
                     onTap: _pickDate,
@@ -512,7 +536,9 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                             color: pInfo['bgColor'] as Color,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: (pInfo['color'] as Color).withValues(alpha: 0.3),
+                              color: (pInfo['color'] as Color).withValues(
+                                alpha: 0.3,
+                              ),
                             ),
                           ),
                           child: Row(
@@ -550,7 +576,9 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                   icon: _isLoading
                       ? const SizedBox.shrink()
                       : Icon(
-                          isEdit ? Icons.check_circle : Icons.video_call_rounded,
+                          isEdit
+                              ? Icons.check_circle
+                              : Icons.video_call_rounded,
                           color: Colors.white,
                         ),
                   label: _isLoading
@@ -565,11 +593,11 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                       : Text(
                           isEdit
                               ? (_meetingCategory == MeetingCategory.onlineClass
-                                  ? 'Update Online Class'
-                                  : 'Update Teacher Meeting')
+                                    ? 'Update Online Class'
+                                    : 'Update Teacher Meeting')
                               : (_meetingCategory == MeetingCategory.onlineClass
-                                  ? 'Save & Schedule Class'
-                                  : 'Save & Schedule Meeting'),
+                                    ? 'Save & Schedule Class'
+                                    : 'Save & Schedule Meeting'),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -871,9 +899,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
       decoration: BoxDecoration(
         color: primaryColor.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: primaryColor.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.2)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -920,6 +946,139 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
     );
   }
 
+  // ── Teacher Selection for Meetings ──────────────────────────────────────────
+
+  Widget _buildTeacherSelection(bool isDark, Color primaryColor) {
+    final teacherProvider = context.watch<TeachersNotifier>();
+
+    return InkWell(
+      onTap: () =>
+          _showTeacherSelectionDialog(teacherProvider, isDark, primaryColor),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF121212) : Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.person_add_alt_1_rounded, size: 20, color: primaryColor),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                _selectedTeacherUuids.isEmpty
+                    ? 'Select teachers...'
+                    : '${_selectedTeacherUuids.length} teacher(s) selected',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: _selectedTeacherUuids.isEmpty
+                      ? (isDark ? Colors.grey.shade500 : Colors.grey.shade600)
+                      : (isDark ? Colors.white : Colors.grey.shade900),
+                ),
+              ),
+            ),
+            Icon(
+              Icons.arrow_drop_down_rounded,
+              color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showTeacherSelectionDialog(
+    TeachersNotifier provider,
+    bool isDark,
+    Color primaryColor,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              backgroundColor: isDark ? Colors.grey.shade900 : Colors.white,
+              title: Text(
+                'Select Teachers',
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 300,
+                child: provider.isLoading
+                    ? Center(
+                        child: CircularProgressIndicator(color: primaryColor),
+                      )
+                    : provider.teachers.isEmpty
+                    ? Center(
+                        child: Text(
+                          'No teachers found',
+                          style: TextStyle(
+                            color: isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade600,
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: provider.teachers.length,
+                        itemBuilder: (context, index) {
+                          final teacher = provider.teachers[index];
+                          final isSelected = _selectedTeacherUuids.contains(
+                            teacher.userId,
+                          );
+                          return CheckboxListTile(
+                            activeColor: primaryColor,
+                            checkColor: Colors.white,
+                            title: Text(
+                              teacher.user?.name ?? 'Unknown Teacher',
+                              style: TextStyle(
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                            value: isSelected,
+                            onChanged: (val) {
+                              setStateDialog(() {
+                                if (val == true) {
+                                  _selectedTeacherUuids.add(teacher.userId);
+                                } else {
+                                  _selectedTeacherUuids.remove(teacher.userId);
+                                }
+                              });
+                              setState(() {});
+                            },
+                          );
+                        },
+                      ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(
+                    'Done',
+                    style: TextStyle(
+                      color: primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   // ── Academic Dropdowns ─────────────────────────────────────────────────────
 
   Widget _buildAcademicDropdowns(bool isDark) {
@@ -929,7 +1088,12 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
 
     // Section filtering with fallback
     var availableSections = sectionSetup.sections
-        .where((s) => _selectedClassId == null || s.classId.isEmpty || s.classId == _selectedClassId)
+        .where(
+          (s) =>
+              _selectedClassId == null ||
+              s.classId.isEmpty ||
+              s.classId == _selectedClassId,
+        )
         .toList();
     if (availableSections.isEmpty && sectionSetup.sections.isNotEmpty) {
       availableSections = sectionSetup.sections;
@@ -937,7 +1101,12 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
 
     // Subject filtering with fallback
     var availableSubjects = subjectSetup.subjects
-        .where((s) => _selectedClassId == null || s.classId.isEmpty || s.classId == _selectedClassId)
+        .where(
+          (s) =>
+              _selectedClassId == null ||
+              s.classId.isEmpty ||
+              s.classId == _selectedClassId,
+        )
         .toList();
     if (availableSubjects.isEmpty && subjectSetup.subjects.isNotEmpty) {
       availableSubjects = subjectSetup.subjects;
@@ -946,10 +1115,12 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
     final validClassId = classSetup.classes.any((c) => c.id == _selectedClassId)
         ? _selectedClassId
         : null;
-    final validSectionId = availableSections.any((s) => s.id == _selectedSectionId)
+    final validSectionId =
+        availableSections.any((s) => s.id == _selectedSectionId)
         ? _selectedSectionId
         : null;
-    final validSubjectId = availableSubjects.any((s) => s.id == _selectedSubjectId)
+    final validSubjectId =
+        availableSubjects.any((s) => s.id == _selectedSubjectId)
         ? _selectedSubjectId
         : null;
 
@@ -957,14 +1128,15 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
       children: [
         DropdownButtonFormField<String>(
           value: validClassId,
-          decoration: _buildInputDecoration('Class', Icons.class_rounded, isDark),
+          decoration: _buildInputDecoration(
+            'Class',
+            Icons.class_rounded,
+            isDark,
+          ),
           dropdownColor: isDark ? Colors.grey.shade900 : Colors.white,
           hint: classSetup.isLoading ? const Text('Loading classes...') : null,
           items: classSetup.classes.map((c) {
-            return DropdownMenuItem(
-              value: c.id,
-              child: Text(c.name),
-            );
+            return DropdownMenuItem(value: c.id, child: Text(c.name));
           }).toList(),
           onChanged: (val) {
             setState(() {
@@ -973,37 +1145,48 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
               _selectedSubjectId = null;
             });
           },
-          validator: (val) => _meetingCategory == MeetingCategory.onlineClass && val == null
+          validator: (val) =>
+              _meetingCategory == MeetingCategory.onlineClass && val == null
               ? 'Please select a class'
               : null,
         ),
         const SizedBox(height: 14),
         DropdownButtonFormField<String>(
           value: validSectionId,
-          decoration: _buildInputDecoration('Section', Icons.groups_rounded, isDark),
+          decoration: _buildInputDecoration(
+            'Section',
+            Icons.groups_rounded,
+            isDark,
+          ),
           dropdownColor: isDark ? Colors.grey.shade900 : Colors.white,
           hint: sectionSetup.isLoading
               ? const Text('Loading sections...')
-              : (availableSections.isEmpty ? const Text('No sections available') : null),
+              : (availableSections.isEmpty
+                    ? const Text('No sections available')
+                    : null),
           items: availableSections.map((s) {
-            return DropdownMenuItem(
-              value: s.id,
-              child: Text(s.name),
-            );
+            return DropdownMenuItem(value: s.id, child: Text(s.name));
           }).toList(),
           onChanged: (val) => setState(() => _selectedSectionId = val),
-          validator: (val) => _meetingCategory == MeetingCategory.onlineClass && val == null
+          validator: (val) =>
+              _meetingCategory == MeetingCategory.onlineClass && val == null
               ? 'Please select a section'
               : null,
         ),
         const SizedBox(height: 14),
         DropdownButtonFormField<String>(
           value: validSubjectId,
-          decoration: _buildInputDecoration('Subject', Icons.book_rounded, isDark),
+          decoration: _buildInputDecoration(
+            'Subject',
+            Icons.book_rounded,
+            isDark,
+          ),
           dropdownColor: isDark ? Colors.grey.shade900 : Colors.white,
           hint: subjectSetup.isLoading
               ? const Text('Loading subjects...')
-              : (availableSubjects.isEmpty ? const Text('No subjects available') : null),
+              : (availableSubjects.isEmpty
+                    ? const Text('No subjects available')
+                    : null),
           items: availableSubjects.map((s) {
             return DropdownMenuItem(
               value: s.id,
@@ -1011,7 +1194,8 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
             );
           }).toList(),
           onChanged: (val) => setState(() => _selectedSubjectId = val),
-          validator: (val) => _meetingCategory == MeetingCategory.onlineClass && val == null
+          validator: (val) =>
+              _meetingCategory == MeetingCategory.onlineClass && val == null
               ? 'Please select a subject'
               : null,
         ),
@@ -1019,7 +1203,11 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
     );
   }
 
-  InputDecoration _buildInputDecoration(String label, IconData icon, bool isDark) {
+  InputDecoration _buildInputDecoration(
+    String label,
+    IconData icon,
+    bool isDark,
+  ) {
     return InputDecoration(
       labelText: label,
       prefixIcon: Icon(

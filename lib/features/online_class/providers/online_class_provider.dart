@@ -93,6 +93,7 @@ class OnlineClassProvider extends ChangeNotifier {
     String? classId,
     String? sectionId,
     String? subjectId,
+    List<String>? participantUuids,
   }) async {
     _setLoading(true);
     _error = null;
@@ -109,6 +110,8 @@ class OnlineClassProvider extends ChangeNotifier {
         if (classId != null) 'classId': classId,
         if (sectionId != null) 'sectionId': sectionId,
         if (subjectId != null) 'subjectId': subjectId,
+        if (participantUuids != null && participantUuids.isNotEmpty)
+          'participantUuids': participantUuids,
       };
 
       log('Create online class payload: $payload');
@@ -154,6 +157,7 @@ class OnlineClassProvider extends ChangeNotifier {
     String? classId,
     String? sectionId,
     String? subjectId,
+    List<String>? participantUuids,
   }) async {
     _setLoading(true);
     _error = null;
@@ -170,6 +174,8 @@ class OnlineClassProvider extends ChangeNotifier {
         if (classId != null) 'classId': classId,
         if (sectionId != null) 'sectionId': sectionId,
         if (subjectId != null) 'subjectId': subjectId,
+        if (participantUuids != null && participantUuids.isNotEmpty)
+          'participantUuids': participantUuids,
       };
 
       log('Update online class payload: $payload');
