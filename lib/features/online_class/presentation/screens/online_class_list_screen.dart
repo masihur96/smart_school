@@ -541,37 +541,6 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
-                      const Spacer(),
-                      Container(
-                        width: 100,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  Container(
-                    width: double.infinity,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // ── Card ──────────────────────────────────────────────────────────────────
-
   Widget _buildOnlineClassCard(
     BuildContext context,
     OnlineClass oClass,
@@ -582,20 +551,17 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final now = DateTime.now();
 
-    // Meeting status computation
-    // Upcoming: Scheduled in the future
     final isUpcoming = oClass.scheduledTime.isAfter(now);
-    // Live: Started within the last 60 minutes
     final isLive =
         !isUpcoming &&
         now.isBefore(oClass.scheduledTime.add(const Duration(minutes: 60)));
-    // Past: Started more than 60 minutes ago
     final isPast = !isUpcoming && !isLive;
 
-    final classSectionLabel = _getClassSectionLabel(context, oClass);
     final relativeTime = _getTimeAgoOrUpcoming(context, oClass.scheduledTime);
     final platformLabel = _getPlatformLabel(context, oClass.meetLink);
     final platformIcon = _getPlatformIcon(oClass.meetLink);
+
+    final bool isTeacherMeeting = oClass.className == null && oClass.sectionName == null;
 
     return Card(
       elevation: 0,
@@ -603,7 +569,10 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+          color: isLive
+              ? Colors.red.shade300
+              : (isDark ? Colors.grey.shade800 : Colors.grey.shade200),
+          width: isLive ? 1.2 : 1.0,
         ),
       ),
       child: Padding(
@@ -611,7 +580,6 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Top Row: Title, Status Badge, 3-dot Menu ──
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -629,134 +597,42 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 6),
-                      // Badges: Subject & Platform
                       Wrap(
                         spacing: 6,
                         runSpacing: 4,
                         children: [
                           if (oClass.subjectName != null &&
                               oClass.subjectName!.isNotEmpty)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.indigo.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.menu_book_outlined,
-                                    size: 11,
-                                    color: Colors.indigo.shade700,
-                                  ),
-                                  const SizedBox(width: 3),
-                                  Text(
-                                    oClass.subjectName!,
-                                    style: TextStyle(
-                                      fontSize: 10.5,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.indigo.shade700,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            _buildBadge(
+                              icon: Icons.menu_book_outlined,
+                              label: oClass.subjectName!,
+                              bgColor: Colors.indigo.withValues(alpha: 0.08),
+                              textColor: Colors.indigo.shade700,
+                              iconColor: Colors.indigo.shade700,
                             ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 7,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  platformIcon,
-                                  size: 11,
-                                  color: Colors.blue.shade700,
-                                ),
-                                const SizedBox(width: 3),
-                                Text(
-                                  platformLabel,
-                                  style: TextStyle(
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.blue.shade700,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          _buildBadge(
+                            icon: platformIcon,
+                            label: platformLabel,
+                            bgColor: Colors.blue.withValues(alpha: 0.08),
+                            textColor: Colors.blue.shade700,
+                            iconColor: Colors.blue.shade700,
+                          ),
+                          _buildBadge(
+                            icon: isTeacherMeeting
+                                ? Icons.supervisor_account_rounded
+                                : Icons.school_rounded,
+                            label: isTeacherMeeting ? 'Teacher Meeting' : 'Class Meeting',
+                            bgColor: isTeacherMeeting
+                                ? Colors.orange.withValues(alpha: 0.10)
+                                : Colors.teal.withValues(alpha: 0.09),
+                            textColor: isTeacherMeeting
+                                ? Colors.orange.shade800
+                                : Colors.teal.shade700,
+                            iconColor: isTeacherMeeting
+                                ? Colors.orange.shade700
+                                : Colors.teal.shade600,
                           ),
                         ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // Status badge (Live / Upcoming / Ended)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 9,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isLive
-                        ? Colors.red.shade50
-                        : (isUpcoming
-                              ? Colors.green.shade50
-                              : (isDark
-                                    ? Colors.grey.shade800
-                                    : Colors.grey.shade100)),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isLive
-                          ? Colors.red.shade300
-                          : (isUpcoming
-                                ? Colors.green.shade300
-                                : (isDark
-                                      ? Colors.grey.shade700
-                                      : Colors.grey.shade300)),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isLive
-                              ? Colors.red
-                              : (isUpcoming ? Colors.green : Colors.grey),
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        isLive
-                            ? l10n.statusLiveNow
-                            : (isUpcoming
-                                  ? l10n.statusUpcoming
-                                  : l10n.statusEnded),
-                        style: TextStyle(
-                          color: isLive
-                              ? Colors.red.shade700
-                              : (isUpcoming
-                                    ? Colors.green.shade700
-                                    : (isDark
-                                          ? Colors.grey.shade400
-                                          : Colors.grey.shade600)),
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.bold,
-                        ),
                       ),
                     ],
                   ),
@@ -790,11 +666,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                         value: 'edit',
                         child: Row(
                           children: [
-                            const Icon(
-                              Icons.edit_outlined,
-                              size: 18,
-                              color: Colors.blue,
-                            ),
+                            const Icon(Icons.edit_outlined, size: 18, color: Colors.blue),
                             const SizedBox(width: 8),
                             Text(l10n.editClass),
                           ],
@@ -804,11 +676,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                         value: 'delete',
                         child: Row(
                           children: [
-                            const Icon(
-                              Icons.delete_outline,
-                              size: 18,
-                              color: Colors.red,
-                            ),
+                            const Icon(Icons.delete_outline, size: 18, color: Colors.red),
                             const SizedBox(width: 8),
                             Text(
                               l10n.deleteClassTitle,
@@ -821,10 +689,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                   ),
               ],
             ),
-
             const SizedBox(height: 12),
-
-            // ── Professional Time Box ──
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(

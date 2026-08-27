@@ -30,6 +30,8 @@ class OnlineClass {
   final String description;
   final String meetLink;
   final DateTime scheduledTime;
+  final String? startTime;
+  final String? endTime;
   final String teacherId;
   final String teacherName;
   final String? classId;
@@ -47,6 +49,8 @@ class OnlineClass {
     required this.description,
     required this.meetLink,
     required this.scheduledTime,
+    this.startTime,
+    this.endTime,
     required this.teacherId,
     required this.teacherName,
     this.classId,
@@ -121,6 +125,8 @@ class OnlineClass {
       description: json['description']?.toString() ?? '',
       meetLink: json['meetLink']?.toString() ?? '',
       scheduledTime: parsedDate,
+      startTime: json['startTime']?.toString(),
+      endTime: json['endTime']?.toString(),
       teacherId: json['hostId']?.toString() ?? json['teacherId']?.toString() ?? '',
       teacherName: tName,
       classId: json['classId']?.toString() ?? (classObj is Map ? (classObj['uuid']?.toString() ?? classObj['id']?.toString()) : null),
@@ -142,6 +148,8 @@ class OnlineClass {
         'description': description,
         'meetLink': meetLink,
         'scheduledTime': scheduledTime.toIso8601String(),
+        'startTime': startTime,
+        'endTime': endTime,
         'teacherId': teacherId,
         'teacherName': teacherName,
         'classId': classId,
