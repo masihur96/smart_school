@@ -72,6 +72,13 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
   late TabController _tabController;
   final List<bool> _visitedTabs = [true, false, false, false];
 
+  /// Controller used to auto-scroll the today's class list to the active class.
+  final ScrollController _classListScrollController = ScrollController();
+
+  /// Set to true once we have scrolled to the current class, so we don't
+  /// repeat the jump on every rebuild.
+  bool _hasScrolledToCurrentClass = false;
+
   int get _selectedIndex => _tabController.index;
 
   @override
@@ -107,7 +114,35 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
   @override
   void dispose() {
     _tabController.dispose();
+    _classListScrollController.dispose();
     super.dispose();
+  }
+
+  /// Scrolls [_classListScrollController] to position the first active (current)
+  /// class card at the leading edge of the list.
+  void _scrollToCurrentClass(List<RoutineEntry> classes) {
+    if (_hasScrolledToCurrentClass) return;
+    if (!_classListScrollController.hasClients) return;
+
+    final activeIndex = classes.indexWhere(
+      (c) => _isCurrentClass(c.startTime, c.endTime),
+    );
+    if (activeIndex <= 0) return; // first card or none – nothing to scroll
+
+    // Each card is screenSize * 0.52 wide + 12px gap.
+    final cardWidth = MediaQuery.of(context).size.width * 0.52 + 12;
+    final targetOffset = (activeIndex * cardWidth).clamp(
+      0.0,
+      _classListScrollController.position.maxScrollExtent,
+    );
+
+    _classListScrollController.animateTo(
+      targetOffset,
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeOutCubic,
+    );
+
+    _hasScrolledToCurrentClass = true;
   }
 
   @override
@@ -409,17 +444,26 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                       },
                     ),
                     const SizedBox(height: 12),
-                    SizedBox(
-                      height: 210,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: classes.length,
-                        itemBuilder: (context, index) => Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: _buildClassCard(context, classes[index]),
-                        ),
-                      ),
+                    Builder(
+                      builder: (context) {
+                        // Scroll to current class after the list has rendered.
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          _scrollToCurrentClass(classes);
+                        });
+                        return SizedBox(
+                          height: 210,
+                          child: ListView.builder(
+                            controller: _classListScrollController,
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: classes.length,
+                            itemBuilder: (context, index) => Padding(
+                              padding: const EdgeInsets.only(right: 12),
+                              child: _buildClassCard(context, classes[index]),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 24),
                   ],
