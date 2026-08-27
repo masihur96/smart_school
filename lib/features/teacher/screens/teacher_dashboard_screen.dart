@@ -1105,7 +1105,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Due: ${DateFormat('dd MMM').format(homework.dueDate)}',
+                    'Date: ${DateFormat('dd MMM').format(homework.dueDate)}',
                     style: const TextStyle(fontSize: 10, color: Colors.red),
                   ),
                   const Icon(Icons.arrow_forward, size: 14, color: Colors.grey),
