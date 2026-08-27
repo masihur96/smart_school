@@ -410,13 +410,13 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
-                      height: 170,
+                      height: 210,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         physics: const BouncingScrollPhysics(),
                         itemCount: classes.length,
                         itemBuilder: (context, index) => Padding(
-                          padding: const EdgeInsets.only(right: 5),
+                          padding: const EdgeInsets.only(right: 12),
                           child: _buildClassCard(context, classes[index]),
                         ),
                       ),
@@ -1366,108 +1366,294 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     }
   }
 
+  /// Parses a "HH:mm:ss" or "HH:mm" time string and converts it to AM/PM format.
+  String _formatTimeAmPm(String timeStr) {
+    try {
+      final parts = timeStr.split(':');
+      int hour = int.parse(parts[0]);
+      final int minute = int.parse(parts[1]);
+      final period = hour >= 12 ? 'PM' : 'AM';
+      if (hour == 0) {
+        hour = 12;
+      } else if (hour > 12) {
+        hour -= 12;
+      }
+      return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
+    } catch (_) {
+      return timeStr;
+    }
+  }
+
+  /// Returns true if the current time falls within [startTime] and [endTime] (HH:mm or HH:mm:ss strings).
+  bool _isCurrentClass(String startTime, String endTime) {
+    try {
+      final now = TimeOfDay.now();
+      final startParts = startTime.split(':');
+      final endParts = endTime.split(':');
+      final startMinutes =
+          int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
+      final endMinutes =
+          int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+      final nowMinutes = now.hour * 60 + now.minute;
+      return nowMinutes >= startMinutes && nowMinutes < endMinutes;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Returns the elapsed fraction [0.0 – 1.0] of the class period at the current time.
+  double _classPeriodProgress(String startTime, String endTime) {
+    try {
+      final now = TimeOfDay.now();
+      final startParts = startTime.split(':');
+      final endParts = endTime.split(':');
+      final startMinutes =
+          int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
+      final endMinutes =
+          int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+      final nowMinutes = now.hour * 60 + now.minute;
+      final total = endMinutes - startMinutes;
+      if (total <= 0) return 0.0;
+      return ((nowMinutes - startMinutes) / total).clamp(0.0, 1.0);
+    } catch (_) {
+      return 0.0;
+    }
+  }
+
   Widget _buildClassCard(BuildContext context, RoutineEntry classInfo) {
     final classNameText =
         classInfo.classEntity?.name ?? 'Class ${classInfo.classId}';
     final sectionNameText = classInfo.sectionEntity?.name != null
-        ? ' - ${classInfo.sectionEntity!.name}'
+        ? ' (${classInfo.sectionEntity!.name})'
         : '';
     final className = '$classNameText$sectionNameText';
     final subjectName =
         classInfo.subjectEntity?.name ?? 'Subject ${classInfo.subjectId}';
 
-    return Card(
-      margin: EdgeInsets.zero,
-      child: SizedBox(
-        width: screenSize(context, .45),
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ScheduleClassDetails(
-                      subjectID: classInfo.subjectId ?? "",
-                      classRoom: classInfo.classEntity!,
-                      sectionId: classInfo.sectionId,
-                      routineId: classInfo.id,
-                    ),
-                  ),
-                );
-              },
-              borderRadius: BorderRadius.circular(24),
+    final isActive = _isCurrentClass(classInfo.startTime, classInfo.endTime);
+    final progress = isActive
+        ? _classPeriodProgress(classInfo.startTime, classInfo.endTime)
+        : 0.0;
+
+    final startAmPm = _formatTimeAmPm(classInfo.startTime);
+    final endAmPm = _formatTimeAmPm(classInfo.endTime);
+
+    // Color palette: green for active, indigo for regular
+    final Color accentColor =
+        isActive ? const Color(0xFF16A34A) : const Color(0xFF4F46E5);
+    final Color accentLight =
+        isActive ? const Color(0xFFDCFCE7) : const Color(0xFFEDE9FE);
+    final Color accentMid =
+        isActive ? const Color(0xFF22C55E) : const Color(0xFF6366F1);
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ScheduleClassDetails(
+              subjectID: classInfo.subjectId ?? "",
+              classRoom: classInfo.classEntity!,
+              sectionId: classInfo.sectionId,
+              routineId: classInfo.id,
+            ),
+          ),
+        );
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        width: screenSize(context, .52),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isActive ? accentColor.withValues(alpha: 0.6) : Colors.transparent,
+            width: 1.8,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: accentColor.withValues(alpha: isActive ? 0.18 : 0.06),
+              blurRadius: isActive ? 16 : 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Top accent strip ───────────────────────────────────────────
+            Container(
+              height: 5,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [accentColor, accentMid],
+                ),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(19),
+                ),
+              ),
+            ),
+
+            Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // ── Header row: time badge + live badge ────────────────
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Time chip
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
+                            horizontal: 9,
+                            vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(10),
+                            color: accentLight,
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Text(
-                            "${classInfo.startTime.split(':').take(2).join(':')} - ${classInfo.endTime.split(':').take(2).join(':')}",
-                            style: TextStyle(
-                              color: Colors.blue.shade700,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 11,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                startAmPm,
+                                style: TextStyle(
+                                  color: accentColor,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 11,
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                              Text(
+                                endAmPm,
+                                style: TextStyle(
+                                  color: accentColor.withValues(alpha: 0.7),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+
+                        const Spacer(),
+
+                        // "NOW" badge if currently active
+                        if (isActive)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: accentColor,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 5,
+                                  height: 5,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                const Text(
+                                  'NOW',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                       ],
                     ),
-                    const Spacer(),
-                    Text(
-                      className,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        letterSpacing: -0.5,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
+
+                    const SizedBox(height: 12),
+
+                    // ── Subject name ───────────────────────────────────────
                     Text(
                       subjectName,
                       style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                        color: accentColor,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 12),
+
+                    const SizedBox(height: 3),
+
+                    // ── Class / Section ────────────────────────────────────
+                    Text(
+                      className,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                        letterSpacing: -0.3,
+                        color: Theme.of(context).textTheme.titleLarge?.color,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+
+                    const Spacer(),
+
+                    // ── Room number (if available) ─────────────────────────
+                    if (classInfo.roomNumber != null &&
+                        classInfo.roomNumber!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.door_front_door_outlined,
+                              size: 12,
+                              color: Colors.grey.shade500,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Room ${classInfo.roomNumber}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    // ── Teacher row ────────────────────────────────────────
                     if (classInfo.teacherEntity != null)
                       Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              shape: BoxShape.circle,
+                          CircleAvatar(
+                            radius: 9,
+                            backgroundColor: accentLight,
+                            child: Icon(
+                              Icons.person,
+                              size: 11,
+                              color: accentColor,
                             ),
-                            child: const Icon(Icons.person, size: 12),
                           ),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
                               classInfo.teacherEntity!.name,
                               style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey.shade700,
+                                fontSize: 11,
+                                color: Colors.grey.shade600,
                                 fontWeight: FontWeight.w500,
                               ),
                               maxLines: 1,
@@ -1476,11 +1662,41 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                           ),
                         ],
                       ),
+
+                    // ── Progress bar (only when class is active) ───────────
+                    if (isActive) ...[
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                minHeight: 5,
+                                backgroundColor: accentLight,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(accentColor),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${(progress * 100).toStringAsFixed(0)}%',
+                            style: TextStyle(
+                              fontSize: 9,
+                              color: accentColor,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
