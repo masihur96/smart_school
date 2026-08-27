@@ -839,9 +839,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                       margin: const EdgeInsets.only(right: 12),
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: isClockOut
-                            ? Colors.green.shade50
-                            : Colors.orange.shade50,
+
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: isClockOut
@@ -942,7 +940,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Icon(icon, size: 10, color: Colors.black87),
+        Icon(icon, size: 10),
 
         SizedBox(width: 5),
         Text(
@@ -951,7 +949,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 10,
-            color: Colors.black87,
+
           ),
         ),
       ],
