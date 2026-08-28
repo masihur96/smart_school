@@ -6,7 +6,7 @@ import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 
 import '../providers/teacher_dashboard_provider.dart';
-import 'mark_entry_screen.dart';
+import 'teacher_exam_details_screen.dart';
 
 class TeacherExamScreen extends StatefulWidget {
   final bool hideAppBar;
@@ -87,8 +87,6 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
     Exam exam,
     AppLocalizations l10n,
   ) {
-    final assignmentsCount = exam.assignments.length;
-    final resultsCount = exam.results.length;
 
     final dateRange = exam.startDate != null && exam.endDate != null
         ? '${DateFormat('MMM dd').format(exam.startDate!)} - ${DateFormat('MMM dd').format(exam.endDate!)}'
@@ -101,16 +99,12 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
 
       child: InkWell(
         onTap: () {
-          if (exam.isPublished) {
-            _showExamDetails(context, exam);
-          } else {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => MarkEntryScreen(initialExamId: exam.id),
-              ),
-            );
-          }
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => TeacherExamDetailsScreen(exam: exam),
+            ),
+          );
         },
         borderRadius: BorderRadius.circular(24),
         child: Stack(
@@ -234,43 +228,6 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
     );
   }
 
-  void _showExamDetails(BuildContext context, Exam exam) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.8,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFFF8F9FE),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-          ),
-          child: Column(
-            children: [
-              const SizedBox(height: 12),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Expanded(
-                child: TeacherExamDetailsSheet(
-                  exam: exam,
-                  scrollController: scrollController,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class TeacherExamRoutineView extends StatelessWidget {
