@@ -36,18 +36,11 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   String? _selectedSectionId;
   Subject? _selectedSubject;
 
-  // All students fetched from server (no section filter)
-  List<TeacherAssignmentStudent> _allStudents = [];
+  // Cache: sectionId (or '' for all) -> students fetched from server
+  final Map<String, List<TeacherAssignmentStudent>> _studentCache = {};
 
-  // Client-side filtered list based on _selectedSectionId
-  List<TeacherAssignmentStudent> get _filteredStudents {
-    if (_selectedSectionId == null || _selectedSectionId!.isEmpty) {
-      return _allStudents;
-    }
-    return _allStudents
-        .where((s) => s.sectionId == _selectedSectionId)
-        .toList();
-  }
+  // Currently displayed students
+  List<TeacherAssignmentStudent> _displayStudents = [];
 
   final Map<String, TextEditingController> _marksControllers = {};
   final Map<String, TextEditingController> _totalMarksControllers = {};
@@ -83,12 +76,12 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
 
   void _fetchStudents() {
     final resultsNotifier = context.read<ResultsNotifier>();
-    
+
     final exam = resultsNotifier.exams.firstWhere(
       (e) => e.id == widget.initialExamId,
       orElse: () => Exam(id: widget.initialExamId, name: ''),
     );
-    
+
     String subjectName = 'Subject';
     try {
       final assignment = exam.assignments.firstWhere(
@@ -107,28 +100,43 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       _selectedSubject = Subject(id: widget.initialSubjectId, name: subjectName);
     });
 
-    if (_selectedClassId != null) {
-      // Fetch ALL students for the class (no section filter) so we can filter client-side
-      resultsNotifier
-          .loadStudents(
-            _selectedExam?.id ?? '',
-            _selectedClassId!,
-          )
-          .then((_) {
-            if (mounted) {
-              setState(() {
-                _allStudents = List.from(resultsNotifier.students);
-              });
-              _populateExistingMarks();
-            }
-          });
+    _loadStudentsForSection(_selectedSectionId);
+  }
+
+  void _loadStudentsForSection(String? sectionId) {
+    final cacheKey = sectionId ?? '';
+    if (_studentCache.containsKey(cacheKey)) {
+      // Already cached — use it directly
+      setState(() => _displayStudents = List.from(_studentCache[cacheKey]!));
+      _populateExistingMarks();
+      return;
     }
+
+    final resultsNotifier = context.read<ResultsNotifier>();
+    if (_selectedClassId == null) return;
+
+    resultsNotifier
+        .loadStudents(
+          _selectedExam?.id ?? '',
+          _selectedClassId!,
+          sectionId: sectionId,
+        )
+        .then((_) {
+          if (mounted) {
+            final students = List<TeacherAssignmentStudent>.from(
+              resultsNotifier.students,
+            );
+            _studentCache[cacheKey] = students;
+            setState(() => _displayStudents = students);
+            _populateExistingMarks();
+          }
+        });
   }
 
   void _populateExistingMarks() {
     if (_selectedExam == null || _selectedSubject == null) return;
 
-    final students = _allStudents;
+    final students = _displayStudents;
     if (students.isEmpty) return;
 
     setState(() {
@@ -190,7 +198,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   @override
   Widget build(BuildContext context) {
     final notifier = context.watch<ResultsNotifier>();
-    final students = _filteredStudents;
+    final students = _displayStudents;
 
     return Scaffold(
       body: CustomScrollView(
@@ -274,6 +282,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                   setState(() {
                     _selectedSectionId = val;
                   });
+                  _loadStudentsForSection(val);
                 },
               ),
             ),
