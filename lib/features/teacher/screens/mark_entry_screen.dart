@@ -35,7 +35,6 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   String? _selectedClassId;
   String? _selectedSectionId;
   Subject? _selectedSubject;
-  bool _showFilters = false;
 
   final Map<String, TextEditingController> _marksControllers = {};
   final Map<String, TextEditingController> _totalMarksControllers = {};
@@ -45,66 +44,13 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final resultsNotifier = context.read<ResultsNotifier>();
       final sectionNotifier = context.read<SectionSetupNotifier>();
       if (sectionNotifier.sections.isEmpty) {
         sectionNotifier.fetchSections();
       }
 
-      if (resultsNotifier.exams.isEmpty) {
-        resultsNotifier.loadExams().then((_) {
-          _handleInitialSelection(resultsNotifier);
-        });
-      } else {
-        _handleInitialSelection(resultsNotifier);
-      }
+      _fetchStudents();
     });
-  }
-
-  Future<void> _handleInitialSelection(ResultsNotifier resultsNotifier) async {
-    if (!mounted || widget.initialExamId == null) return;
-    
-    final exam = resultsNotifier.exams.firstWhere(
-      (e) => e.id == widget.initialExamId,
-      orElse: () => resultsNotifier.exams.first,
-    );
-    
-    if (exam.id == widget.initialExamId) {
-      if (widget.initialClassId != null && widget.initialSubjectId != null) {
-        // Full auto-select flow
-        setState(() {
-          _showFilters = false; // Hide filters since we auto-selected
-          _selectedExam = exam;
-          _selectedExamId = exam.id;
-          _selectedClassId = widget.initialClassId;
-          _selectedSectionId = widget.initialSectionId;
-        });
-        
-        await resultsNotifier.loadExamAssignedSubjects(
-          exam.id,
-          widget.initialClassId!,
-          sectionId: widget.initialSectionId,
-        );
-        
-        if (mounted) {
-          final subjectIdx = resultsNotifier.examSubjects.indexWhere(
-            (s) => s.id == widget.initialSubjectId,
-          );
-          if (subjectIdx != -1) {
-            setState(() {
-              _selectedSubject = resultsNotifier.examSubjects[subjectIdx];
-            });
-            _fetchStudents();
-          } else {
-            setState(() => _showFilters = true);
-          }
-        }
-      } else {
-        // Just select exam and show filters
-        setState(() => _showFilters = true);
-        _onExamChanged(exam);
-      }
-    }
   }
 
   @override
@@ -122,60 +68,32 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     _remarksControllers.clear();
   }
 
-  void _onExamChanged(Exam? exam) {
+  void _fetchStudents() {
+    final resultsNotifier = context.read<ResultsNotifier>();
+    
+    final exam = resultsNotifier.exams.firstWhere(
+      (e) => e.id == widget.initialExamId,
+      orElse: () => Exam(id: widget.initialExamId, name: ''),
+    );
+    
+    String subjectName = 'Subject';
+    try {
+      final assignment = exam.assignments.firstWhere(
+        (a) => a.subjectId == widget.initialSubjectId,
+      );
+      subjectName = assignment.subjectName;
+    } catch (_) {}
+
     setState(() {
       _selectedExam = exam;
-      _selectedExamId = exam?.id;
-      _selectedClassId = null;
-      _selectedSectionId = null;
-      _selectedSubject = null;
-      _disposeControllers();
+      _selectedExamId = exam.id;
+      _selectedClassId = widget.initialClassId;
+      _selectedSectionId = widget.initialSectionId;
+      _selectedSubject = Subject(id: widget.initialSubjectId, name: subjectName);
     });
-  }
 
-  void _onClassChanged(String? classId) {
-    setState(() {
-      _selectedClassId = classId;
-      _selectedSectionId = null;
-      _selectedSubject = null;
-      _disposeControllers();
-    });
-    if (_selectedExamId != null && classId != null) {
-      context.read<ResultsNotifier>().loadExamAssignedSubjects(
-        _selectedExamId!,
-        classId,
-      );
-    }
-  }
-
-  void _onSectionChanged(String? sectionId) {
-    setState(() {
-      _selectedSectionId = sectionId;
-      _selectedSubject = null;
-      _disposeControllers();
-    });
-    if (_selectedExamId != null && _selectedClassId != null) {
-      context.read<ResultsNotifier>().loadExamAssignedSubjects(
-        _selectedExamId!,
-        _selectedClassId!,
-        sectionId: sectionId,
-      );
-    }
-    _fetchStudents();
-  }
-
-  void _onSubjectChanged(Subject? subject) {
-    setState(() {
-      _selectedSubject = subject;
-      _disposeControllers();
-    });
-    _fetchStudents();
-  }
-
-  void _fetchStudents() {
     if (_selectedClassId != null) {
-      context
-          .read<ResultsNotifier>()
+      resultsNotifier
           .loadStudents(
             _selectedExam?.id ?? '',
             _selectedClassId!,
@@ -263,7 +181,6 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
           SliverToBoxAdapter(
             child: Column(
               children: [
-                if (_showFilters) _buildFilterCard(notifier),
                 if (_selectedSubject != null)
                   _buildSectionHeader('Students (${students.length})'),
               ],
@@ -292,174 +209,6 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
         'Mark Entry System',
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
       ),
-      actions: [
-        IconButton(
-          onPressed: () => setState(() => _showFilters = !_showFilters),
-          icon: Icon(_showFilters ? Icons.filter_list_off : Icons.filter_list),
-          tooltip: _showFilters ? 'Hide Filters' : 'Show Filters',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFilterCard(ResultsNotifier notifier) {
-    final user = context.watch<AuthNotifier>().user;
-    
-    final allowedExams = notifier.exams.where((exam) {
-      if (user == null) return false;
-      return exam.assignments.any((a) => a.examinerId == user.id);
-    }).toList();
-
-    final uniqueClasses = <String, String>{};
-    if (_selectedExam != null && user != null) {
-      for (var a in _selectedExam!.assignments) {
-        if (a.examinerId == user.id) {
-          uniqueClasses[a.classId] = a.className;
-        }
-      }
-    }
-
-    final sections = context.watch<SectionSetupNotifier>().sections;
-    final filteredSections = sections
-        .where((s) => s.classId == _selectedClassId)
-        .toList();
-
-    List<Subject> filteredSubjects = [];
-    if (user != null && _selectedExam != null) {
-      final allowedSubjectIds = _selectedExam!.assignments
-          .where((a) =>
-              a.examinerId == user.id && a.classId == _selectedClassId)
-          .map((a) => a.subjectId)
-          .toSet();
-      filteredSubjects = notifier.examSubjects
-          .where((s) => allowedSubjectIds.contains(s.id))
-          .toList();
-    } else {
-      filteredSubjects = notifier.examSubjects;
-    }
-
-    return Card(
-      margin: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildDropdownField<String>(
-              label: 'Examination',
-              icon: Icons.assignment_outlined,
-              value: _selectedExamId,
-              loading: notifier.examsLoading,
-              items: allowedExams
-                  .map(
-                    (e) => DropdownMenuItem(value: e.id, child: Text(e.name)),
-                  )
-                  .toList(),
-              onChanged: (id) {
-                final exam = allowedExams.firstWhere((e) => e.id == id);
-                _onExamChanged(exam);
-              },
-            ),
-            const SizedBox(height: 16),
-            _buildDropdownField<String>(
-              label: 'Class',
-              icon: Icons.school_outlined,
-              value: _selectedClassId,
-              enabled: _selectedExam != null,
-              items: uniqueClasses.entries
-                  .map(
-                    (e) => DropdownMenuItem(
-                  value: e.key,
-                  child: Text(e.value),
-                ),
-              )
-                  .toList(),
-              onChanged: _onClassChanged,
-            ),
-            const SizedBox(height: 12),
-            _buildDropdownField<String>(
-              label: 'Section',
-              icon: Icons.grid_view_outlined,
-              value: _selectedSectionId,
-              enabled: _selectedClassId != null,
-              items: filteredSections
-                  .map(
-                    (s) => DropdownMenuItem(
-                  value: s.id,
-                  child: Text(s.name),
-                ),
-              )
-                  .toList(),
-              onChanged: _onSectionChanged,
-            ),
-            const SizedBox(height: 16),
-            _buildDropdownField<Subject>(
-              label: 'Subject',
-              icon: Icons.book_outlined,
-              value: _selectedSubject,
-              loading: notifier.examSubjectsLoading,
-              enabled: _selectedClassId != null,
-              items: filteredSubjects
-                  .map((s) => DropdownMenuItem(value: s, child: Text(s.name)))
-                  .toList(),
-              onChanged: _onSubjectChanged,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDropdownField<T>({
-    required String label,
-    required IconData icon,
-    required T? value,
-    required List<DropdownMenuItem<T>> items,
-    required ValueChanged<T?>? onChanged,
-    bool loading = false,
-    bool enabled = true,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 6),
-        DropdownButtonFormField<T>(
-          value: value,
-          decoration: InputDecoration(
-            prefixIcon: Icon(icon, size: 20),
-            hintText: 'Select',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
-            ),
-            filled: true,
-
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
-          ),
-
-          items: items,
-          onChanged: enabled ? onChanged : null,
-          icon: loading
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.keyboard_arrow_down),
-          disabledHint: Text(enabled ? 'Select' : 'Previous first'),
-        ),
-      ],
     );
   }
 
@@ -717,28 +466,9 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   }
 
   Widget _buildEmptyState() {
-    return SliverFillRemaining(
+    return const SliverFillRemaining(
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.manage_search, size: 80, color: Colors.grey[200]),
-            const SizedBox(height: 16),
-            Text(
-              'Select Filters to Start',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[400],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Choose exam and classroom to enter marks',
-              style: TextStyle(color: Colors.grey[400]),
-            ),
-          ],
-        ),
+        child: CircularProgressIndicator(),
       ),
     );
   }
