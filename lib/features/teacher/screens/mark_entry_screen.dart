@@ -36,8 +36,8 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   String? _selectedSectionId;
   Subject? _selectedSubject;
 
-  // Cache: sectionId (or '' for all) -> students fetched from server
-  final Map<String, List<TeacherAssignmentStudent>> _studentCache = {};
+  // All students in this class fetched from server
+  List<TeacherAssignmentStudent>? _allClassStudents;
 
   // Currently displayed students
   List<TeacherAssignmentStudent> _displayStudents = [];
@@ -103,32 +103,56 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     _loadStudentsForSection(_selectedSectionId);
   }
 
+  void _filterAndDisplayStudents(String? sectionId) {
+    if (_allClassStudents == null) return;
+    
+    setState(() {
+      if (sectionId != null && sectionId.isNotEmpty) {
+        _displayStudents = _allClassStudents!
+            .where((s) => s.sectionId == sectionId)
+            .toList();
+      } else {
+        _displayStudents = List.from(_allClassStudents!);
+      }
+    });
+    _populateExistingMarks();
+  }
+
   void _loadStudentsForSection(String? sectionId) {
-    final cacheKey = sectionId ?? '';
-    if (_studentCache.containsKey(cacheKey)) {
-      // Already cached — use it directly
-      setState(() => _displayStudents = List.from(_studentCache[cacheKey]!));
-      _populateExistingMarks();
+    if (_allClassStudents != null) {
+      _filterAndDisplayStudents(sectionId);
       return;
     }
 
     final resultsNotifier = context.read<ResultsNotifier>();
     if (_selectedClassId == null) return;
 
+    // Fetch all students for the class once
     resultsNotifier
         .loadStudents(
           _selectedExam?.id ?? '',
           _selectedClassId!,
-          sectionId: sectionId,
+          sectionId: null, // Ensure we fetch all
         )
         .then((_) {
           if (mounted) {
-            final students = List<TeacherAssignmentStudent>.from(
+            _allClassStudents = List<TeacherAssignmentStudent>.from(
               resultsNotifier.students,
             );
-            _studentCache[cacheKey] = students;
-            setState(() => _displayStudents = students);
-            _populateExistingMarks();
+            
+            // Auto select first section if none selected
+            String? targetSectionId = sectionId;
+            if (targetSectionId == null || targetSectionId.isEmpty) {
+              final sections = context.read<SectionSetupNotifier>().sections
+                  .where((s) => s.classId == _selectedClassId)
+                  .toList();
+              if (sections.isNotEmpty) {
+                targetSectionId = sections.first.id;
+                setState(() => _selectedSectionId = targetSectionId);
+              }
+            }
+            
+            _filterAndDisplayStudents(targetSectionId);
           }
         });
   }
