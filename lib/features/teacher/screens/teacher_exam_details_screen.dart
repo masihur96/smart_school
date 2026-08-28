@@ -256,7 +256,7 @@ class _RoutineTab extends StatelessWidget {
   }
 
   Widget _buildAssignmentList(List<ExamAssignment> items) {
-    final sorted = [...items]..sort((a, b) => a.date.compareTo(b.date));
+    final sorted = [...items]..sort(_compareAssignments);
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: sorted.length,
@@ -571,27 +571,7 @@ class _ResultTab extends StatelessWidget {
         .toList();
 
     // Sort: today first → upcoming → past
-    final today = DateTime.now();
-    final todayDate = DateTime(today.year, today.month, today.day);
-    myAssignments.sort((a, b) {
-      final aDate = DateTime(a.date.year, a.date.month, a.date.day);
-      final bDate = DateTime(b.date.year, b.date.month, b.date.day);
-      final aDays = aDate.difference(todayDate).inDays;
-      final bDays = bDate.difference(todayDate).inDays;
-      final aIsToday = aDays == 0;
-      final bIsToday = bDays == 0;
-      final aIsUpcoming = aDays > 0;
-      final bIsUpcoming = bDays > 0;
-
-      // Today always first
-      if (aIsToday && !bIsToday) return -1;
-      if (!aIsToday && bIsToday) return 1;
-      // Upcoming before past
-      if (aIsUpcoming && !bIsUpcoming) return -1;
-      if (!aIsUpcoming && bIsUpcoming) return 1;
-      // Within same group: sort by date ascending
-      return aDate.compareTo(bDate);
-    });
+    myAssignments.sort(_compareAssignments);
 
     final header = Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
@@ -726,7 +706,9 @@ class _AssignedSubjectCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final examDate = assignment.date;
-    final daysLeft = examDate.difference(DateTime(now.year, now.month, now.day)).inDays;
+    final examDateNormalized = DateTime(examDate.year, examDate.month, examDate.day);
+    final todayNormalized = DateTime(now.year, now.month, now.day);
+    final daysLeft = examDateNormalized.difference(todayNormalized).inDays;
     final isToday = daysLeft == 0;
     final isPast = daysLeft < 0;
 
@@ -1171,4 +1153,33 @@ Widget _emptyState({required IconData icon, required String message}) {
       ],
     ),
   );
+}
+
+// ---------------------------------------------------------------------------
+// Shared sorting logic
+// ---------------------------------------------------------------------------
+int _compareAssignments(ExamAssignment a, ExamAssignment b) {
+  final today = DateTime.now();
+  final todayDate = DateTime(today.year, today.month, today.day);
+
+  final aDate = DateTime(a.date.year, a.date.month, a.date.day);
+  final bDate = DateTime(b.date.year, b.date.month, b.date.day);
+  final aDays = aDate.difference(todayDate).inDays;
+  final bDays = bDate.difference(todayDate).inDays;
+
+  final aIsToday = aDays == 0;
+  final bIsToday = bDays == 0;
+  final aIsUpcoming = aDays > 0;
+  final bIsUpcoming = bDays > 0;
+
+  // Today always first
+  if (aIsToday && !bIsToday) return -1;
+  if (!aIsToday && bIsToday) return 1;
+  
+  // Upcoming before past
+  if (aIsUpcoming && !bIsUpcoming) return -1;
+  if (!aIsUpcoming && bIsUpcoming) return 1;
+  
+  // Within same group: sort by date ascending
+  return aDate.compareTo(bDate);
 }
