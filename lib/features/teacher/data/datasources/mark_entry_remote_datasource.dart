@@ -75,12 +75,15 @@ class MarkEntryRemoteDataSource {
     }
   }
 
-  /// GET /teacher/assignments/exams/{examId}/classes/{classId}/students
+  /// GET /teacher/assignments/exams/{examId}/classes/{classId}/students?subjectId={subjectId}
   Future<List<TeacherAssignmentStudent>> getClassStudents(
-      String examId, String classId, {String? sectionId}) async {
+      String examId, String classId, {String? sectionId, String? subjectId}) async {
     final token = await _getToken();
     var url =
         '${APIPath.teacherAssignment}/exams/$examId/classes/$classId/students';
+    if (subjectId != null && subjectId.isNotEmpty) {
+      url += '?subjectId=$subjectId';
+    }
     log('Fetching class students: $url');
 
     final response = await _dataProvider.performRequest(

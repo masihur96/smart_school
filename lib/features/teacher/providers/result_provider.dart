@@ -97,13 +97,13 @@ class ResultsNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> loadStudents(String examId, String classId, {String? sectionId}) async {
+  Future<void> loadStudents(String examId, String classId, {String? sectionId, String? subjectId}) async {
     _studentsLoading = true;
     _students = [];
     _subjects = [];
     notifyListeners();
     try {
-      _students = await _repository.getClassStudents(examId, classId, sectionId: sectionId);
+      _students = await _repository.getClassStudents(examId, classId, sectionId: sectionId, subjectId: subjectId);
       log('Loaded ${_students.length} students for class $classId, section $sectionId');
     } catch (e) {
       log('Error loading students: $e');

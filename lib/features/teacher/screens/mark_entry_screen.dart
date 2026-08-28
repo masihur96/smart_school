@@ -5,10 +5,10 @@ import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 
+import '../../../services/notification_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/result_provider.dart';
 import '../providers/teacher_dashboard_provider.dart';
-import '../../../services/notification_service.dart';
 
 class MarkEntryScreen extends StatefulWidget {
   final bool hideAppBar;
@@ -19,10 +19,10 @@ class MarkEntryScreen extends StatefulWidget {
   const MarkEntryScreen({
     super.key,
     this.hideAppBar = false,
-   required this.initialExamId,
-   required this.initialClassId,
-   required this.initialSectionId,
-   required this.initialSubjectId,
+    required this.initialExamId,
+    required this.initialClassId,
+    required this.initialSectionId,
+    required this.initialSubjectId,
   });
 
   @override
@@ -49,6 +49,8 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   @override
   void initState() {
     super.initState();
+
+    print("widget.initialSubjectId${widget.initialSubjectId}");
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final sectionNotifier = context.read<SectionSetupNotifier>();
       if (sectionNotifier.sections.isEmpty) {
@@ -95,7 +97,10 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       _selectedExamId = exam.id;
       _selectedClassId = widget.initialClassId;
       _selectedSectionId = null; // Always show 'All Sections' initially
-      _selectedSubject = Subject(id: widget.initialSubjectId, name: subjectName);
+      _selectedSubject = Subject(
+        id: widget.initialSubjectId,
+        name: subjectName,
+      );
     });
 
     _loadStudentsForSection(_selectedSectionId);
@@ -103,7 +108,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
 
   void _filterAndDisplayStudents(String? sectionId) {
     if (_allClassStudents == null) return;
-    
+
     setState(() {
       if (sectionId != null && sectionId.isNotEmpty) {
         _displayStudents = _allClassStudents!
@@ -131,13 +136,14 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
           _selectedExam?.id ?? '',
           _selectedClassId!,
           sectionId: null, // Ensure we fetch all
+          subjectId: _selectedSubject?.id,
         )
         .then((_) {
           if (mounted) {
             _allClassStudents = List<TeacherAssignmentStudent>.from(
               resultsNotifier.students,
             );
-            
+
             _filterAndDisplayStudents(sectionId);
           }
         });
@@ -164,16 +170,18 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
           ),
         );
 
-        if (existingResult.marksObtained != -1) {
+        final marksObtained = student.marksObtained ?? (existingResult.marksObtained != -1 ? existingResult.marksObtained : null);
+        final totalMarks = student.totalMarks ?? (existingResult.marksObtained != -1 ? existingResult.totalMarks : 100);
+
+        if (marksObtained != null) {
           _getMarksController(student.id).text =
-              existingResult.marksObtained ==
-                  existingResult.marksObtained.toInt()
-              ? existingResult.marksObtained.toInt().toString()
-              : existingResult.marksObtained.toString();
+              marksObtained == marksObtained.toInt()
+              ? marksObtained.toInt().toString()
+              : marksObtained.toString();
           _getTotalMarksController(student.id).text =
-              existingResult.totalMarks == existingResult.totalMarks.toInt()
-              ? existingResult.totalMarks.toInt().toString()
-              : existingResult.totalMarks.toString();
+              totalMarks == totalMarks.toInt()
+              ? totalMarks.toInt().toString()
+              : totalMarks.toString();
           _getRemarksController(student.id).text = existingResult.remarks;
         } else {
           _getMarksController(student.id).clear();
@@ -255,7 +263,9 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
         .where((s) => s.classId == _selectedClassId)
         .toList();
 
-    final hasValidSection = filteredSections.any((s) => s.id == _selectedSectionId);
+    final hasValidSection = filteredSections.any(
+      (s) => s.id == _selectedSectionId,
+    );
     final displayValue = hasValidSection ? _selectedSectionId : null;
 
     return Card(
@@ -407,7 +417,11 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                   student.name,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                subtitle: Text(AppLocalizations.of(context)!.rollNumber(student.rollNumber.toString())),
+                subtitle: Text(
+                  AppLocalizations.of(
+                    context,
+                  )!.rollNumber(student.rollNumber.toString()),
+                ),
                 trailing: isEntered
                     ? Container(
                         padding: const EdgeInsets.symmetric(
@@ -561,9 +575,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
 
   Widget _buildEmptyState() {
     return const SliverFillRemaining(
-      child: Center(
-        child: CircularProgressIndicator(),
-      ),
+      child: Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -642,7 +654,9 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.failedToSaveMarks(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.failedToSaveMarks(e.toString()),
+            ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
