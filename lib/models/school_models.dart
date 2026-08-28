@@ -1014,13 +1014,18 @@ class TeacherAssignmentStudent {
     this.sectionId,
   });
 
-  factory TeacherAssignmentStudent.fromJson(Map<String, dynamic> json) =>
-      TeacherAssignmentStudent(
-        id: json['id'] ?? '',
-        name: json['name'] ?? '',
-        rollNumber: json['rollNumber'] ?? '',
-        sectionId: json['sectionId'] ?? json['section_id'],
-      );
+  factory TeacherAssignmentStudent.fromJson(Map<String, dynamic> json) {
+    String? parsedSectionId = json['sectionId'] ?? json['section_id'];
+    if (json['section'] != null && json['section'] is Map) {
+      parsedSectionId = json['section']['uuid'] ?? json['section']['id'] ?? parsedSectionId;
+    }
+    return TeacherAssignmentStudent(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      rollNumber: json['rollNumber'] ?? '',
+      sectionId: parsedSectionId,
+    );
+  }
 }
 
 class TeacherAssignmentSubject {

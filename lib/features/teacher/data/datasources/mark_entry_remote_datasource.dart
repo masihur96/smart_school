@@ -81,9 +81,6 @@ class MarkEntryRemoteDataSource {
     final token = await _getToken();
     var url =
         '${APIPath.teacherAssignment}/exams/$examId/classes/$classId/students';
-    if (sectionId != null && sectionId.isNotEmpty) {
-      url += '?sectionId=$sectionId';
-    }
     log('Fetching class students: $url');
 
     final response = await _dataProvider.performRequest(
@@ -102,9 +99,15 @@ class MarkEntryRemoteDataSource {
           ? rawData
           : (rawData is Map ? (rawData['data'] ?? []) : []);
       log('Class students count: ${data.length}');
-      return data
+      
+      var students = data
           .map((json) => TeacherAssignmentStudent.fromJson(json))
           .toList();
+          
+      if (sectionId != null && sectionId.isNotEmpty) {
+        students = students.where((s) => s.sectionId == sectionId).toList();
+      }
+      return students;
     } else {
       throw Exception(
           response.data?['message'] ?? 'Failed to fetch students for class');
