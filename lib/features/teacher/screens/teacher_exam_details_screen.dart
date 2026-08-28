@@ -568,8 +568,30 @@ class _ResultTab extends StatelessWidget {
     // Filter assignments where the logged-in teacher is the examiner
     final myAssignments = exam.assignments
         .where((a) => a.examinerId == currentUserId)
-        .toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+        .toList();
+
+    // Sort: today first → upcoming → past
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    myAssignments.sort((a, b) {
+      final aDate = DateTime(a.date.year, a.date.month, a.date.day);
+      final bDate = DateTime(b.date.year, b.date.month, b.date.day);
+      final aDays = aDate.difference(todayDate).inDays;
+      final bDays = bDate.difference(todayDate).inDays;
+      final aIsToday = aDays == 0;
+      final bIsToday = bDays == 0;
+      final aIsUpcoming = aDays > 0;
+      final bIsUpcoming = bDays > 0;
+
+      // Today always first
+      if (aIsToday && !bIsToday) return -1;
+      if (!aIsToday && bIsToday) return 1;
+      // Upcoming before past
+      if (aIsUpcoming && !bIsUpcoming) return -1;
+      if (!aIsUpcoming && bIsUpcoming) return 1;
+      // Within same group: sort by date ascending
+      return aDate.compareTo(bDate);
+    });
 
     final header = Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
@@ -614,15 +636,81 @@ class _ResultTab extends StatelessWidget {
       );
     }
 
+    // Group by class name for tabs
+    final grouped = <String, List<ExamAssignment>>{};
+    for (final a in myAssignments) {
+      grouped.putIfAbsent(a.className, () => []).add(a);
+    }
+    final classNames = grouped.keys.toList()..sort();
+
     return Column(
       children: [
         header,
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            itemCount: myAssignments.length,
-            itemBuilder: (context, i) =>
-                _AssignedSubjectCard(assignment: myAssignments[i]),
+          child: DefaultTabController(
+            length: classNames.length,
+            child: Column(
+              children: [
+                // Class filter tabs (shown even for single class for consistency)
+                Container(
+                  color: Colors.white,
+                  child: TabBar(
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    indicatorColor: AppColors.primaryTeacher,
+                    indicatorWeight: 3,
+                    labelColor: AppColors.primaryTeacher,
+                    unselectedLabelColor: Colors.grey.shade400,
+                    labelStyle: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 13),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    tabs: classNames.map((c) {
+                      final count = grouped[c]!.length;
+                      return Tab(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Class $c'),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryTeacher
+                                    .withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '$count',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primaryTeacher,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                Expanded(
+                  child: TabBarView(
+                    children: classNames.map((className) {
+                      final items = grouped[className]!;
+                      // Items already sorted globally; no re-sort needed
+                      return ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+                        itemCount: items.length,
+                        itemBuilder: (context, i) =>
+                            _AssignedSubjectCard(assignment: items[i]),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
