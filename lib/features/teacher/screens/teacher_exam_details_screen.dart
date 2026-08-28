@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/school_models.dart';
+import '../providers/result_provider.dart';
 
 import 'mark_entry_screen.dart';
 
@@ -951,19 +952,22 @@ class _AssignedSubjectCard extends StatelessWidget {
                             ),
                           ),
                           const Spacer(),
-                          if (!isPast)
-                            Text(
-                              daysLeft == 0
-                                  ? 'Exam is today!'
-                                  : daysLeft == 1
-                                      ? '1 day remaining'
-                                      : '$daysLeft days remaining',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey.shade400,
-                                fontStyle: FontStyle.italic,
+                          TextButton.icon(
+                            onPressed: () {
+                              _showResultsBottomSheet(context, examId, assignment);
+                            },
+                            icon: Icon(Icons.bar_chart_rounded, size: 14, color: AppColors.primaryTeacher),
+                            label: Text('View Results',
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primaryTeacher)),
+                            style: TextButton.styleFrom(
+                              minimumSize: Size.zero,
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                side: BorderSide(color: AppColors.primaryTeacher.withValues(alpha: 0.3)),
                               ),
                             ),
+                          ),
                         ],
                       ),
                     ],
@@ -1173,6 +1177,244 @@ Widget _emptyState({required IconData icon, required String message}) {
       ],
     ),
   );
+}
+
+// ---------------------------------------------------------------------------
+// Results Bottom Sheet
+// ---------------------------------------------------------------------------
+void _showResultsBottomSheet(BuildContext context, String examId, ExamAssignment assignment) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => _ResultsBottomSheet(examId: examId, assignment: assignment),
+  );
+}
+
+class _ResultsBottomSheet extends StatefulWidget {
+  final String examId;
+  final ExamAssignment assignment;
+  const _ResultsBottomSheet({required this.examId, required this.assignment});
+
+  @override
+  State<_ResultsBottomSheet> createState() => _ResultsBottomSheetState();
+}
+
+class _ResultsBottomSheetState extends State<_ResultsBottomSheet> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ResultsNotifier>().loadStudents(
+        widget.examId,
+        widget.assignment.classId,
+        subjectId: widget.assignment.subjectId,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final notifier = context.watch<ResultsNotifier>();
+    final students = notifier.students;
+    final isLoading = notifier.studentsLoading;
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.85,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.primaryTeacher.withValues(alpha: 0.05),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryTeacher.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Icons.bar_chart_rounded, color: AppColors.primaryTeacher),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${widget.assignment.subjectName} Results',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Class ${widget.assignment.className}',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // List
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : students.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.people_outline, size: 64, color: Colors.grey.shade300),
+                            const SizedBox(height: 16),
+                            Text('No students found', style: TextStyle(color: Colors.grey.shade600, fontSize: 16)),
+                          ],
+                        ),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.all(20),
+                        itemCount: students.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final student = students[index];
+                          final hasMarks = student.marksObtained != null;
+                          final isPass = hasMarks &&
+                              (student.totalMarks != null && student.totalMarks! > 0) &&
+                              (student.marksObtained! / student.totalMarks!) >= 0.4;
+
+                          return Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.grey.shade200),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.02),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: AppColors.primaryTeacher.withValues(alpha: 0.1),
+                                  child: Text(
+                                    student.name.isNotEmpty ? student.name[0] : '?',
+                                    style: const TextStyle(
+                                      color: AppColors.primaryTeacher,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        student.name,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                          color: Color(0xFF1A1C1E),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Roll: ${student.rollNumber}',
+                                        style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (hasMarks)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: isPass
+                                          ? Colors.green.shade50
+                                          : Colors.red.shade50,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: isPass
+                                            ? Colors.green.shade200
+                                            : Colors.red.shade200,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      '${student.marksObtained!.toStringAsFixed(1).replaceAll('.0', '')} / ${student.totalMarks?.toStringAsFixed(1).replaceAll('.0', '') ?? '100'}',
+                                      style: TextStyle(
+                                        color: isPass
+                                            ? Colors.green.shade700
+                                            : Colors.red.shade700,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.pending_actions, size: 14, color: Colors.grey.shade600),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Not Graded',
+                                          style: TextStyle(
+                                            color: Colors.grey.shade600,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
