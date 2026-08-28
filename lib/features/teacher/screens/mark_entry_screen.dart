@@ -140,19 +140,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
               resultsNotifier.students,
             );
             
-            // Auto select first section if none selected
-            String? targetSectionId = sectionId;
-            if (targetSectionId == null || targetSectionId.isEmpty) {
-              final sections = context.read<SectionSetupNotifier>().sections
-                  .where((s) => s.classId == _selectedClassId)
-                  .toList();
-              if (sections.isNotEmpty) {
-                targetSectionId = sections.first.id;
-                setState(() => _selectedSectionId = targetSectionId);
-              }
-            }
-            
-            _filterAndDisplayStudents(targetSectionId);
+            _filterAndDisplayStudents(sectionId);
           }
         });
   }
@@ -294,14 +282,18 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                   contentPadding: EdgeInsets.zero,
                 ),
                 hint: const Text('Select Section'),
-                items: filteredSections
-                    .map(
-                      (s) => DropdownMenuItem(
-                        value: s.id,
-                        child: Text(s.name),
-                      ),
-                    )
-                    .toList(),
+                items: [
+                  const DropdownMenuItem<String>(
+                    value: null,
+                    child: Text('All Sections'),
+                  ),
+                  ...filteredSections.map(
+                    (s) => DropdownMenuItem<String>(
+                      value: s.id,
+                      child: Text(s.name),
+                    ),
+                  ),
+                ],
                 onChanged: (val) {
                   setState(() {
                     _selectedSectionId = val;
