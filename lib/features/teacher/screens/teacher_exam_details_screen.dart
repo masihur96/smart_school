@@ -5,6 +5,8 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/school_models.dart';
 
+import 'mark_entry_screen.dart';
+
 class TeacherExamDetailsScreen extends StatefulWidget {
   final Exam exam;
 
@@ -684,7 +686,7 @@ class _ResultTab extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
                         itemCount: items.length,
                         itemBuilder: (context, i) =>
-                            _AssignedSubjectCard(assignment: items[i]),
+                            _AssignedSubjectCard(examId: exam.id, assignment: items[i]),
                       );
                     }).toList(),
                   ),
@@ -699,8 +701,9 @@ class _ResultTab extends StatelessWidget {
 }
 
 class _AssignedSubjectCard extends StatelessWidget {
+  final String examId;
   final ExamAssignment assignment;
-  const _AssignedSubjectCard({required this.assignment});
+  const _AssignedSubjectCard({required this.examId, required this.assignment});
 
   @override
   Widget build(BuildContext context) {
@@ -757,8 +760,24 @@ class _AssignedSubjectCard extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(22),
-        child: IntrinsicHeight(
-          child: Row(
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MarkEntryScreen(
+                    initialExamId: examId,
+                    initialClassId: assignment.classId,
+                    initialSectionId: "assignment.sectionId",
+                    initialSubjectId: assignment.subjectId,
+                  ),
+                ),
+              );
+            },
+            child: IntrinsicHeight(
+              child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Left accent bar
@@ -955,7 +974,8 @@ class _AssignedSubjectCard extends StatelessWidget {
           ),
         ),
       ),
-    );
+    )));
+
   }
 
   Widget _infoRow({

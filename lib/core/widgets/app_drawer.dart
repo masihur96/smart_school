@@ -270,12 +270,7 @@ class AppDrawer extends StatelessWidget {
           MaterialPageRoute(builder: (_) => HomeworkManagementScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.grade, l10n.markEntry, () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => MarkEntryScreen()),
-        );
-      }, context),
+
       _buildDrawerItem(Icons.calendar_today, l10n.routine, () {
         Navigator.push(
           context,

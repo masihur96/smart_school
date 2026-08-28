@@ -12,8 +12,18 @@ import '../../../services/notification_service.dart';
 
 class MarkEntryScreen extends StatefulWidget {
   final bool hideAppBar;
-  final String? initialExamId;
-  const MarkEntryScreen({super.key, this.hideAppBar = false, this.initialExamId});
+  final String initialExamId;
+  final String initialClassId;
+  final String initialSectionId;
+  final String initialSubjectId;
+  const MarkEntryScreen({
+    super.key,
+    this.hideAppBar = false,
+   required this.initialExamId,
+   required this.initialClassId,
+   required this.initialSectionId,
+   required this.initialSubjectId,
+  });
 
   @override
   State<MarkEntryScreen> createState() => _MarkEntryScreenState();
@@ -36,34 +46,65 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final resultsNotifier = context.read<ResultsNotifier>();
-      if (resultsNotifier.exams.isEmpty) {
-        resultsNotifier.loadExams().then((_) {
-          if (mounted && widget.initialExamId != null) {
-            final exam = resultsNotifier.exams.firstWhere(
-              (e) => e.id == widget.initialExamId,
-              orElse: () => resultsNotifier.exams.first,
-            );
-            if (exam.id == widget.initialExamId) {
-              setState(() => _showFilters = true);
-              _onExamChanged(exam);
-            }
-          }
-        });
-      } else if (widget.initialExamId != null) {
-        final exam = resultsNotifier.exams.firstWhere(
-          (e) => e.id == widget.initialExamId,
-          orElse: () => resultsNotifier.exams.first,
-        );
-        if (exam.id == widget.initialExamId) {
-          setState(() => _showFilters = true);
-          _onExamChanged(exam);
-        }
-      }
       final sectionNotifier = context.read<SectionSetupNotifier>();
       if (sectionNotifier.sections.isEmpty) {
         sectionNotifier.fetchSections();
       }
+
+      if (resultsNotifier.exams.isEmpty) {
+        resultsNotifier.loadExams().then((_) {
+          _handleInitialSelection(resultsNotifier);
+        });
+      } else {
+        _handleInitialSelection(resultsNotifier);
+      }
     });
+  }
+
+  Future<void> _handleInitialSelection(ResultsNotifier resultsNotifier) async {
+    if (!mounted || widget.initialExamId == null) return;
+    
+    final exam = resultsNotifier.exams.firstWhere(
+      (e) => e.id == widget.initialExamId,
+      orElse: () => resultsNotifier.exams.first,
+    );
+    
+    if (exam.id == widget.initialExamId) {
+      if (widget.initialClassId != null && widget.initialSubjectId != null) {
+        // Full auto-select flow
+        setState(() {
+          _showFilters = false; // Hide filters since we auto-selected
+          _selectedExam = exam;
+          _selectedExamId = exam.id;
+          _selectedClassId = widget.initialClassId;
+          _selectedSectionId = widget.initialSectionId;
+        });
+        
+        await resultsNotifier.loadExamAssignedSubjects(
+          exam.id,
+          widget.initialClassId!,
+          sectionId: widget.initialSectionId,
+        );
+        
+        if (mounted) {
+          final subjectIdx = resultsNotifier.examSubjects.indexWhere(
+            (s) => s.id == widget.initialSubjectId,
+          );
+          if (subjectIdx != -1) {
+            setState(() {
+              _selectedSubject = resultsNotifier.examSubjects[subjectIdx];
+            });
+            _fetchStudents();
+          } else {
+            setState(() => _showFilters = true);
+          }
+        }
+      } else {
+        // Just select exam and show filters
+        setState(() => _showFilters = true);
+        _onExamChanged(exam);
+      }
+    }
   }
 
   @override

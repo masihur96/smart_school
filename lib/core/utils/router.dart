@@ -3,6 +3,7 @@ import 'package:smart_school/features/auth/presntation/views/login_screen.dart';
 import 'package:smart_school/features/auth/presntation/views/register_screen.dart';
 import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
 import 'package:smart_school/features/splash_screen.dart';
+import 'package:smart_school/features/teacher/screens/teacher_exam_screen.dart';
 import '../../features/admin/screens/add_edit_student_screen.dart';
 import '../../features/admin/screens/add_edit_teacher_screen.dart';
 import '../../features/admin/screens/admin_dashboard_screen.dart';
@@ -133,7 +134,7 @@ GoRouter getRouter(AuthNotifier authNotifier) {
           ),
           GoRoute(
             path: 'marks',
-            builder: (context, state) => const MarkEntryScreen(),
+            builder: (context, state) => const TeacherExamScreen(),
           ),
         ],
       ),
