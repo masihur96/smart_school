@@ -94,9 +94,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       _selectedExam = exam;
       _selectedExamId = exam.id;
       _selectedClassId = widget.initialClassId;
-      _selectedSectionId = widget.initialSectionId.isNotEmpty
-          ? widget.initialSectionId
-          : null;
+      _selectedSectionId = null; // Always show 'All Sections' initially
       _selectedSubject = Subject(id: widget.initialSubjectId, name: subjectName);
     });
 
