@@ -1005,11 +1005,13 @@ class TeacherAssignmentStudent {
   final String id;
   final String name;
   final String rollNumber;
+  final String? sectionId;
 
   TeacherAssignmentStudent({
     required this.id,
     required this.name,
     required this.rollNumber,
+    this.sectionId,
   });
 
   factory TeacherAssignmentStudent.fromJson(Map<String, dynamic> json) =>
@@ -1017,6 +1019,7 @@ class TeacherAssignmentStudent {
         id: json['id'] ?? '',
         name: json['name'] ?? '',
         rollNumber: json['rollNumber'] ?? '',
+        sectionId: json['sectionId'] ?? json['section_id'],
       );
 }
 
