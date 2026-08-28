@@ -117,6 +117,38 @@ class MarkEntryRemoteDataSource {
     }
   }
 
+  /// GET /teacher/assignments/exams/{examId}/students
+  Future<List<TeacherAssignmentStudent>> getExamStudents(String examId) async {
+    final token = await _getToken();
+    final url = '${APIPath.teacherAssignment}/exams/$examId/students';
+    log('Fetching all students for exam: $url');
+
+    final response = await _dataProvider.performRequest(
+      'GET',
+      url,
+      header: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response == null || response.statusCode == null) {
+      throw Exception('No response from server');
+    }
+
+    if (response.statusCode! >= 200 && response.statusCode! < 300) {
+      final dynamic rawData = response.data;
+      final List data = rawData is List
+          ? rawData
+          : (rawData is Map ? (rawData['data'] ?? []) : []);
+      log('Exam students count: ${data.length}');
+      
+      return data
+          .map((json) => TeacherAssignmentStudent.fromJson(json))
+          .toList();
+    } else {
+      throw Exception(
+          response.data?['message'] ?? 'Failed to fetch exam students');
+    }
+  }
+
   /// GET /teacher/assignments/exams/{examId}/subjects?classId={classId}&sectionId={sectionId}
   Future<List<Subject>> getExamAssignedSubjects(String examId, String classId, {String? sectionId}) async {
     final token = await _getToken();

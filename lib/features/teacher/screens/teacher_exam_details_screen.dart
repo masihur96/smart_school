@@ -522,16 +522,31 @@ class _SyllabusTab extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // RESULT TAB
 // ---------------------------------------------------------------------------
-class _ResultTab extends StatelessWidget {
+class _ResultTab extends StatefulWidget {
   final Exam exam;
   const _ResultTab({required this.exam});
+
+  @override
+  State<_ResultTab> createState() => _ResultTabState();
+}
+
+class _ResultTabState extends State<_ResultTab> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.exam.isPublished) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<ResultsNotifier>().loadExamStudents(widget.exam.id);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final currentUserId = context.read<AuthNotifier>().user?.id ?? '';
 
     // If result is published — show results
-    if (exam.isPublished) {
+    if (widget.exam.isPublished) {
       return _buildPublishedResults(context);
     }
 
@@ -540,17 +555,24 @@ class _ResultTab extends StatelessWidget {
   }
 
   Widget _buildPublishedResults(BuildContext context) {
-    if (exam.results.isEmpty) {
+    final notifier = context.watch<ResultsNotifier>();
+    final students = notifier.students;
+
+    if (notifier.studentsLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (students.isEmpty) {
       return _emptyState(
         icon: Icons.bar_chart_rounded,
         message: 'Results are published but no data is available yet.',
       );
     }
 
-    final grouped = <String, List<Result>>{};
-    for (final r in exam.results) {
-      final key = r.subject?.name ?? r.subjectId ?? 'Unknown Subject';
-      grouped.putIfAbsent(key, () => []).add(r);
+    final grouped = <String, List<TeacherAssignmentStudent>>{};
+    for (final s in students) {
+      final key = s.subjectName ?? 'Unknown Subject';
+      grouped.putIfAbsent(key, () => []).add(s);
     }
     final subjects = grouped.keys.toList()..sort();
 
@@ -559,9 +581,9 @@ class _ResultTab extends StatelessWidget {
       itemCount: subjects.length,
       itemBuilder: (context, i) {
         final subjectName = subjects[i];
-        final results = grouped[subjectName]!;
+        final subjectStudents = grouped[subjectName]!;
         return _ResultSubjectCard(
-            subjectName: subjectName, results: results);
+            subjectName: subjectName, students: subjectStudents);
       },
     );
   }
@@ -569,7 +591,7 @@ class _ResultTab extends StatelessWidget {
   Widget _buildMyAssignedSubjects(
       BuildContext context, String currentUserId) {
     // Filter assignments where the logged-in teacher is the examiner
-    final myAssignments = exam.assignments
+    final myAssignments = widget.exam.assignments
         .where((a) => a.examinerId == currentUserId)
         .toList();
 
@@ -687,7 +709,7 @@ class _ResultTab extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
                         itemCount: items.length,
                         itemBuilder: (context, i) =>
-                            _AssignedSubjectCard(examId: exam.id, assignment: items[i]),
+                            _AssignedSubjectCard(examId: widget.exam.id, assignment: items[i]),
                       );
                     }).toList(),
                   ),
@@ -1026,9 +1048,9 @@ class _AssignedSubjectCard extends StatelessWidget {
 
 class _ResultSubjectCard extends StatelessWidget {
   final String subjectName;
-  final List<Result> results;
+  final List<TeacherAssignmentStudent> students;
   const _ResultSubjectCard(
-      {required this.subjectName, required this.results});
+      {required this.subjectName, required this.students});
 
   @override
   Widget build(BuildContext context) {
@@ -1080,7 +1102,7 @@ class _ResultSubjectCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    '${results.length} Students',
+                    '${students.length} Students',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
@@ -1093,9 +1115,11 @@ class _ResultSubjectCard extends StatelessWidget {
             const SizedBox(height: 14),
             const Divider(height: 1),
             const SizedBox(height: 10),
-            ...results.map((r) {
-              final isPass = r.totalMarks > 0 &&
-                  (r.marksObtained / r.totalMarks) >= 0.4;
+            ...students.map((r) {
+              final hasMarks = r.marksObtained != null;
+              final isPass = hasMarks &&
+                  (r.totalMarks != null && r.totalMarks! > 0) &&
+                  (r.marksObtained! / r.totalMarks!) >= 0.4;
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Row(
@@ -1108,43 +1132,60 @@ class _ResultSubjectCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            r.studentId,
+                            r.name,
                             style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 13,
                               color: Color(0xFF1A1C1E),
                             ),
                           ),
-                          if (r.remarks.isNotEmpty)
-                            Text(
-                              r.remarks,
-                              style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey.shade500),
-                            ),
+                          Text(
+                            'Roll: ${r.rollNumber}',
+                            style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey.shade500),
+                          ),
                         ],
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: isPass
-                            ? Colors.green.shade50
-                            : Colors.red.shade50,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '${r.marksObtained.toStringAsFixed(1)} / ${r.totalMarks.toStringAsFixed(1)}',
-                        style: TextStyle(
+                    if (hasMarks)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 5),
+                        decoration: BoxDecoration(
                           color: isPass
-                              ? Colors.green.shade700
-                              : Colors.red.shade700,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                              ? Colors.green.shade50
+                              : Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '${r.marksObtained!.toStringAsFixed(1).replaceAll('.0', '')} / ${r.totalMarks?.toStringAsFixed(1).replaceAll('.0', '') ?? '100'}',
+                          style: TextStyle(
+                            color: isPass
+                                ? Colors.green.shade700
+                                : Colors.red.shade700,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Not Graded',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               );

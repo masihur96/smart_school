@@ -6,6 +6,7 @@ abstract class IResultRepository {
   Future<List<Subject>> getExamAssignedSubjects(String examId, String classId, {String? sectionId});
   Future<List<TeacherAssignmentStudent>> getClassStudents(
       String examId, String classId, {String? sectionId, String? subjectId});
+  Future<List<TeacherAssignmentStudent>> getExamStudents(String examId);
   Future<List<TeacherAssignmentSubject>> getStudentSubjects(
       String examId, String classId, String studentId);
   Future<void> submitMarks({

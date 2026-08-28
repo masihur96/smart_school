@@ -28,6 +28,10 @@ class ResultRepositoryImpl implements IResultRepository {
       _remoteDataSource.getClassStudents(examId, classId, sectionId: sectionId, subjectId: subjectId);
 
   @override
+  Future<List<TeacherAssignmentStudent>> getExamStudents(String examId) =>
+      _remoteDataSource.getExamStudents(examId);
+
+  @override
   Future<List<TeacherAssignmentSubject>> getStudentSubjects(
           String examId, String classId, String studentId) =>
       _remoteDataSource.getStudentSubjects(examId, classId, studentId);

@@ -113,6 +113,22 @@ class ResultsNotifier extends ChangeNotifier {
     }
   }
 
+  Future<void> loadExamStudents(String examId) async {
+    _studentsLoading = true;
+    _students = [];
+    _subjects = [];
+    notifyListeners();
+    try {
+      _students = await _repository.getExamStudents(examId);
+      log('Loaded ${_students.length} students for exam $examId');
+    } catch (e) {
+      log('Error loading exam students: $e');
+    } finally {
+      _studentsLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> loadSubjects(
       String examId, String classId, String studentId) async {
     _subjectsLoading = true;
