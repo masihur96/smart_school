@@ -49,7 +49,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
         sectionNotifier.fetchSections();
       }
 
-      _fetchStudents();
+      _fetchStudents(isInitial: true);
     });
   }
 
@@ -68,7 +68,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     _remarksControllers.clear();
   }
 
-  void _fetchStudents() {
+  void _fetchStudents({bool isInitial = false}) {
     final resultsNotifier = context.read<ResultsNotifier>();
     
     final exam = resultsNotifier.exams.firstWhere(
@@ -88,7 +88,9 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       _selectedExam = exam;
       _selectedExamId = exam.id;
       _selectedClassId = widget.initialClassId;
-      _selectedSectionId = widget.initialSectionId;
+      if (isInitial) {
+        _selectedSectionId = widget.initialSectionId;
+      }
       _selectedSubject = Subject(id: widget.initialSubjectId, name: subjectName);
     });
 
@@ -181,6 +183,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
           SliverToBoxAdapter(
             child: Column(
               children: [
+                if (_selectedClassId != null) _buildSectionFilterCard(),
                 if (_selectedSubject != null)
                   _buildSectionHeader('Students (${students.length})'),
               ],
@@ -208,6 +211,61 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       title: const Text(
         'Mark Entry System',
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+      ),
+    );
+  }
+
+  Widget _buildSectionFilterCard() {
+    final sections = context.watch<SectionSetupNotifier>().sections;
+    final filteredSections = sections
+        .where((s) => s.classId == _selectedClassId)
+        .toList();
+
+    final hasValidSection = filteredSections.any((s) => s.id == _selectedSectionId);
+    final displayValue = hasValidSection ? _selectedSectionId : null;
+
+    return Card(
+      margin: const EdgeInsets.all(16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            const Icon(Icons.grid_view_outlined, color: Colors.grey),
+            const SizedBox(width: 16),
+            const Text(
+              'Section:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                value: displayValue,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                hint: const Text('Select Section'),
+                items: filteredSections
+                    .map(
+                      (s) => DropdownMenuItem(
+                        value: s.id,
+                        child: Text(s.name),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (val) {
+                  if (val == _selectedSectionId) return;
+                  setState(() {
+                    _selectedSectionId = val;
+                    _disposeControllers();
+                  });
+                  _fetchStudents();
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
