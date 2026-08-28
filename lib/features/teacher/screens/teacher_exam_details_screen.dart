@@ -636,83 +636,296 @@ class _AssignedSubjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final examDate = assignment.date;
+    final daysLeft = examDate.difference(DateTime(now.year, now.month, now.day)).inDays;
+    final isToday = daysLeft == 0;
+    final isPast = daysLeft < 0;
+
+    final String countdownLabel;
+    final Color countdownColor;
+    final Color countdownBg;
+    if (isToday) {
+      countdownLabel = 'TODAY';
+      countdownColor = Colors.white;
+      countdownBg = AppColors.primaryTeacher;
+    } else if (isPast) {
+      countdownLabel = 'OVERDUE';
+      countdownColor = Colors.red.shade700;
+      countdownBg = Colors.red.shade50;
+    } else if (daysLeft == 1) {
+      countdownLabel = 'TOMORROW';
+      countdownColor = Colors.orange.shade800;
+      countdownBg = Colors.orange.shade50;
+    } else {
+      countdownLabel = 'IN $daysLeft DAYS';
+      countdownColor = Colors.blue.shade700;
+      countdownBg = Colors.blue.shade50;
+    }
+
+    final hasSyllabus = assignment.syllabus != null &&
+        assignment.syllabus!.isNotEmpty &&
+        assignment.syllabus != 'N/A';
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
+        border: isToday
+            ? Border.all(color: AppColors.primaryTeacher, width: 1.5)
+            : Border.all(color: Colors.grey.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: isToday
+                ? AppColors.primaryTeacher.withValues(alpha: 0.12)
+                : Colors.black.withValues(alpha: 0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.primaryTeacher.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(Icons.menu_book_rounded,
-                  color: AppColors.primaryTeacher, size: 24),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    assignment.subjectName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Color(0xFF1A1C1E),
-                    ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Left accent bar
+              Container(
+                width: 5,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: isPast
+                        ? [Colors.red.shade300, Colors.red.shade600]
+                        : [
+                            AppColors.primaryTeacher,
+                            AppColors.primaryTeacher.withValues(alpha: 0.5),
+                          ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Class ${assignment.className}${assignment.sectionName != null && assignment.sectionName!.isNotEmpty ? ' – ${assignment.sectionName}' : ''}',
-                    style: TextStyle(
-                        color: Colors.grey.shade500, fontSize: 13),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    DateFormat('EEE, MMM dd yyyy')
-                        .format(assignment.date),
-                    style: TextStyle(
-                      color: AppColors.primaryTeacher,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.orange.shade50,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.orange.shade200),
-              ),
-              child: Text(
-                'Pending',
-                style: TextStyle(
-                  color: Colors.orange.shade700,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
-          ],
+
+              // Main content
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header row
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Subject icon
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryTeacher.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Icon(
+                              Icons.menu_book_rounded,
+                              color: AppColors.primaryTeacher,
+                              size: 22,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  assignment.subjectName,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 17,
+                                    color: Color(0xFF1A1C1E),
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Row(
+                                  children: [
+                                    Icon(Icons.school_rounded,
+                                        size: 12, color: Colors.grey.shade400),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Class ${assignment.className}'
+                                      '${assignment.sectionName != null && assignment.sectionName!.isNotEmpty ? ' · ${assignment.sectionName}' : ''}',
+                                      style: TextStyle(
+                                        color: Colors.grey.shade500,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          // Countdown badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: countdownBg,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              countdownLabel,
+                              style: TextStyle(
+                                color: countdownColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 14),
+
+                      // Info grid
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8F9FA),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Column(
+                          children: [
+                            _infoRow(
+                              icon: Icons.event_rounded,
+                              label: 'Exam Date',
+                              value: DateFormat('EEEE, MMM dd yyyy')
+                                  .format(examDate),
+                              valueColor: isToday
+                                  ? AppColors.primaryTeacher
+                                  : isPast
+                                      ? Colors.red.shade600
+                                      : const Color(0xFF1A1C1E),
+                            ),
+                            const SizedBox(height: 10),
+                            _infoRow(
+                              icon: Icons.person_pin_rounded,
+                              label: 'Examiner',
+                              value: assignment.examinerName,
+                            ),
+                            if (hasSyllabus) ...[
+                              const SizedBox(height: 10),
+                              _infoRow(
+                                icon: Icons.format_list_bulleted_rounded,
+                                label: 'Syllabus',
+                                value: assignment.syllabus!,
+                                maxLines: 2,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Footer status strip
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                              border:
+                                  Border.all(color: Colors.orange.shade200),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.hourglass_top_rounded,
+                                    size: 12,
+                                    color: Colors.orange.shade700),
+                                const SizedBox(width: 5),
+                                Text(
+                                  'Mark Entry Pending',
+                                  style: TextStyle(
+                                    color: Colors.orange.shade700,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Spacer(),
+                          if (!isPast)
+                            Text(
+                              daysLeft == 0
+                                  ? 'Exam is today!'
+                                  : daysLeft == 1
+                                      ? '1 day remaining'
+                                      : '$daysLeft days remaining',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey.shade400,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _infoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    Color? valueColor,
+    int maxLines = 1,
+  }) {
+    return Row(
+      crossAxisAlignment:
+          maxLines > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+      children: [
+        Icon(icon, size: 14, color: Colors.grey.shade400),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 72,
+          child: Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey.shade500,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            maxLines: maxLines,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: valueColor ?? const Color(0xFF1A1C1E),
+              height: maxLines > 1 ? 1.4 : null,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
