@@ -1,5 +1,3 @@
-import 'package:smart_school/core/widgets/zoomable_avatar.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
@@ -11,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
 import 'package:smart_school/features/ai_tutor/screen/ai_tutor_chat_screen.dart';
 import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
 import 'package:smart_school/features/teacher/screens/schedule_class_details.dart';
@@ -29,7 +28,6 @@ import '../../notifications/providers/notification_provider.dart';
 import '../data/models/teacher_dashboard_model.dart';
 import '../providers/teacher_dashboard_provider.dart';
 import 'homework_management_screen.dart';
-import 'mark_entry_screen.dart';
 import 'teacher_attendance_screen.dart';
 import 'teacher_exam_screen.dart';
 import 'teacher_routine_screen.dart';
@@ -169,7 +167,8 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                 ZoomableAvatar(
                   imageUrl: user?.avatar,
                   name: user?.name,
-                  heroTag: 'teacher-dashboard-avatar-${user?.id ?? user?.name ?? 'me'}',
+                  heroTag:
+                      'teacher-dashboard-avatar-${user?.id ?? user?.name ?? 'me'}',
                   radius: 20,
                   backgroundColor: Colors.purple,
                 ),
@@ -284,16 +283,16 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                   }
                 },
                 tabs: [
-                  Tab(icon: const Icon(Icons.dashboard_outlined), text: l10n.home),
+                  Tab(
+                    icon: const Icon(Icons.dashboard_outlined),
+                    text: l10n.home,
+                  ),
                   Tab(
                     icon: const Icon(Icons.check_circle_outline),
                     text: l10n.attendance,
                   ),
                   const Tab(child: SizedBox(width: 48)), // Gap for FAB
-                  Tab(
-                    icon: const Icon(Icons.quiz_outlined),
-                    text: l10n.exams,
-                  ),
+                  Tab(icon: const Icon(Icons.quiz_outlined), text: l10n.exams),
                   Tab(
                     icon: const Icon(Icons.assignment_outlined),
                     text: l10n.homework,
@@ -334,7 +333,10 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                               ),
                             ],
                             border: isClockedOut
-                                ? Border.all(color: Colors.green.shade200, width: 2)
+                                ? Border.all(
+                                    color: Colors.green.shade200,
+                                    width: 2,
+                                  )
                                 : null,
                           ),
                           child: Icon(
@@ -429,8 +431,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                 const SizedBox(height: 12),
                 _ClassCardListView(
                   classes: classes,
-                  buildCard: (ctx, entry) =>
-                      _buildClassCard(ctx, entry),
+                  buildCard: (ctx, entry) => _buildClassCard(ctx, entry),
                   isCurrentClass: _isCurrentClass,
                 ),
                 const SizedBox(height: 24),
@@ -495,7 +496,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                   if (data?.mySubmittedHomework.isNotEmpty ?? false) ...[
                     _buildSectionHeader(
                       l10n.recentHomework,
-                      onSeeAll: () => _tabController.animateTo(3),
+                      onSeeAll: () => _tabController.animateTo(4),
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
@@ -707,8 +708,6 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     );
   }
 
-
-
   Widget _buildAttendanceSection(
     BuildContext context,
     TeacherDashboardData? data,
@@ -839,7 +838,6 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                       margin: const EdgeInsets.only(right: 12),
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: isClockOut
@@ -946,11 +944,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
         Text(
           time,
 
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 10,
-
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
         ),
       ],
     );
@@ -1094,7 +1088,9 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryTeacher.withValues(alpha: 0.1),
+                            color: AppColors.primaryTeacher.withValues(
+                              alpha: 0.1,
+                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(
@@ -1111,7 +1107,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
                             ),
-                            maxLines:  homework.description.isEmpty ? 2 : 1,
+                            maxLines: homework.description.isEmpty ? 2 : 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -1138,7 +1134,11 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.class_outlined, size: 14, color: Colors.grey.shade500),
+                            Icon(
+                              Icons.class_outlined,
+                              size: 14,
+                              color: Colors.grey.shade500,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               homework.classInfo?.name ?? "--",
@@ -1161,12 +1161,19 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: isOverdue ? Colors.red.shade50 : Colors.green.shade50,
+                        color: isOverdue
+                            ? Colors.red.shade50
+                            : Colors.green.shade50,
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                          color: isOverdue ? Colors.red.shade100 : Colors.green.shade100,
+                          color: isOverdue
+                              ? Colors.red.shade100
+                              : Colors.green.shade100,
                         ),
                       ),
                       child: Row(
@@ -1174,7 +1181,9 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                           Icon(
                             Icons.calendar_today_outlined,
                             size: 11,
-                            color: isOverdue ? Colors.red.shade700 : Colors.green.shade700,
+                            color: isOverdue
+                                ? Colors.red.shade700
+                                : Colors.green.shade700,
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -1182,7 +1191,9 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
-                              color: isOverdue ? Colors.red.shade700 : Colors.green.shade700,
+                              color: isOverdue
+                                  ? Colors.red.shade700
+                                  : Colors.green.shade700,
                             ),
                           ),
                         ],
@@ -1190,7 +1201,6 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                     ),
                   ],
                 ),
-
               ],
             ),
           ),
@@ -1479,8 +1489,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
       final endParts = endTime.split(':');
       final startMinutes =
           int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
-      final endMinutes =
-          int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+      final endMinutes = int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
       final nowMinutes = now.hour * 60 + now.minute;
       return nowMinutes >= startMinutes && nowMinutes < endMinutes;
     } catch (_) {
@@ -1505,15 +1514,13 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     try {
       final now = TimeOfDay.now();
       final endParts = endTime.split(':');
-      final endMinutes =
-          int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+      final endMinutes = int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
       final nowMinutes = now.hour * 60 + now.minute;
       return nowMinutes >= endMinutes;
     } catch (_) {
       return false;
     }
   }
-
 
   /// Returns the elapsed fraction [0.0 – 1.0] of the class period at the current time.
   double _classPeriodProgress(String startTime, String endTime) {
@@ -1523,8 +1530,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
       final endParts = endTime.split(':');
       final startMinutes =
           int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
-      final endMinutes =
-          int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+      final endMinutes = int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
       final nowMinutes = now.hour * 60 + now.minute;
       final total = endMinutes - startMinutes;
       if (total <= 0) return 0.0;
@@ -1555,12 +1561,15 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     final endAmPm = _formatTimeAmPm(classInfo.endTime);
 
     // Color palette: green for active, indigo for regular
-    final Color accentColor =
-        isActive ? const Color(0xFF16A34A) : const Color(0xFF4F46E5);
-    final Color accentLight =
-        isActive ? const Color(0xFFDCFCE7) : const Color(0xFFEDE9FE);
-    final Color accentMid =
-        isActive ? const Color(0xFF22C55E) : const Color(0xFF6366F1);
+    final Color accentColor = isActive
+        ? const Color(0xFF16A34A)
+        : const Color(0xFF4F46E5);
+    final Color accentLight = isActive
+        ? const Color(0xFFDCFCE7)
+        : const Color(0xFFEDE9FE);
+    final Color accentMid = isActive
+        ? const Color(0xFF22C55E)
+        : const Color(0xFF6366F1);
 
     return GestureDetector(
       onTap: () {
@@ -1584,7 +1593,9 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isActive ? accentColor.withValues(alpha: 0.6) : Colors.transparent,
+              color: isActive
+                  ? accentColor.withValues(alpha: 0.6)
+                  : Colors.transparent,
               width: 1.8,
             ),
             boxShadow: [
@@ -1602,9 +1613,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
               Container(
                 height: 5,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [accentColor, accentMid],
-                  ),
+                  gradient: LinearGradient(colors: [accentColor, accentMid]),
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(19),
                   ),
@@ -1628,27 +1637,24 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                               vertical: 5,
                             ),
                             decoration: BoxDecoration(
-
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
-        
+
                               children: [
                                 Text(
                                   startAmPm,
                                   style: TextStyle(
-
                                     fontWeight: FontWeight.w800,
                                     fontSize: 11,
                                     letterSpacing: 0.2,
                                   ),
                                 ),
-                                SizedBox(width: 10,),
+                                SizedBox(width: 10),
                                 Text(
                                   endAmPm,
                                   style: TextStyle(
-
                                     fontWeight: FontWeight.w600,
                                     fontSize: 10,
                                   ),
@@ -1656,9 +1662,9 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                               ],
                             ),
                           ),
-        
+
                           const Spacer(),
-        
+
                           // Status badge
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -1684,7 +1690,11 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                                   const SizedBox(width: 4),
                                 ],
                                 Text(
-                                  isActive ? 'NOW' : (isUpcoming ? 'UPCOMING' : (isPassed ? 'PASSED' : '')),
+                                  isActive
+                                      ? 'NOW'
+                                      : (isUpcoming
+                                            ? 'UPCOMING'
+                                            : (isPassed ? 'PASSED' : '')),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 9,
@@ -1697,23 +1707,22 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                           ),
                         ],
                       ),
-        
+
                       const SizedBox(height: 12),
-        
+
                       // ── Subject name ───────────────────────────────────────
                       Text(
                         subjectName,
                         style: TextStyle(
-
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-        
+
                       const SizedBox(height: 3),
-        
+
                       // ── Class / Section ────────────────────────────────────
                       Text(
                         className,
@@ -1726,9 +1735,9 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-        
+
                       const Spacer(),
-        
+
                       // ── Room number (if available) ─────────────────────────
                       if (classInfo.roomNumber != null &&
                           classInfo.roomNumber!.isNotEmpty)
@@ -1753,7 +1762,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                             ],
                           ),
                         ),
-        
+
                       // ── Teacher row ────────────────────────────────────────
                       if (classInfo.teacherEntity != null)
                         Row(
@@ -1761,11 +1770,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                             CircleAvatar(
                               radius: 9,
                               backgroundColor: accentLight,
-                              child: Icon(
-                                Icons.person,
-                                size: 11,
-
-                              ),
+                              child: Icon(Icons.person, size: 11),
                             ),
                             const SizedBox(width: 6),
                             Expanded(
@@ -1782,7 +1787,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                             ),
                           ],
                         ),
-        
+
                       // ── Progress bar (only when class is active) ───────────
                       if (isActive) ...[
                         const SizedBox(height: 10),
@@ -1795,8 +1800,9 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                                   value: progress,
                                   minHeight: 5,
                                   backgroundColor: accentLight,
-                                  valueColor:
-                                      AlwaysStoppedAnimation<Color>(accentColor),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    accentColor,
+                                  ),
                                 ),
                               ),
                             ),
@@ -1856,7 +1862,6 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -1866,18 +1871,16 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
-            if (exams.length > 2)
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const TeacherExamScreen(),
-                    ),
-                  );
-                },
-                child: Text(l10n.viewAll),
-              ),
+
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const TeacherExamScreen()),
+                );
+              },
+              child: Text(l10n.viewAll),
+            ),
           ],
         ),
         const SizedBox(height: 12),
@@ -1905,8 +1908,6 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
         : 'N/A';
 
     return Card(
-
-
       child: SizedBox(
         width: screenSize(context, .88),
         child: Stack(
@@ -1942,13 +1943,15 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                       ),
                       const SizedBox(width: 8),
                       Card(
-
                         color: exam.isPublished
                             ? Colors.green.shade600
                             : Colors.orange.shade600,
 
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4.0,
+                            vertical: 2.0,
+                          ),
                           child: Text(
                             exam.isPublished ? 'Published' : 'Upcoming',
                             style: const TextStyle(
@@ -1962,9 +1965,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                   ),
                   Text(
                     exam.description ?? '',
-                    style: TextStyle(
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(fontSize: 12),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1974,17 +1975,10 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Starts On',
-                            style: TextStyle(
-
-                              fontSize: 10,
-                            ),
-                          ),
+                          Text('Starts On', style: TextStyle(fontSize: 10)),
                           Text(
                             startDateStr,
                             style: const TextStyle(
-
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
@@ -3262,10 +3256,7 @@ class _ClassCardListViewState extends State<_ClassCardListView> {
     if (totalCards <= 1) return;
 
     final perCardOffset = maxScroll / (totalCards - 1);
-    final targetOffset = (activeIndex * perCardOffset).clamp(
-      0.0,
-      maxScroll,
-    );
+    final targetOffset = (activeIndex * perCardOffset).clamp(0.0, maxScroll);
 
     _scrollController.animateTo(
       targetOffset,
