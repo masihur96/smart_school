@@ -1,4 +1,5 @@
 import 'dart:developer';
+
 import 'package:smart_school/configs/network/data_provider.dart';
 import 'package:smart_school/core/constants/api_path.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
@@ -40,7 +41,8 @@ class MarkEntryRemoteDataSource {
       return data.map((json) => Exam.fromJson(json)).toList();
     } else {
       throw Exception(
-          response.data?['message'] ?? 'Failed to fetch teacher exams');
+        response.data?['message'] ?? 'Failed to fetch teacher exams',
+      );
     }
   }
 
@@ -66,18 +68,21 @@ class MarkEntryRemoteDataSource {
           ? rawData
           : (rawData is Map ? (rawData['data'] ?? []) : []);
       log('Exam classes count: ${data.length}');
-      return data
-          .map((json) => TeacherAssignmentClass.fromJson(json))
-          .toList();
+      return data.map((json) => TeacherAssignmentClass.fromJson(json)).toList();
     } else {
       throw Exception(
-          response.data?['message'] ?? 'Failed to fetch classes for exam');
+        response.data?['message'] ?? 'Failed to fetch classes for exam',
+      );
     }
   }
 
   /// GET /teacher/assignments/exams/{examId}/classes/{classId}/students?subjectId={subjectId}
   Future<List<TeacherAssignmentStudent>> getClassStudents(
-      String examId, String classId, {String? sectionId, String? subjectId}) async {
+    String examId,
+    String classId, {
+    String? sectionId,
+    String? subjectId,
+  }) async {
     final token = await _getToken();
     var url =
         '${APIPath.teacherAssignment}/exams/$examId/classes/$classId/students';
@@ -102,18 +107,19 @@ class MarkEntryRemoteDataSource {
           ? rawData
           : (rawData is Map ? (rawData['data'] ?? []) : []);
       log('Class students count: ${data.length}');
-      
+
       var students = data
           .map((json) => TeacherAssignmentStudent.fromJson(json))
           .toList();
-          
+
       if (sectionId != null && sectionId.isNotEmpty) {
         students = students.where((s) => s.sectionId == sectionId).toList();
       }
       return students;
     } else {
       throw Exception(
-          response.data?['message'] ?? 'Failed to fetch students for class');
+        response.data?['message'] ?? 'Failed to fetch students for class',
+      );
     }
   }
 
@@ -139,20 +145,27 @@ class MarkEntryRemoteDataSource {
           ? rawData
           : (rawData is Map ? (rawData['data'] ?? []) : []);
       log('Exam students count: ${data.length}');
-      
+      log('Exam students count: ${data}');
+
       return data
           .map((json) => TeacherAssignmentStudent.fromJson(json))
           .toList();
     } else {
       throw Exception(
-          response.data?['message'] ?? 'Failed to fetch exam students');
+        response.data?['message'] ?? 'Failed to fetch exam students',
+      );
     }
   }
 
   /// GET /teacher/assignments/exams/{examId}/subjects?classId={classId}&sectionId={sectionId}
-  Future<List<Subject>> getExamAssignedSubjects(String examId, String classId, {String? sectionId}) async {
+  Future<List<Subject>> getExamAssignedSubjects(
+    String examId,
+    String classId, {
+    String? sectionId,
+  }) async {
     final token = await _getToken();
-    var url = '${APIPath.teacherAssignment}/exams/$examId/subjects?classId=$classId';
+    var url =
+        '${APIPath.teacherAssignment}/exams/$examId/subjects?classId=$classId';
     if (sectionId != null && sectionId.isNotEmpty) {
       url += '&sectionId=$sectionId';
     }
@@ -177,13 +190,18 @@ class MarkEntryRemoteDataSource {
       return data.map((json) => Subject.fromJson(json)).toList();
     } else {
       throw Exception(
-          response.data?['message'] ?? 'Failed to fetch assigned subjects for exam');
+        response.data?['message'] ??
+            'Failed to fetch assigned subjects for exam',
+      );
     }
   }
 
   /// GET /teacher/assignments/exams/{examId}/classes/{classId}/students/{studentId}/subjects
   Future<List<TeacherAssignmentSubject>> getStudentSubjects(
-      String examId, String classId, String studentId) async {
+    String examId,
+    String classId,
+    String studentId,
+  ) async {
     final token = await _getToken();
     final url =
         '${APIPath.teacherAssignment}/exams/$examId/classes/$classId/students/$studentId/subjects';
@@ -210,7 +228,8 @@ class MarkEntryRemoteDataSource {
           .toList();
     } else {
       throw Exception(
-          response.data?['message'] ?? 'Failed to fetch subjects for student');
+        response.data?['message'] ?? 'Failed to fetch subjects for student',
+      );
     }
   }
 
@@ -246,8 +265,7 @@ class MarkEntryRemoteDataSource {
     }
 
     if (response.statusCode! < 200 || response.statusCode! >= 300) {
-      final message =
-          response.data?['message'] ?? 'Failed to submit marks';
+      final message = response.data?['message'] ?? 'Failed to submit marks';
       throw Exception(message);
     }
   }

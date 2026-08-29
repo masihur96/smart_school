@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/school_models.dart';
-import '../providers/result_provider.dart';
 
+import '../providers/result_provider.dart';
 import 'mark_entry_screen.dart';
 
 class TeacherExamDetailsScreen extends StatefulWidget {
@@ -70,14 +70,17 @@ class _TeacherExamDetailsScreenState extends State<TeacherExamDetailsScreen>
                           children: [
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 5),
+                                horizontal: 12,
+                                vertical: 5,
+                              ),
                               decoration: BoxDecoration(
                                 color: exam.isPublished
                                     ? Colors.white.withOpacity(0.25)
                                     : Colors.orange.withOpacity(0.35),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                    color: Colors.white.withOpacity(0.5)),
+                                  color: Colors.white.withOpacity(0.5),
+                                ),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -105,7 +108,9 @@ class _TeacherExamDetailsScreenState extends State<TeacherExamDetailsScreen>
                             if (dateRange.isNotEmpty)
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 5),
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(20),
@@ -113,13 +118,18 @@ class _TeacherExamDetailsScreenState extends State<TeacherExamDetailsScreen>
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(Icons.calendar_today,
-                                        color: Colors.white, size: 12),
+                                    const Icon(
+                                      Icons.calendar_today,
+                                      color: Colors.white,
+                                      size: 12,
+                                    ),
                                     const SizedBox(width: 5),
                                     Text(
                                       dateRange,
                                       style: const TextStyle(
-                                          color: Colors.white, fontSize: 11),
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -239,7 +249,9 @@ class _RoutineTab extends StatelessWidget {
                 labelColor: AppColors.primaryTeacher,
                 unselectedLabelColor: Colors.grey.shade400,
                 labelStyle: const TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 13),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 tabs: classNames.map((c) => Tab(text: 'Class $c')).toList(),
               ),
@@ -274,8 +286,7 @@ class _RoutineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateStr =
-        DateFormat('EEE, MMM dd yyyy').format(assignment.date);
+    final dateStr = DateFormat('EEE, MMM dd yyyy').format(assignment.date);
     final isToday = _isToday(assignment.date);
 
     return Container(
@@ -307,8 +318,11 @@ class _RoutineCard extends StatelessWidget {
                     color: AppColors.primaryTeacher.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(Icons.book_rounded,
-                      color: AppColors.primaryTeacher, size: 20),
+                  child: Icon(
+                    Icons.book_rounded,
+                    color: AppColors.primaryTeacher,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -337,7 +351,9 @@ class _RoutineCard extends StatelessWidget {
                 if (isToday)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.primaryTeacher,
                       borderRadius: BorderRadius.circular(10),
@@ -364,8 +380,11 @@ class _RoutineCard extends StatelessWidget {
                 children: [
                   _row(Icons.calendar_today, 'Date', dateStr),
                   const SizedBox(height: 8),
-                  _row(Icons.person_rounded, 'Examiner',
-                      assignment.examinerName),
+                  _row(
+                    Icons.person_rounded,
+                    'Examiner',
+                    assignment.examinerName,
+                  ),
                 ],
               ),
             ),
@@ -390,17 +409,19 @@ class _RoutineCard extends StatelessWidget {
         Text(
           '$label: ',
           style: TextStyle(
-              color: Colors.grey.shade500,
-              fontSize: 12,
-              fontWeight: FontWeight.w600),
+            color: Colors.grey.shade500,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         Expanded(
           child: Text(
             value,
             style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1A1C1E)),
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1A1C1E),
+            ),
           ),
         ),
       ],
@@ -417,13 +438,16 @@ class _SyllabusTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final withSyllabus = exam.assignments
-        .where((a) =>
-            a.syllabus != null &&
-            a.syllabus!.isNotEmpty &&
-            a.syllabus != 'N/A')
-        .toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+    final withSyllabus =
+        exam.assignments
+            .where(
+              (a) =>
+                  a.syllabus != null &&
+                  a.syllabus!.isNotEmpty &&
+                  a.syllabus != 'N/A',
+            )
+            .toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
 
     if (withSyllabus.isEmpty) {
       return _emptyState(
@@ -452,7 +476,10 @@ class _SyllabusTab extends StatelessWidget {
                 indicatorWeight: 3,
                 labelColor: AppColors.primaryTeacher,
                 unselectedLabelColor: Colors.grey.shade400,
-                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                labelStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 tabs: classNames.map((c) => Tab(text: 'Class $c')).toList(),
               ),
@@ -462,7 +489,9 @@ class _SyllabusTab extends StatelessWidget {
                 ? _ClassSyllabusView(assignments: grouped[classNames.first]!)
                 : TabBarView(
                     children: classNames
-                        .map((c) => _ClassSyllabusView(assignments: grouped[c]!))
+                        .map(
+                          (c) => _ClassSyllabusView(assignments: grouped[c]!),
+                        )
                         .toList(),
                   ),
           ),
@@ -485,17 +514,20 @@ class _ClassSyllabusViewState extends State<_ClassSyllabusView> {
 
   @override
   Widget build(BuildContext context) {
-    final sections = widget.assignments
-        .map((a) => a.sectionName)
-        .where((s) => s != null && s.isNotEmpty)
-        .cast<String>()
-        .toSet()
-        .toList()
-      ..sort();
+    final sections =
+        widget.assignments
+            .map((a) => a.sectionName)
+            .where((s) => s != null && s.isNotEmpty)
+            .cast<String>()
+            .toSet()
+            .toList()
+          ..sort();
 
     List<ExamAssignment> filtered = widget.assignments;
     if (selectedSection != null) {
-      filtered = filtered.where((a) => a.sectionName == selectedSection).toList();
+      filtered = filtered
+          .where((a) => a.sectionName == selectedSection)
+          .toList();
     }
 
     return Column(
@@ -506,7 +538,11 @@ class _ClassSyllabusViewState extends State<_ClassSyllabusView> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: AppColors.primaryTeacher.withOpacity(0.05),
-              border: Border(bottom: BorderSide(color: AppColors.primaryTeacher.withOpacity(0.1))),
+              border: Border(
+                bottom: BorderSide(
+                  color: AppColors.primaryTeacher.withOpacity(0.1),
+                ),
+              ),
             ),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -521,27 +557,39 @@ class _ClassSyllabusViewState extends State<_ClassSyllabusView> {
                     selectedColor: AppColors.primaryTeacher.withOpacity(0.2),
                     showCheckmark: false,
                     labelStyle: TextStyle(
-                      color: selectedSection == null ? AppColors.primaryTeacher : Colors.grey.shade700,
-                      fontWeight: selectedSection == null ? FontWeight.bold : FontWeight.normal,
+                      color: selectedSection == null
+                          ? AppColors.primaryTeacher
+                          : Colors.grey.shade700,
+                      fontWeight: selectedSection == null
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  ...sections.map((s) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ChoiceChip(
-                          label: Text(s),
-                          selected: selectedSection == s,
-                          onSelected: (val) {
-                            if (val) setState(() => selectedSection = s);
-                          },
-                          selectedColor: AppColors.primaryTeacher.withOpacity(0.2),
-                          showCheckmark: false,
-                          labelStyle: TextStyle(
-                            color: selectedSection == s ? AppColors.primaryTeacher : Colors.grey.shade700,
-                            fontWeight: selectedSection == s ? FontWeight.bold : FontWeight.normal,
-                          ),
+                  ...sections.map(
+                    (s) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(s),
+                        selected: selectedSection == s,
+                        onSelected: (val) {
+                          if (val) setState(() => selectedSection = s);
+                        },
+                        selectedColor: AppColors.primaryTeacher.withOpacity(
+                          0.2,
                         ),
-                      )),
+                        showCheckmark: false,
+                        labelStyle: TextStyle(
+                          color: selectedSection == s
+                              ? AppColors.primaryTeacher
+                              : Colors.grey.shade700,
+                          fontWeight: selectedSection == s
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -578,8 +626,11 @@ class _ClassSyllabusViewState extends State<_ClassSyllabusView> {
                               color: Colors.blue.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(14),
                             ),
-                            child: Icon(Icons.description_rounded,
-                                color: Colors.blue.shade700, size: 20),
+                            child: Icon(
+                              Icons.description_rounded,
+                              color: Colors.blue.shade700,
+                              size: 20,
+                            ),
                           ),
                           const SizedBox(width: 14),
                           Expanded(
@@ -613,8 +664,7 @@ class _ClassSyllabusViewState extends State<_ClassSyllabusView> {
                         decoration: BoxDecoration(
                           color: Colors.blue.shade50,
                           borderRadius: BorderRadius.circular(12),
-                          border:
-                              Border.all(color: Colors.blue.shade100),
+                          border: Border.all(color: Colors.blue.shade100),
                         ),
                         child: Text(
                           a.syllabus!,
@@ -708,17 +758,25 @@ class _ResultTabState extends State<_ResultTab> {
                 indicatorWeight: 3,
                 labelColor: AppColors.primaryTeacher,
                 unselectedLabelColor: Colors.grey.shade400,
-                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                labelStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 tabs: classNames.map((c) => Tab(text: 'Class $c')).toList(),
               ),
             ),
           Expanded(
             child: classNames.length == 1
-                ? _ClassResultView(classStudents: classGrouped[classNames.first]!)
+                ? _ClassResultView(
+                    classStudents: classGrouped[classNames.first]!,
+                  )
                 : TabBarView(
                     children: classNames
-                        .map((c) => _ClassResultView(classStudents: classGrouped[c]!))
+                        .map(
+                          (c) =>
+                              _ClassResultView(classStudents: classGrouped[c]!),
+                        )
                         .toList(),
                   ),
           ),
@@ -727,8 +785,7 @@ class _ResultTabState extends State<_ResultTab> {
     );
   }
 
-  Widget _buildMyAssignedSubjects(
-      BuildContext context, String currentUserId) {
+  Widget _buildMyAssignedSubjects(BuildContext context, String currentUserId) {
     // Filter assignments where the logged-in teacher is the examiner
     final myAssignments = widget.exam.assignments
         .where((a) => a.examinerId == currentUserId)
@@ -748,8 +805,11 @@ class _ResultTabState extends State<_ResultTab> {
         ),
         child: Row(
           children: [
-            Icon(Icons.info_outline_rounded,
-                color: Colors.orange.shade700, size: 20),
+            Icon(
+              Icons.info_outline_rounded,
+              color: Colors.orange.shade700,
+              size: 20,
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -806,7 +866,9 @@ class _ResultTabState extends State<_ResultTab> {
                     labelColor: AppColors.primaryTeacher,
                     unselectedLabelColor: Colors.grey.shade400,
                     labelStyle: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 13),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     tabs: classNames.map((c) {
                       final count = grouped[c]!.length;
@@ -818,10 +880,13 @@ class _ResultTabState extends State<_ResultTab> {
                             const SizedBox(width: 6),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 7, vertical: 2),
+                                horizontal: 7,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryTeacher
-                                    .withValues(alpha: 0.12),
+                                color: AppColors.primaryTeacher.withValues(
+                                  alpha: 0.12,
+                                ),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
@@ -847,8 +912,10 @@ class _ResultTabState extends State<_ResultTab> {
                       return ListView.builder(
                         padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
                         itemCount: items.length,
-                        itemBuilder: (context, i) =>
-                            _AssignedSubjectCard(examId: widget.exam.id, assignment: items[i]),
+                        itemBuilder: (context, i) => _AssignedSubjectCard(
+                          examId: widget.exam.id,
+                          assignment: items[i],
+                        ),
                       );
                     }).toList(),
                   ),
@@ -878,17 +945,20 @@ class _ClassResultViewState extends State<_ClassResultView> {
 
   @override
   Widget build(BuildContext context) {
-    final sections = widget.classStudents
-        .map((s) => s.sectionName)
-        .where((s) => s != null && s.isNotEmpty)
-        .cast<String>()
-        .toSet()
-        .toList()
-      ..sort();
+    final sections =
+        widget.classStudents
+            .map((s) => s.sectionName)
+            .where((s) => s != null && s.isNotEmpty)
+            .cast<String>()
+            .toSet()
+            .toList()
+          ..sort();
 
     List<TeacherAssignmentStudent> filtered = widget.classStudents;
     if (selectedSection != null) {
-      filtered = filtered.where((s) => s.sectionName == selectedSection).toList();
+      filtered = filtered
+          .where((s) => s.sectionName == selectedSection)
+          .toList();
     }
 
     return Column(
@@ -899,7 +969,11 @@ class _ClassResultViewState extends State<_ClassResultView> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: AppColors.primaryTeacher.withOpacity(0.05),
-              border: Border(bottom: BorderSide(color: AppColors.primaryTeacher.withOpacity(0.1))),
+              border: Border(
+                bottom: BorderSide(
+                  color: AppColors.primaryTeacher.withOpacity(0.1),
+                ),
+              ),
             ),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -914,27 +988,39 @@ class _ClassResultViewState extends State<_ClassResultView> {
                     selectedColor: AppColors.primaryTeacher.withOpacity(0.2),
                     showCheckmark: false,
                     labelStyle: TextStyle(
-                      color: selectedSection == null ? AppColors.primaryTeacher : Colors.grey.shade700,
-                      fontWeight: selectedSection == null ? FontWeight.bold : FontWeight.normal,
+                      color: selectedSection == null
+                          ? AppColors.primaryTeacher
+                          : Colors.grey.shade700,
+                      fontWeight: selectedSection == null
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  ...sections.map((s) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ChoiceChip(
-                          label: Text(s),
-                          selected: selectedSection == s,
-                          onSelected: (val) {
-                            if (val) setState(() => selectedSection = s);
-                          },
-                          selectedColor: AppColors.primaryTeacher.withOpacity(0.2),
-                          showCheckmark: false,
-                          labelStyle: TextStyle(
-                            color: selectedSection == s ? AppColors.primaryTeacher : Colors.grey.shade700,
-                            fontWeight: selectedSection == s ? FontWeight.bold : FontWeight.normal,
-                          ),
+                  ...sections.map(
+                    (s) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(s),
+                        selected: selectedSection == s,
+                        onSelected: (val) {
+                          if (val) setState(() => selectedSection = s);
+                        },
+                        selectedColor: AppColors.primaryTeacher.withOpacity(
+                          0.2,
                         ),
-                      )),
+                        showCheckmark: false,
+                        labelStyle: TextStyle(
+                          color: selectedSection == s
+                              ? AppColors.primaryTeacher
+                              : Colors.grey.shade700,
+                          fontWeight: selectedSection == s
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -958,9 +1044,7 @@ class _ClassResultViewState extends State<_ClassResultView> {
               ],
               selected: {viewMode},
               onSelectionChanged: (set) => setState(() => viewMode = set.first),
-              style: ButtonStyle(
-                visualDensity: VisualDensity.compact,
-              ),
+              style: ButtonStyle(visualDensity: VisualDensity.compact),
             ),
           ),
         ),
@@ -988,7 +1072,9 @@ class _ClassResultViewState extends State<_ClassResultView> {
         final subjectName = subjects[i];
         final subjectStudents = grouped[subjectName]!;
         return _ResultSubjectCard(
-            subjectName: subjectName, students: subjectStudents);
+          subjectName: subjectName,
+          students: subjectStudents,
+        );
       },
     );
   }
@@ -998,11 +1084,17 @@ class _ClassResultViewState extends State<_ClassResultView> {
     for (final s in filtered) {
       grouped.putIfAbsent(s.id, () => []).add(s);
     }
-    
+
     final studentList = grouped.values.toList();
     studentList.sort((a, b) {
-      final aTotal = a.fold(0.0, (sum, item) => sum + (item.marksObtained ?? 0));
-      final bTotal = b.fold(0.0, (sum, item) => sum + (item.marksObtained ?? 0));
+      final aTotal = a.fold(
+        0.0,
+        (sum, item) => sum + (item.marksObtained ?? 0),
+      );
+      final bTotal = b.fold(
+        0.0,
+        (sum, item) => sum + (item.marksObtained ?? 0),
+      );
       return bTotal.compareTo(aTotal);
     });
 
@@ -1012,9 +1104,17 @@ class _ClassResultViewState extends State<_ClassResultView> {
       itemBuilder: (context, i) {
         final studentsRecs = studentList[i];
         final first = studentsRecs.first;
-        final totalObtained = studentsRecs.fold(0.0, (sum, item) => sum + (item.marksObtained ?? 0));
-        final totalMax = studentsRecs.fold(0.0, (sum, item) => sum + (item.totalMarks ?? 0));
-        final percentage = totalMax > 0 ? (totalObtained / totalMax) * 100 : 0.0;
+        final totalObtained = studentsRecs.fold(
+          0.0,
+          (sum, item) => sum + (item.marksObtained ?? 0),
+        );
+        final totalMax = studentsRecs.fold(
+          0.0,
+          (sum, item) => sum + (item.totalMarks ?? 0),
+        );
+        final percentage = totalMax > 0
+            ? (totalObtained / totalMax) * 100
+            : 0.0;
         final isPass = percentage >= 40.0;
 
         return Container(
@@ -1030,7 +1130,13 @@ class _ClassResultViewState extends State<_ClassResultView> {
               ),
             ],
             border: Border.all(
-              color: i == 0 ? Colors.amber.shade300 : (i == 1 ? Colors.grey.shade400 : (i == 2 ? Colors.brown.shade300 : Colors.transparent)),
+              color: i == 0
+                  ? Colors.amber.shade300
+                  : (i == 1
+                        ? Colors.grey.shade400
+                        : (i == 2
+                              ? Colors.brown.shade300
+                              : Colors.transparent)),
               width: i < 3 ? 1.5 : 0,
             ),
           ),
@@ -1046,14 +1152,26 @@ class _ClassResultViewState extends State<_ClassResultView> {
                       height: 32,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: i == 0 ? Colors.amber.shade100 : (i == 1 ? Colors.grey.shade200 : (i == 2 ? Colors.brown.shade100 : Colors.blue.shade50)),
+                        color: i == 0
+                            ? Colors.amber.shade100
+                            : (i == 1
+                                  ? Colors.grey.shade200
+                                  : (i == 2
+                                        ? Colors.brown.shade100
+                                        : Colors.blue.shade50)),
                         shape: BoxShape.circle,
                       ),
                       child: Text(
                         '#${i + 1}',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: i == 0 ? Colors.amber.shade900 : (i == 1 ? Colors.grey.shade800 : (i == 2 ? Colors.brown.shade900 : Colors.blue.shade900)),
+                          color: i == 0
+                              ? Colors.amber.shade900
+                              : (i == 1
+                                    ? Colors.grey.shade800
+                                    : (i == 2
+                                          ? Colors.brown.shade900
+                                          : Colors.blue.shade900)),
                         ),
                       ),
                     ),
@@ -1064,11 +1182,18 @@ class _ClassResultViewState extends State<_ClassResultView> {
                         children: [
                           Text(
                             first.name,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1A1C1E)),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Color(0xFF1A1C1E),
+                            ),
                           ),
                           Text(
                             'Roll: ${first.rollNumber}',
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
                           ),
                         ],
                       ),
@@ -1077,11 +1202,13 @@ class _ClassResultViewState extends State<_ClassResultView> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '${totalObtained.toStringAsFixed(1).replaceAll('.0','')} / ${totalMax.toStringAsFixed(1).replaceAll('.0','')}',
+                          '${totalObtained.toStringAsFixed(1).replaceAll('.0', '')} / ${totalMax.toStringAsFixed(1).replaceAll('.0', '')}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
-                            color: isPass ? Colors.green.shade700 : Colors.red.shade700,
+                            color: isPass
+                                ? Colors.green.shade700
+                                : Colors.red.shade700,
                           ),
                         ),
                         Text(
@@ -1089,7 +1216,9 @@ class _ClassResultViewState extends State<_ClassResultView> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: isPass ? Colors.green.shade600 : Colors.red.shade600,
+                            color: isPass
+                                ? Colors.green.shade600
+                                : Colors.red.shade600,
                           ),
                         ),
                       ],
@@ -1103,9 +1232,16 @@ class _ClassResultViewState extends State<_ClassResultView> {
                   spacing: 8,
                   runSpacing: 8,
                   children: studentsRecs.map((subj) {
-                    final sPass = subj.marksObtained != null && subj.totalMarks != null && subj.totalMarks! > 0 && (subj.marksObtained! / subj.totalMarks!) >= 0.4;
+                    final sPass =
+                        subj.marksObtained != null &&
+                        subj.totalMarks != null &&
+                        subj.totalMarks! > 0 &&
+                        (subj.marksObtained! / subj.totalMarks!) >= 0.4;
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade50,
                         borderRadius: BorderRadius.circular(8),
@@ -1116,14 +1252,23 @@ class _ClassResultViewState extends State<_ClassResultView> {
                         children: [
                           Text(
                             '${subj.subjectName ?? 'Unknown'}: ',
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade700,
+                            ),
                           ),
                           Text(
-                            subj.marksObtained != null ? '${subj.marksObtained!.toStringAsFixed(1).replaceAll('.0','')} / ${subj.totalMarks?.toStringAsFixed(1).replaceAll('.0','') ?? '100'}' : 'N/A',
+                            subj.marksObtained != null
+                                ? '${subj.marksObtained!.toStringAsFixed(1).replaceAll('.0', '')} / ${subj.totalMarks?.toStringAsFixed(1).replaceAll('.0', '') ?? '100'}'
+                                : 'N/A',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
-                              color: subj.marksObtained == null ? Colors.grey.shade500 : (sPass ? Colors.green.shade700 : Colors.red.shade700),
+                              color: subj.marksObtained == null
+                                  ? Colors.grey.shade500
+                                  : (sPass
+                                        ? Colors.green.shade700
+                                        : Colors.red.shade700),
                             ),
                           ),
                         ],
@@ -1149,7 +1294,11 @@ class _AssignedSubjectCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final examDate = assignment.date;
-    final examDateNormalized = DateTime(examDate.year, examDate.month, examDate.day);
+    final examDateNormalized = DateTime(
+      examDate.year,
+      examDate.month,
+      examDate.day,
+    );
     final todayNormalized = DateTime(now.year, now.month, now.day);
     final daysLeft = examDateNormalized.difference(todayNormalized).inDays;
     final isToday = daysLeft == 0;
@@ -1176,7 +1325,8 @@ class _AssignedSubjectCard extends StatelessWidget {
       countdownBg = Colors.blue.shade50;
     }
 
-    final hasSyllabus = assignment.syllabus != null &&
+    final hasSyllabus =
+        assignment.syllabus != null &&
         assignment.syllabus!.isNotEmpty &&
         assignment.syllabus != 'N/A';
 
@@ -1218,207 +1368,241 @@ class _AssignedSubjectCard extends StatelessWidget {
             },
             child: IntrinsicHeight(
               child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Left accent bar
-              Container(
-                width: 5,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: isPast
-                        ? [Colors.red.shade300, Colors.red.shade600]
-                        : [
-                            AppColors.primaryTeacher,
-                            AppColors.primaryTeacher.withValues(alpha: 0.5),
-                          ],
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Left accent bar
+                  Container(
+                    width: 5,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: isPast
+                            ? [Colors.red.shade300, Colors.red.shade600]
+                            : [
+                                AppColors.primaryTeacher,
+                                AppColors.primaryTeacher.withValues(alpha: 0.5),
+                              ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
 
-              // Main content
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header row
-                      Row(
+                  // Main content
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Subject icon
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryTeacher.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Icon(
-                              Icons.menu_book_rounded,
-                              color: AppColors.primaryTeacher,
-                              size: 22,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  assignment.subjectName,
-                                  style: const TextStyle(
+                          // Header row
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Subject icon
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryTeacher.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Icon(
+                                  Icons.menu_book_rounded,
+                                  color: AppColors.primaryTeacher,
+                                  size: 22,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      assignment.subjectName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 17,
+                                        color: Color(0xFF1A1C1E),
+                                        letterSpacing: -0.2,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.school_rounded,
+                                          size: 12,
+                                          color: Colors.grey.shade400,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Class ${assignment.className}'
+                                          '${assignment.sectionName != null && assignment.sectionName!.isNotEmpty ? ' · ${assignment.sectionName}' : ''}',
+                                          style: TextStyle(
+                                            color: Colors.grey.shade500,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              // Countdown badge
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: countdownBg,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  countdownLabel,
+                                  style: TextStyle(
+                                    color: countdownColor,
+                                    fontSize: 10,
                                     fontWeight: FontWeight.w800,
-                                    fontSize: 17,
-                                    color: Color(0xFF1A1C1E),
-                                    letterSpacing: -0.2,
+                                    letterSpacing: 0.4,
                                   ),
                                 ),
-                                const SizedBox(height: 3),
-                                Row(
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          // Info grid
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8F9FA),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Column(
+                              children: [
+                                _infoRow(
+                                  icon: Icons.event_rounded,
+                                  label: 'Exam Date',
+                                  value: DateFormat(
+                                    'EEEE, MMM dd yyyy',
+                                  ).format(examDate),
+                                  valueColor: isToday
+                                      ? AppColors.primaryTeacher
+                                      : isPast
+                                      ? Colors.red.shade600
+                                      : const Color(0xFF1A1C1E),
+                                ),
+                                const SizedBox(height: 10),
+                                _infoRow(
+                                  icon: Icons.person_pin_rounded,
+                                  label: 'Examiner',
+                                  value: assignment.examinerName,
+                                ),
+                                if (hasSyllabus) ...[
+                                  const SizedBox(height: 10),
+                                  _infoRow(
+                                    icon: Icons.format_list_bulleted_rounded,
+                                    label: 'Syllabus',
+                                    value: assignment.syllabus!,
+                                    maxLines: 2,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // Footer status strip
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.shade50,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Colors.orange.shade200,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.school_rounded,
-                                        size: 12, color: Colors.grey.shade400),
-                                    const SizedBox(width: 4),
+                                    Icon(
+                                      Icons.hourglass_top_rounded,
+                                      size: 12,
+                                      color: Colors.orange.shade700,
+                                    ),
+                                    const SizedBox(width: 5),
                                     Text(
-                                      'Class ${assignment.className}'
-                                      '${assignment.sectionName != null && assignment.sectionName!.isNotEmpty ? ' · ${assignment.sectionName}' : ''}',
+                                      'Mark Entry Pending',
                                       style: TextStyle(
-                                        color: Colors.grey.shade500,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
+                                        color: Colors.orange.shade700,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          // Countdown badge
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: countdownBg,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              countdownLabel,
-                              style: TextStyle(
-                                color: countdownColor,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.4,
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 14),
-
-                      // Info grid
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8F9FA),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Column(
-                          children: [
-                            _infoRow(
-                              icon: Icons.event_rounded,
-                              label: 'Exam Date',
-                              value: DateFormat('EEEE, MMM dd yyyy')
-                                  .format(examDate),
-                              valueColor: isToday
-                                  ? AppColors.primaryTeacher
-                                  : isPast
-                                      ? Colors.red.shade600
-                                      : const Color(0xFF1A1C1E),
-                            ),
-                            const SizedBox(height: 10),
-                            _infoRow(
-                              icon: Icons.person_pin_rounded,
-                              label: 'Examiner',
-                              value: assignment.examinerName,
-                            ),
-                            if (hasSyllabus) ...[
-                              const SizedBox(height: 10),
-                              _infoRow(
-                                icon: Icons.format_list_bulleted_rounded,
-                                label: 'Syllabus',
-                                value: assignment.syllabus!,
-                                maxLines: 2,
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // Footer status strip
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.shade50,
-                              borderRadius: BorderRadius.circular(8),
-                              border:
-                                  Border.all(color: Colors.orange.shade200),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.hourglass_top_rounded,
-                                    size: 12,
-                                    color: Colors.orange.shade700),
-                                const SizedBox(width: 5),
-                                Text(
-                                  'Mark Entry Pending',
+                              const Spacer(),
+                              TextButton.icon(
+                                onPressed: () {
+                                  _showResultsBottomSheet(
+                                    context,
+                                    examId,
+                                    assignment,
+                                  );
+                                },
+                                icon: Icon(
+                                  Icons.bar_chart_rounded,
+                                  size: 14,
+                                  color: AppColors.primaryTeacher,
+                                ),
+                                label: Text(
+                                  'View Results',
                                   style: TextStyle(
-                                    color: Colors.orange.shade700,
-                                    fontSize: 11,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.bold,
+                                    color: AppColors.primaryTeacher,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          const Spacer(),
-                          TextButton.icon(
-                            onPressed: () {
-                              _showResultsBottomSheet(context, examId, assignment);
-                            },
-                            icon: Icon(Icons.bar_chart_rounded, size: 14, color: AppColors.primaryTeacher),
-                            label: Text('View Results',
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primaryTeacher)),
-                            style: TextButton.styleFrom(
-                              minimumSize: Size.zero,
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                side: BorderSide(color: AppColors.primaryTeacher.withValues(alpha: 0.3)),
+                                style: TextButton.styleFrom(
+                                  minimumSize: Size.zero,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 5,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    side: BorderSide(
+                                      color: AppColors.primaryTeacher
+                                          .withValues(alpha: 0.3),
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
-    )));
-
+    );
   }
 
   Widget _infoRow({
@@ -1429,8 +1613,9 @@ class _AssignedSubjectCard extends StatelessWidget {
     int maxLines = 1,
   }) {
     return Row(
-      crossAxisAlignment:
-          maxLines > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+      crossAxisAlignment: maxLines > 1
+          ? CrossAxisAlignment.start
+          : CrossAxisAlignment.center,
       children: [
         Icon(icon, size: 14, color: Colors.grey.shade400),
         const SizedBox(width: 8),
@@ -1466,8 +1651,7 @@ class _AssignedSubjectCard extends StatelessWidget {
 class _ResultSubjectCard extends StatelessWidget {
   final String subjectName;
   final List<TeacherAssignmentStudent> students;
-  const _ResultSubjectCard(
-      {required this.subjectName, required this.students});
+  const _ResultSubjectCard({required this.subjectName, required this.students});
 
   @override
   Widget build(BuildContext context) {
@@ -1497,8 +1681,11 @@ class _ResultSubjectCard extends StatelessWidget {
                     color: Colors.blue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(Icons.book_outlined,
-                      color: Colors.blue.shade700, size: 20),
+                  child: Icon(
+                    Icons.book_outlined,
+                    color: Colors.blue.shade700,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -1513,7 +1700,9 @@ class _ResultSubjectCard extends StatelessWidget {
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 5),
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(10),
@@ -1534,15 +1723,19 @@ class _ResultSubjectCard extends StatelessWidget {
             const SizedBox(height: 10),
             ...students.map((r) {
               final hasMarks = r.marksObtained != null;
-              final isPass = hasMarks &&
+              final isPass =
+                  hasMarks &&
                   (r.totalMarks != null && r.totalMarks! > 0) &&
                   (r.marksObtained! / r.totalMarks!) >= 0.4;
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Row(
                   children: [
-                    const Icon(Icons.person_outline,
-                        size: 16, color: Colors.grey),
+                    const Icon(
+                      Icons.person_outline,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Column(
@@ -1559,8 +1752,9 @@ class _ResultSubjectCard extends StatelessWidget {
                           Text(
                             'Roll: ${r.rollNumber}',
                             style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey.shade500),
+                              fontSize: 11,
+                              color: Colors.grey.shade500,
+                            ),
                           ),
                         ],
                       ),
@@ -1568,7 +1762,9 @@ class _ResultSubjectCard extends StatelessWidget {
                     if (hasMarks)
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 5),
+                          horizontal: 12,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           color: isPass
                               ? Colors.green.shade50
@@ -1589,7 +1785,9 @@ class _ResultSubjectCard extends StatelessWidget {
                     else
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(8),
@@ -1627,10 +1825,7 @@ Widget _emptyState({required IconData icon, required String message}) {
         Text(
           message,
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.grey.shade500,
-            fontSize: 15,
-          ),
+          style: TextStyle(color: Colors.grey.shade500, fontSize: 15),
         ),
       ],
     ),
@@ -1640,12 +1835,17 @@ Widget _emptyState({required IconData icon, required String message}) {
 // ---------------------------------------------------------------------------
 // Results Bottom Sheet
 // ---------------------------------------------------------------------------
-void _showResultsBottomSheet(BuildContext context, String examId, ExamAssignment assignment) {
+void _showResultsBottomSheet(
+  BuildContext context,
+  String examId,
+  ExamAssignment assignment,
+) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (context) => _ResultsBottomSheet(examId: examId, assignment: assignment),
+    builder: (context) =>
+        _ResultsBottomSheet(examId: examId, assignment: assignment),
   );
 }
 
@@ -1690,7 +1890,9 @@ class _ResultsBottomSheetState extends State<_ResultsBottomSheet> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: AppColors.primaryTeacher.withValues(alpha: 0.05),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
             ),
             child: Row(
               children: [
@@ -1700,7 +1902,10 @@ class _ResultsBottomSheetState extends State<_ResultsBottomSheet> {
                     color: AppColors.primaryTeacher.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(Icons.bar_chart_rounded, color: AppColors.primaryTeacher),
+                  child: Icon(
+                    Icons.bar_chart_rounded,
+                    color: AppColors.primaryTeacher,
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -1729,7 +1934,9 @@ class _ResultsBottomSheetState extends State<_ResultsBottomSheet> {
                   icon: const Icon(Icons.close),
                   style: IconButton.styleFrom(
                     backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ],
@@ -1740,134 +1947,155 @@ class _ResultsBottomSheetState extends State<_ResultsBottomSheet> {
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : students.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.people_outline, size: 64, color: Colors.grey.shade300),
-                            const SizedBox(height: 16),
-                            Text('No students found', style: TextStyle(color: Colors.grey.shade600, fontSize: 16)),
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.people_outline,
+                          size: 64,
+                          color: Colors.grey.shade300,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No students found',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.all(20),
+                    itemCount: students.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final student = students[index];
+                      final hasMarks = student.marksObtained != null;
+                      final isPass =
+                          hasMarks &&
+                          (student.totalMarks != null &&
+                              student.totalMarks! > 0) &&
+                          (student.marksObtained! / student.totalMarks!) >= 0.4;
+
+                      return Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade200),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.02),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
                           ],
                         ),
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.all(20),
-                        itemCount: students.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final student = students[index];
-                          final hasMarks = student.marksObtained != null;
-                          final isPass = hasMarks &&
-                              (student.totalMarks != null && student.totalMarks! > 0) &&
-                              (student.marksObtained! / student.totalMarks!) >= 0.4;
-
-                          return Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.grey.shade200),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.02),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: AppColors.primaryTeacher
+                                  .withValues(alpha: 0.1),
+                              child: Text(
+                                student.name.isNotEmpty ? student.name[0] : '?',
+                                style: const TextStyle(
+                                  color: AppColors.primaryTeacher,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              ],
+                              ),
                             ),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 20,
-                                  backgroundColor: AppColors.primaryTeacher.withValues(alpha: 0.1),
-                                  child: Text(
-                                    student.name.isNotEmpty ? student.name[0] : '?',
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    student.name,
                                     style: const TextStyle(
-                                      color: AppColors.primaryTeacher,
                                       fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                      color: Color(0xFF1A1C1E),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        student.name,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15,
-                                          color: Color(0xFF1A1C1E),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        'Roll: ${student.rollNumber}',
-                                        style: TextStyle(
-                                          color: Colors.grey.shade600,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                if (hasMarks)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: isPass
-                                          ? Colors.green.shade50
-                                          : Colors.red.shade50,
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: isPass
-                                            ? Colors.green.shade200
-                                            : Colors.red.shade200,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      '${student.marksObtained!.toStringAsFixed(1).replaceAll('.0', '')} / ${student.totalMarks?.toStringAsFixed(1).replaceAll('.0', '') ?? '100'}',
-                                      style: TextStyle(
-                                        color: isPass
-                                            ? Colors.green.shade700
-                                            : Colors.red.shade700,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  )
-                                else
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade100,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(Icons.pending_actions, size: 14, color: Colors.grey.shade600),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          'Not Graded',
-                                          style: TextStyle(
-                                            color: Colors.grey.shade600,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Roll: ${student.rollNumber}',
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
-                              ],
+                                ],
+                              ),
                             ),
-                          );
-                        },
-                      ),
+                            if (hasMarks)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isPass
+                                      ? Colors.green.shade50
+                                      : Colors.red.shade50,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: isPass
+                                        ? Colors.green.shade200
+                                        : Colors.red.shade200,
+                                  ),
+                                ),
+                                child: Text(
+                                  '${student.marksObtained!.toStringAsFixed(1).replaceAll('.0', '')} / ${student.totalMarks?.toStringAsFixed(1).replaceAll('.0', '') ?? '100'}',
+                                  style: TextStyle(
+                                    color: isPass
+                                        ? Colors.green.shade700
+                                        : Colors.red.shade700,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              )
+                            else
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.pending_actions,
+                                      size: 14,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Not Graded',
+                                      style: TextStyle(
+                                        color: Colors.grey.shade600,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -1895,11 +2123,11 @@ int _compareAssignments(ExamAssignment a, ExamAssignment b) {
   // Today always first
   if (aIsToday && !bIsToday) return -1;
   if (!aIsToday && bIsToday) return 1;
-  
+
   // Upcoming before past
   if (aIsUpcoming && !bIsUpcoming) return -1;
   if (!aIsUpcoming && bIsUpcoming) return 1;
-  
+
   // Within same group: sort by date ascending
   return aDate.compareTo(bDate);
 }
