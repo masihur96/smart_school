@@ -72,26 +72,41 @@ class _TeacherSelfAttendanceDetailScreenState
     final teachers = context.watch<TeachersNotifier>().teachers;
 
     return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text(
           AppLocalizations.of(context)!.teacherAttendanceLabel,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
         ),
-        backgroundColor: Colors.green.shade600,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.white,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(
+            color: AppColors.border.withOpacity(0.1),
+            height: 1.0,
+          ),
+        ),
       ),
       body: Column(
         children: [
           _buildFilterSection(isAdmin, teachers),
           Expanded(
             child: provider.isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryTeacher,
+                    ),
+                  )
                 : provider.error != null
-                ? _buildErrorWidget(provider.error!)
-                : provider.attendanceList.isEmpty
-                ? _buildEmptyWidget()
-                : _buildAttendanceList(provider.attendanceList),
+                    ? _buildErrorWidget(provider.error!)
+                    : provider.attendanceList.isEmpty
+                        ? _buildEmptyWidget()
+                        : _buildAttendanceList(provider.attendanceList),
           ),
         ],
       ),
@@ -100,27 +115,49 @@ class _TeacherSelfAttendanceDetailScreenState
 
   Widget _buildFilterSection(bool isAdmin, List<dynamic> teachers) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       decoration: BoxDecoration(
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+        color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.black.withOpacity(0.03),
             blurRadius: 10,
-            offset: const Offset(0, 5),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (isAdmin) ...[
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelText: 'Select Teacher',
-                prefixIcon: const Icon(Icons.person_search),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                labelStyle: const TextStyle(color: AppColors.textSecondary),
+                prefixIcon: const Icon(
+                  Icons.person_search,
+                  color: AppColors.textSecondary,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                filled: true,
+                fillColor: Colors.grey.shade50,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: AppColors.primaryTeacher,
+                    width: 1.5,
+                  ),
                 ),
               ),
               value: _selectedTeacherId,
@@ -141,7 +178,7 @@ class _TeacherSelfAttendanceDetailScreenState
                 _fetchData();
               },
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
           ],
           Row(
             children: [
@@ -153,37 +190,58 @@ class _TeacherSelfAttendanceDetailScreenState
                       initialDate: _selectedDate ?? DateTime.now(),
                       firstDate: DateTime(2020),
                       lastDate: DateTime(2030),
+                      builder: (context, child) {
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: const ColorScheme.light(
+                              primary: AppColors.primaryTeacher,
+                              onPrimary: AppColors.white,
+                              onSurface: AppColors.textPrimary,
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
                     );
                     if (picked != null) {
                       setState(() => _selectedDate = picked);
                       _fetchData();
                     }
                   },
+                  borderRadius: BorderRadius.circular(12),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 15,
+                      horizontal: 16,
+                      vertical: 16,
                     ),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade400),
+                      color: Colors.grey.shade50,
+                      border: Border.all(color: Colors.grey.shade300),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.calendar_today,
                           size: 20,
-                          color: Colors.grey,
+                          color: _selectedDate == null
+                              ? AppColors.textSecondary
+                              : AppColors.primaryTeacher,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 12),
                         Text(
                           _selectedDate == null
                               ? 'Filter by Date'
-                              : DateFormat('dd/MM/yyyy').format(_selectedDate!),
+                              : DateFormat('dd MMM yyyy')
+                                  .format(_selectedDate!),
                           style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: _selectedDate == null
+                                ? FontWeight.normal
+                                : FontWeight.w500,
                             color: _selectedDate == null
-                                ? Colors.grey.shade600
-                                : Colors.black,
+                                ? AppColors.textSecondary
+                                : AppColors.textPrimary,
                           ),
                         ),
                       ],
@@ -192,18 +250,32 @@ class _TeacherSelfAttendanceDetailScreenState
                 ),
               ),
               if (_selectedDate != null ||
-                  (isAdmin && _selectedTeacherId != null))
-                IconButton(
-                  onPressed: () {
+                  (isAdmin && _selectedTeacherId != null)) ...[
+                const SizedBox(width: 12),
+                InkWell(
+                  onTap: () {
                     setState(() {
                       _selectedDate = null;
                       if (isAdmin) _selectedTeacherId = null;
                     });
                     _fetchData();
                   },
-                  icon: const Icon(Icons.clear, color: Colors.red),
-                  tooltip: 'Clear Filters',
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      border: Border.all(color: Colors.red.shade100),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.filter_alt_off,
+                      color: Colors.red.shade600,
+                      size: 20,
+                    ),
+                  ),
                 ),
+              ],
             ],
           ),
         ],
@@ -213,7 +285,7 @@ class _TeacherSelfAttendanceDetailScreenState
 
   Widget _buildAttendanceList(List<TeacherSelfAttendance> list) {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(top: 16, bottom: 32, left: 16, right: 16),
       itemCount: list.length,
       itemBuilder: (context, index) {
         final attendance = list[index];
@@ -223,69 +295,251 @@ class _TeacherSelfAttendanceDetailScreenState
   }
 
   Widget _buildAttendanceCard(TeacherSelfAttendance attendance) {
-    final isPresent = attendance.status.toLowerCase() == 'clock-in';
+    final isPresent = attendance.status.toLowerCase() == 'clock-in' || attendance.status.toLowerCase() == 'present';
     final teacherName = attendance.teacher?.name ?? 'Teacher';
+    final accentColor = isPresent ? Colors.green : Colors.orange;
 
-    return Card(
+    String clockIn = _getClockInTime(attendance);
+    String clockOut = _getClockOutTime(attendance);
+
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
-
-      child: Column(
-        children: [
-          ListTile(
-            onTap: () {
-
-            },
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ),
-            leading: CircleAvatar(
-              backgroundColor: isPresent
-                  ? Colors.green.shade50
-                  : Colors.red.shade50,
-              child: Icon(
-                isPresent ? Icons.login_outlined : Icons.check_circle,
-                color: isPresent ? Colors.green : AppColors.primaryTeacher,
-              ),
-            ),
-            title: Text(
-              teacherName,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(formatDate(attendance.time)),
-            trailing: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: isPresent
-                    ? Colors.green.shade50
-                    : AppColors.primaryTeacher,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                attendance.status.toUpperCase(),
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildMiniInfo(
-                  Icons.location_on,
-                  'Dist: ${attendance.distanceFromCenter.toStringAsFixed(1)}m',
-                ),
-                _LocationAddressWidget(
-                  lat: attendance.lat,
-                  lon: attendance.lon,
-                  flex: 2,
-                ),
-              ],
-            ),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Colored left strip
+              Container(
+                width: 5,
+                color: accentColor,
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header Row
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: accentColor.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              isPresent
+                                  ? Icons.login_outlined
+                                  : Icons.logout_outlined,
+                              color: accentColor,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  teacherName,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 16,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.calendar_today_rounded,
+                                      size: 14,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      _formatDateOnly(attendance.time),
+                                      style: const TextStyle(
+                                        color: AppColors.textSecondary,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Status Badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: accentColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: accentColor.withOpacity(0.2),
+                              ),
+                            ),
+                            child: Text(
+                              attendance.status.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: accentColor.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      // Clock In & Clock Out Info Box
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.backgroundLight,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppColors.border.withOpacity(0.05)),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _buildTimeBlock('Clock In', clockIn, Colors.green),
+                            ),
+                            Container(
+                              width: 1,
+                              height: 24,
+                              color: AppColors.border.withOpacity(0.1),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 16),
+                                child: _buildTimeBlock('Clock Out', clockOut, Colors.orange),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Divider(height: 1, color: AppColors.lightGrey),
+                      ),
+                      // Location Details
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildMiniInfo(
+                            Icons.moving_rounded,
+                            'Distance: ${attendance.distanceFromCenter.toStringAsFixed(1)}m',
+                          ),
+                          const SizedBox(width: 16),
+                          _LocationAddressWidget(
+                            lat: attendance.lat,
+                            lon: attendance.lon,
+                            flex: 2,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _getClockInTime(TeacherSelfAttendance att) {
+    if (att.startTime != null && att.startTime!.isNotEmpty) {
+      return _formatTimeOnly(att.startTime);
+    }
+    if (att.status.toLowerCase() == 'clock-in') {
+      return _formatTimeOnly(att.time);
+    }
+    return '--:--';
+  }
+
+  String _getClockOutTime(TeacherSelfAttendance att) {
+    if (att.endTime != null && att.endTime!.isNotEmpty) {
+      return _formatTimeOnly(att.endTime);
+    }
+    if (att.status.toLowerCase() == 'clock-out') {
+      return _formatTimeOnly(att.time);
+    }
+    return '--:--';
+  }
+
+  String _formatTimeOnly(String? utcDate) {
+    if (utcDate == null || utcDate.isEmpty) {
+      return '--:--';
+    }
+    try {
+      final localDate = DateTime.parse(utcDate).toLocal();
+      return DateFormat('hh:mm a').format(localDate);
+    } catch (e) {
+      return '--:--';
+    }
+  }
+
+  String _formatDateOnly(String? utcDate) {
+    if (utcDate == null || utcDate.isEmpty) {
+      return '--';
+    }
+    try {
+      final localDate = DateTime.parse(utcDate).toLocal();
+      return DateFormat('dd MMM yyyy').format(localDate);
+    } catch (e) {
+      return '--';
+    }
+  }
+
+  Widget _buildTimeBlock(String label, String time, Color iconColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.access_time, size: 12, color: iconColor),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          time,
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 
@@ -293,9 +547,7 @@ class _TeacherSelfAttendanceDetailScreenState
     if (utcDate == null || utcDate.isEmpty) {
       return '--';
     }
-
     final localDate = DateTime.parse(utcDate).toLocal();
-
     return DateFormat('dd MMM yyyy, hh:mm a').format(localDate);
   }
 
@@ -303,14 +555,18 @@ class _TeacherSelfAttendanceDetailScreenState
     return Expanded(
       flex: flex,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 14, color: Colors.grey),
-          const SizedBox(width: 4),
+          Icon(icon, size: 16, color: AppColors.textSecondary),
+          const SizedBox(width: 6),
           Flexible(
             child: Text(
               text,
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
-              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+                height: 1.2,
+              ),
             ),
           ),
         ],
@@ -323,14 +579,53 @@ class _TeacherSelfAttendanceDetailScreenState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.event_busy, size: 80, color: Colors.grey.shade300),
-          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.black.withOpacity(0.05),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.event_busy_rounded,
+              size: 64,
+              color: AppColors.textMuted,
+            ),
+          ),
+          const SizedBox(height: 24),
           const Text(
             'No attendance records found',
-            style: TextStyle(color: Colors.grey, fontSize: 16),
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 8),
-          ElevatedButton(onPressed: _fetchData, child: Text(AppLocalizations.of(context)!.retry)),
+          const Text(
+            'Try adjusting your filters or date selection.',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: _fetchData,
+            icon: const Icon(Icons.refresh),
+            label: Text(AppLocalizations.of(context)!.retry),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryTeacher,
+              foregroundColor: AppColors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -343,17 +638,52 @@ class _TeacherSelfAttendanceDetailScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 80, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(
-              'Error loading attendance: $error',
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.red),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.error_outline_rounded,
+                size: 64,
+                color: Colors.red.shade400,
+              ),
             ),
             const SizedBox(height: 24),
-            ElevatedButton(
+            const Text(
+              'Oops! Something went wrong.',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              error,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
               onPressed: _fetchData,
-              child: Text(AppLocalizations.of(context)!.retry),
+              icon: const Icon(Icons.refresh),
+              label: Text(AppLocalizations.of(context)!.retry),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryTeacher,
+                foregroundColor: AppColors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
           ],
         ),
@@ -442,14 +772,24 @@ class _LocationAddressWidgetState extends State<_LocationAddressWidget> {
     return Expanded(
       flex: widget.flex,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.my_location, size: 14, color: Colors.grey),
-          const SizedBox(width: 4),
+          const Icon(
+            Icons.location_on_rounded,
+            size: 16,
+            color: AppColors.textSecondary,
+          ),
+          const SizedBox(width: 6),
           Flexible(
             child: Text(
               _address,
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+                height: 1.2,
+              ),
               overflow: TextOverflow.ellipsis,
+              maxLines: 2,
             ),
           ),
         ],
