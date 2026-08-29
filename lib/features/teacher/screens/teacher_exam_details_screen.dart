@@ -432,11 +432,51 @@ class _SyllabusTab extends StatelessWidget {
       );
     }
 
+    final grouped = <String, List<ExamAssignment>>{};
+    for (final a in withSyllabus) {
+      grouped.putIfAbsent(a.className, () => []).add(a);
+    }
+    final classNames = grouped.keys.toList()..sort();
+
+    return DefaultTabController(
+      length: classNames.length,
+      child: Column(
+        children: [
+          if (classNames.length > 1)
+            Container(
+              color: Colors.white,
+              child: TabBar(
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                indicatorColor: AppColors.primaryTeacher,
+                indicatorWeight: 3,
+                labelColor: AppColors.primaryTeacher,
+                unselectedLabelColor: Colors.grey.shade400,
+                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                tabs: classNames.map((c) => Tab(text: 'Class $c')).toList(),
+              ),
+            ),
+          Expanded(
+            child: classNames.length == 1
+                ? _buildSyllabusList(grouped[classNames.first]!)
+                : TabBarView(
+                    children: classNames
+                        .map((c) => _buildSyllabusList(grouped[c]!))
+                        .toList(),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSyllabusList(List<ExamAssignment> items) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: withSyllabus.length,
+      itemCount: items.length,
       itemBuilder: (context, i) {
-        final a = withSyllabus[i];
+        final a = items[i];
         return Container(
           margin: const EdgeInsets.only(bottom: 14),
           decoration: BoxDecoration(
@@ -569,8 +609,49 @@ class _ResultTabState extends State<_ResultTab> {
       );
     }
 
-    final grouped = <String, List<TeacherAssignmentStudent>>{};
+    final classGrouped = <String, List<TeacherAssignmentStudent>>{};
     for (final s in students) {
+      final key = s.className ?? 'Unknown Class';
+      classGrouped.putIfAbsent(key, () => []).add(s);
+    }
+    final classNames = classGrouped.keys.toList()..sort();
+
+    return DefaultTabController(
+      length: classNames.length,
+      child: Column(
+        children: [
+          if (classNames.length > 1)
+            Container(
+              color: Colors.white,
+              child: TabBar(
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                indicatorColor: AppColors.primaryTeacher,
+                indicatorWeight: 3,
+                labelColor: AppColors.primaryTeacher,
+                unselectedLabelColor: Colors.grey.shade400,
+                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                tabs: classNames.map((c) => Tab(text: 'Class $c')).toList(),
+              ),
+            ),
+          Expanded(
+            child: classNames.length == 1
+                ? _buildResultList(classGrouped[classNames.first]!)
+                : TabBarView(
+                    children: classNames
+                        .map((c) => _buildResultList(classGrouped[c]!))
+                        .toList(),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultList(List<TeacherAssignmentStudent> classStudents) {
+    final grouped = <String, List<TeacherAssignmentStudent>>{};
+    for (final s in classStudents) {
       final key = s.subjectName ?? 'Unknown Subject';
       grouped.putIfAbsent(key, () => []).add(s);
     }
