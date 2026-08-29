@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/school_models.dart';
@@ -722,12 +723,126 @@ class _ResultTabState extends State<_ResultTab> {
     return _buildMyAssignedSubjects(context, currentUserId);
   }
 
+  Widget _buildShimmerLoading() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 5,
+      itemBuilder: (context, i) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+            border: Border.all(
+              color: Colors.grey.shade200,
+              width: 1.5,
+            ),
+          ),
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey.shade300,
+            highlightColor: Colors.grey.shade100,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 16,
+                            width: 120,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            height: 12,
+                            width: 80,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Container(
+                          height: 16,
+                          width: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Container(
+                          height: 12,
+                          width: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                const Divider(height: 1, color: Colors.white),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: List.generate(
+                    4,
+                    (index) => Container(
+                      height: 28,
+                      width: 90.0 + (index % 3) * 15,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildPublishedResults(BuildContext context) {
     final notifier = context.watch<ResultsNotifier>();
     final students = notifier.students;
 
     if (notifier.studentsLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return _buildShimmerLoading();
     }
 
     if (students.isEmpty) {
