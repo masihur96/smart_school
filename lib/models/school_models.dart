@@ -543,6 +543,7 @@ class Notice {
   final String? postedBy; // Name of poster, e.g. "Principal"
   final bool isImportant;
   final String? fileUrl;
+  final DateTime? createdAt; // Added createdAt
 
   Notice({
     this.id,
@@ -556,6 +557,7 @@ class Notice {
     this.fileUrl,
     this.avatar,
     this.deletedAt,
+    this.createdAt,
   });
 
   bool get isDeleted => deletedAt != null;
@@ -576,6 +578,9 @@ class Notice {
     deletedAt: json['deletedAt'] != null
         ? DateTime.tryParse(json['deletedAt'].toString())
         : null,
+    createdAt: json['createdAt'] != null
+        ? DateTime.tryParse(json['createdAt'].toString())
+        : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -588,6 +593,7 @@ class Notice {
     if (fileUrl != null) 'fileUrl': fileUrl,
     if (avatar != null) 'avatar': avatar,
     'deletedAt': deletedAt?.toIso8601String(),
+    if (createdAt != null) 'createdAt': createdAt?.toIso8601String(),
   };
 
   Notice copyWith({
@@ -601,6 +607,7 @@ class Notice {
     bool? isImportant,
     String? fileUrl,
     String? avatar,
+    DateTime? createdAt,
   }) => Notice(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -612,6 +619,7 @@ class Notice {
     isImportant: isImportant ?? this.isImportant,
     fileUrl: fileUrl ?? this.fileUrl,
     avatar: avatar ?? this.avatar,
+    createdAt: createdAt ?? this.createdAt,
   );
 }
 

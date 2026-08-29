@@ -1210,6 +1210,27 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
   }
 
   Widget _buildNoticeCard(BuildContext context, Notice notice) {
+    bool isNew = false;
+    String timeAgo = 'Unknown';
+    if (notice.createdAt != null) {
+      final diff = DateTime.now().difference(notice.createdAt!);
+      isNew = diff.inDays <= 3;
+
+      if (diff.inDays == 0) {
+        if (DateTime.now().day == notice.createdAt!.day) {
+          timeAgo = 'Today';
+        } else {
+          timeAgo = 'Yesterday';
+        }
+      } else if (diff.inDays == 1) {
+        timeAgo = 'Yesterday';
+      } else if (diff.inDays < 7) {
+        timeAgo = '${diff.inDays} days ago';
+      } else {
+        timeAgo = DateFormat('MMM dd, yyyy').format(notice.createdAt!);
+      }
+    }
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
 
@@ -1240,14 +1261,15 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Text(
-                  'New', // Logic for new label
-                  style: TextStyle(
-                    color: Colors.blue.shade700,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+                if (isNew)
+                  Text(
+                    'New',
+                    style: TextStyle(
+                      color: Colors.blue.shade700,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
               ],
             ),
             const SizedBox(height: 6),
@@ -1269,9 +1291,9 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                 const Spacer(),
                 const Icon(Icons.access_time, size: 12, color: Colors.grey),
                 const SizedBox(width: 4),
-                const Text(
-                  'Today',
-                  style: TextStyle(fontSize: 11, color: Colors.grey),
+                Text(
+                  timeAgo,
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
                 ),
               ],
             ),
