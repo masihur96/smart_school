@@ -862,6 +862,8 @@ class _ResultTabState extends State<_ResultTab> {
   }
 }
 
+enum ResultViewMode { studentWise, subjectWise }
+
 class _ClassResultView extends StatefulWidget {
   final List<TeacherAssignmentStudent> classStudents;
   const _ClassResultView({required this.classStudents});
@@ -872,6 +874,7 @@ class _ClassResultView extends StatefulWidget {
 
 class _ClassResultViewState extends State<_ClassResultView> {
   String? selectedSection;
+  ResultViewMode viewMode = ResultViewMode.studentWise;
 
   @override
   Widget build(BuildContext context) {
@@ -887,13 +890,6 @@ class _ClassResultViewState extends State<_ClassResultView> {
     if (selectedSection != null) {
       filtered = filtered.where((s) => s.sectionName == selectedSection).toList();
     }
-
-    final grouped = <String, List<TeacherAssignmentStudent>>{};
-    for (final s in filtered) {
-      final key = s.subjectName ?? 'Unknown Subject';
-      grouped.putIfAbsent(key, () => []).add(s);
-    }
-    final subjects = grouped.keys.toList()..sort();
 
     return Column(
       children: [
@@ -943,19 +939,203 @@ class _ClassResultViewState extends State<_ClassResultView> {
               ),
             ),
           ),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: subjects.length,
-            itemBuilder: (context, i) {
-              final subjectName = subjects[i];
-              final subjectStudents = grouped[subjectName]!;
-              return _ResultSubjectCard(
-                  subjectName: subjectName, students: subjectStudents);
-            },
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          child: SizedBox(
+            width: double.infinity,
+            child: SegmentedButton<ResultViewMode>(
+              segments: const [
+                ButtonSegment(
+                  value: ResultViewMode.studentWise,
+                  label: Text('Result Sheet'),
+                  icon: Icon(Icons.format_list_numbered, size: 18),
+                ),
+                ButtonSegment(
+                  value: ResultViewMode.subjectWise,
+                  label: Text('Subject Wise'),
+                  icon: Icon(Icons.category_outlined, size: 18),
+                ),
+              ],
+              selected: {viewMode},
+              onSelectionChanged: (set) => setState(() => viewMode = set.first),
+              style: ButtonStyle(
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
           ),
         ),
+        Expanded(
+          child: viewMode == ResultViewMode.subjectWise
+              ? _buildSubjectWiseView(filtered)
+              : _buildStudentWiseView(filtered),
+        ),
       ],
+    );
+  }
+
+  Widget _buildSubjectWiseView(List<TeacherAssignmentStudent> filtered) {
+    final grouped = <String, List<TeacherAssignmentStudent>>{};
+    for (final s in filtered) {
+      final key = s.subjectName ?? 'Unknown Subject';
+      grouped.putIfAbsent(key, () => []).add(s);
+    }
+    final subjects = grouped.keys.toList()..sort();
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: subjects.length,
+      itemBuilder: (context, i) {
+        final subjectName = subjects[i];
+        final subjectStudents = grouped[subjectName]!;
+        return _ResultSubjectCard(
+            subjectName: subjectName, students: subjectStudents);
+      },
+    );
+  }
+
+  Widget _buildStudentWiseView(List<TeacherAssignmentStudent> filtered) {
+    final grouped = <String, List<TeacherAssignmentStudent>>{};
+    for (final s in filtered) {
+      grouped.putIfAbsent(s.id, () => []).add(s);
+    }
+    
+    final studentList = grouped.values.toList();
+    studentList.sort((a, b) {
+      final aTotal = a.fold(0.0, (sum, item) => sum + (item.marksObtained ?? 0));
+      final bTotal = b.fold(0.0, (sum, item) => sum + (item.marksObtained ?? 0));
+      return bTotal.compareTo(aTotal);
+    });
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: studentList.length,
+      itemBuilder: (context, i) {
+        final studentsRecs = studentList[i];
+        final first = studentsRecs.first;
+        final totalObtained = studentsRecs.fold(0.0, (sum, item) => sum + (item.marksObtained ?? 0));
+        final totalMax = studentsRecs.fold(0.0, (sum, item) => sum + (item.totalMarks ?? 0));
+        final percentage = totalMax > 0 ? (totalObtained / totalMax) * 100 : 0.0;
+        final isPass = percentage >= 40.0;
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+            border: Border.all(
+              color: i == 0 ? Colors.amber.shade300 : (i == 1 ? Colors.grey.shade400 : (i == 2 ? Colors.brown.shade300 : Colors.transparent)),
+              width: i < 3 ? 1.5 : 0,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: i == 0 ? Colors.amber.shade100 : (i == 1 ? Colors.grey.shade200 : (i == 2 ? Colors.brown.shade100 : Colors.blue.shade50)),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '#${i + 1}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: i == 0 ? Colors.amber.shade900 : (i == 1 ? Colors.grey.shade800 : (i == 2 ? Colors.brown.shade900 : Colors.blue.shade900)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            first.name,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1A1C1E)),
+                          ),
+                          Text(
+                            'Roll: ${first.rollNumber}',
+                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '${totalObtained.toStringAsFixed(1).replaceAll('.0','')} / ${totalMax.toStringAsFixed(1).replaceAll('.0','')}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: isPass ? Colors.green.shade700 : Colors.red.shade700,
+                          ),
+                        ),
+                        Text(
+                          '${percentage.toStringAsFixed(1)}%',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: isPass ? Colors.green.shade600 : Colors.red.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                const Divider(height: 1),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: studentsRecs.map((subj) {
+                    final sPass = subj.marksObtained != null && subj.totalMarks != null && subj.totalMarks! > 0 && (subj.marksObtained! / subj.totalMarks!) >= 0.4;
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${subj.subjectName ?? 'Unknown'}: ',
+                            style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                          ),
+                          Text(
+                            subj.marksObtained != null ? '${subj.marksObtained!.toStringAsFixed(1).replaceAll('.0','')} / ${subj.totalMarks?.toStringAsFixed(1).replaceAll('.0','') ?? '100'}' : 'N/A',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: subj.marksObtained == null ? Colors.grey.shade500 : (sPass ? Colors.green.shade700 : Colors.red.shade700),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
