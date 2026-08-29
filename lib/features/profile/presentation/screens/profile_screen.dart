@@ -291,27 +291,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildSectionHeader(l10n.personalInformation),
-                      TextButton.icon(
-                        onPressed: () {
-                          if (_isEditing) {
-                            _handleUpdate();
-                          } else {
-                            setState(() => _isEditing = true);
-                          }
-                        },
-                        icon: Icon(
-                          _isEditing
-                              ? Icons.check_circle_rounded
-                              : Icons.edit_rounded,
-                          size: 18,
+                      if (user.role == UserRole.admin)
+                        TextButton.icon(
+                          onPressed: () {
+                            if (_isEditing) {
+                              _handleUpdate();
+                            } else {
+                              setState(() => _isEditing = true);
+                            }
+                          },
+                          icon: Icon(
+                            _isEditing
+                                ? Icons.check_circle_rounded
+                                : Icons.edit_rounded,
+                            size: 18,
+                          ),
+                          label: Text(_isEditing ? l10n.save : l10n.edit),
+                          style: TextButton.styleFrom(
+                            foregroundColor: _isEditing
+                                ? Colors.green
+                                : AppColors.primary,
+                          ),
                         ),
-                        label: Text(_isEditing ? l10n.save : l10n.edit),
-                        style: TextButton.styleFrom(
-                          foregroundColor: _isEditing
-                              ? Colors.green
-                              : AppColors.primary,
-                        ),
-                      ),
                     ],
                   ),
                   _buildInfoCard(context, [
