@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '../../admin/providers/notice_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 
@@ -170,17 +170,24 @@ class _TeacherNoticeScreenState extends State<TeacherNoticeScreen> {
                                 mode: LaunchMode.externalApplication,
                               );
                               if (!launched) {
-                                launched = await launchUrl(url, mode: LaunchMode.platformDefault);
+                                launched = await launchUrl(
+                                  url,
+                                  mode: LaunchMode.platformDefault,
+                                );
                               }
                               if (!launched && context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Could not open attachment')),
+                                  const SnackBar(
+                                    content: Text('Could not open attachment'),
+                                  ),
                                 );
                               }
                             } catch (e) {
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Could not open attachment')),
+                                  const SnackBar(
+                                    content: Text('Could not open attachment'),
+                                  ),
                                 );
                               }
                             }
@@ -196,7 +203,7 @@ class _TeacherNoticeScreenState extends State<TeacherNoticeScreen> {
                       Icon(Icons.access_time, size: 14),
                       const SizedBox(width: 4),
                       Text(
-                        'Just now', // Ideally format createdAt from notice
+                        _formatTimeAgo(notice.createdAt),
                         style: TextStyle(fontSize: 12),
                       ),
                     ],
@@ -208,6 +215,30 @@ class _TeacherNoticeScreenState extends State<TeacherNoticeScreen> {
         );
       },
     );
+  }
+
+  String _formatTimeAgo(DateTime? createdAt) {
+    if (createdAt == null) return 'Unknown';
+    final now = DateTime.now();
+    final diff = now.difference(createdAt);
+
+    if (diff.inDays == 0) {
+      if (now.day == createdAt.day) {
+        if (diff.inHours == 0) {
+          if (diff.inMinutes == 0) return 'Just now';
+          return '${diff.inMinutes}m ago';
+        }
+        return '${diff.inHours}h ago';
+      } else {
+        return 'Yesterday';
+      }
+    } else if (diff.inDays == 1) {
+      return 'Yesterday';
+    } else if (diff.inDays < 7) {
+      return '${diff.inDays}d ago';
+    } else {
+      return DateFormat('MMM dd, yyyy').format(createdAt);
+    }
   }
 
   Widget _buildEmptyState() {
