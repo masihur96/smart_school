@@ -1006,6 +1006,7 @@ class TeacherAssignmentStudent {
   final String name;
   final String rollNumber;
   final String? sectionId;
+  final String? sectionName;
   final double? marksObtained;
   final double? totalMarks;
   final String? subjectName;
@@ -1016,6 +1017,7 @@ class TeacherAssignmentStudent {
     required this.name,
     required this.rollNumber,
     this.sectionId,
+    this.sectionName,
     this.marksObtained,
     this.totalMarks,
     this.subjectName,
@@ -1024,8 +1026,10 @@ class TeacherAssignmentStudent {
 
   factory TeacherAssignmentStudent.fromJson(Map<String, dynamic> json) {
     String? parsedSectionId = json['sectionId'] ?? json['section_id'];
+    String? parsedSectionName;
     if (json['section'] != null && json['section'] is Map) {
       parsedSectionId = json['section']['uuid'] ?? json['section']['id'] ?? parsedSectionId;
+      parsedSectionName = json['section']['name'];
     }
     String? parsedSubjectName;
     if (json['subject'] != null && json['subject'] is Map) {
@@ -1040,6 +1044,7 @@ class TeacherAssignmentStudent {
       name: json['name'] ?? '',
       rollNumber: json['rollNumber'] ?? '',
       sectionId: parsedSectionId,
+      sectionName: parsedSectionName,
       marksObtained: json['marksObtained'] != null ? double.tryParse(json['marksObtained'].toString()) : null,
       totalMarks: json['totalMarks'] != null ? double.tryParse(json['totalMarks'].toString()) : null,
       subjectName: parsedSubjectName,

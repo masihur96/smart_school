@@ -459,10 +459,10 @@ class _SyllabusTab extends StatelessWidget {
             ),
           Expanded(
             child: classNames.length == 1
-                ? _buildSyllabusList(grouped[classNames.first]!)
+                ? _ClassSyllabusView(assignments: grouped[classNames.first]!)
                 : TabBarView(
                     children: classNames
-                        .map((c) => _buildSyllabusList(grouped[c]!))
+                        .map((c) => _ClassSyllabusView(assignments: grouped[c]!))
                         .toList(),
                   ),
           ),
@@ -470,91 +470,169 @@ class _SyllabusTab extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildSyllabusList(List<ExamAssignment> items) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: items.length,
-      itemBuilder: (context, i) {
-        final a = items[i];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Icon(Icons.description_rounded,
-                          color: Colors.blue.shade700, size: 20),
+class _ClassSyllabusView extends StatefulWidget {
+  final List<ExamAssignment> assignments;
+  const _ClassSyllabusView({required this.assignments});
+
+  @override
+  State<_ClassSyllabusView> createState() => _ClassSyllabusViewState();
+}
+
+class _ClassSyllabusViewState extends State<_ClassSyllabusView> {
+  String? selectedSection;
+
+  @override
+  Widget build(BuildContext context) {
+    final sections = widget.assignments
+        .map((a) => a.sectionName)
+        .where((s) => s != null && s.isNotEmpty)
+        .cast<String>()
+        .toSet()
+        .toList()
+      ..sort();
+
+    List<ExamAssignment> filtered = widget.assignments;
+    if (selectedSection != null) {
+      filtered = filtered.where((a) => a.sectionName == selectedSection).toList();
+    }
+
+    return Column(
+      children: [
+        if (sections.isNotEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.primaryTeacher.withOpacity(0.05),
+              border: Border(bottom: BorderSide(color: AppColors.primaryTeacher.withOpacity(0.1))),
+            ),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  ChoiceChip(
+                    label: const Text('All Sections'),
+                    selected: selectedSection == null,
+                    onSelected: (val) {
+                      if (val) setState(() => selectedSection = null);
+                    },
+                    selectedColor: AppColors.primaryTeacher.withOpacity(0.2),
+                    showCheckmark: false,
+                    labelStyle: TextStyle(
+                      color: selectedSection == null ? AppColors.primaryTeacher : Colors.grey.shade700,
+                      fontWeight: selectedSection == null ? FontWeight.bold : FontWeight.normal,
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            a.subjectName,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: Color(0xFF1A1C1E),
-                            ),
+                  ),
+                  const SizedBox(width: 8),
+                  ...sections.map((s) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ChoiceChip(
+                          label: Text(s),
+                          selected: selectedSection == s,
+                          onSelected: (val) {
+                            if (val) setState(() => selectedSection = s);
+                          },
+                          selectedColor: AppColors.primaryTeacher.withOpacity(0.2),
+                          showCheckmark: false,
+                          labelStyle: TextStyle(
+                            color: selectedSection == s ? AppColors.primaryTeacher : Colors.grey.shade700,
+                            fontWeight: selectedSection == s ? FontWeight.bold : FontWeight.normal,
                           ),
-                          Text(
-                            'Class ${a.className}${a.sectionName != null && a.sectionName!.isNotEmpty ? ' – ${a.sectionName}' : ''}  •  ${DateFormat('MMM dd').format(a.date)}',
-                            style: TextStyle(
-                              color: Colors.grey.shade500,
-                              fontSize: 12,
+                        ),
+                      )),
+                ],
+              ),
+            ),
+          ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: filtered.length,
+            itemBuilder: (context, i) {
+              final a = filtered[i];
+              return Container(
+                margin: const EdgeInsets.only(bottom: 14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Icon(Icons.description_rounded,
+                                color: Colors.blue.shade700, size: 20),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  a.subjectName,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Color(0xFF1A1C1E),
+                                  ),
+                                ),
+                                Text(
+                                  'Class ${a.className}${a.sectionName != null && a.sectionName!.isNotEmpty ? ' – ${a.sectionName}' : ''}  •  ${DateFormat('MMM dd').format(a.date)}',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade500,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border:
-                        Border.all(color: Colors.blue.shade100),
+                      const SizedBox(height: 14),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border:
+                              Border.all(color: Colors.blue.shade100),
+                        ),
+                        child: Text(
+                          a.syllabus!,
+                          style: TextStyle(
+                            color: Colors.blue.shade900,
+                            fontSize: 14,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  child: Text(
-                    a.syllabus!,
-                    style: TextStyle(
-                      color: Colors.blue.shade900,
-                      fontSize: 14,
-                      height: 1.5,
-                    ),
-                  ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 }
@@ -637,35 +715,15 @@ class _ResultTabState extends State<_ResultTab> {
             ),
           Expanded(
             child: classNames.length == 1
-                ? _buildResultList(classGrouped[classNames.first]!)
+                ? _ClassResultView(classStudents: classGrouped[classNames.first]!)
                 : TabBarView(
                     children: classNames
-                        .map((c) => _buildResultList(classGrouped[c]!))
+                        .map((c) => _ClassResultView(classStudents: classGrouped[c]!))
                         .toList(),
                   ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildResultList(List<TeacherAssignmentStudent> classStudents) {
-    final grouped = <String, List<TeacherAssignmentStudent>>{};
-    for (final s in classStudents) {
-      final key = s.subjectName ?? 'Unknown Subject';
-      grouped.putIfAbsent(key, () => []).add(s);
-    }
-    final subjects = grouped.keys.toList()..sort();
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: subjects.length,
-      itemBuilder: (context, i) {
-        final subjectName = subjects[i];
-        final subjectStudents = grouped[subjectName]!;
-        return _ResultSubjectCard(
-            subjectName: subjectName, students: subjectStudents);
-      },
     );
   }
 
@@ -797,6 +855,104 @@ class _ResultTabState extends State<_ResultTab> {
                 ),
               ],
             ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ClassResultView extends StatefulWidget {
+  final List<TeacherAssignmentStudent> classStudents;
+  const _ClassResultView({required this.classStudents});
+
+  @override
+  State<_ClassResultView> createState() => _ClassResultViewState();
+}
+
+class _ClassResultViewState extends State<_ClassResultView> {
+  String? selectedSection;
+
+  @override
+  Widget build(BuildContext context) {
+    final sections = widget.classStudents
+        .map((s) => s.sectionName)
+        .where((s) => s != null && s.isNotEmpty)
+        .cast<String>()
+        .toSet()
+        .toList()
+      ..sort();
+
+    List<TeacherAssignmentStudent> filtered = widget.classStudents;
+    if (selectedSection != null) {
+      filtered = filtered.where((s) => s.sectionName == selectedSection).toList();
+    }
+
+    final grouped = <String, List<TeacherAssignmentStudent>>{};
+    for (final s in filtered) {
+      final key = s.subjectName ?? 'Unknown Subject';
+      grouped.putIfAbsent(key, () => []).add(s);
+    }
+    final subjects = grouped.keys.toList()..sort();
+
+    return Column(
+      children: [
+        if (sections.isNotEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.primaryTeacher.withOpacity(0.05),
+              border: Border(bottom: BorderSide(color: AppColors.primaryTeacher.withOpacity(0.1))),
+            ),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  ChoiceChip(
+                    label: const Text('All Sections'),
+                    selected: selectedSection == null,
+                    onSelected: (val) {
+                      if (val) setState(() => selectedSection = null);
+                    },
+                    selectedColor: AppColors.primaryTeacher.withOpacity(0.2),
+                    showCheckmark: false,
+                    labelStyle: TextStyle(
+                      color: selectedSection == null ? AppColors.primaryTeacher : Colors.grey.shade700,
+                      fontWeight: selectedSection == null ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ...sections.map((s) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ChoiceChip(
+                          label: Text(s),
+                          selected: selectedSection == s,
+                          onSelected: (val) {
+                            if (val) setState(() => selectedSection = s);
+                          },
+                          selectedColor: AppColors.primaryTeacher.withOpacity(0.2),
+                          showCheckmark: false,
+                          labelStyle: TextStyle(
+                            color: selectedSection == s ? AppColors.primaryTeacher : Colors.grey.shade700,
+                            fontWeight: selectedSection == s ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                      )),
+                ],
+              ),
+            ),
+          ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: subjects.length,
+            itemBuilder: (context, i) {
+              final subjectName = subjects[i];
+              final subjectStudents = grouped[subjectName]!;
+              return _ResultSubjectCard(
+                  subjectName: subjectName, students: subjectStudents);
+            },
           ),
         ),
       ],
