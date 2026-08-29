@@ -694,6 +694,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
   String? _selectedClassId;
   String? _selectedSectionId;
   String? _selectedSubjectId;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -749,45 +750,55 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     final user = context.read<AuthNotifier>().user;
     if (user == null) return;
 
-    final homework = Homework(
-      id:
-          widget.homework?.id ??
-          DateTime.now().millisecondsSinceEpoch.toString(),
-      title: _titleController.text.trim(),
-      description: _descController.text.trim(),
-      classId: _selectedClassId!,
-      sectionId: _selectedSectionId ?? '',
-      subjectId: _selectedSubjectId!,
-      teacherId: widget.homework?.teacherId ?? user.id,
-      schoolId: user.schoolId ?? '',
-      dueDate: _dueDate,
-      createdAt: widget.homework?.createdAt ?? DateTime.now(),
-    );
+    setState(() => _isLoading = true);
 
-    final bool success;
-    if (widget.homework == null) {
-      success = await context.read<HomeworkNotifier>().submitHomework(homework);
-    } else {
-      success = await context.read<HomeworkNotifier>().updateHomework(homework);
-    }
+    try {
+      final homework = Homework(
+        id:
+            widget.homework?.id ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
+        title: _titleController.text.trim(),
+        description: _descController.text.trim(),
+        classId: _selectedClassId!,
+        sectionId: _selectedSectionId ?? '',
+        subjectId: _selectedSubjectId!,
+        teacherId: widget.homework?.teacherId ?? user.id,
+        schoolId: user.schoolId ?? '',
+        dueDate: _dueDate,
+        createdAt: widget.homework?.createdAt ?? DateTime.now(),
+      );
 
-    if (mounted) {
-      if (success) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.homework == null
-                  ? 'Homework assigned successfully!'
-                  : 'Homework updated successfully!',
-            ),
-          ),
+      final bool success;
+      if (widget.homework == null) {
+        success = await context.read<HomeworkNotifier>().submitHomework(
+          homework,
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to save homework')),
+        success = await context.read<HomeworkNotifier>().updateHomework(
+          homework,
         );
       }
+
+      if (mounted) {
+        if (success) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                widget.homework == null
+                    ? 'Homework assigned successfully!'
+                    : 'Homework updated successfully!',
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to save homework')),
+          );
+        }
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -924,22 +935,33 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _submit,
+                      onPressed: _isLoading ? null : _submit,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF7C3AED),
+                        backgroundColor: AppColors.primaryTeacher,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      child: Text(
-                        widget.homework == null ? 'Assign' : 'Update',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              widget.homework == null ? 'Assign' : 'Update',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
                     ),
                   ),
                 ],
@@ -1041,7 +1063,6 @@ class _ViewHomeworkSheet extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Due Date', style: TextStyle(fontSize: 11)),
                     Text(
                       due,
                       style: TextStyle(
@@ -1082,7 +1103,7 @@ class _ViewHomeworkSheet extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7C3AED),
+                  backgroundColor: AppColors.primaryTeacher,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
