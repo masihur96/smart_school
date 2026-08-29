@@ -182,8 +182,11 @@ class HomeworkRemoteDataSource {
     if (classId != null && classId.isNotEmpty) query['classId'] = classId;
     if (sectionId != null && sectionId.isNotEmpty)
       query['sectionId'] = sectionId;
-    if (subjectId != null && subjectId.isNotEmpty)
+    if (subjectId != null && subjectId.isNotEmpty) {
       query['subjectId'] = subjectId;
+      query['subject_id'] = subjectId;
+      query['subject'] = subjectId;
+    }
 
 
 
@@ -223,8 +226,11 @@ class HomeworkRemoteDataSource {
     if (classId != null && classId.isNotEmpty) query['classId'] = classId;
     if (sectionId != null && sectionId.isNotEmpty)
       query['sectionId'] = sectionId;
-    if (subjectId != null && subjectId.isNotEmpty)
+    if (subjectId != null && subjectId.isNotEmpty) {
       query['subjectId'] = subjectId;
+      query['subject_id'] = subjectId;
+      query['subject'] = subjectId;
+    }
     if (date != null && date.isNotEmpty) query['date'] = date;
     if (schoolId != null && schoolId.isNotEmpty) query['schoolId'] = schoolId;
 

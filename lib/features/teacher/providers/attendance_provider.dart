@@ -185,6 +185,8 @@ class AttendanceNotifier extends ChangeNotifier {
       }
       if (subjectId != null && subjectId.isNotEmpty) {
         query['subjectId'] = subjectId;
+        query['subject_id'] = subjectId;
+        query['subject'] = subjectId;
       }
       if (teacherId != null && teacherId.isNotEmpty) {
         query['teacherId'] = teacherId;
@@ -362,6 +364,8 @@ class AttendanceNotifier extends ChangeNotifier {
       }
       if (subjectId != null && subjectId.isNotEmpty) {
         query['subjectId'] = subjectId;
+        query['subject_id'] = subjectId;
+        query['subject'] = subjectId;
       }
       if (teacherId != null && teacherId.isNotEmpty) {
         query['teacherId'] = teacherId;
