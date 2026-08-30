@@ -2748,4 +2748,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToDeleteAccount => 'Failed to delete account';
+
+  @override
+  String get myAttendance => 'My Attendance';
+
+  @override
+  String get filterAttendance => 'Filter Attendance';
+
+  @override
+  String get noAttendanceRecordsFoundFilter =>
+      'No attendance records found for the selected filters.';
+
+  @override
+  String get academicSchedule => 'Academic Schedule';
+
+  @override
+  String get noScheduleYet => 'No Schedule Yet';
+
+  @override
+  String get noScheduleSubtitle =>
+      'Your weekly class routine will appear here.';
+
+  @override
+  String get allAssignmentsDone => 'All Assignments Done';
+
+  @override
+  String get noPendingHomeworkSubtitle => 'No pending homework for your class.';
+
+  @override
+  String get teacherNotAssigned => 'Teacher Not Assigned';
+
+  @override
+  String get completedStatus => 'Completed';
+
+  @override
+  String get submittedStatus => 'Submitted';
 }

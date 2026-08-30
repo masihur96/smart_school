@@ -1533,5 +1533,13 @@
   "myAttendance": "My Attendance",
   "filterAttendance": "Filter Attendance",
   "allDates": "All Dates",
-  "noAttendanceRecordsFoundFilter": "No attendance records found for the selected filters."
+  "noAttendanceRecordsFoundFilter": "No attendance records found for the selected filters.",
+  "academicSchedule": "Academic Schedule",
+  "noScheduleYet": "No Schedule Yet",
+  "noScheduleSubtitle": "Your weekly class routine will appear here.",
+  "allAssignmentsDone": "All Assignments Done",
+  "noPendingHomeworkSubtitle": "No pending homework for your class.",
+  "teacherNotAssigned": "Teacher Not Assigned",
+  "completedStatus": "Completed",
+  "submittedStatus": "Submitted"
 }

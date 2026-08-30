@@ -1275,5 +1275,13 @@
   "myAttendance": "আমার উপস্থিতি",
   "filterAttendance": "উপস্থিতি ফিল্টার করুন",
   "allDates": "সব তারিখ",
-  "noAttendanceRecordsFoundFilter": "নির্বাচিত ফিল্টারগুলোর জন্য কোনো উপস্থিতির রেকর্ড পাওয়া যায়নি।"
+  "noAttendanceRecordsFoundFilter": "নির্বাচিত ফিল্টারগুলোর জন্য কোনো উপস্থিতির রেকর্ড পাওয়া যায়নি।",
+  "academicSchedule": "একাডেমিক রুটিন",
+  "noScheduleYet": "এখনও কোন রুটিন নেই",
+  "noScheduleSubtitle": "আপনার সাপ্তাহিক ক্লাসের রুটিন এখানে প্রদর্শিত হবে।",
+  "allAssignmentsDone": "সব কাজ সম্পন্ন",
+  "noPendingHomeworkSubtitle": "আপনার ক্লাসের জন্য কোন বকেয়া কাজ নেই।",
+  "teacherNotAssigned": "শিক্ষক নিযুক্ত করা হয়নি",
+  "completedStatus": "সম্পন্ন",
+  "submittedStatus": "জমা দেওয়া হয়েছে"
 }

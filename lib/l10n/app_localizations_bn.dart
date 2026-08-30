@@ -1678,7 +1678,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get allSubjectHint => 'সকল বিষয়';
 
   @override
-  String get allDates => 'সকল তারিখ';
+  String get allDates => 'সব তারিখ';
 
   @override
   String totalCountFormat(int total) {
@@ -2750,4 +2750,40 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get failedToDeleteAccount => 'অ্যাকাউন্ট মুছতে ব্যর্থ হয়েছে';
+
+  @override
+  String get myAttendance => 'আমার উপস্থিতি';
+
+  @override
+  String get filterAttendance => 'উপস্থিতি ফিল্টার করুন';
+
+  @override
+  String get noAttendanceRecordsFoundFilter =>
+      'নির্বাচিত ফিল্টারগুলোর জন্য কোনো উপস্থিতির রেকর্ড পাওয়া যায়নি।';
+
+  @override
+  String get academicSchedule => 'একাডেমিক রুটিন';
+
+  @override
+  String get noScheduleYet => 'এখনও কোন রুটিন নেই';
+
+  @override
+  String get noScheduleSubtitle =>
+      'আপনার সাপ্তাহিক ক্লাসের রুটিন এখানে প্রদর্শিত হবে।';
+
+  @override
+  String get allAssignmentsDone => 'সব কাজ সম্পন্ন';
+
+  @override
+  String get noPendingHomeworkSubtitle =>
+      'আপনার ক্লাসের জন্য কোন বকেয়া কাজ নেই।';
+
+  @override
+  String get teacherNotAssigned => 'শিক্ষক নিযুক্ত করা হয়নি';
+
+  @override
+  String get completedStatus => 'সম্পন্ন';
+
+  @override
+  String get submittedStatus => 'জমা দেওয়া হয়েছে';
 }

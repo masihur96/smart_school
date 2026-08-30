@@ -72,9 +72,9 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(
-            'Academic Schedule',
-            style: TextStyle(fontWeight: FontWeight.bold),
+          title: Text(
+            l10n.academicSchedule,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           backgroundColor: AppColors.primaryStudent,
           foregroundColor: Colors.white,
@@ -88,18 +88,18 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                 color: Colors.white.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const TabBar(
+              child: TabBar(
                 indicatorSize: TabBarIndicatorSize.tab,
-                indicator: BoxDecoration(
+                indicator: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
                 labelColor: AppColors.primaryStudent,
                 unselectedLabelColor: Colors.white,
-                labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                 tabs: [
-                  Tab(text: 'Routine'),
-                  Tab(text: 'Homework'),
+                  Tab(text: l10n.routine),
+                  Tab(text: l10n.homework),
                 ],
               ),
             ),
@@ -126,6 +126,7 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
     StudentRoutineNotifier routineNotifier,
     List<String> days,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     if (routineNotifier.isLoading && entries.isEmpty) {
       return _buildRoutineShimmer();
     }
@@ -133,8 +134,8 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
     if (entries.isEmpty && !routineNotifier.isLoading) {
       return _buildEmptyState(
         icon: Icons.calendar_month_outlined,
-        title: 'No Schedule Yet',
-        subtitle: 'Your weekly class routine will appear here.',
+        title: l10n.noScheduleYet,
+        subtitle: l10n.noScheduleSubtitle,
       );
     }
 
@@ -182,9 +183,9 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                         color: AppColors.primaryStudent.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Text(
-                        'TODAY',
-                        style: TextStyle(
+                      child: Text(
+                        l10n.today.toUpperCase(),
+                        style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primaryStudent,
@@ -207,6 +208,7 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
     BuildContext context,
     StudentHomeworkNotifier homeworkNotifier,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final homeworkList = homeworkNotifier.homeworkList;
 
     if (homeworkNotifier.isLoading && homeworkList.isEmpty) {
@@ -216,8 +218,8 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
     if (homeworkList.isEmpty && !homeworkNotifier.isLoading) {
       return _buildEmptyState(
         icon: Icons.assignment_outlined,
-        title: 'All Assignments Done',
-        subtitle: 'No pending homework for your class.',
+        title: l10n.allAssignmentsDone,
+        subtitle: l10n.noPendingHomeworkSubtitle,
       );
     }
 
@@ -443,8 +445,9 @@ class _RoutineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subjectName = entry.subjectEntity?.name ?? 'Unknown Subject';
-    final teacherName = entry.teacherEntity?.name ?? 'Teacher Not Assigned';
+    final l10n = AppLocalizations.of(context)!;
+    final subjectName = entry.subjectEntity?.name ?? l10n.unknownSubject;
+    final teacherName = entry.teacherEntity?.name ?? l10n.teacherNotAssigned;
     final room = entry.roomNumber ?? 'N/A';
 
     // Format times to look cleaner (e.g. 09:00:00 -> 09:00 AM)
@@ -452,7 +455,7 @@ class _RoutineCard extends StatelessWidget {
       if (timeStr == null || timeStr.isEmpty) return 'N/A';
       try {
         final time = DateFormat('HH:mm:ss').parse(timeStr);
-        return DateFormat('hh:mm a').format(time);
+        return DateFormat('hh:mm a', l10n.localeName).format(time);
       } catch (e) {
         return timeStr;
       }
@@ -543,7 +546,7 @@ class _RoutineCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        'Room: $room',
+                        l10n.roomNumberFormat(room),
                         style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
@@ -568,71 +571,134 @@ class _HomeworkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final hw = sh.homework!;
     final isDone = sh.status == 'done';
     final isSubmitted = sh.status == 'submitted';
-    final isOverdue = hw.dueDate.isBefore(DateTime.now()) && !isDone;
+    final isOverdue = hw.dueDate.isBefore(DateTime.now()) && !isDone && !isSubmitted;
 
     Color statusColor;
     String statusText;
+    IconData statusIcon;
 
     if (isDone) {
       statusColor = const Color(0xFF10B981);
-      statusText = 'Completed';
+      statusText = l10n.completedStatus;
+      statusIcon = Icons.check_circle;
     } else if (isSubmitted) {
       statusColor = const Color(0xFF3B82F6);
-      statusText = 'Submitted';
+      statusText = l10n.submittedStatus;
+      statusIcon = Icons.send;
     } else if (isOverdue) {
       statusColor = const Color(0xFFEF4444);
-      statusText = 'Overdue';
+      statusText = l10n.overdue;
+      statusIcon = Icons.error_outline;
     } else {
       statusColor = const Color(0xFFF59E0B);
-      statusText = 'Pending';
+      statusText = l10n.pending;
+      statusIcon = Icons.pending_actions;
     }
 
+    final subjectName = hw.subjectInfo?.name ?? l10n.unknownSubject;
+    final formattedDate = DateFormat('EEEE, MMM d, yyyy', l10n.localeName).format(hw.dueDate);
+
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          // Future functionality can be added here
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        DateFormat('MMM d').format(hw.dueDate),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: isOverdue ? Colors.red : Colors.grey[500],
-                        ),
-                      ),
-                      _StatusChip(color: statusColor, text: statusText),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    hw.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryStudent.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.book_outlined,
+                      color: AppColors.primaryStudent,
+                      size: 24,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    hw.description,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 13, height: 1.4),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          subjectName,
+                          style: const TextStyle(
+                            color: AppColors.primaryStudent,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          hw.title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.black87,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  _StatusChip(color: statusColor, text: statusText, icon: statusIcon),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                hw.description,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 14,
+                  height: 1.5,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Divider(height: 1),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today_outlined,
+                    size: 16,
+                    color: isOverdue ? Colors.red : Colors.grey.shade600,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      '${l10n.due}: $formattedDate',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: isOverdue ? Colors.red : Colors.grey.shade700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -642,24 +708,33 @@ class _HomeworkCard extends StatelessWidget {
 class _StatusChip extends StatelessWidget {
   final Color color;
   final String text;
+  final IconData icon;
 
-  const _StatusChip({required this.color, required this.text});
+  const _StatusChip({required this.color, required this.text, required this.icon});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.bold,
-          fontSize: 10,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+            ),
+          ),
+        ],
       ),
     );
   }

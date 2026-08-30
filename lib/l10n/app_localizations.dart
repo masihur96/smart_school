@@ -5093,6 +5093,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to delete account'**
   String get failedToDeleteAccount;
+
+  /// No description provided for @myAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'My Attendance'**
+  String get myAttendance;
+
+  /// No description provided for @filterAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Attendance'**
+  String get filterAttendance;
+
+  /// No description provided for @noAttendanceRecordsFoundFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No attendance records found for the selected filters.'**
+  String get noAttendanceRecordsFoundFilter;
+
+  /// No description provided for @academicSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Schedule'**
+  String get academicSchedule;
+
+  /// No description provided for @noScheduleYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No Schedule Yet'**
+  String get noScheduleYet;
+
+  /// No description provided for @noScheduleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your weekly class routine will appear here.'**
+  String get noScheduleSubtitle;
+
+  /// No description provided for @allAssignmentsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All Assignments Done'**
+  String get allAssignmentsDone;
+
+  /// No description provided for @noPendingHomeworkSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending homework for your class.'**
+  String get noPendingHomeworkSubtitle;
+
+  /// No description provided for @teacherNotAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Not Assigned'**
+  String get teacherNotAssigned;
+
+  /// No description provided for @completedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completedStatus;
+
+  /// No description provided for @submittedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get submittedStatus;
 }
 
 class _AppLocalizationsDelegate
