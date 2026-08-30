@@ -1529,5 +1529,9 @@
   "deleteAccountWarning": "This action is permanent and cannot be undone. All your data will be deleted from our servers.",
   "typeDeleteToConfirm": "Type DELETE to confirm:",
   "deleteUppercase": "DELETE",
-  "failedToDeleteAccount": "Failed to delete account"
+  "failedToDeleteAccount": "Failed to delete account",
+  "myAttendance": "My Attendance",
+  "filterAttendance": "Filter Attendance",
+  "allDates": "All Dates",
+  "noAttendanceRecordsFoundFilter": "No attendance records found for the selected filters."
 }

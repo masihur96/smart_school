@@ -4,8 +4,8 @@ import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
-import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
+import 'package:smart_school/models/school_models.dart';
 
 import '../../auth/providers/auth_provider.dart';
 import '../providers/student_attendance_provider.dart';
@@ -46,6 +46,34 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
         _selectedDate = picked;
       });
     }
+  }
+
+  String _formatTime(String time) {
+    if (time.toLowerCase().contains('am') || time.toLowerCase().contains('pm')) {
+      return time;
+    }
+    try {
+      final parts = time.split(':');
+      if (parts.length >= 2) {
+        int hour = int.parse(parts[0].replaceAll(RegExp(r'[^0-9]'), ''));
+        int minute = int.parse(parts[1].replaceAll(RegExp(r'[^0-9]'), ''));
+        String period = 'AM';
+        if (hour >= 12) {
+          period = 'PM';
+          if (hour > 12) {
+            hour -= 12;
+          }
+        }
+        if (hour == 0) {
+          hour = 12;
+        }
+        final minStr = minute.toString().padLeft(2, '0');
+        return '$hour:$minStr $period';
+      }
+    } catch (e) {
+      // ignore
+    }
+    return time;
   }
 
   @override
@@ -109,7 +137,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
           ? null
           : AppBar(
               title: Text(
-                'My Attendance',
+                l10n.myAttendance,
                 style: TextStyle(color: AppColors.white),
               ),
               backgroundColor: AppColors.primaryStudent,
@@ -189,9 +217,9 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Filter Attendance',
-                            style: TextStyle(
+                          Text(
+                            l10n.filterAttendance,
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
                             ),
@@ -219,9 +247,10 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                                       children: [
                                         Text(
                                           _selectedDate == null
-                                              ? 'All Dates'
+                                              ? l10n.allDates
                                               : DateFormat(
                                                   'MMM d, yyyy',
+                                                  l10n.localeName,
                                                 ).format(_selectedDate!),
                                           style: TextStyle(
                                             color: _selectedDate == null
@@ -300,11 +329,12 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                     ),
                     const Divider(height: 1, thickness: 1),
                     if (sortedRecords.isEmpty && !isLoading)
-                      const Center(
+                      Center(
                         child: Padding(
-                          padding: EdgeInsets.all(32),
+                          padding: const EdgeInsets.all(32),
                           child: Text(
-                            'No attendance records found for the selected filters.',
+                            l10n.noAttendanceRecordsFoundFilter,
+                            textAlign: TextAlign.center,
                           ),
                         ),
                       )
@@ -321,9 +351,9 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                               record.status == AttendanceStatus.leave;
 
                           final subjectName =
-                              record.subjectInfo?.name ?? 'Unknown Subject';
+                              record.subjectInfo?.name ?? l10n.unknownSubject;
                           final timeStr = record.routineInfo != null
-                              ? '${record.routineInfo!.startTime} - ${record.routineInfo!.endTime}'
+                              ? '${_formatTime(record.routineInfo!.startTime)} - ${_formatTime(record.routineInfo!.endTime)}'
                               : null;
 
                           return ListTile(
@@ -355,6 +385,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                                 Text(
                                   DateFormat(
                                     'EEEE, MMM d, yyyy',
+                                    l10n.localeName,
                                   ).format(record.date),
                                   style: TextStyle(
                                     fontSize: 12,
@@ -387,10 +418,9 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                record.status.name
-                                        .substring(0, 1)
-                                        .toUpperCase() +
-                                    record.status.name.substring(1),
+                                isPresent
+                                    ? l10n.present
+                                    : (isLeave ? l10n.leave : l10n.absent),
                                 style: TextStyle(
                                   color: isPresent
                                       ? AppColors.primaryStudent
@@ -502,11 +532,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                 Shimmer.fromColors(
                   baseColor: Colors.grey[300]!,
                   highlightColor: Colors.grey[100]!,
-                  child: Container(
-                    width: 150,
-                    height: 20,
-                    color: Colors.white,
-                  ),
+                  child: Container(width: 150, height: 20, color: Colors.white),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -558,11 +584,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                 title: Shimmer.fromColors(
                   baseColor: Colors.grey[300]!,
                   highlightColor: Colors.grey[100]!,
-                  child: Container(
-                    width: 120,
-                    height: 16,
-                    color: Colors.white,
-                  ),
+                  child: Container(width: 120, height: 16, color: Colors.white),
                 ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

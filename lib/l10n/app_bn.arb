@@ -1271,5 +1271,9 @@
   "deleteAccountWarning": "এই পদক্ষেপটি স্থায়ী এবং পূর্বাবস্থায় ফেরানো যাবে না। আপনার সমস্ত ডেটা আমাদের সার্ভার থেকে মুছে ফেলা হবে।",
   "typeDeleteToConfirm": "নিশ্চিত করতে DELETE টাইপ করুন:",
   "deleteUppercase": "DELETE",
-  "failedToDeleteAccount": "অ্যাকাউন্ট মুছতে ব্যর্থ হয়েছে"
+  "failedToDeleteAccount": "অ্যাকাউন্ট মুছতে ব্যর্থ হয়েছে",
+  "myAttendance": "আমার উপস্থিতি",
+  "filterAttendance": "উপস্থিতি ফিল্টার করুন",
+  "allDates": "সব তারিখ",
+  "noAttendanceRecordsFoundFilter": "নির্বাচিত ফিল্টারগুলোর জন্য কোনো উপস্থিতির রেকর্ড পাওয়া যায়নি।"
 }
