@@ -918,7 +918,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    'Due: ${homework?.dueDate != null ? DateFormat('dd MMM').format(homework!.dueDate) : "N/A"}',
+                    '${homework?.dueDate != null ? DateFormat('dd MMM yyyy').format(homework!.dueDate) : "N/A"}',
                     style: TextStyle(
                       fontSize: 11,
                       color: Colors.red.shade400,
@@ -944,77 +944,45 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
     final exam = examData.exam!;
     final result = examData.result!;
 
-    return Container(
-      width: screenSize(context, .85),
+    return Card(
       margin: const EdgeInsets.only(right: 16, bottom: 8),
-      decoration: BoxDecoration(
-        color: AppColors.primaryStudent,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.indigo.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -10,
-            top: -10,
-            child: Icon(
-              Icons.stars_rounded,
-              size: 100,
-              color: Colors.white.withOpacity(0.1),
+
+      child: SizedBox(
+        width: screenSize(context, .85),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -10,
+              top: -10,
+              child: Icon(
+                Icons.stars_rounded,
+                size: 100,
+                color: Colors.white.withOpacity(0.1),
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              children: [
-                CircularPercentIndicator(
-                  radius: 40.0,
-                  lineWidth: 8.0,
-                  animation: true,
-                  percent: result.percentage / 100,
-                  center: Text(
-                    "${result.percentage.toInt()}%",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
-                  ),
-                  circularStrokeCap: CircularStrokeCap.round,
-                  progressColor: Colors.amber,
-                  backgroundColor: Colors.white24,
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Row(
+                children: [
+                  Column(
                     children: [
-                      Text(
-                        exam.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      CircularPercentIndicator(
+                        radius: 40.0,
+                        lineWidth: 8.0,
+                        animation: true,
+                        percent: result.percentage / 100,
+                        center: Text(
+                          "${result.percentage.toInt()}%",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        circularStrokeCap: CircularStrokeCap.round,
+                        progressColor: Colors.amber,
+                        backgroundColor: Colors.white24,
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Total Marks: ${result.totalObtained} / ${result.totalMax}',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 5),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
@@ -1035,11 +1003,41 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                       ),
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          exam.name,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          exam.description ?? "",
+                          style: const TextStyle(fontSize: 12),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Total Marks: ${result.totalObtained} / ${result.totalMax}',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
