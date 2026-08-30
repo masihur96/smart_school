@@ -1,5 +1,3 @@
-import 'package:smart_school/core/widgets/zoomable_avatar.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
@@ -11,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
 import 'package:smart_school/features/ai_tutor/screen/ai_tutor_chat_screen.dart';
 import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
@@ -151,44 +150,72 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
       },
       child: Scaffold(
         appBar: AppBar(
-          leadingWidth: screenSize(context, .15),
+          leadingWidth: screenSize(context, .1),
           leading: IconButton(
             icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () => ZoomDrawer.of(context)?.toggle(),
           ),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                _getTitle(l10n),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Colors.white,
+          title: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
+            },
+            child: Row(
+              children: [
+                ZoomableAvatar(
+                  imageUrl: user?.avatar,
+                  name: user?.name,
+                  heroTag:
+                      'teacher-dashboard-avatar-${user?.id ?? user?.name ?? 'me'}',
+                  radius: 20,
+                  backgroundColor: Colors.purple,
                 ),
-              ),
-              Text(
-                user?.school?.name ?? 'School Name',
-                style: const TextStyle(fontSize: 12, color: Colors.white70),
-              ),
-            ],
+                const SizedBox(width: 15),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      user?.name ?? "",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                    Text(
+                      user?.designation ?? 'School Name',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           centerTitle: false,
           elevation: 0,
+
           backgroundColor: AppColors.primaryStudent,
           foregroundColor: Colors.white,
           iconTheme: const IconThemeData(color: Colors.white),
           actions: [
             NotificationIconButton(color: AppColors.primaryStudent),
-            IconButton(
-              icon: const Icon(Icons.account_circle_outlined),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                );
+            GestureDetector(
+              onTap: () {
+                _showAIDoctorDialog(context);
+                // Navigate to profile screen
               },
+              child: Lottie.asset(
+                'assets/animation1.json',
+                width: 60,
+                fit: BoxFit.fill,
+                repeat: true,
+              ),
             ),
             const SizedBox(width: 8),
           ],
@@ -309,7 +336,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildModernHeader(context, user, l10n),
+            SizedBox(height: 10),
             if (data?.marqueeData != null && data!.marqueeData!.text.isNotEmpty)
               MarqueeNotice(
                 customText: data.marqueeData!.text,
@@ -410,82 +437,6 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
             ),
           ),
       ],
-    );
-  }
-
-  Widget _buildModernHeader(
-    BuildContext context,
-    User? user,
-    AppLocalizations l10n,
-  ) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.primaryStudent,
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.green.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.fromLTRB(25, 20, 25, 30),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              ZoomableAvatar(
-                imageUrl: user?.avatar,
-                name: user?.name,
-                heroTag: 'student-dashboard-avatar-${user?.id ?? user?.name ?? 'me'}',
-                radius: 25,
-                backgroundColor: Colors.purple,
-              ),
-              const SizedBox(width: 15),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.welcomeBack,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
-                        fontSize: 14,
-                      ),
-                    ),
-                    Text(
-                      user?.name ?? 'Student',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  _showAIDoctorDialog(context);
-                  // Navigate to profile screen
-                },
-                child: Lottie.asset(
-                  'assets/animation1.json',
-                  width: 80,
-                  fit: BoxFit.fill,
-                  repeat: true,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
