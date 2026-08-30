@@ -1283,5 +1283,6 @@
   "noPendingHomeworkSubtitle": "আপনার ক্লাসের জন্য কোন বকেয়া কাজ নেই।",
   "teacherNotAssigned": "শিক্ষক নিযুক্ত করা হয়নি",
   "completedStatus": "সম্পন্ন",
-  "submittedStatus": "জমা দেওয়া হয়েছে"
+  "submittedStatus": "জমা দেওয়া হয়েছে",
+  "justNow": "এইমাত্র"
 }

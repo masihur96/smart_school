@@ -293,7 +293,34 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
       themeColor = AppColors.primaryStudent;
     }
 
-    print(user?.role.name.toLowerCase());
+    if (isStudent) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.onlineClassesTitle),
+          backgroundColor: themeColor,
+          foregroundColor: Colors.white,
+        ),
+        body: Consumer<OnlineClassProvider>(
+          builder: (context, provider, _) {
+            if (provider.isLoading) {
+              return _buildShimmerLoader();
+            }
+
+            if (provider.error != null && provider.onlineClasses.isEmpty) {
+              return _buildErrorState(provider, themeColor);
+            }
+
+            return _buildListForTab(
+              provider,
+              themeColor,
+              canManageClass,
+              1, // Class meeting filter
+            );
+          },
+        ),
+      );
+    }
+
     return DefaultTabController(
       length: 3,
       child: Scaffold(

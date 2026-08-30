@@ -67,7 +67,26 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
     );
   }
 
+  String _getTimeAgo(DateTime? date, AppLocalizations l10n) {
+    if (date == null) return '';
+    final diff = DateTime.now().difference(date);
+    if (diff.inDays > 365) {
+      return '${(diff.inDays / 365).floor()}y ago';
+    } else if (diff.inDays >= 30) {
+      return '${(diff.inDays / 30).floor()}mo ago';
+    } else if (diff.inDays >= 1) {
+      return l10n.daysAgo(diff.inDays);
+    } else if (diff.inHours >= 1) {
+      return l10n.hoursAgo(diff.inHours);
+    } else if (diff.inMinutes >= 1) {
+      return l10n.minutesAgo(diff.inMinutes);
+    } else {
+      return l10n.justNow;
+    }
+  }
+
   Widget _buildNoticesList(List notices) {
+    final l10n = AppLocalizations.of(context)!;
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: notices.length,
@@ -165,8 +184,8 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
                       Icon(Icons.access_time, size: 14),
                       const SizedBox(width: 4),
                       Text(
-                        'Just now', // Ideally format createdAt from notice
-                        style: TextStyle(fontSize: 12),
+                        _getTimeAgo(notice.createdAt, l10n),
+                        style: const TextStyle(fontSize: 12),
                       ),
                     ],
                   ),
@@ -214,13 +233,21 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
                             Shimmer.fromColors(
                               baseColor: Colors.grey[300]!,
                               highlightColor: Colors.grey[100]!,
-                              child: Container(width: 150, height: 16, color: Colors.white),
+                              child: Container(
+                                width: 150,
+                                height: 16,
+                                color: Colors.white,
+                              ),
                             ),
                             const SizedBox(height: 6),
                             Shimmer.fromColors(
                               baseColor: Colors.grey[300]!,
                               highlightColor: Colors.grey[100]!,
-                              child: Container(width: 80, height: 12, color: Colors.white),
+                              child: Container(
+                                width: 80,
+                                height: 12,
+                                color: Colors.white,
+                              ),
                             ),
                           ],
                         ),
@@ -229,20 +256,31 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Shimmer.fromColors(
                         baseColor: Colors.grey[300]!,
                         highlightColor: Colors.grey[100]!,
-                        child: Container(width: double.infinity, height: 14, color: Colors.white),
+                        child: Container(
+                          width: double.infinity,
+                          height: 14,
+                          color: Colors.white,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Shimmer.fromColors(
                         baseColor: Colors.grey[300]!,
                         highlightColor: Colors.grey[100]!,
-                        child: Container(width: 250, height: 14, color: Colors.white),
+                        child: Container(
+                          width: 250,
+                          height: 14,
+                          color: Colors.white,
+                        ),
                       ),
                     ],
                   ),
@@ -262,7 +300,11 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
                       Shimmer.fromColors(
                         baseColor: Colors.grey[300]!,
                         highlightColor: Colors.grey[100]!,
-                        child: Container(width: 60, height: 12, color: Colors.white),
+                        child: Container(
+                          width: 60,
+                          height: 12,
+                          color: Colors.white,
+                        ),
                       ),
                     ],
                   ),

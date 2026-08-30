@@ -5159,6 +5159,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Submitted'**
   String get submittedStatus;
+
+  /// No description provided for @justNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get justNow;
 }
 
 class _AppLocalizationsDelegate

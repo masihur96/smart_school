@@ -2783,4 +2783,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get submittedStatus => 'Submitted';
+
+  @override
+  String get justNow => 'Just now';
 }

@@ -2786,4 +2786,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get submittedStatus => 'জমা দেওয়া হয়েছে';
+
+  @override
+  String get justNow => 'এইমাত্র';
 }

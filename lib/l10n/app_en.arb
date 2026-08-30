@@ -1541,5 +1541,6 @@
   "noPendingHomeworkSubtitle": "No pending homework for your class.",
   "teacherNotAssigned": "Teacher Not Assigned",
   "completedStatus": "Completed",
-  "submittedStatus": "Submitted"
+  "submittedStatus": "Submitted",
+  "justNow": "Just now"
 }
