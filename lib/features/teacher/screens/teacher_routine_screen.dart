@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 
 import '../../../models/school_models.dart';
 import '../../admin/providers/routine_provider.dart';
 import '../../auth/providers/auth_provider.dart';
-import 'package:smart_school/l10n/app_localizations.dart';
 
 class TeacherRoutineScreen extends StatefulWidget {
   const TeacherRoutineScreen({super.key});
@@ -167,11 +168,7 @@ class _TeacherRoutineScreenState extends State<TeacherRoutineScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        width: 150,
-                        height: 20,
-                        color: Colors.white,
-                      ),
+                      Container(width: 150, height: 20, color: Colors.white),
                       Container(
                         width: 100,
                         height: 24,
@@ -221,6 +218,27 @@ class _RoutineCard extends StatelessWidget {
 
   const _RoutineCard({required this.entry});
 
+  String _formatTimeAMPM(String time) {
+    if (time.isEmpty) return time;
+    try {
+      final parts = time.split(':');
+      if (parts.length >= 2) {
+        final now = DateTime.now();
+        final dt = DateTime(
+          now.year,
+          now.month,
+          now.day,
+          int.parse(parts[0]),
+          int.parse(parts[1]),
+        );
+        return DateFormat('hh:mm a').format(dt);
+      }
+    } catch (e) {
+      // fallback
+    }
+    return time;
+  }
+
   @override
   Widget build(BuildContext context) {
     final subjectName = entry.subjectEntity?.name ?? 'Unknown Subject';
@@ -230,6 +248,9 @@ class _RoutineCard extends StatelessWidget {
     final classDisplay = sectionName.isNotEmpty
         ? '$className ($sectionName)'
         : className;
+
+    final startTimeFormatted = _formatTimeAMPM(entry.startTime);
+    final endTimeFormatted = _formatTimeAMPM(entry.endTime);
 
     return Card(
       child: Padding(
@@ -259,7 +280,7 @@ class _RoutineCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '${entry.startTime} - ${entry.endTime}',
+                    '$startTimeFormatted - $endTimeFormatted',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
