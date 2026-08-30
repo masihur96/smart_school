@@ -371,7 +371,7 @@ class _HomeworkCard extends StatelessWidget {
                   Icon(Icons.event_outlined, size: 16, color: Colors.grey[400]),
                   const SizedBox(width: 6),
                   Text(
-                    'Due: ${DateFormat('MMM d, yyyy').format(dueDate)}',
+                    '${DateFormat('MMM d, yyyy').format(dueDate)}',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
