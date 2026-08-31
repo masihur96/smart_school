@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/teacher/providers/attendance_provider.dart';
-import 'package:smart_school/features/teacher/screens/homework_details_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../core/utils/class_routine_pdf_helper.dart';
@@ -753,22 +752,12 @@ class _HomeworkTab extends StatelessWidget {
                     orElse: () => Subject(id: '', name: 'Unknown Subject'),
                   )
                   .name;
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => HomeworkDetailsScreen(homeworkId: hw.id),
-                    ),
-                  );
-                },
-                child: _HomeworkCard(
-                  homework: hw,
-                  subjectName: subjectName,
-                  onView: () => _showViewSheet(ctx, hw, subjectName),
-                  onEdit: () => _showEditSheet(ctx, hw),
-                  onDelete: () => _confirmDelete(ctx, hw.id),
-                ),
+              return _HomeworkCard(
+                homework: hw,
+                subjectName: subjectName,
+                onView: () => _showViewSheet(ctx, hw, subjectName),
+                onEdit: () => _showEditSheet(ctx, hw),
+                onDelete: () => _confirmDelete(ctx, hw.id),
               );
             },
           ),

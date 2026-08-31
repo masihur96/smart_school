@@ -53,14 +53,16 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
 
           final homework = provider.selectedHomework;
           if (homework == null) {
-            return Center(child: Text(AppLocalizations.of(context)!.homeworkNotFound));
+            return Center(
+              child: Text(AppLocalizations.of(context)!.homeworkNotFound),
+            );
           }
 
           final sortedStudentHomeworks = List.of(homework.studentHomeworks);
           sortedStudentHomeworks.sort((a, b) {
             final rollA = a.student?.rollNumber;
             final rollB = b.student?.rollNumber;
-            
+
             final intRollA = int.tryParse(rollA ?? '');
             final intRollB = int.tryParse(rollB ?? '');
 
@@ -104,7 +106,9 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.all(20.0),
-                      child: Text(AppLocalizations.of(context)!.noStudentsAssigned),
+                      child: Text(
+                        AppLocalizations.of(context)!.noStudentsAssigned,
+                      ),
                     ),
                   )
                 else
@@ -300,8 +304,6 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: () {
-
-
                   _showUpdateStatusDialog(
                     homeworkId: studentHomework.studentId,
                     studentId: studentHomework.id,
@@ -310,7 +312,9 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                   );
                 },
                 icon: const Icon(Icons.edit_note, size: 18),
-                label: Text(AppLocalizations.of(context)!.updateStatusAndComment),
+                label: Text(
+                  AppLocalizations.of(context)!.updateStatusAndComment,
+                ),
                 style: OutlinedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -402,9 +406,14 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                     items: [
                       DropdownMenuItem(
                         value: 'pending',
-                        child: Text(AppLocalizations.of(context)!.pendingStatus),
+                        child: Text(
+                          AppLocalizations.of(context)!.pendingStatus,
+                        ),
                       ),
-                      DropdownMenuItem(value: 'done', child: Text(AppLocalizations.of(context)!.doneStatus)),
+                      DropdownMenuItem(
+                        value: 'done',
+                        child: Text(AppLocalizations.of(context)!.doneStatus),
+                      ),
                     ],
                     onChanged: isUpdating
                         ? null
@@ -441,8 +450,9 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                           });
 
                           final navigator = Navigator.of(context);
-                          final scaffoldMessenger =
-                              ScaffoldMessenger.of(context);
+                          final scaffoldMessenger = ScaffoldMessenger.of(
+                            context,
+                          );
 
                           final success = isBulk
                               ? await context
@@ -478,7 +488,11 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                             });
                             scaffoldMessenger.showSnackBar(
                               SnackBar(
-                                content: Text(AppLocalizations.of(context)!.failedToUpdateStatus),
+                                content: Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.failedToUpdateStatus,
+                                ),
                               ),
                             );
                           }
