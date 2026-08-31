@@ -1,5 +1,3 @@
-import 'package:smart_school/core/widgets/zoomable_avatar.dart';
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
 import 'package:smart_school/features/admin/providers/student_performance_provider.dart';
 import 'package:smart_school/features/admin/providers/teacher_performance_provider.dart';
 import 'package:smart_school/features/admin/screens/student_performance_screen.dart';
@@ -18,7 +17,6 @@ import 'package:smart_school/features/profile/presentation/screens/profile_scree
 import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../core/services/geocoding_service.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/notification_icon_button.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -186,31 +184,35 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                   imageUrl: user?.avatar,
                   name: user?.name,
                   heroTag:
-                  'teacher-dashboard-avatar-${user?.id ?? user?.name ?? 'me'}',
+                      'teacher-dashboard-avatar-${user?.id ?? user?.name ?? 'me'}',
                   radius: 20,
                   backgroundColor: Colors.purple,
                 ),
                 const SizedBox(width: 15),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      user?.name ?? "",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontSize: 18,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "${user?.name ?? ""}",
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
                       ),
-                    ),
-                    Text(
-                      user?.role.name.toUpperCase() ?? 'School Name',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.white70,
+                      Text(
+                        user?.role.name.toUpperCase() ?? 'School Name',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white70,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -616,7 +618,10 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(l10n.yearLabel(data.year), style: const TextStyle(fontSize: 12)),
+                    Text(
+                      l10n.yearLabel(data.year),
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ],
                 ),
               ],
@@ -1838,9 +1843,18 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
         if (list.isEmpty) return const SizedBox.shrink();
 
         final localizedMonths = [
-          l10n.monthJan, l10n.monthFeb, l10n.monthMar, l10n.monthApr,
-          l10n.monthMay, l10n.monthJun, l10n.monthJul, l10n.monthAug,
-          l10n.monthSep, l10n.monthOct, l10n.monthNov, l10n.monthDec,
+          l10n.monthJan,
+          l10n.monthFeb,
+          l10n.monthMar,
+          l10n.monthApr,
+          l10n.monthMay,
+          l10n.monthJun,
+          l10n.monthJul,
+          l10n.monthAug,
+          l10n.monthSep,
+          l10n.monthOct,
+          l10n.monthNov,
+          l10n.monthDec,
         ];
 
         return Column(
@@ -1969,7 +1983,9 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                 Row(
                   children: [
                     ZoomableAvatar(
-                      imageUrl: perf.avatar?.isNotEmpty == true ? perf.avatar : null,
+                      imageUrl: perf.avatar?.isNotEmpty == true
+                          ? perf.avatar
+                          : null,
                       name: perf.name,
                       heroTag: 'teacher-leaderboard-avatar-${perf.name}',
                       radius: 16,
@@ -2106,9 +2122,18 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
         }
 
         final localizedMonths = [
-          l10n.monthJan, l10n.monthFeb, l10n.monthMar, l10n.monthApr,
-          l10n.monthMay, l10n.monthJun, l10n.monthJul, l10n.monthAug,
-          l10n.monthSep, l10n.monthOct, l10n.monthNov, l10n.monthDec,
+          l10n.monthJan,
+          l10n.monthFeb,
+          l10n.monthMar,
+          l10n.monthApr,
+          l10n.monthMay,
+          l10n.monthJun,
+          l10n.monthJul,
+          l10n.monthAug,
+          l10n.monthSep,
+          l10n.monthOct,
+          l10n.monthNov,
+          l10n.monthDec,
         ];
 
         return Column(
@@ -2169,11 +2194,21 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     double _calcScore() {
       double total = 0;
       int count = 0;
-      if (perf.attendance.totalWorkingDays > 0) { total += perf.attendance.percentage; count++; }
-      if (perf.homework.totalAssigned > 0) { total += perf.homework.percentage; count++; }
-      if (perf.exams.totalMaximumMarks > 0) { total += perf.exams.percentage; count++; }
+      if (perf.attendance.totalWorkingDays > 0) {
+        total += perf.attendance.percentage;
+        count++;
+      }
+      if (perf.homework.totalAssigned > 0) {
+        total += perf.homework.percentage;
+        count++;
+      }
+      if (perf.exams.totalMaximumMarks > 0) {
+        total += perf.exams.percentage;
+        count++;
+      }
       return count > 0 ? total / count : 0;
     }
+
     final score = _calcScore();
 
     Color badgeColor;
@@ -2262,7 +2297,9 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                 Row(
                   children: [
                     ZoomableAvatar(
-                      imageUrl: perf.avatar?.isNotEmpty == true ? perf.avatar : null,
+                      imageUrl: perf.avatar?.isNotEmpty == true
+                          ? perf.avatar
+                          : null,
                       name: perf.name,
                       heroTag: 'student-leaderboard-avatar-${perf.name}',
                       radius: 16,
@@ -2307,21 +2344,27 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                       perf.attendance.totalWorkingDays > 0
                           ? '${perf.attendance.presentDays}/${perf.attendance.totalWorkingDays}d'
                           : 'N/A',
-                      perf.attendance.totalWorkingDays > 0 ? Colors.green : Colors.grey.shade400,
+                      perf.attendance.totalWorkingDays > 0
+                          ? Colors.green
+                          : Colors.grey.shade400,
                     ),
                     const SizedBox(width: 5),
                     _perfStatChip(
                       perf.homework.totalAssigned > 0
                           ? '${perf.homework.totalDone}/${perf.homework.totalAssigned}hw'
                           : 'N/A',
-                      perf.homework.totalAssigned > 0 ? Colors.blue : Colors.grey.shade400,
+                      perf.homework.totalAssigned > 0
+                          ? Colors.blue
+                          : Colors.grey.shade400,
                     ),
                     const SizedBox(width: 5),
                     _perfStatChip(
                       perf.exams.totalMaximumMarks > 0
                           ? '${perf.exams.totalMarksObtained.toStringAsFixed(0)}/${perf.exams.totalMaximumMarks.toStringAsFixed(0)}m'
                           : 'N/A',
-                      perf.exams.totalMaximumMarks > 0 ? Colors.purple : Colors.grey.shade400,
+                      perf.exams.totalMaximumMarks > 0
+                          ? Colors.purple
+                          : Colors.grey.shade400,
                     ),
                   ],
                 ),
@@ -3065,7 +3108,9 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    if (stats.effectiveSectionName.isNotEmpty) ...[
+                                    if (stats
+                                        .effectiveSectionName
+                                        .isNotEmpty) ...[
                                       const SizedBox(height: 2),
                                       Text(
                                         'Section: ${stats.effectiveSectionName}',
