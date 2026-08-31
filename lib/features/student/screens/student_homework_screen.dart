@@ -86,12 +86,10 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> {
 
                         if (hw == null) return const SizedBox();
 
-                        final subName = subjects
-                            .firstWhere(
-                              (s) => s.id == hw.subjectId,
-                              orElse: () => Subject(id: '', name: 'Subject'),
-                            )
-                            .name;
+
+
+                        final subName = hw.subjectInfo?.name??"Subject";
+
 
                         return _HomeworkCard(
                           studentHomework: studentHw,
@@ -371,7 +369,7 @@ class _HomeworkCard extends StatelessWidget {
                   Icon(Icons.event_outlined, size: 16, color: Colors.grey[400]),
                   const SizedBox(width: 6),
                   Text(
-                    '${DateFormat('MMM d, yyyy').format(dueDate)}',
+                    DateFormat('EEEE, MMM d, yyyy').format(dueDate),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -499,13 +497,13 @@ class _HomeworkDetailSheet extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.15),
+                    color: AppColors.primaryStudent.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     subName,
                     style: const TextStyle(
-                      color: Colors.green,
+                      color: AppColors.primaryStudent,
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
                     ),
@@ -513,7 +511,7 @@ class _HomeworkDetailSheet extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  DateFormat('MMM d, yyyy').format(hw.dueDate),
+                  DateFormat('EEEE, MMM d, yyyy').format(hw.dueDate),
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: primaryText,
@@ -604,7 +602,7 @@ class _HomeworkDetailSheet extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
+                  backgroundColor: AppColors.primaryStudent,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 16),

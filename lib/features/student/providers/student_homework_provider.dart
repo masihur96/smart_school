@@ -41,7 +41,8 @@ class StudentHomeworkNotifier extends ChangeNotifier {
         _homeworkList.sort((a, b) {
           final dateA = a.homework?.dueDate ?? DateTime.now();
           final dateB = b.homework?.dueDate ?? DateTime.now();
-          return dateA.compareTo(dateB);
+
+          return dateB.compareTo(dateA); // Latest first
         });
         log('Fetched ${_homeworkList.length} student homework entries for class $classId');
       } else {
