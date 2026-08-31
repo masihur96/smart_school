@@ -136,7 +136,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     final authNotifier = context.watch<AuthNotifier>();
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
+    final user = authNotifier.user;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, dynamic result) async {
@@ -168,14 +168,52 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
       },
       child: Scaffold(
         appBar: AppBar(
-          leadingWidth: screenSize(context, .15),
+          leadingWidth: screenSize(context, .07),
           leading: IconButton(
             icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () => ZoomDrawer.of(context)?.toggle(),
           ),
-          title: Text(
-            _getTitle(l10n),
-            style: const TextStyle(color: AppColors.white),
+          title: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
+            },
+            child: Row(
+              children: [
+                ZoomableAvatar(
+                  imageUrl: user?.avatar,
+                  name: user?.name,
+                  heroTag:
+                  'teacher-dashboard-avatar-${user?.id ?? user?.name ?? 'me'}',
+                  radius: 20,
+                  backgroundColor: Colors.purple,
+                ),
+                const SizedBox(width: 15),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      user?.name ?? "",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                    Text(
+                      user?.role.name.toUpperCase() ?? 'School Name',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           iconTheme: const IconThemeData(color: AppColors.white),
           backgroundColor: AppColors.primaryAdmin,
