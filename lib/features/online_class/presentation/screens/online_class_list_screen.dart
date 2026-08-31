@@ -723,12 +723,10 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
         return Shimmer.fromColors(
           baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
           highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
-          child: Card(
-            elevation: 0,
+          child: Container(
+
             margin: const EdgeInsets.only(bottom: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
+
             child: Padding(
               padding: const EdgeInsets.all(14.0),
               child: Column(
@@ -828,6 +826,10 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     // Meeting status computation
     final isUpcoming = oClass.scheduledTime.isAfter(now);
     // Live: Started within the last 60 minutes
+    print(isUpcoming);
+    print(oClass.scheduledTime);
+    print(now);
+
     final isLive =
         !isUpcoming &&
         now.isBefore(oClass.scheduledTime.add(const Duration(minutes: 60)));

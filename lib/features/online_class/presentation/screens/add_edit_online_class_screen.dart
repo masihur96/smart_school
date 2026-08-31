@@ -110,11 +110,16 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
   }
 
   Future<void> _pickDate() async {
+    final now = DateTime.now();
+    // When editing, the existing date may be in the past — allow it as the earliest selectable date
+    final earliestDate = _selectedDate != null && _selectedDate!.isBefore(now)
+        ? _selectedDate!
+        : now;
     final date = await showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      initialDate: _selectedDate ?? now,
+      firstDate: earliestDate,
+      lastDate: now.add(const Duration(days: 730)),
     );
     if (date != null) {
       setState(() => _selectedDate = date);
