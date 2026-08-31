@@ -96,12 +96,10 @@ class NotificationNotifier extends ChangeNotifier {
     for (int i = 0; i < _notifications.length; i++) {
       if (!_notifications[i].isRead) {
         unreadIndices.add(i);
-        _notifications[i] = _notifications[i].copyWith(isRead: true);
       }
     }
 
     if (unreadIndices.isEmpty) return;
-    notifyListeners();
 
     // Call backend to persist changes concurrently
     final results = await Future.wait(
@@ -110,17 +108,16 @@ class NotificationNotifier extends ChangeNotifier {
       ),
     );
 
-    bool hasError = false;
+    bool hasUpdate = false;
     for (int i = 0; i < results.length; i++) {
-      if (!results[i]) {
-        hasError = true;
-        // Revert failed ones
+      if (results[i]) {
+        hasUpdate = true;
         final index = unreadIndices[i];
-        _notifications[index] = _notifications[index].copyWith(isRead: false);
+        _notifications[index] = _notifications[index].copyWith(isRead: true);
       }
     }
 
-    if (hasError) {
+    if (hasUpdate) {
       notifyListeners();
     }
   }
