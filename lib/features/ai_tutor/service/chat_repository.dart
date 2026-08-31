@@ -11,7 +11,7 @@ class ChatRepository {
 
     // Prepare data for POST request
     dynamic data = {
-      "model": "mistral-large-latest",
+      "model": "open-mistral-7b",
       "messages": [
         {"role": "user", "content": text},
       ],
@@ -19,7 +19,7 @@ class ChatRepository {
 
     // Request header
     dynamic header = {
-      "Authorization": "Bearer A0b5MHGq230KVhrOvge4omud5BrvQemV",
+      "Authorization": "Bearer nE7emk3UaZdiHf3hoAS0lhz4s6MG1WNV",
     };
 
     try {
@@ -35,8 +35,6 @@ class ChatRepository {
       if (response.statusCode == 200) {
         var data = response.data;
         chatBootModel = ChatBootModel.fromJson(data);
-
-
       } else {
         log("Failed to create notice: ${response.statusMessage}");
       }
