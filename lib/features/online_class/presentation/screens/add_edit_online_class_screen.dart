@@ -222,9 +222,10 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
       }
 
       setState(() => _isLoading = true);
+      print(_selectedDate);
 
       final isEditing = widget.onlineClass != null;
-      final dateStr = _selectedDate!.toUtc().toIso8601String();
+      final dateStr = _selectedDate!.toIso8601String();
       final startTimeStr = _selectedTime!.format(context);
       final endTimeStr = _selectedEndTime!.format(context);
 
@@ -288,6 +289,8 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
           );
         }
       } else {
+
+        print(dateStr);
         final success = await context
             .read<OnlineClassProvider>()
             .updateOnlineClass(
