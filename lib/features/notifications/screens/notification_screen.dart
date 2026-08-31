@@ -34,8 +34,19 @@ class _NotificationScreenState extends State<NotificationScreen> {
         title: Text(AppLocalizations.of(context)!.notificationsTitle),
         foregroundColor: AppColors.white,
 
-        leading: BackButton(),
-
+        leading: const BackButton(),
+        actions: [
+          Consumer<NotificationNotifier>(
+            builder: (context, notifier, _) {
+              if (notifier.unreadCount == 0) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.checklist),
+                tooltip: 'Mark all as read',
+                onPressed: () => notifier.markAllAsRead(),
+              );
+            },
+          ),
+        ],
       ),
       body: Consumer<NotificationNotifier>(
         builder: (context, notifier, child) {
@@ -50,7 +61,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 children: [
                   const Icon(Icons.error_outline, size: 60, color: Colors.red),
                   const SizedBox(height: 16),
-                  Text(AppLocalizations.of(context)!.errorLabel(notifier.error ?? '')),
+                  Text(
+                    AppLocalizations.of(
+                      context,
+                    )!.errorLabel(notifier.error ?? ''),
+                  ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => notifier.fetchNotifications(),
@@ -138,7 +153,7 @@ class _NotificationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      return Card(
+    return Card(
       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 16),
       color: notification.isRead ? null : Colors.blue.withOpacity(0.05),
       child: ListTile(

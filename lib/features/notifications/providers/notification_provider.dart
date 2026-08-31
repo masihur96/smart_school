@@ -4,7 +4,7 @@ import 'package:smart_school/services/notification_service.dart';
 
 class NotificationNotifier extends ChangeNotifier {
   final NotificationService _notificationService = NotificationService();
-  
+
   List<NotificationModel> _notifications = [];
   bool _isLoading = false;
   String? _error;
@@ -87,6 +87,40 @@ class NotificationNotifier extends ChangeNotifier {
     if (!success) {
       // Revert if the API call failed
       _notifications[index] = _notifications[index].copyWith(isRead: false);
+      notifyListeners();
+    }
+  }
+
+  Future<void> markAllAsRead() async {
+    final unreadIndices = <int>[];
+    for (int i = 0; i < _notifications.length; i++) {
+      if (!_notifications[i].isRead) {
+        unreadIndices.add(i);
+        _notifications[i] = _notifications[i].copyWith(isRead: true);
+      }
+    }
+
+    if (unreadIndices.isEmpty) return;
+    notifyListeners();
+
+    // Call backend to persist changes concurrently
+    final results = await Future.wait(
+      unreadIndices.map(
+        (index) => _notificationService.markAsRead(_notifications[index].id),
+      ),
+    );
+
+    bool hasError = false;
+    for (int i = 0; i < results.length; i++) {
+      if (!results[i]) {
+        hasError = true;
+        // Revert failed ones
+        final index = unreadIndices[i];
+        _notifications[index] = _notifications[index].copyWith(isRead: false);
+      }
+    }
+
+    if (hasError) {
       notifyListeners();
     }
   }
