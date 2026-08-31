@@ -53,23 +53,29 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
                 ),
               ],
             ),
-      body: examNotifier.isLoading && exams.isEmpty
-          ? _buildShimmerLoading()
-          : examNotifier.error != null
-          ? _buildErrorState(examNotifier.error!)
-          : exams.isEmpty
-          ? _buildEmptyState()
-          : _buildExamsList(exams),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: examNotifier.isLoading
+            ? _buildShimmerLoading()
+            : examNotifier.error != null
+            ? _buildErrorState(examNotifier.error!)
+            : exams.isEmpty
+            ? _buildEmptyState()
+            : _buildExamsList(exams),
+      ),
     );
   }
 
   Widget _buildExamsList(List<Exam> exams) {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+
       itemCount: exams.length,
       itemBuilder: (context, index) {
         final exam = exams[index];
-        return _buildExamCard(exam);
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: _buildExamCard(exam),
+        );
       },
     );
   }
@@ -79,6 +85,7 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
         exam.endDate != null && exam.endDate!.isBefore(DateTime.now());
 
     return Card(
+      margin: EdgeInsets.zero,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
