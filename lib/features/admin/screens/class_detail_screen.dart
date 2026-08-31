@@ -464,7 +464,10 @@ class _AttendanceTab extends StatelessWidget {
                 Shimmer.fromColors(
                   baseColor: Colors.grey.shade200,
                   highlightColor: Colors.grey.shade50,
-                  child: const CircleAvatar(radius: 22, backgroundColor: Colors.white),
+                  child: const CircleAvatar(
+                    radius: 22,
+                    backgroundColor: Colors.white,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -723,7 +726,7 @@ class _HomeworkTab extends StatelessWidget {
     final homeworkList = homeworkNotifier.homeworkRecords
         .where((h) => h.classId == classRoom.id)
         .toList();
-    
+
     // Sort descending by created date (recent items at top)
     homeworkList.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
@@ -812,7 +815,7 @@ class _HomeworkTab extends StatelessWidget {
       },
     );
   }
-  
+
   void _showAddSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -956,7 +959,6 @@ class _HomeworkCard extends StatelessWidget {
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
-                                color: Colors.black87,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -968,7 +970,11 @@ class _HomeworkCard extends StatelessWidget {
                             height: 24,
                             child: PopupMenuButton<String>(
                               padding: EdgeInsets.zero,
-                              icon: Icon(Icons.more_horiz, color: Colors.grey[400], size: 20),
+                              icon: Icon(
+                                Icons.more_horiz,
+                                color: Colors.grey[400],
+                                size: 20,
+                              ),
                               onSelected: (val) {
                                 if (val == 'view') {
                                   onView();
@@ -985,7 +991,10 @@ class _HomeworkCard extends StatelessWidget {
                                     value: 'view',
                                     child: Row(
                                       children: [
-                                        const Icon(Icons.visibility_outlined, size: 18),
+                                        const Icon(
+                                          Icons.visibility_outlined,
+                                          size: 18,
+                                        ),
                                         const SizedBox(width: 8),
                                         Text(l10n.view),
                                       ],
@@ -995,7 +1004,10 @@ class _HomeworkCard extends StatelessWidget {
                                     value: 'edit',
                                     child: Row(
                                       children: [
-                                        const Icon(Icons.edit_outlined, size: 18),
+                                        const Icon(
+                                          Icons.edit_outlined,
+                                          size: 18,
+                                        ),
                                         const SizedBox(width: 8),
                                         Text(l10n.edit),
                                       ],
@@ -1013,7 +1025,9 @@ class _HomeworkCard extends StatelessWidget {
                                         const SizedBox(width: 8),
                                         Text(
                                           l10n.delete,
-                                          style: const TextStyle(color: Colors.red),
+                                          style: const TextStyle(
+                                            color: Colors.red,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -1026,7 +1040,10 @@ class _HomeworkCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.primaryAdmin.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(6),
@@ -1070,7 +1087,7 @@ class _HomeworkCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'Due: $due',
+                  due,
                   style: TextStyle(
                     fontSize: 12,
                     color: isPast ? Colors.red[400] : Colors.grey[600],
@@ -1080,7 +1097,10 @@ class _HomeworkCard extends StatelessWidget {
                 if (isPast) ...[
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.red.shade50,
                       borderRadius: BorderRadius.circular(4),
@@ -1096,7 +1116,7 @@ class _HomeworkCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                ]
+                ],
               ],
             ),
           ],
