@@ -484,7 +484,7 @@ class _RoutineCard extends StatelessWidget {
                 child: Row(
                   children: [
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
                           startTime,
@@ -500,6 +500,24 @@ class _RoutineCard extends StatelessWidget {
                             fontSize: 11,
 
                             fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(height: 5,),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            room,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
@@ -536,23 +554,7 @@ class _RoutineCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        l10n.roomNumberFormat(room),
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+
                   ],
                 ),
               ),
@@ -685,7 +687,7 @@ class _HomeworkCard extends StatelessWidget {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      '${l10n.due}: $formattedDate',
+                      formattedDate,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
