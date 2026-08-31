@@ -903,11 +903,13 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
     final percentage = result.totalMarks > 0
         ? (result.marksObtained / result.totalMarks)
         : 0.0;
+
+    print(result.subject?.name);
     final pctScore = percentage * 100;
     final grade = _calculateGrade(pctScore);
     final gradeColor = _getGradeColor(grade);
     final subjectName = result.subject?.name ?? 'Subject';
-    final teacherName = result.teacher?.name ?? 'Teacher N/A';
+    final teacherName = result.teacher?.name ?? 'Teacher';
     final initial = subjectName.isNotEmpty ? subjectName[0].toUpperCase() : '?';
 
     return Container(

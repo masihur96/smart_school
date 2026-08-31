@@ -173,26 +173,31 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                   backgroundColor: Colors.purple,
                 ),
                 const SizedBox(width: 15),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      user?.name ?? "",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontSize: 18,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Text(
+                        user?.name ?? "",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+
+                          fontSize: 18,
+                        ),
                       ),
-                    ),
-                    Text(
-                      user?.designation ?? 'School Name',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.white70,
+                      Text(
+                        user?.designation ?? 'School Name',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white70,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -217,7 +222,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                 repeat: true,
               ),
             ),
-            const SizedBox(width: 8),
+
           ],
         ),
         body: BottomBar(
