@@ -174,7 +174,15 @@ class _AiTutorChatScreenState extends State<AiTutorChatScreen> {
       message.isSpeaking = true;
     });
 
-    var result = await _flutterTts.speak(message.text);
+    // Clean text to remove markdown and emojis for better human-like speech
+    String cleanText = message.text.replaceAll(RegExp(r'[*#_~`]'), '');
+    cleanText = cleanText.replaceAll(
+        RegExp(
+            r'[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]',
+            unicode: true),
+        '');
+
+    var result = await _flutterTts.speak(cleanText);
     if (result == 0) {
       // If speech failed to start immediately
       setState(() {
@@ -208,7 +216,7 @@ class _AiTutorChatScreenState extends State<AiTutorChatScreen> {
     // Stop speaking when user sends a new message
     await _stopSpeaking();
 
-    String prompt =
+String prompt =
         """
 You are a friendly AI Tutor for school and college students.
 
@@ -220,6 +228,7 @@ Instructions:
 - If the answer contains calculations, show all steps.
 - If the student makes a mistake, politely correct it.
 - At the end, provide a short summary.
+- Do NOT use emojis, markdown formatting (like ** for bold or # for headings), or special symbols. Respond with clean plain text only.
 
 Student Question:
 $text
