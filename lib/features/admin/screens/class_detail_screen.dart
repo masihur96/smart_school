@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/teacher/providers/attendance_provider.dart';
 import 'package:smart_school/features/teacher/screens/homework_details_screen.dart';
@@ -391,7 +392,7 @@ class _AttendanceTab extends StatelessWidget {
         // Student list
         Expanded(
           child: isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? _buildShimmerLoading()
               : students.isEmpty
               ? _EmptyState(
                   icon: Icons.people_outline,
@@ -440,6 +441,81 @@ class _AttendanceTab extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildShimmerLoading() {
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+      itemCount: 8,
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      itemBuilder: (context, index) {
+        return Card(
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.grey.shade100),
+          ),
+          elevation: 0,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                Shimmer.fromColors(
+                  baseColor: Colors.grey.shade200,
+                  highlightColor: Colors.grey.shade50,
+                  child: const CircleAvatar(radius: 22, backgroundColor: Colors.white),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Shimmer.fromColors(
+                        baseColor: Colors.grey.shade200,
+                        highlightColor: Colors.grey.shade50,
+                        child: Container(
+                          height: 14,
+                          width: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Shimmer.fromColors(
+                        baseColor: Colors.grey.shade200,
+                        highlightColor: Colors.grey.shade50,
+                        child: Container(
+                          height: 12,
+                          width: 80,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Shimmer.fromColors(
+                  baseColor: Colors.grey.shade200,
+                  highlightColor: Colors.grey.shade50,
+                  child: Container(
+                    height: 30,
+                    width: 130,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -647,15 +723,14 @@ class _HomeworkTab extends StatelessWidget {
     final homeworkList = homeworkNotifier.homeworkRecords
         .where((h) => h.classId == classRoom.id)
         .toList();
+    
+    // Sort descending by created date (recent items at top)
+    homeworkList.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     return Stack(
       children: [
         if (isLoading)
-          const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Color(0xFF7C3AED)),
-            ),
-          )
+          _buildShimmerLoading()
         else if (homeworkList.isEmpty)
           const _EmptyState(
             icon: Icons.assignment_outlined,
@@ -717,6 +792,27 @@ class _HomeworkTab extends StatelessWidget {
     );
   }
 
+  Widget _buildShimmerLoading() {
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+      itemCount: 6,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: Colors.grey.shade200,
+          highlightColor: Colors.grey.shade50,
+          child: Container(
+            height: 120,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
   void _showAddSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -818,133 +914,190 @@ class _HomeworkCard extends StatelessWidget {
     final isPast = homework.dueDate.isBefore(DateTime.now());
 
     return Card(
+      elevation: 0,
       margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
+        padding: const EdgeInsets.all(16),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icon
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColors.primaryAdmin,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.assignment_rounded,
-                color: Colors.white,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: 12),
-            // Content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    homework.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Icon
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryAdmin.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    subjectName,
-                    style: TextStyle(
-                      color: AppColors.primaryAdmin,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  child: const Icon(
+                    Icons.assignment_rounded,
+                    color: AppColors.primaryAdmin,
+                    size: 24,
                   ),
-                  if (homework.description.isNotEmpty) ...[
-                    const SizedBox(height: 5),
-                    Text(
-                      homework.description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                    ),
-                  ],
-                  const SizedBox(height: 8),
-                  Row(
+                ),
+                const SizedBox(width: 14),
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.event_rounded,
-                        size: 14,
-                        color: isPast ? Colors.red[400] : Colors.grey[500],
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              homework.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.black87,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          // Action Menu
+                          SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: PopupMenuButton<String>(
+                              padding: EdgeInsets.zero,
+                              icon: Icon(Icons.more_horiz, color: Colors.grey[400], size: 20),
+                              onSelected: (val) {
+                                if (val == 'view') {
+                                  onView();
+                                } else if (val == 'edit') {
+                                  onEdit();
+                                } else if (val == 'delete') {
+                                  onDelete();
+                                }
+                              },
+                              itemBuilder: (context) {
+                                final l10n = AppLocalizations.of(context)!;
+                                return [
+                                  PopupMenuItem(
+                                    value: 'view',
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.visibility_outlined, size: 18),
+                                        const SizedBox(width: 8),
+                                        Text(l10n.view),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'edit',
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.edit_outlined, size: 18),
+                                        const SizedBox(width: 8),
+                                        Text(l10n.edit),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'delete',
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.delete_outline,
+                                          color: Colors.red,
+                                          size: 18,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          l10n.delete,
+                                          style: const TextStyle(color: Colors.red),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ];
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'HW Date: $due',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: isPast ? Colors.red[400] : Colors.grey[500],
-                          fontWeight: FontWeight.w600,
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryAdmin.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          subjectName,
+                          style: const TextStyle(
+                            color: AppColors.primaryAdmin,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            // Delete
-            PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert, color: Colors.grey[400], size: 20),
-              onSelected: (val) {
-                if (val == 'view') {
-                  onView();
-                } else if (val == 'edit') {
-                  onEdit();
-                } else if (val == 'delete') {
-                  onDelete();
-                }
-              },
-              itemBuilder: (context) {
-                final l10n = AppLocalizations.of(context)!;
-                return [
-                  PopupMenuItem(
-                    value: 'view',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.visibility_outlined, size: 18),
-                        const SizedBox(width: 8),
-                        Text(l10n.view),
-                      ],
+            if (homework.description.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                homework.description,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+              ),
+            ],
+            const SizedBox(height: 14),
+            const Divider(height: 1, color: Color(0xFFF0F0F0)),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  isPast ? Icons.event_busy_rounded : Icons.event_rounded,
+                  size: 16,
+                  color: isPast ? Colors.red[400] : Colors.grey[500],
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Due: $due',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isPast ? Colors.red[400] : Colors.grey[600],
+                    fontWeight: isPast ? FontWeight.bold : FontWeight.w500,
+                  ),
+                ),
+                if (isPast) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: Colors.red.shade200),
+                    ),
+                    child: const Text(
+                      'OVERDUE',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ),
-                  PopupMenuItem(
-                    value: 'edit',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.edit_outlined, size: 18),
-                        const SizedBox(width: 8),
-                        Text(l10n.edit),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.delete_outline,
-                          color: Colors.red,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          l10n.delete,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ],
-                    ),
-                  ),
-                ];
-              },
+                ]
+              ],
             ),
           ],
         ),
