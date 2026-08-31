@@ -912,8 +912,6 @@ class _HomeworkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final due =
-        '${homework.dueDate.day.toString().padLeft(2, '0')}/${homework.dueDate.month.toString().padLeft(2, '0')}/${homework.dueDate.year}';
     final isPast = homework.dueDate.isBefore(DateTime.now());
 
     return Card(
@@ -1087,7 +1085,7 @@ class _HomeworkCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  due,
+                  '${DateFormat('MMM dd, yyyy').format(homework.dueDate)}',
                   style: TextStyle(
                     fontSize: 12,
                     color: isPast ? Colors.red[400] : Colors.grey[600],
