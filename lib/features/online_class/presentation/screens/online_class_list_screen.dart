@@ -433,6 +433,33 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
           .toList();
     }
 
+    final now = DateTime.now();
+    filteredList.sort((a, b) {
+      final startA = _getExactStartDateTime(a);
+      final endA = _getExactEndDateTime(a);
+      final startB = _getExactStartDateTime(b);
+      final endB = _getExactEndDateTime(b);
+
+      final isLiveA = startA.isBefore(now) && endA.isAfter(now);
+      final isLiveB = startB.isBefore(now) && endB.isAfter(now);
+
+      if (isLiveA && !isLiveB) return -1;
+      if (!isLiveA && isLiveB) return 1;
+
+      final isUpcomingA = startA.isAfter(now);
+      final isUpcomingB = startB.isAfter(now);
+
+      if (isUpcomingA && !isUpcomingB) return -1;
+      if (!isUpcomingA && isUpcomingB) return 1;
+
+      if (isUpcomingA && isUpcomingB) {
+        return startA.compareTo(startB); // Nearest future first
+      }
+
+      // Both are past
+      return startB.compareTo(startA); // Nearest past first (descending)
+    });
+
     if (filteredList.isEmpty) {
       return _buildEmptyState(canManageClass, themeColor);
     }
@@ -465,13 +492,77 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
-  String _getTimeAgoOrUpcoming(BuildContext context, DateTime scheduledTime) {
+  DateTime _parseTimeStr(DateTime baseDate, String? timeStr, {bool isEnd = false}) {
+    if (timeStr == null || timeStr.trim().isEmpty) {
+      return isEnd ? baseDate.add(const Duration(hours: 1)) : baseDate;
+    }
+    
+    try {
+      final cleanTimeStr = timeStr.trim().replaceAll('\u202F', ' '); // Handle narrow no-break space
+      // Try parsing with AM/PM
+      final format = DateFormat('h:mm a');
+      final parsed = format.parse(cleanTimeStr);
+      return DateTime(baseDate.year, baseDate.month, baseDate.day, parsed.hour, parsed.minute);
+    } catch (_) {}
+    
+    try {
+      final cleanTimeStr = timeStr.trim().replaceAll('\u202F', ' '); // Handle narrow no-break space
+      final format = DateFormat('hh:mm a');
+      final parsed = format.parse(cleanTimeStr);
+      return DateTime(baseDate.year, baseDate.month, baseDate.day, parsed.hour, parsed.minute);
+    } catch (_) {}
+
+    try {
+      // Try 24 hour format
+      final format = DateFormat('HH:mm');
+      final parsed = format.parse(timeStr.trim());
+      return DateTime(baseDate.year, baseDate.month, baseDate.day, parsed.hour, parsed.minute);
+    } catch (_) {}
+
+    try {
+      // Manual fallback parsing
+      final parts = timeStr.trim().split(RegExp(r'[:\s]'));
+      if (parts.length >= 2) {
+        int hour = int.tryParse(parts[0]) ?? 0;
+        int minute = int.tryParse(parts[1]) ?? 0;
+        final lower = timeStr.toLowerCase();
+        if (lower.contains('pm') && hour < 12) {
+          hour += 12;
+        } else if (lower.contains('am') && hour == 12) {
+          hour = 0;
+        }
+        return DateTime(baseDate.year, baseDate.month, baseDate.day, hour, minute);
+      }
+    } catch (_) {}
+    
+    return isEnd ? baseDate.add(const Duration(hours: 1)) : baseDate;
+  }
+
+  DateTime _getExactStartDateTime(OnlineClass oClass) {
+    return _parseTimeStr(oClass.scheduledTime, oClass.startTime);
+  }
+
+  DateTime _getExactEndDateTime(OnlineClass oClass) {
+    // If end time is missing, default to start time + 1 hour
+    final start = _getExactStartDateTime(oClass);
+    if (oClass.endTime == null || oClass.endTime!.isEmpty) {
+      return start.add(const Duration(hours: 1));
+    }
+    DateTime end = _parseTimeStr(oClass.scheduledTime, oClass.endTime, isEnd: true);
+    // If end time ends up being before start time (e.g. cross midnight), add a day
+    if (end.isBefore(start)) {
+      end = end.add(const Duration(days: 1));
+    }
+    return end;
+  }
+
+  String _getTimeAgoOrUpcoming(BuildContext context, DateTime exactStartTime) {
     final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
-    final difference = scheduledTime.difference(now);
+    final difference = exactStartTime.difference(now);
 
     if (difference.isNegative) {
-      final pastDiff = now.difference(scheduledTime);
+      final pastDiff = now.difference(exactStartTime);
       if (pastDiff.inMinutes < 60) {
         return l10n.minutesAgo(pastDiff.inMinutes);
       } else if (pastDiff.inHours < 24) {
@@ -481,7 +572,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
       } else if (pastDiff.inDays < 7) {
         return l10n.daysAgo(pastDiff.inDays);
       } else {
-        return DateFormat('MMM dd').format(scheduledTime);
+        return DateFormat('MMM dd').format(exactStartTime);
       }
     } else {
       if (difference.inMinutes < 60) {
@@ -493,7 +584,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
       } else if (difference.inDays < 7) {
         return l10n.inDays(difference.inDays);
       } else {
-        return DateFormat('MMM dd').format(scheduledTime);
+        return DateFormat('MMM dd').format(exactStartTime);
       }
     }
   }
@@ -823,20 +914,15 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final now = DateTime.now();
 
+    final exactStart = _getExactStartDateTime(oClass);
+    final exactEnd = _getExactEndDateTime(oClass);
+
     // Meeting status computation
-    final isUpcoming = oClass.scheduledTime.isAfter(now);
-    // Live: Started within the last 60 minutes
-    print(isUpcoming);
-    print(oClass.scheduledTime);
-    print(now);
+    final isUpcoming = exactStart.isAfter(now);
+    final isLive = exactStart.isBefore(now) && exactEnd.isAfter(now);
+    final isPast = exactEnd.isBefore(now);
 
-    final isLive =
-        !isUpcoming &&
-        now.isBefore(oClass.scheduledTime.add(const Duration(minutes: 60)));
-    // Past: Started more than 60 minutes ago
-    final isPast = !isUpcoming && !isLive;
-
-    final relativeTime = _getTimeAgoOrUpcoming(context, oClass.scheduledTime);
+    final relativeTime = _getTimeAgoOrUpcoming(context, exactStart);
     final platformLabel = _getPlatformLabel(context, oClass.meetLink);
     final platformIcon = _getPlatformIcon(oClass.meetLink);
 
