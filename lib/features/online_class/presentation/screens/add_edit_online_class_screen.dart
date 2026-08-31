@@ -8,6 +8,7 @@ import 'package:smart_school/features/admin/providers/teacher_provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
 import 'package:smart_school/models/online_class_model.dart';
+import 'package:smart_school/services/notification_service.dart';
 
 enum MeetingCategory { onlineClass, teacherMeeting }
 
@@ -274,6 +275,14 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
         setState(() => _isLoading = false);
 
         if (success && mounted) {
+          if (participants != null && participants.isNotEmpty) {
+            final displayDate = DateFormat('MMM dd, yyyy').format(_selectedDate!);
+            NotificationService().sendBulkNotification(
+              receiverUuids: participants,
+              title: 'New ${_meetingCategory == MeetingCategory.onlineClass ? "Online Class" : "Meeting"} Scheduled',
+              message: '${_titleController.text.trim()} is scheduled on $displayDate at $startTimeStr',
+            );
+          }
           Navigator.pop(context, true);
         } else if (mounted) {
           final error = context.read<OnlineClassProvider>().error;
@@ -310,6 +319,13 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
         setState(() => _isLoading = false);
 
         if (success && mounted) {
+          if (participants != null && participants.isNotEmpty) {
+            NotificationService().sendBulkNotification(
+              receiverUuids: participants,
+              title: '${_meetingCategory == MeetingCategory.onlineClass ? "Online Class" : "Meeting"} Updated',
+              message: '${_titleController.text.trim()} schedule has been updated. Please check the new details.',
+            );
+          }
           Navigator.pop(context, true);
         } else if (mounted) {
           final error = context.read<OnlineClassProvider>().error;

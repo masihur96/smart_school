@@ -8,6 +8,7 @@ import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
 import 'package:smart_school/models/online_class_model.dart';
 import 'package:smart_school/models/user_model.dart';
+import 'package:smart_school/services/notification_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../l10n/app_localizations.dart';
@@ -1322,7 +1323,19 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: isPast ? null : () => _launchURL(oClass.meetLink),
+                onPressed: isPast ? null : () {
+                  final user = context.read<AuthNotifier>().user;
+                  if (user != null && 
+                      (user.id == oClass.teacherId || user.role == UserRole.teacher || user.role == UserRole.admin || user.role == UserRole.superadmin) && 
+                      oClass.participants.isNotEmpty) {
+                    NotificationService().sendBulkNotification(
+                      receiverUuids: oClass.participants.map((p) => p.uuid).toList(),
+                      title: 'Class is Starting',
+                      message: 'The host has joined ${oClass.title}. Please join the meeting now.',
+                    );
+                  }
+                  _launchURL(oClass.meetLink);
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isLive
                       ? const Color(0xFFEF4444)
