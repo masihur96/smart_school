@@ -34,37 +34,51 @@ class _PricingSchoolScreenState extends State<PricingSchoolScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
       body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics()),
         slivers: [
-          _buildSliverAppBar(),
+          _buildSliverAppBar(theme),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text(
-                    'Available Plans',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Consumer<PricingNotifier>(
-                    builder: (context, notifier, _) {
-                      return Text(
-                        '${notifier.plans.length} Plans',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Overview',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
                         ),
-                      );
-                    },
+                      ),
+                      const SizedBox(height: 4),
+                      Consumer<PricingNotifier>(
+                        builder: (context, notifier, _) {
+                          return Text(
+                            '${notifier.plans.length} available plans',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
           ),
-          _buildPricingList(),
+          _buildPricingList(theme),
+          const SliverToBoxAdapter(child: SizedBox(height: 80)),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -84,20 +98,21 @@ class _PricingSchoolScreenState extends State<PricingSchoolScreen> {
     );
   }
 
-  Widget _buildSliverAppBar() {
+  Widget _buildSliverAppBar(ThemeData theme) {
     return SliverAppBar(
-      expandedHeight: 180,
+      expandedHeight: 160,
       pinned: true,
       elevation: 0,
       backgroundColor: AppColors.primaryDark,
       flexibleSpace: FlexibleSpaceBar(
-        centerTitle: true,
+        centerTitle: false,
+        titlePadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         title: const Text(
-          'Pricing Management',
+          'Pricing Plans',
           style: TextStyle(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
             color: Colors.white,
-            fontSize: 16,
+            fontSize: 22,
           ),
         ),
         background: Stack(
@@ -106,19 +121,19 @@ class _PricingSchoolScreenState extends State<PricingSchoolScreen> {
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.primaryDark, Color(0xFF673AB7)],
+                  colors: [AppColors.primaryDark, AppColors.primary],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
               ),
             ),
             Positioned(
-              right: -20,
-              top: -20,
+              right: -30,
+              top: -10,
               child: Icon(
                 Icons.payments_rounded,
-                size: 150,
-                color: Colors.white.withOpacity(0.1),
+                size: 160,
+                color: Colors.white.withOpacity(0.05),
               ),
             ),
           ],
@@ -128,7 +143,7 @@ class _PricingSchoolScreenState extends State<PricingSchoolScreen> {
     );
   }
 
-  Widget _buildPricingList() {
+  Widget _buildPricingList(ThemeData theme) {
     return Consumer<PricingNotifier>(
       builder: (context, notifier, child) {
         if (notifier.isLoading && notifier.plans.isEmpty) {
@@ -140,17 +155,43 @@ class _PricingSchoolScreenState extends State<PricingSchoolScreen> {
         if (notifier.error != null && notifier.plans.isEmpty) {
           return SliverFillRemaining(
             child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(notifier.error!),
-                  ElevatedButton(
-                    onPressed: () => notifier.fetchPricingPlans(),
-                    child: Text(AppLocalizations.of(context)!.retry),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.error_outline,
+                          size: 48, color: AppColors.error),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      notifier.error!,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () => notifier.fetchPricingPlans(),
+                      icon: const Icon(Icons.refresh),
+                      label: Text(AppLocalizations.of(context)!.retry),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -162,18 +203,31 @@ class _PricingSchoolScreenState extends State<PricingSchoolScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.inventory_2_outlined,
-                    size: 80,
-                    color: Colors.grey.withOpacity(0.3),
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: AppColors.textMuted.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.inventory_2_outlined,
+                      size: 64,
+                      color: AppColors.textMuted.withOpacity(0.5),
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   Text(
                     'No pricing plans found',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Create a new pricing plan to get started.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary.withOpacity(0.7),
                     ),
                   ),
                 ],
@@ -183,11 +237,14 @@ class _PricingSchoolScreenState extends State<PricingSchoolScreen> {
         }
 
         return SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               final plan = notifier.plans[index];
-              return PricingPlanCard(plan: plan);
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: PricingPlanCard(plan: plan),
+              );
             }, childCount: notifier.plans.length),
           ),
         );
@@ -203,146 +260,173 @@ class PricingPlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: AppColors.border.withOpacity(0.1)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header: Plan Name and Badge
           Padding(
             padding: const EdgeInsets.all(20),
-            child: Column(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
+                Container(
+                  height: 48,
+                  width: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.workspace_premium_rounded,
+                        color: AppColors.primary, size: 24),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            plan.name,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: Text(
+                              plan.name,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            plan.description,
-                            style: TextStyle(fontSize: 13),
-                          ),
+                          if (plan.isCustom) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                'CUSTOM',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: Colors.orange,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
-                    ),
-                    if (plan.isCustom)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Text(
-                          'CUSTOM',
-                          style: TextStyle(
-                            color: Colors.orange,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      const SizedBox(height: 4),
+                      Text(
+                        plan.description,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
                         ),
                       ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_horiz_rounded),
-                      onSelected: (value) {
-                        if (value == 'edit') {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            builder: (context) =>
-                                AddPricingPlanBottomSheet(plan: plan),
-                          );
-                        } else if (value == 'delete') {
-                          _showDeleteConfirmation(context);
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              const Icon(Icons.edit_outlined, size: 20),
-                              const SizedBox(width: 8),
-                              Text(AppLocalizations.of(context)!.editPlan),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.delete_outline_rounded,
-                                size: 20,
-                                color: Colors.red,
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                'Delete Plan',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    _buildPricingDetail(
-                      context,
-                      Icons.people_alt_rounded,
-                      'Students',
-                      '${plan.minStudents} - ${plan.maxStudents}',
-                    ),
-                    const SizedBox(width: 16),
-                    _buildPricingDetail(
-                      context,
-                      Icons.calendar_month_rounded,
-                      'Monthly',
-                      '\$${plan.pricePerMonth}',
-                    ),
-                    const SizedBox(width: 16),
-                    _buildPricingDetail(
-                      context,
-                      Icons.person_outline_rounded,
-                      'Per Student',
-                      '\$${plan.pricePerStudent}',
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-          Divider(),
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0, bottom: 8),
+
+          Divider(height: 1, color: AppColors.border.withOpacity(0.1)),
+
+          // Body: Pricing Details
+          Container(
+            padding: const EdgeInsets.all(20),
+            color: AppColors.lightGrey.withOpacity(0.5),
             child: Row(
               children: [
-                const Icon(Icons.info_outline_rounded, size: 16),
-                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildPricingDetail(
+                    context,
+                    Icons.people_alt_rounded,
+                    'Students',
+                    '${plan.minStudents} - ${plan.maxStudents}',
+                    const Color(0xFF022B3A),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildPricingDetail(
+                    context,
+                    Icons.calendar_month_rounded,
+                    'Monthly',
+                    '\$${plan.pricePerMonth}',
+                    AppColors.success,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildPricingDetail(
+                    context,
+                    Icons.person_outline_rounded,
+                    'Per Student',
+                    '\$${plan.pricePerStudent}',
+                    AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Divider(height: 1, color: AppColors.border.withOpacity(0.1)),
+
+          // Footer: Created date & Actions
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
                 Text(
                   'Created: ${plan.createdAt != null ? DateFormat.yMMMMd().format(DateTime.parse(plan.createdAt!)) : 'N/A'}',
-                  style: const TextStyle(),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary.withOpacity(0.7),
+                  ),
+                ),
+                Row(
+                  children: [
+                    _ActionButton(
+                      icon: Icons.edit_outlined,
+                      label: 'Edit',
+                      color: AppColors.primary,
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) =>
+                              AddPricingPlanBottomSheet(plan: plan),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    _ActionButton(
+                      icon: Icons.delete_outline,
+                      label: 'Delete',
+                      color: AppColors.error,
+                      onTap: () => _showDeleteConfirmation(context),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -352,47 +436,55 @@ class PricingPlanCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPricingDetail(
-    BuildContext context,
-    IconData icon,
-    String label,
-    String value,
-  ) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 14),
-              const SizedBox(width: 4),
-              Text(label, style: const TextStyle(fontSize: 11)),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
+  Widget _buildPricingDetail(BuildContext context, IconData icon, String label,
+      String value, Color iconColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 14, color: iconColor),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 
   void _showDeleteConfirmation(BuildContext context) {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.deletePricingPlan),
         content: Text(
           'Are you sure you want to delete "${plan.name}"? This action cannot be undone.',
+          style: theme.textTheme.bodyMedium,
         ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(AppLocalizations.of(context)!.cancelAction),
           ),
-          ElevatedButton(
+          FilledButton(
             onPressed: () async {
               Navigator.pop(context);
               final success = await context
@@ -400,17 +492,64 @@ class PricingPlanCard extends StatelessWidget {
                   .deletePricingPlan(plan.id!);
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('"${plan.name}" deleted')),
+                  SnackBar(
+                    content: Text('"${plan.name}" deleted successfully'),
+                    backgroundColor: AppColors.success,
+                    behavior: SnackBarBehavior.floating,
+                  ),
                 );
               }
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
             ),
             child: Text(AppLocalizations.of(context)!.deleteAction),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: Row(
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -498,7 +637,8 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
                   ? 'Pricing plan updated successfully!'
                   : 'Pricing plan created successfully!',
             ),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -509,10 +649,19 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
   Widget build(BuildContext context) {
     final padding = MediaQuery.of(context).viewInsets.bottom;
     final isEditing = widget.plan != null;
+    final theme = Theme.of(context);
 
-    return Card(
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      padding: EdgeInsets.only(bottom: padding),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(24.0),
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -522,7 +671,7 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
               children: [
                 Center(
                   child: Container(
-                    width: 40,
+                    width: 48,
                     height: 4,
                     decoration: BoxDecoration(
                       color: Colors.grey.shade300,
@@ -533,9 +682,9 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
                 const SizedBox(height: 24),
                 Text(
                   isEditing ? 'Update Pricing Plan' : 'Create New Plan',
-                  style: const TextStyle(
-                    fontSize: 22,
+                  style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -543,7 +692,9 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
                   isEditing
                       ? 'Modify the pricing structure below'
                       : 'Define a new pricing structure for institutions',
-                  style: TextStyle(fontSize: 14),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 _buildTextField(
@@ -584,16 +735,16 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
                   children: [
                     Expanded(
                       child: _buildTextField(
-                        'Price/Month',
+                        'Price/Month (\$)',
                         _priceMonthController,
-                        Icons.money_outlined,
+                        Icons.monetization_on_outlined,
                         keyboardType: TextInputType.number,
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: _buildTextField(
-                        'Price/Student',
+                        'Price/Student (\$)',
                         _priceStudentController,
                         Icons.person_pin_circle_outlined,
                         keyboardType: TextInputType.number,
@@ -610,15 +761,16 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
                   decoration: BoxDecoration(
                     color: AppColors.backgroundLight,
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.border.withOpacity(0.1)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Custom Plan',
-                        style: TextStyle(
+                        style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       Switch.adaptive(
@@ -632,32 +784,36 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
                 const SizedBox(height: 32),
                 Consumer<PricingNotifier>(
                   builder: (context, notifier, child) {
-                    return ElevatedButton(
+                    return FilledButton(
                       onPressed: notifier.isLoading ? null : _submit,
-                      style: ElevatedButton.styleFrom(
+                      style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
                         minimumSize: const Size(double.infinity, 56),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        elevation: 0,
                       ),
                       child: notifier.isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
                           : Text(
-                              isEditing
-                                  ? 'UPDATE PRICING PLAN'
-                                  : 'CREATE PRICING PLAN',
+                              isEditing ? 'Update Plan' : 'Create Plan',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                letterSpacing: 1,
+                                letterSpacing: 0.5,
                               ),
                             ),
                     );
                   },
                 ),
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -675,22 +831,26 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
+      style: const TextStyle(color: AppColors.textPrimary),
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon),
+        labelStyle: const TextStyle(color: AppColors.textSecondary),
+        prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 20),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: AppColors.border.withOpacity(0.2)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: AppColors.border.withOpacity(0.2)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         filled: true,
+        fillColor: AppColors.backgroundLight,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
       validator: (value) => value == null || value.isEmpty ? 'Required' : null,
     );
