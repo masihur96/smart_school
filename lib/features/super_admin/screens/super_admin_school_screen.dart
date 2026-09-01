@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/core/utils/storage_service.dart';
 import 'package:smart_school/features/super_admin/providers/super_admin_dashboard_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
@@ -700,213 +701,458 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
       ),
     );
   }
-  void _showDeleteConfirmation(
-      BuildContext context,
-      SuperAdminSchool school,
-      AppLocalizations l10n,
-      ) {
+  Future<void> _showDeleteConfirmation(
+      BuildContext context, SuperAdminSchool school, AppLocalizations l10n) async {
+    // ── 1. Check if security credentials are stored ──
+    final storedEmail = await StorageService.getEmail();
+    final storedPassword = await StorageService.getPassword();
+    final hasCredentials =
+        (storedEmail?.isNotEmpty ?? false) && (storedPassword?.isNotEmpty ?? false);
+
+    if (!context.mounted) return;
+
+    if (!hasCredentials) {
+      // ── 2a. Credentials not set → suggest setting them ──
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.lock_outline_rounded,
+                    color: Colors.orange, size: 20),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text('Security Credentials Required',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'To delete a school you must first set your security credentials (email & password) for deletion verification.',
+                style: TextStyle(
+                    color: Colors.grey.shade700, fontSize: 13, height: 1.5),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded,
+                        color: Colors.blue, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Tap "Set Credentials" to save your email & password securely.',
+                        style: TextStyle(
+                            color: Colors.blue.shade700,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(l10n.cancelAction),
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const _SecurityCredentialsPage(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.key_rounded, size: 16),
+              label: const Text('Set Credentials'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _kBrand,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                elevation: 0,
+              ),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // ── 2b. Credentials exist → verify password before deleting ──
     final passwordController = TextEditingController();
-    bool obscurePassword = true;
+    bool isPasswordVisible = false;
+    bool isVerifying = false;
+    String? errorMsg;
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: const Row(
-                children: [
-                  Icon(
-                    Icons.warning_rounded,
-                    color: Color(0xFFEF4444),
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Delete School?',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'This action cannot be undone. To confirm, please enter your password.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.black54,
-                      height: 1.4,
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  TextFormField(
-                    controller: passwordController,
-                    obscureText: obscurePassword,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      hintText: 'Enter your password',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            obscurePassword = !obscurePassword;
-                          });
-                        },
-                        icon: Icon(
-                          obscurePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                        ),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFD1D5DB),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFEF4444),
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(dialogContext);
-                  },
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDlgState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    final password = passwordController.text.trim();
-
-                    if (password.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Please enter your password.'),
-                        ),
-                      );
-                      return;
-                    }
-
-                    // TODO: Verify password with backend
-                    // If password is correct:
-                    //
-                    // _deleteSchool(school);
-                    //
-                    // Navigator.pop(dialogContext);
-                  },
-                  icon: const Icon(
-                    Icons.delete_outline,
-                    size: 18,
+                child: const Icon(Icons.delete_outline_rounded,
+                    color: Colors.red, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(l10n.deleteInstitution,
+                    style: const TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Enter your password to confirm deletion of "${school.name}". This action cannot be undone.',
+                style: TextStyle(
+                    color: Colors.grey.shade600, fontSize: 13, height: 1.5),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: passwordController,
+                obscureText: !isPasswordVisible,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  prefixIcon: const Icon(Icons.lock_outline_rounded),
+                  errorText: errorMsg,
+                  suffixIcon: IconButton(
+                    icon: Icon(isPasswordVisible
+                        ? Icons.visibility_off_rounded
+                        : Icons.visibility_rounded),
+                    onPressed: () => setDlgState(
+                        () => isPasswordVisible = !isPasswordVisible),
                   ),
-                  label: const Text('Delete School'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEF4444),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                        const BorderSide(color: Colors.red, width: 1.5),
                   ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 12),
                 ),
-              ],
-            );
-          },
-        );
-      },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: isVerifying ? null : () => Navigator.pop(ctx),
+              child: Text(l10n.cancelAction),
+            ),
+            ElevatedButton.icon(
+              onPressed: isVerifying
+                  ? null
+                  : () async {
+                      final entered = passwordController.text;
+                      if (entered.isEmpty) {
+                        setDlgState(() => errorMsg = 'Password is required');
+                        return;
+                      }
+                      if (entered != storedPassword) {
+                        setDlgState(() => errorMsg = 'Incorrect password');
+                        return;
+                      }
+                      setDlgState(() {
+                        isVerifying = true;
+                        errorMsg = null;
+                      });
+                      Navigator.pop(ctx);
+                      final success = await context
+                          .read<SuperAdminSchoolNotifier>()
+                          .deleteSchool(school.id!);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(success
+                                ? '${school.name} deleted'
+                                : 'Failed to delete school'),
+                          ),
+                        );
+                      }
+                    },
+              icon: isVerifying
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 2),
+                    )
+                  : const Icon(Icons.delete_outline_rounded, size: 16),
+              label: Text(l10n.deleteAction),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                elevation: 0,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
-  // void _showDeleteConfirmation(
-  //     BuildContext context, SuperAdminSchool school, AppLocalizations l10n) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (ctx) => AlertDialog(
-  //       shape:
-  //           RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-  //       title: Row(
-  //         children: [
-  //           Container(
-  //             padding: const EdgeInsets.all(8),
-  //             decoration: BoxDecoration(
-  //               color: Colors.red.withOpacity(0.1),
-  //               borderRadius: BorderRadius.circular(10),
-  //             ),
-  //             child: const Icon(Icons.delete_outline_rounded,
-  //                 color: Colors.red, size: 20),
-  //           ),
-  //           const SizedBox(width: 12),
-  //           Text(l10n.deleteInstitution,
-  //               style: const TextStyle(fontSize: 16)),
-  //         ],
-  //       ),
-  //       content: Text(
-  //         'Are you sure you want to delete "${school.name}"? This action cannot be undone.',
-  //         style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-  //       ),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () => Navigator.pop(ctx),
-  //           child: Text(l10n.cancelAction),
-  //         ),
-  //         ElevatedButton(
-  //           onPressed: () async {
-  //             Navigator.pop(ctx);
-  //             final success = await context
-  //                 .read<SuperAdminSchoolNotifier>()
-  //                 .deleteSchool(school.id!);
-  //             if (success && context.mounted) {
-  //               ScaffoldMessenger.of(context).showSnackBar(
-  //                 SnackBar(content: Text('${school.name} deleted')),
-  //               );
-  //             }
-  //           },
-  //           style: ElevatedButton.styleFrom(
-  //             backgroundColor: Colors.red,
-  //             foregroundColor: Colors.white,
-  //             shape: RoundedRectangleBorder(
-  //                 borderRadius: BorderRadius.circular(10)),
-  //             elevation: 0,
-  //           ),
-  //           child: Text(l10n.deleteAction),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+}
+
+// ── Security Credentials Setup Page ──
+class _SecurityCredentialsPage extends StatefulWidget {
+  const _SecurityCredentialsPage();
+
+  @override
+  State<_SecurityCredentialsPage> createState() =>
+      _SecurityCredentialsPageState();
+}
+
+class _SecurityCredentialsPageState extends State<_SecurityCredentialsPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
+  bool _obscure = true;
+  bool _saving = false;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadExisting();
+  }
+
+  Future<void> _loadExisting() async {
+    final email = await StorageService.getEmail();
+    final pass = await StorageService.getPassword();
+    if (mounted) {
+      setState(() {
+        if (email != null) _emailCtrl.text = email;
+        if (pass != null) _passCtrl.text = pass;
+        _loaded = true;
+      });
+    }
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _saving = true);
+    await StorageService.saveEmail(_emailCtrl.text.trim());
+    await StorageService.savePassword(_passCtrl.text);
+    setState(() => _saving = false);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Security credentials saved successfully'),
+          backgroundColor: Color(0xFF10B981),
+        ),
+      );
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    _passCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _kSurface,
+      appBar: AppBar(
+        backgroundColor: _kBrand,
+        foregroundColor: Colors.white,
+        title: const Text('Security Credentials',
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+        elevation: 0,
+      ),
+      body: _loaded
+          ? SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Info card
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: _kBrand.withOpacity(0.06),
+                        borderRadius: BorderRadius.circular(14),
+                        border:
+                            Border.all(color: _kBrand.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.shield_outlined,
+                              color: _kBrand, size: 20),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'These credentials are stored securely on your device and are used to verify your identity before performing sensitive actions like deleting a school.',
+                              style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade700,
+                                  height: 1.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+
+                    // Email field
+                    const Text('Email / Phone',
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF374151),
+                            letterSpacing: 0.3)),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _emailCtrl,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your email or phone',
+                        prefixIcon: const Icon(Icons.person_outline_rounded),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                BorderSide(color: Colors.grey.shade200)),
+                        enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                BorderSide(color: Colors.grey.shade200)),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide:
+                              const BorderSide(color: _kBrand, width: 1.5),
+                        ),
+                      ),
+                      validator: (v) =>
+                          (v == null || v.trim().isEmpty)
+                              ? 'Email is required'
+                              : null,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Password field
+                    const Text('Password',
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF374151),
+                            letterSpacing: 0.3)),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _passCtrl,
+                      obscureText: _obscure,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your password',
+                        prefixIcon: const Icon(Icons.lock_outline_rounded),
+                        suffixIcon: IconButton(
+                          icon: Icon(_obscure
+                              ? Icons.visibility_off_rounded
+                              : Icons.visibility_rounded),
+                          onPressed: () =>
+                              setState(() => _obscure = !_obscure),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                BorderSide(color: Colors.grey.shade200)),
+                        enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                BorderSide(color: Colors.grey.shade200)),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide:
+                              const BorderSide(color: _kBrand, width: 1.5),
+                        ),
+                      ),
+                      validator: (v) =>
+                          (v == null || v.isEmpty)
+                              ? 'Password is required'
+                              : null,
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Save button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed: _saving ? null : _save,
+                        icon: _saving
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                    color: Colors.white, strokeWidth: 2),
+                              )
+                            : const Icon(Icons.save_rounded, size: 18),
+                        label: Text(
+                          _saving ? 'Saving…' : 'Save Credentials',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 14),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _kBrand,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14)),
+                          elevation: 0,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : const Center(child: CircularProgressIndicator(color: _kBrand)),
+    );
+  }
 }
 
 // ── Sticky tab bar delegate ──
