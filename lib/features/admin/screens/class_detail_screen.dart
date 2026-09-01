@@ -1422,6 +1422,7 @@ class _ViewHomeworkSheet extends StatelessWidget {
     final isPast = homework.dueDate.isBefore(DateTime.now());
 
     return Card(
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(14.0),
         child: Column(
