@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
 import 'package:smart_school/features/super_admin/providers/super_admin_dashboard_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
-import 'package:smart_school/models/school_models.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/school_model.dart';
@@ -61,11 +59,13 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
       list = list
-          .where((s) =>
-              s.name.toLowerCase().contains(q) ||
-              s.schoolId.toLowerCase().contains(q) ||
-              s.address.toLowerCase().contains(q) ||
-              s.email.toLowerCase().contains(q))
+          .where(
+            (s) =>
+                s.name.toLowerCase().contains(q) ||
+                s.schoolId.toLowerCase().contains(q) ||
+                s.address.toLowerCase().contains(q) ||
+                s.email.toLowerCase().contains(q),
+          )
           .toList();
     }
     return list;
@@ -83,7 +83,6 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
     final filtered = _filtered(all);
 
     return Scaffold(
-      backgroundColor: _kSurface,
       body: NestedScrollView(
         physics: const BouncingScrollPhysics(),
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
@@ -95,8 +94,11 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
             backgroundColor: _kBrand,
             iconTheme: const IconThemeData(color: Colors.white),
             flexibleSpace: FlexibleSpaceBar(
-              titlePadding:
-                  const EdgeInsets.only(left: 56, bottom: 16, right: 16),
+              titlePadding: const EdgeInsets.only(
+                left: 56,
+                bottom: 16,
+                right: 16,
+              ),
 
               background: Stack(
                 fit: StackFit.expand,
@@ -139,12 +141,16 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                         Row(
                           children: [
                             _headerChip(
-                                Icons.business_rounded, '$active Active',
-                                const Color(0xFF4ADE80)),
+                              Icons.business_rounded,
+                              '$active Active',
+                              const Color(0xFF4ADE80),
+                            ),
                             const SizedBox(width: 8),
                             _headerChip(
-                                Icons.cancel_rounded, '$inactive Inactive',
-                                const Color(0xFFF87171)),
+                              Icons.cancel_rounded,
+                              '$inactive Inactive',
+                              const Color(0xFFF87171),
+                            ),
                           ],
                         ),
                       ],
@@ -159,8 +165,7 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
           SliverToBoxAdapter(
             child: Container(
               color: _kBrand,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Container(
                 height: 44,
                 decoration: BoxDecoration(
@@ -170,21 +175,22 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                 child: TextField(
                   controller: _searchController,
                   onChanged: (v) => setState(() => _searchQuery = v.trim()),
-                  style: const TextStyle( fontSize: 14),
+                  style: const TextStyle(fontSize: 14),
                   decoration: InputDecoration(
                     hintText: 'Search by name, ID, address…',
-                    hintStyle:
-                        TextStyle( fontSize: 13),
-                    prefixIcon: const Icon(Icons.search_rounded,
-                        size: 20),
+                    hintStyle: TextStyle(fontSize: 13),
+                    prefixIcon: const Icon(Icons.search_rounded, size: 20),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? GestureDetector(
                             onTap: () {
                               _searchController.clear();
                               setState(() => _searchQuery = '');
                             },
-                            child: const Icon(Icons.close_rounded,
-                                color: Colors.white70, size: 18),
+                            child: const Icon(
+                              Icons.close_rounded,
+                              color: Colors.white70,
+                              size: 18,
+                            ),
                           )
                         : null,
                     border: InputBorder.none,
@@ -206,9 +212,13 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                 indicatorColor: _kBrand,
                 indicatorWeight: 2.5,
                 labelStyle: const TextStyle(
-                    fontWeight: FontWeight.w700, fontSize: 13),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
                 unselectedLabelStyle: const TextStyle(
-                    fontWeight: FontWeight.w500, fontSize: 13),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 13,
+                ),
                 tabs: [
                   Tab(text: 'All (${all.length})'),
                   Tab(text: 'Active ($active)'),
@@ -227,19 +237,16 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                 .fetchDashboardData();
           },
           child: isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(color: _kBrand))
+              ? const Center(child: CircularProgressIndicator(color: _kBrand))
               : filtered.isEmpty
-                  ? _buildEmpty()
-                  : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: filtered.length,
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(height: 12),
-                      itemBuilder: (_, i) =>
-                          _buildSchoolCard(filtered[i], l10n),
-                    ),
+              ? _buildEmpty()
+              : ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: filtered.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (_, i) => _buildSchoolCard(filtered[i], l10n),
+                ),
         ),
       ),
     );
@@ -261,7 +268,10 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
           Text(
             label,
             style: TextStyle(
-                fontSize: 11, color: color, fontWeight: FontWeight.w700),
+              fontSize: 11,
+              color: color,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),
@@ -275,8 +285,11 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.business_outlined,
-                size: 72, color: Colors.grey.shade300),
+            Icon(
+              Icons.business_outlined,
+              size: 72,
+              color: Colors.grey.shade300,
+            ),
             const SizedBox(height: 16),
             Text(
               _searchQuery.isNotEmpty
@@ -284,9 +297,10 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                   : 'No schools found',
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.grey.shade500,
-                  fontWeight: FontWeight.w500),
+                fontSize: 15,
+                color: Colors.grey.shade500,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
@@ -296,18 +310,19 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
 
   Widget _buildSchoolCard(SuperAdminSchool school, AppLocalizations l10n) {
     final isActive = school.isActive;
-    final statusColor =
-        isActive ? const Color(0xFF10B981) : const Color(0xFFEF4444);
+    final statusColor = isActive
+        ? const Color(0xFF10B981)
+        : const Color(0xFFEF4444);
     final statusText = isActive ? 'Active' : 'Inactive';
-    final statusIcon =
-        isActive ? Icons.check_circle_rounded : Icons.cancel_rounded;
+    final statusIcon = isActive
+        ? Icons.check_circle_rounded
+        : Icons.cancel_rounded;
 
     return Container(
       decoration: BoxDecoration(
         color: _kCard,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-            color: statusColor.withOpacity(0.15), width: 1.2),
+        border: Border.all(color: statusColor.withOpacity(0.15), width: 1.2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -333,7 +348,8 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                       child: SizedBox(
                         width: 48,
                         height: 48,
-                        child: school.avatar != null && school.avatar!.isNotEmpty
+                        child:
+                            school.avatar != null && school.avatar!.isNotEmpty
                             ? Image.network(
                                 school.avatar!,
                                 width: 48,
@@ -386,25 +402,31 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                       GestureDetector(
                         onTap: () async {
                           await Clipboard.setData(
-                              ClipboardData(text: school.schoolId));
+                            ClipboardData(text: school.schoolId),
+                          );
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                  content: Text('School ID copied'),
-                                  duration: Duration(seconds: 1)),
+                                content: Text('School ID copied'),
+                                duration: Duration(seconds: 1),
+                              ),
                             );
                           }
                         },
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.tag_rounded,
-                                size: 12, color: Colors.grey.shade400),
+                            Icon(
+                              Icons.tag_rounded,
+                              size: 12,
+                              color: Colors.grey.shade400,
+                            ),
                             const SizedBox(width: 3),
                             Text(
                               school.schoolId.lastIndexOf("-") != -1
                                   ? school.schoolId.substring(
-                                      school.schoolId.lastIndexOf("-") + 1)
+                                      school.schoolId.lastIndexOf("-") + 1,
+                                    )
                                   : school.schoolId,
                               style: TextStyle(
                                 fontSize: 11,
@@ -414,16 +436,19 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                               ),
                             ),
                             const SizedBox(width: 4),
-                            Icon(Icons.copy_rounded,
-                                size: 11, color: Colors.grey.shade400),
+                            Icon(
+                              Icons.copy_rounded,
+                              size: 11,
+                              color: Colors.grey.shade400,
+                            ),
                           ],
                         ),
                       ),
                     ],
                   ),
                 ),
-                // Status badge
 
+                // Status badge
               ],
             ),
           ),
@@ -452,13 +477,13 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                         icon: Icons.phone_rounded,
                         iconColor: const Color(0xFF10B981),
                         label: 'Phone',
-                        value: school.phone.isNotEmpty
-                            ? school.phone
-                            : '—',
+                        value: school.phone.isNotEmpty ? school.phone : '—',
                         onTap: school.phone.isNotEmpty
                             ? () async {
                                 final uri = Uri(
-                                    scheme: 'tel', path: school.phone);
+                                  scheme: 'tel',
+                                  path: school.phone,
+                                );
                                 if (await canLaunchUrl(uri)) {
                                   await launchUrl(uri);
                                 }
@@ -473,14 +498,13 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                         icon: Icons.email_rounded,
                         iconColor: const Color(0xFF8B5CF6),
                         label: 'Email',
-                        value: school.email.isNotEmpty
-                            ? school.email
-                            : '—',
+                        value: school.email.isNotEmpty ? school.email : '—',
                         onTap: school.email.isNotEmpty
                             ? () async {
                                 final uri = Uri(
-                                    scheme: 'mailto',
-                                    path: school.email);
+                                  scheme: 'mailto',
+                                  path: school.email,
+                                );
                                 if (await canLaunchUrl(uri)) {
                                   await launchUrl(uri);
                                 }
@@ -503,11 +527,9 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                 bottomLeft: Radius.circular(18),
                 bottomRight: Radius.circular(18),
               ),
-              border: Border(
-                  top: BorderSide(color: Colors.grey.shade100)),
+              border: Border(top: BorderSide(color: Colors.grey.shade100)),
             ),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
               children: [
                 // Delete Button
@@ -664,10 +686,11 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                 Text(
                   label,
                   style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey.shade400,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.3),
+                    fontSize: 10,
+                    color: Colors.grey.shade400,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
                 ),
                 const SizedBox(height: 1),
                 Text(
@@ -676,12 +699,9 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 12,
-                    color: isLink
-                        ? _kBrand
-                        : const Color(0xFF374151),
+                    color: isLink ? _kBrand : const Color(0xFF374151),
                     fontWeight: FontWeight.w600,
-                    decoration:
-                        isLink ? TextDecoration.underline : null,
+                    decoration: isLink ? TextDecoration.underline : null,
                     decorationColor: _kBrand,
                   ),
                 ),
@@ -692,13 +712,18 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
       ),
     );
   }
+
   Future<void> _showDeleteConfirmation(
-      BuildContext context, SuperAdminSchool school, AppLocalizations l10n) async {
+    BuildContext context,
+    SuperAdminSchool school,
+    AppLocalizations l10n,
+  ) async {
     // ── 1. Check if security credentials are stored ──
     final storedEmail = await StorageService.getEmail();
     final storedPassword = await StorageService.getPassword();
     final hasCredentials =
-        (storedEmail?.isNotEmpty ?? false) && (storedPassword?.isNotEmpty ?? false);
+        (storedEmail?.isNotEmpty ?? false) &&
+        (storedPassword?.isNotEmpty ?? false);
 
     if (!context.mounted) return;
 
@@ -707,7 +732,9 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Row(
             children: [
               Container(
@@ -716,13 +743,18 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                   color: Colors.orange.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.lock_outline_rounded,
-                    color: Colors.orange, size: 20),
+                child: const Icon(
+                  Icons.lock_outline_rounded,
+                  color: Colors.orange,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               const Expanded(
-                child: Text('Security Credentials Required',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                child: Text(
+                  'Security Credentials Required',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                ),
               ),
             ],
           ),
@@ -733,7 +765,10 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
               Text(
                 'To delete a school you must first set your security credentials (email & password) for deletion verification.',
                 style: TextStyle(
-                    color: Colors.grey.shade700, fontSize: 13, height: 1.5),
+                  color: Colors.grey.shade700,
+                  fontSize: 13,
+                  height: 1.5,
+                ),
               ),
               const SizedBox(height: 12),
               Container(
@@ -745,16 +780,20 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline_rounded,
-                        color: Colors.blue, size: 16),
+                    const Icon(
+                      Icons.info_outline_rounded,
+                      color: Colors.blue,
+                      size: 16,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Tap "Set Credentials" to save your email & password securely.',
                         style: TextStyle(
-                            color: Colors.blue.shade700,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500),
+                          color: Colors.blue.shade700,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],
@@ -783,7 +822,8 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                 backgroundColor: _kBrand,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 elevation: 0,
               ),
             ),
@@ -804,7 +844,9 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
       barrierDismissible: false,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlgState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Row(
             children: [
               Container(
@@ -813,14 +855,21 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                   color: Colors.red.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.delete_outline_rounded,
-                    color: Colors.red, size: 20),
+                child: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: Colors.red,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(l10n.deleteInstitution,
-                    style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w700)),
+                child: Text(
+                  l10n.deleteInstitution,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ],
           ),
@@ -830,7 +879,10 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
               Text(
                 'Enter your password to confirm deletion of "${school.name}". This action cannot be undone.',
                 style: TextStyle(
-                    color: Colors.grey.shade600, fontSize: 13, height: 1.5),
+                  color: Colors.grey.shade600,
+                  fontSize: 13,
+                  height: 1.5,
+                ),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -842,21 +894,26 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                   prefixIcon: const Icon(Icons.lock_outline_rounded),
                   errorText: errorMsg,
                   suffixIcon: IconButton(
-                    icon: Icon(isPasswordVisible
-                        ? Icons.visibility_off_rounded
-                        : Icons.visibility_rounded),
+                    icon: Icon(
+                      isPasswordVisible
+                          ? Icons.visibility_off_rounded
+                          : Icons.visibility_rounded,
+                    ),
                     onPressed: () => setDlgState(
-                        () => isPasswordVisible = !isPasswordVisible),
+                      () => isPasswordVisible = !isPasswordVisible,
+                    ),
                   ),
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        const BorderSide(color: Colors.red, width: 1.5),
+                    borderSide: const BorderSide(color: Colors.red, width: 1.5),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 12),
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                 ),
               ),
             ],
@@ -890,9 +947,11 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text(success
-                                ? '${school.name} deleted'
-                                : 'Failed to delete school'),
+                            content: Text(
+                              success
+                                  ? '${school.name} deleted'
+                                  : 'Failed to delete school',
+                            ),
                           ),
                         );
                       }
@@ -902,7 +961,9 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                       width: 14,
                       height: 14,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2),
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
                     )
                   : const Icon(Icons.delete_outline_rounded, size: 16),
               label: Text(l10n.deleteAction),
@@ -910,7 +971,8 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 elevation: 0,
               ),
             ),
@@ -987,8 +1049,10 @@ class _SecurityCredentialsPageState extends State<_SecurityCredentialsPage> {
       appBar: AppBar(
         backgroundColor: _kBrand,
         foregroundColor: Colors.white,
-        title: const Text('Security Credentials',
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+        title: const Text(
+          'Security Credentials',
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+        ),
         elevation: 0,
       ),
       body: _loaded
@@ -1005,22 +1069,25 @@ class _SecurityCredentialsPageState extends State<_SecurityCredentialsPage> {
                       decoration: BoxDecoration(
                         color: _kBrand.withOpacity(0.06),
                         borderRadius: BorderRadius.circular(14),
-                        border:
-                            Border.all(color: _kBrand.withOpacity(0.2)),
+                        border: Border.all(color: _kBrand.withOpacity(0.2)),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.shield_outlined,
-                              color: _kBrand, size: 20),
+                          const Icon(
+                            Icons.shield_outlined,
+                            color: _kBrand,
+                            size: 20,
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               'These credentials are stored securely on your device and are used to verify your identity before performing sensitive actions like deleting a school.',
                               style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey.shade700,
-                                  height: 1.5),
+                                fontSize: 13,
+                                color: Colors.grey.shade700,
+                                height: 1.5,
+                              ),
                             ),
                           ),
                         ],
@@ -1029,12 +1096,15 @@ class _SecurityCredentialsPageState extends State<_SecurityCredentialsPage> {
                     const SizedBox(height: 28),
 
                     // Email field
-                    const Text('Email / Phone',
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF374151),
-                            letterSpacing: 0.3)),
+                    const Text(
+                      'Email / Phone',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF374151),
+                        letterSpacing: 0.3,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _emailCtrl,
@@ -1045,33 +1115,37 @@ class _SecurityCredentialsPageState extends State<_SecurityCredentialsPage> {
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide:
-                                BorderSide(color: Colors.grey.shade200)),
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade200),
+                        ),
                         enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide:
-                                BorderSide(color: Colors.grey.shade200)),
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade200),
+                        ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide:
-                              const BorderSide(color: _kBrand, width: 1.5),
+                          borderSide: const BorderSide(
+                            color: _kBrand,
+                            width: 1.5,
+                          ),
                         ),
                       ),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty)
-                              ? 'Email is required'
-                              : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Email is required'
+                          : null,
                     ),
                     const SizedBox(height: 20),
 
                     // Password field
-                    const Text('Password',
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF374151),
-                            letterSpacing: 0.3)),
+                    const Text(
+                      'Password',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF374151),
+                        letterSpacing: 0.3,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _passCtrl,
@@ -1080,32 +1154,34 @@ class _SecurityCredentialsPageState extends State<_SecurityCredentialsPage> {
                         hintText: 'Enter your password',
                         prefixIcon: const Icon(Icons.lock_outline_rounded),
                         suffixIcon: IconButton(
-                          icon: Icon(_obscure
-                              ? Icons.visibility_off_rounded
-                              : Icons.visibility_rounded),
-                          onPressed: () =>
-                              setState(() => _obscure = !_obscure),
+                          icon: Icon(
+                            _obscure
+                                ? Icons.visibility_off_rounded
+                                : Icons.visibility_rounded,
+                          ),
+                          onPressed: () => setState(() => _obscure = !_obscure),
                         ),
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide:
-                                BorderSide(color: Colors.grey.shade200)),
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade200),
+                        ),
                         enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide:
-                                BorderSide(color: Colors.grey.shade200)),
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade200),
+                        ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide:
-                              const BorderSide(color: _kBrand, width: 1.5),
+                          borderSide: const BorderSide(
+                            color: _kBrand,
+                            width: 1.5,
+                          ),
                         ),
                       ),
-                      validator: (v) =>
-                          (v == null || v.isEmpty)
-                              ? 'Password is required'
-                              : null,
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? 'Password is required'
+                          : null,
                     ),
                     const SizedBox(height: 32),
 
@@ -1120,19 +1196,24 @@ class _SecurityCredentialsPageState extends State<_SecurityCredentialsPage> {
                                 width: 18,
                                 height: 18,
                                 child: CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 2),
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Icon(Icons.save_rounded, size: 18),
                         label: Text(
                           _saving ? 'Saving…' : 'Save Credentials',
                           style: const TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 14),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _kBrand,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14)),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                           elevation: 0,
                         ),
                       ),
@@ -1158,11 +1239,11 @@ class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      color: Colors.white,
-      child: tabBar,
-    );
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(color: Colors.white, child: tabBar);
   }
 
   @override
