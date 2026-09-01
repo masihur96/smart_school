@@ -107,45 +107,36 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Overview',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
+                        Text(
+                          'Overview',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Consumer<SubscriptionNotifier>(
+                          builder: (context, notifier, _) {
+                            final count = _getFilteredSubscriptions(
+                                    notifier.subscriptions)
+                                .length;
+                            return Text(
+                              '$count subscriptions',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: AppColors.textSecondary,
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Consumer<SubscriptionNotifier>(
-                              builder: (context, notifier, _) {
-                                final count = _getFilteredSubscriptions(
-                                        notifier.subscriptions)
-                                    .length;
-                                return Text(
-                                  '$count subscriptions',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
+                            );
+                          },
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    _buildSearchBar(theme),
-                    const SizedBox(height: 16),
-                    _buildFilterTabs(theme),
                   ],
                 ),
               ),
@@ -158,12 +149,71 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     );
   }
 
+  Widget _buildSliverAppBar(ThemeData theme) {
+    return SliverAppBar(
+      expandedHeight: 80,
+      pinned: true,
+      elevation: 0,
+      backgroundColor: AppColors.primaryDark,
+      title: const Text(
+        'Subscriptions',
+        style: TextStyle(
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+          fontSize: 22,
+        ),
+      ),
+      flexibleSpace: FlexibleSpaceBar(
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.primaryDark, AppColors.primary],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+            ),
+            Positioned(
+              right: -30,
+              top: -10,
+              child: Icon(
+                Icons.analytics_rounded,
+                size: 160,
+                color: Colors.white.withOpacity(0.05),
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(130),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSearchBar(theme),
+              const SizedBox(height: 16),
+              _buildFilterTabs(theme),
+            ],
+          ),
+        ),
+      ),
+      iconTheme: const IconThemeData(color: Colors.white),
+    );
+  }
+
   Widget _buildSearchBar(ThemeData theme) {
     return TextField(
       controller: _searchController,
+      style: const TextStyle(color: AppColors.textPrimary),
       decoration: InputDecoration(
         hintText: 'Search by school name, email, or ID...',
-        hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 14),
+        hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 14),
         prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
         suffixIcon: _searchQuery.isNotEmpty
             ? IconButton(
@@ -179,15 +229,15 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.border.withOpacity(0.1)),
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.border.withOpacity(0.1)),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary),
+          borderSide: const BorderSide(color: Colors.white, width: 2),
         ),
       ),
     );
@@ -226,66 +276,21 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         }
       },
       labelStyle: TextStyle(
-        color: isSelected ? AppColors.white : AppColors.textSecondary,
-        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        color: isSelected ? AppColors.primaryDark : Colors.white70,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
       ),
-      selectedColor: AppColors.primary,
-      backgroundColor: AppColors.white,
+      selectedColor: Colors.white,
+      backgroundColor: Colors.white.withOpacity(0.15),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
           color: isSelected
-              ? AppColors.primary
-              : AppColors.border.withOpacity(0.2),
+              ? Colors.white
+              : Colors.transparent,
         ),
       ),
       showCheckmark: false,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    );
-  }
-
-  Widget _buildSliverAppBar(ThemeData theme) {
-    return SliverAppBar(
-      expandedHeight: 160,
-      pinned: true,
-      elevation: 0,
-      backgroundColor: AppColors.primaryDark,
-      flexibleSpace: FlexibleSpaceBar(
-        centerTitle: false,
-        titlePadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        title: const Text(
-          'Subscriptions',
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-            fontSize: 22,
-          ),
-        ),
-        background: Stack(
-          fit: StackFit.expand,
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppColors.primaryDark, AppColors.primary],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-            ),
-            Positioned(
-              right: -30,
-              top: -10,
-              child: Icon(
-                Icons.analytics_rounded,
-                size: 160,
-                color: Colors.white.withOpacity(0.05),
-              ),
-            ),
-          ],
-        ),
-      ),
-      iconTheme: const IconThemeData(color: Colors.white),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     );
   }
 
