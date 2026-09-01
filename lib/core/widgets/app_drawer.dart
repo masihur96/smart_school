@@ -61,11 +61,11 @@ class AppDrawer extends StatelessWidget {
             children: [
               UserAccountsDrawerHeader(
                 accountName: Text(
-                  user.school?.name ?? "",
+                  user.school?.name ?? "System Admin",
                   style: const TextStyle(color: Colors.white),
                 ),
                 accountEmail: Text(
-                  user.school?.address ?? "",
+                  user.school?.address ?? "Dhaka,Bangladesh",
                   style: const TextStyle(color: Colors.white),
                 ),
 
@@ -73,7 +73,7 @@ class AppDrawer extends StatelessWidget {
                   imageUrl: user.school?.avatar.isNotEmpty == true
                       ? user.school!.avatar
                       : null,
-                  name: user.school?.name,
+                  name: user.school?.name??"Super Admin",
                   heroTag:
                       'school-avatar-${user.school?.id ?? user.school?.name ?? 'school'}',
                   radius: 20,

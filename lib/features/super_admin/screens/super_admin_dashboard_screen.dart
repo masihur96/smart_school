@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/widgets/app_drawer.dart';
 import 'package:smart_school/core/widgets/notification_icon_button.dart';
 import 'package:smart_school/core/widgets/zoomable_avatar.dart';
@@ -21,8 +20,7 @@ import 'package:smart_school/models/user_model.dart';
 
 // Brand color for Super Admin
 const _kBrand = Color(0xFF1F7A8C);
-const _kBrandDark = Color(0xFF155F6E);
-const _kBrandLight = Color(0xFF2AA3BC);
+
 const _kSurface = Color(0xFFF4F7FA);
 const _kCard = Colors.white;
 
@@ -74,14 +72,7 @@ class _SuperAdminDashboardContentState
 
   void _onItemTapped(int index) => setState(() => _selectedIndex = index);
 
-  String _getTitle(AppLocalizations l10n) {
-    switch (_selectedIndex) {
-      case 0: return l10n.systemOverview;
-      case 1: return l10n.schoolManagement;
-      case 2: return l10n.systemConfig;
-      default: return l10n.superAdmin;
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -284,139 +275,6 @@ class _SuperAdminDashboardContentState
     );
   }
 
-  Widget _buildHeader(User? user, AppLocalizations l10n) {
-    final now = DateTime.now();
-    final months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    final days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-    final dateStr = '${days[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}, ${now.year}';
-
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [_kBrandDark, _kBrand, _kBrandLight],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(36),
-          bottomRight: Radius.circular(36),
-        ),
-      ),
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // User row
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white.withOpacity(0.6), width: 2),
-                ),
-                child: CircleAvatar(
-                  radius: 28,
-                  backgroundColor: Colors.white.withOpacity(0.15),
-                  child: const Icon(Icons.admin_panel_settings_rounded, size: 32, color: Colors.white),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.welcomeBack,
-                      style: TextStyle(color: Colors.white.withOpacity(0.75), fontSize: 13),
-                    ),
-                    Text(
-                      user?.name ?? 'System Administrator',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.18),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        'System Administrator',
-                        style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          // Date + system status row
-          Row(
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Icon(Icons.calendar_today_rounded, color: Colors.white.withOpacity(0.7), size: 14),
-                    const SizedBox(width: 6),
-                    Text(
-                      dateStr,
-                      style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SystemStatusScreen()),
-                ),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withOpacity(0.25)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 7, height: 7,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF4ADE80),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        l10n.systemStatusHealthy,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(Icons.chevron_right_rounded, color: Colors.white.withOpacity(0.7), size: 14),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildStatGrid(AppLocalizations l10n) {
     final notifier = context.watch<SuperAdminDashboardNotifier>();
