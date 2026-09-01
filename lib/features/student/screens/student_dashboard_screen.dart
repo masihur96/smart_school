@@ -47,7 +47,7 @@ class StudentDashboardScreen extends StatelessWidget {
       angle: 0.0,
       openCurve: Curves.fastOutSlowIn,
       closeCurve: Curves.fastOutSlowIn,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 200),
       drawerShadowsBackgroundColor: Colors.grey.shade300,
       slideWidth: MediaQuery.of(context).size.width * 0.65,
     );
