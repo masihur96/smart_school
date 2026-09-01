@@ -332,23 +332,47 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // School icon badge
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        _kBrand.withOpacity(0.9),
-                        const Color(0xFF0F4C5C),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                // School avatar
+                Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: school.avatar != null && school.avatar!.isNotEmpty
+                            ? Image.network(
+                                school.avatar!,
+                                width: 48,
+                                height: 48,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) =>
+                                    _buildInitialsAvatar(school.name),
+                                loadingBuilder: (_, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return _buildInitialsAvatar(school.name);
+                                },
+                              )
+                            : _buildInitialsAvatar(school.name),
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Icon(Icons.business_rounded,
-                      size: 22, color: Colors.white),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(statusIcon, size: 11, color: statusColor),
+                        const SizedBox(width: 4),
+                        Text(
+                          statusText,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: statusColor,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
                 const SizedBox(width: 12),
                 // Name + ID
@@ -385,7 +409,10 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                                 size: 12, color: Colors.grey.shade400),
                             const SizedBox(width: 3),
                             Text(
-                              school.schoolId,
+                              school.schoolId.lastIndexOf("-") != -1
+                                  ? school.schoolId.substring(
+                                      school.schoolId.lastIndexOf("-") + 1)
+                                  : school.schoolId,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: Colors.grey.shade500,
@@ -403,32 +430,7 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                   ),
                 ),
                 // Status badge
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                        color: statusColor.withOpacity(0.3), width: 1),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(statusIcon, size: 11, color: statusColor),
-                      const SizedBox(width: 4),
-                      Text(
-                        statusText,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: statusColor,
-                          letterSpacing: 0.4,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+
               ],
             ),
           ),
@@ -515,67 +517,84 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
               children: [
-                // Delete option
-                PopupMenuButton<String>(
-                  tooltip: 'More options',
-                  icon: Icon(Icons.more_horiz_rounded,
-                      color: Colors.grey.shade500, size: 20),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  onSelected: (value) {
-                    if (value == 'delete') {
-                      _showDeleteConfirmation(context, school, l10n);
-                    }
+                // Delete Button
+                OutlinedButton.icon(
+                  onPressed: () {
+                    _showDeleteConfirmation(context, school, l10n);
                   },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete_outline_rounded,
-                              size: 18, color: Color(0xFFEF4444)),
-                          SizedBox(width: 8),
-                          Text(
-                            'Delete School',
-                            style: TextStyle(
-                                color: Color(0xFFEF4444),
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13),
-                          ),
-                        ],
-                      ),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    size: 18,
+                    color: Color(0xFFEF4444),
+                  ),
+                  label: const Text(
+                    "Delete",
+                    style: TextStyle(
+                      color: Color(0xFFEF4444),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFEF4444),
+                    backgroundColor: const Color(0xFFFEF2F2),
+                    side: const BorderSide(
+                      color: Color(0xFFFCA5A5),
+                      width: 1.2,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
                 ),
                 const Spacer(),
                 // Manage button
                 Material(
                   color: _kBrand,
+                  elevation: 2,
+                  shadowColor: _kBrand.withOpacity(0.25),
                   borderRadius: BorderRadius.circular(10),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(10),
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            SchoolManagementDetailsScreen(school: school),
-                      ),
-                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              SchoolManagementDetailsScreen(school: school),
+                        ),
+                      );
+                    },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 9),
+                        horizontal: 18,
+                        vertical: 11,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.15),
+                        ),
+                      ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: const [
-                          Icon(Icons.settings_rounded,
-                              size: 14, color: Colors.white),
-                          SizedBox(width: 6),
+                          Icon(
+                            Icons.settings_rounded,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                          SizedBox(width: 7),
                           Text(
                             'Manage',
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
-                              fontSize: 12,
+                              fontSize: 13,
                             ),
                           ),
                         ],
@@ -587,6 +606,37 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInitialsAvatar(String name) {
+    final initials = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .take(2)
+        .map((w) => w[0].toUpperCase())
+        .join();
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF1F7A8C), Color(0xFF0F4C5C)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        initials,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.5,
+        ),
       ),
     );
   }

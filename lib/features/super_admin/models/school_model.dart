@@ -6,6 +6,10 @@ class SuperAdminSchool {
   final String phone;
   final String email;
   final bool isActive;
+  final String? avatar;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final DateTime? deletedAt;
 
   SuperAdminSchool({
     this.id,
@@ -15,6 +19,10 @@ class SuperAdminSchool {
     required this.phone,
     required this.email,
     this.isActive = true,
+    this.avatar,
+    this.createdAt,
+    this.updatedAt,
+    this.deletedAt,
   });
 
   factory SuperAdminSchool.fromJson(Map<String, dynamic> json) {
@@ -26,6 +34,16 @@ class SuperAdminSchool {
       phone: json['phone'] ?? '',
       email: json['email'] ?? '',
       isActive: json['isActive'] ?? true,
+      avatar: json['avatar'] as String?,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'])
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'])
+          : null,
+      deletedAt: json['deletedAt'] != null
+          ? DateTime.tryParse(json['deletedAt'])
+          : null,
     );
   }
 
@@ -48,6 +66,10 @@ class SuperAdminSchool {
     String? phone,
     String? email,
     bool? isActive,
+    String? avatar,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? deletedAt,
   }) {
     return SuperAdminSchool(
       id: id ?? this.id,
@@ -57,6 +79,10 @@ class SuperAdminSchool {
       phone: phone ?? this.phone,
       email: email ?? this.email,
       isActive: isActive ?? this.isActive,
+      avatar: avatar ?? this.avatar,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
     );
   }
 }

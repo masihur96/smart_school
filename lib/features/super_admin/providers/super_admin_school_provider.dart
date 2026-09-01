@@ -31,12 +31,15 @@ class SuperAdminSchoolNotifier extends ChangeNotifier {
         APIPath.superAdminSchools,
         header: {'Authorization': 'Bearer $token'},
       );
+      
+
 
       if (response != null && response.statusCode == 200) {
         final dynamic rawData = response.data;
         final List dataList = rawData is List
             ? rawData
             : (rawData is Map ? (rawData['data'] ?? []) : []);
+        print("dataList: $dataList");
 
         _schools = dataList
             .map((json) => SuperAdminSchool.fromJson(json))
