@@ -107,43 +107,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           ),
           slivers: [
             _buildSliverAppBar(theme),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Overview',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Consumer<SubscriptionNotifier>(
-                          builder: (context, notifier, _) {
-                            final count = _getFilteredSubscriptions(
-                              notifier.subscriptions,
-                            ).length;
-                            return Text(
-                              '$count subscriptions',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+
             _buildSubscriptionList(theme),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
@@ -406,7 +370,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             delegate: SliverChildBuilderDelegate((context, index) {
               final subscription = filteredSubscriptions[index];
               return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.only(bottom: 16, top: 10),
                 child: SubscriptionCard(subscription: subscription),
               );
             }, childCount: filteredSubscriptions.length),
