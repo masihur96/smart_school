@@ -18,6 +18,8 @@ class AuthResponseModel {
   final double? lon;
   final double? radius;
   final School? school;
+  final ClassRoom? classEntity;
+  final Section? section;
 
   AuthResponseModel({
     required this.id,
@@ -37,6 +39,8 @@ class AuthResponseModel {
     this.lon,
     this.radius,
     this.school,
+    this.classEntity,
+    this.section,
   });
 
   factory AuthResponseModel.fromJson(Map<String, dynamic> json) {
@@ -65,6 +69,8 @@ class AuthResponseModel {
           ? double.tryParse(json['radius'].toString())
           : null,
       school: json['school'] != null ? School.fromJson(json['school']) : null,
+      classEntity: json['class'] != null ? ClassRoom.fromJson(json['class']) : null,
+      section: json['section'] != null ? Section.fromJson(json['section']) : null,
     );
   }
 
@@ -88,6 +94,8 @@ class AuthResponseModel {
       'lon': lon,
       'radius': radius,
       'school': school?.toJson(),
+      'class': classEntity?.toJson(),
+      'section': section?.toJson(),
     };
   }
 }

@@ -18,6 +18,8 @@ class UserEntity {
   final double? lon;
   final double? radius;
   final School? school;
+  final ClassRoom? classEntity;
+  final Section? section;
 
   UserEntity({
     required this.id,
@@ -37,5 +39,7 @@ class UserEntity {
     this.lon,
     this.radius,
     this.school,
+    this.classEntity,
+    this.section,
   });
 }

@@ -33,6 +33,8 @@ class AuthRepositoryImpl implements AuthRepository {
       lon: result.lon,
       radius: result.radius,
       school: result.school,
+      classEntity: result.classEntity,
+      section: result.section,
     );
   }
 
@@ -57,6 +59,8 @@ class AuthRepositoryImpl implements AuthRepository {
       lon: result.lon,
       radius: result.radius,
       school: result.school,
+      classEntity: result.classEntity,
+      section: result.section,
     );
   }
 

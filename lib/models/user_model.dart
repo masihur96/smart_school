@@ -21,6 +21,8 @@ class User {
   final double? radius;
   final DateTime? deletedAt;
   final School? school;
+  final ClassRoom? classEntity;
+  final Section? section;
 
   User({
     required this.id,
@@ -41,6 +43,8 @@ class User {
     this.radius,
     this.deletedAt,
     this.school,
+    this.classEntity,
+    this.section,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -79,6 +83,8 @@ class User {
           ? DateTime.tryParse(json['deletedAt'].toString())
           : null,
       school: json['school'] != null ? School.fromJson(json['school']) : null,
+      classEntity: json['class'] != null ? ClassRoom.fromJson(json['class']) : null,
+      section: json['section'] != null ? Section.fromJson(json['section']) : null,
     );
   }
 
@@ -103,6 +109,8 @@ class User {
       'radius': radius,
       'deletedAt': deletedAt?.toIso8601String(),
       'school': school?.toJson(),
+      'class': classEntity?.toJson(),
+      'section': section?.toJson(),
     };
   }
 }

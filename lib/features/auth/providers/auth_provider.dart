@@ -95,6 +95,8 @@ class AuthNotifier extends ChangeNotifier {
           lon: profile.lon,
           radius: profile.radius,
           school: profile.school,
+          classEntity: profile.classEntity,
+          section: profile.section,
         );
 
         if ((_user?.role == UserRole.admin ||
@@ -168,6 +170,8 @@ class AuthNotifier extends ChangeNotifier {
         lon: profile.lon,
         radius: profile.radius,
         school: profile.school,
+        classEntity: profile.classEntity,
+        section: profile.section,
       );
 
       if ((_user?.role == UserRole.admin || _user?.role == UserRole.teacher) &&

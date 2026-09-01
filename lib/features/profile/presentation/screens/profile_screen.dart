@@ -338,7 +338,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       value: user.phone ?? l10n.notAvailable,
                       isEditable: true,
                       controller: _phoneController,
+                    ),   _buildInfoTile(
+                      context,
+                      icon: Icons.admin_panel_settings_outlined,
+                      label: l10n.accountRoleLabel,
+                      value: user.role.name.toUpperCase(),
                     ),
+                    if (user.classEntity != null)
+                      _buildInfoTile(
+                        context,
+                        icon: Icons.class_outlined,
+                        label: l10n.classLabel,
+                        value: user.classEntity!.name,
+                      ),
+                    if (user.section != null)
+                      _buildInfoTile(
+                        context,
+                        icon: Icons.meeting_room_outlined,
+                        label: l10n.sectionLabel,
+                        value: user.section!.name,
+                      ),
+                    if (user.rollNumber != null && user.rollNumber!.isNotEmpty)
+                      _buildInfoTile(
+                        context,
+                        icon: Icons.format_list_numbered_rounded,
+                        label: l10n.rollNumberLabel,
+                        value: user.rollNumber!,
+                      ),
+                    if (user.designation != null &&
+                        user.designation!.isNotEmpty)
+                      _buildInfoTile(
+                        context,
+                        icon: Icons.badge_outlined,
+                        label: l10n.designationLabel,
+                        value: user.designation!,
+                      ),
                   ]),
 
                   const SizedBox(height: 24),
@@ -407,27 +441,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       useSchoolEditState: true,
                       controller: _schoolAddressController,
                     ),
-                    _buildInfoTile(
-                      context,
-                      icon: Icons.admin_panel_settings_outlined,
-                      label: l10n.accountRoleLabel,
-                      value: user.role.name.toUpperCase(),
-                    ),
-                    if (user.rollNumber != null && user.rollNumber!.isNotEmpty)
-                      _buildInfoTile(
-                        context,
-                        icon: Icons.format_list_numbered_rounded,
-                        label: l10n.rollNumberLabel,
-                        value: user.rollNumber!,
-                      ),
-                    if (user.designation != null &&
-                        user.designation!.isNotEmpty)
-                      _buildInfoTile(
-                        context,
-                        icon: Icons.badge_outlined,
-                        label: l10n.designationLabel,
-                        value: user.designation!,
-                      ),
+
                   ]),
 
                   // const SizedBox(height: 24),
