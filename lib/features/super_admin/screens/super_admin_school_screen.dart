@@ -97,16 +97,7 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
             flexibleSpace: FlexibleSpaceBar(
               titlePadding:
                   const EdgeInsets.only(left: 56, bottom: 16, right: 16),
-              title: innerBoxIsScrolled
-                  ? const Text(
-                      'Schools',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    )
-                  : null,
+
               background: Stack(
                 fit: StackFit.expand,
                 children: [
