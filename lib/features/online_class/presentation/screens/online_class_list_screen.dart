@@ -230,15 +230,10 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                           'Meeting Link',
                           style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
-                        subtitle: InkWell(
-                          onTap: () => _launchURL(oClass.meetLink),
-                          child: Text(
-                            oClass.meetLink,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.blue,
-                              decoration: TextDecoration.underline,
-                            ),
+                        subtitle: Text(
+                          oClass.meetLink,
+                          style: const TextStyle(
+                            fontSize: 14,
                           ),
                         ),
                       ),
