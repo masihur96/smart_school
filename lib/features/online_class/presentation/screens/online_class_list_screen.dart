@@ -1306,6 +1306,10 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
               const SizedBox(height: 10),
             ],
 
+            // ── Host Info ──
+            _buildHostRow(oClass, isDark, themeColor),
+            const SizedBox(height: 8),
+
             // ── Participants ──
             if (oClass.participants.isNotEmpty) ...[
               _buildParticipantsRow(oClass.participants, isDark),
@@ -1380,6 +1384,87 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  // ── Host Row ──────────────────────────────────────────────────────────────
+
+  Widget _buildHostRow(OnlineClass oClass, bool isDark, Color themeColor) {
+    final avatarUrl = oClass.teacherAvatar;
+    final initial = oClass.teacherName.isNotEmpty
+        ? oClass.teacherName[0].toUpperCase()
+        : 'H';
+
+    return Row(
+      children: [
+        // Avatar
+        Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: themeColor.withValues(alpha: 0.25),
+              width: 1.5,
+            ),
+          ),
+          child: ClipOval(
+            child: avatarUrl != null && avatarUrl.isNotEmpty
+                ? Image.network(
+                    avatarUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: isDark
+                          ? themeColor.withValues(alpha: 0.25)
+                          : themeColor.withValues(alpha: 0.12),
+                      child: Center(
+                        child: Text(
+                          initial,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: themeColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : Container(
+                    color: isDark
+                        ? themeColor.withValues(alpha: 0.25)
+                        : themeColor.withValues(alpha: 0.12),
+                    child: Center(
+                      child: Text(
+                        initial,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: themeColor,
+                        ),
+                      ),
+                    ),
+                  ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Icon(
+          Icons.person_rounded,
+          size: 12,
+          color: Colors.grey.shade500,
+        ),
+        const SizedBox(width: 3),
+        Expanded(
+          child: Text(
+            'Host: ${oClass.teacherName}',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 

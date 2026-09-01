@@ -34,6 +34,7 @@ class OnlineClass {
   final String? endTime;
   final String teacherId;
   final String teacherName;
+  final String? teacherAvatar;
   final String? classId;
   final String? className;
   final String? sectionId;
@@ -53,6 +54,7 @@ class OnlineClass {
     this.endTime,
     required this.teacherId,
     required this.teacherName,
+    this.teacherAvatar,
     this.classId,
     this.className,
     this.sectionId,
@@ -65,10 +67,17 @@ class OnlineClass {
 
   factory OnlineClass.fromJson(Map<String, dynamic> json) {
     String tName = 'Host';
-    if (json['host'] != null && json['host'] is Map && json['host']['name'] != null) {
-      tName = json['host']['name'].toString();
-    } else if (json['teacher'] != null && json['teacher'] is Map && json['teacher']['name'] != null) {
-      tName = json['teacher']['name'].toString();
+    String? tAvatar;
+    if (json['host'] != null && json['host'] is Map) {
+      if (json['host']['name'] != null) tName = json['host']['name'].toString();
+      if (json['host']['avatar'] != null && json['host']['avatar'].toString().isNotEmpty) {
+        tAvatar = json['host']['avatar'].toString();
+      }
+    } else if (json['teacher'] != null && json['teacher'] is Map) {
+      if (json['teacher']['name'] != null) tName = json['teacher']['name'].toString();
+      if (json['teacher']['avatar'] != null && json['teacher']['avatar'].toString().isNotEmpty) {
+        tAvatar = json['teacher']['avatar'].toString();
+      }
     } else if (json['teacherName'] != null && json['teacherName'].toString().isNotEmpty) {
       tName = json['teacherName'].toString();
     } else if (json['hostName'] != null && json['hostName'].toString().isNotEmpty) {
@@ -129,6 +138,7 @@ class OnlineClass {
       endTime: json['endTime']?.toString(),
       teacherId: json['hostId']?.toString() ?? json['teacherId']?.toString() ?? '',
       teacherName: tName,
+      teacherAvatar: tAvatar,
       classId: json['classId']?.toString() ?? (classObj is Map ? (classObj['uuid']?.toString() ?? classObj['id']?.toString()) : null),
       className: cName,
       sectionId: json['sectionId']?.toString() ?? (sectionObj is Map ? (sectionObj['uuid']?.toString() ?? sectionObj['id']?.toString()) : null),
@@ -152,6 +162,7 @@ class OnlineClass {
         'endTime': endTime,
         'teacherId': teacherId,
         'teacherName': teacherName,
+        'teacherAvatar': teacherAvatar,
         'classId': classId,
         'className': className,
         'sectionId': sectionId,
