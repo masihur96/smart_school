@@ -35,9 +35,16 @@ class SuperAdminDashboardScreen extends StatelessWidget {
       controller: ZoomDrawerController(),
       menuScreen: const AppDrawer(),
       mainScreen: const SuperAdminDashboardContent(),
+      menuBackgroundColor: Colors.grey,
+      style: DrawerStyle.defaultStyle,
+      androidCloseOnBackTap: true,
+
       borderRadius: 24.0,
       showShadow: true,
-      angle: -12.0,
+      angle: 0.0,
+      openCurve: Curves.fastOutSlowIn,
+      closeCurve: Curves.fastOutSlowIn,
+      duration: const Duration(milliseconds: 200),
       drawerShadowsBackgroundColor: Colors.grey.shade300,
       slideWidth: MediaQuery.of(context).size.width * 0.65,
     );
