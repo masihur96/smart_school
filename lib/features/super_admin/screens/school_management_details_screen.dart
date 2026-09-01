@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/features/notifications/providers/notification_provider.dart';
@@ -145,7 +146,7 @@ class _UserListTab extends StatelessWidget {
         }
 
         if (isLoading || classNotifier.isLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return const _ShimmerUserList();
         }
 
         if (users.isEmpty) {
@@ -556,4 +557,190 @@ class _UserCard extends StatelessWidget {
       ),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// Shimmer skeleton — mirrors the real _UserListTab layout
+// ---------------------------------------------------------------------------
+
+class _ShimmerUserList extends StatelessWidget {
+  const _ShimmerUserList();
+
+  @override
+  Widget build(BuildContext context) {
+    final baseColor = Colors.grey.shade300;
+    final highlightColor = Colors.grey.shade100;
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        // Show 2 fake class groups
+        itemCount: 2,
+        itemBuilder: (_, __) => const _ShimmerClassGroup(),
+      ),
+    );
+  }
+}
+
+class _ShimmerClassGroup extends StatelessWidget {
+  const _ShimmerClassGroup();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── Class header row (icon + label + count pill) ──
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+          child: Row(
+            children: [
+              // icon placeholder
+              Container(
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // label placeholder
+              Container(
+                width: 100,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // count pill placeholder
+              Container(
+                width: 28,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // ── 3 fake user cards per group ──
+        ...List.generate(3, (_) => const _ShimmerUserCard()),
+
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+}
+
+class _ShimmerUserCard extends StatelessWidget {
+  const _ShimmerUserCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          children: [
+            // ── Avatar circle ──
+            Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 16),
+
+            // ── Name / email / tags column ──
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // name line
+                  Container(
+                    width: double.infinity,
+                    height: 13,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  // email line (shorter)
+                  Container(
+                    width: 160,
+                    height: 11,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // info tags row
+                  Row(
+                    children: [
+                      _shimmerTag(60),
+                      const SizedBox(width: 8),
+                      _shimmerTag(72),
+                      const SizedBox(width: 8),
+                      _shimmerTag(88),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Right column: notification icon + status badge ──
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                // notification icon placeholder
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                // status badge placeholder
+                Container(
+                  width: 54,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _shimmerTag(double width) => Container(
+        width: width,
+        height: 18,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(4),
+        ),
+      );
 }
