@@ -40,7 +40,8 @@ class _PricingSchoolScreenState extends State<PricingSchoolScreen> {
       backgroundColor: AppColors.backgroundLight,
       body: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics()),
+          parent: BouncingScrollPhysics(),
+        ),
         slivers: [
           _buildSliverAppBar(theme),
           SliverToBoxAdapter(
@@ -146,7 +147,7 @@ class _PricingSchoolScreenState extends State<PricingSchoolScreen> {
   Widget _buildPricingList(ThemeData theme) {
     return Consumer<PricingNotifier>(
       builder: (context, notifier, child) {
-        if (notifier.isLoading && notifier.plans.isEmpty) {
+        if (notifier.isLoading) {
           return const SliverFillRemaining(
             child: Center(child: CircularProgressIndicator()),
           );
@@ -166,8 +167,11 @@ class _PricingSchoolScreenState extends State<PricingSchoolScreen> {
                         color: AppColors.error.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.error_outline,
-                          size: 48, color: AppColors.error),
+                      child: const Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: AppColors.error,
+                      ),
                     ),
                     const SizedBox(height: 24),
                     Text(
@@ -184,7 +188,9 @@ class _PricingSchoolScreenState extends State<PricingSchoolScreen> {
                       label: Text(AppLocalizations.of(context)!.retry),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 12),
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -292,8 +298,11 @@ class PricingPlanCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Center(
-                    child: Icon(Icons.workspace_premium_rounded,
-                        color: AppColors.primary, size: 24),
+                    child: Icon(
+                      Icons.workspace_premium_rounded,
+                      color: AppColors.primary,
+                      size: 24,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -318,7 +327,9 @@ class PricingPlanCard extends StatelessWidget {
                             const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 4),
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.orange.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
@@ -436,8 +447,13 @@ class PricingPlanCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPricingDetail(BuildContext context, IconData icon, String label,
-      String value, Color iconColor) {
+  Widget _buildPricingDetail(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+    Color iconColor,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -448,9 +464,9 @@ class PricingPlanCard extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
@@ -458,9 +474,9 @@ class PricingPlanCard extends StatelessWidget {
         Text(
           value,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -503,7 +519,8 @@ class PricingPlanCard extends StatelessWidget {
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.error,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             child: Text(AppLocalizations.of(context)!.deleteAction),
           ),
@@ -761,7 +778,9 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
                   decoration: BoxDecoration(
                     color: AppColors.backgroundLight,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.border.withOpacity(0.1)),
+                    border: Border.all(
+                      color: AppColors.border.withOpacity(0.1),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -850,7 +869,10 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
         ),
         filled: true,
         fillColor: AppColors.backgroundLight,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
       ),
       validator: (value) => value == null || value.isEmpty ? 'Required' : null,
     );
