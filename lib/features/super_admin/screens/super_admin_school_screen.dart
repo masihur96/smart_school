@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/super_admin/providers/super_admin_dashboard_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
+import 'package:smart_school/models/school_models.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/school_model.dart';
@@ -699,64 +700,213 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
       ),
     );
   }
-
   void _showDeleteConfirmation(
-      BuildContext context, SuperAdminSchool school, AppLocalizations l10n) {
+      BuildContext context,
+      SuperAdminSchool school,
+      AppLocalizations l10n,
+      ) {
+    final passwordController = TextEditingController();
+    bool obscurePassword = true;
+
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.delete_outline_rounded,
-                  color: Colors.red, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Text(l10n.deleteInstitution,
-                style: const TextStyle(fontSize: 16)),
-          ],
-        ),
-        content: Text(
-          'Are you sure you want to delete "${school.name}"? This action cannot be undone.',
-          style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.cancelAction),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final success = await context
-                  .read<SuperAdminSchoolNotifier>()
-                  .deleteSchool(school.id!);
-              if (success && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${school.name} deleted')),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              elevation: 0,
-            ),
-            child: Text(l10n.deleteAction),
-          ),
-        ],
-      ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Row(
+                children: [
+                  Icon(
+                    Icons.warning_rounded,
+                    color: Color(0xFFEF4444),
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Delete School?',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'This action cannot be undone. To confirm, please enter your password.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.black54,
+                      height: 1.4,
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  TextFormField(
+                    controller: passwordController,
+                    obscureText: obscurePassword,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      hintText: 'Enter your password',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            obscurePassword = !obscurePassword;
+                          });
+                        },
+                        icon: Icon(
+                          obscurePassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                        ),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFD1D5DB),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFEF4444),
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                  },
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    final password = passwordController.text.trim();
+
+                    if (password.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please enter your password.'),
+                        ),
+                      );
+                      return;
+                    }
+
+                    // TODO: Verify password with backend
+                    // If password is correct:
+                    //
+                    // _deleteSchool(school);
+                    //
+                    // Navigator.pop(dialogContext);
+                  },
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    size: 18,
+                  ),
+                  label: const Text('Delete School'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEF4444),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
+  // void _showDeleteConfirmation(
+  //     BuildContext context, SuperAdminSchool school, AppLocalizations l10n) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (ctx) => AlertDialog(
+  //       shape:
+  //           RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+  //       title: Row(
+  //         children: [
+  //           Container(
+  //             padding: const EdgeInsets.all(8),
+  //             decoration: BoxDecoration(
+  //               color: Colors.red.withOpacity(0.1),
+  //               borderRadius: BorderRadius.circular(10),
+  //             ),
+  //             child: const Icon(Icons.delete_outline_rounded,
+  //                 color: Colors.red, size: 20),
+  //           ),
+  //           const SizedBox(width: 12),
+  //           Text(l10n.deleteInstitution,
+  //               style: const TextStyle(fontSize: 16)),
+  //         ],
+  //       ),
+  //       content: Text(
+  //         'Are you sure you want to delete "${school.name}"? This action cannot be undone.',
+  //         style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(ctx),
+  //           child: Text(l10n.cancelAction),
+  //         ),
+  //         ElevatedButton(
+  //           onPressed: () async {
+  //             Navigator.pop(ctx);
+  //             final success = await context
+  //                 .read<SuperAdminSchoolNotifier>()
+  //                 .deleteSchool(school.id!);
+  //             if (success && context.mounted) {
+  //               ScaffoldMessenger.of(context).showSnackBar(
+  //                 SnackBar(content: Text('${school.name} deleted')),
+  //               );
+  //             }
+  //           },
+  //           style: ElevatedButton.styleFrom(
+  //             backgroundColor: Colors.red,
+  //             foregroundColor: Colors.white,
+  //             shape: RoundedRectangleBorder(
+  //                 borderRadius: BorderRadius.circular(10)),
+  //             elevation: 0,
+  //           ),
+  //           child: Text(l10n.deleteAction),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 }
 
 // ── Sticky tab bar delegate ──
