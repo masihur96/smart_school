@@ -282,15 +282,6 @@ class _SuperAdminDashboardContentState
     final data = notifier.dashboardData;
     final isLoading = notifier.isLoading;
 
-    if (isLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 30),
-          child: CircularProgressIndicator(color: _kBrand),
-        ),
-      );
-    }
-
     final stats = [
       _StatItem(label: l10n.totalSchools, value: '${data.totalSchools}', icon: Icons.business_rounded, color: const Color(0xFF3B82F6), sub: 'Registered'),
       _StatItem(label: l10n.totalStudents, value: '${data.totalStudents}', icon: Icons.people_alt_rounded, color: const Color(0xFF8B5CF6), sub: 'Enrolled'),
@@ -298,83 +289,174 @@ class _SuperAdminDashboardContentState
       _StatItem(label: l10n.activeSubscription, value: '${data.activeSubscriptions}', icon: Icons.verified_rounded, color: const Color(0xFFF59E0B), sub: 'Running'),
     ];
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 14,
-        mainAxisSpacing: 14,
-        childAspectRatio: 1,
-      ),
-      itemCount: stats.length,
-      itemBuilder: (_, i) => _buildStatCard(stats[i]),
-    );
-  }
-
-  Widget _buildStatCard(_StatItem stat) {
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: _kCard,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: stat.color.withOpacity(0.12), width: 1.5),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: stat.color.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: stat.color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(stat.icon, size: 20, color: stat.color),
+          // ── Header banner ──
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF1F7A8C), Color(0xFF0F4C5C)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF4ADE80).withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.analytics_rounded, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                const Text(
+                  'System Overview',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                  ),
                 ),
-                child: const Text(
-                  '● Live',
-                  style: TextStyle(fontSize: 9, color: Color(0xFF16A34A), fontWeight: FontWeight.w700),
-                ),
-              ),
-            ],
+                const Spacer(),
+                if (isLoading)
+                  const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white60,
+                    ),
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.circle, size: 6, color: Color(0xFF4ADE80)),
+                        SizedBox(width: 4),
+                        Text(
+                          'Live',
+                          style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.w700),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
           ),
+          // ── Stat rows ──
+          if (isLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 36),
+              child: Center(
+                child: CircularProgressIndicator(color: _kBrand),
+              ),
+            )
+          else
+            ...List.generate(stats.length, (i) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildStatRow(stats[i]),
+                if (i < stats.length - 1)
+                  Divider(
+                    height: 1,
+                    indent: 18,
+                    endIndent: 18,
+                    color: Colors.grey.shade100,
+                  ),
+              ],
+            )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatRow(_StatItem stat) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      child: Row(
+        children: [
+          // Icon badge
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: stat.color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(stat.icon, size: 20, color: stat.color),
+          ),
+          const SizedBox(width: 14),
+          // Label & sub
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  stat.label,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF374151),
+                  ),
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  stat.sub,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey.shade400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Value + chip
           Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 stat.value,
                 style: TextStyle(
-                  fontSize: 26,
+                  fontSize: 22,
                   fontWeight: FontWeight.w800,
                   color: stat.color,
-                  height: 1,
+                  height: 1.1,
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                stat.label,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF374151)),
-              ),
-              Text(
-                stat.sub,
-                style: TextStyle(fontSize: 10, color: Colors.grey.shade400),
+              const SizedBox(height: 3),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  color: stat.color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  stat.sub.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                    color: stat.color,
+                    letterSpacing: 0.5,
+                  ),
+                ),
               ),
             ],
           ),
