@@ -172,6 +172,7 @@ class _SuperAdminDashboardContentState
             ),
           ),
           elevation: 0,
+          leadingWidth: 40,
           backgroundColor: _kBrand,
           actions: [
             NotificationIconButton(color: _kBrand),
@@ -180,40 +181,9 @@ class _SuperAdminDashboardContentState
                 context,
                 MaterialPageRoute(builder: (_) => const SystemStatusScreen()),
               ),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withOpacity(0.25)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 7, height: 7,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF4ADE80),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      l10n.systemStatusHealthy,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(Icons.chevron_right_rounded, color: Colors.white.withOpacity(0.7), size: 14),
-                  ],
-                ),
-              ),
+              child: Icon(Icons.health_and_safety_outlined),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 8),
           ],
         ),
         body: IndexedStack(
