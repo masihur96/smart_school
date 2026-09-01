@@ -32,6 +32,7 @@ class SuperAdminDashboardScreen extends StatelessWidget {
     return ZoomDrawer(
       controller: ZoomDrawerController(),
       menuScreen: const AppDrawer(),
+      mainScreenTapClose: true,
       mainScreen: const SuperAdminDashboardContent(),
       menuBackgroundColor: Colors.grey,
       style: DrawerStyle.defaultStyle,
@@ -304,7 +305,7 @@ class _SuperAdminDashboardContentState
         crossAxisCount: 2,
         crossAxisSpacing: 14,
         mainAxisSpacing: 14,
-        childAspectRatio: 1.35,
+        childAspectRatio: 1,
       ),
       itemCount: stats.length,
       itemBuilder: (_, i) => _buildStatCard(stats[i]),
