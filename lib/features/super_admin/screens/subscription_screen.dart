@@ -59,12 +59,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         statusFiltered = allSubs;
         break;
       case SubscriptionFilter.active:
-        statusFiltered =
-            allSubs.where((s) => s.isActive && !_isExpired(s)).toList();
+        statusFiltered = allSubs
+            .where((s) => s.isActive && !_isExpired(s))
+            .toList();
         break;
       case SubscriptionFilter.inactive:
-        statusFiltered =
-            allSubs.where((s) => !s.isActive && !_isExpired(s)).toList();
+        statusFiltered = allSubs
+            .where((s) => !s.isActive && !_isExpired(s))
+            .toList();
         break;
       case SubscriptionFilter.expired:
         statusFiltered = allSubs.where((s) => _isExpired(s)).toList();
@@ -101,7 +103,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         color: AppColors.primary,
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics()),
+            parent: BouncingScrollPhysics(),
+          ),
           slivers: [
             _buildSliverAppBar(theme),
             SliverToBoxAdapter(
@@ -125,8 +128,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                         Consumer<SubscriptionNotifier>(
                           builder: (context, notifier, _) {
                             final count = _getFilteredSubscriptions(
-                                    notifier.subscriptions)
-                                .length;
+                              notifier.subscriptions,
+                            ).length;
                             return Text(
                               '$count subscriptions',
                               style: theme.textTheme.bodyMedium?.copyWith(
@@ -225,8 +228,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             : null,
         filled: true,
         fillColor: AppColors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -262,7 +267,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   }
 
   Widget _buildFilterChip(
-      String label, SubscriptionFilter filter, ThemeData theme) {
+    String label,
+    SubscriptionFilter filter,
+    ThemeData theme,
+  ) {
     final isSelected = _selectedFilter == filter;
 
     return ChoiceChip(
@@ -276,18 +284,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         }
       },
       labelStyle: TextStyle(
-        color: isSelected ? AppColors.primaryDark : Colors.white70,
+        color: isSelected ? AppColors.primaryDark : Colors.grey,
         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
       ),
       selectedColor: Colors.white,
       backgroundColor: Colors.white.withOpacity(0.15),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: isSelected
-              ? Colors.white
-              : Colors.transparent,
-        ),
+        side: BorderSide(color: isSelected ? Colors.white : Colors.transparent),
       ),
       showCheckmark: false,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -317,8 +321,11 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                         color: AppColors.error.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.error_outline,
-                          size: 48, color: AppColors.error),
+                      child: const Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: AppColors.error,
+                      ),
                     ),
                     const SizedBox(height: 24),
                     Text(
@@ -335,7 +342,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       label: Text(AppLocalizations.of(context)!.retry),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 12),
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -348,8 +357,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           );
         }
 
-        final filteredSubscriptions =
-            _getFilteredSubscriptions(notifier.subscriptions);
+        final filteredSubscriptions = _getFilteredSubscriptions(
+          notifier.subscriptions,
+        );
 
         if (filteredSubscriptions.isEmpty) {
           return SliverFillRemaining(
@@ -393,16 +403,13 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         return SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final subscription = filteredSubscriptions[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: SubscriptionCard(subscription: subscription),
-                );
-              },
-              childCount: filteredSubscriptions.length,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final subscription = filteredSubscriptions[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: SubscriptionCard(subscription: subscription),
+              );
+            }, childCount: filteredSubscriptions.length),
           ),
         );
       },
@@ -448,10 +455,11 @@ class SubscriptionCard extends StatelessWidget {
     final statusBgColor = isExpired
         ? AppColors.warning.withOpacity(0.1)
         : (isActive
-            ? AppColors.success.withOpacity(0.1)
-            : AppColors.error.withOpacity(0.1));
-    final statusText =
-        isExpired ? 'Expired' : (isActive ? 'Active' : 'Inactive');
+              ? AppColors.success.withOpacity(0.1)
+              : AppColors.error.withOpacity(0.1));
+    final statusText = isExpired
+        ? 'Expired'
+        : (isActive ? 'Active' : 'Inactive');
 
     return Container(
       decoration: BoxDecoration(
@@ -483,8 +491,11 @@ class SubscriptionCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: const Center(
-                    child: Icon(Icons.business_rounded,
-                        color: AppColors.primary, size: 28),
+                    child: Icon(
+                      Icons.business_rounded,
+                      color: AppColors.primary,
+                      size: 28,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -510,7 +521,9 @@ class SubscriptionCard extends StatelessWidget {
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4),
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: statusBgColor,
                               borderRadius: BorderRadius.circular(12),
@@ -529,15 +542,18 @@ class SubscriptionCard extends StatelessWidget {
                       InkWell(
                         onTap: () {
                           Clipboard.setData(
-                              ClipboardData(text: subscription.schoolId));
+                            ClipboardData(text: subscription.schoolId),
+                          );
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(AppLocalizations.of(context)!
-                                  .schoolUuidCopied),
+                              content: Text(
+                                AppLocalizations.of(context)!.schoolUuidCopied,
+                              ),
                               behavior: SnackBarBehavior.floating,
                               duration: const Duration(seconds: 2),
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8)),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
                             ),
                           );
                         },
@@ -553,40 +569,51 @@ class SubscriptionCard extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 4),
-                            Icon(Icons.copy_rounded,
-                                size: 14,
-                                color: AppColors.primary.withOpacity(0.6)),
+                            Icon(
+                              Icons.copy_rounded,
+                              size: 14,
+                              color: AppColors.primary.withOpacity(0.6),
+                            ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(Icons.email_outlined,
-                              size: 14, color: AppColors.textSecondary),
+                          const Icon(
+                            Icons.email_outlined,
+                            size: 14,
+                            color: AppColors.textSecondary,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               school?.email ?? 'No email',
                               style: theme.textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary),
+                                color: AppColors.textSecondary,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
-                      if (school?.phone != null && school!.phone.isNotEmpty) ...[
+                      if (school?.phone != null &&
+                          school!.phone.isNotEmpty) ...[
                         const SizedBox(height: 2),
                         Row(
                           children: [
-                            const Icon(Icons.phone_outlined,
-                                size: 14, color: AppColors.textSecondary),
+                            const Icon(
+                              Icons.phone_outlined,
+                              size: 14,
+                              color: AppColors.textSecondary,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               school.phone,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary),
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                           ],
                         ),
@@ -646,19 +673,27 @@ class SubscriptionCard extends StatelessWidget {
                     color: AppColors.white,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                        color: AppColors.border.withOpacity(0.1)),
+                      color: AppColors.border.withOpacity(0.1),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _buildDateSection(
-                          context, 'Start Date', _formatDate(subscription.startDate)),
+                        context,
+                        'Start Date',
+                        _formatDate(subscription.startDate),
+                      ),
                       Container(
-                          width: 1,
-                          height: 24,
-                          color: AppColors.border.withOpacity(0.2)),
+                        width: 1,
+                        height: 24,
+                        color: AppColors.border.withOpacity(0.2),
+                      ),
                       _buildDateSection(
-                          context, 'End Date', _formatDate(subscription.endDate)),
+                        context,
+                        'End Date',
+                        _formatDate(subscription.endDate),
+                      ),
                     ],
                   ),
                 ),
@@ -708,8 +743,13 @@ class SubscriptionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoItem(BuildContext context, String label, String value,
-      IconData icon, Color iconColor) {
+  Widget _buildInfoItem(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+    Color iconColor,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -720,9 +760,9 @@ class SubscriptionCard extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
@@ -730,9 +770,9 @@ class SubscriptionCard extends StatelessWidget {
         Text(
           value,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -745,17 +785,17 @@ class SubscriptionCard extends StatelessWidget {
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
         ),
         const SizedBox(height: 2),
         Text(
           date,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
         ),
       ],
     );
@@ -798,7 +838,8 @@ class SubscriptionCard extends StatelessWidget {
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.error,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             child: Text(AppLocalizations.of(context)!.delete),
           ),
