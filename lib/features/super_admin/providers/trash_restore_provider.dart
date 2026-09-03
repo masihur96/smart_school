@@ -28,7 +28,8 @@ class DeletedRecord {
 
     switch (entity) {
       case 'user':
-        name = json['name'] ?? json['username'] ?? json['email'] ?? 'Unknown User';
+        name =
+            json['name'] ?? json['username'] ?? json['email'] ?? 'Unknown User';
         subtitle = json['email'] ?? json['role'];
         break;
       case 'school':
@@ -49,10 +50,15 @@ class DeletedRecord {
         break;
       case 'pricing':
         name = json['name'] ?? json['planName'] ?? 'Unknown Plan';
-        subtitle = json['pricePerMonth'] != null ? '\$${json['pricePerMonth']}/mo' : (json['price'] != null ? '\$${json['price']}' : null);
+        subtitle = json['pricePerMonth'] != null
+            ? '\$${json['pricePerMonth']}/mo'
+            : (json['price'] != null ? '\$${json['price']}' : null);
         break;
       case 'subscription':
-        name = json['school']?['name'] ?? json['schoolId'] ?? 'Unknown Subscription';
+        name =
+            json['school']?['name'] ??
+            json['schoolId'] ??
+            'Unknown Subscription';
         subtitle = json['pricingPlan']?['name'] ?? json['planId'];
         break;
       case 'homework':
@@ -120,9 +126,11 @@ class TrashRestoreNotifier extends ChangeNotifier {
   int get selectedCount => _selectedIds.length;
   bool isSelected(String id) => _selectedIds.contains(id);
 
-  void enterSelectionMode(String id) {
+  void enterSelectionMode([String? id]) {
     _selectionMode = true;
-    _selectedIds.add(id);
+    if (id != null && id.isNotEmpty) {
+      _selectedIds.add(id);
+    }
     notifyListeners();
   }
 
@@ -218,11 +226,18 @@ class TrashRestoreNotifier extends ChangeNotifier {
 
             if (value is List && supportedEntities.contains(entityKey)) {
               _deletedData[entityKey] = value
-                  .map((j) => DeletedRecord.fromJson(j as Map<String, dynamic>, entityKey))
+                  .map(
+                    (j) => DeletedRecord.fromJson(
+                      j as Map<String, dynamic>,
+                      entityKey,
+                    ),
+                  )
                   .toList();
             }
           });
-          log('[Trash] Fetched consolidated data: $totalDeleted records across ${_deletedData.length} categories');
+          log(
+            '[Trash] Fetched consolidated data: $totalDeleted records across ${_deletedData.length} categories',
+          );
         }
       } else {
         _error = 'Failed to fetch trash: ${response?.statusCode}';
@@ -257,11 +272,18 @@ class TrashRestoreNotifier extends ChangeNotifier {
         final dynamic rawData = response.data;
         final List dataList = rawData is List
             ? rawData
-            : (rawData is Map ? (rawData['data'] ?? rawData['records'] ?? []) : []);
+            : (rawData is Map
+                  ? (rawData['data'] ?? rawData['records'] ?? [])
+                  : []);
 
-        _deletedData[entity] =
-            dataList.map((j) => DeletedRecord.fromJson(j as Map<String, dynamic>, entity)).toList();
-        log('[Trash] Fetched ${_deletedData[entity]!.length} deleted $entity records');
+        _deletedData[entity] = dataList
+            .map(
+              (j) => DeletedRecord.fromJson(j as Map<String, dynamic>, entity),
+            )
+            .toList();
+        log(
+          '[Trash] Fetched ${_deletedData[entity]!.length} deleted $entity records',
+        );
       } else {
         _deletedData[entity] = [];
       }
@@ -392,7 +414,9 @@ class TrashRestoreNotifier extends ChangeNotifier {
         log('[Trash] Bulk deleted $succeeded ${entity} records');
       } else {
         // Fallback: delete one by one
-        log('[Trash] Bulk endpoint failed (${response?.statusCode}), falling back to sequential deletes');
+        log(
+          '[Trash] Bulk endpoint failed (${response?.statusCode}), falling back to sequential deletes',
+        );
         for (final id in ids) {
           try {
             final res = await DataProvider().performRequest(
@@ -459,8 +483,7 @@ class TrashRestoreNotifier extends ChangeNotifier {
               'Content-Type': 'application/json',
             },
           );
-          if (res != null &&
-              (res.statusCode == 200 || res.statusCode == 201)) {
+          if (res != null && (res.statusCode == 200 || res.statusCode == 201)) {
             _deletedData[entity]?.removeWhere((r) => r.id == id);
             _selectedIds.remove(id);
             succeeded++;

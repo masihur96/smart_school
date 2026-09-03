@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -86,6 +87,7 @@ class _BackupScreenState extends State<BackupScreen>
       if (notifier.selectionMode) {
         notifier.clearSelection();
       }
+      setState(() {});
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Only fetch if there's nothing yet loaded (avoid re-fetching on tab switch)
@@ -272,8 +274,41 @@ class _BackupScreenState extends State<BackupScreen>
                               ],
                             ),
                           ),
-                          _RefreshButton(
-                            onTap: () => notifier.fetchAllFromTrash(),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (_currentEntityKey() != null) ...[
+                                GestureDetector(
+                                  onTap: () {
+                                    if (notifier.selectionMode) {
+                                      notifier.clearSelection();
+                                    } else {
+                                      notifier.enterSelectionMode();
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: notifier.selectionMode
+                                          ? Colors.blueAccent.withOpacity(0.2)
+                                          : Colors.white.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Icon(
+                                      Icons.checklist_rounded,
+                                      color: notifier.selectionMode
+                                          ? Colors.blueAccent
+                                          : Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                              ],
+                              _RefreshButton(
+                                onTap: () => notifier.fetchAllFromTrash(),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -304,9 +339,7 @@ class _BackupScreenState extends State<BackupScreen>
         cursorColor: Colors.blueAccent,
         decoration: InputDecoration(
           hintText: 'Search records...',
-          hintStyle: TextStyle(
-            fontSize: 14,
-          ),
+          hintStyle: TextStyle(fontSize: 14),
           prefixIcon: Icon(Icons.search_rounded, size: 20),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
@@ -429,7 +462,12 @@ class _BackupScreenState extends State<BackupScreen>
     }
 
     return ListView(
-      padding: EdgeInsets.fromLTRB(16, 12, 16, notifier.selectionMode ? 120 : 12),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        12,
+        16,
+        notifier.selectionMode ? 120 : 12,
+      ),
       physics: const BouncingScrollPhysics(),
       children: grouped.entries.map((entry) {
         return _buildEntityGroup(notifier, entry.key, entry.value);
@@ -564,7 +602,11 @@ class _BackupScreenState extends State<BackupScreen>
         Expanded(
           child: ListView.separated(
             padding: EdgeInsets.fromLTRB(
-                16, 16, 16, notifier.selectionMode ? 120 : 16),
+              16,
+              16,
+              16,
+              notifier.selectionMode ? 120 : 16,
+            ),
             physics: const BouncingScrollPhysics(),
             itemCount: records.length,
             separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -608,8 +650,11 @@ class _BackupScreenState extends State<BackupScreen>
       ),
       child: Row(
         children: [
-          Icon(Icons.checklist_rounded,
-              size: 18, color: const Color(0xFFEF4444)),
+          Icon(
+            Icons.checklist_rounded,
+            size: 18,
+            color: const Color(0xFFEF4444),
+          ),
           const SizedBox(width: 8),
           Text(
             '${notifier.selectedCount} selected',
@@ -679,10 +724,7 @@ class _BackupScreenState extends State<BackupScreen>
             ),
           ],
           border: Border(
-            top: BorderSide(
-              color: Colors.white.withOpacity(0.06),
-              width: 1,
-            ),
+            top: BorderSide(color: Colors.white.withOpacity(0.06), width: 1),
           ),
         ),
         child: Column(
@@ -757,10 +799,10 @@ class _BackupScreenState extends State<BackupScreen>
                       onTap: notifier.selectedCount == 0
                           ? null
                           : () => _confirmBulkRestore(
-                                context,
-                                notifier,
-                                safeEntityKey,
-                              ),
+                              context,
+                              notifier,
+                              safeEntityKey,
+                            ),
                     ),
                   ),
                 if (!isAllTab) const SizedBox(width: 10),
@@ -774,10 +816,10 @@ class _BackupScreenState extends State<BackupScreen>
                     onTap: notifier.selectedCount == 0 || isAllTab
                         ? null
                         : () => _confirmBulkDelete(
-                              context,
-                              notifier,
-                              safeEntityKey,
-                            ),
+                            context,
+                            notifier,
+                            safeEntityKey,
+                          ),
                   ),
                 ),
               ],
@@ -1073,10 +1115,12 @@ class _BackupScreenState extends State<BackupScreen>
   ) async {
     final ids = notifier.selectedIds.toList();
     final count = ids.length;
-    final entityLabel = _entities.firstWhere(
-      (e) => e['key'] == entity,
-      orElse: () => {'label': entity},
-    )['label'] as String;
+    final entityLabel =
+        _entities.firstWhere(
+              (e) => e['key'] == entity,
+              orElse: () => {'label': entity},
+            )['label']
+            as String;
 
     final color = _entityColor(entity);
 
@@ -1145,9 +1189,9 @@ class _BackupScreenState extends State<BackupScreen>
         final msg = result.failed == 0
             ? '${result.succeeded} record${result.succeeded == 1 ? '' : 's'} restored successfully!'
             : '${result.succeeded} restored, ${result.failed} failed.';
-        ScaffoldMessenger.of(ctx).showSnackBar(
-          _buildSnackBar(msg, result.failed == 0),
-        );
+        ScaffoldMessenger.of(
+          ctx,
+        ).showSnackBar(_buildSnackBar(msg, result.failed == 0));
       }
     }
   }
@@ -1161,10 +1205,12 @@ class _BackupScreenState extends State<BackupScreen>
     final ids = notifier.selectedIds.toList();
     final count = ids.length;
     const dangerColor = Color(0xFFEF4444);
-    final entityLabel = _entities.firstWhere(
-      (e) => e['key'] == entity,
-      orElse: () => {'label': entity},
-    )['label'] as String;
+    final entityLabel =
+        _entities.firstWhere(
+              (e) => e['key'] == entity,
+              orElse: () => {'label': entity},
+            )['label']
+            as String;
 
     final confirmed = await showDialog<bool>(
       context: ctx,
@@ -1274,15 +1320,18 @@ class _BackupScreenState extends State<BackupScreen>
         final msg = result.failed == 0
             ? '${result.succeeded} record${result.succeeded == 1 ? '' : 's'} permanently deleted.'
             : '${result.succeeded} deleted, ${result.failed} failed.';
-        ScaffoldMessenger.of(ctx).showSnackBar(
-          _buildSnackBar(msg, result.failed == 0, isDelete: true),
-        );
+        ScaffoldMessenger.of(
+          ctx,
+        ).showSnackBar(_buildSnackBar(msg, result.failed == 0, isDelete: true));
       }
     }
   }
 
-  SnackBar _buildSnackBar(String message, bool success,
-      {bool isDelete = false}) {
+  SnackBar _buildSnackBar(
+    String message,
+    bool success, {
+    bool isDelete = false,
+  }) {
     final color = success
         ? (isDelete ? const Color(0xFFEF4444) : const Color(0xFF2E7D32))
         : Colors.red[700]!;
@@ -1378,9 +1427,7 @@ class _RecordCard extends StatelessWidget {
                       height: 24,
                       margin: const EdgeInsets.only(right: 12),
                       decoration: BoxDecoration(
-                        color: isSelected
-                            ? dangerColor
-                            : Colors.transparent,
+                        color: isSelected ? dangerColor : Colors.transparent,
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
                           color: isSelected
@@ -1390,8 +1437,11 @@ class _RecordCard extends StatelessWidget {
                         ),
                       ),
                       child: isSelected
-                          ? const Icon(Icons.check_rounded,
-                              size: 14, color: Colors.white)
+                          ? const Icon(
+                              Icons.check_rounded,
+                              size: 14,
+                              color: Colors.white,
+                            )
                           : null,
                     ),
                   ],
@@ -1612,9 +1662,7 @@ class _BulkActionButton extends StatelessWidget {
                     Icon(
                       icon,
                       size: 16,
-                      color: disabled
-                          ? Colors.white.withOpacity(0.25)
-                          : color,
+                      color: disabled ? Colors.white.withOpacity(0.25) : color,
                     ),
                     const SizedBox(width: 7),
                     Text(
@@ -1640,29 +1688,27 @@ class _LoadingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(
-            width: 40,
-            height: 40,
-            child: CircularProgressIndicator(
-              strokeWidth: 3,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 6,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Shimmer.fromColors(
+            baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
+            highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
+            child: Container(
+              height: 84,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
             ),
           ),
-          const SizedBox(height: 24),
-          Text(
-            'Synchronizing trash data...',
-            style: TextStyle(
-              color: const Color(0xFF64748B),
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
