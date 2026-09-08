@@ -1579,6 +1579,13 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    const Spacer(),
+                    Text(
+                      hw.description,
+                      style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                 ),
               ),
