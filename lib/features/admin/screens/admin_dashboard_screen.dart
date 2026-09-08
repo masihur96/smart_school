@@ -1580,11 +1580,39 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                       overflow: TextOverflow.ellipsis,
                     ),
                     const Spacer(),
-                    Text(
-                      hw.description,
-                      style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 10,
+                          backgroundColor: Colors.purple.withOpacity(0.2),
+                          backgroundImage: hw.teacherAvatar != null 
+                              ? NetworkImage(hw.teacherAvatar!)
+                              : null,
+                          child: hw.teacherAvatar == null
+                              ? Text(
+                                  hw.teacherName.isNotEmpty ? hw.teacherName[0].toUpperCase() : '?',
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.purple,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            hw.teacherName,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey[800],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

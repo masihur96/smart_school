@@ -18,15 +18,15 @@ class AdminDashboardData {
       attendTeacher: AttendTeacher.fromJson(json['attendTeacher'] ?? {}),
       attendStudent: AttendStudent.fromJson(json['attendStudent'] ?? {}),
       recentHomework: (json['recentHomework'] as List<dynamic>?)
-              ?.map((e) => RecentHomework.fromJson(e))
+              ?.map((e) => RecentHomework.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       recentNotice: (json['recentNotice'] as List<dynamic>?)
-              ?.map((e) => RecentNotice.fromJson(e))
+              ?.map((e) => RecentNotice.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       currentExam: (json['currentExam'] as List<dynamic>?)
-              ?.map((e) => CurrentExam.fromJson(e))
+              ?.map((e) => CurrentExam.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
     );
@@ -52,13 +52,13 @@ class AttendTeacher {
 
   factory AttendTeacher.fromJson(Map<String, dynamic> json) {
     return AttendTeacher(
-      date: json['date'] ?? '',
-      totalTeachers: json['totalTeachers'] ?? 0,
-      present: json['present'] ?? 0,
-      absent: json['absent'] ?? 0,
-      attendanceRate: (json['attendanceRate'] ?? 0).toDouble(),
+      date: json['date']?.toString() ?? '',
+      totalTeachers: int.tryParse(json['totalTeachers']?.toString() ?? '0') ?? 0,
+      present: int.tryParse(json['present']?.toString() ?? '0') ?? 0,
+      absent: int.tryParse(json['absent']?.toString() ?? '0') ?? 0,
+      attendanceRate: double.tryParse(json['attendanceRate']?.toString() ?? '0') ?? 0.0,
       recentRecords: (json['recentRecords'] as List<dynamic>?)
-              ?.map((e) => TeacherRecentRecord.fromJson(e))
+              ?.map((e) => TeacherRecentRecord.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
     );
@@ -88,15 +88,15 @@ class AttendStudent {
 
   factory AttendStudent.fromJson(Map<String, dynamic> json) {
     return AttendStudent(
-      date: json['date'] ?? '',
-      totalStudents: json['totalStudents'] ?? 0,
-      recorded: json['recorded'] ?? 0,
-      present: json['present'] ?? 0,
-      absent: json['absent'] ?? 0,
-      leave: json['leave'] ?? 0,
-      attendanceRate: (json['attendanceRate'] ?? 0).toDouble(),
+      date: json['date']?.toString() ?? '',
+      totalStudents: int.tryParse(json['totalStudents']?.toString() ?? '0') ?? 0,
+      recorded: int.tryParse(json['recorded']?.toString() ?? '0') ?? 0,
+      present: int.tryParse(json['present']?.toString() ?? '0') ?? 0,
+      absent: int.tryParse(json['absent']?.toString() ?? '0') ?? 0,
+      leave: int.tryParse(json['leave']?.toString() ?? '0') ?? 0,
+      attendanceRate: double.tryParse(json['attendanceRate']?.toString() ?? '0') ?? 0.0,
       data: (json['data'] as List<dynamic>?)
-              ?.map((e) => StudentAttendanceRecord.fromJson(e))
+              ?.map((e) => StudentAttendanceRecord.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
     );
@@ -169,17 +169,17 @@ class StudentAttendanceRecord {
     }
 
     return StudentAttendanceRecord(
-      id: json['id'] ?? '',
-      studentId: json['studentId'] ?? '',
-      studentName: json['student']?['name'] ?? 'Unknown',
-      rollNumber: json['student']?['rollNumber'] ?? '',
-      designation: json['student']?['designation'] ?? '',
-      status: json['status'] ?? '',
-      date: json['date'] ?? '',
-      className: json['class']?['name'] ?? json['className'] ?? json['classInfo']?['name'] ?? '',
+      id: json['id']?.toString() ?? '',
+      studentId: json['studentId']?.toString() ?? '',
+      studentName: json['studentName']?.toString() ?? json['student']?['name']?.toString() ?? 'Unknown',
+      rollNumber: json['student']?['rollNumber']?.toString() ?? '',
+      designation: json['student']?['designation']?.toString() ?? '',
+      status: json['status']?.toString() ?? '',
+      date: json['date']?.toString() ?? '',
+      className: json['class']?['name']?.toString() ?? json['className']?.toString() ?? json['classInfo']?['name']?.toString() ?? '',
       sectionName: extractSectionName(json),
-      subjectId: json['subjectId'],
-      subjectName: json['subject']?['name'] ?? json['subjectInfo']?['name'],
+      subjectId: json['subjectId']?.toString(),
+      subjectName: json['subject']?['name']?.toString() ?? json['subjectInfo']?['name']?.toString(),
     );
   }
 }
@@ -192,6 +192,8 @@ class RecentHomework {
   final String className;
   final String subjectName;
   final String sectionName;
+  final String teacherName;
+  final String? teacherAvatar;
 
   RecentHomework({
     required this.id,
@@ -201,17 +203,21 @@ class RecentHomework {
     required this.className,
     required this.subjectName,
     required this.sectionName,
+    required this.teacherName,
+    this.teacherAvatar,
   });
 
   factory RecentHomework.fromJson(Map<String, dynamic> json) {
     return RecentHomework(
-      id: json['id'] ?? '',
-      title: json['title'] ?? '',
-      description: json['description'] ?? '',
-      dueDate: json['dueDate'] ?? '',
-      className: json['classInfo']?['name'] ?? '',
-      subjectName: json['subjectInfo']?['name'] ?? '',
-      sectionName: json['sectionInfo']?['name'] ?? '',
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      dueDate: json['dueDate']?.toString() ?? '',
+      className: json['classInfo']?['name']?.toString() ?? '',
+      subjectName: json['subjectInfo']?['name']?.toString() ?? '',
+      sectionName: json['sectionInfo']?['name']?.toString() ?? '',
+      teacherName: json['teacherInfo']?['name']?.toString() ?? '',
+      teacherAvatar: json['teacherInfo']?['avatar']?.toString(),
     );
   }
 }
@@ -237,13 +243,13 @@ class RecentNotice {
 
   factory RecentNotice.fromJson(Map<String, dynamic> json) {
     return RecentNotice(
-      id: json['id'] ?? '',
-      title: json['title'] ?? '',
-      content: json['content'] ?? '',
-      targetAudience: json['targetAudience'] ?? '',
-      isImportent: json['isImportent'] ?? false,
-      postedBy: json['postedBy'] ?? '',
-      createdAt: json['createdAt'] ?? '',
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      content: json['content']?.toString() ?? '',
+      targetAudience: json['targetAudience']?.toString() ?? '',
+      isImportent: json['isImportent'] == true || json['isImportent'] == 'true',
+      postedBy: json['postedBy']?.toString() ?? '',
+      createdAt: json['createdAt']?.toString() ?? '',
     );
   }
 }
@@ -267,12 +273,12 @@ class CurrentExam {
 
   factory CurrentExam.fromJson(Map<String, dynamic> json) {
     return CurrentExam(
-      id: json['id'] ?? '',
-      examName: json['exam_name'] ?? '',
-      description: json['description'] ?? '',
-      startDate: json['start_date'] ?? '',
-      endDate: json['end_date'] ?? '',
-      isPublished: json['is_published'] ?? false,
+      id: json['id']?.toString() ?? '',
+      examName: json['exam_name']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      startDate: json['start_date']?.toString() ?? '',
+      endDate: json['end_date']?.toString() ?? '',
+      isPublished: json['isPublished'] == true || json['isPublished'] == 'true' || json['is_published'] == true || json['is_published'] == 'true',
     );
   }
 }
@@ -304,16 +310,16 @@ class TeacherRecentRecord {
 
   factory TeacherRecentRecord.fromJson(Map<String, dynamic> json) {
     return TeacherRecentRecord(
-      id: json['id'] ?? '',
-      teacherName: json['teacher']?['name'] ?? 'Unknown',
-      designation: json['teacher']?['designation'] ?? '',
-      date: json['date'] ?? '',
-      time: json['time'] ?? '',
-      startTime: json['startTime'] ?? '',
-      endTime: json['endTime'],
-      status: json['status'] ?? '',
-      lat: json['lat'] ?? '',
-      lon: json['lon'] ?? '',
+      id: json['id']?.toString() ?? '',
+      teacherName: json['teacher']?['name']?.toString() ?? 'Unknown',
+      designation: json['teacher']?['designation']?.toString() ?? '',
+      date: json['date']?.toString() ?? '',
+      time: json['time']?.toString() ?? '',
+      startTime: json['startTime']?.toString() ?? '',
+      endTime: json['endTime']?.toString(),
+      status: json['status']?.toString() ?? '',
+      lat: json['lat']?.toString() ?? '',
+      lon: json['lon']?.toString() ?? '',
     );
   }
 }
