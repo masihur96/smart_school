@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/school_models.dart' hide Teacher;
 import '../../../models/teacher_model.dart';
@@ -11,7 +12,6 @@ import '../providers/exam_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
 import '../providers/teacher_provider.dart';
-import 'package:smart_school/l10n/app_localizations.dart';
 
 // Local model for a single academic assignment draft
 class _AssignmentDraft {
@@ -52,6 +52,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
 
   // Step 2 fields
   final List<_AssignmentDraft> _assignments = [];
+  String? _selectedFilterClassId;
 
   bool get isEditing => widget.exam != null;
 
@@ -163,6 +164,10 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
 
   // ── STEP 2: Assignments ────────────────────────────────────────────────────
   Widget _buildStep2() {
+    final allClasses = context.read<ClassSetupNotifier>().classes;
+    final uniqueClassIds = _assignments.map((a) => a.classId).whereType<String>().toSet();
+    final filterClasses = allClasses.where((c) => uniqueClassIds.contains(c.id)).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -233,6 +238,41 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
             ),
           ],
         ),
+        if (filterClasses.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 36,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: const Text('All'),
+                    selected: _selectedFilterClassId == null,
+                    onSelected: (val) {
+                      if (val) setState(() => _selectedFilterClassId = null);
+                    },
+                    selectedColor: Colors.purple.shade100,
+                  ),
+                ),
+                ...filterClasses.map(
+                  (c) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(c.name),
+                      selected: _selectedFilterClassId == c.id,
+                      onSelected: (val) {
+                        setState(() => _selectedFilterClassId = val ? c.id : null);
+                      },
+                      selectedColor: Colors.purple.shade100,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         const SizedBox(height: 8),
         if (_assignments.isEmpty)
           Container(
@@ -260,7 +300,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
             ),
           )
         else
-          ..._assignments.asMap().entries.map((e) {
+          ..._assignments.asMap().entries.where((e) => _selectedFilterClassId == null || e.value.classId == _selectedFilterClassId).map((e) {
             final i = e.key;
             final a = e.value;
             return _AssignmentCard(
@@ -277,7 +317,11 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
   // ── Add/Edit assignment bottom sheet ────────────────────────────────────
   void _addAssignmentSheet({int? index}) {
     final user = context.read<AuthNotifier>().user;
-    final classes = context.read<ClassSetupNotifier>().classes.where((c) => c.schoolId == user?.schoolId).toList();
+    final classes = context
+        .read<ClassSetupNotifier>()
+        .classes
+        .where((c) => c.schoolId == user?.schoolId)
+        .toList();
     final allSubjects = context.read<SubjectSetupNotifier>().subjects;
     final teachers = context.read<TeachersNotifier>().teachers;
 
@@ -325,7 +369,9 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        editing ? AppLocalizations.of(context)!.editAssignment : AppLocalizations.of(context)!.addAssignment,
+                        editing
+                            ? AppLocalizations.of(context)!.editAssignment
+                            : AppLocalizations.of(context)!.addAssignment,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -464,7 +510,9 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                             ),
                           ),
                           child: Text(
-                            editing ? AppLocalizations.of(context)!.saveChanges : AppLocalizations.of(context)!.addAssignment,
+                            editing
+                                ? AppLocalizations.of(context)!.saveChanges
+                                : AppLocalizations.of(context)!.addAssignment,
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -571,7 +619,9 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              AppLocalizations.of(context)!.examSavedSuccessfully(_nameController.text.trim()),
+              AppLocalizations.of(
+                context,
+              )!.examSavedSuccessfully(_nameController.text.trim()),
             ),
             backgroundColor: Colors.green,
           ),
@@ -582,7 +632,12 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
       log('Error saving exam: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorLabel(e.toString())), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.errorLabel(e.toString()),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -594,7 +649,11 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? AppLocalizations.of(context)!.editExam : AppLocalizations.of(context)!.createExam),
+        title: Text(
+          isEditing
+              ? AppLocalizations.of(context)!.editExam
+              : AppLocalizations.of(context)!.createExam,
+        ),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -714,7 +773,9 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
             ),
             Step(
               title: Text(AppLocalizations.of(context)!.assignments),
-              subtitle: Text(AppLocalizations.of(context)!.addedCount(_assignments.length)),
+              subtitle: Text(
+                AppLocalizations.of(context)!.addedCount(_assignments.length),
+              ),
               isActive: _currentStep >= 1,
               state: _currentStep > 1 ? StepState.complete : StepState.indexed,
               content: _buildStep2(),
@@ -883,7 +944,11 @@ class _AssignmentCard extends StatelessWidget {
               value: 'edit',
               child: Row(
                 children: [
-                  const Icon(Icons.edit_outlined, size: 18, color: Colors.orange),
+                  const Icon(
+                    Icons.edit_outlined,
+                    size: 18,
+                    color: Colors.orange,
+                  ),
                   const SizedBox(width: 8),
                   Text(AppLocalizations.of(context)!.edit),
                 ],
@@ -895,7 +960,10 @@ class _AssignmentCard extends StatelessWidget {
                 children: [
                   const Icon(Icons.delete_outline, size: 18, color: Colors.red),
                   const SizedBox(width: 8),
-                  Text(AppLocalizations.of(context)!.remove, style: const TextStyle(color: Colors.red)),
+                  Text(
+                    AppLocalizations.of(context)!.remove,
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
             ),
