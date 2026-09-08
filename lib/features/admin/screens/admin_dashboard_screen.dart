@@ -1585,12 +1585,14 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                         CircleAvatar(
                           radius: 10,
                           backgroundColor: Colors.purple.withOpacity(0.2),
-                          backgroundImage: hw.teacherAvatar != null 
+                          backgroundImage: hw.teacherAvatar != null
                               ? NetworkImage(hw.teacherAvatar!)
                               : null,
                           child: hw.teacherAvatar == null
                               ? Text(
-                                  hw.teacherName.isNotEmpty ? hw.teacherName[0].toUpperCase() : '?',
+                                  hw.teacherName.isNotEmpty
+                                      ? hw.teacherName[0].toUpperCase()
+                                      : '?',
                                   style: const TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
@@ -2225,23 +2227,11 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     int rank,
   ) {
     final l10n = AppLocalizations.of(context)!;
-    // Smart average — only count metrics that actually have data
     double _calcScore() {
-      double total = 0;
-      int count = 0;
-      if (perf.attendance.totalWorkingDays > 0) {
-        total += perf.attendance.percentage;
-        count++;
-      }
-      if (perf.homework.totalAssigned > 0) {
-        total += perf.homework.percentage;
-        count++;
-      }
-      if (perf.exams.totalMaximumMarks > 0) {
-        total += perf.exams.percentage;
-        count++;
-      }
-      return count > 0 ? total / count : 0;
+      return (perf.attendance.percentage +
+              perf.homework.percentage +
+              perf.exams.percentage) /
+          3;
     }
 
     final score = _calcScore();

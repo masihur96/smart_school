@@ -7,7 +7,6 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/models/admin_dashboard_model.dart';
 import 'package:smart_school/features/admin/providers/student_performance_provider.dart';
 
-
 class StudentPerformanceScreen extends StatefulWidget {
   const StudentPerformanceScreen({super.key});
 
@@ -65,21 +64,10 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
   }
 
   double _score(StudentPerformance p) {
-    double total = 0;
-    int count = 0;
-    if (p.attendance.totalWorkingDays > 0) {
-      total += p.attendance.percentage;
-      count++;
-    }
-    if (p.homework.totalAssigned > 0) {
-      total += p.homework.percentage;
-      count++;
-    }
-    if (p.exams.totalMaximumMarks > 0) {
-      total += p.exams.percentage;
-      count++;
-    }
-    return count > 0 ? total / count : 0;
+    return (p.attendance.percentage +
+            p.homework.percentage +
+            p.exams.percentage) /
+        3;
   }
 
   Color _gradeColor(double s) {
@@ -842,7 +830,9 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                             strokeCap: StrokeCap.round,
                           ),
                           ZoomableAvatar(
-                            imageUrl: perf.avatar?.isNotEmpty == true ? perf.avatar : null,
+                            imageUrl: perf.avatar?.isNotEmpty == true
+                                ? perf.avatar
+                                : null,
                             name: perf.name,
                             heroTag: 'student-perf-top-${perf.name}',
                             radius: 28,
@@ -1032,7 +1022,10 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
               const Spacer(),
               if (!hasData)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(6),
@@ -1373,7 +1366,12 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
     );
   }
 
-  Widget _miniBar(String label, double value, Color color, {bool hasData = true}) {
+  Widget _miniBar(
+    String label,
+    double value,
+    Color color, {
+    bool hasData = true,
+  }) {
     final displayColor = hasData ? color : Colors.grey.shade400;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
