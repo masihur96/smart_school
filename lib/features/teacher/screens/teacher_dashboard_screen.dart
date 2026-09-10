@@ -12,6 +12,13 @@ import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/widgets/zoomable_avatar.dart';
 import 'package:smart_school/features/ai_tutor/screen/ai_tutor_chat_screen.dart';
+import 'package:smart_school/features/library/providers/library_book_provider.dart';
+import 'package:smart_school/features/library/data/models/book.dart';
+import 'package:smart_school/features/library/screens/library_dashboard_screen.dart';
+import 'package:smart_school/features/library/widgets/book_card.dart';
+import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
+import 'package:smart_school/models/online_class_model.dart';
+import 'package:smart_school/features/online_class/presentation/screens/online_class_list_screen.dart';
 import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
 import 'package:smart_school/features/teacher/screens/schedule_class_details.dart';
 import 'package:smart_school/features/teacher/screens/teacher_notice_screen.dart';
@@ -102,6 +109,16 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
         final notifProvider = context.read<NotificationNotifier>();
         if (notifProvider.notifications.isEmpty) {
           notifProvider.fetchNotifications();
+        }
+
+        final onlineClassProvider = context.read<OnlineClassProvider>();
+        if (onlineClassProvider.onlineClasses.isEmpty) {
+          onlineClassProvider.fetchOnlineClasses();
+        }
+
+        final libraryProvider = context.read<LibraryBookNotifier>();
+        if (libraryProvider.books.isEmpty) {
+          libraryProvider.fetchBooks();
         }
       }
     });
@@ -373,6 +390,8 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     AppLocalizations l10n,
   ) {
     final provider = context.watch<TeacherDashboardProvider>();
+    final onlineClassProvider = context.watch<OnlineClassProvider>();
+    final libraryProvider = context.watch<LibraryBookNotifier>();
     final data = provider.dashboardData;
     final classes = provider.todayClasses
         .where((c) => c.teacherId == user.id)
@@ -514,6 +533,80 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                           context,
                           data.mySubmittedHomework[index],
                         ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                  if (onlineClassProvider.onlineClasses.isNotEmpty) ...[
+                    _buildSectionHeader(
+                      'Online Classes',
+                      onSeeAll: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const OnlineClassListScreen(
+                                isAdminOrTeacher: true),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 140,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: onlineClassProvider.onlineClasses.length > 5
+                            ? 5
+                            : onlineClassProvider.onlineClasses.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 12.0),
+                            child: SizedBox(
+                              width: screenSize(context, 0.75),
+                              child: _buildOnlineClassCard(
+                                  context, onlineClassProvider.onlineClasses[index]),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                  if (libraryProvider.books.isNotEmpty) ...[
+                    _buildSectionHeader(
+                      'Library Books',
+                      onSeeAll: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LibraryDashboardScreen(
+                                comeFrom: 'Teacher'),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 150,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: libraryProvider.books.length > 5
+                            ? 5
+                            : libraryProvider.books.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 12.0),
+                            child: SizedBox(
+                              width: screenSize(context, 0.75),
+                              child: BookCard(
+                                book: libraryProvider.books[index],
+                                onTap: () {},
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -1386,6 +1479,66 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
             child: const Text('Close'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildOnlineClassCard(BuildContext context, OnlineClass onlineClass) {
+    return Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          if (onlineClass.meetLink.isNotEmpty) {
+            try {
+              launchUrl(Uri.parse(onlineClass.meetLink),
+                  mode: LaunchMode.externalApplication);
+            } catch (_) {}
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                onlineClass.title,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                onlineClass.description,
+                style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const Spacer(),
+              Row(
+                children: [
+                  const Icon(Icons.class_, size: 12, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      onlineClass.className ?? 'Meeting',
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.access_time, size: 12, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(
+                    DateFormat('hh:mm a').format(onlineClass.scheduledTime),
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
