@@ -1012,7 +1012,7 @@ class _HomeworkCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    subjectName,
+                    homework.subjectInfo?.name ?? "",
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                   if (homework.description.isNotEmpty) ...[
@@ -1034,7 +1034,7 @@ class _HomeworkCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Due: ${DateFormat('dd MMM yyyy').format(homework.dueDate)}',
+                        DateFormat('dd MMM yyyy').format(homework.dueDate),
                         style: TextStyle(
                           fontSize: 11,
                           color: isPast ? Colors.red[400] : Colors.grey[500],
@@ -1162,7 +1162,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     final firstDate = widget.homework != null
         ? DateTime(2000)
         : DateTime(now.year, now.month, now.day);
-        
+
     // Ensure initialDate is on or after firstDate to prevent assertion errors
     final safeInitialDate = _dueDate.isBefore(firstDate) ? firstDate : _dueDate;
 
