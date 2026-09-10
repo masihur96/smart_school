@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/widgets/zoomable_avatar.dart';
@@ -531,9 +532,26 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                       },
                     ),
                     const SizedBox(height: 12),
-                    ...data!.recentNotice
-                        .take(3)
-                        .map((notice) => _buildNoticeCard(context, notice)),
+                    SizedBox(
+                      height: 140,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: data!.recentNotice.length > 5
+                            ? 5
+                            : data.recentNotice.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 12.0),
+                            child: SizedBox(
+                              width: screenSize(context, 0.75),
+                              child: _buildNoticeCard(
+                                  context, data.recentNotice[index]),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                     const SizedBox(height: 24),
                   ],
                 ],
@@ -1236,73 +1254,138 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     }
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                if (notice.isImportant)
-                  const Padding(
-                    padding: EdgeInsets.only(right: 8),
-                    child: Icon(
-                      Icons.priority_high,
-                      color: Colors.amber,
-                      size: 16,
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _showNoticeDetails(context, notice, timeAgo),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  if (notice.isImportant)
+                    const Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: Icon(
+                        Icons.priority_high,
+                        color: Colors.amber,
+                        size: 16,
+                      ),
+                    ),
+                  Expanded(
+                    child: Text(
+                      notice.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                Expanded(
-                  child: Text(
-                    notice.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
+                  if (isNew)
+                    Text(
+                      'New',
+                      style: TextStyle(
+                        color: Colors.blue.shade700,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (isNew)
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                notice.content,
+                style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const Spacer(),
+              Row(
+                children: [
+                  const Icon(Icons.person, size: 12, color: Colors.grey),
+                  const SizedBox(width: 4),
                   Text(
-                    'New',
-                    style: TextStyle(
-                      color: Colors.blue.shade700,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    notice.postedBy ?? 'Admin',
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
                   ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              notice.content,
-              style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                const Icon(Icons.person, size: 12, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(
-                  notice.postedBy ?? 'Admin',
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
-                ),
-                const Spacer(),
-                const Icon(Icons.access_time, size: 12, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(
-                  timeAgo,
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
-                ),
-              ],
-            ),
+                  const Spacer(),
+                  const Icon(Icons.access_time, size: 12, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(
+                    timeAgo,
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showNoticeDetails(
+      BuildContext context, Notice notice, String timeAgo) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            if (notice.isImportant)
+              const Padding(
+                padding: EdgeInsets.only(right: 8),
+                child: Icon(Icons.priority_high, color: Colors.amber, size: 20),
+              ),
+            Expanded(child: Text(notice.title)),
           ],
         ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Posted by ${notice.postedBy ?? 'Admin'} • $timeAgo',
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              ),
+              const SizedBox(height: 16),
+              Text(notice.content, style: const TextStyle(fontSize: 15)),
+              if (notice.fileUrl != null && notice.fileUrl!.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final url = Uri.parse(notice.fileUrl!);
+                    try {
+                      if (!await launchUrl(url,
+                          mode: LaunchMode.externalApplication)) {
+                        await launchUrl(url, mode: LaunchMode.platformDefault);
+                      }
+                    } catch (_) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Could not open attachment')),
+                        );
+                      }
+                    }
+                  },
+                  icon: const Icon(Icons.attachment),
+                  label: const Text('View Attachment'),
+                ),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
