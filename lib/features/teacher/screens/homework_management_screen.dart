@@ -705,8 +705,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     _descController = TextEditingController(
       text: widget.homework?.description ?? '',
     );
-    _dueDate =
-        widget.homework?.dueDate ?? DateTime.now().add(const Duration(days: 1));
+    _dueDate = widget.homework?.dueDate ?? DateTime.now();
 
     if (widget.homework != null) {
       _selectedClassId = widget.homework!.classId;
@@ -922,7 +921,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                     onTap: _pickDueDate,
                     child: AbsorbPointer(
                       child: TextFormField(
-                        decoration: _inputDeco('Due Date').copyWith(
+                        decoration: _inputDeco('Date').copyWith(
                           suffixIcon: const Icon(Icons.calendar_today_rounded),
                         ),
                         controller: TextEditingController(

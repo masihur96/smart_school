@@ -138,7 +138,9 @@ class _ScheduleClassDetailsState extends State<ScheduleClassDetails>
     final teacherId = authNotifier.user?.id;
     if (teacherId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.errorNoActiveUser)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.errorNoActiveUser),
+        ),
       );
       return;
     }
@@ -210,7 +212,9 @@ class _ScheduleClassDetailsState extends State<ScheduleClassDetails>
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.attendanceSavedSuccessfully),
+          content: Text(
+            AppLocalizations.of(context)!.attendanceSavedSuccessfully,
+          ),
           backgroundColor: AppColors.primaryTeacher,
           behavior: SnackBarBehavior.floating,
         ),
@@ -930,12 +934,19 @@ class _HomeworkTab extends StatelessWidget {
                 Navigator.pop(ctx);
                 if (!success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(AppLocalizations.of(context)!.failedToDeleteHomework)),
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(context)!.failedToDeleteHomework,
+                      ),
+                    ),
                   );
                 }
               }
             },
-            child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
+            child: Text(
+              AppLocalizations.of(context)!.delete,
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -1074,9 +1085,16 @@ class _HomeworkCard extends StatelessWidget {
                     value: 'delete',
                     child: Row(
                       children: [
-                        const Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                        const Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                          size: 18,
+                        ),
                         const SizedBox(width: 8),
-                        Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+                        Text(
+                          l10n.delete,
+                          style: const TextStyle(color: Colors.red),
+                        ),
                       ],
                     ),
                   ),
@@ -1128,8 +1146,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
       text: widget.homework?.description ?? '',
     );
 
-    _dueDate =
-        widget.homework?.dueDate ?? DateTime.now().add(const Duration(days: 3));
+    _dueDate = widget.homework?.dueDate ?? DateTime.now();
   }
 
   @override
@@ -1162,11 +1179,12 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     final user = authNotifier.user;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.errorNoActiveUser)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.errorNoActiveUser),
+        ),
       );
       return;
     }
-
 
     final homework = Homework(
       id: widget.homework?.id ?? '',
@@ -1338,7 +1356,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                   onTap: _pickDueDate,
                   child: AbsorbPointer(
                     child: TextFormField(
-                      decoration: _inputDeco('Due Date').copyWith(
+                      decoration: _inputDeco('Date').copyWith(
                         suffixIcon: const Icon(Icons.calendar_today_rounded),
                       ),
                       controller: TextEditingController(text: dueLabel),
