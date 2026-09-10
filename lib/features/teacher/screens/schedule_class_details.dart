@@ -1157,11 +1157,20 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
   }
 
   Future<void> _pickDueDate() async {
+    final now = DateTime.now();
+    // Allow picking past dates when editing an existing homework
+    final firstDate = widget.homework != null
+        ? DateTime(2000)
+        : DateTime(now.year, now.month, now.day);
+        
+    // Ensure initialDate is on or after firstDate to prevent assertion errors
+    final safeInitialDate = _dueDate.isBefore(firstDate) ? firstDate : _dueDate;
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: _dueDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      initialDate: safeInitialDate,
+      firstDate: firstDate,
+      lastDate: now.add(const Duration(days: 365)),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
           colorScheme: const ColorScheme.light(primary: Color(0xFF7C3AED)),
