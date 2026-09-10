@@ -11,9 +11,10 @@ import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/widgets/zoomable_avatar.dart';
 import 'package:smart_school/features/ai_tutor/screen/ai_tutor_chat_screen.dart';
+import 'package:smart_school/features/library/data/models/book.dart';
 import 'package:smart_school/features/library/providers/library_book_provider.dart';
 import 'package:smart_school/features/library/screens/library_dashboard_screen.dart';
-import 'package:smart_school/features/library/widgets/book_card.dart';
+import 'package:smart_school/features/library/widgets/book_grid_card.dart';
 import 'package:smart_school/features/online_class/presentation/screens/online_class_list_screen.dart';
 import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
 import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
@@ -391,6 +392,15 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     final provider = context.watch<TeacherDashboardProvider>();
     final onlineClassProvider = context.watch<OnlineClassProvider>();
     final libraryProvider = context.watch<LibraryBookNotifier>();
+    
+    final upcomingClasses = onlineClassProvider.onlineClasses
+        .where((c) => c.scheduledTime.isAfter(DateTime.now().subtract(const Duration(minutes: 30))))
+        .toList();
+        
+    final availableBooks = libraryProvider.books
+        .where((b) => b.isAvailable)
+        .toList();
+
     final data = provider.dashboardData;
     final classes = provider.todayClasses
         .where((c) => c.teacherId == user.id)
@@ -536,7 +546,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                     ),
                     const SizedBox(height: 24),
                   ],
-                  if (onlineClassProvider.onlineClasses.isNotEmpty) ...[
+                  if (upcomingClasses.isNotEmpty) ...[
                     _buildSectionHeader(
                       'Online Classes',
                       onSeeAll: () {
@@ -552,13 +562,13 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
-                      height: 140,
+                      height: 150,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         physics: const BouncingScrollPhysics(),
-                        itemCount: onlineClassProvider.onlineClasses.length > 5
+                        itemCount: upcomingClasses.length > 5
                             ? 5
-                            : onlineClassProvider.onlineClasses.length,
+                            : upcomingClasses.length,
                         itemBuilder: (context, index) {
                           return Padding(
                             padding: const EdgeInsets.only(right: 12.0),
@@ -566,7 +576,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                               width: screenSize(context, 0.75),
                               child: _buildOnlineClassCard(
                                 context,
-                                onlineClassProvider.onlineClasses[index],
+                                upcomingClasses[index],
                               ),
                             ),
                           );
@@ -575,7 +585,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                     ),
                     const SizedBox(height: 24),
                   ],
-                  if (libraryProvider.books.isNotEmpty) ...[
+                  if (availableBooks.isNotEmpty) ...[
                     _buildSectionHeader(
                       'Library Books',
                       onSeeAll: () {
@@ -591,20 +601,20 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
-                      height: 150,
+                      height: 200,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         physics: const BouncingScrollPhysics(),
-                        itemCount: libraryProvider.books.length > 5
+                        itemCount: availableBooks.length > 5
                             ? 5
-                            : libraryProvider.books.length,
+                            : availableBooks.length,
                         itemBuilder: (context, index) {
                           return Padding(
                             padding: const EdgeInsets.only(right: 12.0),
                             child: SizedBox(
-                              width: screenSize(context, 0.75),
-                              child: BookCard(
-                                book: libraryProvider.books[index],
+                              width: 140,
+                              child: BookGridCard(
+                                book: availableBooks[index],
                                 onTap: () {},
                               ),
                             ),
@@ -1510,14 +1520,44 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                onlineClass.title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      onlineClass.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (onlineClass.meetLink.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          try {
+                            launchUrl(
+                              Uri.parse(onlineClass.meetLink),
+                              mode: LaunchMode.externalApplication,
+                            );
+                          } catch (_) {}
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
+                          minimumSize: const Size(0, 28),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: const Text('Join', style: TextStyle(fontSize: 12)),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 6),
               Text(
