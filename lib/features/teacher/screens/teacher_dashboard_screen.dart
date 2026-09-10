@@ -7,25 +7,24 @@ import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/widgets/zoomable_avatar.dart';
 import 'package:smart_school/features/ai_tutor/screen/ai_tutor_chat_screen.dart';
 import 'package:smart_school/features/library/providers/library_book_provider.dart';
-import 'package:smart_school/features/library/data/models/book.dart';
 import 'package:smart_school/features/library/screens/library_dashboard_screen.dart';
 import 'package:smart_school/features/library/widgets/book_card.dart';
-import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
-import 'package:smart_school/models/online_class_model.dart';
 import 'package:smart_school/features/online_class/presentation/screens/online_class_list_screen.dart';
+import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
 import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
 import 'package:smart_school/features/teacher/screens/schedule_class_details.dart';
 import 'package:smart_school/features/teacher/screens/teacher_notice_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_self_attendance_detail_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
+import 'package:smart_school/models/online_class_model.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/user_model.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/widgets/app_drawer.dart';
 import '../../../core/widgets/marquee_notice.dart';
@@ -545,7 +544,8 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                           context,
                           MaterialPageRoute(
                             builder: (_) => const OnlineClassListScreen(
-                                isAdminOrTeacher: true),
+                              isAdminOrTeacher: true,
+                            ),
                           ),
                         );
                       },
@@ -565,7 +565,9 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                             child: SizedBox(
                               width: screenSize(context, 0.75),
                               child: _buildOnlineClassCard(
-                                  context, onlineClassProvider.onlineClasses[index]),
+                                context,
+                                onlineClassProvider.onlineClasses[index],
+                              ),
                             ),
                           );
                         },
@@ -581,7 +583,8 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                           context,
                           MaterialPageRoute(
                             builder: (_) => const LibraryDashboardScreen(
-                                comeFrom: 'Teacher'),
+                              comeFrom: 'Teacher',
+                            ),
                           ),
                         );
                       },
@@ -639,13 +642,15 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                             child: SizedBox(
                               width: screenSize(context, 0.75),
                               child: _buildNoticeCard(
-                                  context, data.recentNotice[index]),
+                                context,
+                                data.recentNotice[index],
+                              ),
                             ),
                           );
                         },
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 150),
                   ],
                 ],
               ),
@@ -1421,8 +1426,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     );
   }
 
-  void _showNoticeDetails(
-      BuildContext context, Notice notice, String timeAgo) {
+  void _showNoticeDetails(BuildContext context, Notice notice, String timeAgo) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -1453,15 +1457,18 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                   onPressed: () async {
                     final url = Uri.parse(notice.fileUrl!);
                     try {
-                      if (!await launchUrl(url,
-                          mode: LaunchMode.externalApplication)) {
+                      if (!await launchUrl(
+                        url,
+                        mode: LaunchMode.externalApplication,
+                      )) {
                         await launchUrl(url, mode: LaunchMode.platformDefault);
                       }
                     } catch (_) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text('Could not open attachment')),
+                            content: Text('Could not open attachment'),
+                          ),
                         );
                       }
                     }
@@ -1491,8 +1498,10 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
         onTap: () {
           if (onlineClass.meetLink.isNotEmpty) {
             try {
-              launchUrl(Uri.parse(onlineClass.meetLink),
-                  mode: LaunchMode.externalApplication);
+              launchUrl(
+                Uri.parse(onlineClass.meetLink),
+                mode: LaunchMode.externalApplication,
+              );
             } catch (_) {}
           }
         },
@@ -1503,7 +1512,10 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
             children: [
               Text(
                 onlineClass.title,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
