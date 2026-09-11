@@ -33,6 +33,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   String? _selectedExamId;
   Exam? _selectedExam;
   String? _selectedClassId;
+  String? _selectedClassName;
   String? _selectedSectionId;
   Subject? _selectedSubject;
 
@@ -85,17 +86,20 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     );
 
     String subjectName = 'Subject';
+    String className = 'Class';
     try {
       final assignment = exam.assignments.firstWhere(
-        (a) => a.subjectId == widget.initialSubjectId,
+        (a) => a.subjectId == widget.initialSubjectId && a.classId == widget.initialClassId,
       );
       subjectName = assignment.subjectName;
+      className = assignment.className;
     } catch (_) {}
 
     setState(() {
       _selectedExam = exam;
       _selectedExamId = exam.id;
       _selectedClassId = widget.initialClassId;
+      _selectedClassName = className;
       _selectedSectionId = null; // Always show 'All Sections' initially
       _selectedSubject = Subject(
         id: widget.initialSubjectId,
@@ -229,7 +233,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
           SliverToBoxAdapter(
             child: Column(
               children: [
-                if (_selectedClassId != null) _buildSectionFilterCard(),
+                if (_selectedClassId != null) _buildInfoCard(),
                 if (_selectedSubject != null)
                   _buildSectionHeader('Students (${students.length})'),
               ],
@@ -261,7 +265,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     );
   }
 
-  Widget _buildSectionFilterCard() {
+  Widget _buildInfoCard() {
     final sections = context.watch<SectionSetupNotifier>().sections;
     final filteredSections = sections
         .where((s) => s.classId == _selectedClassId)
@@ -276,43 +280,73 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       margin: const EdgeInsets.all(16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Row(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
           children: [
-            const Icon(Icons.grid_view_outlined, color: Colors.grey),
-            const SizedBox(width: 16),
-            const Text(
-              'Section:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                value: displayValue,
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
+            Row(
+              children: [
+                const Icon(Icons.class_outlined, color: Colors.grey),
+                const SizedBox(width: 16),
+                Text(
+                  'Class:',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700]),
                 ),
-                hint: const Text('Select Section'),
-                items: [
-                  const DropdownMenuItem<String>(
-                    value: null,
-                    child: Text('All Sections'),
-                  ),
-                  ...filteredSections.map(
-                    (s) => DropdownMenuItem<String>(
-                      value: s.id,
-                      child: Text(s.name),
+                const SizedBox(width: 8),
+                Expanded(child: Text(_selectedClassName ?? 'N/A', style: const TextStyle(fontWeight: FontWeight.bold))),
+              ],
+            ),
+            const Divider(height: 16),
+            Row(
+              children: [
+                const Icon(Icons.book_outlined, color: Colors.grey),
+                const SizedBox(width: 16),
+                Text(
+                  'Subject:',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700]),
+                ),
+                const SizedBox(width: 8),
+                Expanded(child: Text(_selectedSubject?.name ?? 'N/A', style: const TextStyle(fontWeight: FontWeight.bold))),
+              ],
+            ),
+            const Divider(height: 16),
+            Row(
+              children: [
+                const Icon(Icons.grid_view_outlined, color: Colors.grey),
+                const SizedBox(width: 16),
+                Text(
+                  'Section:',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700]),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: displayValue,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
                     ),
+                    hint: const Text('Select Section'),
+                    items: [
+                      const DropdownMenuItem<String>(
+                        value: null,
+                        child: Text('All Sections'),
+                      ),
+                      ...filteredSections.map(
+                        (s) => DropdownMenuItem<String>(
+                          value: s.id,
+                          child: Text(s.name),
+                        ),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedSectionId = val;
+                      });
+                      _loadStudentsForSection(val);
+                    },
                   ),
-                ],
-                onChanged: (val) {
-                  setState(() {
-                    _selectedSectionId = val;
-                  });
-                  _loadStudentsForSection(val);
-                },
-              ),
+                ),
+              ],
             ),
           ],
         ),
@@ -330,14 +364,6 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
             title,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
-          if (_selectedSubject != null)
-            Text(
-              _selectedSubject!.name,
-              style: TextStyle(
-                color: AppColors.primaryTeacher,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
         ],
       ),
     );
