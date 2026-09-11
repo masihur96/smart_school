@@ -40,15 +40,23 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
     final exams = provider.exams;
 
     return Scaffold(
-      appBar: widget.hideAppBar ? null : AppBar(
-        title: Text(l10n?.exams ?? ""),
-        backgroundColor: AppColors.primaryTeacher,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          TextButton(onPressed: _refresh, child: Text(l10n?.viewAll ?? "",style: TextStyle(color: Colors.white),)),
-         ],
-      ),
+      appBar: widget.hideAppBar
+          ? null
+          : AppBar(
+              title: Text(l10n?.exams ?? ""),
+              backgroundColor: AppColors.primaryTeacher,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              actions: [
+                TextButton(
+                  onPressed: _refresh,
+                  child: Text(
+                    l10n?.viewAll ?? "",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
       body: provider.isLoading && exams.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -87,7 +95,6 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
     Exam exam,
     AppLocalizations l10n,
   ) {
-
     final dateRange = exam.startDate != null && exam.endDate != null
         ? '${DateFormat('MMM dd').format(exam.startDate!)} - ${DateFormat('MMM dd').format(exam.endDate!)}'
         : (exam.startDate != null
@@ -109,7 +116,6 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
         borderRadius: BorderRadius.circular(24),
         child: Stack(
           children: [
-
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -122,7 +128,6 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
                         child: Text(
                           exam.name,
                           style: const TextStyle(
-
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.5,
@@ -148,7 +153,7 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
                         ),
                         child: Text(
                           exam.isPublished ? 'Published' : 'Draft',
-                          style:  TextStyle(
+                          style: TextStyle(
                             color: exam.isPublished
                                 ? Colors.green
                                 : Colors.grey,
@@ -163,11 +168,7 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
                   if (exam.description != null && exam.description!.isNotEmpty)
                     Text(
                       exam.description!,
-                      style: TextStyle(
-
-                        fontSize: 14,
-                        height: 1.4,
-                      ),
+                      style: TextStyle(fontSize: 14, height: 1.4),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -227,7 +228,6 @@ class _TeacherExamScreenState extends State<TeacherExamScreen> {
       ),
     );
   }
-
 }
 
 class TeacherExamRoutineView extends StatelessWidget {
@@ -243,7 +243,9 @@ class TeacherExamRoutineView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (exam.assignments.isEmpty) {
-      return Center(child: Text(AppLocalizations.of(context)!.noRoutinesAssigned));
+      return Center(
+        child: Text(AppLocalizations.of(context)!.noRoutinesAssigned),
+      );
     }
 
     final grouped = <String, List<ExamAssignment>>{};
@@ -485,7 +487,8 @@ class TeacherExamDetailsSheet extends StatefulWidget {
   });
 
   @override
-  State<TeacherExamDetailsSheet> createState() => _TeacherExamDetailsSheetState();
+  State<TeacherExamDetailsSheet> createState() =>
+      _TeacherExamDetailsSheetState();
 }
 
 class _TeacherExamDetailsSheetState extends State<TeacherExamDetailsSheet> {
@@ -517,10 +520,12 @@ class _TeacherExamDetailsSheetState extends State<TeacherExamDetailsSheet> {
                         boxShadow: _selectedIndex == 0
                             ? [
                                 BoxShadow(
-                                  color: AppColors.primaryTeacher.withOpacity(0.3),
+                                  color: AppColors.primaryTeacher.withOpacity(
+                                    0.3,
+                                  ),
                                   blurRadius: 8,
                                   offset: const Offset(0, 4),
-                                )
+                                ),
                               ]
                             : null,
                       ),
@@ -550,10 +555,12 @@ class _TeacherExamDetailsSheetState extends State<TeacherExamDetailsSheet> {
                         boxShadow: _selectedIndex == 1
                             ? [
                                 BoxShadow(
-                                  color: AppColors.primaryTeacher.withOpacity(0.3),
+                                  color: AppColors.primaryTeacher.withOpacity(
+                                    0.3,
+                                  ),
                                   blurRadius: 8,
                                   offset: const Offset(0, 4),
-                                )
+                                ),
                               ]
                             : null,
                       ),
@@ -633,10 +640,12 @@ class TeacherExamResultsView extends StatelessWidget {
       itemBuilder: (context, index) {
         final subjectName = subjectNames[index];
         final subjectResults = grouped[subjectName]!;
-        
+
         return Card(
           margin: const EdgeInsets.only(bottom: 20),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           elevation: 0,
           color: Colors.white,
           child: Padding(
@@ -652,7 +661,10 @@ class TeacherExamResultsView extends StatelessWidget {
                         color: Colors.blue.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Icon(Icons.book_outlined, color: Colors.blue.shade700),
+                      child: Icon(
+                        Icons.book_outlined,
+                        color: Colors.blue.shade700,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -665,7 +677,10 @@ class TeacherExamResultsView extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(12),
@@ -686,10 +701,13 @@ class TeacherExamResultsView extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: subjectResults.length,
-                  separatorBuilder: (context, index) => const Divider(height: 24),
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 24),
                   itemBuilder: (context, idx) {
                     final res = subjectResults[idx];
-                    final isPass = res.totalMarks > 0 && (res.marksObtained / res.totalMarks) >= 0.4;
+                    final isPass =
+                        res.totalMarks > 0 &&
+                        (res.marksObtained / res.totalMarks) >= 0.4;
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -718,15 +736,22 @@ class TeacherExamResultsView extends StatelessWidget {
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
-                            color: isPass ? Colors.green.shade50 : Colors.red.shade50,
+                            color: isPass
+                                ? Colors.green.shade50
+                                : Colors.red.shade50,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                             '${res.marksObtained.toStringAsFixed(1)} / ${res.totalMarks.toStringAsFixed(1)}',
                             style: TextStyle(
-                              color: isPass ? Colors.green.shade700 : Colors.red.shade700,
+                              color: isPass
+                                  ? Colors.green.shade700
+                                  : Colors.red.shade700,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
