@@ -43,8 +43,12 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
           (n) => n.classId == null || n.classId == currentUser.classIds.first,
         )
         .toList()
-        .reversed
-        .toList();
+      ..sort((a, b) {
+        if (a.createdAt == null && b.createdAt == null) return 0;
+        if (a.createdAt == null) return 1;
+        if (b.createdAt == null) return -1;
+        return b.createdAt!.compareTo(a.createdAt!);
+      });
 
     return Scaffold(
       appBar: widget.isFromDrawer
