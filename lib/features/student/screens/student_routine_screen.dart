@@ -68,55 +68,19 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
       'Sunday',
     ];
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            l10n.academicSchedule,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: AppColors.primaryStudent,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(60),
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: TabBar(
-                indicatorSize: TabBarIndicatorSize.tab,
-                indicator: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                ),
-                labelColor: AppColors.primaryStudent,
-                unselectedLabelColor: Colors.white,
-                labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                tabs: [
-                  Tab(text: l10n.routine),
-                  Tab(text: l10n.homework),
-                ],
-              ),
-            ),
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          l10n.academicSchedule,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        body: TabBarView(
-          children: [
-            RefreshIndicator(
-              onRefresh: () => routineNotifier.fetchRoutine(classId),
-              child: _buildRoutineList(entries, routineNotifier, days),
-            ),
-            RefreshIndicator(
-              onRefresh: () => homeworkNotifier.fetchHomework(classId),
-              child: _buildHomeworkList(context, homeworkNotifier),
-            ),
-          ],
-        ),
+        backgroundColor: AppColors.primaryStudent,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: RefreshIndicator(
+        onRefresh: () => routineNotifier.fetchRoutine(classId),
+        child: _buildRoutineList(entries, routineNotifier, days),
       ),
     );
   }
@@ -169,7 +133,9 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
-                      color: isToday ? AppColors.primaryStudent : Colors.grey[500],
+                      color: isToday
+                          ? AppColors.primaryStudent
+                          : Colors.grey[500],
                     ),
                   ),
                   if (isToday) ...[
@@ -268,18 +234,30 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                             Shimmer.fromColors(
                               baseColor: Colors.grey[300]!,
                               highlightColor: Colors.grey[100]!,
-                              child: Container(width: 60, height: 14, color: Colors.white),
+                              child: Container(
+                                width: 60,
+                                height: 14,
+                                color: Colors.white,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Shimmer.fromColors(
                               baseColor: Colors.grey[300]!,
                               highlightColor: Colors.grey[100]!,
-                              child: Container(width: 50, height: 11, color: Colors.white),
+                              child: Container(
+                                width: 50,
+                                height: 11,
+                                color: Colors.white,
+                              ),
                             ),
                           ],
                         ),
                         const SizedBox(width: 16),
-                        Container(height: 30, width: 1, color: Colors.grey[300]),
+                        Container(
+                          height: 30,
+                          width: 1,
+                          color: Colors.grey[300],
+                        ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
@@ -288,7 +266,11 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                               Shimmer.fromColors(
                                 baseColor: Colors.grey[300]!,
                                 highlightColor: Colors.grey[100]!,
-                                child: Container(width: 100, height: 15, color: Colors.white),
+                                child: Container(
+                                  width: 100,
+                                  height: 15,
+                                  color: Colors.white,
+                                ),
                               ),
                               const SizedBox(height: 6),
                               Row(
@@ -296,13 +278,20 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                                   Shimmer.fromColors(
                                     baseColor: Colors.grey[300]!,
                                     highlightColor: Colors.grey[100]!,
-                                    child: const Icon(Icons.person_outline, size: 12),
+                                    child: const Icon(
+                                      Icons.person_outline,
+                                      size: 12,
+                                    ),
                                   ),
                                   const SizedBox(width: 4),
                                   Shimmer.fromColors(
                                     baseColor: Colors.grey[300]!,
                                     highlightColor: Colors.grey[100]!,
-                                    child: Container(width: 80, height: 12, color: Colors.white),
+                                    child: Container(
+                                      width: 80,
+                                      height: 12,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -355,7 +344,11 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                           Shimmer.fromColors(
                             baseColor: Colors.grey[300]!,
                             highlightColor: Colors.grey[100]!,
-                            child: Container(width: 40, height: 14, color: Colors.white),
+                            child: Container(
+                              width: 40,
+                              height: 14,
+                              color: Colors.white,
+                            ),
                           ),
                           Shimmer.fromColors(
                             baseColor: Colors.grey[300]!,
@@ -375,19 +368,31 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                       Shimmer.fromColors(
                         baseColor: Colors.grey[300]!,
                         highlightColor: Colors.grey[100]!,
-                        child: Container(width: 150, height: 16, color: Colors.white),
+                        child: Container(
+                          width: 150,
+                          height: 16,
+                          color: Colors.white,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Shimmer.fromColors(
                         baseColor: Colors.grey[300]!,
                         highlightColor: Colors.grey[100]!,
-                        child: Container(width: double.infinity, height: 13, color: Colors.white),
+                        child: Container(
+                          width: double.infinity,
+                          height: 13,
+                          color: Colors.white,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Shimmer.fromColors(
                         baseColor: Colors.grey[300]!,
                         highlightColor: Colors.grey[100]!,
-                        child: Container(width: 200, height: 13, color: Colors.white),
+                        child: Container(
+                          width: 200,
+                          height: 13,
+                          color: Colors.white,
+                        ),
                       ),
                     ],
                   ),
@@ -502,7 +507,7 @@ class _RoutineCard extends StatelessWidget {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        SizedBox(height: 5,),
+                        SizedBox(height: 5),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -554,7 +559,6 @@ class _RoutineCard extends StatelessWidget {
                         ],
                       ),
                     ),
-
                   ],
                 ),
               ),
@@ -577,7 +581,8 @@ class _HomeworkCard extends StatelessWidget {
     final hw = sh.homework!;
     final isDone = sh.status == 'done';
     final isSubmitted = sh.status == 'submitted';
-    final isOverdue = hw.dueDate.isBefore(DateTime.now()) && !isDone && !isSubmitted;
+    final isOverdue =
+        hw.dueDate.isBefore(DateTime.now()) && !isDone && !isSubmitted;
 
     Color statusColor;
     String statusText;
@@ -602,7 +607,10 @@ class _HomeworkCard extends StatelessWidget {
     }
 
     final subjectName = hw.subjectInfo?.name ?? l10n.unknownSubject;
-    final formattedDate = DateFormat('EEEE, MMM d, yyyy', l10n.localeName).format(hw.dueDate);
+    final formattedDate = DateFormat(
+      'EEEE, MMM d, yyyy',
+      l10n.localeName,
+    ).format(hw.dueDate);
 
     return Card(
       elevation: 2,
@@ -660,7 +668,11 @@ class _HomeworkCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  _StatusChip(color: statusColor, text: statusText, icon: statusIcon),
+                  _StatusChip(
+                    color: statusColor,
+                    text: statusText,
+                    icon: statusIcon,
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
@@ -712,7 +724,11 @@ class _StatusChip extends StatelessWidget {
   final String text;
   final IconData icon;
 
-  const _StatusChip({required this.color, required this.text, required this.icon});
+  const _StatusChip({
+    required this.color,
+    required this.text,
+    required this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
