@@ -89,7 +89,9 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     String className = 'Class';
     try {
       final assignment = exam.assignments.firstWhere(
-        (a) => a.subjectId == widget.initialSubjectId && a.classId == widget.initialClassId,
+        (a) =>
+            a.subjectId == widget.initialSubjectId &&
+            a.classId == widget.initialClassId,
       );
       subjectName = assignment.subjectName;
       className = assignment.className;
@@ -115,16 +117,28 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
 
     setState(() {
       var filtered = _allClassStudents!;
-      
+
       if (sectionId != null && sectionId.isNotEmpty) {
         filtered = filtered.where((s) => s.sectionId == sectionId).toList();
       }
-      
+
       if (_selectedSubject != null) {
-        filtered = filtered.where((s) => s.subjectId == _selectedSubject!.id).toList();
+        filtered = filtered
+            .where((s) => s.subjectId == _selectedSubject!.id)
+            .toList();
       }
-      
+
       _displayStudents = filtered.toList();
+      
+      if (_displayStudents.isNotEmpty) {
+        final firstStudent = _displayStudents.first;
+        if (firstStudent.className != null && firstStudent.className!.isNotEmpty) {
+          _selectedClassName = firstStudent.className;
+        }
+        if (firstStudent.subjectName != null && firstStudent.subjectName!.isNotEmpty) {
+          _selectedSubject = Subject(id: _selectedSubject!.id, name: firstStudent.subjectName!);
+        }
+      }
     });
     _populateExistingMarks();
   }
@@ -178,16 +192,26 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
           ),
         );
 
-        final marksObtained = student.marksObtained ?? (existingResult.marksObtained != -1 ? existingResult.marksObtained : null);
-        final totalMarks = student.totalMarks ?? (existingResult.marksObtained != -1 ? existingResult.totalMarks : 100);
+        final marksObtained =
+            student.marksObtained ??
+            (existingResult.marksObtained != -1
+                ? existingResult.marksObtained
+                : null);
+        final totalMarks =
+            student.totalMarks ??
+            (existingResult.marksObtained != -1
+                ? existingResult.totalMarks
+                : 100);
 
         if (marksObtained != null) {
-          _getMarksController(student.id).text =
-              marksObtained == marksObtained.toInt()
+          _getMarksController(
+            student.id,
+          ).text = marksObtained == marksObtained.toInt()
               ? marksObtained.toInt().toString()
               : marksObtained.toString();
-          _getTotalMarksController(student.id).text =
-              totalMarks == totalMarks.toInt()
+          _getTotalMarksController(
+            student.id,
+          ).text = totalMarks == totalMarks.toInt()
               ? totalMarks.toInt().toString()
               : totalMarks.toString();
           _getRemarksController(student.id).text = existingResult.remarks;
@@ -278,79 +302,136 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
 
     return Card(
       margin: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 2,
+      shadowColor: Colors.black12,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Icon(Icons.class_outlined, color: Colors.grey),
-                const SizedBox(width: 16),
-                Text(
-                  'Class:',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700]),
-                ),
-                const SizedBox(width: 8),
-                Expanded(child: Text(_selectedClassName ?? 'N/A', style: const TextStyle(fontWeight: FontWeight.bold))),
-              ],
-            ),
-            const Divider(height: 16),
-            Row(
-              children: [
-                const Icon(Icons.book_outlined, color: Colors.grey),
-                const SizedBox(width: 16),
-                Text(
-                  'Subject:',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700]),
-                ),
-                const SizedBox(width: 8),
-                Expanded(child: Text(_selectedSubject?.name ?? 'N/A', style: const TextStyle(fontWeight: FontWeight.bold))),
-              ],
-            ),
-            const Divider(height: 16),
-            Row(
-              children: [
-                const Icon(Icons.grid_view_outlined, color: Colors.grey),
-                const SizedBox(width: 16),
-                Text(
-                  'Section:',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700]),
-                ),
-                const SizedBox(width: 8),
                 Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: displayValue,
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
+                  child: _buildInfoTile(
+                    icon: Icons.class_outlined,
+                    title: 'Class',
+                    value: _selectedClassName ?? 'N/A',
+                    iconColor: Colors.blue,
+                  ),
+                ),
+                Container(width: 1, height: 40, color: Colors.grey.shade200),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: _buildInfoTile(
+                      icon: Icons.book_outlined,
+                      title: 'Subject',
+                      value: _selectedSubject?.name ?? 'N/A',
+                      iconColor: Colors.orange,
                     ),
-                    hint: const Text('Select Section'),
-                    items: [
-                      const DropdownMenuItem<String>(
-                        value: null,
-                        child: Text('All Sections'),
-                      ),
-                      ...filteredSections.map(
-                        (s) => DropdownMenuItem<String>(
-                          value: s.id,
-                          child: Text(s.name),
-                        ),
-                      ),
-                    ],
-                    onChanged: (val) {
-                      setState(() {
-                        _selectedSectionId = val;
-                      });
-                      _loadStudentsForSection(val);
-                    },
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 16),
+            const Divider(height: 1),
+            const SizedBox(height: 16),
+            Text(
+              'Filter by Section',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  value: displayValue,
+                  hint: const Text('Select Section'),
+                  icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                  items: [
+                    const DropdownMenuItem<String>(
+                      value: null,
+                      child: Text('All Sections'),
+                    ),
+                    ...filteredSections.map(
+                      (s) => DropdownMenuItem<String>(
+                        value: s.id,
+                        child: Text(s.name),
+                      ),
+                    ),
+                  ],
+                  onChanged: (val) {
+                    setState(() {
+                      _selectedSectionId = val;
+                    });
+                    _loadStudentsForSection(val);
+                  },
+                ),
+              ),
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildInfoTile({
+    required IconData icon,
+    required String title,
+    required String value,
+    required Color iconColor,
+  }) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: iconColor, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

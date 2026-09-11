@@ -741,10 +741,7 @@ class _ResultTabState extends State<_ResultTab> {
                 offset: const Offset(0, 4),
               ),
             ],
-            border: Border.all(
-              color: Colors.grey.shade200,
-              width: 1.5,
-            ),
+            border: Border.all(color: Colors.grey.shade200, width: 1.5),
           ),
           child: Shimmer.fromColors(
             baseColor: Colors.grey.shade300,
@@ -1414,6 +1411,8 @@ class _AssignedSubjectCard extends StatelessWidget {
       examDate.month,
       examDate.day,
     );
+
+    print("fdfdf${assignment.sectionId}");
     final todayNormalized = DateTime(now.year, now.month, now.day);
     final daysLeft = examDateNormalized.difference(todayNormalized).inDays;
     final isToday = daysLeft == 0;
