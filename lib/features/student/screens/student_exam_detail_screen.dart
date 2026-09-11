@@ -115,7 +115,7 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                           children: [
                             Icon(Icons.calendar_month_rounded, size: 18),
                             SizedBox(width: 6),
-                            Text('Routine'),
+                            Text(AppLocalizations.of(context)!.routine),
                           ],
                         ),
                       ),
@@ -135,7 +135,7 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                           children: [
                             Icon(Icons.analytics_rounded, size: 18),
                             SizedBox(width: 6),
-                            Text('Results'),
+                            Text(AppLocalizations.of(context)!.results),
                           ],
                         ),
                       ),
@@ -872,14 +872,14 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
               children: [
                 _buildSummaryStat(
                   icon: Icons.scoreboard_rounded,
-                  label: 'Total Marks',
+                  label: AppLocalizations.of(context)!.totalMarksText,
                   value:
                       '${obtained.toStringAsFixed(obtained.truncateToDouble() == obtained ? 0 : 1)} / ${max.toStringAsFixed(max.truncateToDouble() == max ? 0 : 1)}',
                 ),
                 Container(height: 24, width: 1, color: Colors.white24),
                 _buildSummaryStat(
                   icon: Icons.check_circle_outline_rounded,
-                  label: 'Subjects Passed',
+                  label: AppLocalizations.of(context)!.subjectsPassed,
                   value: '$passedSubjects of $totalSubjects',
                 ),
               ],

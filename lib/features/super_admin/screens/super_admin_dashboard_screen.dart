@@ -471,7 +471,7 @@ class _SuperAdminDashboardContentState
       _ActionItem(label: l10n.pricing, subtitle: 'Configure subscription plans', icon: Icons.sell_rounded, color: const Color(0xFF8B5CF6), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PricingSchoolScreen()))),
       _ActionItem(label: l10n.subscription, subtitle: 'View active subscriptions', icon: Icons.verified_user_rounded, color: const Color(0xFF10B981), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SubscriptionScreen()))),
       _ActionItem(label: l10n.backup, subtitle: 'System data & backup', icon: Icons.storage_rounded, color: const Color(0xFFF59E0B), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BackupScreen()))),
-      _ActionItem(label: 'Announcement', subtitle: 'Broadcast system notification', icon: Icons.campaign_rounded, color: const Color(0xFFEF4444), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SuperAdminNotificationSenderScreen()))),
+      _ActionItem(label: AppLocalizations.of(context)!.announcement, subtitle: 'Broadcast system notification', icon: Icons.campaign_rounded, color: const Color(0xFFEF4444), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SuperAdminNotificationSenderScreen()))),
     ];
 
     return Column(

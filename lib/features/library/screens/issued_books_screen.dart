@@ -172,7 +172,7 @@ class _IssuedBooksScreenState extends State<IssuedBooksScreen> {
   }) {
     final l10n = AppLocalizations.of(context)!;
     final filters = [
-      {'key': 'All', 'label': l10n.filterAll, 'count': totalCount, 'color': const Color(0xFF1A3C6E)},
+      {'key': AppLocalizations.of(context)!.all, 'label': l10n.filterAll, 'count': totalCount, 'color': const Color(0xFF1A3C6E)},
       {'key': 'Issued', 'label': l10n.filterIssued, 'count': activeCount, 'color': const Color(0xFF2563EB)},
       if (overdueCount > 0)
         {'key': 'Overdue', 'label': l10n.filterOverdue, 'count': overdueCount, 'color': const Color(0xFFEF4444)},

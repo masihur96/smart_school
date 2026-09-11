@@ -216,14 +216,14 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Limit Reached'),
+        title: Text(AppLocalizations.of(context)!.limitReached),
         content: const Text(
           'You have reached the maximum limit of your current pricing plan. Please upgrade to add more.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancelText),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
@@ -417,10 +417,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             const SizedBox(height: 32),
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Full Name',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.fullName,
                 prefixIcon: Icon(Icons.person),
-                hintText: 'e.g. John Doe',
+                hintText: AppLocalizations.of(context)!.egJohnDoe,
               ),
               textInputAction: TextInputAction.next,
               validator: _validateName,
@@ -455,7 +455,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
 
             // ── Multi-Select Section Picker ──────────────────────────────────
             _MultiSelectField(
-              label: 'Section',
+              label: AppLocalizations.of(context)!.section,
               icon: Icons.meeting_room,
               isLoading: isSectionsLoading,
               emptyHint: _selectedClassIds.isEmpty
@@ -489,10 +489,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
 
             TextFormField(
               controller: _rollIdController,
-              decoration: const InputDecoration(
-                labelText: 'Roll Number',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.rollNumberLabel,
                 prefixIcon: Icon(Icons.numbers),
-                hintText: 'e.g. 101',
+                hintText: AppLocalizations.of(context)!.egRoll,
               ),
               keyboardType: TextInputType.number,
               textInputAction: TextInputAction.next,
@@ -501,10 +501,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _aboutController,
-              decoration: const InputDecoration(
-                labelText: 'About (e.g. About Student)',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.aboutStudent,
                 prefixIcon: Icon(Icons.badge),
-                hintText: 'e.g. Student Bio or Notes',
+                hintText: AppLocalizations.of(context)!.egStudentBio,
               ),
               textInputAction: TextInputAction.next,
               validator: _validateAbout,
@@ -512,10 +512,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email Address',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.emailAddress,
                 prefixIcon: Icon(Icons.email),
-                hintText: 'e.g. student@school.edu',
+                hintText: AppLocalizations.of(context)!.egStudentEmail,
               ),
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
@@ -524,10 +524,10 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _phoneController,
-              decoration: const InputDecoration(
-                labelText: 'Phone',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.phone,
                 prefixIcon: Icon(Icons.phone),
-                hintText: 'e.g. +8801712345678',
+                hintText: AppLocalizations.of(context)!.egPhone,
               ),
               keyboardType: TextInputType.phone,
               textInputAction: TextInputAction.next,
@@ -543,7 +543,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                     ? 'Password (leave blank to keep current)'
                     : 'Password',
                 prefixIcon: const Icon(Icons.lock),
-                hintText: 'At least 6 characters',
+                hintText: AppLocalizations.of(context)!.atLeast6Chars,
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword ? Icons.visibility_off : Icons.visibility,

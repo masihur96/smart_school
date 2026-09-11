@@ -16,6 +16,8 @@ import '../../../core/utils/storage_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/expense_model.dart';
 import '../providers/expense_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
+
 
 class AddEditExpenseScreen extends StatefulWidget {
   final Expense? expense;
@@ -222,7 +224,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                   Icons.photo_camera_rounded,
                   color: Color(0xFF10B981),
                 ),
-                title: const Text('Take Photo / Receipt'),
+                title: Text(AppLocalizations.of(context)!.takePhotoReceipt),
                 onTap: () {
                   Navigator.pop(ctx);
                   _pickImageSource(ImageSource.camera);
@@ -233,7 +235,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                   Icons.photo_library_rounded,
                   color: Color(0xFF6366F1),
                 ),
-                title: const Text('Choose from Gallery'),
+                title: Text(AppLocalizations.of(context)!.chooseFromGallery),
                 onTap: () {
                   Navigator.pop(ctx);
                   _pickImageSource(ImageSource.gallery);
@@ -244,7 +246,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                   Icons.picture_as_pdf_rounded,
                   color: Color(0xFFEC4899),
                 ),
-                title: const Text('Select PDF / Document'),
+                title: Text(AppLocalizations.of(context)!.selectPdfDocument),
                 onTap: () {
                   Navigator.pop(ctx);
                   _pickDocument();
@@ -326,8 +328,8 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
           });
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Attachment uploaded successfully!'),
+              SnackBar(
+                content: Text(AppLocalizations.of(context)!.attachmentUploadedSuccess),
                 backgroundColor: Color(0xFF10B981),
                 behavior: SnackBarBehavior.floating,
               ),
@@ -692,7 +694,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                   color: themeColor,
                 ),
                 decoration: InputDecoration(
-                  labelText: 'Amount (৳)',
+                  labelText: AppLocalizations.of(context)!.amountTaka,
                   hintText: '0.00',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -719,7 +721,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
               DropdownButtonFormField<String>(
                 initialValue: _selectedCategory,
                 decoration: InputDecoration(
-                  labelText: 'Category',
+                  labelText: AppLocalizations.of(context)!.category,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -749,7 +751,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                     child: DropdownButtonFormField<String>(
                       initialValue: _selectedPaymentMethod,
                       decoration: InputDecoration(
-                        labelText: 'Channel',
+                        labelText: AppLocalizations.of(context)!.channel,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -778,8 +780,8 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                     child: TextFormField(
                       controller: _refNumberController,
                       decoration: InputDecoration(
-                        labelText: 'Receipt / Ref #',
-                        hintText: 'e.g. DEP-2026-08-001',
+                        labelText: AppLocalizations.of(context)!.receiptRef,
+                        hintText: AppLocalizations.of(context)!.egReceipt,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -842,7 +844,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                 controller: _descriptionController,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  labelText: 'Remarks / Details (Optional)',
+                  labelText: AppLocalizations.of(context)!.remarksDetailsOptional,
                   hintText: isIncome
                       ? 'e.g. Collected via offline counter and bank deposits'
                       : 'e.g. Monthly utility bill payment voucher...',

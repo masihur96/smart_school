@@ -75,7 +75,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get notifications => 'বিজ্ঞপ্তি';
 
   @override
-  String get homework => 'বাড়ির কাজ';
+  String get homework => 'হোমওয়ার্ক';
 
   @override
   String get attendance => 'উপস্থিতি';
@@ -227,7 +227,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get marqueeMessage => 'মার্কি বার্তা';
 
   @override
-  String get allClasses => 'সকল শ্রেণি';
+  String get allClasses => 'সব ক্লাস';
 
   @override
   String get schoolPerformance => 'স্কুল পারফরম্যান্স';
@@ -626,7 +626,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get viewProfile => 'প্রোফাইল দেখুন';
 
   @override
-  String get sendNotification => 'বিজ্ঞপ্তি পাঠান';
+  String get sendNotification => 'নোটিফিকেশন পাঠান';
 
   @override
   String get editTeacher => 'শিক্ষক সম্পাদনা';
@@ -650,7 +650,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get registerTeacher => 'শিক্ষক নিবন্ধন করুন';
 
   @override
-  String get delete => 'মুছুন';
+  String get delete => 'মুছে ফেলুন';
 
   @override
   String notifyTeacher(String name) {
@@ -806,7 +806,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String rollNumber(String roll) {
-    return 'রোল: $roll';
+    return 'রোল নম্বর';
   }
 
   @override
@@ -1049,7 +1049,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get classLabel => 'শ্রেণি';
 
   @override
-  String get section => 'শাখা';
+  String get section => 'সেকশন';
 
   @override
   String get subject => 'বিষয়';
@@ -1092,7 +1092,7 @@ class AppLocalizationsBn extends AppLocalizations {
       'অনুগ্রহ করে শ্রেণী, বিষয় এবং শিক্ষক নির্বাচন করুন';
 
   @override
-  String get failedToSaveHomework => 'হোমওয়ার্ক সংরক্ষণ করতে ব্যর্থ হয়েছে';
+  String get failedToSaveHomework => 'হোমওয়ার্ক সংরক্ষণ করতে ব্যর্থ';
 
   @override
   String get addHomework => 'হোমওয়ার্ক যোগ করুন';
@@ -1137,7 +1137,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get messageLabel => 'বার্তা';
 
   @override
-  String get limitReached => 'সীমা অতিক্রম করেছে';
+  String get limitReached => 'সীমা পেরিয়ে গেছে';
 
   @override
   String studentLimitReached(int count, int max) {
@@ -2315,7 +2315,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get selectAllVisible => 'দৃশ্যমান সকলকে নির্বাচন করুন';
 
   @override
-  String get clearSelection => 'নির্বাচন বাতিল করুন';
+  String get clearSelection => 'নির্বাচন পরিষ্কার করুন';
 
   @override
   String get statTotal => 'মোট';
@@ -3040,4 +3040,441 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get newUpdateDownloaded => '🎉 একটি নতুন আপডেট ডাউনলোড করা হয়েছে।';
+
+  @override
+  String get egTeacherEmail => 'যেমন teacher@school.edu';
+
+  @override
+  String get egImageLink => 'https://example.com/image.png';
+
+  @override
+  String get examName => 'পরীক্ষার নাম';
+
+  @override
+  String get egStudentEmail => 'যেমন student@school.edu';
+
+  @override
+  String get previousPage => 'আগের পৃষ্ঠা';
+
+  @override
+  String get enterYourPassword => 'আপনার পাসওয়ার্ড দিন';
+
+  @override
+  String get egPhone => 'যেমন +8801712345678';
+
+  @override
+  String get schoolIdCopied => 'স্কুল আইডি কপি করা হয়েছে';
+
+  @override
+  String get typeMessageHere => 'আপনার মেসেজ এখানে লিখুন...';
+
+  @override
+  String get egRoll => 'যেমন 101';
+
+  @override
+  String get startDate => 'শুরুর তারিখ';
+
+  @override
+  String get imageUrlOptional => 'ছবির ইউআরএল (ঐচ্ছিক)';
+
+  @override
+  String get allDesignations => 'সব পদবি';
+
+  @override
+  String get searchByNameOrRoll => 'নাম বা রোল দিয়ে খুঁজুন…';
+
+  @override
+  String get searchRecords => 'রেকর্ড খুঁজুন...';
+
+  @override
+  String get receiverUuid => 'প্রাপকের UUID';
+
+  @override
+  String get prepare => 'প্রস্তুত করুন';
+
+  @override
+  String get chooseFromGallery => 'গ্যালারি থেকে বেছে নিন';
+
+  @override
+  String get securityCredentialsSaved =>
+      'নিরাপত্তা ক্রেডেনশিয়াল সফলভাবে সংরক্ষিত হয়েছে';
+
+  @override
+  String get announcement => 'ঘোষণা';
+
+  @override
+  String get pdfFileReq => 'পিডিএফ ফাইল *';
+
+  @override
+  String get noStudentsForTranscripts =>
+      'ট্রান্সক্রিপ্টের জন্য কোনো শিক্ষার্থী নির্বাচন করা হয়নি।';
+
+  @override
+  String get attendanceSubmittedSuccess => 'উপস্থিতি সফলভাবে জমা দেওয়া হয়েছে';
+
+  @override
+  String get targetAudience => 'লক্ষ্য দর্শক';
+
+  @override
+  String get enterUserUuid => 'ব্যবহারকারীর UUID দিন';
+
+  @override
+  String get authorReq => 'লেখক *';
+
+  @override
+  String get coverImageOptional => 'কভার ছবি (ঐচ্ছিক)';
+
+  @override
+  String get markAttendance => 'উপস্থিতি দিন';
+
+  @override
+  String get shareTimetablePdf => 'রুটিন পিডিএফ শেয়ার করুন';
+
+  @override
+  String get emailAddress => 'ইমেইল ঠিকানা';
+
+  @override
+  String get refresh => 'রিফ্রেশ';
+
+  @override
+  String get selectPdfDocument => 'পিডিএফ / ডকুমেন্ট নির্বাচন করুন';
+
+  @override
+  String get pleaseSelectClassSubject =>
+      'দয়া করে ক্লাস এবং বিষয় নির্বাচন করুন';
+
+  @override
+  String get longitude => 'দ্রাঘিমাংশ';
+
+  @override
+  String get atLeast6Chars => 'অন্তত ৬টি অক্ষর';
+
+  @override
+  String get openInExternalApp => 'বাহ্যিক অ্যাপে খুলুন';
+
+  @override
+  String get enterMarqueeText => 'মারকিউ স্ক্রোলিং টেক্সট দিন...';
+
+  @override
+  String get egPrincipalContact => 'যেমন principal@school.edu বা 017...';
+
+  @override
+  String get messageBody => 'মেসেজ বডি';
+
+  @override
+  String get enterMarksOneStudent =>
+      'দয়া করে অন্তত একজন শিক্ষার্থীর নম্বর দিন';
+
+  @override
+  String get egDrMasihur => 'যেমন ড. মশিউর রহমান';
+
+  @override
+  String get egAddress => 'যেমন ১২৩ এডুকেশন এভিনিউ, ধানমন্ডি, ঢাকা';
+
+  @override
+  String get unassignStudents => 'শিক্ষার্থীদের বাতিল করুন';
+
+  @override
+  String get confirmDeleteStudent =>
+      'আপনি কি নিশ্চিত যে এই শিক্ষার্থীকে মুছে ফেলতে চান?';
+
+  @override
+  String get egSystemAlert => 'যেমন সিস্টেম রক্ষণাবেক্ষণ সতর্কতা';
+
+  @override
+  String get searchNameIdAddress => 'নাম, আইডি, ঠিকানা দিয়ে খুঁজুন…';
+
+  @override
+  String get markPresent => 'উপস্থিত দিন';
+
+  @override
+  String get noStudentsForIdCards =>
+      'আইডি কার্ডের জন্য কোনো শিক্ষার্থী নির্বাচন করা হয়নি।';
+
+  @override
+  String get aboutStudent => 'সম্পর্কে (যেমন শিক্ষার্থীর সম্পর্কে)';
+
+  @override
+  String get schoolIdNotFound => 'স্কুল আইডি পাওয়া যায়নি';
+
+  @override
+  String get egReceipt => 'যেমন DEP-2026-08-001';
+
+  @override
+  String get remarksDetailsOptional => 'মন্তব্য / বিস্তারিত (ঐচ্ছিক)';
+
+  @override
+  String get imageOptions => 'ছবির অপশন';
+
+  @override
+  String get phoneNumber => 'ফোন নম্বর';
+
+  @override
+  String get retrySetup => 'সেটআপ পুনরায় চেষ্টা করুন';
+
+  @override
+  String get searchSchoolNameEmailId =>
+      'স্কুলের নাম, ইমেইল বা আইডি দিয়ে খুঁজুন...';
+
+  @override
+  String get weeklyGrid => 'সাপ্তাহিক গ্রিড';
+
+  @override
+  String get publishedYear => 'প্রকাশিত বছর';
+
+  @override
+  String get logOut => 'লগ আউট';
+
+  @override
+  String get logInWithBiometrics => 'বায়োমেট্রিক্স দিয়ে লগইন করুন';
+
+  @override
+  String get noHomeworksFound =>
+      'কোনো হোমওয়ার্ক পাওয়া যায়নি।\\nযোগ করতে + চাপুন।';
+
+  @override
+  String get unassignStudent => 'শিক্ষার্থী বাতিল করুন';
+
+  @override
+  String get dataPath => 'ডেটা পাথ';
+
+  @override
+  String get share => 'শেয়ার করুন';
+
+  @override
+  String get subjectsPassed => 'পাস করা বিষয়সমূহ';
+
+  @override
+  String get noStudentsForExamSection =>
+      'এই পরীক্ষার সেকশনের জন্য কোনো শিক্ষার্থী নেই।';
+
+  @override
+  String get dataUuid => 'ডেটা UUID';
+
+  @override
+  String get download => 'ডাউনলোড';
+
+  @override
+  String get verify => 'যাচাই করুন';
+
+  @override
+  String get enterEmailOrPhone => 'আপনার ইমেইল বা ফোন দিন';
+
+  @override
+  String get amountTaka => 'পরিমাণ (৳)';
+
+  @override
+  String get receiptRef => 'রশিদ / রেফারেন্স #';
+
+  @override
+  String get egUuidString => 'যেমন UUID বা ID স্ট্রিং';
+
+  @override
+  String get admin => 'অ্যাডমিন';
+
+  @override
+  String get noClass => 'কোনো ক্লাস নেই';
+
+  @override
+  String get totalMarksText => 'মোট নম্বর';
+
+  @override
+  String get unknownClass => 'অজানা ক্লাস';
+
+  @override
+  String get noStudentsToGenTranscripts =>
+      'ট্রান্সক্রিপ্ট তৈরি করার জন্য কোনো শিক্ষার্থী নেই।';
+
+  @override
+  String get searchNameRoll => 'নাম/রোল খুঁজুন…';
+
+  @override
+  String get notificationSentSuccess => 'নোটিফিকেশন সফলভাবে পাঠানো হয়েছে';
+
+  @override
+  String get print => 'প্রিন্ট';
+
+  @override
+  String get title => 'শিরোনাম';
+
+  @override
+  String get takePhotoReceipt => 'ছবি / রশিদ তুলুন';
+
+  @override
+  String get retryLastMessage => 'শেষ মেসেজ আবার চেষ্টা করুন';
+
+  @override
+  String get noDeletedRecordsCategory =>
+      'এই ক্যাটাগরির জন্য কোনো মুছে ফেলা রেকর্ড নেই';
+
+  @override
+  String get enter6DigitCode => '৬-সংখ্যার কোড দিন';
+
+  @override
+  String get designation => 'পদবি';
+
+  @override
+  String get theScheduleFor => 'এর রুটিন ';
+
+  @override
+  String get fillRequiredFields => 'দয়া করে প্রয়োজনীয় ঘরগুলো পূরণ করুন';
+
+  @override
+  String get egPrincipalEmail => 'যেমন principal@school.edu';
+
+  @override
+  String get egJohnDoe => 'যেমন রহিম মিয়া';
+
+  @override
+  String get deletingTransaction => 'লেনদেন মুছে ফেলা হচ্ছে...';
+
+  @override
+  String get printTimetable => 'রুটিন প্রিন্ট করুন';
+
+  @override
+  String get noSection => 'কোনো সেকশন নেই';
+
+  @override
+  String get unknownSection => 'অজানা সেকশন';
+
+  @override
+  String get notificationTitle => 'নোটিফিকেশন শিরোনাম';
+
+  @override
+  String get dayByDay => 'দিন-প্রতিদিন';
+
+  @override
+  String get noDeletedRecordsFound => 'কোনো মুছে ফেলা রেকর্ড পাওয়া যায়নি';
+
+  @override
+  String get filtered => 'ফিল্টার করা হয়েছে';
+
+  @override
+  String get resultsFor => 'এর ফলাফল ';
+
+  @override
+  String get latitude => 'অক্ষাংশ';
+
+  @override
+  String get read => 'পড়া হয়েছে';
+
+  @override
+  String get failedToGetResponse => 'রেসপন্স পেতে ব্যর্থ। আবার চেষ্টা করুন।';
+
+  @override
+  String get egSeniorLecturer => 'যেমন সিনিয়র প্রভাষক, গণিত';
+
+  @override
+  String get failedToSubmitMarks => 'নম্বর জমা দিতে ব্যর্থ';
+
+  @override
+  String get noResultsSelectedStudents =>
+      'নির্বাচিত শিক্ষার্থীদের কোনো ফলাফল পাওয়া যায়নি।';
+
+  @override
+  String get egOxfordModel => 'যেমন অক্সফোর্ড মডেল একাডেমি';
+
+  @override
+  String get homeworkProvided => 'দেওয়া হোমওয়ার্ক';
+
+  @override
+  String get nextPage => 'পরবর্তী পৃষ্ঠা';
+
+  @override
+  String get allowedRadius => 'অনুমোদিত ব্যাসার্ধ (মিটার)';
+
+  @override
+  String get content => 'বিষয়বস্তু';
+
+  @override
+  String get totalPages => 'মোট পৃষ্ঠা';
+
+  @override
+  String get deleteForever => 'চিরতরে মুছে ফেলুন';
+
+  @override
+  String get bookTitleReq => 'বইয়ের নাম *';
+
+  @override
+  String get examScheduleFor => 'এর পরীক্ষার রুটিন ';
+
+  @override
+  String get restoreSelected => 'নির্বাচিতগুলো পুনরুদ্ধার করুন';
+
+  @override
+  String get zoomIn => 'জুম ইন';
+
+  @override
+  String get channel => 'মাধ্যম';
+
+  @override
+  String get marksSubmittedSuccess => 'নম্বর সফলভাবে জমা দেওয়া হয়েছে';
+
+  @override
+  String get submitAttendance => 'উপস্থিতি জমা দিন';
+
+  @override
+  String get fullName => 'পুরো নাম';
+
+  @override
+  String get zoomOut => 'জুম আউট';
+
+  @override
+  String get category => 'ক্যাটাগরি';
+
+  @override
+  String get attendanceMarkedSuccess => 'উপস্থিতি সফলভাবে দেওয়া হয়েছে!';
+
+  @override
+  String get emailVerification => 'ইমেইল যাচাইকরণ';
+
+  @override
+  String get noStudentsToGenIdCards =>
+      'আইডি কার্ড তৈরি করার জন্য কোনো শিক্ষার্থী নেই।';
+
+  @override
+  String get tcPreview => 'ট্রান্সফার সার্টিফিকেট প্রিভিউ';
+
+  @override
+  String get egStudentBio => 'যেমন শিক্ষার্থীর বায়ো বা নোট';
+
+  @override
+  String get noStudentsForReportCards =>
+      'রিপোর্ট কার্ডের জন্য কোনো শিক্ষার্থী নির্বাচন করা হয়নি।';
+
+  @override
+  String get egDrJohnDoe => 'যেমন ড. রহিম মিয়া';
+
+  @override
+  String get resetZoom => 'জুম রিসেট (১০০%)';
+
+  @override
+  String get subjectReq => 'বিষয় *';
+
+  @override
+  String get rollNo => 'রোল নং';
+
+  @override
+  String get generatePdf => 'পিডিএফ তৈরি করুন';
+
+  @override
+  String get postedBy => 'প্রকাশ করেছেন';
+
+  @override
+  String get attachmentUploadedSuccess => 'অ্যাটাচমেন্ট সফলভাবে আপলোড হয়েছে!';
+
+  @override
+  String get messageStr => 'মেসেজ';
+
+  @override
+  String get classReq => 'ক্লাস *';
+
+  @override
+  String get cancelText => 'বাতিল';
+
+  @override
+  String get endDate => 'শেষ তারিখ';
+
+  @override
+  String get setCredentials => 'ক্রেডেনশিয়াল সেট করুন';
 }

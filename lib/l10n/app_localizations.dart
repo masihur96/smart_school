@@ -1613,7 +1613,7 @@ abstract class AppLocalizations {
   /// No description provided for @rollNumber.
   ///
   /// In en, this message translates to:
-  /// **'Roll: {roll}'**
+  /// **'Roll Number'**
   String rollNumber(String roll);
 
   /// No description provided for @marksEnteredRequired.
@@ -4355,7 +4355,7 @@ abstract class AppLocalizations {
   /// No description provided for @clearSelection.
   ///
   /// In en, this message translates to:
-  /// **'Clear Selection'**
+  /// **'Clear selection'**
   String get clearSelection;
 
   /// No description provided for @statTotal.
@@ -5639,6 +5639,852 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'🎉 A new update has been downloaded.'**
   String get newUpdateDownloaded;
+
+  /// No description provided for @egTeacherEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. teacher@school.edu'**
+  String get egTeacherEmail;
+
+  /// No description provided for @egImageLink.
+  ///
+  /// In en, this message translates to:
+  /// **'https://example.com/image.png'**
+  String get egImageLink;
+
+  /// No description provided for @examName.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Name'**
+  String get examName;
+
+  /// No description provided for @egStudentEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. student@school.edu'**
+  String get egStudentEmail;
+
+  /// No description provided for @previousPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Page'**
+  String get previousPage;
+
+  /// No description provided for @enterYourPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get enterYourPassword;
+
+  /// No description provided for @egPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. +8801712345678'**
+  String get egPhone;
+
+  /// No description provided for @schoolIdCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'School ID copied'**
+  String get schoolIdCopied;
+
+  /// No description provided for @typeMessageHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your message here...'**
+  String get typeMessageHere;
+
+  /// No description provided for @egRoll.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 101'**
+  String get egRoll;
+
+  /// No description provided for @startDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date'**
+  String get startDate;
+
+  /// No description provided for @imageUrlOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Image URL (Optional)'**
+  String get imageUrlOptional;
+
+  /// No description provided for @allDesignations.
+  ///
+  /// In en, this message translates to:
+  /// **'All Designations'**
+  String get allDesignations;
+
+  /// No description provided for @searchByNameOrRoll.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name or roll…'**
+  String get searchByNameOrRoll;
+
+  /// No description provided for @searchRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Search records...'**
+  String get searchRecords;
+
+  /// No description provided for @receiverUuid.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiver UUID'**
+  String get receiverUuid;
+
+  /// No description provided for @prepare.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare'**
+  String get prepare;
+
+  /// No description provided for @chooseFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from Gallery'**
+  String get chooseFromGallery;
+
+  /// No description provided for @securityCredentialsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Security credentials saved successfully'**
+  String get securityCredentialsSaved;
+
+  /// No description provided for @announcement.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement'**
+  String get announcement;
+
+  /// No description provided for @pdfFileReq.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF File *'**
+  String get pdfFileReq;
+
+  /// No description provided for @noStudentsForTranscripts.
+  ///
+  /// In en, this message translates to:
+  /// **'No students selected for transcripts.'**
+  String get noStudentsForTranscripts;
+
+  /// No description provided for @attendanceSubmittedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance submitted successfully'**
+  String get attendanceSubmittedSuccess;
+
+  /// No description provided for @targetAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Audience'**
+  String get targetAudience;
+
+  /// No description provided for @enterUserUuid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter user UUID'**
+  String get enterUserUuid;
+
+  /// No description provided for @authorReq.
+  ///
+  /// In en, this message translates to:
+  /// **'Author *'**
+  String get authorReq;
+
+  /// No description provided for @coverImageOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover Image (optional)'**
+  String get coverImageOptional;
+
+  /// No description provided for @markAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Attendance'**
+  String get markAttendance;
+
+  /// No description provided for @shareTimetablePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Timetable PDF'**
+  String get shareTimetablePdf;
+
+  /// No description provided for @emailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Address'**
+  String get emailAddress;
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// No description provided for @selectPdfDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Select PDF / Document'**
+  String get selectPdfDocument;
+
+  /// No description provided for @pleaseSelectClassSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select class and subject'**
+  String get pleaseSelectClassSubject;
+
+  /// No description provided for @longitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Longitude'**
+  String get longitude;
+
+  /// No description provided for @atLeast6Chars.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 6 characters'**
+  String get atLeast6Chars;
+
+  /// No description provided for @openInExternalApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in External App'**
+  String get openInExternalApp;
+
+  /// No description provided for @enterMarqueeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter marquee scrolling text...'**
+  String get enterMarqueeText;
+
+  /// No description provided for @egPrincipalContact.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. principal@school.edu or 017...'**
+  String get egPrincipalContact;
+
+  /// No description provided for @messageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Message Body'**
+  String get messageBody;
+
+  /// No description provided for @enterMarksOneStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter marks for at least one student'**
+  String get enterMarksOneStudent;
+
+  /// No description provided for @egDrMasihur.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Dr. Masihur Rahman'**
+  String get egDrMasihur;
+
+  /// No description provided for @egAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 123 Education Ave, Dhanmondi, Dhaka'**
+  String get egAddress;
+
+  /// No description provided for @unassignStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassign Students'**
+  String get unassignStudents;
+
+  /// No description provided for @confirmDeleteStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this student?'**
+  String get confirmDeleteStudent;
+
+  /// No description provided for @egSystemAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., System Maintenance Alert'**
+  String get egSystemAlert;
+
+  /// No description provided for @searchNameIdAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, ID, address…'**
+  String get searchNameIdAddress;
+
+  /// No description provided for @markPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Present'**
+  String get markPresent;
+
+  /// No description provided for @noStudentsForIdCards.
+  ///
+  /// In en, this message translates to:
+  /// **'No students selected for ID cards.'**
+  String get noStudentsForIdCards;
+
+  /// No description provided for @aboutStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'About (e.g. About Student)'**
+  String get aboutStudent;
+
+  /// No description provided for @schoolIdNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'School ID not found'**
+  String get schoolIdNotFound;
+
+  /// No description provided for @egReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. DEP-2026-08-001'**
+  String get egReceipt;
+
+  /// No description provided for @remarksDetailsOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Remarks / Details (Optional)'**
+  String get remarksDetailsOptional;
+
+  /// No description provided for @imageOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Image Options'**
+  String get imageOptions;
+
+  /// No description provided for @phoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number'**
+  String get phoneNumber;
+
+  /// No description provided for @retrySetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry Setup'**
+  String get retrySetup;
+
+  /// No description provided for @searchSchoolNameEmailId.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by school name, email, or ID...'**
+  String get searchSchoolNameEmailId;
+
+  /// No description provided for @weeklyGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Grid'**
+  String get weeklyGrid;
+
+  /// No description provided for @publishedYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Published Year'**
+  String get publishedYear;
+
+  /// No description provided for @logOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get logOut;
+
+  /// No description provided for @logInWithBiometrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in with biometrics'**
+  String get logInWithBiometrics;
+
+  /// No description provided for @noHomeworksFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No homeworks found.\\nTap + to add one.'**
+  String get noHomeworksFound;
+
+  /// No description provided for @unassignStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassign Student'**
+  String get unassignStudent;
+
+  /// No description provided for @dataPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Path'**
+  String get dataPath;
+
+  /// No description provided for @share.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
+  /// No description provided for @subjectsPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'Subjects Passed'**
+  String get subjectsPassed;
+
+  /// No description provided for @noStudentsForExamSection.
+  ///
+  /// In en, this message translates to:
+  /// **'No students available for this exam section.'**
+  String get noStudentsForExamSection;
+
+  /// No description provided for @dataUuid.
+  ///
+  /// In en, this message translates to:
+  /// **'Data UUID'**
+  String get dataUuid;
+
+  /// No description provided for @download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get download;
+
+  /// No description provided for @verify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verify;
+
+  /// No description provided for @enterEmailOrPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email or phone'**
+  String get enterEmailOrPhone;
+
+  /// No description provided for @amountTaka.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (৳)'**
+  String get amountTaka;
+
+  /// No description provided for @receiptRef.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt / Ref #'**
+  String get receiptRef;
+
+  /// No description provided for @egUuidString.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., UUID or ID string'**
+  String get egUuidString;
+
+  /// No description provided for @admin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get admin;
+
+  /// No description provided for @noClass.
+  ///
+  /// In en, this message translates to:
+  /// **'No Class'**
+  String get noClass;
+
+  /// No description provided for @totalMarksText.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Marks'**
+  String get totalMarksText;
+
+  /// No description provided for @unknownClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Class'**
+  String get unknownClass;
+
+  /// No description provided for @noStudentsToGenTranscripts.
+  ///
+  /// In en, this message translates to:
+  /// **'No students to generate transcripts.'**
+  String get noStudentsToGenTranscripts;
+
+  /// No description provided for @searchNameRoll.
+  ///
+  /// In en, this message translates to:
+  /// **'Search name/roll…'**
+  String get searchNameRoll;
+
+  /// No description provided for @notificationSentSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification sent successfully'**
+  String get notificationSentSuccess;
+
+  /// No description provided for @print.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get print;
+
+  /// No description provided for @title.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get title;
+
+  /// No description provided for @takePhotoReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo / Receipt'**
+  String get takePhotoReceipt;
+
+  /// No description provided for @retryLastMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry last message'**
+  String get retryLastMessage;
+
+  /// No description provided for @noDeletedRecordsCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No deleted records for this category'**
+  String get noDeletedRecordsCategory;
+
+  /// No description provided for @enter6DigitCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 6-digit Code'**
+  String get enter6DigitCode;
+
+  /// No description provided for @designation.
+  ///
+  /// In en, this message translates to:
+  /// **'Designation'**
+  String get designation;
+
+  /// No description provided for @theScheduleFor.
+  ///
+  /// In en, this message translates to:
+  /// **'The schedule for '**
+  String get theScheduleFor;
+
+  /// No description provided for @fillRequiredFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill required fields'**
+  String get fillRequiredFields;
+
+  /// No description provided for @egPrincipalEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. principal@school.edu'**
+  String get egPrincipalEmail;
+
+  /// No description provided for @egJohnDoe.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. John Doe'**
+  String get egJohnDoe;
+
+  /// No description provided for @deletingTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting transaction...'**
+  String get deletingTransaction;
+
+  /// No description provided for @printTimetable.
+  ///
+  /// In en, this message translates to:
+  /// **'Print Timetable'**
+  String get printTimetable;
+
+  /// No description provided for @noSection.
+  ///
+  /// In en, this message translates to:
+  /// **'No Section'**
+  String get noSection;
+
+  /// No description provided for @unknownSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Section'**
+  String get unknownSection;
+
+  /// No description provided for @notificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Title'**
+  String get notificationTitle;
+
+  /// No description provided for @dayByDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day-by-Day'**
+  String get dayByDay;
+
+  /// No description provided for @noDeletedRecordsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No deleted records found'**
+  String get noDeletedRecordsFound;
+
+  /// No description provided for @filtered.
+  ///
+  /// In en, this message translates to:
+  /// **'Filtered'**
+  String get filtered;
+
+  /// No description provided for @resultsFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Results for '**
+  String get resultsFor;
+
+  /// No description provided for @latitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Latitude'**
+  String get latitude;
+
+  /// No description provided for @read.
+  ///
+  /// In en, this message translates to:
+  /// **'Read'**
+  String get read;
+
+  /// No description provided for @failedToGetResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to get a response. Please try again.'**
+  String get failedToGetResponse;
+
+  /// No description provided for @egSeniorLecturer.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Senior Lecturer, Mathematics'**
+  String get egSeniorLecturer;
+
+  /// No description provided for @failedToSubmitMarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to submit marks'**
+  String get failedToSubmitMarks;
+
+  /// No description provided for @noResultsSelectedStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found for the selected students.'**
+  String get noResultsSelectedStudents;
+
+  /// No description provided for @egOxfordModel.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Oxford Model Academy'**
+  String get egOxfordModel;
+
+  /// No description provided for @homeworkProvided.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework Provided'**
+  String get homeworkProvided;
+
+  /// No description provided for @nextPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Page'**
+  String get nextPage;
+
+  /// No description provided for @allowedRadius.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed Radius (meters)'**
+  String get allowedRadius;
+
+  /// No description provided for @content.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get content;
+
+  /// No description provided for @totalPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Pages'**
+  String get totalPages;
+
+  /// No description provided for @deleteForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Forever'**
+  String get deleteForever;
+
+  /// No description provided for @bookTitleReq.
+  ///
+  /// In en, this message translates to:
+  /// **'Book Title *'**
+  String get bookTitleReq;
+
+  /// No description provided for @examScheduleFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam schedule for '**
+  String get examScheduleFor;
+
+  /// No description provided for @restoreSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Selected'**
+  String get restoreSelected;
+
+  /// No description provided for @zoomIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom In'**
+  String get zoomIn;
+
+  /// No description provided for @channel.
+  ///
+  /// In en, this message translates to:
+  /// **'Channel'**
+  String get channel;
+
+  /// No description provided for @marksSubmittedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Marks submitted successfully'**
+  String get marksSubmittedSuccess;
+
+  /// No description provided for @submitAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Attendance'**
+  String get submitAttendance;
+
+  /// No description provided for @fullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get fullName;
+
+  /// No description provided for @zoomOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom Out'**
+  String get zoomOut;
+
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category;
+
+  /// No description provided for @attendanceMarkedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance marked successfully!'**
+  String get attendanceMarkedSuccess;
+
+  /// No description provided for @emailVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Verification'**
+  String get emailVerification;
+
+  /// No description provided for @noStudentsToGenIdCards.
+  ///
+  /// In en, this message translates to:
+  /// **'No students to generate ID cards.'**
+  String get noStudentsToGenIdCards;
+
+  /// No description provided for @tcPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Certificate Preview'**
+  String get tcPreview;
+
+  /// No description provided for @egStudentBio.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Student Bio or Notes'**
+  String get egStudentBio;
+
+  /// No description provided for @noStudentsForReportCards.
+  ///
+  /// In en, this message translates to:
+  /// **'No students selected for report cards.'**
+  String get noStudentsForReportCards;
+
+  /// No description provided for @egDrJohnDoe.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Dr. John Doe'**
+  String get egDrJohnDoe;
+
+  /// No description provided for @resetZoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Zoom (100%)'**
+  String get resetZoom;
+
+  /// No description provided for @subjectReq.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject *'**
+  String get subjectReq;
+
+  /// No description provided for @rollNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Roll No'**
+  String get rollNo;
+
+  /// No description provided for @generatePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate PDF'**
+  String get generatePdf;
+
+  /// No description provided for @postedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted By'**
+  String get postedBy;
+
+  /// No description provided for @attachmentUploadedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment uploaded successfully!'**
+  String get attachmentUploadedSuccess;
+
+  /// No description provided for @messageStr.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get messageStr;
+
+  /// No description provided for @classReq.
+  ///
+  /// In en, this message translates to:
+  /// **'Class *'**
+  String get classReq;
+
+  /// No description provided for @cancelText.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelText;
+
+  /// No description provided for @endDate.
+  ///
+  /// In en, this message translates to:
+  /// **'End Date'**
+  String get endDate;
+
+  /// No description provided for @setCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Credentials'**
+  String get setCredentials;
 }
 
 class _AppLocalizationsDelegate

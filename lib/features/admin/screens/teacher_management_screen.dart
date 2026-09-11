@@ -186,7 +186,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                           ),
                         ),
                         initialValue: _selectedStatus,
-                        items: ['All', 'Active', 'Inactive']
+                        items: [AppLocalizations.of(context)!.all, 'Active', 'Inactive']
                             .map(
                               (s) => DropdownMenuItem(value: s, child: Text(s)),
                             )
@@ -302,7 +302,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
-                title: const Text("Limit Reached"),
+                title: Text(AppLocalizations.of(context)!.limitReached),
 
                 content: Text(
                   "You have reached your student limit "
@@ -313,7 +313,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text("Cancel"),
+                    child: Text(AppLocalizations.of(context)!.cancelText),
                   ),
 
                   ElevatedButton(
@@ -327,7 +327,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                         ),
                       );
                     },
-                    child: const Text("Upgrade Plan"),
+                    child: Text(AppLocalizations.of(context)!.upgradePlan),
                   ),
                 ],
               ),
@@ -1098,8 +1098,8 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
               children: [
                 TextField(
                   controller: titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Title',
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.title,
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -1107,8 +1107,8 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                 TextField(
                   controller: messageController,
                   maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Message',
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.messageStr,
                     border: OutlineInputBorder(),
                   ),
                 ),

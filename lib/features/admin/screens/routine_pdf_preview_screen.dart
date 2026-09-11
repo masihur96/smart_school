@@ -399,13 +399,13 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
           // Direct Print
           IconButton(
             icon: const Icon(Icons.print_rounded),
-            tooltip: 'Print Timetable',
+            tooltip: AppLocalizations.of(context)!.printTimetable,
             onPressed: _pdfBytes != null ? _printPdf : null,
           ),
           // Direct Share
           IconButton(
             icon: const Icon(Icons.share_rounded),
-            tooltip: 'Share Timetable PDF',
+            tooltip: AppLocalizations.of(context)!.shareTimetablePdf,
             onPressed: _pdfBytes != null ? _sharePdf : null,
           ),
           const SizedBox(width: 4),
@@ -456,7 +456,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                         ElevatedButton.icon(
                           onPressed: _generatePdf,
                           icon: const Icon(Icons.refresh),
-                          label: const Text('Generate PDF'),
+                          label: Text(AppLocalizations.of(context)!.generatePdf),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryAdmin,
                             foregroundColor: Colors.white,
@@ -535,7 +535,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                   color: Colors.white,
                   size: 20,
                 ),
-                tooltip: 'Zoom Out',
+                tooltip: AppLocalizations.of(context)!.zoomOut,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
                 onPressed: _currentZoomLevel > 0.55 ? _zoomOut : null,
@@ -569,7 +569,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                   color: Colors.white,
                   size: 20,
                 ),
-                tooltip: 'Zoom In',
+                tooltip: AppLocalizations.of(context)!.zoomIn,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
                 onPressed: _currentZoomLevel < 4.8 ? _zoomIn : null,
@@ -590,7 +590,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                   color: Colors.white,
                   size: 17,
                 ),
-                tooltip: 'Reset Zoom (100%)',
+                tooltip: AppLocalizations.of(context)!.resetZoom,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
                 onPressed: (_currentZoomLevel - 1.0).abs() > 0.05
@@ -636,7 +636,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                   color: Colors.white,
                   size: 22,
                 ),
-                tooltip: 'Previous Page',
+                tooltip: AppLocalizations.of(context)!.previousPage,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
                 onPressed: _currentPage > 1
@@ -665,7 +665,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                   color: Colors.white,
                   size: 22,
                 ),
-                tooltip: 'Next Page',
+                tooltip: AppLocalizations.of(context)!.nextPage,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
                 onPressed: _currentPage < _pageCount
@@ -873,7 +873,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                     children: [
                       Expanded(
                         child: _buildLayoutPill(
-                          label: 'Day-by-Day',
+                          label: AppLocalizations.of(context)!.dayByDay,
                           icon: Icons.view_day_outlined,
                           layout: RoutinePdfLayout.dayByDay,
                         ),
@@ -881,7 +881,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: _buildLayoutPill(
-                          label: 'Weekly Grid',
+                          label: AppLocalizations.of(context)!.weeklyGrid,
                           icon: Icons.grid_view_rounded,
                           layout: RoutinePdfLayout.weeklyGrid,
                         ),

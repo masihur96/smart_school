@@ -205,7 +205,7 @@ class _AdminHomeworkManagementScreenState
             const SizedBox(width: 12),
             Expanded(
               child: _buildDropdown(
-                label: 'Section',
+                label: AppLocalizations.of(context)!.section,
                 value: _selectedSection,
                 items: [
                   DropdownMenuItem(

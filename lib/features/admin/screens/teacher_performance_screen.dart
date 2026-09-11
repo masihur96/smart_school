@@ -266,7 +266,7 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
           //       return IconButton(
           //         icon: const Icon(Icons.refresh_rounded, color: Colors.white),
           //         onPressed: () => provider.fetchPerformances(),
-          //         tooltip: 'Refresh',
+          //         tooltip: AppLocalizations.of(context)!.refresh,
           //       );
           //     },
           //   ),
@@ -424,7 +424,7 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
         IconButton(
           icon: const Icon(Icons.refresh_rounded, color: Colors.white),
           onPressed: () => provider.fetchPerformances(),
-          tooltip: 'Refresh',
+          tooltip: AppLocalizations.of(context)!.refresh,
         ),
       ],
     );
@@ -479,9 +479,9 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                     hint: 'All Designations',
                     value: provider.filterDesignation,
                     items: [
-                      const DropdownMenuItem<String?>(
+                      DropdownMenuItem<String?>(
                         value: null,
-                        child: Text('All Designations'),
+                        child: Text(AppLocalizations.of(context)!.allDesignations),
                       ),
                       ...designations.map(
                         (d) => DropdownMenuItem(value: d, child: Text(d)),
@@ -664,7 +664,7 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                     provider.clearSelectedTeacher();
                   },
                   color: Colors.grey.shade500,
-                  tooltip: 'Clear selection',
+                  tooltip: AppLocalizations.of(context)!.clearSelection,
                 ),
               ] else ...[
                 const SizedBox(width: 12),
@@ -885,7 +885,7 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                     Expanded(
                       child: _buildMetricDetailCard(
                         icon: Icons.how_to_reg_rounded,
-                        label: 'Attendance',
+                        label: AppLocalizations.of(context)!.attendance,
                         percentage: perf.attendance.percentage,
                         detail1: '${perf.attendance.presentDays} present',
                         detail2:
@@ -897,7 +897,7 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                     Expanded(
                       child: _buildMetricDetailCard(
                         icon: Icons.assignment_rounded,
-                        label: 'Homework Provided',
+                        label: AppLocalizations.of(context)!.homeworkProvided,
                         percentage: perf.homework.percentage,
                         detail1: '${perf.homework.totalProvided} provided',
                         detail2: '${perf.homework.target} target',

@@ -124,7 +124,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
         children: [
           _field(
             controller: _nameController,
-            label: 'Exam Name',
+            label: AppLocalizations.of(context)!.examName,
             hint: 'e.g. Final Exam 2025',
             icon: Icons.edit_note,
             validator: (v) => v!.isEmpty ? 'Required' : null,
@@ -132,14 +132,14 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
           const SizedBox(height: 14),
           _field(
             controller: _descController,
-            label: 'Description (optional)',
+            label: AppLocalizations.of(context)!.descriptionOptional,
             hint: 'e.g. End of year examination',
             icon: Icons.description_outlined,
             maxLines: 2,
           ),
           const SizedBox(height: 14),
           _dateTile(
-            label: 'Start Date',
+            label: AppLocalizations.of(context)!.startDate,
             icon: Icons.event,
             value: _startDate,
             onTap: () async {
@@ -149,7 +149,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
           ),
           const SizedBox(height: 14),
           _dateTile(
-            label: 'End Date',
+            label: AppLocalizations.of(context)!.endDate,
             icon: Icons.event_available,
             value: _endDate,
             onTap: () async {
@@ -248,7 +248,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: ChoiceChip(
-                    label: const Text('All'),
+                    label: Text(AppLocalizations.of(context)!.all),
                     selected: _selectedFilterClassId == null,
                     onSelected: (val) {
                       if (val) setState(() => _selectedFilterClassId = null);

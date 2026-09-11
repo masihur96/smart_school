@@ -12,6 +12,8 @@ import '../../admin/providers/setup_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/academic_book.dart';
 import '../providers/academic_book_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
+
 
 class AddEditAcademicBookScreen extends StatefulWidget {
   final AcademicBook? book; // null = add mode
@@ -338,7 +340,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
           padding: const EdgeInsets.all(20),
           children: [
             // ── Title ────────────────────────────────────────────────────────
-            _SectionLabel(label: 'Book Title *', icon: Icons.title_rounded),
+            _SectionLabel(label: AppLocalizations.of(context)!.bookTitleReq, icon: Icons.title_rounded),
             const SizedBox(height: 8),
             _buildTextField(
               controller: _titleCtrl,
@@ -349,7 +351,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
             const SizedBox(height: 18),
 
             // ── Author ───────────────────────────────────────────────────────
-            _SectionLabel(label: 'Author *', icon: Icons.person_rounded),
+            _SectionLabel(label: AppLocalizations.of(context)!.authorReq, icon: Icons.person_rounded),
             const SizedBox(height: 8),
             _buildTextField(
               controller: _authorCtrl,
@@ -360,7 +362,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
             const SizedBox(height: 18),
 
             // ── Class ────────────────────────────────────────────────────────
-            _SectionLabel(label: 'Class *', icon: Icons.class_rounded),
+            _SectionLabel(label: AppLocalizations.of(context)!.classReq, icon: Icons.class_rounded),
             const SizedBox(height: 8),
             _buildDropdown<String>(
               value: _selectedClassId,
@@ -392,7 +394,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
             const SizedBox(height: 18),
 
             // ── Subject (free text) ──────────────────────────────────────────
-            _SectionLabel(label: 'Subject *', icon: Icons.book_rounded),
+            _SectionLabel(label: AppLocalizations.of(context)!.subjectReq, icon: Icons.book_rounded),
             const SizedBox(height: 8),
             _buildTextField(
               controller: _subjectCtrl,
@@ -404,7 +406,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
 
             // ── Description ──────────────────────────────────────────────────
             _SectionLabel(
-              label: 'Description (optional)',
+              label: AppLocalizations.of(context)!.descriptionOptional,
               icon: Icons.description_rounded,
             ),
             const SizedBox(height: 8),
@@ -417,7 +419,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
 
             // ── Cover Image Picker ───────────────────────────────────────────
             _SectionLabel(
-              label: 'Cover Image (optional)',
+              label: AppLocalizations.of(context)!.coverImageOptional,
               icon: Icons.image_rounded,
             ),
             const SizedBox(height: 8),
@@ -438,7 +440,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _SectionLabel(
-                        label: 'Total Pages',
+                        label: AppLocalizations.of(context)!.totalPages,
                         icon: Icons.menu_book_rounded,
                       ),
                       const SizedBox(height: 8),
@@ -459,7 +461,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _SectionLabel(
-                        label: 'Published Year',
+                        label: AppLocalizations.of(context)!.publishedYear,
                         icon: Icons.calendar_today_rounded,
                       ),
                       const SizedBox(height: 8),
@@ -510,7 +512,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
             const SizedBox(height: 24),
 
             // ── PDF Picker ───────────────────────────────────────────────────
-            _SectionLabel(label: 'PDF File *', icon: Icons.attach_file_rounded),
+            _SectionLabel(label: AppLocalizations.of(context)!.pdfFileReq, icon: Icons.attach_file_rounded),
             const SizedBox(height: 8),
             GestureDetector(
               onTap: isBusy ? null : _pickPdf,

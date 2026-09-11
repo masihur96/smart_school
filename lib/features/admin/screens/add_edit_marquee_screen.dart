@@ -133,8 +133,8 @@ class _AddEditMarqueeScreenState extends State<AddEditMarqueeScreen> {
               TextFormField(
                 controller: _textController,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  hintText: 'Enter marquee scrolling text...',
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.enterMarqueeText,
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {

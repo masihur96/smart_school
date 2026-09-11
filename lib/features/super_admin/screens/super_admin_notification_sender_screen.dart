@@ -131,8 +131,8 @@ class _SuperAdminNotificationSenderScreenState
               TextFormField(
                 controller: _titleController,
                 decoration: InputDecoration(
-                  labelText: 'Notification Title',
-                  hintText: 'e.g., System Maintenance Alert',
+                  labelText: AppLocalizations.of(context)!.notificationTitle,
+                  hintText: AppLocalizations.of(context)!.egSystemAlert,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -148,8 +148,8 @@ class _SuperAdminNotificationSenderScreenState
                 controller: _messageController,
                 maxLines: 4,
                 decoration: InputDecoration(
-                  labelText: 'Message Body',
-                  hintText: 'Type your message here...',
+                  labelText: AppLocalizations.of(context)!.messageBody,
+                  hintText: AppLocalizations.of(context)!.typeMessageHere,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -209,7 +209,7 @@ class _SuperAdminNotificationSenderScreenState
                   controller: _idController,
                   decoration: InputDecoration(
                     labelText: 'Enter ${_targets[_selectedTarget]} ID',
-                    hintText: 'e.g., UUID or ID string',
+                    hintText: AppLocalizations.of(context)!.egUuidString,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

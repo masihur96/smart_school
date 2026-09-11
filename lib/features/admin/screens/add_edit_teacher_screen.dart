@@ -246,14 +246,14 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Limit Reached'),
+        title: Text(AppLocalizations.of(context)!.limitReached),
         content: const Text(
           'You have reached the maximum limit of your current pricing plan. Please upgrade to add more.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancelText),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
@@ -473,9 +473,9 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                     TextFormField(
                       controller: _nameController,
                       decoration: InputDecoration(
-                        labelText: 'Full Name',
+                        labelText: AppLocalizations.of(context)!.fullName,
                         prefixIcon: const Icon(Icons.person),
-                        hintText: 'e.g. Dr. John Doe',
+                        hintText: AppLocalizations.of(context)!.egDrJohnDoe,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -487,9 +487,9 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                     TextFormField(
                       controller: _emailController,
                       decoration: InputDecoration(
-                        labelText: 'Email Address',
+                        labelText: AppLocalizations.of(context)!.emailAddress,
                         prefixIcon: const Icon(Icons.email),
-                        hintText: 'e.g. teacher@school.edu',
+                        hintText: AppLocalizations.of(context)!.egTeacherEmail,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -502,9 +502,9 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                     TextFormField(
                       controller: _phoneController,
                       decoration: InputDecoration(
-                        labelText: 'Phone Number',
+                        labelText: AppLocalizations.of(context)!.phoneNumber,
                         prefixIcon: const Icon(Icons.phone),
-                        hintText: 'e.g. +8801712345678',
+                        hintText: AppLocalizations.of(context)!.egPhone,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -518,20 +518,20 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                     DropdownButtonFormField<String>(
                       initialValue: _selectedRole,
                       decoration: InputDecoration(
-                        labelText: 'Role',
+                        labelText: AppLocalizations.of(context)!.role,
                         prefixIcon: const Icon(Icons.admin_panel_settings_outlined),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      items: const [
+                      items: [
                         DropdownMenuItem(
                           value: 'teacher',
                           child: Row(
                             children: [
                               Icon(Icons.school_outlined, size: 20, color: Colors.purple),
                               SizedBox(width: 8),
-                              Text('Teacher'),
+                              Text(AppLocalizations.of(context)!.teacher),
                             ],
                           ),
                         ),
@@ -541,7 +541,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                             children: [
                               Icon(Icons.manage_accounts_outlined, size: 20, color: Colors.purple),
                               SizedBox(width: 8),
-                              Text('Admin'),
+                              Text(AppLocalizations.of(context)!.admin),
                             ],
                           ),
                         ),
@@ -628,9 +628,9 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                     TextFormField(
                       controller: _designationController,
                       decoration: InputDecoration(
-                        labelText: 'Designation',
+                        labelText: AppLocalizations.of(context)!.designation,
                         prefixIcon: const Icon(Icons.badge_outlined),
-                        hintText: 'e.g. Senior Lecturer, Mathematics',
+                        hintText: AppLocalizations.of(context)!.egSeniorLecturer,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -687,7 +687,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                             controller: _latController,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
-                              labelText: 'Latitude',
+                              labelText: AppLocalizations.of(context)!.latitude,
                               prefixIcon: const Icon(Icons.map_outlined),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -701,7 +701,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                             controller: _lonController,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
-                              labelText: 'Longitude',
+                              labelText: AppLocalizations.of(context)!.longitude,
                               prefixIcon: const Icon(Icons.explore_outlined),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -716,7 +716,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                       controller: _radiusController,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        labelText: 'Allowed Radius (meters)',
+                        labelText: AppLocalizations.of(context)!.allowedRadius,
                         prefixIcon: const Icon(Icons.radar_outlined),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),

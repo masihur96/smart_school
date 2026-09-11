@@ -237,7 +237,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
+              child: Text(AppLocalizations.of(context)!.cancelText)),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: _primary,
@@ -368,7 +368,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
       ),
       IconButton(
         icon: const Icon(Icons.open_in_browser_rounded, size: 20),
-        tooltip: 'Open in External App',
+        tooltip: AppLocalizations.of(context)!.openInExternalApp,
         onPressed: _openInBrowser,
       ),
     ];
@@ -496,7 +496,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
                   _StepDot(
                       done: true,
                       active: _phase == _ViewerPhase.downloading,
-                      label: 'Download',
+                      label: AppLocalizations.of(context)!.download,
                       color: _primary),
                   _StepLine(
                       done: _phase == _ViewerPhase.opening ||
@@ -505,13 +505,13 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
                   _StepDot(
                       done: _phase == _ViewerPhase.ready,
                       active: _phase == _ViewerPhase.opening,
-                      label: 'Prepare',
+                      label: AppLocalizations.of(context)!.prepare,
                       color: _primary),
                   _StepLine(done: _phase == _ViewerPhase.ready, color: _primary),
                   _StepDot(
                       done: _phase == _ViewerPhase.ready,
                       active: false,
-                      label: 'Read',
+                      label: AppLocalizations.of(context)!.read,
                       color: _primary),
                 ],
               ),

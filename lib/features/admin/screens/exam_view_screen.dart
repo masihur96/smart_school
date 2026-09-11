@@ -250,8 +250,8 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
           onPressed: () {
             if (students.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('No students available for this exam section.'),
+                SnackBar(
+                  content: Text(AppLocalizations.of(context)!.noStudentsForExamSection),
                 ),
               );
               return;
@@ -471,7 +471,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
                   SizedBox(width: 12),
                   Expanded(
                     child: _buildDropdownField<String?>(
-                      label: 'Section',
+                      label: AppLocalizations.of(context)!.section,
                       value: _selectedSectionId,
                       items: [
                         DropdownMenuItem<String?>(
@@ -840,7 +840,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
     if (schoolId == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('School ID not found')));
+      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.schoolIdNotFound)));
       return;
     }
 
@@ -866,8 +866,8 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
 
     if (marksList.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter marks for at least one student'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.enterMarksOneStudent),
         ),
       );
       return;
@@ -883,16 +883,16 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
     if (context.mounted) {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Marks submitted successfully'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.marksSubmittedSuccess),
             behavior: SnackBarBehavior.floating,
           ),
         );
         _fetchMarksFromAPI();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to submit marks'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.failedToSubmitMarks),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),

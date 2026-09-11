@@ -9,6 +9,8 @@ import 'package:smart_school/core/utils/pdf_image_helper.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/student_model.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
+
 
 
 class GenerateTcScreen extends StatelessWidget {
@@ -30,7 +32,7 @@ class GenerateTcScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transfer Certificate Preview'),
+        title: Text(AppLocalizations.of(context)!.tcPreview),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
       ),

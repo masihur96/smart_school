@@ -228,7 +228,7 @@ class _AdminRegisterSchoolScreenState extends State<AdminRegisterSchoolScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout_rounded),
-            tooltip: 'Log out',
+            tooltip: AppLocalizations.of(context)!.logOut,
             onPressed: () async {
               await authNotifier.logout();
               if (context.mounted) {
@@ -427,7 +427,7 @@ class _AdminRegisterSchoolScreenState extends State<AdminRegisterSchoolScreen> {
                         controller: _nameController,
                         textInputAction: TextInputAction.next,
                         decoration: InputDecoration(
-                          hintText: 'e.g. Oxford Model Academy',
+                          hintText: AppLocalizations.of(context)!.egOxfordModel,
                           prefixIcon: const Icon(
                             Icons.school_outlined,
                             color: Colors.purple,
@@ -483,7 +483,7 @@ class _AdminRegisterSchoolScreenState extends State<AdminRegisterSchoolScreen> {
                         maxLines: 2,
                         textInputAction: TextInputAction.done,
                         decoration: InputDecoration(
-                          hintText: 'e.g. 123 Education Ave, Dhanmondi, Dhaka',
+                          hintText: AppLocalizations.of(context)!.egAddress,
                           prefixIcon: const Padding(
                             padding: EdgeInsets.only(bottom: 20.0),
                             child: Icon(

@@ -271,7 +271,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
           //       return IconButton(
           //         icon: const Icon(Icons.refresh_rounded, color: Colors.white),
           //         onPressed: () => provider.fetchPerformances(),
-          //         tooltip: 'Refresh',
+          //         tooltip: AppLocalizations.of(context)!.refresh,
           //       );
           //     },
           //   ),
@@ -432,7 +432,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
         IconButton(
           icon: const Icon(Icons.refresh_rounded, color: Colors.white),
           onPressed: () => provider.fetchPerformances(),
-          tooltip: 'Refresh',
+          tooltip: AppLocalizations.of(context)!.refresh,
         ),
       ],
     );
@@ -486,9 +486,9 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                   hint: 'All Classes',
                   value: provider.filterClass,
                   items: [
-                    const DropdownMenuItem<String?>(
+                    DropdownMenuItem<String?>(
                       value: null,
-                      child: Text('All Classes'),
+                      child: Text(AppLocalizations.of(context)!.allClasses),
                     ),
                     ...classes.map(
                       (c) => DropdownMenuItem(value: c, child: Text(c)),
@@ -693,7 +693,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                       provider.clearSelectedStudent();
                     },
                     color: Colors.grey.shade500,
-                    tooltip: 'Clear selection',
+                    tooltip: AppLocalizations.of(context)!.clearSelection,
                   ),
                 ] else ...[
                   const SizedBox(width: 12),
@@ -921,7 +921,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                     Expanded(
                       child: _buildMetricDetailCard(
                         icon: Icons.how_to_reg_rounded,
-                        label: 'Attendance',
+                        label: AppLocalizations.of(context)!.attendance,
                         percentage: perf.attendance.percentage,
                         detail1: '${perf.attendance.presentDays} present',
                         detail2:
@@ -934,7 +934,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                     Expanded(
                       child: _buildMetricDetailCard(
                         icon: Icons.assignment_rounded,
-                        label: 'Homework',
+                        label: AppLocalizations.of(context)!.homework,
                         percentage: perf.homework.percentage,
                         detail1: '${perf.homework.totalDone} done',
                         detail2: '${perf.homework.totalAssigned} assigned',
@@ -946,7 +946,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                     Expanded(
                       child: _buildMetricDetailCard(
                         icon: Icons.assessment_rounded,
-                        label: 'Exams',
+                        label: AppLocalizations.of(context)!.exams,
                         percentage: perf.exams.percentage,
                         detail1:
                             '${perf.exams.totalMarksObtained.toStringAsFixed(0)} marks',

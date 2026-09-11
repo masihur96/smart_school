@@ -132,7 +132,7 @@ class _TeacherSelfAttendanceDetailScreenState
           if (isAdmin) ...[
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
-                labelText: 'Select Teacher',
+                labelText: AppLocalizations.of(context)!.selectTeacher,
                 labelStyle: const TextStyle(color: AppColors.textSecondary),
                 prefixIcon: const Icon(
                   Icons.person_search,

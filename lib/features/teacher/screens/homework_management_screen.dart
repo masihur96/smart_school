@@ -210,9 +210,9 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
           else
             Expanded(
               child: homeworkList.isEmpty
-                  ? const _EmptyState(
+                  ? _EmptyState(
                       icon: Icons.assignment_outlined,
-                      message: 'No homeworks found.\nTap + to add one.',
+                      message: AppLocalizations.of(context)!.noHomeworksFound,
                     )
                   : ListView.separated(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
@@ -747,7 +747,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedClassId == null || _selectedSubjectId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select class and subject')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.pleaseSelectClassSubject)),
       );
       return;
     }
@@ -798,7 +798,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to save homework')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.failedToSaveHomework)),
           );
         }
       }

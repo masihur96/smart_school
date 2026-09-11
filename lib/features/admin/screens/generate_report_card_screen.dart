@@ -185,7 +185,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                 await Printing.layoutPdf(onLayout: (_) async => _pdfBytes!);
               }
             },
-            tooltip: 'Print',
+            tooltip: AppLocalizations.of(context)!.print,
           ),
           IconButton(
             icon: const Icon(Icons.share),
@@ -197,7 +197,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                 );
               }
             },
-            tooltip: 'Share',
+            tooltip: AppLocalizations.of(context)!.share,
           ),
         ],
       ),
@@ -208,8 +208,8 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
             child: _isLoading || _pdfBytes == null
                 ? const Center(child: CircularProgressIndicator())
                 : _currentStudents.isEmpty
-                ? const Center(
-                    child: Text('No students selected for report cards.'),
+                ? Center(
+                    child: Text(AppLocalizations.of(context)!.noStudentsForReportCards),
                   )
                 : pdfx.PdfViewPinch(controller: _pdfController!),
           ),
@@ -238,13 +238,13 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                     _selectedClassId != null)
                   DropdownMenuItem(
                     value: _selectedClassId,
-                    child: const Text('Unknown Class'),
+                    child: Text(AppLocalizations.of(context)!.unknownClass),
                   ),
                 if (!uniqueClasses.containsKey(_selectedClassId) &&
                     _selectedClassId == null)
-                  const DropdownMenuItem(
+                  DropdownMenuItem(
                     value: null,
-                    child: Text('Select Class'),
+                    child: Text(AppLocalizations.of(context)!.selectClass),
                   ),
                 ...uniqueClasses.entries.map(
                   (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
@@ -265,7 +265,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: _buildDropdown<String?>(
-                label: 'Section',
+                label: AppLocalizations.of(context)!.section,
                 value: uniqueSections.containsKey(_selectedSectionId)
                     ? _selectedSectionId
                     : null,
@@ -278,7 +278,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                       _selectedSectionId != null)
                     DropdownMenuItem(
                       value: _selectedSectionId,
-                      child: const Text('Unknown Section'),
+                      child: Text(AppLocalizations.of(context)!.unknownSection),
                     ),
                   ...uniqueSections.entries.map(
                     (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),

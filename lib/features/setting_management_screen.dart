@@ -328,46 +328,46 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Send Notification"),
+        title: Text(AppLocalizations.of(context)!.sendNotification),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: receiverUuidController,
-                decoration: const InputDecoration(
-                  labelText: "Receiver UUID",
-                  hintText: "Enter user UUID",
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.receiverUuid,
+                  hintText: AppLocalizations.of(context)!.enterUserUuid,
                 ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: titleController,
-                decoration: const InputDecoration(labelText: "Title"),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.title),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: messageController,
-                decoration: const InputDecoration(labelText: "Message"),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.messageStr),
                 maxLines: 3,
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: imageController,
-                decoration: const InputDecoration(
-                  labelText: "Image URL (Optional)",
-                  hintText: "https://example.com/image.png",
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.imageUrlOptional,
+                  hintText: AppLocalizations.of(context)!.egImageLink,
                 ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: pathController,
-                decoration: const InputDecoration(labelText: "Data Path"),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.dataPath),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: dataUuidController,
-                decoration: const InputDecoration(labelText: "Data UUID"),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.dataUuid),
               ),
             ],
           ),
@@ -375,7 +375,7 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            child: Text(AppLocalizations.of(context)!.cancelText),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -383,7 +383,7 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
                   titleController.text.isEmpty ||
                   messageController.text.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Please fill required fields")),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.fillRequiredFields)),
                 );
                 return;
               }
@@ -404,8 +404,8 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
                 );
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Notification sent successfully"),
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context)!.notificationSentSuccess),
                   ),
                 );
               } catch (e) {
@@ -414,7 +414,7 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
                 ).showSnackBar(SnackBar(content: Text("Failed to send: $e")));
               }
             },
-            child: const Text("Send"),
+            child: Text(AppLocalizations.of(context)!.send),
           ),
         ],
       ),

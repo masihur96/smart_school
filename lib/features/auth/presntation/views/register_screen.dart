@@ -293,7 +293,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         controller: _nameController,
                         textInputAction: TextInputAction.next,
                         decoration: InputDecoration(
-                          hintText: 'e.g. Dr. Masihur Rahman',
+                          hintText: AppLocalizations.of(context)!.egDrMasihur,
                           prefixIcon: const Icon(
                             Icons.person_outline_rounded,
                             color: Colors.purple,
@@ -344,7 +344,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         decoration: InputDecoration(
-                          hintText: 'e.g. principal@school.edu',
+                          hintText: AppLocalizations.of(context)!.egPrincipalEmail,
                           prefixIcon: const Icon(
                             Icons.email_outlined,
                             color: Colors.purple,
@@ -395,7 +395,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         keyboardType: TextInputType.phone,
                         textInputAction: TextInputAction.next,
                         decoration: InputDecoration(
-                          hintText: 'e.g. +8801712345678',
+                          hintText: AppLocalizations.of(context)!.egPhone,
                           prefixIcon: const Icon(
                             Icons.phone_outlined,
                             color: Colors.purple,
@@ -446,7 +446,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         obscureText: !_isPasswordVisible,
                         textInputAction: TextInputAction.done,
                         decoration: InputDecoration(
-                          hintText: 'At least 6 characters',
+                          hintText: AppLocalizations.of(context)!.atLeast6Chars,
                           prefixIcon: const Icon(
                             Icons.lock_outline_rounded,
                             color: Colors.purple,

@@ -70,14 +70,14 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Unassign Student'),
+        title: Text(AppLocalizations.of(context)!.unassignStudent),
         content: Text(
           'Remove ${student.user?.name ?? 'this student'} from ${widget.classRoom.name}?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancelText),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -100,14 +100,14 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Unassign Students'),
+        title: Text(AppLocalizations.of(context)!.unassignStudents),
         content: Text(
           'Remove ${_selectedIds.length} selected students from ${widget.classRoom.name}?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancelText),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -301,7 +301,7 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
                           decoration: InputDecoration(
                             fillColor: Colors.transparent,
 
-                            hintText: 'Search by name or roll…',
+                            hintText: AppLocalizations.of(context)!.searchByNameOrRoll,
                             hintStyle: TextStyle(
                               color: _kTextMid,
                               fontSize: 13,
@@ -368,9 +368,9 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
                                   AppLocalizations.of(context)!.allSections,
                                 ),
                               ),
-                              const DropdownMenuItem(
+                              DropdownMenuItem(
                                 value: '',
-                                child: Text('No Section'),
+                                child: Text(AppLocalizations.of(context)!.noSection),
                               ),
                               ...context
                                   .watch<SectionSetupNotifier>()
@@ -531,7 +531,7 @@ class _StatsBar extends StatelessWidget {
         children: [
           _StatChip(
             icon: Icons.people_outlined,
-            label: 'Total',
+            label: AppLocalizations.of(context)!.total,
             value: '$total',
             color: _kPrimary,
           ),
@@ -539,7 +539,7 @@ class _StatsBar extends StatelessWidget {
           if (shown != total)
             _StatChip(
               icon: Icons.filter_list,
-              label: 'Filtered',
+              label: AppLocalizations.of(context)!.filtered,
               value: '$shown',
               color: const Color(0xFF0EA5E9),
             ),
@@ -1198,7 +1198,7 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
                     child: TextField(
                       onChanged: (v) => setState(() => _searchQuery = v),
                       decoration: InputDecoration(
-                        hintText: 'Search name/roll…',
+                        hintText: AppLocalizations.of(context)!.searchNameRoll,
                         hintStyle: TextStyle(color: _kTextMid, fontSize: 13),
                         prefixIcon: const Icon(
                           Icons.search,
@@ -1245,13 +1245,13 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
                           });
                         },
                         items: [
-                          const DropdownMenuItem(
+                          DropdownMenuItem(
                             value: null,
-                            child: Text('All'),
+                            child: Text(AppLocalizations.of(context)!.all),
                           ),
-                          const DropdownMenuItem(
+                          DropdownMenuItem(
                             value: '',
-                            child: Text('No Class'),
+                            child: Text(AppLocalizations.of(context)!.noClass),
                           ),
                           ...context
                               .watch<ClassSetupNotifier>()

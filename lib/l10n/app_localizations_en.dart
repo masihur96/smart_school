@@ -802,7 +802,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String rollNumber(String roll) {
-    return 'Roll: $roll';
+    return 'Roll Number';
   }
 
   @override
@@ -2321,7 +2321,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectAllVisible => 'Select All Visible';
 
   @override
-  String get clearSelection => 'Clear Selection';
+  String get clearSelection => 'Clear selection';
 
   @override
   String get statTotal => 'Total';
@@ -3032,4 +3032,437 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get newUpdateDownloaded => '🎉 A new update has been downloaded.';
+
+  @override
+  String get egTeacherEmail => 'e.g. teacher@school.edu';
+
+  @override
+  String get egImageLink => 'https://example.com/image.png';
+
+  @override
+  String get examName => 'Exam Name';
+
+  @override
+  String get egStudentEmail => 'e.g. student@school.edu';
+
+  @override
+  String get previousPage => 'Previous Page';
+
+  @override
+  String get enterYourPassword => 'Enter your password';
+
+  @override
+  String get egPhone => 'e.g. +8801712345678';
+
+  @override
+  String get schoolIdCopied => 'School ID copied';
+
+  @override
+  String get typeMessageHere => 'Type your message here...';
+
+  @override
+  String get egRoll => 'e.g. 101';
+
+  @override
+  String get startDate => 'Start Date';
+
+  @override
+  String get imageUrlOptional => 'Image URL (Optional)';
+
+  @override
+  String get allDesignations => 'All Designations';
+
+  @override
+  String get searchByNameOrRoll => 'Search by name or roll…';
+
+  @override
+  String get searchRecords => 'Search records...';
+
+  @override
+  String get receiverUuid => 'Receiver UUID';
+
+  @override
+  String get prepare => 'Prepare';
+
+  @override
+  String get chooseFromGallery => 'Choose from Gallery';
+
+  @override
+  String get securityCredentialsSaved =>
+      'Security credentials saved successfully';
+
+  @override
+  String get announcement => 'Announcement';
+
+  @override
+  String get pdfFileReq => 'PDF File *';
+
+  @override
+  String get noStudentsForTranscripts =>
+      'No students selected for transcripts.';
+
+  @override
+  String get attendanceSubmittedSuccess => 'Attendance submitted successfully';
+
+  @override
+  String get targetAudience => 'Target Audience';
+
+  @override
+  String get enterUserUuid => 'Enter user UUID';
+
+  @override
+  String get authorReq => 'Author *';
+
+  @override
+  String get coverImageOptional => 'Cover Image (optional)';
+
+  @override
+  String get markAttendance => 'Mark Attendance';
+
+  @override
+  String get shareTimetablePdf => 'Share Timetable PDF';
+
+  @override
+  String get emailAddress => 'Email Address';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String get selectPdfDocument => 'Select PDF / Document';
+
+  @override
+  String get pleaseSelectClassSubject => 'Please select class and subject';
+
+  @override
+  String get longitude => 'Longitude';
+
+  @override
+  String get atLeast6Chars => 'At least 6 characters';
+
+  @override
+  String get openInExternalApp => 'Open in External App';
+
+  @override
+  String get enterMarqueeText => 'Enter marquee scrolling text...';
+
+  @override
+  String get egPrincipalContact => 'e.g. principal@school.edu or 017...';
+
+  @override
+  String get messageBody => 'Message Body';
+
+  @override
+  String get enterMarksOneStudent =>
+      'Please enter marks for at least one student';
+
+  @override
+  String get egDrMasihur => 'e.g. Dr. Masihur Rahman';
+
+  @override
+  String get egAddress => 'e.g. 123 Education Ave, Dhanmondi, Dhaka';
+
+  @override
+  String get unassignStudents => 'Unassign Students';
+
+  @override
+  String get confirmDeleteStudent =>
+      'Are you sure you want to delete this student?';
+
+  @override
+  String get egSystemAlert => 'e.g., System Maintenance Alert';
+
+  @override
+  String get searchNameIdAddress => 'Search by name, ID, address…';
+
+  @override
+  String get markPresent => 'Mark Present';
+
+  @override
+  String get noStudentsForIdCards => 'No students selected for ID cards.';
+
+  @override
+  String get aboutStudent => 'About (e.g. About Student)';
+
+  @override
+  String get schoolIdNotFound => 'School ID not found';
+
+  @override
+  String get egReceipt => 'e.g. DEP-2026-08-001';
+
+  @override
+  String get remarksDetailsOptional => 'Remarks / Details (Optional)';
+
+  @override
+  String get imageOptions => 'Image Options';
+
+  @override
+  String get phoneNumber => 'Phone Number';
+
+  @override
+  String get retrySetup => 'Retry Setup';
+
+  @override
+  String get searchSchoolNameEmailId =>
+      'Search by school name, email, or ID...';
+
+  @override
+  String get weeklyGrid => 'Weekly Grid';
+
+  @override
+  String get publishedYear => 'Published Year';
+
+  @override
+  String get logOut => 'Log out';
+
+  @override
+  String get logInWithBiometrics => 'Log in with biometrics';
+
+  @override
+  String get noHomeworksFound => 'No homeworks found.\\nTap + to add one.';
+
+  @override
+  String get unassignStudent => 'Unassign Student';
+
+  @override
+  String get dataPath => 'Data Path';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get subjectsPassed => 'Subjects Passed';
+
+  @override
+  String get noStudentsForExamSection =>
+      'No students available for this exam section.';
+
+  @override
+  String get dataUuid => 'Data UUID';
+
+  @override
+  String get download => 'Download';
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String get enterEmailOrPhone => 'Enter your email or phone';
+
+  @override
+  String get amountTaka => 'Amount (৳)';
+
+  @override
+  String get receiptRef => 'Receipt / Ref #';
+
+  @override
+  String get egUuidString => 'e.g., UUID or ID string';
+
+  @override
+  String get admin => 'Admin';
+
+  @override
+  String get noClass => 'No Class';
+
+  @override
+  String get totalMarksText => 'Total Marks';
+
+  @override
+  String get unknownClass => 'Unknown Class';
+
+  @override
+  String get noStudentsToGenTranscripts =>
+      'No students to generate transcripts.';
+
+  @override
+  String get searchNameRoll => 'Search name/roll…';
+
+  @override
+  String get notificationSentSuccess => 'Notification sent successfully';
+
+  @override
+  String get print => 'Print';
+
+  @override
+  String get title => 'Title';
+
+  @override
+  String get takePhotoReceipt => 'Take Photo / Receipt';
+
+  @override
+  String get retryLastMessage => 'Retry last message';
+
+  @override
+  String get noDeletedRecordsCategory => 'No deleted records for this category';
+
+  @override
+  String get enter6DigitCode => 'Enter 6-digit Code';
+
+  @override
+  String get designation => 'Designation';
+
+  @override
+  String get theScheduleFor => 'The schedule for ';
+
+  @override
+  String get fillRequiredFields => 'Please fill required fields';
+
+  @override
+  String get egPrincipalEmail => 'e.g. principal@school.edu';
+
+  @override
+  String get egJohnDoe => 'e.g. John Doe';
+
+  @override
+  String get deletingTransaction => 'Deleting transaction...';
+
+  @override
+  String get printTimetable => 'Print Timetable';
+
+  @override
+  String get noSection => 'No Section';
+
+  @override
+  String get unknownSection => 'Unknown Section';
+
+  @override
+  String get notificationTitle => 'Notification Title';
+
+  @override
+  String get dayByDay => 'Day-by-Day';
+
+  @override
+  String get noDeletedRecordsFound => 'No deleted records found';
+
+  @override
+  String get filtered => 'Filtered';
+
+  @override
+  String get resultsFor => 'Results for ';
+
+  @override
+  String get latitude => 'Latitude';
+
+  @override
+  String get read => 'Read';
+
+  @override
+  String get failedToGetResponse =>
+      'Failed to get a response. Please try again.';
+
+  @override
+  String get egSeniorLecturer => 'e.g. Senior Lecturer, Mathematics';
+
+  @override
+  String get failedToSubmitMarks => 'Failed to submit marks';
+
+  @override
+  String get noResultsSelectedStudents =>
+      'No results found for the selected students.';
+
+  @override
+  String get egOxfordModel => 'e.g. Oxford Model Academy';
+
+  @override
+  String get homeworkProvided => 'Homework Provided';
+
+  @override
+  String get nextPage => 'Next Page';
+
+  @override
+  String get allowedRadius => 'Allowed Radius (meters)';
+
+  @override
+  String get content => 'Content';
+
+  @override
+  String get totalPages => 'Total Pages';
+
+  @override
+  String get deleteForever => 'Delete Forever';
+
+  @override
+  String get bookTitleReq => 'Book Title *';
+
+  @override
+  String get examScheduleFor => 'Exam schedule for ';
+
+  @override
+  String get restoreSelected => 'Restore Selected';
+
+  @override
+  String get zoomIn => 'Zoom In';
+
+  @override
+  String get channel => 'Channel';
+
+  @override
+  String get marksSubmittedSuccess => 'Marks submitted successfully';
+
+  @override
+  String get submitAttendance => 'Submit Attendance';
+
+  @override
+  String get fullName => 'Full Name';
+
+  @override
+  String get zoomOut => 'Zoom Out';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get attendanceMarkedSuccess => 'Attendance marked successfully!';
+
+  @override
+  String get emailVerification => 'Email Verification';
+
+  @override
+  String get noStudentsToGenIdCards => 'No students to generate ID cards.';
+
+  @override
+  String get tcPreview => 'Transfer Certificate Preview';
+
+  @override
+  String get egStudentBio => 'e.g. Student Bio or Notes';
+
+  @override
+  String get noStudentsForReportCards =>
+      'No students selected for report cards.';
+
+  @override
+  String get egDrJohnDoe => 'e.g. Dr. John Doe';
+
+  @override
+  String get resetZoom => 'Reset Zoom (100%)';
+
+  @override
+  String get subjectReq => 'Subject *';
+
+  @override
+  String get rollNo => 'Roll No';
+
+  @override
+  String get generatePdf => 'Generate PDF';
+
+  @override
+  String get postedBy => 'Posted By';
+
+  @override
+  String get attachmentUploadedSuccess => 'Attachment uploaded successfully!';
+
+  @override
+  String get messageStr => 'Message';
+
+  @override
+  String get classReq => 'Class *';
+
+  @override
+  String get cancelText => 'Cancel';
+
+  @override
+  String get endDate => 'End Date';
+
+  @override
+  String get setCredentials => 'Set Credentials';
 }

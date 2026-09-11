@@ -261,8 +261,8 @@ $text
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to get a response. Please try again.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.failedToGetResponse),
           ),
         );
       }
@@ -361,7 +361,7 @@ $text
           IconButton(
             icon: const Icon(Icons.refresh, color: AppColors.white),
             onPressed: _isLoading ? null : _retryLastMessage,
-            tooltip: 'Retry last message',
+            tooltip: AppLocalizations.of(context)!.retryLastMessage,
             color: AppColors.white,
           ),
         ],

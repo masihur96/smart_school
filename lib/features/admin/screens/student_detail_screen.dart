@@ -111,9 +111,9 @@ class StudentDetailScreen extends StatelessWidget {
                 children: [
                   _buildSectionTitle('Academic Information'),
                   _buildInfoCard([
-                    _buildInfoRow(Icons.numbers, 'Roll Number', student.rollId),
+                    _buildInfoRow(Icons.numbers, AppLocalizations.of(context)!.rollNumberLabel, student.rollId),
                     _buildInfoRow(Icons.class_, AppLocalizations.of(context)!.className, className),
-                    _buildInfoRow(Icons.grid_view, 'Section', sectionName),
+                    _buildInfoRow(Icons.grid_view, AppLocalizations.of(context)!.section, sectionName),
                     _buildInfoRow(
                       Icons.grid_view,
                       'About',
@@ -405,12 +405,12 @@ class StudentDetailScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Student'),
-        content: const Text('Are you sure you want to delete this student?'),
+        title: Text(AppLocalizations.of(context)!.deleteStudent),
+        content: Text(AppLocalizations.of(context)!.confirmDeleteStudent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancelText),
           ),
           ElevatedButton(
             onPressed: () {
@@ -419,7 +419,7 @@ class StudentDetailScreen extends StatelessWidget {
               Navigator.pop(context); // Close details screen
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+            child: Text(AppLocalizations.of(context)!.delete, style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

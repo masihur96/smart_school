@@ -39,7 +39,7 @@ class _BookListScreenState extends State<BookListScreen> {
 
   List<String> _categories(List<Book> books) {
     final cats = books.map((b) => b.category).toSet().toList()..sort();
-    return ['All', ...cats];
+    return [AppLocalizations.of(context)!.all, ...cats];
   }
 
   List<Book> _filteredBooks(List<Book> books) {

@@ -410,7 +410,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
-                            hintText: 'e.g. principal@school.edu or 017...',
+                            hintText: AppLocalizations.of(context)!.egPrincipalContact,
                             prefixIcon: const Icon(
                               Icons.email_outlined,
                               color: Colors.purple,
@@ -459,7 +459,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         TextFormField(
                           controller: _passwordController,
                           decoration: InputDecoration(
-                            hintText: 'Enter your password',
+                            hintText: AppLocalizations.of(context)!.enterYourPassword,
                             prefixIcon: const Icon(
                               Icons.lock_outline_rounded,
                               color: Colors.purple,
@@ -607,7 +607,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     size: 32,
                                     color: Colors.purple,
                                   ),
-                                  tooltip: 'Log in with biometrics',
+                                  tooltip: AppLocalizations.of(context)!.logInWithBiometrics,
                                 ),
                         ),
                       ],

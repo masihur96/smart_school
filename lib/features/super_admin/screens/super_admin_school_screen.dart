@@ -178,7 +178,7 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                   onChanged: (v) => setState(() => _searchQuery = v.trim()),
                   style: const TextStyle(fontSize: 14),
                   decoration: InputDecoration(
-                    hintText: 'Search by name, ID, address…',
+                    hintText: AppLocalizations.of(context)!.searchNameIdAddress,
                     hintStyle: TextStyle(fontSize: 13),
                     prefixIcon: const Icon(Icons.search_rounded, size: 20),
                     suffixIcon: _searchQuery.isNotEmpty
@@ -621,8 +621,8 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                           );
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('School ID copied'),
+                              SnackBar(
+                                content: Text(AppLocalizations.of(context)!.schoolIdCopied),
                                 duration: Duration(seconds: 1),
                               ),
                             );
@@ -679,7 +679,7 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                 _infoTile(
                   icon: Icons.location_on_rounded,
                   iconColor: const Color(0xFF3B82F6),
-                  label: 'Address',
+                  label: AppLocalizations.of(context)!.address,
                   value: school.address.isNotEmpty
                       ? school.address
                       : 'Not provided',
@@ -691,7 +691,7 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                       child: _infoTile(
                         icon: Icons.phone_rounded,
                         iconColor: const Color(0xFF10B981),
-                        label: 'Phone',
+                        label: AppLocalizations.of(context)!.phone,
                         value: school.phone.isNotEmpty ? school.phone : '—',
                         onTap: school.phone.isNotEmpty
                             ? () async {
@@ -712,7 +712,7 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                       child: _infoTile(
                         icon: Icons.email_rounded,
                         iconColor: const Color(0xFF8B5CF6),
-                        label: 'Email',
+                        label: AppLocalizations.of(context)!.email,
                         value: school.email.isNotEmpty ? school.email : '—',
                         onTap: school.email.isNotEmpty
                             ? () async {
@@ -1032,7 +1032,7 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                 );
               },
               icon: const Icon(Icons.key_rounded, size: 16),
-              label: const Text('Set Credentials'),
+              label: Text(AppLocalizations.of(context)!.setCredentials),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _kBrand,
                 foregroundColor: Colors.white,
@@ -1105,7 +1105,7 @@ class _SuperAdminSchoolScreenState extends State<SuperAdminSchoolScreen>
                 obscureText: !isPasswordVisible,
                 autofocus: true,
                 decoration: InputDecoration(
-                  labelText: 'Password',
+                  labelText: AppLocalizations.of(context)!.password,
                   prefixIcon: const Icon(Icons.lock_outline_rounded),
                   errorText: errorMsg,
                   suffixIcon: IconButton(
@@ -1241,8 +1241,8 @@ class _SecurityCredentialsPageState extends State<_SecurityCredentialsPage> {
     setState(() => _saving = false);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Security credentials saved successfully'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.securityCredentialsSaved),
           backgroundColor: Color(0xFF10B981),
         ),
       );
@@ -1325,7 +1325,7 @@ class _SecurityCredentialsPageState extends State<_SecurityCredentialsPage> {
                       controller: _emailCtrl,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
-                        hintText: 'Enter your email or phone',
+                        hintText: AppLocalizations.of(context)!.enterEmailOrPhone,
                         prefixIcon: const Icon(Icons.person_outline_rounded),
                         filled: true,
                         fillColor: Colors.white,
@@ -1366,7 +1366,7 @@ class _SecurityCredentialsPageState extends State<_SecurityCredentialsPage> {
                       controller: _passCtrl,
                       obscureText: _obscure,
                       decoration: InputDecoration(
-                        hintText: 'Enter your password',
+                        hintText: AppLocalizations.of(context)!.enterYourPassword,
                         prefixIcon: const Icon(Icons.lock_outline_rounded),
                         suffixIcon: IconButton(
                           icon: Icon(

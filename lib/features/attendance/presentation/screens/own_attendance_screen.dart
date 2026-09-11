@@ -9,7 +9,7 @@ class OwnAttendanceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('My Attendance')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.myAttendance)),
       body: Column(
         children: [
           Container(

@@ -321,7 +321,7 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
                     Icons.add_photo_alternate,
                     color: AppColors.primary,
                   ),
-                  tooltip: 'Image Options',
+                  tooltip: AppLocalizations.of(context)!.imageOptions,
                   onPressed: _showImageOptions,
                 ),
                 validator: (val) {

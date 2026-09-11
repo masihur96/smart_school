@@ -325,7 +325,7 @@ class _UserCard extends StatelessWidget {
               TextField(
                 controller: titleController,
                 decoration: InputDecoration(
-                  labelText: 'Title',
+                  labelText: AppLocalizations.of(context)!.title,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -337,7 +337,7 @@ class _UserCard extends StatelessWidget {
                 controller: messageController,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  labelText: 'Message',
+                  labelText: AppLocalizations.of(context)!.messageStr,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -501,7 +501,7 @@ class _UserCard extends StatelessWidget {
                     Icons.notifications_active_outlined,
                     color: AppColors.primary,
                   ),
-                  tooltip: 'Send Notification',
+                  tooltip: AppLocalizations.of(context)!.sendNotification,
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(

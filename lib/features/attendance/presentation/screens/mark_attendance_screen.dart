@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/data/mock_data/mock_data.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
+
 
 class MarkAttendanceScreen extends StatefulWidget {
   const MarkAttendanceScreen({super.key});
@@ -47,7 +49,7 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Email Verification'),
+        title: Text(AppLocalizations.of(context)!.emailVerification),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -56,8 +58,8 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
             ),
             const SizedBox(height: 16),
             TextField(
-              decoration: const InputDecoration(
-                labelText: 'Enter 6-digit Code',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.enter6DigitCode,
                 hintText: '123456',
               ),
               keyboardType: TextInputType.number,
@@ -68,14 +70,14 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancelText),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               _onSuccess();
             },
-            child: const Text('Verify'),
+            child: Text(AppLocalizations.of(context)!.verify),
           ),
         ],
       ),
@@ -93,14 +95,14 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancelText),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               _onSuccess();
             },
-            child: const Text('Mark Present'),
+            child: Text(AppLocalizations.of(context)!.markPresent),
           ),
         ],
       ),
@@ -110,8 +112,8 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
   void _onSuccess() {
     MockData.markTodayPresent();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Attendance marked successfully!'),
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.attendanceMarkedSuccess),
         backgroundColor: AppColors.success,
       ),
     );
@@ -121,7 +123,7 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Mark Attendance')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.markAttendance)),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(

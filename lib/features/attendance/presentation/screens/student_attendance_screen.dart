@@ -102,8 +102,8 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                   ElevatedButton(
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Attendance submitted successfully'),
+                        SnackBar(
+                          content: Text(AppLocalizations.of(context)!.attendanceSubmittedSuccess),
                         ),
                       );
                     },
@@ -113,7 +113,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                         vertical: 0,
                       ),
                     ),
-                    child: const Text('Submit Attendance'),
+                    child: Text(AppLocalizations.of(context)!.submitAttendance),
                   ),
               ],
             ),

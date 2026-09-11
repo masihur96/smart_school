@@ -77,14 +77,14 @@ class _SectionStudentsScreenState extends State<SectionStudentsScreen>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Unassign Student'),
+        title: Text(AppLocalizations.of(context)!.unassignStudent),
         content: Text(
           'Remove ${student.user?.name ?? 'this student'} from Section ${widget.section.name}?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancelText),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -107,14 +107,14 @@ class _SectionStudentsScreenState extends State<SectionStudentsScreen>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Unassign Students'),
+        title: Text(AppLocalizations.of(context)!.unassignStudents),
         content: Text(
           'Remove ${_selectedIds.length} selected students from Section ${widget.section.name}?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancelText),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -309,7 +309,7 @@ class _SectionStudentsScreenState extends State<SectionStudentsScreen>
                   onChanged: (v) => setState(() => _searchQuery = v),
                   decoration: InputDecoration(
                     fillColor: Colors.white,
-                    hintText: 'Search by name or roll…',
+                    hintText: AppLocalizations.of(context)!.searchByNameOrRoll,
                     hintStyle: TextStyle(color: _kTextMid, fontSize: 13),
                     prefixIcon: const Icon(
                       Icons.search,
@@ -456,7 +456,7 @@ class _StatsBar extends StatelessWidget {
         children: [
           _StatChip(
             icon: Icons.people_outlined,
-            label: 'Total',
+            label: AppLocalizations.of(context)!.total,
             value: '$total',
             color: _kPrimary,
           ),
@@ -464,7 +464,7 @@ class _StatsBar extends StatelessWidget {
           if (shown != total)
             _StatChip(
               icon: Icons.filter_list,
-              label: 'Filtered',
+              label: AppLocalizations.of(context)!.filtered,
               value: '$shown',
               color: const Color(0xFF0EA5E9),
             ),
@@ -1149,7 +1149,7 @@ class _AssignSectionStudentsSheetState
                           );
                         },
                         decoration: InputDecoration(
-                          hintText: 'Search name/roll…',
+                          hintText: AppLocalizations.of(context)!.searchNameRoll,
                           hintStyle: TextStyle(color: _kTextMid, fontSize: 13),
                           prefixIcon: const Icon(
                             Icons.search,
@@ -1184,7 +1184,7 @@ class _AssignSectionStudentsSheetState
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           isExpanded: true,
-                          hint: Text('All Classes', style: TextStyle(color: _kTextMid, fontSize: 13)),
+                          hint: Text(AppLocalizations.of(context)!.allClasses, style: TextStyle(color: _kTextMid, fontSize: 13)),
                           value: _filterClassId,
                           icon: const Icon(Icons.arrow_drop_down, color: _kPrimary),
                           onChanged: (val) {
@@ -1197,7 +1197,7 @@ class _AssignSectionStudentsSheetState
                           items: [
                             DropdownMenuItem<String>(
                               value: null,
-                              child: const Text('All Classes', style: TextStyle(fontSize: 13)),
+                              child: Text(AppLocalizations.of(context)!.allClasses, style: TextStyle(fontSize: 13)),
                             ),
                             ...classes.map((c) => DropdownMenuItem(
                               value: c.id,
@@ -1824,7 +1824,7 @@ class _AssignStudentTileState extends State<_AssignStudentTile> {
                 enabled: !widget.isAssigning,
                 onChanged: widget.onRollChanged,
                 decoration: InputDecoration(
-                  hintText: 'Roll No',
+                  hintText: AppLocalizations.of(context)!.rollNo,
                   hintStyle: const TextStyle(fontSize: 11, color: Colors.grey),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 8,

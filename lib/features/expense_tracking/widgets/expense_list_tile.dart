@@ -6,6 +6,8 @@ import '../../auth/providers/auth_provider.dart';
 import '../models/expense_model.dart';
 import '../providers/expense_provider.dart';
 import '../screens/add_edit_expense_screen.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
+
 
 class ExpenseListTile extends StatelessWidget {
   final Expense expense;
@@ -327,7 +329,7 @@ class ExpenseListTile extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancelText),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -337,7 +339,7 @@ class ExpenseListTile extends StatelessWidget {
               final provider = context.read<ExpenseProvider>();
 
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                   content: Row(
                     children: [
                       SizedBox(
@@ -349,7 +351,7 @@ class ExpenseListTile extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: 12),
-                      Text('Deleting transaction...'),
+                      Text(AppLocalizations.of(context)!.deletingTransaction),
                     ],
                   ),
                   duration: Duration(seconds: 1),
@@ -419,7 +421,7 @@ class ExpenseListTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),

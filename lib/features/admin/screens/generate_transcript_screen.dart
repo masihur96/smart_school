@@ -161,7 +161,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                 await Printing.layoutPdf(onLayout: (_) async => _pdfBytes!);
               }
             },
-            tooltip: 'Print',
+            tooltip: AppLocalizations.of(context)!.print,
           ),
           IconButton(
             icon: const Icon(Icons.share),
@@ -170,7 +170,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                 await Printing.sharePdf(bytes: _pdfBytes!, filename: 'transcripts.pdf');
               }
             },
-            tooltip: 'Share',
+            tooltip: AppLocalizations.of(context)!.share,
           ),
         ],
       ),
@@ -181,8 +181,8 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
             child: _isLoading || _pdfBytes == null
                 ? const Center(child: CircularProgressIndicator())
                 : _currentStudents.isEmpty
-                ? const Center(
-                    child: Text('No students selected for transcripts.'),
+                ? Center(
+                    child: Text(AppLocalizations.of(context)!.noStudentsForTranscripts),
                   )
                 : pdfx.PdfViewPinch(
                     controller: _pdfController!,
@@ -208,9 +208,9 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
               value: uniqueClasses.containsKey(_selectedClassId) ? _selectedClassId : null,
               items: [
                 if (!uniqueClasses.containsKey(_selectedClassId) && _selectedClassId != null)
-                  DropdownMenuItem(value: _selectedClassId, child: const Text('Unknown Class')),
+                  DropdownMenuItem(value: _selectedClassId, child: Text(AppLocalizations.of(context)!.unknownClass)),
                 if (!uniqueClasses.containsKey(_selectedClassId) && _selectedClassId == null)
-                  const DropdownMenuItem(value: null, child: Text('Select Class')),
+                  DropdownMenuItem(value: null, child: Text(AppLocalizations.of(context)!.selectClass)),
                 ...uniqueClasses.entries.map(
                   (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
                 ),
@@ -230,7 +230,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: _buildDropdown<String?>(
-                label: 'Section',
+                label: AppLocalizations.of(context)!.section,
                 value: uniqueSections.containsKey(_selectedSectionId) ? _selectedSectionId : null,
                 items: [
                   DropdownMenuItem(
@@ -238,7 +238,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                     child: Text(AppLocalizations.of(context)!.allSections),
                   ),
                   if (!uniqueSections.containsKey(_selectedSectionId) && _selectedSectionId != null)
-                    DropdownMenuItem(value: _selectedSectionId, child: const Text('Unknown Section')),
+                    DropdownMenuItem(value: _selectedSectionId, child: Text(AppLocalizations.of(context)!.unknownSection)),
                   ...uniqueSections.entries.map(
                     (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
                   ),
@@ -434,8 +434,8 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
     if (pdf.document.pdfPageList.pages.isEmpty) {
       pdf.addPage(
         pw.Page(
-          build: (context) => pw.Center(
-            child: pw.Text('No results found for the selected students.'),
+          build: (pw.Context pwContext) => pw.Center(
+            child: pw.Text(AppLocalizations.of(context)!.noResultsSelectedStudents),
           ),
         ),
       );

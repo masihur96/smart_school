@@ -418,7 +418,7 @@ class PricingPlanCard extends StatelessWidget {
                   children: [
                     _ActionButton(
                       icon: Icons.edit_outlined,
-                      label: 'Edit',
+                      label: AppLocalizations.of(context)!.edit,
                       color: AppColors.primary,
                       onTap: () {
                         showModalBottomSheet(
@@ -433,7 +433,7 @@ class PricingPlanCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     _ActionButton(
                       icon: Icons.delete_outline,
-                      label: 'Delete',
+                      label: AppLocalizations.of(context)!.delete,
                       color: AppColors.error,
                       onTap: () => _showDeleteConfirmation(context),
                     ),

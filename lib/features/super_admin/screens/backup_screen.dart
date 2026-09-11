@@ -338,7 +338,7 @@ class _BackupScreenState extends State<BackupScreen>
         style: const TextStyle(fontSize: 14),
         cursorColor: Colors.blueAccent,
         decoration: InputDecoration(
-          hintText: 'Search records...',
+          hintText: AppLocalizations.of(context)!.searchRecords,
           hintStyle: TextStyle(fontSize: 14),
           prefixIcon: Icon(Icons.search_rounded, size: 20),
           suffixIcon: _searchQuery.isNotEmpty
@@ -452,7 +452,7 @@ class _BackupScreenState extends State<BackupScreen>
         .toList();
 
     if (all.isEmpty) {
-      return const _EmptyView(message: 'No deleted records found');
+      return _EmptyView(message: AppLocalizations.of(context)!.noDeletedRecordsFound);
     }
 
     // Group by entity
@@ -579,7 +579,7 @@ class _BackupScreenState extends State<BackupScreen>
 
     if (records.isEmpty) {
       return _EmptyView(
-        message: 'No deleted records for this category',
+        message: AppLocalizations.of(context)!.noDeletedRecordsCategory,
         icon: _entityIcon(entity),
         color: color,
       );
@@ -781,7 +781,7 @@ class _BackupScreenState extends State<BackupScreen>
                     size: 20,
                   ),
                   onPressed: () => notifier.clearSelection(),
-                  tooltip: 'Cancel',
+                  tooltip: AppLocalizations.of(context)!.cancelText,
                 ),
               ],
             ),
@@ -792,7 +792,7 @@ class _BackupScreenState extends State<BackupScreen>
                 if (!isAllTab)
                   Expanded(
                     child: _BulkActionButton(
-                      label: 'Restore Selected',
+                      label: AppLocalizations.of(context)!.restoreSelected,
                       icon: Icons.unarchive_rounded,
                       color: const Color(0xFF22C55E),
                       loading: notifier.restoring,
@@ -809,7 +809,7 @@ class _BackupScreenState extends State<BackupScreen>
                 // Delete Selected
                 Expanded(
                   child: _BulkActionButton(
-                    label: 'Delete Forever',
+                    label: AppLocalizations.of(context)!.deleteForever,
                     icon: Icons.delete_forever_rounded,
                     color: const Color(0xFFEF4444),
                     loading: notifier.deleting,
@@ -1078,7 +1078,7 @@ class _BackupScreenState extends State<BackupScreen>
           ElevatedButton.icon(
             onPressed: () => Navigator.of(dialogCtx).pop(true),
             icon: const Icon(Icons.delete_forever_rounded, size: 16),
-            label: const Text('Delete Forever'),
+            label: Text(AppLocalizations.of(context)!.deleteForever),
             style: ElevatedButton.styleFrom(
               backgroundColor: dangerColor,
               foregroundColor: Colors.white,

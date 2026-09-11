@@ -936,7 +936,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
         content: Text(
-          l10n.changeRoleConfirmationMessage(admin.name, 'Admin', 'Teacher'),
+          l10n.changeRoleConfirmationMessage(admin.name, AppLocalizations.of(context)!.admin, 'Teacher'),
           style: const TextStyle(
             fontSize: 14,
             color: Colors.black87,

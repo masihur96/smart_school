@@ -120,8 +120,8 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                   onPressed: () {
                     if (students.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('No students to generate transcripts.'),
+                        SnackBar(
+                          content: Text(AppLocalizations.of(context)!.noStudentsToGenTranscripts),
                         ),
                       );
                       return;
@@ -140,8 +140,8 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                   onPressed: () {
                     if (students.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('No students to generate ID cards.'),
+                        SnackBar(
+                          content: Text(AppLocalizations.of(context)!.noStudentsToGenIdCards),
                         ),
                       );
                       return;

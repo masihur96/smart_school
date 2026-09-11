@@ -70,7 +70,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                 else
                   IconButton(
                     icon: const Icon(Icons.refresh),
-                    tooltip: 'Refresh',
+                    tooltip: AppLocalizations.of(context)!.refresh,
                     onPressed: () {
                       final user = context.read<AuthNotifier>().user;
                       if (user?.schoolId != null) {
@@ -373,14 +373,14 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                 children: [
                   _buildField(
                     controller: titleController,
-                    label: 'Title',
+                    label: AppLocalizations.of(context)!.title,
                     hint: 'e.g. Welcome Back!',
                     icon: Icons.title,
                   ),
                   const SizedBox(height: 12),
                   _buildField(
                     controller: contentController,
-                    label: 'Content',
+                    label: AppLocalizations.of(context)!.content,
                     hint: 'e.g. School reopens next Monday.',
                     icon: Icons.notes,
                     maxLines: 3,
@@ -388,14 +388,14 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                   const SizedBox(height: 12),
                   _buildField(
                     controller: postedByController,
-                    label: 'Posted By',
+                    label: AppLocalizations.of(context)!.postedBy,
                     hint: 'e.g. Principal',
                     icon: Icons.person,
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     decoration: InputDecoration(
-                      labelText: 'Target Audience',
+                      labelText: AppLocalizations.of(context)!.targetAudience,
                       prefixIcon: const Icon(Icons.group, color: Colors.purple),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -407,7 +407,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                     ),
                     initialValue: selectedAudience,
                     items: [
-                      DropdownMenuItem(value: 'All', child: Text(AppLocalizations.of(context)!.all)),
+                      DropdownMenuItem(value: AppLocalizations.of(context)!.all, child: Text(AppLocalizations.of(context)!.all)),
                       DropdownMenuItem(
                         value: 'Students',
                         child: Text(AppLocalizations.of(context)!.studentsAudience),
@@ -607,7 +607,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancelText),
           ),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(

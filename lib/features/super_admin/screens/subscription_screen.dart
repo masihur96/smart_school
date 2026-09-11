@@ -179,7 +179,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       controller: _searchController,
       style: const TextStyle(color: AppColors.textPrimary),
       decoration: InputDecoration(
-        hintText: 'Search by school name, email, or ID...',
+        hintText: AppLocalizations.of(context)!.searchSchoolNameEmailId,
         hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 14),
         prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
         suffixIcon: _searchQuery.isNotEmpty
@@ -218,7 +218,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       physics: const BouncingScrollPhysics(),
       child: Row(
         children: [
-          _buildFilterChip('All', SubscriptionFilter.all, theme),
+          _buildFilterChip(AppLocalizations.of(context)!.all, SubscriptionFilter.all, theme),
           const SizedBox(width: 8),
           _buildFilterChip('Active', SubscriptionFilter.active, theme),
           const SizedBox(width: 8),
@@ -693,7 +693,7 @@ class SubscriptionCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     _ActionButton(
                       icon: Icons.delete_outline,
-                      label: 'Delete',
+                      label: AppLocalizations.of(context)!.delete,
                       color: AppColors.error,
                       onTap: () => _confirmDelete(context),
                     ),
