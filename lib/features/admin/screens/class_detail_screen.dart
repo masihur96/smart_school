@@ -1606,6 +1606,8 @@ class _PeriodSelector extends StatelessWidget {
     required this.subjectId,
     required this.selectedDate,
     required this.onChanged,
+    this.sectionId,
+    this.selectedRoutineId,
   });
 
   @override

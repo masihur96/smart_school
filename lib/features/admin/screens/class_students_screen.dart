@@ -1168,6 +1168,7 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
                 _MultiSelectToggleBtn(
                   active: _multiSelectMode,
                   selectedCount: _selectedIds.length,
+                  color: _kPrimary,
                   onToggle: () {
                     setState(() {
                       _multiSelectMode = !_multiSelectMode;
@@ -1384,6 +1385,7 @@ class _MultiSelectToggleBtn extends StatelessWidget {
     required this.active,
     required this.selectedCount,
     required this.onToggle,
+    required this.color,
   });
 
   @override
