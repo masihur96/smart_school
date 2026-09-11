@@ -11,10 +11,9 @@ import 'package:smart_school/configs/custom_size.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/widgets/zoomable_avatar.dart';
 import 'package:smart_school/features/ai_tutor/screen/ai_tutor_chat_screen.dart';
-import 'package:smart_school/features/library/data/models/book.dart';
 import 'package:smart_school/features/library/providers/library_book_provider.dart';
-import 'package:smart_school/features/library/screens/library_dashboard_screen.dart';
 import 'package:smart_school/features/library/screens/book_detail_screen.dart';
+import 'package:smart_school/features/library/screens/library_dashboard_screen.dart';
 import 'package:smart_school/features/library/widgets/book_grid_card.dart';
 import 'package:smart_school/features/online_class/presentation/screens/online_class_list_screen.dart';
 import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
@@ -393,11 +392,15 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     final provider = context.watch<TeacherDashboardProvider>();
     final onlineClassProvider = context.watch<OnlineClassProvider>();
     final libraryProvider = context.watch<LibraryBookNotifier>();
-    
+
     final upcomingClasses = onlineClassProvider.onlineClasses
-        .where((c) => c.scheduledTime.isAfter(DateTime.now().subtract(const Duration(minutes: 30))))
+        .where(
+          (c) => c.scheduledTime.isAfter(
+            DateTime.now().subtract(const Duration(minutes: 30)),
+          ),
+        )
         .toList();
-        
+
     final availableBooks = libraryProvider.books
         .where((b) => b.isAvailable)
         .toList();
@@ -467,6 +470,44 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                   classes: classes,
                   buildCard: (ctx, entry) => _buildClassCard(ctx, entry),
                   isCurrentClass: _isCurrentClass,
+                ),
+                const SizedBox(height: 24),
+              ],
+              if (upcomingClasses.isNotEmpty) ...[
+                _buildSectionHeader(
+                  'Online Classes',
+                  onSeeAll: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const OnlineClassListScreen(isAdminOrTeacher: true),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 150,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: upcomingClasses.length > 5
+                        ? 5
+                        : upcomingClasses.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 12.0),
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width - 48,
+                          child: _buildOnlineClassCard(
+                            context,
+                            upcomingClasses[index],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
                 const SizedBox(height: 24),
               ],
@@ -547,45 +588,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                     ),
                     const SizedBox(height: 24),
                   ],
-                  if (upcomingClasses.isNotEmpty) ...[
-                    _buildSectionHeader(
-                      'Online Classes',
-                      onSeeAll: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const OnlineClassListScreen(
-                              isAdminOrTeacher: true,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: 150,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: upcomingClasses.length > 5
-                            ? 5
-                            : upcomingClasses.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 12.0),
-                            child: SizedBox(
-                              width: MediaQuery.of(context).size.width - 48,
-                              child: _buildOnlineClassCard(
-                                context,
-                                upcomingClasses[index],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
+
                   if (availableBooks.isNotEmpty) ...[
                     _buildSectionHeader(
                       'Library Books',
@@ -1565,17 +1568,29 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                         Expanded(
                           child: Text(
                             onlineClass.className ?? 'Meeting',
-                            style: const TextStyle(fontSize: 11, color: Colors.grey),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(width: 4),
-                        const Icon(Icons.access_time, size: 12, color: Colors.grey),
+                        const Icon(
+                          Icons.access_time,
+                          size: 12,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 4),
                         Text(
-                          DateFormat('hh:mm a').format(onlineClass.scheduledTime),
-                          style: const TextStyle(fontSize: 11, color: Colors.grey),
+                          DateFormat(
+                            'hh:mm a',
+                          ).format(onlineClass.scheduledTime),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                          ),
                         ),
                       ],
                     ),
@@ -1596,11 +1611,16 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                           backgroundColor: Colors.blue,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 4),
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
                           minimumSize: const Size(0, 28),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: const Text('Join', style: TextStyle(fontSize: 12)),
+                        child: const Text(
+                          'Join',
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ),
                     ),
                 ],
