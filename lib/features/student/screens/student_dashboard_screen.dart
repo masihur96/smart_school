@@ -614,7 +614,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                 child: Image.asset('assets/tutor.png', height: 90, width: 90),
               ),
 
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
 
               Text(
                 AppLocalizations.of(context)!.aiTutor,
@@ -629,7 +629,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                 style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
               ),
 
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
 
               Text(
                 AppLocalizations.of(context)!.aiTutorDescription,
@@ -650,7 +650,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                   children: [
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.check_circle,
                           color: Colors.deepPurple,
                           size: 18,
@@ -1459,7 +1459,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                           DateFormat(
                             'hh:mm a',
                           ).format(onlineClass.scheduledTime),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             color: Colors.grey,
                           ),

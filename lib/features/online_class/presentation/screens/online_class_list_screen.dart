@@ -183,7 +183,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Icon(Icons.person, color: themeColor),
@@ -193,7 +193,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                       ),
                       subtitle: Text(
                         oClass.teacherName,
-                        style: const TextStyle(fontSize: 16),
+                        style: TextStyle(fontSize: 16),
                       ),
                     ),
                     if (oClass.description.isNotEmpty)

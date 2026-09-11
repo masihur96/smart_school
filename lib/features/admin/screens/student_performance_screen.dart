@@ -503,7 +503,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
               if (sections.isNotEmpty) ...[
                 _dropdownChip<String?>(
                   icon: Icons.group_work_rounded,
-                  color: const Color(0xFFF59E0B),
+                  color: Color(0xFFF59E0B),
                   hint: AppLocalizations.of(context)!.allSections,
                   value: provider.filterSection,
                   items: [

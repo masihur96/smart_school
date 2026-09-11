@@ -588,7 +588,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                 color: Colors.blue.withOpacity(0.5),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Text(
               AppLocalizations.of(context)!.noAttendanceRecords,
               style: TextStyle(

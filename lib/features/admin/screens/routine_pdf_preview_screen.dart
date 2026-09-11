@@ -671,7 +671,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                 onPressed: _currentPage < _pageCount
                     ? () {
                         _pdfController?.nextPage(
-                          duration: const Duration(milliseconds: 250),
+                          duration: Duration(milliseconds: 250),
                           curve: Curves.easeInOut,
                         );
                       }

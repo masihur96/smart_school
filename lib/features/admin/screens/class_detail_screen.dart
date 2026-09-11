@@ -343,7 +343,7 @@ class _AttendanceTab extends StatelessWidget {
           child: Row(
             children: [
               const Icon(Icons.calendar_today, size: 18),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
                 AppLocalizations.of(context)!.dateLabel,
                 style: TextStyle(fontWeight: FontWeight.w600),
@@ -770,7 +770,7 @@ class _HomeworkTab extends StatelessWidget {
             heroTag: 'hw_fab',
             onPressed: () => _showAddSheet(context),
             backgroundColor: AppColors.primaryAdmin,
-            icon: const Icon(Icons.add, color: Colors.white),
+            icon: Icon(Icons.add, color: Colors.white),
             label: Text(
               AppLocalizations.of(context)!.addHomework,
               style: TextStyle(
@@ -1502,7 +1502,7 @@ class _ViewHomeworkSheet extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             // Description Section
             Text(
@@ -1530,7 +1530,7 @@ class _ViewHomeworkSheet extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryAdmin,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),

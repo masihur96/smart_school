@@ -119,7 +119,7 @@ class StudentDetailScreen extends StatelessWidget {
                       'About',
                       student.user?.designation ?? "N/A",
                     ),
-                    _buildStatusRow(student.isActive),
+                    _buildStatusRow(context, student.isActive),
                   ]),
                   const SizedBox(height: 24),
                   _buildSectionTitle('Contact Information'),
@@ -366,7 +366,7 @@ class StudentDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusRow(bool isActive) {
+  Widget _buildStatusRow(BuildContext context, bool isActive) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(

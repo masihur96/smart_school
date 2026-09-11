@@ -425,7 +425,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                             }
                           },
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   TextField(
                     controller: commentController,
                     enabled: !isUpdating,

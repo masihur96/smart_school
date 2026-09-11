@@ -725,7 +725,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
             elevation: 0,
           ),
           child: context.watch<ResultsNotifier>().submitting
-              ? const SizedBox(
+              ? SizedBox(
                   height: 20,
                   width: 20,
                   child: CircularProgressIndicator(

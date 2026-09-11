@@ -1077,7 +1077,7 @@ class _ViewHomeworkSheet extends StatelessWidget {
                     Text(
                       due,
                       style: TextStyle(
-                        color: isPast ? Colors.red : const Color(0xFF1E1B4B),
+                        color: isPast ? Colors.red : Color(0xFF1E1B4B),
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -1108,7 +1108,7 @@ class _ViewHomeworkSheet extends StatelessWidget {
                 style: TextStyle(fontSize: 14, height: 1.5),
               ),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

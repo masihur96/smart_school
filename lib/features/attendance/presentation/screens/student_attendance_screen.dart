@@ -136,7 +136,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                   child: ListTile(
                     title: Text(
                       student['name'],
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text('Roll: ${student['roll']}'),
                     trailing: _isToday

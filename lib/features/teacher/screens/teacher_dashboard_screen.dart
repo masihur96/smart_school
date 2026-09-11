@@ -731,7 +731,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                 child: Image.asset('assets/tutor.png', height: 90, width: 90),
               ),
 
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
 
               Text(
                 AppLocalizations.of(context)!.aiTutor,
@@ -746,7 +746,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                 style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
               ),
 
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
 
               Text(
                 AppLocalizations.of(context)!.aiTutorDescription,
@@ -954,7 +954,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                 Container(
                   height: 30,
                   width: 1,
-                  margin: const EdgeInsets.symmetric(horizontal: 15),
+                  margin: EdgeInsets.symmetric(horizontal: 15),
                   color: Colors.grey.shade300,
                 ),
                 _buildTimeInfo(
@@ -1490,7 +1490,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 16),
-              Text(notice.content, style: const TextStyle(fontSize: 15)),
+              Text(notice.content, style: TextStyle(fontSize: 15)),
               if (notice.fileUrl != null && notice.fileUrl!.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
@@ -1617,7 +1617,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                   ),
                   if (onlineClass.meetLink.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
+                      padding: EdgeInsets.only(left: 8.0),
                       child: ElevatedButton(
                         onPressed: () {
                           try {

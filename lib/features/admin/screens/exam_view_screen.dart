@@ -326,7 +326,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
             ),
             if (widget.exam.description != null &&
                 widget.exam.description!.isNotEmpty) ...[
-              const Divider(height: 24),
+              Divider(height: 24),
               Text(
                 AppLocalizations.of(context)!.description,
                 style: TextStyle(
@@ -468,7 +468,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
                   ),
                 ),
                 if (uniqueSections.isNotEmpty) ...[
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(
                     child: _buildDropdownField<String?>(
                       label: 'Section',

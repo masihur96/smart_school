@@ -179,7 +179,7 @@ class _TeacherExamDetailsScreenState extends State<TeacherExamDetailsScreen>
                   indicatorWeight: 3,
                   labelColor: AppColors.primaryTeacher,
                   unselectedLabelColor: Colors.grey.shade500,
-                  labelStyle: const TextStyle(
+                  labelStyle: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                   ),

@@ -233,7 +233,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                 label: 'Section',
                 value: uniqueSections.containsKey(_selectedSectionId) ? _selectedSectionId : null,
                 items: [
-                  const DropdownMenuItem(
+                  DropdownMenuItem(
                     value: null,
                     child: Text(AppLocalizations.of(context)!.allSections),
                   ),
