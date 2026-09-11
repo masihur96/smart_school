@@ -369,8 +369,8 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
       dummyPdf.addPage(
         pw.MultiPage(
           pageTheme: makePageTheme(),
-          build: (context) => _buildTranscriptPage(
-            context,
+          build: (pw.Context pwContext) => _buildTranscriptPage(
+            pwContext,
             student,
             studentExamsWithResults,
             schoolName,
@@ -415,9 +415,9 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
               return pw.SizedBox();
             },
           ),
-          build: (pw.Context context) {
+          build: (pw.Context pwContext) {
             return _buildTranscriptPage(
-              context,
+              pwContext,
               student,
               studentExamsWithResults,
               schoolName,
@@ -445,7 +445,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
   }
 
   List<pw.Widget> _buildTranscriptPage(
-    pw.Context context,
+    pw.Context pwContext,
     Student student,
     Map<Exam, List<Result>> studentExamsWithResults,
     String schoolName,

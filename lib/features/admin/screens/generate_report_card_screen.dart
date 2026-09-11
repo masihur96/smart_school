@@ -390,9 +390,9 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
         pw.Page(
           pageFormat: format,
           margin: const pw.EdgeInsets.all(20),
-          build: (pw.Context context) {
+          build: (pw.Context pwContext) {
             return _buildReportCardSinglePage(
-              context: context,
+              pwContext: pwContext,
               student: student,
               results: studentResults,
               rank: studentRanks[student.userId] ?? 0,
@@ -434,7 +434,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
   }
 
   pw.Widget _buildReportCardSinglePage({
-    required pw.Context context,
+    required pw.Context pwContext,
     required Student student,
     required List<Result> results,
     required int rank,
