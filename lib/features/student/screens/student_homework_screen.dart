@@ -86,10 +86,7 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> {
 
                         if (hw == null) return const SizedBox();
 
-
-
-                        final subName = hw.subjectInfo?.name??"Subject";
-
+                        final subName = hw.subjectInfo?.name ?? "Subject";
 
                         return _HomeworkCard(
                           studentHomework: studentHw,
@@ -351,13 +348,36 @@ class _HomeworkCard extends StatelessWidget {
                       fontSize: 17,
                     ),
                   ),
-                  const SizedBox(height: 6),
+
+                  const SizedBox(height: 8),
                   Text(
                     hw.description,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 14, height: 1.4),
                   ),
+
+                  if (hw.teacherInfo != null) ...[
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.person_outline,
+                          size: 14,
+                          color: Colors.grey[600],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          hw.teacherInfo!.name,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
