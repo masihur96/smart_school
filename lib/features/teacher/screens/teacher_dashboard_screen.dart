@@ -14,6 +14,7 @@ import 'package:smart_school/features/ai_tutor/screen/ai_tutor_chat_screen.dart'
 import 'package:smart_school/features/library/data/models/book.dart';
 import 'package:smart_school/features/library/providers/library_book_provider.dart';
 import 'package:smart_school/features/library/screens/library_dashboard_screen.dart';
+import 'package:smart_school/features/library/screens/book_detail_screen.dart';
 import 'package:smart_school/features/library/widgets/book_grid_card.dart';
 import 'package:smart_school/features/online_class/presentation/screens/online_class_list_screen.dart';
 import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
@@ -573,7 +574,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                           return Padding(
                             padding: const EdgeInsets.only(right: 12.0),
                             child: SizedBox(
-                              width: screenSize(context, 0.75),
+                              width: MediaQuery.of(context).size.width - 48,
                               child: _buildOnlineClassCard(
                                 context,
                                 upcomingClasses[index],
@@ -593,7 +594,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                           context,
                           MaterialPageRoute(
                             builder: (_) => const LibraryDashboardScreen(
-                              comeFrom: 'Teacher',
+                              comeFrom: 'teacher',
                             ),
                           ),
                         );
@@ -601,7 +602,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
-                      height: 200,
+                      height: 220,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         physics: const BouncingScrollPhysics(),
@@ -612,10 +613,20 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                           return Padding(
                             padding: const EdgeInsets.only(right: 12.0),
                             child: SizedBox(
-                              width: 140,
+                              width: 150,
                               child: BookGridCard(
                                 book: availableBooks[index],
-                                onTap: () {},
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => BookDetailScreen(
+                                        comeFrom: 'teacher',
+                                        book: availableBooks[index],
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           );
@@ -1534,6 +1545,41 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                onlineClass.description,
+                style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const Spacer(),
+              Row(
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        const Icon(Icons.class_, size: 12, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            onlineClass.className ?? 'Meeting',
+                            style: const TextStyle(fontSize: 11, color: Colors.grey),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.access_time, size: 12, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Text(
+                          DateFormat('hh:mm a').format(onlineClass.scheduledTime),
+                          style: const TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
                   if (onlineClass.meetLink.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0),
@@ -1557,35 +1603,6 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                         child: const Text('Join', style: TextStyle(fontSize: 12)),
                       ),
                     ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                onlineClass.description,
-                style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const Spacer(),
-              Row(
-                children: [
-                  const Icon(Icons.class_, size: 12, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      onlineClass.className ?? 'Meeting',
-                      style: const TextStyle(fontSize: 11, color: Colors.grey),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.access_time, size: 12, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text(
-                    DateFormat('hh:mm a').format(onlineClass.scheduledTime),
-                    style: const TextStyle(fontSize: 11, color: Colors.grey),
-                  ),
                 ],
               ),
             ],
