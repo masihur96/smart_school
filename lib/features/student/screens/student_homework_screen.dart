@@ -86,7 +86,7 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen> {
 
                         if (hw == null) return const SizedBox();
 
-                        final subName = hw.subjectInfo?.name ?? "Subject";
+                        final subName = hw.subjectInfo?.name ?? AppLocalizations.of(context)!.subjectName;
 
                         return _HomeworkCard(
                           studentHomework: studentHw,
@@ -555,7 +555,7 @@ class _HomeworkDetailSheet extends StatelessWidget {
             const SizedBox(height: 16),
 
             Text(
-              'Description',
+              AppLocalizations.of(context)!.description,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

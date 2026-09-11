@@ -160,7 +160,7 @@ class _StudentResultScreenState extends State<StudentResultScreen> {
                   children: [
                     _buildInfoItem(
                       Icons.event,
-                      'Start',
+                      AppLocalizations.of(context)!.start,
                       DateFormat(
                         'MMM dd',
                       ).format(exam.startDate ?? DateTime.now()),

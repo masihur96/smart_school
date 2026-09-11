@@ -195,7 +195,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        "${user?.name ?? ""}",
+                        user?.name ?? "",
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                         style: const TextStyle(
@@ -319,7 +319,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
               Positioned(
                 top: -16,
                 child: Theme(
-                  data: Theme.of(context).copyWith(useMaterial3: true),
+                  data: Theme.of(context).copyWith(),
                   child: PopupMenuButton<int>(
                     offset: const Offset(0, -110),
                     shape: RoundedRectangleBorder(
@@ -2227,14 +2227,14 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     int rank,
   ) {
     final l10n = AppLocalizations.of(context)!;
-    double _calcScore() {
+    double calcScore() {
       return (perf.attendance.percentage +
               perf.homework.percentage +
               perf.exams.percentage) /
           3;
     }
 
-    final score = _calcScore();
+    final score = calcScore();
 
     Color badgeColor;
     String badgeText;
@@ -2496,7 +2496,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
           ),
           TextButton(
             onPressed: () => provider.fetchPerformances(),
-            child: const Text('Retry', style: TextStyle(fontSize: 12)),
+            child: Text(AppLocalizations.of(context)!.retry, style: TextStyle(fontSize: 12)),
           ),
         ],
       ),

@@ -25,7 +25,6 @@ import 'package:smart_school/features/student/screens/student_notice_screen.dart
 import 'package:smart_school/features/student/screens/student_result_screen.dart';
 import 'package:smart_school/features/student/screens/student_routine_screen.dart';
 import 'package:smart_school/features/teacher/screens/homework_management_screen.dart';
-import 'package:smart_school/features/teacher/screens/mark_entry_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_attendance_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_exam_screen.dart';
 import 'package:smart_school/features/teacher/screens/teacher_routine_screen.dart';

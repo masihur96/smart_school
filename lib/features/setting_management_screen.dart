@@ -177,7 +177,7 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
           //   _buildSectionHeader("Developer Tools", theme),
           //   _buildSettingTile(
           //     icon: Icons.send_rounded,
-          //     title: "Send Test Notification",
+          //     title: AppLocalizations.of(context)!.sendTestNotification,
           //     subtitle: "Send a custom notification to a specific user",
           //     theme: theme,
           //     isAction: true,

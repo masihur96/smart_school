@@ -21,7 +21,6 @@ import '../../features/student/screens/student_notice_screen.dart';
 import '../../features/student/screens/student_result_screen.dart';
 import '../../features/student/screens/student_routine_screen.dart';
 import '../../features/teacher/screens/homework_management_screen.dart';
-import '../../features/teacher/screens/mark_entry_screen.dart';
 import '../../features/teacher/screens/teacher_attendance_screen.dart';
 import '../../features/teacher/screens/teacher_dashboard_screen.dart';
 import '../../models/user_model.dart';

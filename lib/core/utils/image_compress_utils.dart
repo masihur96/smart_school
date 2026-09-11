@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:ui' as ui;
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -78,7 +77,7 @@ class ImageCompressUtils {
 
       debugPrint(
         '[ImageCompress] Scale ${(scaleFactor * 100).toStringAsFixed(0)}% → '
-        '${targetW}x${targetH} → ${(bytes.length / 1024).toStringAsFixed(1)} KB',
+        '${targetW}x$targetH → ${(bytes.length / 1024).toStringAsFixed(1)} KB',
       );
 
       if (bytes.length <= targetBytes) {

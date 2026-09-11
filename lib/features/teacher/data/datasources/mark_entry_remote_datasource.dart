@@ -145,7 +145,7 @@ class MarkEntryRemoteDataSource {
           ? rawData
           : (rawData is Map ? (rawData['data'] ?? []) : []);
       log('Exam students count: ${data.length}');
-      log('Exam students count: ${data}');
+      log('Exam students count: $data');
 
       return data
           .map((json) => TeacherAssignmentStudent.fromJson(json))

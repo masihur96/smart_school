@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
@@ -7,7 +8,6 @@ import 'package:smart_school/models/school_models.dart';
 
 import '../../../services/notification_service.dart';
 import '../../auth/providers/auth_provider.dart';
-import 'package:shimmer/shimmer.dart';
 import '../providers/result_provider.dart';
 import '../providers/teacher_dashboard_provider.dart';
 
@@ -70,9 +70,15 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
   }
 
   void _disposeControllers() {
-    for (var c in _marksControllers.values) c.dispose();
-    for (var c in _totalMarksControllers.values) c.dispose();
-    for (var c in _remarksControllers.values) c.dispose();
+    for (var c in _marksControllers.values) {
+      c.dispose();
+    }
+    for (var c in _totalMarksControllers.values) {
+      c.dispose();
+    }
+    for (var c in _remarksControllers.values) {
+      c.dispose();
+    }
     _marksControllers.clear();
     _totalMarksControllers.clear();
     _remarksControllers.clear();
@@ -86,8 +92,8 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       orElse: () => Exam(id: widget.initialExamId, name: ''),
     );
 
-    String subjectName = 'Subject';
-    String className = 'Class';
+    String subjectName = AppLocalizations.of(context)!.subjectName;
+    String className = AppLocalizations.of(context)!.className;
     try {
       final assignment = exam.assignments.firstWhere(
         (a) =>
@@ -103,7 +109,8 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       _selectedExamId = exam.id;
       _selectedClassId = widget.initialClassId;
       _selectedClassName = className;
-      _selectedSectionId = null; // Always show 'All Sections' initially
+      _selectedSectionId =
+          null; // Always show AppLocalizations.of(context)!.allSections initially
       _selectedSubject = Subject(
         id: widget.initialSubjectId,
         name: subjectName,
@@ -130,14 +137,19 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       }
 
       _displayStudents = filtered.toList();
-      
+
       if (_displayStudents.isNotEmpty) {
         final firstStudent = _displayStudents.first;
-        if (firstStudent.className != null && firstStudent.className!.isNotEmpty) {
+        if (firstStudent.className != null &&
+            firstStudent.className!.isNotEmpty) {
           _selectedClassName = firstStudent.className;
         }
-        if (firstStudent.subjectName != null && firstStudent.subjectName!.isNotEmpty) {
-          _selectedSubject = Subject(id: _selectedSubject!.id, name: firstStudent.subjectName!);
+        if (firstStudent.subjectName != null &&
+            firstStudent.subjectName!.isNotEmpty) {
+          _selectedSubject = Subject(
+            id: _selectedSubject!.id,
+            name: firstStudent.subjectName!,
+          );
         }
       }
     });
@@ -283,8 +295,8 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
       elevation: 0,
       backgroundColor: AppColors.primaryTeacher,
       foregroundColor: Colors.white,
-      title: const Text(
-        'Mark Entry System',
+      title: Text(
+        AppLocalizations.of(context)!.markEntrySystem,
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
       ),
     );
@@ -319,7 +331,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                 Expanded(
                   child: _buildInfoTile(
                     icon: Icons.class_outlined,
-                    title: 'Class',
+                    title: AppLocalizations.of(context)!.className,
                     value: _selectedClassName ?? 'N/A',
                     iconColor: Colors.blue,
                   ),
@@ -330,7 +342,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                     padding: const EdgeInsets.only(left: 16),
                     child: _buildInfoTile(
                       icon: Icons.book_outlined,
-                      title: 'Subject',
+                      title: AppLocalizations.of(context)!.subjectName,
                       value: _selectedSubject?.name ?? 'N/A',
                       iconColor: Colors.orange,
                     ),
@@ -342,7 +354,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
             const Divider(height: 1),
             const SizedBox(height: 16),
             Text(
-              'Filter by Section',
+              AppLocalizations.of(context)!.filterBySection,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -361,12 +373,12 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                 child: DropdownButton<String>(
                   isExpanded: true,
                   value: displayValue,
-                  hint: const Text('Select Section'),
+                  hint: Text(AppLocalizations.of(context)!.selectSection),
                   icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
                   items: [
-                    const DropdownMenuItem<String>(
+                    DropdownMenuItem<String>(
                       value: null,
-                      child: Text('All Sections'),
+                      child: Text(AppLocalizations.of(context)!.allSections),
                     ),
                     ...filteredSections.map(
                       (s) => DropdownMenuItem<String>(
@@ -721,13 +733,13 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
                     strokeWidth: 2,
                   ),
                 )
-              : const Row(
+              : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.save_outlined),
                     SizedBox(width: 8),
                     Text(
-                      'Save All Results',
+                      AppLocalizations.of(context)!.saveAllResults,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -852,7 +864,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
         if (adminInfo != null && adminInfo.id.isNotEmpty) {
           NotificationService().sendBulkNotification(
             receiverUuids: [adminInfo.id],
-            title: '📊 Marks Submitted',
+            title: AppLocalizations.of(context)!.marksSubmitted,
             message:
                 'Marks for "${_selectedExam!.name}" – ${_selectedSubject!.name} '
                 '(${_marksControllers.length} student(s)) have been saved by ${user.name}.',

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 
 import '../providers/result_provider.dart';
@@ -182,9 +183,9 @@ class _TeacherExamDetailsScreenState extends State<TeacherExamDetailsScreen>
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                   ),
-                  tabs: const [
+                  tabs: [
                     Tab(text: 'Routine'),
-                    Tab(text: 'Syllabus'),
+                    Tab(text: AppLocalizations.of(context)!.syllabus),
                     Tab(text: 'Result'),
                   ],
                 ),
@@ -225,7 +226,7 @@ class _RoutineTab extends StatelessWidget {
     if (exam.assignments.isEmpty) {
       return _emptyState(
         icon: Icons.event_note_outlined,
-        message: 'No exam routines assigned yet.',
+        message: AppLocalizations.of(context)!.noExamRoutinesAssignedYet,
       );
     }
 
@@ -359,8 +360,8 @@ class _RoutineCard extends StatelessWidget {
                       color: AppColors.primaryTeacher,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Text(
-                      'TODAY',
+                    child: Text(
+                      AppLocalizations.of(context)!.todayLabel,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 10,
@@ -383,7 +384,7 @@ class _RoutineCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   _row(
                     Icons.person_rounded,
-                    'Examiner',
+                    AppLocalizations.of(context)!.examiner,
                     assignment.examinerName,
                   ),
                 ],
@@ -453,7 +454,7 @@ class _SyllabusTab extends StatelessWidget {
     if (withSyllabus.isEmpty) {
       return _emptyState(
         icon: Icons.description_outlined,
-        message: 'No syllabus information available.',
+        message: AppLocalizations.of(context)!.noSyllabusInformationAvailable,
       );
     }
 
@@ -550,7 +551,7 @@ class _ClassSyllabusViewState extends State<_ClassSyllabusView> {
               child: Row(
                 children: [
                   ChoiceChip(
-                    label: const Text('All Sections'),
+                    label: Text(AppLocalizations.of(context)!.allSections),
                     selected: selectedSection == null,
                     onSelected: (val) {
                       if (val) setState(() => selectedSection = null);
@@ -845,7 +846,7 @@ class _ResultTabState extends State<_ResultTab> {
     if (students.isEmpty) {
       return _emptyState(
         icon: Icons.bar_chart_rounded,
-        message: 'Results are published but no data is available yet.',
+        message: AppLocalizations.of(context)!.resultsPublishedNoData,
       );
     }
 
@@ -925,7 +926,9 @@ class _ResultTabState extends State<_ResultTab> {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Results not published yet. Showing your assigned subjects for this exam.',
+                AppLocalizations.of(
+                  context,
+                )!.resultsNotPublishedAssignedSubjects,
                 style: TextStyle(
                   color: Colors.orange.shade800,
                   fontSize: 12,
@@ -945,7 +948,7 @@ class _ResultTabState extends State<_ResultTab> {
           Expanded(
             child: _emptyState(
               icon: Icons.assignment_ind_outlined,
-              message: 'You have no subjects assigned for this exam.',
+              message: AppLocalizations.of(context)!.noSubjectsAssignedForExam,
             ),
           ),
         ],
@@ -1092,7 +1095,7 @@ class _ClassResultViewState extends State<_ClassResultView> {
               child: Row(
                 children: [
                   ChoiceChip(
-                    label: const Text('All Sections'),
+                    label: Text(AppLocalizations.of(context)!.allSections),
                     selected: selectedSection == null,
                     onSelected: (val) {
                       if (val) setState(() => selectedSection = null);
@@ -1142,15 +1145,15 @@ class _ClassResultViewState extends State<_ClassResultView> {
           child: SizedBox(
             width: double.infinity,
             child: SegmentedButton<ResultViewMode>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: ResultViewMode.studentWise,
-                  label: Text('Result Sheet'),
+                  label: Text(AppLocalizations.of(context)!.resultSheet),
                   icon: Icon(Icons.format_list_numbered, size: 18),
                 ),
                 ButtonSegment(
                   value: ResultViewMode.subjectWise,
-                  label: Text('Subject Wise'),
+                  label: Text(AppLocalizations.of(context)!.subjectWise),
                   icon: Icon(Icons.category_outlined, size: 18),
                 ),
               ],
@@ -1422,7 +1425,7 @@ class _AssignedSubjectCard extends StatelessWidget {
     final Color countdownColor;
     final Color countdownBg;
     if (isToday) {
-      countdownLabel = 'TODAY';
+      countdownLabel = AppLocalizations.of(context)!.todayLabel;
       countdownColor = Colors.white;
       countdownBg = AppColors.primaryTeacher;
     } else if (isPast) {
@@ -1601,7 +1604,7 @@ class _AssignedSubjectCard extends StatelessWidget {
                               children: [
                                 _infoRow(
                                   icon: Icons.event_rounded,
-                                  label: 'Exam Date',
+                                  label: AppLocalizations.of(context)!.examDate,
                                   value: DateFormat(
                                     'EEEE, MMM dd yyyy',
                                   ).format(examDate),
@@ -1614,14 +1617,16 @@ class _AssignedSubjectCard extends StatelessWidget {
                                 const SizedBox(height: 10),
                                 _infoRow(
                                   icon: Icons.person_pin_rounded,
-                                  label: 'Examiner',
+                                  label: AppLocalizations.of(context)!.examiner,
                                   value: assignment.examinerName,
                                 ),
                                 if (hasSyllabus) ...[
                                   const SizedBox(height: 10),
                                   _infoRow(
                                     icon: Icons.format_list_bulleted_rounded,
-                                    label: 'Syllabus',
+                                    label: AppLocalizations.of(
+                                      context,
+                                    )!.syllabus,
                                     value: assignment.syllabus!,
                                     maxLines: 2,
                                   ),
@@ -1657,7 +1662,9 @@ class _AssignedSubjectCard extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 5),
                                     Text(
-                                      'Mark Entry Pending',
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.markEntryPending,
                                       style: TextStyle(
                                         color: Colors.orange.shade700,
                                         fontSize: 11,
@@ -1682,7 +1689,7 @@ class _AssignedSubjectCard extends StatelessWidget {
                                   color: AppColors.primaryTeacher,
                                 ),
                                 label: Text(
-                                  'View Results',
+                                  AppLocalizations.of(context)!.viewResults,
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
@@ -1907,7 +1914,7 @@ class _ResultSubjectCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          'Not Graded',
+                          AppLocalizations.of(context)!.notGraded,
                           style: TextStyle(
                             color: Colors.grey.shade600,
                             fontSize: 11,
@@ -2072,7 +2079,7 @@ class _ResultsBottomSheetState extends State<_ResultsBottomSheet> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'No students found',
+                          AppLocalizations.of(context)!.noStudentsFound,
                           style: TextStyle(
                             color: Colors.grey.shade600,
                             fontSize: 16,
@@ -2195,7 +2202,7 @@ class _ResultsBottomSheetState extends State<_ResultsBottomSheet> {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      'Not Graded',
+                                      AppLocalizations.of(context)!.notGraded,
                                       style: TextStyle(
                                         color: Colors.grey.shade600,
                                         fontSize: 11,

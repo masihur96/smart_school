@@ -181,7 +181,7 @@ class _AdminHomeworkManagementScreenState
           children: [
             Expanded(
               child: _buildDropdown(
-                label: 'Class',
+                label: AppLocalizations.of(context)!.className,
                 value: _selectedClass,
                 items: [
                   DropdownMenuItem(
@@ -229,7 +229,7 @@ class _AdminHomeworkManagementScreenState
           children: [
             Expanded(
               child: _buildDropdown(
-                label: 'Subject',
+                label: AppLocalizations.of(context)!.subjectName,
                 value: _selectedSubject,
                 items: [
                   DropdownMenuItem(
@@ -331,7 +331,7 @@ class _AdminHomeworkManagementScreenState
           ),
         ),
       ),
-      value: value,
+      initialValue: value,
       items: items,
       onChanged: onChanged,
 
@@ -668,7 +668,7 @@ class _HomeworkCard extends StatelessWidget {
 
 class _AddHomeworkSheet extends StatefulWidget {
   final Homework? homework;
-  const _AddHomeworkSheet({super.key, this.homework});
+  const _AddHomeworkSheet({this.homework});
 
   @override
   State<_AddHomeworkSheet> createState() => _AddHomeworkSheetState();
@@ -829,7 +829,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                 const SizedBox(height: 20),
                 DropdownButtonFormField<String>(
                   decoration: _inputDeco('Select Class'),
-                  value: _selectedClassId,
+                  initialValue: _selectedClassId,
                   items: classes
                       .map(
                         (c) =>
@@ -848,7 +848,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
                   decoration: _inputDeco('Select Section (Optional)'),
-                  value: _selectedSectionId,
+                  initialValue: _selectedSectionId,
                   items: filteredSections
                       .map(
                         (s) =>
@@ -862,7 +862,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
                   decoration: _inputDeco('Select Subject'),
-                  value: _selectedSubjectId,
+                  initialValue: _selectedSubjectId,
                   items: filteredSubjects
                       .map(
                         (s) =>
@@ -877,7 +877,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
                   decoration: _inputDeco('Assign to Teacher'),
-                  value: _selectedTeacherId,
+                  initialValue: _selectedTeacherId,
                   items: teachers
                       .map(
                         (t) => DropdownMenuItem(

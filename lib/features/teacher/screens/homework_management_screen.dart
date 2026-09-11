@@ -42,12 +42,14 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
       if (classProvider.classes.isEmpty) await classProvider.fetchSchoolData();
 
       final sectionProvider = context.read<SectionSetupNotifier>();
-      if (sectionProvider.sections.isEmpty)
+      if (sectionProvider.sections.isEmpty) {
         await sectionProvider.fetchSchoolData();
+      }
 
       final subjectProvider = context.read<SubjectSetupNotifier>();
-      if (subjectProvider.subjects.isEmpty)
+      if (subjectProvider.subjects.isEmpty) {
         await subjectProvider.fetchSchoolData();
+      }
 
       final homeworkNotifier = context.read<HomeworkNotifier>();
       if (homeworkNotifier.homeworkRecords.isEmpty) {
@@ -122,8 +124,10 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<String?>(
-                        decoration: _inputDeco('Class'),
-                        value: _selectedClass,
+                        decoration: _inputDeco(
+                          AppLocalizations.of(context)!.className,
+                        ),
+                        initialValue: _selectedClass,
                         items: [
                           DropdownMenuItem(
                             value: null,
@@ -150,7 +154,7 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
                     Expanded(
                       child: DropdownButtonFormField<String?>(
                         decoration: _inputDeco('Section'),
-                        value: _selectedSection,
+                        initialValue: _selectedSection,
                         items: [
                           DropdownMenuItem(
                             value: null,
@@ -179,8 +183,10 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String?>(
-                  decoration: _inputDeco('Subject'),
-                  value: _selectedSubject,
+                  decoration: _inputDeco(
+                    AppLocalizations.of(context)!.subjectName,
+                  ),
+                  initialValue: _selectedSubject,
                   isExpanded: true,
                   items: [
                     DropdownMenuItem(
@@ -255,7 +261,7 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
       //   foregroundColor: Colors.white,
       //   icon: const Icon(Icons.add),
       //   label: const Text(
-      //     'Add Homework',
+      //     AppLocalizations.of(context)!.addHomework,
       //     style: TextStyle(fontWeight: FontWeight.bold),
       //   ),
       // ),
@@ -838,7 +844,9 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                     ),
                   ),
                   Text(
-                    widget.homework == null ? 'Add Homework' : 'Edit Homework',
+                    widget.homework == null
+                        ? AppLocalizations.of(context)!.addHomework
+                        : 'Edit Homework',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -847,8 +855,10 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                   const SizedBox(height: 16),
                   widget.homework == null
                       ? DropdownButtonFormField<String>(
-                          decoration: _inputDeco('Class'),
-                          value: _selectedClassId,
+                          decoration: _inputDeco(
+                            AppLocalizations.of(context)!.className,
+                          ),
+                          initialValue: _selectedClassId,
                           items: classes
                               .map(
                                 (c) => DropdownMenuItem(
@@ -870,7 +880,7 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                   widget.homework == null
                       ? DropdownButtonFormField<String>(
                           decoration: _inputDeco('Section (optional)'),
-                          value: _selectedSectionId,
+                          initialValue: _selectedSectionId,
                           items: filteredSections
                               .map(
                                 (s) => DropdownMenuItem(
@@ -886,8 +896,10 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                   const SizedBox(height: 12),
                   widget.homework == null
                       ? DropdownButtonFormField<String>(
-                          decoration: _inputDeco('Subject'),
-                          value: _selectedSubjectId,
+                          decoration: _inputDeco(
+                            AppLocalizations.of(context)!.subjectName,
+                          ),
+                          initialValue: _selectedSubjectId,
                           items: filteredSubjects
                               .map(
                                 (s) => DropdownMenuItem(
@@ -1075,8 +1087,8 @@ class _ViewHomeworkSheet extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Description',
+            Text(
+              AppLocalizations.of(context)!.description,
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -1109,8 +1121,8 @@ class _ViewHomeworkSheet extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: const Text(
-                  'Close',
+                child: Text(
+                  AppLocalizations.of(context)!.close,
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                 ),
               ),

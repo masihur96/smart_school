@@ -3,17 +3,18 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:pdfx/pdfx.dart' as pdfx;
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/utils/pdf_image_helper.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/student_model.dart';
-import 'package:pdfx/pdfx.dart' as pdfx;
+
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
-
 
 class GenerateIdCardScreen extends StatefulWidget {
   final List<Student> students;
@@ -126,7 +127,6 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
         backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
         actions: [
-
           IconButton(
             icon: const Icon(Icons.print),
             onPressed: () async {
@@ -140,7 +140,10 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
             icon: const Icon(Icons.share),
             onPressed: () async {
               if (_pdfBytes != null) {
-                await Printing.sharePdf(bytes: _pdfBytes!, filename: 'id_cards.pdf');
+                await Printing.sharePdf(
+                  bytes: _pdfBytes!,
+                  filename: 'id_cards.pdf',
+                );
               }
             },
             tooltip: 'Share',
@@ -157,9 +160,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                 ? const Center(
                     child: Text('No students selected for ID cards.'),
                   )
-                : pdfx.PdfViewPinch(
-                    controller: _pdfController!,
-                  ),
+                : pdfx.PdfViewPinch(controller: _pdfController!),
           ),
         ],
       ),
@@ -177,13 +178,23 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
         children: [
           Expanded(
             child: _buildDropdown<String?>(
-              label: 'Class',
-              value: uniqueClasses.containsKey(_selectedClassId) ? _selectedClassId : null,
+              label: AppLocalizations.of(context)!.className,
+              value: uniqueClasses.containsKey(_selectedClassId)
+                  ? _selectedClassId
+                  : null,
               items: [
-                if (!uniqueClasses.containsKey(_selectedClassId) && _selectedClassId != null)
-                  DropdownMenuItem(value: _selectedClassId, child: const Text('Unknown Class')),
-                if (!uniqueClasses.containsKey(_selectedClassId) && _selectedClassId == null)
-                  const DropdownMenuItem(value: null, child: Text('Select Class')),
+                if (!uniqueClasses.containsKey(_selectedClassId) &&
+                    _selectedClassId != null)
+                  DropdownMenuItem(
+                    value: _selectedClassId,
+                    child: const Text('Unknown Class'),
+                  ),
+                if (!uniqueClasses.containsKey(_selectedClassId) &&
+                    _selectedClassId == null)
+                  const DropdownMenuItem(
+                    value: null,
+                    child: Text('Select Class'),
+                  ),
                 ...uniqueClasses.entries.map(
                   (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
                 ),
@@ -204,14 +215,20 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
             Expanded(
               child: _buildDropdown<String?>(
                 label: 'Section',
-                value: uniqueSections.containsKey(_selectedSectionId) ? _selectedSectionId : null,
+                value: uniqueSections.containsKey(_selectedSectionId)
+                    ? _selectedSectionId
+                    : null,
                 items: [
-                  const DropdownMenuItem(
+                  DropdownMenuItem(
                     value: null,
-                    child: Text('All Sections'),
+                    child: Text(AppLocalizations.of(context)!.allSections),
                   ),
-                  if (!uniqueSections.containsKey(_selectedSectionId) && _selectedSectionId != null)
-                    DropdownMenuItem(value: _selectedSectionId, child: const Text('Unknown Section')),
+                  if (!uniqueSections.containsKey(_selectedSectionId) &&
+                      _selectedSectionId != null)
+                    DropdownMenuItem(
+                      value: _selectedSectionId,
+                      child: const Text('Unknown Section'),
+                    ),
                   ...uniqueSections.entries.map(
                     (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
                   ),
@@ -255,7 +272,9 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.primaryAdmin.withValues(alpha: 0.3)),
+            border: Border.all(
+              color: AppColors.primaryAdmin.withValues(alpha: 0.3),
+            ),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<T>(
@@ -263,7 +282,10 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
               items: items,
               onChanged: onChanged,
               isExpanded: true,
-              icon: const Icon(Icons.arrow_drop_down, color: AppColors.primaryAdmin),
+              icon: const Icon(
+                Icons.arrow_drop_down,
+                color: AppColors.primaryAdmin,
+              ),
             ),
           ),
         ),
@@ -280,14 +302,22 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
     String resolvedClassName = 'N/A';
     if (_selectedClassId != null) {
       try {
-        resolvedClassName = context.read<ClassSetupNotifier>().classes.firstWhere((c) => c.id == _selectedClassId).name;
+        resolvedClassName = context
+            .read<ClassSetupNotifier>()
+            .classes
+            .firstWhere((c) => c.id == _selectedClassId)
+            .name;
       } catch (_) {}
     }
 
     String resolvedSectionName = 'N/A';
     if (_selectedSectionId != null) {
       try {
-        resolvedSectionName = context.read<SectionSetupNotifier>().sections.firstWhere((s) => s.id == _selectedSectionId).name;
+        resolvedSectionName = context
+            .read<SectionSetupNotifier>()
+            .sections
+            .firstWhere((s) => s.id == _selectedSectionId)
+            .name;
       } catch (_) {}
     }
 
@@ -318,7 +348,9 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
       final avatarUrl = student.user?.avatar ?? '';
       if (avatarUrl.isNotEmpty) {
         try {
-          avatars[student.userId] = await PdfImageHelper.getCachedImageProvider(avatarUrl);
+          avatars[student.userId] = await PdfImageHelper.getCachedImageProvider(
+            avatarUrl,
+          );
         } catch (e) {
           // Fallback
         }
@@ -377,8 +409,12 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
     String resolvedClassName,
     String resolvedSectionName,
   ) {
-    final className = student.className?.isNotEmpty == true ? student.className! : resolvedClassName;
-    final sectionName = student.sectionName?.isNotEmpty == true ? student.sectionName! : resolvedSectionName;
+    final className = student.className?.isNotEmpty == true
+        ? student.className!
+        : resolvedClassName;
+    final sectionName = student.sectionName?.isNotEmpty == true
+        ? student.sectionName!
+        : resolvedSectionName;
 
     return pw.Container(
       width: width,
@@ -545,7 +581,10 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
             child: pw.Column(
               children: [
                 _buildDetailRow('Roll No', student.rollId),
-                _buildDetailRow('Class', '$className - $sectionName'),
+                _buildDetailRow(
+                  AppLocalizations.of(context)!.className,
+                  '$className - $sectionName',
+                ),
                 _buildDetailRow(
                   'Contact',
                   student.guardianContact.isNotEmpty

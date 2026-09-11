@@ -38,7 +38,7 @@ class ChatRepository {
       } else {
         log("Failed to create notice: ${response.statusMessage}");
       }
-    } catch (exception, stackTrace) {
+    } catch (exception) {
       // Log exception and capture it using Sentry for error monitoring
 
       log("Exception: $exception");

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/data/mock_data/mock_data.dart';
 
@@ -17,9 +18,9 @@ class OwnAttendanceScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildStat('Present', '22', Colors.white),
-                _buildStat('Absent', '2', Colors.white70),
-                _buildStat('Leave', '1', Colors.white70),
+                _buildStat(AppLocalizations.of(context)!.present, '22', Colors.white),
+                _buildStat(AppLocalizations.of(context)!.absent, '2', Colors.white70),
+                _buildStat(AppLocalizations.of(context)!.leave, '1', Colors.white70),
               ],
             ),
           ),
@@ -38,14 +39,14 @@ class OwnAttendanceScreen extends StatelessWidget {
                   ),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: record['status'] == 'Present'
+                      backgroundColor: record['status'] == AppLocalizations.of(context)!.present
                           ? AppColors.success.withOpacity(0.1)
                           : AppColors.error.withOpacity(0.1),
                       child: Icon(
-                        record['status'] == 'Present'
+                        record['status'] == AppLocalizations.of(context)!.present
                             ? Icons.check
                             : Icons.close,
-                        color: record['status'] == 'Present'
+                        color: record['status'] == AppLocalizations.of(context)!.present
                             ? AppColors.success
                             : AppColors.error,
                       ),
@@ -57,7 +58,7 @@ class OwnAttendanceScreen extends StatelessWidget {
                     trailing: Text(
                       record['status'],
                       style: TextStyle(
-                        color: record['status'] == 'Present'
+                        color: record['status'] == AppLocalizations.of(context)!.present
                             ? AppColors.success
                             : AppColors.error,
                         fontWeight: FontWeight.w600,

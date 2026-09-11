@@ -411,7 +411,7 @@ class TrashRestoreNotifier extends ChangeNotifier {
         _deletedData[entity]?.removeWhere((r) => ids.contains(r.id));
         _selectedIds.removeAll(ids);
         succeeded = ids.length;
-        log('[Trash] Bulk deleted $succeeded ${entity} records');
+        log('[Trash] Bulk deleted $succeeded $entity records');
       } else {
         // Fallback: delete one by one
         log(

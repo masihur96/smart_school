@@ -5165,6 +5165,480 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Just now'**
   String get justNow;
+
+  /// No description provided for @recentHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent History'**
+  String get recentHistory;
+
+  /// No description provided for @homeworkAndAssignmentHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework & Assignment Help'**
+  String get homeworkAndAssignmentHelp;
+
+  /// No description provided for @start.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get start;
+
+  /// No description provided for @join.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get join;
+
+  /// No description provided for @later.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get later;
+
+  /// No description provided for @examRoutines.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Routines'**
+  String get examRoutines;
+
+  /// No description provided for @couldNotOpenAttachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open attachment'**
+  String get couldNotOpenAttachment;
+
+  /// No description provided for @aiTutor.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Tutor'**
+  String get aiTutor;
+
+  /// No description provided for @instantAnswersAndExplanations.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant Answers & Explanations'**
+  String get instantAnswersAndExplanations;
+
+  /// No description provided for @seeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See All'**
+  String get seeAll;
+
+  /// No description provided for @examAndQuizPreparation.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam & Quiz Preparation'**
+  String get examAndQuizPreparation;
+
+  /// No description provided for @newLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get newLabel;
+
+  /// No description provided for @examiner.
+  ///
+  /// In en, this message translates to:
+  /// **'Examiner'**
+  String get examiner;
+
+  /// No description provided for @startsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts On'**
+  String get startsOn;
+
+  /// No description provided for @yourSmartLearningCompanion.
+  ///
+  /// In en, this message translates to:
+  /// **'Your smart learning companion'**
+  String get yourSmartLearningCompanion;
+
+  /// No description provided for @noRecordsForSelectedSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'No records for selected subject'**
+  String get noRecordsForSelectedSubject;
+
+  /// No description provided for @noClassesScheduledForToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No classes scheduled for today'**
+  String get noClassesScheduledForToday;
+
+  /// No description provided for @aiTutorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Need help with homework, exam preparation, or understanding a topic? Ask questions anytime and get instant academic support.'**
+  String get aiTutorDescription;
+
+  /// No description provided for @markEntryPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Entry Pending'**
+  String get markEntryPending;
+
+  /// No description provided for @noSubjectsAssignedForExam.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no subjects assigned for this exam.'**
+  String get noSubjectsAssignedForExam;
+
+  /// No description provided for @noExamRoutinesAssignedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No exam routines assigned yet.'**
+  String get noExamRoutinesAssignedYet;
+
+  /// No description provided for @syllabus.
+  ///
+  /// In en, this message translates to:
+  /// **'Syllabus'**
+  String get syllabus;
+
+  /// No description provided for @resultsNotPublishedAssignedSubjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Results not published yet. Showing your assigned subjects for this exam.'**
+  String get resultsNotPublishedAssignedSubjects;
+
+  /// No description provided for @resultSheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Result Sheet'**
+  String get resultSheet;
+
+  /// No description provided for @resultsPublishedNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'Results are published but no data is available yet.'**
+  String get resultsPublishedNoData;
+
+  /// No description provided for @todayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'TODAY'**
+  String get todayLabel;
+
+  /// No description provided for @notGraded.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Graded'**
+  String get notGraded;
+
+  /// No description provided for @viewResults.
+  ///
+  /// In en, this message translates to:
+  /// **'View Results'**
+  String get viewResults;
+
+  /// No description provided for @subjectWise.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject Wise'**
+  String get subjectWise;
+
+  /// No description provided for @examDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Date'**
+  String get examDate;
+
+  /// No description provided for @noSyllabusInformationAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No syllabus information available.'**
+  String get noSyllabusInformationAvailable;
+
+  /// No description provided for @selectSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Section'**
+  String get selectSection;
+
+  /// No description provided for @filterBySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Section'**
+  String get filterBySection;
+
+  /// No description provided for @marksSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'📊 Marks Submitted'**
+  String get marksSubmitted;
+
+  /// No description provided for @subjectName.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get subjectName;
+
+  /// No description provided for @markEntrySystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Entry System'**
+  String get markEntrySystem;
+
+  /// No description provided for @saveAllResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Save All Results'**
+  String get saveAllResults;
+
+  /// No description provided for @late.
+  ///
+  /// In en, this message translates to:
+  /// **'Late'**
+  String get late;
+
+  /// No description provided for @unmarked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmarked'**
+  String get unmarked;
+
+  /// No description provided for @noSubjectsForThisClass.
+  ///
+  /// In en, this message translates to:
+  /// **'No subjects for this class'**
+  String get noSubjectsForThisClass;
+
+  /// No description provided for @attendanceSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Attendance Saved'**
+  String get attendanceSaved;
+
+  /// No description provided for @noHomeworkAssignedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No homework assigned yet.\\nTap + to add one.'**
+  String get noHomeworkAssignedYet;
+
+  /// No description provided for @clearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Filters'**
+  String get clearFilters;
+
+  /// No description provided for @noAttendanceRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'No Attendance Records'**
+  String get noAttendanceRecords;
+
+  /// No description provided for @searchByStudentName.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by student name...'**
+  String get searchByStudentName;
+
+  /// No description provided for @bulkUpdateStatusNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This will update the status for ALL students in this homework.'**
+  String get bulkUpdateStatusNotice;
+
+  /// No description provided for @bulkUpdateStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk Update Status'**
+  String get bulkUpdateStatus;
+
+  /// No description provided for @comment.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get comment;
+
+  /// No description provided for @addFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Add feedback...'**
+  String get addFeedback;
+
+  /// No description provided for @onlineClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Online Class'**
+  String get onlineClass;
+
+  /// No description provided for @teacherMeeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Meeting'**
+  String get teacherMeeting;
+
+  /// No description provided for @facultyAndStaffMeeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Faculty & Staff Meeting'**
+  String get facultyAndStaffMeeting;
+
+  /// No description provided for @scheduleDateAndTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule Date & Time'**
+  String get scheduleDateAndTime;
+
+  /// No description provided for @pleaseSelectDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select date, start time, and end time'**
+  String get pleaseSelectDateTime;
+
+  /// No description provided for @meetingBroadcastNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This meeting will be broadcasted to all teachers and staff members. Class, Section, and Subject selections are not required.'**
+  String get meetingBroadcastNotice;
+
+  /// No description provided for @virtualMeetingLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Virtual Meeting Link'**
+  String get virtualMeetingLink;
+
+  /// No description provided for @meetingLinkOrUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting Link / URL'**
+  String get meetingLinkOrUrl;
+
+  /// No description provided for @meetingDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting Date'**
+  String get meetingDate;
+
+  /// No description provided for @loadingClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading classes...'**
+  String get loadingClasses;
+
+  /// No description provided for @loadingSubjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading subjects...'**
+  String get loadingSubjects;
+
+  /// No description provided for @loadingSections.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading sections...'**
+  String get loadingSections;
+
+  /// No description provided for @noTeachersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No teachers found'**
+  String get noTeachersFound;
+
+  /// No description provided for @noSectionsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No sections available'**
+  String get noSectionsAvailable;
+
+  /// No description provided for @noSubjectsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No subjects available'**
+  String get noSubjectsAvailable;
+
+  /// No description provided for @selectParticipants.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Participants (Teachers/Staff)'**
+  String get selectParticipants;
+
+  /// No description provided for @selectTeachers.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Teachers'**
+  String get selectTeachers;
+
+  /// No description provided for @academicDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Details'**
+  String get academicDetails;
+
+  /// No description provided for @hostOrTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Host / Teacher'**
+  String get hostOrTeacher;
+
+  /// No description provided for @classIsStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Class is Starting'**
+  String get classIsStarting;
+
+  /// No description provided for @participants.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get participants;
+
+  /// No description provided for @keepAnEyeOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep an eye out!'**
+  String get keepAnEyeOut;
+
+  /// No description provided for @newNoticesWillAppearHere.
+  ///
+  /// In en, this message translates to:
+  /// **'New notices will appear here.'**
+  String get newNoticesWillAppearHere;
+
+  /// No description provided for @urgentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'URGENT'**
+  String get urgentLabel;
+
+  /// No description provided for @noNotificationsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet'**
+  String get noNotificationsYet;
+
+  /// No description provided for @markAllAsRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get markAllAsRead;
+
+  /// No description provided for @testNotificationSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Test notification sent!'**
+  String get testNotificationSent;
+
+  /// No description provided for @sendTestNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Test Notification'**
+  String get sendTestNotification;
+
+  /// No description provided for @restartApp.
+  ///
+  /// In en, this message translates to:
+  /// **'RESTART'**
+  String get restartApp;
+
+  /// No description provided for @newUpdateDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'🎉 A new update has been downloaded.'**
+  String get newUpdateDownloaded;
 }
 
 class _AppLocalizationsDelegate

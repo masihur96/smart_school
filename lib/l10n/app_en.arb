@@ -292,7 +292,7 @@
   "allStatus": "All Status",
   "activeOnly": "Active Only",
   "inactiveOnly": "Inactive Only",
-  "noStudentsFound": "No students found.",
+  "noStudentsFound": "No students found",
   "rollLabel": "Roll: {roll}",
   "@rollLabel": {
     "placeholders": {
@@ -302,7 +302,7 @@
     }
   },
   "deleteStudent": "Delete Student",
-  "viewDetails": "View Details",
+  "viewDetails": "View details",
   "edit": "Edit",
   "notifyStudent": "Notify {name}",
   "@notifyStudent": {
@@ -704,7 +704,6 @@
   },
   "unknownSubject": "Unknown Subject",
   "unknownTeacher": "Unknown Teacher",
-  "teacher": "Teacher",
   "dayAndDate": "Day & Date",
   "duration": "Duration",
   "room": "Room",
@@ -766,7 +765,6 @@
   "done": "Done",
   "hwAdded": "HW Added",
   "pending": "Pending",
-  "viewDetails": "View Details",
   "editRoutineEntry": "Edit Routine Entry",
   "addRoutineEntry": "Add Routine Entry",
   "updateApplySelectedDays": "Update and apply to selected days",
@@ -923,7 +921,6 @@
       }
     }
   },
-  "unknownTeacher": "Unknown Teacher",
   "statusClockIn": "CLOCK-IN",
   "statusClockOut": "CLOCK-OUT",
   "statusUnknown": "UNKNOWN",
@@ -953,8 +950,6 @@
   "onlineClassesTitle": "Online Classes",
   "deleteClassTitle": "Delete Class",
   "deleteClassConfirmation": "Are you sure you want to delete this class?",
-  "cancel": "Cancel",
-  "delete": "Delete",
   "classDeletedSuccess": "Class deleted successfully",
   "failedToDeleteClass": "Failed to delete class",
   "couldNotLaunchUrl": "Could not launch {url}",
@@ -1024,7 +1019,6 @@
   "onlineMeeting": "Online Meeting",
   "unableToLoadClasses": "Unable to Load Classes",
   "unableToLoadClassesMessage": "Failed to connect to the server. Please check your network connection and try again.",
-  "retry": "Retry",
   "noOnlineClassesScheduled": "No Online Classes Scheduled",
   "noOnlineClassesAdminMessage": "There are currently no online classes scheduled. Tap below to schedule a new live class or pull down to refresh.",
   "noOnlineClassesStudentMessage": "There are no upcoming online classes scheduled at this time. Pull down to refresh or check back later.",
@@ -1032,7 +1026,6 @@
   "statusLiveNow": "LIVE NOW",
   "statusUpcoming": "Upcoming",
   "statusEnded": "Ended",
-  "editClass": "Edit Class",
   "statusLive": "LIVE",
   "classEnded": "Class Ended",
   "joinLiveClass": "Join Live Class",
@@ -1047,7 +1040,6 @@
   "issuedLabel": "Issued",
   "returnedLabel": "Returned",
   "overdueLabel": "Overdue",
-  "viewDetails": "View details",
   "searchBookHint": "Search title or author…",
   "categoryAll": "All",
   "booksFoundCount": "{count, plural, =1{1 book found} other{{count} books found}}",
@@ -1079,12 +1071,10 @@
   "sectionOverdue": "Overdue",
   "sectionCurrentlyIssued": "Currently Issued",
   "sectionReturnedHistory": "Returned History",
-  "classLabel": "Class",
   "sectionLabelShort": "Sec",
   "issueDate": "Issue Date",
   "returnDate": "Return Date",
   "dueDate": "Due Date",
-  "pendingStatus": "Pending",
   "returnedOn": "Returned on {date}",
   "@returnedOn": {
     "placeholders": {
@@ -1125,7 +1115,6 @@
   "returnBookButton": "Return Book",
   "markAsReturned": "Mark as Returned",
   "bookReturnedSuccess": "Book marked as returned successfully!",
-  "unknownStudent": "Unknown Student",
   "addBookTitle": "Add Book",
   "editBookTitle": "Edit Book",
   "basicDetails": "Basic Details",
@@ -1160,7 +1149,7 @@
       }
     }
   },
-  "deleteBookTitle": "Delete Book",
+  "deleteBookTitle": "Delete Book?",
   "deleteBookConfirmation": "Are you sure you want to delete \"{title}\"? This action cannot be undone.",
   "@deleteBookConfirmation": {
     "placeholders": {
@@ -1207,23 +1196,12 @@
   "statusAvailable": "Available",
   "statusUnavailable": "Unavailable",
   "statusNotAvailable": "Not Available",
-  "allClasses": "All Classes",
-  "allSections": "All Sections",
   "searchStudentHint": "Search student name from server…",
   "studentsFoundCount": "{count, plural, =1{1 student found} other{{count} students found}}",
   "@studentsFoundCount": {
     "placeholders": {
       "count": {
         "type": "int"
-      }
-    }
-  },
-  "noStudentsFound": "No students found",
-  "rollLabel": "Roll: {roll}",
-  "@rollLabel": {
-    "placeholders": {
-      "roll": {
-        "type": "String"
       }
     }
   },
@@ -1444,7 +1422,6 @@
   "addMoney": "Add Money",
   "academicBooksTitle": "Academic Books",
   "academicBooksSubtitle": "Digital soft copies by class & subject",
-  "deleteBookTitle": "Delete Book?",
   "deleteBookConfirmMessage": "\"{title}\" will be permanently removed.",
   "@deleteBookConfirmMessage": {
     "placeholders": {
@@ -1455,19 +1432,6 @@
   },
   "noPdfAvailableForBook": "No PDF available for this book",
   "searchBooksOrSubjectsHint": "Search books or subjects…",
-  "allClasses": "All Classes",
-  "allSubjects": "All Subjects",
-  "classLabel": "Class",
-  "subjectLabel": "Subject",
-  "booksFoundCount": "{count, plural, =1{1 book found} other{{count} books found}}",
-  "@booksFoundCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "resetFilters": "Reset Filters",
   "addBookButton": "Add Book",
   "totalBooksStat": "Total Books",
   "classesStat": "Classes",
@@ -1532,7 +1496,6 @@
   "failedToDeleteAccount": "Failed to delete account",
   "myAttendance": "My Attendance",
   "filterAttendance": "Filter Attendance",
-  "allDates": "All Dates",
   "noAttendanceRecordsFoundFilter": "No attendance records found for the selected filters.",
   "academicSchedule": "Academic Schedule",
   "noScheduleYet": "No Schedule Yet",
@@ -1542,5 +1505,84 @@
   "teacherNotAssigned": "Teacher Not Assigned",
   "completedStatus": "Completed",
   "submittedStatus": "Submitted",
-  "justNow": "Just now"
+  "justNow": "Just now",
+  "recentHistory": "Recent History",
+  "homeworkAndAssignmentHelp": "Homework & Assignment Help",
+  "start": "Start",
+  "join": "Join",
+  "later": "Later",
+  "examRoutines": "Exam Routines",
+  "couldNotOpenAttachment": "Could not open attachment",
+  "aiTutor": "AI Tutor",
+  "instantAnswersAndExplanations": "Instant Answers & Explanations",
+  "seeAll": "See All",
+  "examAndQuizPreparation": "Exam & Quiz Preparation",
+  "newLabel": "New",
+  "examiner": "Examiner",
+  "startsOn": "Starts On",
+  "yourSmartLearningCompanion": "Your smart learning companion",
+  "noRecordsForSelectedSubject": "No records for selected subject",
+  "noClassesScheduledForToday": "No classes scheduled for today",
+  "aiTutorDescription": "Need help with homework, exam preparation, or understanding a topic? Ask questions anytime and get instant academic support.",
+  "markEntryPending": "Mark Entry Pending",
+  "noSubjectsAssignedForExam": "You have no subjects assigned for this exam.",
+  "noExamRoutinesAssignedYet": "No exam routines assigned yet.",
+  "syllabus": "Syllabus",
+  "resultsNotPublishedAssignedSubjects": "Results not published yet. Showing your assigned subjects for this exam.",
+  "resultSheet": "Result Sheet",
+  "resultsPublishedNoData": "Results are published but no data is available yet.",
+  "todayLabel": "TODAY",
+  "notGraded": "Not Graded",
+  "viewResults": "View Results",
+  "subjectWise": "Subject Wise",
+  "examDate": "Exam Date",
+  "noSyllabusInformationAvailable": "No syllabus information available.",
+  "selectSection": "Select Section",
+  "filterBySection": "Filter by Section",
+  "marksSubmitted": "📊 Marks Submitted",
+  "subjectName": "Subject",
+  "markEntrySystem": "Mark Entry System",
+  "saveAllResults": "Save All Results",
+  "late": "Late",
+  "unmarked": "Unmarked",
+  "noSubjectsForThisClass": "No subjects for this class",
+  "attendanceSaved": "✅ Attendance Saved",
+  "noHomeworkAssignedYet": "No homework assigned yet.\\nTap + to add one.",
+  "clearFilters": "Clear Filters",
+  "noAttendanceRecords": "No Attendance Records",
+  "searchByStudentName": "Search by student name...",
+  "bulkUpdateStatusNotice": "This will update the status for ALL students in this homework.",
+  "bulkUpdateStatus": "Bulk Update Status",
+  "comment": "Comment",
+  "addFeedback": "Add feedback...",
+  "onlineClass": "Online Class",
+  "teacherMeeting": "Teacher Meeting",
+  "facultyAndStaffMeeting": "Faculty & Staff Meeting",
+  "scheduleDateAndTime": "Schedule Date & Time",
+  "pleaseSelectDateTime": "Please select date, start time, and end time",
+  "meetingBroadcastNotice": "This meeting will be broadcasted to all teachers and staff members. Class, Section, and Subject selections are not required.",
+  "virtualMeetingLink": "Virtual Meeting Link",
+  "meetingLinkOrUrl": "Meeting Link / URL",
+  "meetingDate": "Meeting Date",
+  "loadingClasses": "Loading classes...",
+  "loadingSubjects": "Loading subjects...",
+  "loadingSections": "Loading sections...",
+  "noTeachersFound": "No teachers found",
+  "noSectionsAvailable": "No sections available",
+  "noSubjectsAvailable": "No subjects available",
+  "selectParticipants": "Select Participants (Teachers/Staff)",
+  "selectTeachers": "Select Teachers",
+  "academicDetails": "Academic Details",
+  "hostOrTeacher": "Host / Teacher",
+  "classIsStarting": "Class is Starting",
+  "participants": "Participants",
+  "keepAnEyeOut": "Keep an eye out!",
+  "newNoticesWillAppearHere": "New notices will appear here.",
+  "urgentLabel": "URGENT",
+  "noNotificationsYet": "No notifications yet",
+  "markAllAsRead": "Mark all as read",
+  "testNotificationSent": "Test notification sent!",
+  "sendTestNotification": "Send Test Notification",
+  "restartApp": "RESTART",
+  "newUpdateDownloaded": "🎉 A new update has been downloaded."
 }

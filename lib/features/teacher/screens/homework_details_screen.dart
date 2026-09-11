@@ -41,7 +41,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
               }
             },
             icon: const Icon(Icons.group_add_outlined),
-            tooltip: 'Bulk Update Status',
+            tooltip: AppLocalizations.of(context)!.bulkUpdateStatus,
           ),
         ],
       ),
@@ -155,7 +155,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
             const Divider(height: 32),
             _buildDetailRow(
               Icons.description_outlined,
-              'Description',
+              AppLocalizations.of(context)!.description,
               homework.description,
             ),
             const SizedBox(height: 16),
@@ -378,29 +378,31 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
           builder: (context, setDialogState) {
             return AlertDialog(
               title: Text(
-                isBulk ? 'Bulk Update Status' : 'Update Student Status',
+                isBulk
+                    ? AppLocalizations.of(context)!.bulkUpdateStatus
+                    : 'Update Student Status',
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (isBulk)
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.only(bottom: 16.0),
                       child: Text(
-                        'This will update the status for ALL students in this homework.',
+                        AppLocalizations.of(context)!.bulkUpdateStatusNotice,
                         style: TextStyle(color: Colors.orange, fontSize: 13),
                       ),
                     ),
                   DropdownButtonFormField<String>(
-                    value:
+                    initialValue:
                         [
                           'pending',
                           'done',
                         ].contains(selectedStatus.toLowerCase())
                         ? selectedStatus.toLowerCase()
                         : 'pending',
-                    decoration: const InputDecoration(
-                      labelText: 'Status',
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.status,
                       border: OutlineInputBorder(),
                     ),
                     items: [
@@ -427,10 +429,10 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                   TextField(
                     controller: commentController,
                     enabled: !isUpdating,
-                    decoration: const InputDecoration(
-                      labelText: 'Comment',
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.comment,
                       border: OutlineInputBorder(),
-                      hintText: 'Add feedback...',
+                      hintText: AppLocalizations.of(context)!.addFeedback,
                     ),
                     maxLines: 3,
                   ),
@@ -466,7 +468,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                                     .read<HomeworkNotifier>()
                                     .updateStudentHomeworkStatus(
                                       homeworkId: homeworkId,
-                                      studentId: studentId!,
+                                      studentId: studentId,
                                       status: selectedStatus,
                                       comment: commentController.text,
                                     );

@@ -429,7 +429,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
 
             // ── Multi-Select Class Picker ────────────────────────────────────
             _MultiSelectField(
-              label: 'Class',
+              label: AppLocalizations.of(context)!.className,
               icon: Icons.class_,
               isLoading: isClassesLoading,
               emptyHint: classes.isEmpty ? 'No classes available' : 'Select Classes',

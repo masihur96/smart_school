@@ -38,17 +38,19 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
       return Scaffold(body: Center(child: Text(l10n.notLoggedIn)));
     }
 
-    final notices = noticeNotifier.notices
-        .where(
-          (n) => n.classId == null || n.classId == currentUser.classIds.first,
-        )
-        .toList()
-      ..sort((a, b) {
-        if (a.createdAt == null && b.createdAt == null) return 0;
-        if (a.createdAt == null) return 1;
-        if (b.createdAt == null) return -1;
-        return b.createdAt!.compareTo(a.createdAt!);
-      });
+    final notices =
+        noticeNotifier.notices
+            .where(
+              (n) =>
+                  n.classId == null || n.classId == currentUser.classIds.first,
+            )
+            .toList()
+          ..sort((a, b) {
+            if (a.createdAt == null && b.createdAt == null) return 0;
+            if (a.createdAt == null) return 1;
+            if (b.createdAt == null) return -1;
+            return b.createdAt!.compareTo(a.createdAt!);
+          });
 
     return Scaffold(
       appBar: widget.isFromDrawer
@@ -332,16 +334,16 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
             color: Colors.indigo.withOpacity(0.1),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Keep an eye out!',
+          Text(
+            AppLocalizations.of(context)!.keepAnEyeOut,
             style: TextStyle(
               fontSize: 18,
               color: Colors.grey,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const Text(
-            'New notices will appear here.',
+          Text(
+            AppLocalizations.of(context)!.newNoticesWillAppearHere,
             style: TextStyle(color: Colors.grey),
           ),
         ],

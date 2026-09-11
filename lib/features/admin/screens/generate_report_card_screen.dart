@@ -4,18 +4,18 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:pdfx/pdfx.dart' as pdfx;
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/utils/pdf_image_helper.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart';
 import 'package:smart_school/models/student_model.dart';
-import 'package:pdfx/pdfx.dart' as pdfx;
 
 import '../providers/exam_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
-
 
 class GenerateReportCardScreen extends StatefulWidget {
   final Exam exam;
@@ -191,7 +191,10 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
             icon: const Icon(Icons.share),
             onPressed: () async {
               if (_pdfBytes != null) {
-                await Printing.sharePdf(bytes: _pdfBytes!, filename: 'report_cards.pdf');
+                await Printing.sharePdf(
+                  bytes: _pdfBytes!,
+                  filename: 'report_cards.pdf',
+                );
               }
             },
             tooltip: 'Share',
@@ -208,9 +211,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                 ? const Center(
                     child: Text('No students selected for report cards.'),
                   )
-                : pdfx.PdfViewPinch(
-                    controller: _pdfController!,
-                  ),
+                : pdfx.PdfViewPinch(controller: _pdfController!),
           ),
         ],
       ),
@@ -228,7 +229,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
         children: [
           Expanded(
             child: _buildDropdown<String?>(
-              label: 'Class',
+              label: AppLocalizations.of(context)!.className,
               value: uniqueClasses.containsKey(_selectedClassId)
                   ? _selectedClassId
                   : null,
@@ -269,9 +270,9 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                     ? _selectedSectionId
                     : null,
                 items: [
-                  const DropdownMenuItem(
+                  DropdownMenuItem(
                     value: null,
-                    child: Text('All Sections'),
+                    child: Text(AppLocalizations.of(context)!.allSections),
                   ),
                   if (!uniqueSections.containsKey(_selectedSectionId) &&
                       _selectedSectionId != null)
@@ -343,15 +344,13 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
       }
     }
 
-    final allResults = [
-      ...widget.exam.results,
-      ..._fetchedResults,
-    ];
+    final allResults = [...widget.exam.results, ..._fetchedResults];
 
     bool matchesStudent(Result r, Student student) {
       if (r.studentId.isNotEmpty) {
         if (r.studentId == student.userId) return true;
-        if (student.user != null && r.studentId == student.user!.id) return true;
+        if (student.user != null && r.studentId == student.user!.id)
+          return true;
         if (r.studentId == student.rollId) return true;
       }
       return false;
@@ -460,14 +459,24 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
         ? (marksObtainedAll / totalMarksAll) * 100
         : 0.0;
     final String overallGrade = _calculateGrade(percentage);
-    final String className = _resolveClassName(student, _selectedClassId, allClasses, widget.exam.assignments);
-    final String sectionName = _resolveSectionName(student, _selectedSectionId, allSections, widget.exam.assignments);
+    final String className = _resolveClassName(
+      student,
+      _selectedClassId,
+      allClasses,
+      widget.exam.assignments,
+    );
+    final String sectionName = _resolveSectionName(
+      student,
+      _selectedSectionId,
+      allSections,
+      widget.exam.assignments,
+    );
 
     final primaryColor = PdfColor.fromHex('#1E1B4B'); // Deep Navy
-    final accentColor = PdfColor.fromHex('#4338CA');  // Indigo Accent
-    final goldColor = PdfColor.fromHex('#D97706');    // Amber Gold
-    final bgTint = PdfColor.fromHex('#F8FAFC');       // Slate Tint
-    final borderTint = PdfColor.fromHex('#E2E8F0');   // Subtle Border
+    final accentColor = PdfColor.fromHex('#4338CA'); // Indigo Accent
+    final goldColor = PdfColor.fromHex('#D97706'); // Amber Gold
+    final bgTint = PdfColor.fromHex('#F8FAFC'); // Slate Tint
+    final borderTint = PdfColor.fromHex('#E2E8F0'); // Subtle Border
 
     return pw.Container(
       decoration: pw.BoxDecoration(
@@ -525,7 +534,10 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                     if (schoolAddress.isNotEmpty)
                       pw.Text(
                         schoolAddress,
-                        style: pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
+                        style: pw.TextStyle(
+                          fontSize: 8,
+                          color: PdfColors.grey700,
+                        ),
                       ),
                     if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty)
                       pw.Text(
@@ -533,17 +545,25 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                           if (schoolPhone.isNotEmpty) 'Phone: $schoolPhone',
                           if (schoolEmail.isNotEmpty) 'Email: $schoolEmail',
                         ].join(' | '),
-                        style: pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+                        style: pw.TextStyle(
+                          fontSize: 8,
+                          color: PdfColors.grey600,
+                        ),
                       ),
                   ],
                 ),
               ),
               pw.Container(
-                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: pw.BoxDecoration(
                   color: bgTint,
                   border: pw.Border.all(color: borderTint),
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(4),
+                  ),
                 ),
                 child: pw.Column(
                   children: [
@@ -557,7 +577,10 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                     ),
                     pw.Text(
                       'OFFICIAL RESULT',
-                      style: pw.TextStyle(fontSize: 6.5, color: PdfColors.grey600),
+                      style: pw.TextStyle(
+                        fontSize: 6.5,
+                        color: PdfColors.grey600,
+                      ),
                     ),
                   ],
                 ),
@@ -615,11 +638,21 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      _buildProfileRow('Student Name', student.user?.name ?? 'N/A', isBold: true),
+                      _buildProfileRow(
+                        'Student Name',
+                        student.user?.name ?? 'N/A',
+                        isBold: true,
+                      ),
                       pw.SizedBox(height: 4),
-                      _buildProfileRow('Roll Number', student.rollId.isNotEmpty ? student.rollId : 'N/A'),
+                      _buildProfileRow(
+                        'Roll Number',
+                        student.rollId.isNotEmpty ? student.rollId : 'N/A',
+                      ),
                       pw.SizedBox(height: 4),
-                      _buildProfileRow('Class & Sec', '$className - $sectionName'),
+                      _buildProfileRow(
+                        'Class & Sec',
+                        '$className - $sectionName',
+                      ),
                     ],
                   ),
                 ),
@@ -635,12 +668,17 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                     children: [
                       _buildProfileRow('Student ID', student.userId),
                       pw.SizedBox(height: 4),
-                      _buildProfileRow('Total Subjects', '${results.length} Subjects'),
+                      _buildProfileRow(
+                        'Total Subjects',
+                        '${results.length} Subjects',
+                      ),
                       pw.SizedBox(height: 4),
                       _buildProfileRow(
                         'Result Status',
                         percentage >= 40 ? 'PASSED' : 'NEEDS ATTENTION',
-                        valueColor: percentage >= 40 ? PdfColor.fromHex('#15803D') : PdfColor.fromHex('#B91C1C'),
+                        valueColor: percentage >= 40
+                            ? PdfColor.fromHex('#15803D')
+                            : PdfColor.fromHex('#B91C1C'),
                         isBold: true,
                       ),
                     ],
@@ -672,10 +710,19 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
               4: pw.Alignment.center,
               5: pw.Alignment.centerLeft,
             },
-            headers: ['SUBJECT', 'MAX MARKS', 'PASS MARKS', 'OBTAINED', 'GRADE', 'REMARKS'],
+            headers: [
+              'SUBJECT',
+              'MAX MARKS',
+              'PASS MARKS',
+              'OBTAINED',
+              'GRADE',
+              'REMARKS',
+            ],
             data: [
               ...results.map((r) {
-                final pct = r.totalMarks > 0 ? (r.marksObtained / r.totalMarks) * 100 : 0.0;
+                final pct = r.totalMarks > 0
+                    ? (r.marksObtained / r.totalMarks) * 100
+                    : 0.0;
                 final grade = _calculateGrade(pct);
                 final passMarks = (r.totalMarks * 0.4).toStringAsFixed(0);
 
@@ -695,7 +742,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                   } catch (_) {}
                 }
                 if (subjectName.isEmpty) {
-                  subjectName = 'Subject';
+                  subjectName = AppLocalizations.of(context)!.subjectName;
                 }
 
                 return [
@@ -715,13 +762,25 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
           // 5. SUMMARY STATS CARDS
           pw.Row(
             children: [
-              _buildMetricCard('Total Score', '${marksObtainedAll.toStringAsFixed(1)} / ${totalMarksAll.toStringAsFixed(0)}', primaryColor),
+              _buildMetricCard(
+                'Total Score',
+                '${marksObtainedAll.toStringAsFixed(1)} / ${totalMarksAll.toStringAsFixed(0)}',
+                primaryColor,
+              ),
               pw.SizedBox(width: 8),
-              _buildMetricCard('Percentage', '${percentage.toStringAsFixed(2)}%', accentColor),
+              _buildMetricCard(
+                'Percentage',
+                '${percentage.toStringAsFixed(2)}%',
+                accentColor,
+              ),
               pw.SizedBox(width: 8),
               _buildMetricCard('Overall Grade', overallGrade, goldColor),
               pw.SizedBox(width: 8),
-              _buildMetricCard('Class Rank', _getOrdinal(rank), rank == 1 ? goldColor : primaryColor),
+              _buildMetricCard(
+                'Class Rank',
+                _getOrdinal(rank),
+                rank == 1 ? goldColor : primaryColor,
+              ),
             ],
           ),
 
@@ -738,19 +797,28 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                   decoration: pw.BoxDecoration(
                     color: bgTint,
                     border: pw.Border.all(color: borderTint),
-                    borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+                    borderRadius: const pw.BorderRadius.all(
+                      pw.Radius.circular(4),
+                    ),
                   ),
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text(
                         'GRADING SCALE',
-                        style: pw.TextStyle(fontSize: 7.5, fontWeight: pw.FontWeight.bold, color: primaryColor),
+                        style: pw.TextStyle(
+                          fontSize: 7.5,
+                          fontWeight: pw.FontWeight.bold,
+                          color: primaryColor,
+                        ),
                       ),
                       pw.SizedBox(height: 4),
                       pw.Text(
                         'A+: 90-100% | A: 80-89% | B: 70-79%\nC: 60-69%   | D: 50-59% | F: <50%',
-                        style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey800),
+                        style: const pw.TextStyle(
+                          fontSize: 7,
+                          color: PdfColors.grey800,
+                        ),
                       ),
                     ],
                   ),
@@ -764,19 +832,29 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                   decoration: pw.BoxDecoration(
                     color: bgTint,
                     border: pw.Border.all(color: borderTint),
-                    borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+                    borderRadius: const pw.BorderRadius.all(
+                      pw.Radius.circular(4),
+                    ),
                   ),
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text(
                         'CLASS TEACHER\'S REMARKS',
-                        style: pw.TextStyle(fontSize: 7.5, fontWeight: pw.FontWeight.bold, color: primaryColor),
+                        style: pw.TextStyle(
+                          fontSize: 7.5,
+                          fontWeight: pw.FontWeight.bold,
+                          color: primaryColor,
+                        ),
                       ),
                       pw.SizedBox(height: 4),
                       pw.Text(
                         _getTeacherComment(percentage),
-                        style: pw.TextStyle(fontSize: 7.5, fontStyle: pw.FontStyle.italic, color: PdfColors.grey800),
+                        style: pw.TextStyle(
+                          fontSize: 7.5,
+                          fontStyle: pw.FontStyle.italic,
+                          color: PdfColors.grey800,
+                        ),
                       ),
                     ],
                   ),
@@ -791,7 +869,9 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
           pw.Container(
             padding: const pw.EdgeInsets.only(top: 8),
             decoration: const pw.BoxDecoration(
-              border: pw.Border(top: pw.BorderSide(color: PdfColors.grey400, width: 0.8)),
+              border: pw.Border(
+                top: pw.BorderSide(color: PdfColors.grey400, width: 0.8),
+              ),
             ),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -800,21 +880,43 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                   children: [
                     pw.Container(width: 120, height: 1, color: PdfColors.black),
                     pw.SizedBox(height: 3),
-                    pw.Text('Class Teacher Signature', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold)),
+                    pw.Text(
+                      'Class Teacher Signature',
+                      style: pw.TextStyle(
+                        fontSize: 8,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
                 pw.Column(
                   children: [
-                    pw.Container(width: 100, height: 1, color: PdfColors.grey400),
+                    pw.Container(
+                      width: 100,
+                      height: 1,
+                      color: PdfColors.grey400,
+                    ),
                     pw.SizedBox(height: 3),
-                    pw.Text('Official Seal', style: const pw.TextStyle(fontSize: 7.5, color: PdfColors.grey600)),
+                    pw.Text(
+                      'Official Seal',
+                      style: const pw.TextStyle(
+                        fontSize: 7.5,
+                        color: PdfColors.grey600,
+                      ),
+                    ),
                   ],
                 ),
                 pw.Column(
                   children: [
                     pw.Container(width: 120, height: 1, color: PdfColors.black),
                     pw.SizedBox(height: 3),
-                    pw.Text('Principal Signature', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold)),
+                    pw.Text(
+                      'Principal Signature',
+                      style: pw.TextStyle(
+                        fontSize: 8,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -825,14 +927,23 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
     );
   }
 
-  pw.Widget _buildProfileRow(String label, String value, {bool isBold = false, PdfColor? valueColor}) {
+  pw.Widget _buildProfileRow(
+    String label,
+    String value, {
+    bool isBold = false,
+    PdfColor? valueColor,
+  }) {
     return pw.Row(
       children: [
         pw.SizedBox(
           width: 75,
           child: pw.Text(
             '$label:',
-            style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold, color: PdfColors.grey700),
+            style: pw.TextStyle(
+              fontSize: 8,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.grey700,
+            ),
           ),
         ),
         pw.Expanded(
@@ -862,12 +973,20 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
           children: [
             pw.Text(
               title.toUpperCase(),
-              style: pw.TextStyle(fontSize: 6.5, fontWeight: pw.FontWeight.bold, color: PdfColors.grey700),
+              style: pw.TextStyle(
+                fontSize: 6.5,
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.grey700,
+              ),
             ),
             pw.SizedBox(height: 2),
             pw.Text(
               value,
-              style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: color),
+              style: pw.TextStyle(
+                fontSize: 11,
+                fontWeight: pw.FontWeight.bold,
+                color: color,
+              ),
             ),
           ],
         ),
@@ -899,7 +1018,9 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
   ) {
     if (selectedClassId != null) {
       try {
-        return assignments.firstWhere((a) => a.classId == selectedClassId).className;
+        return assignments
+            .firstWhere((a) => a.classId == selectedClassId)
+            .className;
       } catch (_) {}
       try {
         return allClasses.firstWhere((c) => c.id == selectedClassId).name;
@@ -912,7 +1033,9 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
       return allClasses.firstWhere((c) => c.id == student.classId).name;
     } catch (_) {}
     try {
-      return assignments.firstWhere((a) => a.classId == student.classId).className;
+      return assignments
+          .firstWhere((a) => a.classId == student.classId)
+          .className;
     } catch (_) {}
     return 'N/A';
   }
@@ -929,8 +1052,9 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
       } catch (_) {}
       try {
         return assignments
-            .firstWhere((a) => a.sectionId == selectedSectionId)
-            .sectionName ?? 'N/A';
+                .firstWhere((a) => a.sectionId == selectedSectionId)
+                .sectionName ??
+            'N/A';
       } catch (_) {}
     }
     if (student.sectionName != null && student.sectionName!.isNotEmpty) {
@@ -941,8 +1065,9 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
     } catch (_) {}
     try {
       return assignments
-          .firstWhere((a) => a.sectionId == student.sectionId)
-          .sectionName ?? 'N/A';
+              .firstWhere((a) => a.sectionId == student.sectionId)
+              .sectionName ??
+          'N/A';
     } catch (_) {}
     return 'N/A';
   }

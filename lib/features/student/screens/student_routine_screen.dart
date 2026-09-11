@@ -162,7 +162,7 @@ class _StudentRoutineScreenState extends State<StudentRoutineScreen> {
                 ],
               ),
             ),
-            ...dayEntries.map((e) => _RoutineCard(entry: e)).toList(),
+            ...dayEntries.map((e) => _RoutineCard(entry: e)),
             const SizedBox(height: 20),
           ],
         );
@@ -528,7 +528,7 @@ class _RoutineCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(width: 16),
-                    Container(height: 30, width: 1),
+                    SizedBox(height: 30, width: 1),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(

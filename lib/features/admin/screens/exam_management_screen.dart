@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/teacher_model.dart';
@@ -35,10 +35,12 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
       if (context.read<TeachersNotifier>().teachers.isEmpty) {
         context.read<TeachersNotifier>().fetchTeachers();
       }
-      if (context.read<StudentsNotifier>().students.isEmpty && !context.read<StudentsNotifier>().isLoading) {
+      if (context.read<StudentsNotifier>().students.isEmpty &&
+          !context.read<StudentsNotifier>().isLoading) {
         context.read<StudentsNotifier>().fetchStudents();
       }
-      if (context.read<SectionSetupNotifier>().sections.isEmpty && !context.read<SectionSetupNotifier>().isLoading) {
+      if (context.read<SectionSetupNotifier>().sections.isEmpty &&
+          !context.read<SectionSetupNotifier>().isLoading) {
         context.read<SectionSetupNotifier>().fetchSections();
       }
     });
@@ -108,11 +110,20 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              value: _selectedStatus,
+              initialValue: _selectedStatus,
               items: [
-                DropdownMenuItem(value: 'All', child: Text(AppLocalizations.of(context)!.all)),
-                DropdownMenuItem(value: 'Published', child: Text(AppLocalizations.of(context)!.publishedOption)),
-                DropdownMenuItem(value: 'Unpublished', child: Text(AppLocalizations.of(context)!.unpublishedOption)),
+                DropdownMenuItem(
+                  value: 'All',
+                  child: Text(AppLocalizations.of(context)!.all),
+                ),
+                DropdownMenuItem(
+                  value: 'Published',
+                  child: Text(AppLocalizations.of(context)!.publishedOption),
+                ),
+                DropdownMenuItem(
+                  value: 'Unpublished',
+                  child: Text(AppLocalizations.of(context)!.unpublishedOption),
+                ),
               ],
               onChanged: (val) => setState(() => _selectedStatus = val!),
             ),
@@ -131,286 +142,294 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                   ? _ExamShimmer(
                       isDark: Theme.of(context).brightness == Brightness.dark,
                     )
-                : exams.isEmpty
-                ? ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: [
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.5,
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                  : exams.isEmpty
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.5,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.assignment_outlined,
+                                  size: 64,
+                                  color: Colors.grey.shade300,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  AppLocalizations.of(context)!.noExamsFound,
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(16),
+                      itemCount: exams.length,
+                      itemBuilder: (context, index) {
+                        final exam = exams[index];
+                        final assignmentsCount = exam.assignments.length;
+                        String subtitleText = AppLocalizations.of(
+                          context,
+                        )!.assignmentCountLabel(assignmentsCount);
+                        if (assignmentsCount > 0) {
+                          final firstClass = classes
+                              .firstWhere(
+                                (c) => c.id == exam.assignments.first.classId,
+                                orElse: () => ClassRoom(id: '', name: ''),
+                              )
+                              .name;
+                          final firstSubj = subjects
+                              .firstWhere(
+                                (s) => s.id == exam.assignments.first.subjectId,
+                                orElse: () => Subject(id: '', name: ''),
+                              )
+                              .name;
+                          if (firstClass.isNotEmpty && firstSubj.isNotEmpty) {
+                            subtitleText +=
+                                ' • ${AppLocalizations.of(context)!.egLabel} $firstClass - $firstSubj';
+                          }
+                        }
+
+                        return Card(
+                          elevation: 0,
+                          margin: const EdgeInsets.only(bottom: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            side: BorderSide(color: Colors.grey.shade200),
+                          ),
+                          child: Stack(
                             children: [
-                              Icon(
-                                Icons.assignment_outlined,
-                                size: 64,
-                                color: Colors.grey.shade300,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                AppLocalizations.of(context)!.noExamsFound,
-                                style: TextStyle(
-                                  color: Colors.grey.shade600,
-                                  fontSize: 16,
+                              Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  children: [
+                                    Column(
+                                      children: [
+                                        Container(
+                                          width: 50,
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                Colors.purple.shade300,
+                                                Colors.purple.shade600,
+                                              ],
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                            ),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.assignment,
+                                            color: Colors.white,
+                                            size: 28,
+                                          ),
+                                        ),
+                                        SizedBox(height: 10),
+                                        Text(
+                                          exam.isPublished
+                                              ? AppLocalizations.of(
+                                                  context,
+                                                )!.publishedOption
+                                              : AppLocalizations.of(
+                                                  context,
+                                                )!.draft,
+                                          style: TextStyle(
+                                            color: exam.isPublished
+                                                ? Colors.green
+                                                : Colors.orange,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                exam.name,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 12),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            subtitleText,
+                                            style: TextStyle(fontSize: 13),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.calendar_today_outlined,
+                                                size: 14,
+                                                // color: Colors.grey.shade400,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                '${DateFormat('MMM dd, yyyy').format(exam.startDate ?? DateTime.now())} - ${DateFormat('MMM dd, yyyy').format(exam.endDate ?? DateTime.now())}',
+                                                style: TextStyle(fontSize: 12),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    PopupMenuButton<String>(
+                                      icon: const Icon(Icons.more_vert),
+                                      onSelected: (value) async {
+                                        if (value == 'view') {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  ExamViewScreen(exam: exam),
+                                            ),
+                                          );
+                                        } else if (value == 'edit') {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  AddEditExamScreen(exam: exam),
+                                            ),
+                                          );
+                                        } else if (value == 'publish') {
+                                          _updatePublishStatus(
+                                            context,
+                                            exam,
+                                            true,
+                                          );
+                                        } else if (value == 'unpublish') {
+                                          _updatePublishStatus(
+                                            context,
+                                            exam,
+                                            false,
+                                          );
+                                        } else if (value == 'duplicate') {
+                                          _duplicateExam(context, exam);
+                                        } else if (value == 'delete') {
+                                          _confirmDelete(context, exam);
+                                        }
+                                      },
+                                      itemBuilder: (context) {
+                                        final l10n = AppLocalizations.of(
+                                          context,
+                                        )!;
+                                        return [
+                                          PopupMenuItem(
+                                            value: 'view',
+                                            child: Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.visibility_outlined,
+                                                  color: Colors.green,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(l10n.viewDetails),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            value: 'edit',
+                                            child: Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.edit_outlined,
+                                                  color: Colors.orange,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(l10n.editExam),
+                                              ],
+                                            ),
+                                          ),
+                                          if (!exam.isPublished)
+                                            PopupMenuItem(
+                                              value: 'publish',
+                                              child: Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.publish,
+                                                    color: Colors.blue,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(l10n.publishResult),
+                                                ],
+                                              ),
+                                            ),
+                                          if (exam.isPublished)
+                                            PopupMenuItem(
+                                              value: 'unpublish',
+                                              child: Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.unpublished_outlined,
+                                                    color: Colors.grey,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(l10n.unpublishResult),
+                                                ],
+                                              ),
+                                            ),
+                                          PopupMenuItem(
+                                            value: 'duplicate',
+                                            child: Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.copy_outlined,
+                                                  color: Colors.indigo,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(l10n.duplicateExam),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            value: 'delete',
+                                            child: Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.delete_outline,
+                                                  color: Colors.red,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(l10n.deleteExam),
+                                              ],
+                                            ),
+                                          ),
+                                        ];
+                                      },
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                    ],
-                  )
-                : ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(16),
-                    itemCount: exams.length,
-                    itemBuilder: (context, index) {
-                      final exam = exams[index];
-                      final assignmentsCount = exam.assignments.length;
-                      String subtitleText =
-                          AppLocalizations.of(context)!.assignmentCountLabel(assignmentsCount);
-                      if (assignmentsCount > 0) {
-                        final firstClass = classes
-                            .firstWhere(
-                              (c) => c.id == exam.assignments.first.classId,
-                              orElse: () => ClassRoom(id: '', name: ''),
-                            )
-                            .name;
-                        final firstSubj = subjects
-                            .firstWhere(
-                              (s) => s.id == exam.assignments.first.subjectId,
-                              orElse: () => Subject(id: '', name: ''),
-                            )
-                            .name;
-                        if (firstClass.isNotEmpty && firstSubj.isNotEmpty) {
-                          subtitleText += ' • ${AppLocalizations.of(context)!.egLabel} $firstClass - $firstSubj';
-                        }
-                      }
-
-                      return Card(
-                        elevation: 0,
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          side: BorderSide(color: Colors.grey.shade200),
-                        ),
-                        child: Stack(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                children: [
-                                  Column(
-                                    children: [
-                                      Container(
-                                        width: 50,
-                                        height: 50,
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [
-                                              Colors.purple.shade300,
-                                              Colors.purple.shade600,
-                                            ],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                          ),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.assignment,
-                                          color: Colors.white,
-                                          size: 28,
-                                        ),
-                                      ),
-                                      SizedBox(height: 10),
-                                      Text(
-                                        exam.isPublished
-                                            ? AppLocalizations.of(context)!.publishedOption
-                                            : AppLocalizations.of(context)!.draft,
-                                        style: TextStyle(
-                                          color: exam.isPublished
-                                              ? Colors.green
-                                              : Colors.orange,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              exam.name,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 12),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          subtitleText,
-                                          style: TextStyle(fontSize: 13),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.calendar_today_outlined,
-                                              size: 14,
-                                              // color: Colors.grey.shade400,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              '${DateFormat('MMM dd, yyyy').format(exam.startDate ?? DateTime.now())} - ${DateFormat('MMM dd, yyyy').format(exam.endDate ?? DateTime.now())}',
-                                              style: TextStyle(fontSize: 12),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  PopupMenuButton<String>(
-                                    icon: const Icon(Icons.more_vert),
-                                    onSelected: (value) async {
-                                      if (value == 'view') {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                ExamViewScreen(exam: exam),
-                                          ),
-                                        );
-                                      } else if (value == 'edit') {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                AddEditExamScreen(exam: exam),
-                                          ),
-                                        );
-                                      } else if (value == 'publish') {
-                                        _updatePublishStatus(
-                                          context,
-                                          exam,
-                                          true,
-                                        );
-                                      } else if (value == 'unpublish') {
-                                        _updatePublishStatus(
-                                          context,
-                                          exam,
-                                          false,
-                                        );
-                                      } else if (value == 'duplicate') {
-                                        _duplicateExam(context, exam);
-                                      } else if (value == 'delete') {
-                                        _confirmDelete(context, exam);
-                                      }
-                                    },
-                                    itemBuilder: (context) {
-                                      final l10n = AppLocalizations.of(context)!;
-                                      return [
-                                        PopupMenuItem(
-                                          value: 'view',
-                                          child: Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.visibility_outlined,
-                                                color: Colors.green,
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(l10n.viewDetails),
-                                            ],
-                                          ),
-                                        ),
-                                        PopupMenuItem(
-                                          value: 'edit',
-                                          child: Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.edit_outlined,
-                                                color: Colors.orange,
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(l10n.editExam),
-                                            ],
-                                          ),
-                                        ),
-                                        if (!exam.isPublished)
-                                          PopupMenuItem(
-                                            value: 'publish',
-                                            child: Row(
-                                              children: [
-                                                const Icon(
-                                                  Icons.publish,
-                                                  color: Colors.blue,
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Text(l10n.publishResult),
-                                              ],
-                                            ),
-                                          ),
-                                        if (exam.isPublished)
-                                          PopupMenuItem(
-                                            value: 'unpublish',
-                                            child: Row(
-                                              children: [
-                                                const Icon(
-                                                  Icons.unpublished_outlined,
-                                                  color: Colors.grey,
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Text(l10n.unpublishResult),
-                                              ],
-                                            ),
-                                          ),
-                                        PopupMenuItem(
-                                          value: 'duplicate',
-                                          child: Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.copy_outlined,
-                                                color: Colors.indigo,
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(l10n.duplicateExam),
-                                            ],
-                                          ),
-                                        ),
-                                        PopupMenuItem(
-                                          value: 'delete',
-                                          child: Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.delete_outline,
-                                                color: Colors.red,
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(l10n.deleteExam),
-                                            ],
-                                          ),
-                                        ),
-                                      ];
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
             ),
           ),
         ],
@@ -606,7 +625,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                             ],
                           ),
                         );
-                      }).toList(),
+                      }),
                     ],
                   ),
                 ),
@@ -622,8 +641,8 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    'Close',
+                  child: Text(
+                    AppLocalizations.of(context)!.close,
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
@@ -678,7 +697,9 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
             ),
             actions: [
               TextButton(
-                onPressed: isPublishing ? null : () => Navigator.pop(dialogContext),
+                onPressed: isPublishing
+                    ? null
+                    : () => Navigator.pop(dialogContext),
                 child: Text(AppLocalizations.of(context)!.cancel),
               ),
               ElevatedButton(
@@ -716,13 +737,17 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                               content: Text(
                                 'Results ${newStatus ? 'published' : 'unpublished'} successfully!',
                               ),
-                              backgroundColor: newStatus ? Colors.green : Colors.grey,
+                              backgroundColor: newStatus
+                                  ? Colors.green
+                                  : Colors.grey,
                             ),
                           );
                         }
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: newStatus ? Colors.purple : Colors.grey.shade700,
+                  backgroundColor: newStatus
+                      ? Colors.purple
+                      : Colors.grey.shade700,
                   foregroundColor: Colors.white,
                   minimumSize: const Size(110, 38),
                 ),
@@ -762,9 +787,9 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
             label: Text(AppLocalizations.of(context)!.duplicateExam),
             onPressed: () async {
               Navigator.pop(context);
-              final success = await context
-                  .read<ExamsNotifier>()
-                  .duplicateExam(exam.id);
+              final success = await context.read<ExamsNotifier>().duplicateExam(
+                exam.id,
+              );
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -773,8 +798,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                           ? '"${exam.name}" duplicated successfully!'
                           : 'Failed to duplicate exam. Please try again.',
                     ),
-                    backgroundColor:
-                        success ? Colors.indigo : Colors.red,
+                    backgroundColor: success ? Colors.indigo : Colors.red,
                   ),
                 );
               }
@@ -804,7 +828,9 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
             ),
             actions: [
               TextButton(
-                onPressed: isDeleting ? null : () => Navigator.pop(dialogContext),
+                onPressed: isDeleting
+                    ? null
+                    : () => Navigator.pop(dialogContext),
                 child: Text(AppLocalizations.of(context)!.cancel),
               ),
               ElevatedButton(
@@ -831,8 +857,9 @@ class _ExamManagementScreenState extends State<ExamManagementScreen> {
                                     ? '"${exam.name}" deleted successfully!'
                                     : 'Failed to delete exam. Please try again.',
                               ),
-                              backgroundColor:
-                                  success ? Colors.red : Colors.orange,
+                              backgroundColor: success
+                                  ? Colors.red
+                                  : Colors.orange,
                             ),
                           );
                         }
@@ -875,7 +902,6 @@ class _ExamShimmer extends StatelessWidget {
           baseColor: baseColor,
           highlightColor: highlightColor,
           child: Container(
-
             margin: const EdgeInsets.only(bottom: 12),
 
             child: Padding(

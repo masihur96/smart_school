@@ -2789,4 +2789,255 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get justNow => 'এইমাত্র';
+
+  @override
+  String get recentHistory => 'সাম্প্রতিক ইতিহাস';
+
+  @override
+  String get homeworkAndAssignmentHelp =>
+      'হোমওয়ার্ক এবং অ্যাসাইনমেন্ট সহায়তা';
+
+  @override
+  String get start => 'শুরু করুন';
+
+  @override
+  String get join => 'যোগ দিন';
+
+  @override
+  String get later => 'পরে';
+
+  @override
+  String get examRoutines => 'পরীক্ষার রুটিন';
+
+  @override
+  String get couldNotOpenAttachment => 'সংযুক্তি খোলা যায়নি';
+
+  @override
+  String get aiTutor => 'এআই টিউটর';
+
+  @override
+  String get instantAnswersAndExplanations => 'তাত্ক্ষণিক উত্তর এবং ব্যাখ্যা';
+
+  @override
+  String get seeAll => 'সব দেখুন';
+
+  @override
+  String get examAndQuizPreparation => 'পরীক্ষা এবং কুইজ প্রস্তুতি';
+
+  @override
+  String get newLabel => 'নতুন';
+
+  @override
+  String get examiner => 'পরীক্ষক';
+
+  @override
+  String get startsOn => 'শুরু হবে';
+
+  @override
+  String get yourSmartLearningCompanion => 'আপনার স্মার্ট লার্নিং সঙ্গী';
+
+  @override
+  String get noRecordsForSelectedSubject =>
+      'নির্বাচিত বিষয়ের জন্য কোনো রেকর্ড নেই';
+
+  @override
+  String get noClassesScheduledForToday =>
+      'আজকের জন্য কোনো ক্লাস নির্ধারিত নেই';
+
+  @override
+  String get aiTutorDescription =>
+      'হোমওয়ার্ক, পরীক্ষার প্রস্তুতি বা কোনো বিষয় বুঝতে সাহায্য প্রয়োজন? যেকোনো সময় প্রশ্ন করুন এবং তাৎক্ষণিক একাডেমিক সহায়তা পান।';
+
+  @override
+  String get markEntryPending => 'মার্ক এন্ট্রি বাকি আছে';
+
+  @override
+  String get noSubjectsAssignedForExam =>
+      'এই পরীক্ষার জন্য আপনার কোনো বিষয় নির্ধারিত নেই।';
+
+  @override
+  String get noExamRoutinesAssignedYet =>
+      'এখনো কোনো পরীক্ষার রুটিন নির্ধারিত হয়নি।';
+
+  @override
+  String get syllabus => 'সিলেবাস';
+
+  @override
+  String get resultsNotPublishedAssignedSubjects =>
+      'ফলাফল এখনো প্রকাশিত হয়নি। এই পরীক্ষার জন্য আপনার নির্ধারিত বিষয়গুলো দেখানো হচ্ছে।';
+
+  @override
+  String get resultSheet => 'ফলাফল শিট';
+
+  @override
+  String get resultsPublishedNoData =>
+      'ফলাফল প্রকাশিত হয়েছে তবে এখনো কোনো ডেটা উপলব্ধ নেই।';
+
+  @override
+  String get todayLabel => 'আজ';
+
+  @override
+  String get notGraded => 'গ্রেড করা হয়নি';
+
+  @override
+  String get viewResults => 'ফলাফল দেখুন';
+
+  @override
+  String get subjectWise => 'বিষয়ভিত্তিক';
+
+  @override
+  String get examDate => 'পরীক্ষার তারিখ';
+
+  @override
+  String get noSyllabusInformationAvailable =>
+      'কোনো সিলেবাসের তথ্য উপলব্ধ নেই।';
+
+  @override
+  String get selectSection => 'শাখা নির্বাচন করুন';
+
+  @override
+  String get filterBySection => 'শাখা অনুযায়ী ফিল্টার করুন';
+
+  @override
+  String get marksSubmitted => '📊 নম্বর জমা দেওয়া হয়েছে';
+
+  @override
+  String get subjectName => 'বিষয়';
+
+  @override
+  String get markEntrySystem => 'মার্ক এন্ট্রি সিস্টেম';
+
+  @override
+  String get saveAllResults => 'সব ফলাফল সংরক্ষণ করুন';
+
+  @override
+  String get late => 'দেরি';
+
+  @override
+  String get unmarked => 'চিহ্নিত নয়';
+
+  @override
+  String get noSubjectsForThisClass => 'এই শ্রেণীর জন্য কোনো বিষয় নেই';
+
+  @override
+  String get attendanceSaved => '✅ উপস্থিতি সংরক্ষিত হয়েছে';
+
+  @override
+  String get noHomeworkAssignedYet =>
+      'কোনো হোমওয়ার্ক দেওয়া হয়নি।\\nযোগ করতে + ট্যাপ করুন।';
+
+  @override
+  String get clearFilters => 'ফিল্টার মুছুন';
+
+  @override
+  String get noAttendanceRecords => 'কোনো উপস্থিতির রেকর্ড নেই';
+
+  @override
+  String get searchByStudentName => 'শিক্ষার্থীর নাম দিয়ে খুঁজুন...';
+
+  @override
+  String get bulkUpdateStatusNotice =>
+      'এটি এই হোমওয়ার্কের সমস্ত শিক্ষার্থীর স্ট্যাটাস আপডেট করবে।';
+
+  @override
+  String get bulkUpdateStatus => 'একসাথে স্ট্যাটাস আপডেট';
+
+  @override
+  String get comment => 'মন্তব্য';
+
+  @override
+  String get addFeedback => 'মতামত যোগ করুন...';
+
+  @override
+  String get onlineClass => 'অনলাইন ক্লাস';
+
+  @override
+  String get teacherMeeting => 'শিক্ষক মিটিং';
+
+  @override
+  String get facultyAndStaffMeeting => 'ফ্যাকাল্টি এবং স্টাফ মিটিং';
+
+  @override
+  String get scheduleDateAndTime => 'তারিখ এবং সময় নির্ধারণ করুন';
+
+  @override
+  String get pleaseSelectDateTime =>
+      'অনুগ্রহ করে তারিখ, শুরুর সময় এবং শেষ হওয়ার সময় নির্বাচন করুন';
+
+  @override
+  String get meetingBroadcastNotice =>
+      'এই মিটিংটি সমস্ত শিক্ষক এবং কর্মীদের জন্য সম্প্রচারিত হবে। শ্রেণী, শাখা এবং বিষয় নির্বাচনের প্রয়োজন নেই।';
+
+  @override
+  String get virtualMeetingLink => 'ভার্চুয়াল মিটিং লিংক';
+
+  @override
+  String get meetingLinkOrUrl => 'মিটিং লিংক / ইউআরএল';
+
+  @override
+  String get meetingDate => 'মিটিংয়ের তারিখ';
+
+  @override
+  String get loadingClasses => 'শ্রেণী লোড হচ্ছে...';
+
+  @override
+  String get loadingSubjects => 'বিষয় লোড হচ্ছে...';
+
+  @override
+  String get loadingSections => 'শাখা লোড হচ্ছে...';
+
+  @override
+  String get noTeachersFound => 'কোনো শিক্ষক পাওয়া যায়নি';
+
+  @override
+  String get noSectionsAvailable => 'কোনো শাখা উপলব্ধ নেই';
+
+  @override
+  String get noSubjectsAvailable => 'কোনো বিষয় উপলব্ধ নেই';
+
+  @override
+  String get selectParticipants =>
+      'অংশগ্রহণকারীদের নির্বাচন করুন (শিক্ষক/কর্মী)';
+
+  @override
+  String get selectTeachers => 'শিক্ষকদের নির্বাচন করুন';
+
+  @override
+  String get academicDetails => 'একাডেমিক বিবরণ';
+
+  @override
+  String get hostOrTeacher => 'হোস্ট / শিক্ষক';
+
+  @override
+  String get classIsStarting => 'ক্লাস শুরু হচ্ছে';
+
+  @override
+  String get participants => 'অংশগ্রহণকারী';
+
+  @override
+  String get keepAnEyeOut => 'চোখ রাখুন!';
+
+  @override
+  String get newNoticesWillAppearHere => 'নতুন নোটিশ এখানে দেখা যাবে।';
+
+  @override
+  String get urgentLabel => 'জরুরী';
+
+  @override
+  String get noNotificationsYet => 'কোনো নোটিফিকেশন নেই';
+
+  @override
+  String get markAllAsRead => 'সব পড়া হিসেবে চিহ্নিত করুন';
+
+  @override
+  String get testNotificationSent => 'টেস্ট নোটিফিকেশন পাঠানো হয়েছে!';
+
+  @override
+  String get sendTestNotification => 'টেস্ট নোটিফিকেশন পাঠান';
+
+  @override
+  String get restartApp => 'রিস্টার্ট';
+
+  @override
+  String get newUpdateDownloaded => '🎉 একটি নতুন আপডেট ডাউনলোড করা হয়েছে।';
 }

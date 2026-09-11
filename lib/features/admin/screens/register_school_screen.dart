@@ -44,7 +44,7 @@ class _AdminRegisterSchoolScreenState extends State<AdminRegisterSchoolScreen> {
     if (widget.initialEmail != null && widget.initialEmail!.trim().isNotEmpty) {
       return widget.initialEmail!.trim();
     }
-    return authNotifier.user?.email?.trim() ?? '';
+    return authNotifier.user?.email.trim() ?? '';
   }
 
   String _getPhone(AuthNotifier authNotifier) {

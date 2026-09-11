@@ -72,7 +72,9 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF8FAFC),
+      backgroundColor: isDark
+          ? const Color(0xFF121212)
+          : const Color(0xFFF8FAFC),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -93,7 +95,9 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                   child: TabBar(
                     controller: _tabController,
                     labelColor: AppColors.primaryStudent,
-                    unselectedLabelColor: isDark ? Colors.grey[400] : Colors.grey[600],
+                    unselectedLabelColor: isDark
+                        ? Colors.grey[400]
+                        : Colors.grey[600],
                     indicatorColor: AppColors.primaryStudent,
                     indicatorWeight: 3,
                     labelStyle: const TextStyle(
@@ -104,7 +108,7 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                       fontWeight: FontWeight.w500,
                       fontSize: 13,
                     ),
-                    tabs: const [
+                    tabs: [
                       Tab(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -121,7 +125,7 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                           children: [
                             Icon(Icons.menu_book_rounded, size: 18),
                             SizedBox(width: 6),
-                            Text('Syllabus'),
+                            Text(AppLocalizations.of(context)!.syllabus),
                           ],
                         ),
                       ),
@@ -292,7 +296,8 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
           return _buildEmptyState(
             icon: Icons.calendar_today_outlined,
             title: 'No Exam Routine Available',
-            subtitle: 'The schedule for this examination has not been posted yet.',
+            subtitle:
+                'The schedule for this examination has not been posted yet.',
           );
         }
 
@@ -301,7 +306,8 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
           children: [
             _buildSectionHeader(
               title: 'Examination Schedule',
-              subtitle: '${p.routine.length} Subject${p.routine.length > 1 ? 's' : ''} Scheduled',
+              subtitle:
+                  '${p.routine.length} Subject${p.routine.length > 1 ? 's' : ''} Scheduled',
               icon: Icons.event_note_rounded,
             ),
             const SizedBox(height: 12),
@@ -353,8 +359,8 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                   color: isToday
                       ? AppColors.primaryStudent
                       : (isPast
-                          ? (isDark ? Colors.grey[800] : Colors.grey[200])
-                          : AppColors.primaryStudent.withValues(alpha: 0.1)),
+                            ? (isDark ? Colors.grey[800] : Colors.grey[200])
+                            : AppColors.primaryStudent.withValues(alpha: 0.1)),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -367,8 +373,10 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                         color: isToday
                             ? Colors.white
                             : (isPast
-                                ? (isDark ? Colors.grey[400] : Colors.grey[600])
-                                : AppColors.primaryStudent),
+                                  ? (isDark
+                                        ? Colors.grey[400]
+                                        : Colors.grey[600])
+                                  : AppColors.primaryStudent),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -380,8 +388,10 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                         color: isToday
                             ? Colors.white
                             : (isPast
-                                ? (isDark ? Colors.grey[300] : Colors.grey[800])
-                                : AppColors.primaryStudent),
+                                  ? (isDark
+                                        ? Colors.grey[300]
+                                        : Colors.grey[800])
+                                  : AppColors.primaryStudent),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -393,8 +403,12 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                         color: isToday
                             ? Colors.white.withValues(alpha: 0.9)
                             : (isPast
-                                ? (isDark ? Colors.grey[500] : Colors.grey[500])
-                                : AppColors.primaryStudent.withValues(alpha: 0.8)),
+                                  ? (isDark
+                                        ? Colors.grey[500]
+                                        : Colors.grey[500])
+                                  : AppColors.primaryStudent.withValues(
+                                      alpha: 0.8,
+                                    )),
                       ),
                     ),
                   ],
@@ -416,7 +430,9 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : const Color(0xFF1E293B),
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF1E293B),
                               ),
                             ),
                           ),
@@ -430,8 +446,8 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                                 color: AppColors.primaryStudent,
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Text(
-                                'TODAY',
+                              child: Text(
+                                AppLocalizations.of(context)!.todayLabel,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 10,
@@ -452,11 +468,14 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              AppLocalizations.of(context)!
-                                  .examinerLabel(a.examinerName),
+                              AppLocalizations.of(
+                                context,
+                              )!.examinerLabel(a.examinerName),
                               style: TextStyle(
                                 fontSize: 13,
-                                color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                color: isDark
+                                    ? Colors.grey[400]
+                                    : Colors.grey[600],
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -465,7 +484,8 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                         ],
                       ),
                       if (a.className.isNotEmpty ||
-                          (a.sectionName != null && a.sectionName!.isNotEmpty)) ...[
+                          (a.sectionName != null &&
+                              a.sectionName!.isNotEmpty)) ...[
                         const SizedBox(height: 8),
                         Wrap(
                           spacing: 6,
@@ -512,7 +532,8 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
           return _buildEmptyState(
             icon: Icons.import_contacts_outlined,
             title: 'No Syllabus Outline',
-            subtitle: 'Detailed syllabus topic descriptions have not been published yet.',
+            subtitle:
+                'Detailed syllabus topic descriptions have not been published yet.',
           );
         }
 
@@ -521,7 +542,8 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
           children: [
             _buildSectionHeader(
               title: 'Exam Topics & Syllabus',
-              subtitle: 'Study guidance for ${syllabusItems.length} Subject${syllabusItems.length > 1 ? 's' : ''}',
+              subtitle:
+                  'Study guidance for ${syllabusItems.length} Subject${syllabusItems.length > 1 ? 's' : ''}',
               icon: Icons.menu_book_rounded,
             ),
             const SizedBox(height: 12),
@@ -534,8 +556,9 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
 
   Widget _buildSyllabusCard(ExamAssignment item) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final initial =
-        item.subjectName.isNotEmpty ? item.subjectName[0].toUpperCase() : '?';
+    final initial = item.subjectName.isNotEmpty
+        ? item.subjectName[0].toUpperCase()
+        : '?';
 
     final lines = (item.syllabus ?? '')
         .split('\n')
@@ -639,7 +662,9 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                                 line.replaceAll(RegExp(r'^[\-\*\•]\s*'), ''),
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: isDark ? Colors.grey[300] : Colors.grey[800],
+                                  color: isDark
+                                      ? Colors.grey[300]
+                                      : Colors.grey[800],
                                   height: 1.4,
                                 ),
                               ),
@@ -688,11 +713,15 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
     for (var r in results) {
       totalObtained += r.marksObtained;
       totalMax += r.totalMarks;
-      final pct = r.totalMarks > 0 ? (r.marksObtained / r.totalMarks) * 100 : 0.0;
+      final pct = r.totalMarks > 0
+          ? (r.marksObtained / r.totalMarks) * 100
+          : 0.0;
       if (pct >= 33.0) passCount++;
     }
 
-    final overallPercentage = totalMax > 0 ? (totalObtained / totalMax) * 100 : 0.0;
+    final overallPercentage = totalMax > 0
+        ? (totalObtained / totalMax) * 100
+        : 0.0;
     final overallGrade = _calculateGrade(overallPercentage);
     final overallGradeColor = _getGradeColor(overallGrade);
 
@@ -712,7 +741,8 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
         const SizedBox(height: 20),
         _buildSectionHeader(
           title: 'Subject Performance Breakdown',
-          subtitle: '${results.length} Evaluated Subject${results.length > 1 ? 's' : ''}',
+          subtitle:
+              '${results.length} Evaluated Subject${results.length > 1 ? 's' : ''}',
           icon: Icons.fact_check_rounded,
         ),
         const SizedBox(height: 12),
@@ -739,10 +769,7 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
         gradient: LinearGradient(
           colors: isDark
               ? [const Color(0xFF1E1B4B), const Color(0xFF311B92)]
-              : [
-                  AppColors.primaryStudent,
-                  const Color(0xFF3730A3),
-                ],
+              : [AppColors.primaryStudent, const Color(0xFF3730A3)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -908,7 +935,8 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
     final pctScore = percentage * 100;
     final grade = _calculateGrade(pctScore);
     final gradeColor = _getGradeColor(grade);
-    final subjectName = result.subject?.name ?? 'Subject';
+    final subjectName =
+        result.subject?.name ?? AppLocalizations.of(context)!.subjectName;
     final teacherName = result.teacher?.name ?? 'Teacher';
     final initial = subjectName.isNotEmpty ? subjectName[0].toUpperCase() : '?';
 
@@ -980,7 +1008,9 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                               teacherName,
                               style: TextStyle(
                                 fontSize: 13,
-                                color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                color: isDark
+                                    ? Colors.grey[400]
+                                    : Colors.grey[600],
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -1042,14 +1072,19 @@ class _StudentExamDetailScreenState extends State<StudentExamDetailScreen>
                     child: LinearProgressIndicator(
                       value: percentage.clamp(0.0, 1.0),
                       minHeight: 8,
-                      backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+                      backgroundColor: isDark
+                          ? Colors.grey[800]
+                          : Colors.grey[200],
                       valueColor: AlwaysStoppedAnimation<Color>(gradeColor),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: gradeColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),

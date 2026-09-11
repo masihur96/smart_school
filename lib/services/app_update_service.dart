@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -137,8 +138,8 @@ class AppUpdateService {
   void _showFlexibleUpdateSnackBar(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text(
-          '🎉 A new update has been downloaded.',
+        content: Text(
+          AppLocalizations.of(context)!.newUpdateDownloaded,
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF1A73E8),
@@ -147,7 +148,7 @@ class AppUpdateService {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
         action: SnackBarAction(
-          label: 'RESTART',
+          label: AppLocalizations.of(context)!.restartApp,
           textColor: Colors.amberAccent,
           onPressed: completeFlexibleUpdate,
         ),

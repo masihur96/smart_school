@@ -1385,8 +1385,9 @@ class _RecordCard extends StatelessWidget {
       final dt = DateTime.parse(raw).toLocal();
       final now = DateTime.now();
       final diff = now.difference(dt);
-      if (diff.inDays == 0)
+      if (diff.inDays == 0) {
         return 'Today at ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+      }
       if (diff.inDays == 1) return 'Yesterday';
       if (diff.inDays < 7) return '${diff.inDays} days ago';
       return '${dt.day}/${dt.month}/${dt.year}';

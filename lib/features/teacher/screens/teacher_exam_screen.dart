@@ -506,7 +506,7 @@ class TeacherExamRoutineView extends StatelessWidget {
                               children: [
                                 _buildDetailRow(
                                   Icons.person_rounded,
-                                  'Examiner',
+                                  AppLocalizations.of(context)!.examiner,
                                   assignment.examinerName,
                                 ),
                                 if (hasSection) ...[
@@ -523,7 +523,7 @@ class TeacherExamRoutineView extends StatelessWidget {
                                   const SizedBox(height: 12),
                                   _buildDetailRow(
                                     Icons.description_rounded,
-                                    'Syllabus',
+                                    AppLocalizations.of(context)!.syllabus,
                                     assignment.syllabus!,
                                   ),
                                 ],

@@ -1,4 +1,5 @@
 import 'package:smart_school/core/widgets/zoomable_avatar.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -111,7 +112,7 @@ class StudentDetailScreen extends StatelessWidget {
                   _buildSectionTitle('Academic Information'),
                   _buildInfoCard([
                     _buildInfoRow(Icons.numbers, 'Roll Number', student.rollId),
-                    _buildInfoRow(Icons.class_, 'Class', className),
+                    _buildInfoRow(Icons.class_, AppLocalizations.of(context)!.className, className),
                     _buildInfoRow(Icons.grid_view, 'Section', sectionName),
                     _buildInfoRow(
                       Icons.grid_view,
@@ -381,7 +382,7 @@ class StudentDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Status',
+                  AppLocalizations.of(context)!.status,
                   style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
                 Text(

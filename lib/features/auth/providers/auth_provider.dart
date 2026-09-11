@@ -324,8 +324,9 @@ class AuthNotifier extends ChangeNotifier {
     try {
       final token = await StorageService.getToken();
       if (token == null) throw Exception('No authentication token found');
-      if (_user?.schoolId == null)
+      if (_user?.schoolId == null) {
         throw Exception('No school ID found for user');
+      }
 
       final now = DateTime.now().toUtc();
 
@@ -421,7 +422,7 @@ class AuthNotifier extends ChangeNotifier {
 
   String formatIso(DateTime date) {
     final iso = date.toUtc().toIso8601String();
-    return iso.contains('.') ? iso.split('.').first + '.000Z' : iso + '.000Z';
+    return iso.contains('.') ? '${iso.split('.').first}.000Z' : '$iso.000Z';
   }
 
   Future<void> fetchAdmins() async {

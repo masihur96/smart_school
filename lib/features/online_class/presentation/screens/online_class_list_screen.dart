@@ -6,12 +6,12 @@ import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/online_class_model.dart';
 import 'package:smart_school/models/user_model.dart';
 import 'package:smart_school/services/notification_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../l10n/app_localizations.dart';
 import 'add_edit_online_class_screen.dart';
 
 class OnlineClassListScreen extends StatefulWidget {
@@ -187,8 +187,8 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Icon(Icons.person, color: themeColor),
-                      title: const Text(
-                        'Host / Teacher',
+                      title: Text(
+                        AppLocalizations.of(context)!.hostOrTeacher,
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                       subtitle: Text(
@@ -200,8 +200,8 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                       ListTile(
                         contentPadding: EdgeInsets.zero,
                         leading: Icon(Icons.description, color: themeColor),
-                        title: const Text(
-                          'Description',
+                        title: Text(
+                          AppLocalizations.of(context)!.description,
                           style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                         subtitle: Text(
@@ -232,9 +232,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                         ),
                         subtitle: Text(
                           oClass.meetLink,
-                          style: const TextStyle(
-                            fontSize: 14,
-                          ),
+                          style: const TextStyle(fontSize: 14),
                         ),
                       ),
                     const Divider(height: 30),
@@ -324,14 +322,14 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
           title: Text(l10n.onlineClassesTitle),
           backgroundColor: themeColor,
           foregroundColor: Colors.white,
-          bottom: const TabBar(
+          bottom: TabBar(
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white70,
             indicatorColor: Colors.white,
             tabs: [
               Tab(text: 'All'),
               Tab(text: 'Class Meeting'),
-              Tab(text: 'Teacher Meeting'),
+              Tab(text: AppLocalizations.of(context)!.teacherMeeting),
             ],
           ),
         ),
@@ -488,31 +486,59 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
-  DateTime _parseTimeStr(DateTime baseDate, String? timeStr, {bool isEnd = false}) {
+  DateTime _parseTimeStr(
+    DateTime baseDate,
+    String? timeStr, {
+    bool isEnd = false,
+  }) {
     if (timeStr == null || timeStr.trim().isEmpty) {
       return isEnd ? baseDate.add(const Duration(hours: 1)) : baseDate;
     }
-    
+
     try {
-      final cleanTimeStr = timeStr.trim().replaceAll('\u202F', ' '); // Handle narrow no-break space
+      final cleanTimeStr = timeStr.trim().replaceAll(
+        '\u202F',
+        ' ',
+      ); // Handle narrow no-break space
       // Try parsing with AM/PM
       final format = DateFormat('h:mm a');
       final parsed = format.parse(cleanTimeStr);
-      return DateTime(baseDate.year, baseDate.month, baseDate.day, parsed.hour, parsed.minute);
+      return DateTime(
+        baseDate.year,
+        baseDate.month,
+        baseDate.day,
+        parsed.hour,
+        parsed.minute,
+      );
     } catch (_) {}
-    
+
     try {
-      final cleanTimeStr = timeStr.trim().replaceAll('\u202F', ' '); // Handle narrow no-break space
+      final cleanTimeStr = timeStr.trim().replaceAll(
+        '\u202F',
+        ' ',
+      ); // Handle narrow no-break space
       final format = DateFormat('hh:mm a');
       final parsed = format.parse(cleanTimeStr);
-      return DateTime(baseDate.year, baseDate.month, baseDate.day, parsed.hour, parsed.minute);
+      return DateTime(
+        baseDate.year,
+        baseDate.month,
+        baseDate.day,
+        parsed.hour,
+        parsed.minute,
+      );
     } catch (_) {}
 
     try {
       // Try 24 hour format
       final format = DateFormat('HH:mm');
       final parsed = format.parse(timeStr.trim());
-      return DateTime(baseDate.year, baseDate.month, baseDate.day, parsed.hour, parsed.minute);
+      return DateTime(
+        baseDate.year,
+        baseDate.month,
+        baseDate.day,
+        parsed.hour,
+        parsed.minute,
+      );
     } catch (_) {}
 
     try {
@@ -527,10 +553,16 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
         } else if (lower.contains('am') && hour == 12) {
           hour = 0;
         }
-        return DateTime(baseDate.year, baseDate.month, baseDate.day, hour, minute);
+        return DateTime(
+          baseDate.year,
+          baseDate.month,
+          baseDate.day,
+          hour,
+          minute,
+        );
       }
     } catch (_) {}
-    
+
     return isEnd ? baseDate.add(const Duration(hours: 1)) : baseDate;
   }
 
@@ -544,7 +576,11 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
     if (oClass.endTime == null || oClass.endTime!.isEmpty) {
       return start.add(const Duration(hours: 1));
     }
-    DateTime end = _parseTimeStr(oClass.scheduledTime, oClass.endTime, isEnd: true);
+    DateTime end = _parseTimeStr(
+      oClass.scheduledTime,
+      oClass.endTime,
+      isEnd: true,
+    );
     // If end time ends up being before start time (e.g. cross midnight), add a day
     if (end.isBefore(start)) {
       end = end.add(const Duration(days: 1));
@@ -811,7 +847,6 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
           baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
           highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
           child: Container(
-
             margin: const EdgeInsets.only(bottom: 14),
 
             child: Padding(
@@ -987,7 +1022,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
                                 ? Icons.supervisor_account_rounded
                                 : Icons.school_rounded,
                             label: isTeacherMeeting
-                                ? 'Teacher Meeting'
+                                ? AppLocalizations.of(context)!.teacherMeeting
                                 : 'Class Meeting',
                             bgColor: isTeacherMeeting
                                 ? Colors.orange.withValues(alpha: 0.10)
@@ -1322,19 +1357,29 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: isPast ? null : () {
-                  final user = context.read<AuthNotifier>().user;
-                  if (user != null && 
-                      (user.id == oClass.teacherId || user.role == UserRole.teacher || user.role == UserRole.admin || user.role == UserRole.superadmin) && 
-                      oClass.participants.isNotEmpty) {
-                    NotificationService().sendBulkNotification(
-                      receiverUuids: oClass.participants.map((p) => p.uuid).toList(),
-                      title: 'Class is Starting',
-                      message: 'The host has joined ${oClass.title}. Please join the meeting now.',
-                    );
-                  }
-                  _launchURL(oClass.meetLink);
-                },
+                onPressed: isPast
+                    ? null
+                    : () {
+                        final user = context.read<AuthNotifier>().user;
+                        if (user != null &&
+                            (user.id == oClass.teacherId ||
+                                user.role == UserRole.teacher ||
+                                user.role == UserRole.admin ||
+                                user.role == UserRole.superadmin) &&
+                            oClass.participants.isNotEmpty) {
+                          NotificationService().sendBulkNotification(
+                            receiverUuids: oClass.participants
+                                .map((p) => p.uuid)
+                                .toList(),
+                            title: AppLocalizations.of(
+                              context,
+                            )!.classIsStarting,
+                            message:
+                                'The host has joined ${oClass.title}. Please join the meeting now.',
+                          );
+                        }
+                        _launchURL(oClass.meetLink);
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isLive
                       ? const Color(0xFFEF4444)
@@ -1442,11 +1487,7 @@ class _OnlineClassListScreenState extends State<OnlineClassListScreen> {
           ),
         ),
         const SizedBox(width: 8),
-        Icon(
-          Icons.person_rounded,
-          size: 12,
-          color: Colors.grey.shade500,
-        ),
+        Icon(Icons.person_rounded, size: 12, color: Colors.grey.shade500),
         const SizedBox(width: 3),
         Expanded(
           child: Text(

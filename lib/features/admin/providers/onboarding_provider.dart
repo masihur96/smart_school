@@ -96,8 +96,9 @@ class OnboardingNotifier extends ChangeNotifier {
           createdClass.id,
           'A',
         );
-        if (!sectionSuccess)
+        if (!sectionSuccess) {
           throw Exception('Failed to create section for $className');
+        }
 
         completedSteps++;
         _progress = (completedSteps / totalSteps) * 0.95;
@@ -114,10 +115,11 @@ class OnboardingNotifier extends ChangeNotifier {
             createdClass.id,
             schoolId,
           );
-          if (!subjectSuccess)
+          if (!subjectSuccess) {
             throw Exception(
               'Failed to create subject $subjectName for $className',
             );
+          }
 
           completedSteps++;
           _progress = (completedSteps / totalSteps) * 0.95;

@@ -388,8 +388,8 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                     children: [
                       // Class dropdown
                       DropdownButtonFormField<String>(
-                        decoration: _dropDeco('Class', Icons.class_outlined),
-                        value: classId,
+                        decoration: _dropDeco(AppLocalizations.of(context)!.className, Icons.class_outlined),
+                        initialValue: classId,
                         items: classes
                             .map(
                               (c) => DropdownMenuItem(
@@ -406,8 +406,8 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                       const SizedBox(height: 14),
                       // Subject dropdown (filtered by class)
                       DropdownButtonFormField<String>(
-                        decoration: _dropDeco('Subject', Icons.book_outlined),
-                        value: subjectId,
+                        decoration: _dropDeco(AppLocalizations.of(context)!.subjectName, Icons.book_outlined),
+                        initialValue: subjectId,
                         items: allSubjects
                             .where(
                               (s) => classId == null || s.classId == classId,
@@ -428,7 +428,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                           'Examiner / Teacher',
                           Icons.person_outline,
                         ),
-                        value: examinerId,
+                        initialValue: examinerId,
                         items: teachers
                             .map(
                               (t) => DropdownMenuItem(
@@ -449,7 +449,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                         },
                         child: InputDecorator(
                           decoration: _dropDeco(
-                            'Exam Date',
+                            AppLocalizations.of(context)!.examDate,
                             Icons.calendar_today,
                           ),
                           child: Text(
@@ -667,8 +667,9 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
           type: StepperType.horizontal,
           elevation: 0,
           onStepTapped: (i) {
-            if (i == 1 && !(_step1Key.currentState?.validate() ?? false))
+            if (i == 1 && !(_step1Key.currentState?.validate() ?? false)) {
               return;
+            }
             setState(() => _currentStep = i);
           },
           controlsBuilder: (context, details) {

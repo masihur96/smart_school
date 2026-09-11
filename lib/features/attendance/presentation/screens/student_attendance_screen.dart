@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/data/mock_data/mock_data.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 class StudentAttendanceScreen extends StatefulWidget {
   final bool isTab;
@@ -31,9 +32,9 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
         student['id']:
             existingData?.firstWhere(
               (a) => a['studentId'] == student['id'],
-              orElse: () => {'status': 'Present'},
+              orElse: () => {'status': AppLocalizations.of(context)!.present},
             )['status'] ??
-            'Present',
+            AppLocalizations.of(context)!.present,
     };
   }
 
@@ -44,7 +45,7 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Student Attendance'),
+        title: Text(AppLocalizations.of(context)!.studentAttendance),
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_today),
@@ -140,9 +141,15 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                     subtitle: Text('Roll: ${student['roll']}'),
                     trailing: _isToday
                         ? SegmentedButton<String>(
-                            segments: const [
-                              ButtonSegment(value: 'Present', label: Text('P')),
-                              ButtonSegment(value: 'Absent', label: Text('A')),
+                            segments: [
+                              ButtonSegment(
+                                value: AppLocalizations.of(context)!.present,
+                                label: Text('P'),
+                              ),
+                              ButtonSegment(
+                                value: AppLocalizations.of(context)!.absent,
+                                label: Text('A'),
+                              ),
                             ],
                             selected: {status},
                             onSelectionChanged: (newSelection) {
@@ -153,7 +160,9 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                             },
                             showSelectedIcon: false,
                             style: SegmentedButton.styleFrom(
-                              selectedBackgroundColor: status == 'Present'
+                              selectedBackgroundColor:
+                                  status ==
+                                      AppLocalizations.of(context)!.present
                                   ? AppColors.success
                                   : AppColors.error,
                               selectedForegroundColor: Colors.white,
@@ -165,7 +174,9 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: status == 'Present'
+                              color:
+                                  status ==
+                                      AppLocalizations.of(context)!.present
                                   ? AppColors.success.withOpacity(0.1)
                                   : AppColors.error.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(8),
@@ -173,7 +184,9 @@ class _StudentAttendanceScreenState extends State<StudentAttendanceScreen> {
                             child: Text(
                               status,
                               style: TextStyle(
-                                color: status == 'Present'
+                                color:
+                                    status ==
+                                        AppLocalizations.of(context)!.present
                                     ? AppColors.success
                                     : AppColors.error,
                                 fontWeight: FontWeight.bold,

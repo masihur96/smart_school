@@ -717,7 +717,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
 
               // Category Dropdown
               DropdownButtonFormField<String>(
-                value: _selectedCategory,
+                initialValue: _selectedCategory,
                 decoration: InputDecoration(
                   labelText: 'Category',
                   border: OutlineInputBorder(
@@ -747,7 +747,7 @@ class _AddEditExpenseScreenState extends State<AddEditExpenseScreen> {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _selectedPaymentMethod,
+                      initialValue: _selectedPaymentMethod,
                       decoration: InputDecoration(
                         labelText: 'Channel',
                         border: OutlineInputBorder(

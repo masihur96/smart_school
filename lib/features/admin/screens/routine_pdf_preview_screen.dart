@@ -12,8 +12,8 @@ import 'package:smart_school/features/admin/providers/routine_provider.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/features/admin/providers/teacher_provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/school_models.dart' hide Teacher;
-import 'package:smart_school/models/teacher_model.dart';
 
 class RoutinePdfPreviewScreen extends StatefulWidget {
   final String? initialClassId;
@@ -119,8 +119,9 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
       if (_selectedClassId == null) {
         // ── ALL CLASSES SELECTED ─────────────────────────────────────────────
         for (final cls in classes) {
-          final classSections =
-              sections.where((s) => s.classId == cls.id).toList();
+          final classSections = sections
+              .where((s) => s.classId == cls.id)
+              .toList();
 
           if (classSections.isNotEmpty) {
             bool addedForClass = false;
@@ -160,7 +161,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                 groups.add(
                   ClassSectionRoutineGroup(
                     className: cls.name,
-                    sectionName: 'All Sections',
+                    sectionName: AppLocalizations.of(context)!.allSections,
                     entries: generalEntries,
                   ),
                 );
@@ -169,14 +170,16 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
           } else {
             if (_selectedSectionFilter == null) {
               final entries = routineState.entries
-                  .where((e) => e.key.startsWith('${cls.id}_') || e.key == cls.id)
+                  .where(
+                    (e) => e.key.startsWith('${cls.id}_') || e.key == cls.id,
+                  )
                   .expand((e) => e.value)
                   .toList();
               if (entries.isNotEmpty) {
                 groups.add(
                   ClassSectionRoutineGroup(
                     className: cls.name,
-                    sectionName: 'All Sections',
+                    sectionName: AppLocalizations.of(context)!.allSections,
                     entries: entries,
                   ),
                 );
@@ -189,7 +192,9 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
           for (final entry in routineState.entries) {
             if (entry.value.isNotEmpty) {
               final firstItem = entry.value.first;
-              final cName = firstItem.classEntity?.name ?? 'Class';
+              final cName =
+                  firstItem.classEntity?.name ??
+                  AppLocalizations.of(context)!.className;
               final sName = firstItem.sectionEntity?.name ?? 'Section';
               groups.add(
                 ClassSectionRoutineGroup(
@@ -205,10 +210,12 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
         // ── SPECIFIC CLASS SELECTED ──────────────────────────────────────────
         final cls = classes.firstWhere(
           (c) => c.id == _selectedClassId,
-          orElse: () => ClassRoom(id: _selectedClassId!, name: 'Selected Class'),
+          orElse: () =>
+              ClassRoom(id: _selectedClassId!, name: 'Selected Class'),
         );
-        final classSections =
-            sections.where((s) => s.classId == _selectedClassId).toList();
+        final classSections = sections
+            .where((s) => s.classId == _selectedClassId)
+            .toList();
 
         if (_selectedSectionFilter != null &&
             _selectedSectionFilter!.isNotEmpty) {
@@ -225,7 +232,8 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
           );
 
           final key = '${_selectedClassId}_${sec.id}';
-          final entries = routineState[key] ??
+          final entries =
+              routineState[key] ??
               routineState.entries
                   .where((e) => e.key == key)
                   .expand((e) => e.value)
@@ -263,20 +271,20 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
               groups.add(
                 ClassSectionRoutineGroup(
                   className: cls.name,
-                  sectionName: 'All Sections',
+                  sectionName: AppLocalizations.of(context)!.allSections,
                   entries: allEntries,
                 ),
               );
             }
           } else {
             final allEntries = routineState.entries
-                  .where((e) => e.key.startsWith('${_selectedClassId}_'))
-                  .expand((e) => e.value)
-                  .toList();
+                .where((e) => e.key.startsWith('${_selectedClassId}_'))
+                .expand((e) => e.value)
+                .toList();
             groups.add(
               ClassSectionRoutineGroup(
                 className: cls.name,
-                sectionName: 'All Sections',
+                sectionName: AppLocalizations.of(context)!.allSections,
                 entries: allEntries,
               ),
             );
@@ -340,8 +348,12 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
   }
 
   String _getFilename() {
-    final classPart = _selectedClassId == null ? 'All_Classes' : 'Class_$_selectedClassId';
-    final secPart = _selectedSectionFilter == null ? 'All_Sections' : 'Section_$_selectedSectionFilter';
+    final classPart = _selectedClassId == null
+        ? 'All_Classes'
+        : 'Class_$_selectedClassId';
+    final secPart = _selectedSectionFilter == null
+        ? 'All_Sections'
+        : 'Section_$_selectedSectionFilter';
     final timestamp = DateFormat('yyyyMMdd_HHmm').format(DateTime.now());
     return 'Routine_${classPart}_${secPart}_$timestamp.pdf';
   }
@@ -367,8 +379,8 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
             Text(
               _selectedClassId == null
                   ? (_selectedSectionFilter != null
-                      ? '${_selectedSectionFilter!} Routine (All Classes)'
-                      : 'All Classes Routine')
+                        ? '${_selectedSectionFilter!} Routine (All Classes)'
+                        : 'All Classes Routine')
                   : 'Class Routine Preview',
               style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
@@ -411,7 +423,9 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CircularProgressIndicator(color: AppColors.primaryAdmin),
+                        CircularProgressIndicator(
+                          color: AppColors.primaryAdmin,
+                        ),
                         SizedBox(height: 16),
                         Text(
                           'Generating Routine PDF...',
@@ -467,7 +481,9 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                                 setState(() => _currentPage = page);
                               },
                               onDocumentLoaded: (document) {
-                                setState(() => _pageCount = document.pagesCount);
+                                setState(
+                                  () => _pageCount = document.pagesCount,
+                                );
                               },
                             ),
                           ),
@@ -530,7 +546,10 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                 onTap: _resetZoom,
                 borderRadius: BorderRadius.circular(6),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 4,
+                  ),
                   child: Text(
                     '${(_currentZoomLevel * 100).toInt()}%',
                     style: const TextStyle(
@@ -574,8 +593,9 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                 tooltip: 'Reset Zoom (100%)',
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
-                onPressed:
-                    (_currentZoomLevel - 1.0).abs() > 0.05 ? _resetZoom : null,
+                onPressed: (_currentZoomLevel - 1.0).abs() > 0.05
+                    ? _resetZoom
+                    : null,
               ),
             ],
           ),
@@ -664,29 +684,27 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
     );
   }
 
-  Widget _buildFilterBar(
-    List<ClassRoom> classes,
-    List<Section> allSections,
-  ) {
+  Widget _buildFilterBar(List<ClassRoom> classes, List<Section> allSections) {
     final List<DropdownMenuItem<String?>> sectionDropdownItems = [];
 
     sectionDropdownItems.add(
-      const DropdownMenuItem<String?>(
+      DropdownMenuItem<String?>(
         value: null,
         child: Text(
-          'All Sections',
+          AppLocalizations.of(context)!.allSections,
           style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
         ),
       ),
     );
 
     if (_selectedClassId == null) {
-      final distinctSectionNames = allSections
-          .map((s) => s.name.trim())
-          .where((name) => name.isNotEmpty)
-          .toSet()
-          .toList()
-        ..sort();
+      final distinctSectionNames =
+          allSections
+              .map((s) => s.name.trim())
+              .where((name) => name.isNotEmpty)
+              .toSet()
+              .toList()
+            ..sort();
 
       for (final secName in distinctSectionNames) {
         sectionDropdownItems.add(
@@ -725,8 +743,8 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
     final validSectionValues = sectionDropdownItems.map((i) => i.value).toSet();
     final effectiveSectionValue =
         validSectionValues.contains(_selectedSectionFilter)
-            ? _selectedSectionFilter
-            : null;
+        ? _selectedSectionFilter
+        : null;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

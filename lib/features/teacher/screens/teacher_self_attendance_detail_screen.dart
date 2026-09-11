@@ -160,7 +160,7 @@ class _TeacherSelfAttendanceDetailScreenState
                   ),
                 ),
               ),
-              value: _selectedTeacherId,
+              initialValue: _selectedTeacherId,
               items: [
                 DropdownMenuItem(
                   value: null,

@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
@@ -203,7 +204,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
         children: [
           Expanded(
             child: _buildDropdown<String?>(
-              label: 'Class',
+              label: AppLocalizations.of(context)!.className,
               value: uniqueClasses.containsKey(_selectedClassId) ? _selectedClassId : null,
               items: [
                 if (!uniqueClasses.containsKey(_selectedClassId) && _selectedClassId != null)
@@ -234,7 +235,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                 items: [
                   const DropdownMenuItem(
                     value: null,
-                    child: Text('All Sections'),
+                    child: Text(AppLocalizations.of(context)!.allSections),
                   ),
                   if (!uniqueSections.containsKey(_selectedSectionId) && _selectedSectionId != null)
                     DropdownMenuItem(value: _selectedSectionId, child: const Text('Unknown Section')),
@@ -525,7 +526,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
             pw.SizedBox(height: 8),
             _buildInfoRow('Student ID', student.rollId),
             pw.SizedBox(height: 8),
-            _buildInfoRow('Class', className),
+            _buildInfoRow(AppLocalizations.of(context)!.className, className),
             pw.SizedBox(height: 24),
 
             // TABLE
@@ -539,7 +540,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
               ),
               cellStyle: const pw.TextStyle(fontSize: 10),
               cellAlignment: pw.Alignment.center,
-              headers: ['Exam', 'Class', 'GPA', 'Grade', 'Remarks'],
+              headers: ['Exam', AppLocalizations.of(context)!.className, 'GPA', 'Grade', 'Remarks'],
               data: [
                 ...studentExamsWithResults.entries.map((entry) {
                   final exam = entry.key;

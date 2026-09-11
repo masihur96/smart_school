@@ -124,10 +124,10 @@ class DataProvider {
     } on DioException catch (exception) {
       if (kDebugMode) {
         log("DioException: $exception");
-        log("Dio Url: ${url}");
-        log("Dio query: ${query}");
-        log("Dio data: ${data}");
-        log("Dio header: ${header}");
+        log("Dio Url: $url");
+        log("Dio query: $query");
+        log("Dio data: $data");
+        log("Dio header: $header");
       }
       return exception.response;
     }

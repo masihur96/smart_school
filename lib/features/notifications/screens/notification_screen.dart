@@ -41,7 +41,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
               if (notifier.unreadCount == 0) return const SizedBox.shrink();
               return IconButton(
                 icon: const Icon(Icons.checklist),
-                tooltip: 'Mark all as read',
+                tooltip: AppLocalizations.of(context)!.markAllAsRead,
                 onPressed: () => notifier.markAllAsRead(),
               );
             },
@@ -88,7 +88,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'No notifications yet',
+                    AppLocalizations.of(context)!.noNotificationsYet,
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.grey[600],
@@ -124,12 +124,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
       //         "This is a test notification from the app",
       //       );
       //       ScaffoldMessenger.of(context).showSnackBar(
-      //         const SnackBar(content: Text('Test notification sent!')),
+      //         const SnackBar(content: Text(AppLocalizations.of(context)!.testNotificationSent)),
       //       );
       //     }
       //   },
       //   child: const Icon(Icons.send),
-      //   tooltip: 'Send Test Notification',
+      //   tooltip: AppLocalizations.of(context)!.sendTestNotification,
       // ),
     );
   }

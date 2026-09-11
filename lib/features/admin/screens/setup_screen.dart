@@ -1369,7 +1369,7 @@ void _showAddEditSectionDialog(BuildContext context, {Section? existing}) {
         mainAxisSize: MainAxisSize.min,
         children: [
           DropdownButtonFormField<String>(
-            value: selectedClassId,
+            initialValue: selectedClassId,
             decoration: _inputDec(l10n.selectClass, icon: Icons.class_outlined),
             items: classes
                 .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
@@ -1443,7 +1443,7 @@ void _showAddEditSubjectDialog(BuildContext context, {Subject? existing}) {
         mainAxisSize: MainAxisSize.min,
         children: [
           DropdownButtonFormField<String>(
-            value: selectedClassId,
+            initialValue: selectedClassId,
             decoration: _inputDec(l10n.selectClass, icon: Icons.class_outlined),
             items: classes
                 .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))

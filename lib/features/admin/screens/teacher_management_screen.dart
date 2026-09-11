@@ -1,11 +1,10 @@
-import 'package:smart_school/core/widgets/zoomable_avatar.dart';
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
 import 'package:smart_school/features/admin/providers/student_provider.dart';
 import 'package:smart_school/features/admin/screens/add_edit_teacher_screen.dart';
 import 'package:smart_school/features/admin/screens/admin_pricing_plan_screen.dart';
@@ -19,7 +18,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/services/geocoding_service.dart';
 import '../providers/setup_provider.dart';
 import '../providers/teacher_provider.dart';
-
 
 class TeacherManagementScreen extends StatefulWidget {
   const TeacherManagementScreen({super.key});
@@ -178,7 +176,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         decoration: InputDecoration(
-                          labelText: 'Status',
+                          labelText: AppLocalizations.of(context)!.status,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 8,
@@ -187,7 +185,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        value: _selectedStatus,
+                        initialValue: _selectedStatus,
                         items: ['All', 'Active', 'Inactive']
                             .map(
                               (s) => DropdownMenuItem(value: s, child: Text(s)),
@@ -252,7 +250,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  'No teachers found',
+                                  AppLocalizations.of(context)!.noTeachersFound,
                                   style: TextStyle(
                                     color: Colors.grey.shade600,
                                     fontSize: 16,
@@ -356,7 +354,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
     final user = teacher.user;
     final teacherName = user?.name.isNotEmpty == true ? user!.name : 'No Name';
     final teacherPhone = user?.phone?.trim() ?? '';
-    final email = user?.email?.trim() ?? '';
+    final email = user?.email.trim() ?? '';
     final lat = teacher.lat ?? user?.lat;
     final lon = teacher.lon ?? user?.lon;
     final hasLatLon = lat != null && lon != null;
@@ -746,7 +744,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '$subjectCount ${subjectCount == 1 ? "Subject" : "Subjects"}',
+                              '$subjectCount ${subjectCount == 1 ? AppLocalizations.of(context)!.subjectName : "Subjects"}',
                               style: TextStyle(
                                 fontSize: 11,
                                 color: Colors.indigo.shade700,
@@ -889,8 +887,6 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
     );
   }
 
-
-
   void _showTeacherDetails(BuildContext context, Teacher teacher) {
     final user = teacher.user;
 
@@ -1012,8 +1008,8 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    'Close',
+                  child: Text(
+                    AppLocalizations.of(context)!.close,
                     style: TextStyle(color: Colors.white),
                   ),
                 ),

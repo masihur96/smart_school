@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_school/core/constants/api_path.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../configs/network/data_provider.dart';
 import '../../../models/school_models.dart';
@@ -217,7 +218,7 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
       if (_selectedSectionId != null && _selectedSectionId!.isNotEmpty) {
         if (s.sectionId != _selectedSectionId) return false;
       } else if (_selectedSectionId == '') {
-        if (s.sectionId != null && s.sectionId!.isNotEmpty) return false;
+        if (s.sectionId.isNotEmpty) return false;
       }
 
       if (_searchQuery.isNotEmpty) {
@@ -230,7 +231,6 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
     }).toList();
 
     return Scaffold(
-
       body: NestedScrollView(
         headerSliverBuilder: (ctx, _) => [
           SliverAppBar(
@@ -337,7 +337,6 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
                           ],
                         ),
                         child: DropdownButtonHideUnderline(
-
                           child: DropdownButton<String?>(
                             isExpanded: true,
                             dropdownColor: Colors.white,
@@ -363,9 +362,11 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
                               });
                             },
                             items: [
-                              const DropdownMenuItem(
+                              DropdownMenuItem(
                                 value: null,
-                                child: Text('All Sections'),
+                                child: Text(
+                                  AppLocalizations.of(context)!.allSections,
+                                ),
                               ),
                               const DropdownMenuItem(
                                 value: '',
@@ -566,16 +567,12 @@ class _StatChip extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, ),
+        Icon(icon, size: 16),
         const SizedBox(width: 4),
         Text('$label: ', style: TextStyle(fontSize: 12)),
         Text(
           value,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-
-          ),
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -684,7 +681,6 @@ class _StudentTile extends StatelessWidget {
                     child: Text(
                       initial,
                       style: TextStyle(
-
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
@@ -818,11 +814,7 @@ class _MiniChip extends StatelessWidget {
           const SizedBox(width: 3),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 10,
-
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -993,12 +985,10 @@ class _AssignStudentsSheetState extends State<_AssignStudentsSheet> {
             .where((s) => !s.isDeleted)
             .toList();
 
-        final unassigned = all
-            .where((s) {
-              final classIds = s.user?.classIds ?? [];
-              return !classIds.contains(widget.classRoom.id);
-            })
-            .toList();
+        final unassigned = all.where((s) {
+          final classIds = s.user?.classIds ?? [];
+          return !classIds.contains(widget.classRoom.id);
+        }).toList();
 
         setState(() {
           _unassigned = unassigned;
@@ -1394,7 +1384,6 @@ class _MultiSelectToggleBtn extends StatelessWidget {
     required this.active,
     required this.selectedCount,
     required this.onToggle,
-    this.color = _kPrimary,
   });
 
   @override

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
-import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../admin/providers/notice_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 
@@ -131,8 +132,8 @@ class _TeacherNoticeScreenState extends State<TeacherNoticeScreen> {
                             color: Colors.red,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
-                            'URGENT',
+                          child: Text(
+                            AppLocalizations.of(context)!.urgentLabel,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 10,
@@ -177,16 +178,24 @@ class _TeacherNoticeScreenState extends State<TeacherNoticeScreen> {
                               }
                               if (!launched && context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Could not open attachment'),
+                                  SnackBar(
+                                    content: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.couldNotOpenAttachment,
+                                    ),
                                   ),
                                 );
                               }
                             } catch (e) {
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Could not open attachment'),
+                                  SnackBar(
+                                    content: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.couldNotOpenAttachment,
+                                    ),
                                   ),
                                 );
                               }
@@ -252,16 +261,16 @@ class _TeacherNoticeScreenState extends State<TeacherNoticeScreen> {
             color: Colors.indigo.withOpacity(0.1),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Keep an eye out!',
+          Text(
+            AppLocalizations.of(context)!.keepAnEyeOut,
             style: TextStyle(
               fontSize: 18,
               color: Colors.grey,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const Text(
-            'New notices will appear here.',
+          Text(
+            AppLocalizations.of(context)!.newNoticesWillAppearHere,
             style: TextStyle(color: Colors.grey),
           ),
         ],

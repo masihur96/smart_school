@@ -721,7 +721,7 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
                 ),
                 const SizedBox(height: 16),
                 _buildTextField(
-                  'Description',
+                  AppLocalizations.of(context)!.description,
                   _descController,
                   Icons.description_outlined,
                 ),

@@ -229,7 +229,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                             ),
                           ),
                         ],
-                        value: _selectedClassId,
+                        initialValue: _selectedClassId,
                         onChanged: (val) {
                           setState(() {
                             _selectedClassId = val;
@@ -268,7 +268,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                 ),
                               ),
                         ],
-                        value: _selectedSectionId,
+                        initialValue: _selectedSectionId,
                         onChanged: (val) {
                           setState(() => _selectedSectionId = val);
                           _applyFilters();
@@ -313,7 +313,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                             ),
                           ),
                         ],
-                        value: _selectedStatus,
+                        initialValue: _selectedStatus,
                         onChanged: (val) {
                           setState(() => _selectedStatus = val);
                           _applyFilters();

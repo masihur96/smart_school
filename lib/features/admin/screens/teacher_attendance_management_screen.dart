@@ -721,7 +721,7 @@ class _CreateAttendanceBottomSheetState
                     filled: true,
                     fillColor: Colors.grey[50],
                   ),
-                  value: _selectedTeacher,
+                  initialValue: _selectedTeacher,
                   items: teachersProvider.teachers.map((Teacher teacher) {
                     return DropdownMenuItem<Teacher>(
                       value: teacher,
@@ -744,7 +744,7 @@ class _CreateAttendanceBottomSheetState
                   filled: true,
                   fillColor: Colors.grey[50],
                 ),
-                value: _selectedStatus,
+                initialValue: _selectedStatus,
                 items: _statuses.map((String status) {
                   return DropdownMenuItem<String>(
                     value: status,

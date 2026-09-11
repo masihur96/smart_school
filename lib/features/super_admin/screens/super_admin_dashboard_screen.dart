@@ -586,7 +586,7 @@ class _SuperAdminDashboardContentState
         subtitle: Text(subtitle, style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
         value: value,
         onChanged: (val) {},
-        activeColor: color,
+        activeThumbColor: color,
       ),
     );
   }

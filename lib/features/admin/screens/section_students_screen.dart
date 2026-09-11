@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -1219,7 +1220,7 @@ class _AssignSectionStudentsSheetState
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           isExpanded: true,
-                          hint: Text('All Sections', style: TextStyle(color: _kTextMid, fontSize: 13)),
+                          hint: Text(AppLocalizations.of(context)!.allSections, style: TextStyle(color: _kTextMid, fontSize: 13)),
                           value: _filterSectionId,
                           icon: const Icon(Icons.arrow_drop_down, color: _kPrimary),
                           onChanged: _filterClassId == null ? null : (val) {
@@ -1231,7 +1232,7 @@ class _AssignSectionStudentsSheetState
                           items: [
                             DropdownMenuItem<String>(
                               value: null,
-                              child: const Text('All Sections', style: TextStyle(fontSize: 13)),
+                              child: Text(AppLocalizations.of(context)!.allSections, style: TextStyle(fontSize: 13)),
                             ),
                             ...availableSections.map((s) => DropdownMenuItem(
                               value: s.id,

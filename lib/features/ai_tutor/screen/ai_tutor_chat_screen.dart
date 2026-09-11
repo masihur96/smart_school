@@ -321,7 +321,7 @@ $text
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "AI Tutor",
+                    AppLocalizations.of(context)!.aiTutor,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
@@ -354,7 +354,7 @@ $text
                   });
                   if (!value) _stopSpeaking();
                 },
-                activeColor: AppColors.white,
+                activeThumbColor: AppColors.white,
               ),
             ],
           ),

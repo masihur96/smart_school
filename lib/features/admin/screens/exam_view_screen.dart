@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/school_models.dart';
 import '../../../models/student_model.dart';
@@ -90,8 +91,9 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
         for (final mark in marks) {
           // The API returns a student object nested inside each mark record
           final student = mark['student'];
-          final String? studentId =
-              student != null ? (student['id']?.toString()) : null;
+          final String? studentId = student != null
+              ? (student['id']?.toString())
+              : null;
           if (studentId == null) continue;
 
           final double marksObtained =
@@ -100,14 +102,16 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
               (mark['totalMarks'] as num?)?.toDouble() ?? 100;
 
           if (marksObtained >= 0) {
-            _getMarksController(studentId).text =
-                marksObtained == marksObtained.toInt()
-                    ? marksObtained.toInt().toString()
-                    : marksObtained.toString();
-            _getTotalMarksController(studentId).text =
-                totalMarks == totalMarks.toInt()
-                    ? totalMarks.toInt().toString()
-                    : totalMarks.toString();
+            _getMarksController(
+              studentId,
+            ).text = marksObtained == marksObtained.toInt()
+                ? marksObtained.toInt().toString()
+                : marksObtained.toString();
+            _getTotalMarksController(
+              studentId,
+            ).text = totalMarks == totalMarks.toInt()
+                ? totalMarks.toInt().toString()
+                : totalMarks.toString();
           }
         }
       });
@@ -164,7 +168,6 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
       }
     });
   }
-
 
   @override
   void dispose() {
@@ -324,8 +327,8 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
             if (widget.exam.description != null &&
                 widget.exam.description!.isNotEmpty) ...[
               const Divider(height: 24),
-              const Text(
-                'Description',
+              Text(
+                AppLocalizations.of(context)!.description,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -435,7 +438,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
               children: [
                 Expanded(
                   child: _buildDropdownField<String>(
-                    label: 'Class',
+                    label: AppLocalizations.of(context)!.className,
                     value: _selectedClassId,
                     items: uniqueClasses.entries.map((e) {
                       return DropdownMenuItem(
@@ -471,9 +474,11 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
                       label: 'Section',
                       value: _selectedSectionId,
                       items: [
-                        const DropdownMenuItem<String?>(
+                        DropdownMenuItem<String?>(
                           value: null,
-                          child: Text('All Sections'),
+                          child: Text(
+                            AppLocalizations.of(context)!.allSections,
+                          ),
                         ),
                         ...uniqueSections.entries.map((e) {
                           return DropdownMenuItem(
@@ -504,7 +509,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildDropdownField<ExamAssignment>(
-                    label: 'Subject',
+                    label: AppLocalizations.of(context)!.subjectName,
                     value: _selectedAssignment,
                     items: filteredAssignments.map((a) {
                       return DropdownMenuItem(
@@ -607,7 +612,7 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'No students found',
+                AppLocalizations.of(context)!.noStudentsFound,
                 style: TextStyle(color: Colors.grey.shade500, fontSize: 16),
               ),
             ],

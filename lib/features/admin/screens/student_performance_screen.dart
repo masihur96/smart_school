@@ -1,11 +1,11 @@
-import 'package:smart_school/core/widgets/zoomable_avatar.dart';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
 import 'package:smart_school/features/admin/models/admin_dashboard_model.dart';
 import 'package:smart_school/features/admin/providers/student_performance_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 class StudentPerformanceScreen extends StatefulWidget {
   const StudentPerformanceScreen({super.key});
@@ -504,12 +504,12 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                 _dropdownChip<String?>(
                   icon: Icons.group_work_rounded,
                   color: const Color(0xFFF59E0B),
-                  hint: 'All Sections',
+                  hint: AppLocalizations.of(context)!.allSections,
                   value: provider.filterSection,
                   items: [
-                    const DropdownMenuItem<String?>(
+                    DropdownMenuItem<String?>(
                       value: null,
-                      child: Text('All Sections'),
+                      child: Text(AppLocalizations.of(context)!.allSections),
                     ),
                     ...sections.map(
                       (s) => DropdownMenuItem(value: s, child: Text(s)),
@@ -1125,7 +1125,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'No students found',
+                    AppLocalizations.of(context)!.noStudentsFound,
                     style: TextStyle(
                       color: Colors.grey.shade500,
                       fontSize: 16,
@@ -1559,7 +1559,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
           ElevatedButton.icon(
             onPressed: () => provider.fetchPerformances(),
             icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
+            label: Text(AppLocalizations.of(context)!.retry),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryAdmin,
               foregroundColor: Colors.white,

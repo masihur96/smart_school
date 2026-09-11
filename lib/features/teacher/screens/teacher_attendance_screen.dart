@@ -126,7 +126,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                 if (_hasActiveFilters)
                   IconButton(
                     icon: const Icon(Icons.filter_alt_off),
-                    tooltip: 'Clear Filters',
+                    tooltip: AppLocalizations.of(context)!.clearFilters,
                     onPressed: _clearFilters,
                   ),
               ],
@@ -307,7 +307,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                 onSubmitted: (_) => _fetchData(),
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
-                  hintText: 'Search by student name...',
+                  hintText: AppLocalizations.of(context)!.searchByStudentName,
                   hintStyle: TextStyle(color: Colors.grey.shade400),
                   prefixIcon: Icon(
                     CupertinoIcons.search,
@@ -339,7 +339,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                 children: [
                   Expanded(
                     child: _buildDropdown<String>(
-                      hint: 'Class',
+                      hint: AppLocalizations.of(context)!.className,
                       value: _selectedClassId,
                       icon: Icons.class_outlined,
                       items: classProvider.classes
@@ -589,8 +589,8 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'No Attendance Records',
+            Text(
+              AppLocalizations.of(context)!.noAttendanceRecords,
               style: TextStyle(
                 color: Colors.black87,
                 fontSize: 18,
@@ -608,7 +608,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
               ElevatedButton.icon(
                 onPressed: _clearFilters,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Clear Filters'),
+                label: Text(AppLocalizations.of(context)!.clearFilters),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryTeacher,
                   foregroundColor: Colors.white,
@@ -725,7 +725,8 @@ class _AttendanceRecordCard extends StatelessWidget {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                record.subjectInfo?.name ?? "Subject",
+                                record.subjectInfo?.name ??
+                                    AppLocalizations.of(context)!.subjectName,
                                 style: TextStyle(
                                   color: Colors.grey.shade700,
                                   fontSize: 13,

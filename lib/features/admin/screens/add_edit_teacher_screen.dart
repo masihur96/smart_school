@@ -516,7 +516,7 @@ class _AddEditTeacherScreenState extends State<AddEditTeacherScreen> {
                     const SizedBox(height: 16),
                     // Role Selector
                     DropdownButtonFormField<String>(
-                      value: _selectedRole,
+                      initialValue: _selectedRole,
                       decoration: InputDecoration(
                         labelText: 'Role',
                         prefixIcon: const Icon(Icons.admin_panel_settings_outlined),

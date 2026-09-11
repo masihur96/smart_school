@@ -123,7 +123,7 @@ class OnlineClass {
     List<OnlineClassParticipant> parsedParticipants = [];
     final partsList = json['participants'] ?? json['participantList'] ?? json['participant'] ?? json['Participants'];
     if (partsList != null && partsList is List) {
-      parsedParticipants = (partsList as List)
+      parsedParticipants = (partsList)
           .map((e) => OnlineClassParticipant.fromJson(e as Map<String, dynamic>))
           .toList();
     }

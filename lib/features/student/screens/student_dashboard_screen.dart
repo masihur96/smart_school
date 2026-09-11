@@ -264,6 +264,25 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
           ),
           scrollBehavior: const BottomBarScrollBehavior(hideOnScroll: true),
           showIcon: false,
+          body: TabBarView(
+            controller: _tabController,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              _buildDashboardOverview(context, user, l10n),
+              if (_visitedTabs.contains(1))
+                const StudentAttendanceScreen(hideAppBar: true)
+              else
+                const SizedBox(),
+              if (_visitedTabs.contains(2))
+                const StudentResultScreen(hideAppBar: true)
+              else
+                const SizedBox(),
+              if (_visitedTabs.contains(3))
+                const StudentHomeworkScreen(hideAppBar: true)
+              else
+                const SizedBox(),
+            ],
+          ),
           child: TabBar(
             controller: _tabController,
             indicatorColor: AppColors.primaryStudent,
@@ -292,25 +311,6 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                 icon: const Icon(Icons.assignment_outlined),
                 text: l10n.homework,
               ),
-            ],
-          ),
-          body: TabBarView(
-            controller: _tabController,
-            physics: const NeverScrollableScrollPhysics(),
-            children: [
-              _buildDashboardOverview(context, user, l10n),
-              if (_visitedTabs.contains(1))
-                const StudentAttendanceScreen(hideAppBar: true)
-              else
-                const SizedBox(),
-              if (_visitedTabs.contains(2))
-                const StudentResultScreen(hideAppBar: true)
-              else
-                const SizedBox(),
-              if (_visitedTabs.contains(3))
-                const StudentHomeworkScreen(hideAppBar: true)
-              else
-                const SizedBox(),
             ],
           ),
         ),
@@ -386,7 +386,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildSectionHeader(
-                    "${l10n.attendance}",
+                    l10n.attendance,
                     onSeeAll: () {
                       _tabController.animateTo(1);
                     },
@@ -585,7 +585,9 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
           TextButton(
             onPressed: onSeeAll,
             child: Text(
-              'See All', // Modify with l10n later if needed
+              AppLocalizations.of(
+                context,
+              )!.seeAll, // Modify with l10n later if needed
               style: TextStyle(color: AppColors.primaryStudent),
             ),
           ),
@@ -614,23 +616,23 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
 
               const SizedBox(height: 20),
 
-              const Text(
-                "AI Tutor",
+              Text(
+                AppLocalizations.of(context)!.aiTutor,
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 8),
 
               Text(
-                "Your smart learning companion",
+                AppLocalizations.of(context)!.yourSmartLearningCompanion,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
               ),
 
               const SizedBox(height: 20),
 
-              const Text(
-                "Need help with homework, exam preparation, or understanding a topic? Ask questions anytime and get instant academic support.",
+              Text(
+                AppLocalizations.of(context)!.aiTutorDescription,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 15, height: 1.5),
               ),
@@ -644,20 +646,44 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                   color: Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Column(
+                child: Column(
                   children: [
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.check_circle,
                           color: Colors.deepPurple,
                           size: 18,
                         ),
-                        SizedBox(width: 8),
-                        Expanded(child: Text("Homework & Assignment Help")),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            AppLocalizations.of(
+                              context,
+                            )!.homeworkAndAssignmentHelp,
+                          ),
+                        ),
                       ],
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.check_circle,
+                          color: Colors.deepPurple,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            AppLocalizations.of(
+                              context,
+                            )!.examAndQuizPreparation,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
                     Row(
                       children: [
                         Icon(
@@ -666,19 +692,13 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                           size: 18,
                         ),
                         SizedBox(width: 8),
-                        Expanded(child: Text("Exam & Quiz Preparation")),
-                      ],
-                    ),
-                    SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          color: Colors.deepPurple,
-                          size: 18,
+                        Expanded(
+                          child: Text(
+                            AppLocalizations.of(
+                              context,
+                            )!.instantAnswersAndExplanations,
+                          ),
                         ),
-                        SizedBox(width: 8),
-                        Expanded(child: Text("Instant Answers & Explanations")),
                       ],
                     ),
                   ],
@@ -695,7 +715,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size.fromHeight(48),
                       ),
-                      child: const Text("Later"),
+                      child: Text(AppLocalizations.of(context)!.later),
                     ),
                   ),
 
@@ -714,7 +734,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                         );
                       },
                       icon: const Icon(Icons.chat_bubble_outline),
-                      label: const Text("Start"),
+                      label: Text(AppLocalizations.of(context)!.start),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepPurple,
                         foregroundColor: Colors.white,
@@ -938,7 +958,8 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                           ),
                           const Spacer(),
                           Text(
-                            record.subjectInfo?.name ?? 'Subject',
+                            record.subjectInfo?.name ??
+                                AppLocalizations.of(context)!.subjectName,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
@@ -999,7 +1020,9 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
 
   Widget _buildHomeworkCard(BuildContext context, StudentHomework hwData) {
     var homework = hwData.homework;
-    var subject = homework?.subjectInfo?.name ?? 'Subject';
+    var subject =
+        homework?.subjectInfo?.name ??
+        AppLocalizations.of(context)!.subjectName;
     var isDone = hwData.status == 'done';
 
     return Card(
@@ -1071,7 +1094,9 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${homework?.dueDate != null ? DateFormat('dd MMM yyyy').format(homework!.dueDate) : "N/A"}',
+                    homework?.dueDate != null
+                        ? DateFormat('dd MMM yyyy').format(homework!.dueDate)
+                        : "N/A",
                     style: TextStyle(
                       fontSize: 11,
                       color: Colors.red.shade400,
@@ -1091,8 +1116,9 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
     BuildContext context,
     MyRecentExamWithResult examData,
   ) {
-    if (examData.exam == null || examData.result == null)
+    if (examData.exam == null || examData.result == null) {
       return const SizedBox();
+    }
 
     final exam = examData.exam!;
     final result = examData.result!;
@@ -1251,7 +1277,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                   ),
                   if (isNew)
                     Text(
-                      'New',
+                      AppLocalizations.of(context)!.newLabel,
                       style: TextStyle(
                         color: Colors.blue.shade700,
                         fontSize: 10,
@@ -1332,15 +1358,19 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                     } catch (_) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Could not open attachment'),
+                          SnackBar(
+                            content: Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.couldNotOpenAttachment,
+                            ),
                           ),
                         );
                       }
                     }
                   },
                   icon: const Icon(Icons.attachment),
-                  label: const Text('View Attachment'),
+                  label: Text(AppLocalizations.of(context)!.viewAttachment),
                 ),
               ],
             ],
@@ -1349,7 +1379,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(context)!.close),
           ),
         ],
       ),
@@ -1459,8 +1489,8 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                           minimumSize: const Size(0, 28),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: const Text(
-                          'Join',
+                        child: Text(
+                          AppLocalizations.of(context)!.join,
                           style: TextStyle(fontSize: 12),
                         ),
                       ),

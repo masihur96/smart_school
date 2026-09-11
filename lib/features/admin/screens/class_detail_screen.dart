@@ -344,8 +344,8 @@ class _AttendanceTab extends StatelessWidget {
             children: [
               const Icon(Icons.calendar_today, size: 18),
               const SizedBox(width: 8),
-              const Text(
-                'Date:',
+              Text(
+                AppLocalizations.of(context)!.dateLabel,
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(width: 8),
@@ -621,7 +621,7 @@ class _AttendanceToggle extends StatelessWidget {
       children: [
         _ToggleChip(
           label: 'P',
-          tooltip: 'Present',
+          tooltip: AppLocalizations.of(context)!.present,
           active: current == AttendanceStatus.present,
           activeColor: Colors.green,
           onTap: () => onChanged(AttendanceStatus.present),
@@ -629,15 +629,15 @@ class _AttendanceToggle extends StatelessWidget {
         const SizedBox(width: 4),
         _ToggleChip(
           label: 'A',
-          tooltip: 'Absent',
+          tooltip: AppLocalizations.of(context)!.absent,
           active: current == AttendanceStatus.absent,
           activeColor: Colors.red,
           onTap: () => onChanged(AttendanceStatus.absent),
         ),
         const SizedBox(width: 4),
         _ToggleChip(
-          label: 'Late',
-          tooltip: 'Late',
+          label: AppLocalizations.of(context)!.late,
+          tooltip: AppLocalizations.of(context)!.late,
           active: current == AttendanceStatus.late,
           activeColor: Colors.blue,
           onTap: () => onChanged(AttendanceStatus.late),
@@ -645,7 +645,7 @@ class _AttendanceToggle extends StatelessWidget {
         const SizedBox(width: 4),
         _ToggleChip(
           label: 'L',
-          tooltip: 'Leave',
+          tooltip: AppLocalizations.of(context)!.leave,
           active: current == AttendanceStatus.leave,
           activeColor: Colors.orange,
           onTap: () => onChanged(AttendanceStatus.leave),
@@ -734,9 +734,9 @@ class _HomeworkTab extends StatelessWidget {
         if (isLoading)
           _buildShimmerLoading()
         else if (homeworkList.isEmpty)
-          const _EmptyState(
+          _EmptyState(
             icon: Icons.assignment_outlined,
-            message: 'No homework assigned yet.\nTap + to add one.',
+            message: AppLocalizations.of(context)!.noHomeworkAssignedYet,
           )
         else
           ListView.separated(
@@ -771,8 +771,8 @@ class _HomeworkTab extends StatelessWidget {
             onPressed: () => _showAddSheet(context),
             backgroundColor: AppColors.primaryAdmin,
             icon: const Icon(Icons.add, color: Colors.white),
-            label: const Text(
-              'Add Homework',
+            label: Text(
+              AppLocalizations.of(context)!.addHomework,
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -1074,7 +1074,7 @@ class _HomeworkCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  '${DateFormat('MMM dd, yyyy').format(homework.dueDate)}',
+                  DateFormat('MMM dd, yyyy').format(homework.dueDate),
                   style: TextStyle(
                     fontSize: 12,
                     color: isPast ? Colors.red[400] : Colors.grey[600],
@@ -1282,20 +1282,22 @@ class _AddHomeworkSheetState extends State<_AddHomeworkSheet> {
                   ),
                 ),
                 Text(
-                  widget.homework == null ? 'Add Homework' : 'Edit Homework',
+                  widget.homework == null
+                      ? AppLocalizations.of(context)!.addHomework
+                      : 'Edit Homework',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
 
                 // // Subject dropdown
                 // DropdownButtonFormField<String>(
-                //   decoration: _inputDeco('Subject'),
+                //   decoration: _inputDeco(AppLocalizations.of(context)!.subjectName),
                 //   value: _selectedSubjectId,
                 //   items: subjects.isEmpty
                 //       ? [
                 //           const DropdownMenuItem(
                 //             value: '__none__',
-                //             child: Text('No subjects for this class'),
+                //             child: Text(AppLocalizations.of(context)!.noSubjectsForThisClass),
                 //           ),
                 //         ]
                 //       : subjects
@@ -1485,7 +1487,7 @@ class _ViewHomeworkSheet extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Due Date',
+                      AppLocalizations.of(context)!.dueDate,
                       style: TextStyle(color: Colors.grey[500], fontSize: 11),
                     ),
                     Text(
@@ -1503,8 +1505,8 @@ class _ViewHomeworkSheet extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Description Section
-            const Text(
-              'Description',
+            Text(
+              AppLocalizations.of(context)!.description,
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -1533,8 +1535,8 @@ class _ViewHomeworkSheet extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: const Text(
-                  'Close',
+                child: Text(
+                  AppLocalizations.of(context)!.close,
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                 ),
               ),
@@ -1601,10 +1603,8 @@ class _PeriodSelector extends StatelessWidget {
 
   const _PeriodSelector({
     required this.classId,
-    this.sectionId,
     required this.subjectId,
     required this.selectedDate,
-    this.selectedRoutineId,
     required this.onChanged,
   });
 

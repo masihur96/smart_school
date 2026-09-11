@@ -7,6 +7,7 @@ import 'package:smart_school/features/admin/providers/student_provider.dart';
 import 'package:smart_school/features/admin/providers/teacher_provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/online_class_model.dart';
 import 'package:smart_school/services/notification_service.dart';
 
@@ -215,8 +216,8 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
           _selectedTime == null ||
           _selectedEndTime == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please select date, start time, and end time'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.pleaseSelectDateTime),
           ),
         );
         return;
@@ -276,11 +277,15 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
 
         if (success && mounted) {
           if (participants != null && participants.isNotEmpty) {
-            final displayDate = DateFormat('MMM dd, yyyy').format(_selectedDate!);
+            final displayDate = DateFormat(
+              'MMM dd, yyyy',
+            ).format(_selectedDate!);
             NotificationService().sendBulkNotification(
               receiverUuids: participants,
-              title: 'New ${_meetingCategory == MeetingCategory.onlineClass ? "Online Class" : "Meeting"} Scheduled',
-              message: '${_titleController.text.trim()} is scheduled on $displayDate at $startTimeStr',
+              title:
+                  'New ${_meetingCategory == MeetingCategory.onlineClass ? AppLocalizations.of(context)!.onlineClass : "Meeting"} Scheduled',
+              message:
+                  '${_titleController.text.trim()} is scheduled on $displayDate at $startTimeStr',
             );
           }
           Navigator.pop(context, true);
@@ -298,7 +303,6 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
           );
         }
       } else {
-
         print(dateStr);
         final success = await context
             .read<OnlineClassProvider>()
@@ -322,8 +326,10 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
           if (participants != null && participants.isNotEmpty) {
             NotificationService().sendBulkNotification(
               receiverUuids: participants,
-              title: '${_meetingCategory == MeetingCategory.onlineClass ? "Online Class" : "Meeting"} Updated',
-              message: '${_titleController.text.trim()} schedule has been updated. Please check the new details.',
+              title:
+                  '${_meetingCategory == MeetingCategory.onlineClass ? AppLocalizations.of(context)!.onlineClass : "Meeting"} Updated',
+              message:
+                  '${_titleController.text.trim()} schedule has been updated. Please check the new details.',
             );
           }
           Navigator.pop(context, true);
@@ -411,7 +417,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _descController,
-                    label: 'Description',
+                    label: AppLocalizations.of(context)!.description,
                     hint: _meetingCategory == MeetingCategory.onlineClass
                         ? 'Optional class agenda or instructions...'
                         : 'Optional meeting agenda, notes, or target topics...',
@@ -427,14 +433,14 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
               if (_meetingCategory == MeetingCategory.onlineClass)
                 _buildCardSection(
                   isDark: isDark,
-                  title: 'Academic Details',
+                  title: AppLocalizations.of(context)!.academicDetails,
                   icon: Icons.menu_book_outlined,
                   children: [_buildAcademicDropdowns(isDark)],
                 )
               else
                 _buildCardSection(
                   isDark: isDark,
-                  title: 'Select Participants (Teachers/Staff)',
+                  title: AppLocalizations.of(context)!.selectParticipants,
                   icon: Icons.groups_outlined,
                   children: [_buildTeacherSelection(isDark, primaryThemeColor)],
                 ),
@@ -443,11 +449,11 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
               // ── Date & Time Schedule Card ──────────────────────────────────
               _buildCardSection(
                 isDark: isDark,
-                title: 'Schedule Date & Time',
+                title: AppLocalizations.of(context)!.scheduleDateAndTime,
                 icon: Icons.event_available_outlined,
                 children: [
                   _buildDateTimePicker(
-                    label: 'Meeting Date',
+                    label: AppLocalizations.of(context)!.meetingDate,
                     value: _selectedDate != null
                         ? DateFormat(
                             'EEEE, MMM dd, yyyy',
@@ -463,7 +469,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                     children: [
                       Expanded(
                         child: _buildDateTimePicker(
-                          label: 'Start Time',
+                          label: AppLocalizations.of(context)!.startTime,
                           value: _selectedTime != null
                               ? _selectedTime!.format(context)
                               : 'Select Start Time',
@@ -476,7 +482,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _buildDateTimePicker(
-                          label: 'End Time',
+                          label: AppLocalizations.of(context)!.endTime,
                           value: _selectedEndTime != null
                               ? _selectedEndTime!.format(context)
                               : 'Select End Time',
@@ -527,12 +533,12 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
               // ── Meeting Link Card ──────────────────────────────────────────
               _buildCardSection(
                 isDark: isDark,
-                title: 'Virtual Meeting Link',
+                title: AppLocalizations.of(context)!.virtualMeetingLink,
                 icon: Icons.videocam_outlined,
                 children: [
                   _buildTextField(
                     controller: _linkController,
-                    label: 'Meeting Link / URL',
+                    label: AppLocalizations.of(context)!.meetingLinkOrUrl,
                     hint: 'e.g. https://meet.google.com/xxx-xxxx-xxx',
                     icon: Icons.link_rounded,
                     isDark: isDark,
@@ -663,7 +669,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
           Expanded(
             child: _buildTypeSegmentTab(
               category: MeetingCategory.onlineClass,
-              label: 'Online Class',
+              label: AppLocalizations.of(context)!.onlineClass,
               icon: Icons.school_rounded,
               primaryColor: primaryThemeColor,
               isDark: isDark,
@@ -672,7 +678,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
           Expanded(
             child: _buildTypeSegmentTab(
               category: MeetingCategory.teacherMeeting,
-              label: 'Teacher Meeting',
+              label: AppLocalizations.of(context)!.teacherMeeting,
               icon: Icons.record_voice_over_rounded,
               primaryColor: primaryThemeColor,
               isDark: isDark,
@@ -949,7 +955,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Faculty & Staff Meeting',
+                  AppLocalizations.of(context)!.facultyAndStaffMeeting,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -958,7 +964,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'This meeting will be broadcasted to all teachers and staff members. Class, Section, and Subject selections are not required.',
+                  AppLocalizations.of(context)!.meetingBroadcastNotice,
                   style: TextStyle(
                     fontSize: 12.5,
                     color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
@@ -1031,7 +1037,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
             return AlertDialog(
               backgroundColor: isDark ? Colors.grey.shade900 : Colors.white,
               title: Text(
-                'Select Teachers',
+                AppLocalizations.of(context)!.selectTeachers,
                 style: TextStyle(
                   color: isDark ? Colors.white : Colors.black,
                   fontSize: 18,
@@ -1048,7 +1054,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                     : provider.teachers.isEmpty
                     ? Center(
                         child: Text(
-                          'No teachers found',
+                          AppLocalizations.of(context)!.noTeachersFound,
                           style: TextStyle(
                             color: isDark
                                 ? Colors.grey.shade400
@@ -1091,7 +1097,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
                   child: Text(
-                    'Done',
+                    AppLocalizations.of(context)!.done,
                     style: TextStyle(
                       color: primaryColor,
                       fontWeight: FontWeight.bold,
@@ -1154,14 +1160,16 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
     return Column(
       children: [
         DropdownButtonFormField<String>(
-          value: validClassId,
+          initialValue: validClassId,
           decoration: _buildInputDecoration(
-            'Class',
+            AppLocalizations.of(context)!.className,
             Icons.class_rounded,
             isDark,
           ),
           dropdownColor: isDark ? Colors.grey.shade900 : Colors.white,
-          hint: classSetup.isLoading ? const Text('Loading classes...') : null,
+          hint: classSetup.isLoading
+              ? Text(AppLocalizations.of(context)!.loadingClasses)
+              : null,
           items: classSetup.classes.map((c) {
             return DropdownMenuItem(value: c.id, child: Text(c.name));
           }).toList(),
@@ -1179,7 +1187,7 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
         ),
         const SizedBox(height: 14),
         DropdownButtonFormField<String>(
-          value: validSectionId,
+          initialValue: validSectionId,
           decoration: _buildInputDecoration(
             'Section',
             Icons.groups_rounded,
@@ -1187,9 +1195,9 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
           ),
           dropdownColor: isDark ? Colors.grey.shade900 : Colors.white,
           hint: sectionSetup.isLoading
-              ? const Text('Loading sections...')
+              ? Text(AppLocalizations.of(context)!.loadingSections)
               : (availableSections.isEmpty
-                    ? const Text('No sections available')
+                    ? Text(AppLocalizations.of(context)!.noSectionsAvailable)
                     : null),
           items: availableSections.map((s) {
             return DropdownMenuItem(value: s.id, child: Text(s.name));
@@ -1202,17 +1210,17 @@ class _AddEditOnlineClassScreenState extends State<AddEditOnlineClassScreen> {
         ),
         const SizedBox(height: 14),
         DropdownButtonFormField<String>(
-          value: validSubjectId,
+          initialValue: validSubjectId,
           decoration: _buildInputDecoration(
-            'Subject',
+            AppLocalizations.of(context)!.subjectName,
             Icons.book_rounded,
             isDark,
           ),
           dropdownColor: isDark ? Colors.grey.shade900 : Colors.white,
           hint: subjectSetup.isLoading
-              ? const Text('Loading subjects...')
+              ? Text(AppLocalizations.of(context)!.loadingSubjects)
               : (availableSubjects.isEmpty
-                    ? const Text('No subjects available')
+                    ? Text(AppLocalizations.of(context)!.noSubjectsAvailable)
                     : null),
           items: availableSubjects.map((s) {
             return DropdownMenuItem(

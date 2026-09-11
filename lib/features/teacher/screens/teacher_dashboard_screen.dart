@@ -330,7 +330,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                     final isClockedOut = status?.status == 'clock-out';
 
                     return Theme(
-                      data: Theme.of(context).copyWith(useMaterial3: true),
+                      data: Theme.of(context).copyWith(),
                       child: GestureDetector(
                         onTap: () => _performSelfAttendance(
                           context,
@@ -430,7 +430,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                 backgroundColor: AppColors.primaryTeacher,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Retry'),
+              child: Text(AppLocalizations.of(context)!.retry),
             ),
           ],
         ),
@@ -701,7 +701,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
           TextButton(
             onPressed: onSeeAll,
             child: Text(
-              'See All', // Use l10n if available
+              AppLocalizations.of(context)!.seeAll, // Use l10n if available
               style: TextStyle(
                 color: Colors.green.shade700,
                 fontWeight: FontWeight.w600,
@@ -733,23 +733,23 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
 
               const SizedBox(height: 20),
 
-              const Text(
-                "AI Tutor",
+              Text(
+                AppLocalizations.of(context)!.aiTutor,
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 8),
 
               Text(
-                "Your smart learning companion",
+                AppLocalizations.of(context)!.yourSmartLearningCompanion,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
               ),
 
               const SizedBox(height: 20),
 
-              const Text(
-                "Need help with homework, exam preparation, or understanding a topic? Ask questions anytime and get instant academic support.",
+              Text(
+                AppLocalizations.of(context)!.aiTutorDescription,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 15, height: 1.5),
               ),
@@ -759,7 +759,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
-                  child: const Column(
+                  child: Column(
                     children: [
                       Row(
                         children: [
@@ -769,19 +769,13 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                             size: 18,
                           ),
                           SizedBox(width: 8),
-                          Expanded(child: Text("Homework & Assignment Help")),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.check_circle,
-                            color: Colors.deepPurple,
-                            size: 18,
+                          Expanded(
+                            child: Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.homeworkAndAssignmentHelp,
+                            ),
                           ),
-                          SizedBox(width: 8),
-                          Expanded(child: Text("Exam & Quiz Preparation")),
                         ],
                       ),
                       SizedBox(height: 10),
@@ -794,7 +788,29 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                           ),
                           SizedBox(width: 8),
                           Expanded(
-                            child: Text("Instant Answers & Explanations"),
+                            child: Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.examAndQuizPreparation,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.deepPurple,
+                            size: 18,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.instantAnswersAndExplanations,
+                            ),
                           ),
                         ],
                       ),
@@ -813,7 +829,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size.fromHeight(48),
                       ),
-                      child: const Text("Later"),
+                      child: Text(AppLocalizations.of(context)!.later),
                     ),
                   ),
 
@@ -832,7 +848,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                         );
                       },
                       icon: const Icon(Icons.chat_bubble_outline),
-                      label: const Text("Start"),
+                      label: Text(AppLocalizations.of(context)!.start),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepPurple,
                         foregroundColor: Colors.white,
@@ -961,8 +977,8 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
             if (data?.myAttendanceList.isNotEmpty ?? false) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5.0),
-                child: const Text(
-                  'Recent History',
+                child: Text(
+                  AppLocalizations.of(context)!.recentHistory,
                   style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -1409,7 +1425,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                   ),
                   if (isNew)
                     Text(
-                      'New',
+                      AppLocalizations.of(context)!.newLabel,
                       style: TextStyle(
                         color: Colors.blue.shade700,
                         fontSize: 10,
@@ -1490,15 +1506,19 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                     } catch (_) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Could not open attachment'),
+                          SnackBar(
+                            content: Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.couldNotOpenAttachment,
+                            ),
                           ),
                         );
                       }
                     }
                   },
                   icon: const Icon(Icons.attachment),
-                  label: const Text('View Attachment'),
+                  label: Text(AppLocalizations.of(context)!.viewAttachment),
                 ),
               ],
             ],
@@ -1507,7 +1527,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(context)!.close),
           ),
         ],
       ),
@@ -1617,8 +1637,8 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                           minimumSize: const Size(0, 28),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: const Text(
-                          'Join',
+                        child: Text(
+                          AppLocalizations.of(context)!.join,
                           style: TextStyle(fontSize: 12),
                         ),
                       ),
@@ -2326,7 +2346,10 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Starts On', style: TextStyle(fontSize: 10)),
+                          Text(
+                            AppLocalizations.of(context)!.startsOn,
+                            style: TextStyle(fontSize: 10),
+                          ),
                           Text(
                             startDateStr,
                             style: const TextStyle(
@@ -2493,7 +2516,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
           Icon(Icons.event_busy, color: Colors.blueGrey.shade300, size: 48),
           const SizedBox(height: 16),
           Text(
-            'No classes scheduled for today',
+            AppLocalizations.of(context)!.noClassesScheduledForToday,
             style: TextStyle(
               color: Colors.blueGrey.shade700,
               fontWeight: FontWeight.w500,
@@ -2962,7 +2985,7 @@ class ExamRoutinesDialog extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Exam Routines',
+                                  AppLocalizations.of(context)!.examRoutines,
                                   style: TextStyle(
                                     color: Colors.white.withOpacity(0.8),
                                     fontSize: 12,
@@ -3092,7 +3115,7 @@ class ExamRoutinesDialog extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      'Examiner: ',
+                                      '${AppLocalizations.of(context)!.examiner}: ',
                                       style: TextStyle(
                                         color: Colors.grey.shade600,
                                         fontSize: 13,
@@ -3175,8 +3198,8 @@ class ExamRoutinesDialog extends StatelessWidget {
                         ),
                       ),
                       onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        'Close',
+                      child: Text(
+                        AppLocalizations.of(context)!.close,
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -3304,7 +3327,7 @@ class _ClassPerformanceCardWithSubjectDropdownState
                               ),
                             ),
                             Text(
-                              'RATE',
+                              AppLocalizations.of(context)!.rate,
                               style: TextStyle(
                                 fontSize: 8,
                                 fontWeight: FontWeight.w600,
@@ -3322,7 +3345,8 @@ class _ClassPerformanceCardWithSubjectDropdownState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            stats.classInfo?.name ?? 'Class',
+                            stats.classInfo?.name ??
+                                AppLocalizations.of(context)!.className,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
@@ -3375,7 +3399,7 @@ class _ClassPerformanceCardWithSubjectDropdownState
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Student Attendance',
+                        AppLocalizations.of(context)!.studentAttendance,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -3431,7 +3455,9 @@ class _ClassPerformanceCardWithSubjectDropdownState
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         child: Text(
-                          'No records for selected subject',
+                          AppLocalizations.of(
+                            context,
+                          )!.noRecordsForSelectedSubject,
                           style: TextStyle(
                             color: Colors.grey.shade500,
                             fontSize: 12,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
@@ -1046,7 +1047,7 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'No teachers found',
+                    AppLocalizations.of(context)!.noTeachersFound,
                     style: TextStyle(
                       color: Colors.grey.shade500,
                       fontSize: 16,
@@ -1446,7 +1447,7 @@ class _TeacherPerformanceScreenState extends State<TeacherPerformanceScreen> {
           ElevatedButton.icon(
             onPressed: () => provider.fetchPerformances(),
             icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
+            label: Text(AppLocalizations.of(context)!.retry),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryAdmin,
               foregroundColor: Colors.white,

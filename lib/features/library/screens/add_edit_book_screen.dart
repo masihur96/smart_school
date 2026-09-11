@@ -301,7 +301,7 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
               _buildSectionTitle(l10n.additionalInfo),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _selectedCategory,
+                initialValue: _selectedCategory,
                 decoration: _buildInputDecoration(l10n.categoryLabel, Icons.category),
                 items: _categories.map((c) {
                   return DropdownMenuItem(value: c, child: Text(c));
@@ -325,8 +325,9 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
                   onPressed: _showImageOptions,
                 ),
                 validator: (val) {
-                  if (val == null || val.isEmpty)
+                  if (val == null || val.isEmpty) {
                     return l10n.coverImageRequired;
+                  }
                   return null;
                 },
               ),

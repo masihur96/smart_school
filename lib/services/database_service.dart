@@ -1,7 +1,6 @@
 import '../models/school_models.dart' hide Teacher;
 import '../models/student_model.dart';
 import '../models/teacher_model.dart';
-import '../models/user_model.dart';
 
 class DatabaseService {
   // Mock Data

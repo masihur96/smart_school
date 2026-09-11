@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -558,7 +559,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
                       horizontal: 24, vertical: 12),
                 ),
                 icon: const Icon(Icons.refresh_rounded, size: 18),
-                label: const Text('Retry',
+                label: Text(AppLocalizations.of(context)!.retry,
                     style: TextStyle(fontWeight: FontWeight.w700)),
               ),
             ],

@@ -2786,4 +2786,250 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get justNow => 'Just now';
+
+  @override
+  String get recentHistory => 'Recent History';
+
+  @override
+  String get homeworkAndAssignmentHelp => 'Homework & Assignment Help';
+
+  @override
+  String get start => 'Start';
+
+  @override
+  String get join => 'Join';
+
+  @override
+  String get later => 'Later';
+
+  @override
+  String get examRoutines => 'Exam Routines';
+
+  @override
+  String get couldNotOpenAttachment => 'Could not open attachment';
+
+  @override
+  String get aiTutor => 'AI Tutor';
+
+  @override
+  String get instantAnswersAndExplanations => 'Instant Answers & Explanations';
+
+  @override
+  String get seeAll => 'See All';
+
+  @override
+  String get examAndQuizPreparation => 'Exam & Quiz Preparation';
+
+  @override
+  String get newLabel => 'New';
+
+  @override
+  String get examiner => 'Examiner';
+
+  @override
+  String get startsOn => 'Starts On';
+
+  @override
+  String get yourSmartLearningCompanion => 'Your smart learning companion';
+
+  @override
+  String get noRecordsForSelectedSubject => 'No records for selected subject';
+
+  @override
+  String get noClassesScheduledForToday => 'No classes scheduled for today';
+
+  @override
+  String get aiTutorDescription =>
+      'Need help with homework, exam preparation, or understanding a topic? Ask questions anytime and get instant academic support.';
+
+  @override
+  String get markEntryPending => 'Mark Entry Pending';
+
+  @override
+  String get noSubjectsAssignedForExam =>
+      'You have no subjects assigned for this exam.';
+
+  @override
+  String get noExamRoutinesAssignedYet => 'No exam routines assigned yet.';
+
+  @override
+  String get syllabus => 'Syllabus';
+
+  @override
+  String get resultsNotPublishedAssignedSubjects =>
+      'Results not published yet. Showing your assigned subjects for this exam.';
+
+  @override
+  String get resultSheet => 'Result Sheet';
+
+  @override
+  String get resultsPublishedNoData =>
+      'Results are published but no data is available yet.';
+
+  @override
+  String get todayLabel => 'TODAY';
+
+  @override
+  String get notGraded => 'Not Graded';
+
+  @override
+  String get viewResults => 'View Results';
+
+  @override
+  String get subjectWise => 'Subject Wise';
+
+  @override
+  String get examDate => 'Exam Date';
+
+  @override
+  String get noSyllabusInformationAvailable =>
+      'No syllabus information available.';
+
+  @override
+  String get selectSection => 'Select Section';
+
+  @override
+  String get filterBySection => 'Filter by Section';
+
+  @override
+  String get marksSubmitted => '📊 Marks Submitted';
+
+  @override
+  String get subjectName => 'Subject';
+
+  @override
+  String get markEntrySystem => 'Mark Entry System';
+
+  @override
+  String get saveAllResults => 'Save All Results';
+
+  @override
+  String get late => 'Late';
+
+  @override
+  String get unmarked => 'Unmarked';
+
+  @override
+  String get noSubjectsForThisClass => 'No subjects for this class';
+
+  @override
+  String get attendanceSaved => '✅ Attendance Saved';
+
+  @override
+  String get noHomeworkAssignedYet =>
+      'No homework assigned yet.\\nTap + to add one.';
+
+  @override
+  String get clearFilters => 'Clear Filters';
+
+  @override
+  String get noAttendanceRecords => 'No Attendance Records';
+
+  @override
+  String get searchByStudentName => 'Search by student name...';
+
+  @override
+  String get bulkUpdateStatusNotice =>
+      'This will update the status for ALL students in this homework.';
+
+  @override
+  String get bulkUpdateStatus => 'Bulk Update Status';
+
+  @override
+  String get comment => 'Comment';
+
+  @override
+  String get addFeedback => 'Add feedback...';
+
+  @override
+  String get onlineClass => 'Online Class';
+
+  @override
+  String get teacherMeeting => 'Teacher Meeting';
+
+  @override
+  String get facultyAndStaffMeeting => 'Faculty & Staff Meeting';
+
+  @override
+  String get scheduleDateAndTime => 'Schedule Date & Time';
+
+  @override
+  String get pleaseSelectDateTime =>
+      'Please select date, start time, and end time';
+
+  @override
+  String get meetingBroadcastNotice =>
+      'This meeting will be broadcasted to all teachers and staff members. Class, Section, and Subject selections are not required.';
+
+  @override
+  String get virtualMeetingLink => 'Virtual Meeting Link';
+
+  @override
+  String get meetingLinkOrUrl => 'Meeting Link / URL';
+
+  @override
+  String get meetingDate => 'Meeting Date';
+
+  @override
+  String get loadingClasses => 'Loading classes...';
+
+  @override
+  String get loadingSubjects => 'Loading subjects...';
+
+  @override
+  String get loadingSections => 'Loading sections...';
+
+  @override
+  String get noTeachersFound => 'No teachers found';
+
+  @override
+  String get noSectionsAvailable => 'No sections available';
+
+  @override
+  String get noSubjectsAvailable => 'No subjects available';
+
+  @override
+  String get selectParticipants => 'Select Participants (Teachers/Staff)';
+
+  @override
+  String get selectTeachers => 'Select Teachers';
+
+  @override
+  String get academicDetails => 'Academic Details';
+
+  @override
+  String get hostOrTeacher => 'Host / Teacher';
+
+  @override
+  String get classIsStarting => 'Class is Starting';
+
+  @override
+  String get participants => 'Participants';
+
+  @override
+  String get keepAnEyeOut => 'Keep an eye out!';
+
+  @override
+  String get newNoticesWillAppearHere => 'New notices will appear here.';
+
+  @override
+  String get urgentLabel => 'URGENT';
+
+  @override
+  String get noNotificationsYet => 'No notifications yet';
+
+  @override
+  String get markAllAsRead => 'Mark all as read';
+
+  @override
+  String get testNotificationSent => 'Test notification sent!';
+
+  @override
+  String get sendTestNotification => 'Send Test Notification';
+
+  @override
+  String get restartApp => 'RESTART';
+
+  @override
+  String get newUpdateDownloaded => '🎉 A new update has been downloaded.';
 }

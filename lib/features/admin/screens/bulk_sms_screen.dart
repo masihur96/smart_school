@@ -10,7 +10,6 @@ import 'package:smart_school/features/admin/providers/student_provider.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/student_model.dart';
 import 'package:smart_school/services/sms_service.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
 class BulkSmsScreen extends StatefulWidget {

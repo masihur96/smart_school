@@ -180,8 +180,9 @@ class HomeworkRemoteDataSource {
 
     final query = <String, dynamic>{};
     if (classId != null && classId.isNotEmpty) query['classId'] = classId;
-    if (sectionId != null && sectionId.isNotEmpty)
+    if (sectionId != null && sectionId.isNotEmpty) {
       query['sectionId'] = sectionId;
+    }
     if (subjectId != null && subjectId.isNotEmpty) {
       query['subjectId'] = subjectId;
       query['subject_id'] = subjectId;
@@ -224,8 +225,9 @@ class HomeworkRemoteDataSource {
 
     final query = <String, dynamic>{};
     if (classId != null && classId.isNotEmpty) query['classId'] = classId;
-    if (sectionId != null && sectionId.isNotEmpty)
+    if (sectionId != null && sectionId.isNotEmpty) {
       query['sectionId'] = sectionId;
+    }
     if (subjectId != null && subjectId.isNotEmpty) {
       query['subjectId'] = subjectId;
       query['subject_id'] = subjectId;

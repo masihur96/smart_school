@@ -502,7 +502,7 @@ class _AddEditAcademicBookScreenState extends State<AddEditAcademicBookScreen> {
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                   ),
                   value: _isActive,
-                  activeColor: const Color(0xFF10B981),
+                  activeThumbColor: const Color(0xFF10B981),
                   onChanged: (v) => setState(() => _isActive = v),
                 ),
               ),

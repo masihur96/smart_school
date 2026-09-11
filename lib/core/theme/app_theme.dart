@@ -17,7 +17,7 @@ class AppTheme {
         centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(
+        iconTheme: IconThemeData(
           color: Colors.white, // Drawer menu icon color
         ),
         foregroundColor: Colors.white,
@@ -89,7 +89,7 @@ class AppTheme {
         centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(
+        iconTheme: IconThemeData(
           color: Colors.white, // Drawer menu icon color
         ),
         foregroundColor: Colors.white,

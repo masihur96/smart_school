@@ -19,7 +19,7 @@ class StudentsNotifier extends ChangeNotifier {
   bool _isLoadingMore = false;
   int _totalCount = 0;
 
-  List<Student> _unassignedStudents = [];
+  final List<Student> _unassignedStudents = [];
   bool _isUnassignedLoading = false;
   int _unassignedCurrentPage = 1;
   bool _unassignedHasMore = true;
@@ -200,8 +200,9 @@ class StudentsNotifier extends ChangeNotifier {
         for (var item in data) {
           try {
             final parsedStudent = Student.fromJson(item);
-            if (parsedStudent.isDeleted)
+            if (parsedStudent.isDeleted) {
               continue; // Filter out soft-deleted students
+            }
             _dbService.students.add(parsedStudent);
           } catch (e) {
             log('Error parsing student: $e');
@@ -252,10 +253,12 @@ class StudentsNotifier extends ChangeNotifier {
         'limit': '15',
       };
       if (search != null && search.isNotEmpty) query['search'] = search;
-      if (filterClassId != null && filterClassId.isNotEmpty)
+      if (filterClassId != null && filterClassId.isNotEmpty) {
         query['classId'] = filterClassId;
-      if (filterSectionId != null && filterSectionId.isNotEmpty)
+      }
+      if (filterSectionId != null && filterSectionId.isNotEmpty) {
         query['sectionId'] = filterSectionId;
+      }
 
       final response = await DataProvider().performRequest(
         'GET',

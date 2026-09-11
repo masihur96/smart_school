@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -199,13 +198,13 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                     }
                     if (!launched && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Could not open attachment')),
+                        SnackBar(content: Text(AppLocalizations.of(context)!.couldNotOpenAttachment)),
                       );
                     }
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Could not open attachment')),
+                        SnackBar(content: Text(AppLocalizations.of(context)!.couldNotOpenAttachment)),
                       );
                     }
                   }
@@ -213,7 +212,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                 icon: const Icon(Icons.attach_file, size: 16),
                 label: Column(
                   children: [
-                    const Text('View Attachment'),
+                    Text(AppLocalizations.of(context)!.viewAttachment),
                     ],
                 ),
 
@@ -406,7 +405,7 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
                         vertical: 14,
                       ),
                     ),
-                    value: selectedAudience,
+                    initialValue: selectedAudience,
                     items: [
                       DropdownMenuItem(value: 'All', child: Text(AppLocalizations.of(context)!.all)),
                       DropdownMenuItem(
@@ -860,13 +859,13 @@ class _NoticeCard extends StatelessWidget {
                         }
                         if (!launched && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Could not open attachment')),
+                            SnackBar(content: Text(AppLocalizations.of(context)!.couldNotOpenAttachment)),
                           );
                         }
                       } catch (e) {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Could not open attachment')),
+                            SnackBar(content: Text(AppLocalizations.of(context)!.couldNotOpenAttachment)),
                           );
                         }
                       }

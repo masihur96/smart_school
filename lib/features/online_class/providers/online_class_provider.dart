@@ -53,7 +53,7 @@ class OnlineClassProvider extends ChangeNotifier {
         header: headers,
       );
 
-      log('Fetch online classes response: ${response}');
+      log('Fetch online classes response: $response');
       log('Fetch online classes response: ${response?.statusCode}');
 
       if (response != null &&

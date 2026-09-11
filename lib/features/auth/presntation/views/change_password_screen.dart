@@ -111,8 +111,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 prefixIcon: Icons.lock_reset_rounded,
                 validator: (value) {
                   if (value == null || value.isEmpty) return l10n.fieldRequired;
-                  if (value.length < 6)
+                  if (value.length < 6) {
                     return 'Password must be at least 6 characters';
+                  }
                   if (value == _oldPasswordController.text) {
                     return 'New password cannot be same as old password';
                   }
@@ -129,8 +130,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 prefixIcon: Icons.lock_clock_rounded,
                 validator: (value) {
                   if (value == null || value.isEmpty) return l10n.fieldRequired;
-                  if (value != _newPasswordController.text)
+                  if (value != _newPasswordController.text) {
                     return l10n.passwordsDoNotMatch;
+                  }
                   return null;
                 },
               ),

@@ -2,7 +2,6 @@ import 'package:smart_school/core/widgets/zoomable_avatar.dart';
 
 import 'dart:developer';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
