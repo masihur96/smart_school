@@ -1017,6 +1017,7 @@ class TeacherAssignmentStudent {
   final String? sectionName;
   final double? marksObtained;
   final double? totalMarks;
+  final String? subjectId;
   final String? subjectName;
   final String? className;
 
@@ -1028,6 +1029,7 @@ class TeacherAssignmentStudent {
     this.sectionName,
     this.marksObtained,
     this.totalMarks,
+    this.subjectId,
     this.subjectName,
     this.className,
   });
@@ -1039,8 +1041,10 @@ class TeacherAssignmentStudent {
       parsedSectionId = json['section']['uuid'] ?? json['section']['id'] ?? parsedSectionId;
       parsedSectionName = json['section']['name'];
     }
+    String? parsedSubjectId = json['subjectId'] ?? json['subject_id'];
     String? parsedSubjectName;
     if (json['subject'] != null && json['subject'] is Map) {
+      parsedSubjectId = json['subject']['uuid'] ?? json['subject']['id'] ?? parsedSubjectId;
       parsedSubjectName = json['subject']['name'];
     }
     String? parsedClassName;
@@ -1055,6 +1059,7 @@ class TeacherAssignmentStudent {
       sectionName: parsedSectionName,
       marksObtained: json['marksObtained'] != null ? double.tryParse(json['marksObtained'].toString()) : null,
       totalMarks: json['totalMarks'] != null ? double.tryParse(json['totalMarks'].toString()) : null,
+      subjectId: parsedSubjectId,
       subjectName: parsedSubjectName,
       className: parsedClassName,
     );

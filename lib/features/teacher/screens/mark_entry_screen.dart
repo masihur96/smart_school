@@ -110,13 +110,17 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
     if (_allClassStudents == null) return;
 
     setState(() {
+      var filtered = _allClassStudents!;
+      
       if (sectionId != null && sectionId.isNotEmpty) {
-        _displayStudents = _allClassStudents!
-            .where((s) => s.sectionId == sectionId)
-            .toList();
-      } else {
-        _displayStudents = List.from(_allClassStudents!);
+        filtered = filtered.where((s) => s.sectionId == sectionId).toList();
       }
+      
+      if (_selectedSubject != null) {
+        filtered = filtered.where((s) => s.subjectId == _selectedSubject!.id).toList();
+      }
+      
+      _displayStudents = filtered.toList();
     });
     _populateExistingMarks();
   }
@@ -136,7 +140,7 @@ class _MarkEntryScreenState extends State<MarkEntryScreen> {
           _selectedExam?.id ?? '',
           _selectedClassId!,
           sectionId: null, // Ensure we fetch all
-          subjectId: _selectedSubject?.id,
+          subjectId: null, // Fetch all students for all subjects
         )
         .then((_) {
           if (mounted) {
