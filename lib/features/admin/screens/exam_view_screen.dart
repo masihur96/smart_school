@@ -10,6 +10,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../providers/exam_provider.dart';
 import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
+import 'generate_admit_card_screen.dart';
 import 'generate_report_card_screen.dart';
 
 class ExamViewScreen extends StatefulWidget {
@@ -245,8 +246,36 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
       elevation: 0,
       backgroundColor: AppColors.primaryAdmin,
       actions: [
+        // ── Admit Card ──
+        IconButton(
+          icon: const Icon(Icons.badge_outlined),
+          tooltip: 'Generate Admit Card',
+          onPressed: () {
+            if (students.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    AppLocalizations.of(context)!.noStudentsForExamSection,
+                  ),
+                ),
+              );
+              return;
+            }
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GenerateAdmitCardScreen(
+                  exam: widget.exam,
+                  students: students,
+                ),
+              ),
+            );
+          },
+        ),
+        // ── Report Card ──
         IconButton(
           icon: const Icon(Icons.report_outlined),
+          tooltip: 'Generate Report Card',
           onPressed: () {
             if (students.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -267,7 +296,6 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
                 ),
               ),
             );
-            // Implement download functionality here
           },
         ),
       ],
