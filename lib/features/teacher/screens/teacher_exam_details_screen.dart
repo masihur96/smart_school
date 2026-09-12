@@ -42,14 +42,13 @@ class _TeacherExamDetailsScreenState extends State<TeacherExamDetailsScreen>
     final dateRange = _formatDateRange(exam);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
           SliverAppBar(
             expandedHeight: 200,
             pinned: true,
             backgroundColor: AppColors.primaryTeacher,
-            foregroundColor: Colors.white,
+
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: BoxDecoration(
@@ -242,21 +241,18 @@ class _RoutineTab extends StatelessWidget {
       child: Column(
         children: [
           if (classNames.length > 1)
-            Container(
-              color: Colors.white,
-              child: TabBar(
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
-                indicatorColor: AppColors.primaryTeacher,
-                labelColor: AppColors.primaryTeacher,
-                unselectedLabelColor: Colors.grey.shade400,
-                labelStyle: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                tabs: classNames.map((c) => Tab(text: 'Class $c')).toList(),
+            TabBar(
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              indicatorColor: AppColors.primaryTeacher,
+              labelColor: AppColors.primaryTeacher,
+              unselectedLabelColor: Colors.grey.shade400,
+              labelStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
               ),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              tabs: classNames.map((c) => Tab(text: 'Class $c')).toList(),
             ),
           Expanded(
             child: classNames.length == 1
@@ -290,11 +286,11 @@ class _RoutineCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final dateStr = DateFormat('EEE, MMM dd yyyy').format(assignment.date);
     final isToday = _isToday(assignment.date);
+    print(isToday);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: isToday
             ? Border.all(color: AppColors.primaryTeacher, width: 1.5)
@@ -336,7 +332,6 @@ class _RoutineCard extends StatelessWidget {
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: Color(0xFF1A1C1E),
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -375,7 +370,6 @@ class _RoutineCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -406,24 +400,16 @@ class _RoutineCard extends StatelessWidget {
   Widget _row(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 14, color: Colors.grey.shade400),
+        Icon(icon, size: 14),
         const SizedBox(width: 8),
         Text(
           '$label: ',
-          style: TextStyle(
-            color: Colors.grey.shade500,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1A1C1E),
-            ),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
           ),
         ),
       ],
@@ -469,22 +455,19 @@ class _SyllabusTab extends StatelessWidget {
       child: Column(
         children: [
           if (classNames.length > 1)
-            Container(
-              color: Colors.white,
-              child: TabBar(
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
-                indicatorColor: AppColors.primaryTeacher,
-                indicatorWeight: 3,
-                labelColor: AppColors.primaryTeacher,
-                unselectedLabelColor: Colors.grey.shade400,
-                labelStyle: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                tabs: classNames.map((c) => Tab(text: 'Class $c')).toList(),
+            TabBar(
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              indicatorColor: AppColors.primaryTeacher,
+              indicatorWeight: 3,
+              labelColor: AppColors.primaryTeacher,
+              unselectedLabelColor: Colors.grey.shade400,
+              labelStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
               ),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              tabs: classNames.map((c) => Tab(text: 'Class $c')).toList(),
             ),
           Expanded(
             child: classNames.length == 1
@@ -602,19 +585,9 @@ class _ClassSyllabusViewState extends State<_ClassSyllabusView> {
             itemCount: filtered.length,
             itemBuilder: (context, i) {
               final a = filtered[i];
-              return Container(
+              return Card(
                 margin: const EdgeInsets.only(bottom: 14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
+
                 child: Padding(
                   padding: const EdgeInsets.all(18),
                   child: Column(
@@ -644,15 +617,11 @@ class _ClassSyllabusViewState extends State<_ClassSyllabusView> {
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
-                                    color: Color(0xFF1A1C1E),
                                   ),
                                 ),
                                 Text(
                                   'Class ${a.className}${a.sectionName != null && a.sectionName!.isNotEmpty ? ' – ${a.sectionName}' : ''}  •  ${DateFormat('MMM dd').format(a.date)}',
-                                  style: TextStyle(
-                                    color: Colors.grey.shade500,
-                                    fontSize: 12,
-                                  ),
+                                  style: TextStyle(fontSize: 12),
                                 ),
                               ],
                             ),
@@ -663,18 +632,10 @@ class _ClassSyllabusViewState extends State<_ClassSyllabusView> {
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.blue.shade100),
-                        ),
+
                         child: Text(
                           a.syllabus!,
-                          style: TextStyle(
-                            color: Colors.blue.shade900,
-                            fontSize: 14,
-                            height: 1.5,
-                          ),
+                          style: TextStyle(fontSize: 14, height: 1.5),
                         ),
                       ),
                     ],
@@ -907,44 +868,9 @@ class _ResultTabState extends State<_ResultTab> {
     // Sort: today first → upcoming → past
     myAssignments.sort(_compareAssignments);
 
-    final header = Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.orange.shade50,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.orange.shade200),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.info_outline_rounded,
-              color: Colors.orange.shade700,
-              size: 20,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                AppLocalizations.of(
-                  context,
-                )!.resultsNotPublishedAssignedSubjects,
-                style: TextStyle(
-                  color: Colors.orange.shade800,
-                  fontSize: 12,
-                  height: 1.4,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-
     if (myAssignments.isEmpty) {
       return Column(
         children: [
-          header,
           Expanded(
             child: _emptyState(
               icon: Icons.assignment_ind_outlined,
@@ -964,60 +890,56 @@ class _ResultTabState extends State<_ResultTab> {
 
     return Column(
       children: [
-        header,
         Expanded(
           child: DefaultTabController(
             length: classNames.length,
             child: Column(
               children: [
                 // Class filter tabs (shown even for single class for consistency)
-                Container(
-                  color: Colors.white,
-                  child: TabBar(
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.start,
-                    indicatorColor: AppColors.primaryTeacher,
-                    indicatorWeight: 3,
-                    labelColor: AppColors.primaryTeacher,
-                    unselectedLabelColor: Colors.grey.shade400,
-                    labelStyle: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    tabs: classNames.map((c) {
-                      final count = grouped[c]!.length;
-                      return Tab(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Class $c'),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 2,
+                TabBar(
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  indicatorColor: AppColors.primaryTeacher,
+                  indicatorWeight: 3,
+                  labelColor: AppColors.primaryTeacher,
+                  unselectedLabelColor: Colors.grey.shade400,
+                  labelStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  tabs: classNames.map((c) {
+                    final count = grouped[c]!.length;
+                    return Tab(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Class $c'),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryTeacher.withValues(
+                                alpha: 0.12,
                               ),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryTeacher.withValues(
-                                  alpha: 0.12,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                '$count',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primaryTeacher,
-                                ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              '$count',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryTeacher,
                               ),
                             ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
                 ),
                 Expanded(
                   child: TabBarView(
@@ -1415,7 +1337,6 @@ class _AssignedSubjectCard extends StatelessWidget {
       examDate.day,
     );
 
-    print("fdfdf${assignment.sectionId}");
     final todayNormalized = DateTime(now.year, now.month, now.day);
     final daysLeft = examDateNormalized.difference(todayNormalized).inDays;
     final isToday = daysLeft == 0;
@@ -1450,7 +1371,6 @@ class _AssignedSubjectCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(22),
         border: isToday
             ? Border.all(color: AppColors.primaryTeacher, width: 1.5)
@@ -1540,24 +1460,19 @@ class _AssignedSubjectCard extends StatelessWidget {
                                       style: const TextStyle(
                                         fontWeight: FontWeight.w800,
                                         fontSize: 17,
-                                        color: Color(0xFF1A1C1E),
+
                                         letterSpacing: -0.2,
                                       ),
                                     ),
                                     const SizedBox(height: 3),
                                     Row(
                                       children: [
-                                        Icon(
-                                          Icons.school_rounded,
-                                          size: 12,
-                                          color: Colors.grey.shade400,
-                                        ),
+                                        Icon(Icons.school_rounded, size: 12),
                                         const SizedBox(width: 4),
                                         Text(
                                           'Class ${assignment.className}'
                                           '${assignment.sectionName != null && assignment.sectionName!.isNotEmpty ? ' · ${assignment.sectionName}' : ''}',
                                           style: TextStyle(
-                                            color: Colors.grey.shade500,
                                             fontSize: 12,
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -1594,44 +1509,46 @@ class _AssignedSubjectCard extends StatelessWidget {
                           const SizedBox(height: 14),
 
                           // Info grid
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF8F9FA),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Column(
-                              children: [
-                                _infoRow(
-                                  icon: Icons.event_rounded,
-                                  label: AppLocalizations.of(context)!.examDate,
-                                  value: DateFormat(
-                                    'EEEE, MMM dd yyyy',
-                                  ).format(examDate),
-                                  valueColor: isToday
-                                      ? AppColors.primaryTeacher
-                                      : isPast
-                                      ? Colors.red.shade600
-                                      : const Color(0xFF1A1C1E),
-                                ),
-                                const SizedBox(height: 10),
-                                _infoRow(
-                                  icon: Icons.person_pin_rounded,
-                                  label: AppLocalizations.of(context)!.examiner,
-                                  value: assignment.examinerName,
-                                ),
-                                if (hasSyllabus) ...[
-                                  const SizedBox(height: 10),
+                          Card(
+                            child: Padding(
+                              padding: EdgeInsets.all(12),
+                              child: Column(
+                                children: [
                                   _infoRow(
-                                    icon: Icons.format_list_bulleted_rounded,
+                                    icon: Icons.event_rounded,
                                     label: AppLocalizations.of(
                                       context,
-                                    )!.syllabus,
-                                    value: assignment.syllabus!,
-                                    maxLines: 2,
+                                    )!.examDate,
+                                    value: DateFormat(
+                                      'EEEE, MMM dd yyyy',
+                                    ).format(examDate),
+                                    valueColor: isToday
+                                        ? AppColors.primaryTeacher
+                                        : isPast
+                                        ? Colors.red.shade600
+                                        : const Color(0xFF1A1C1E),
                                   ),
+                                  const SizedBox(height: 10),
+                                  _infoRow(
+                                    icon: Icons.person_pin_rounded,
+                                    label: AppLocalizations.of(
+                                      context,
+                                    )!.examiner,
+                                    value: assignment.examinerName,
+                                  ),
+                                  if (hasSyllabus) ...[
+                                    const SizedBox(height: 10),
+                                    _infoRow(
+                                      icon: Icons.format_list_bulleted_rounded,
+                                      label: AppLocalizations.of(
+                                        context,
+                                      )!.syllabus,
+                                      value: assignment.syllabus!,
+                                      maxLines: 2,
+                                    ),
+                                  ],
                                 ],
-                              ],
+                              ),
                             ),
                           ),
 
@@ -1744,11 +1661,7 @@ class _AssignedSubjectCard extends StatelessWidget {
           width: 72,
           child: Text(
             label,
-            style: TextStyle(
-              color: Colors.grey.shade500,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),
         ),
         Expanded(
@@ -1759,7 +1672,7 @@ class _AssignedSubjectCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: valueColor ?? const Color(0xFF1A1C1E),
+
               height: maxLines > 1 ? 1.4 : null,
             ),
           ),
