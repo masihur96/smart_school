@@ -572,9 +572,6 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       topLeft: pw.Radius.circular(5),
                       bottomLeft: pw.Radius.circular(5),
                     ),
-                    border: pw.Border(
-                      right: pw.BorderSide(color: PdfColors.grey300),
-                    ),
                   ),
                   child: avatar != null
                       ? pw.ClipRRect(
@@ -607,6 +604,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                           ),
                         ),
                 ),
+                
+                pw.Container(width: 0.8, color: PdfColors.grey300),
 
                 // Details
                 pw.Expanded(
