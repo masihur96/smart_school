@@ -17,7 +17,7 @@ import '../providers/setup_provider.dart';
 import '../providers/student_provider.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Enum – available admit card templates
+// Enum - available admit card templates
 // ─────────────────────────────────────────────────────────────────────────────
 enum AdmitCardTemplate { classic, modern, minimal, compact }
 
@@ -243,7 +243,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       avatarFutures.add(safeImage(url));
     }
 
-    // Wait for ALL in parallel — fastest possible loading
+    // Wait for ALL in parallel - fastest possible loading
     final allResults = await Future.wait<Object?>([
       fontRegFuture,
       fontBoldFuture,
@@ -393,7 +393,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // TEMPLATE 1 – CLASSIC
+  // TEMPLATE 1 - CLASSIC
   // Formal university-style: letterhead top, amber rule, student box with
   // photo, full schedule table with 4 columns, numbered instructions,
   // three signature blocks.
@@ -467,8 +467,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       pw.SizedBox(height: 2),
                       pw.Text(
                         [
-                          if (schoolPhone.isNotEmpty) '📞 $schoolPhone',
-                          if (schoolEmail.isNotEmpty) '✉ $schoolEmail',
+                          if (schoolPhone.isNotEmpty) 'Ph: $schoolPhone',
+                          if (schoolEmail.isNotEmpty) 'Email: $schoolEmail',
                         ].join('     '),
                         textAlign: pw.TextAlign.center,
                         style: const pw.TextStyle(
@@ -529,7 +529,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             pw.SizedBox(height: 2),
             pw.Center(
               child: pw.Text(
-                '${DateFormat('dd MMMM yyyy').format(widget.exam.startDate!)}  —  ${DateFormat('dd MMMM yyyy').format(widget.exam.endDate ?? widget.exam.startDate!)}',
+                '${DateFormat('dd MMMM yyyy').format(widget.exam.startDate!)}  -  ${DateFormat('dd MMMM yyyy').format(widget.exam.endDate ?? widget.exam.startDate!)}',
                 style: const pw.TextStyle(
                   fontSize: 8,
                   color: PdfColors.grey700,
@@ -613,7 +613,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                             ),
                             pw.SizedBox(width: 12),
                             pw.Expanded(
-                              child: _classicField('Class', '$className  –  $sectionName', primary: primary),
+                              child: _classicField('Class', '$className  -  $sectionName', primary: primary),
                             ),
                           ],
                         ),
@@ -749,7 +749,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         '${DateFormat('dd MMM yyyy').format(a.date)}\n${DateFormat('EEEE').format(a.date)}',
                       ),
                       _tCell(
-                        a.examinerName.isNotEmpty ? a.examinerName : '—',
+                        a.examinerName.isNotEmpty ? a.examinerName : '-',
                       ),
                     ],
                   );
@@ -838,7 +838,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // TEMPLATE 2 – MODERN
+  // TEMPLATE 2 - MODERN
   // Bold indigo/teal design: full-width colored header band with circular
   // school logo and student chip, left-accent colored subject cards in 2
   // columns, clean barcode footer.
@@ -938,7 +938,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                             [
                               if (schoolPhone.isNotEmpty) schoolPhone,
                               if (schoolEmail.isNotEmpty) schoolEmail,
-                            ].join('  ·  '),
+                            ].join('  |  '),
                             style: const pw.TextStyle(
                               color: PdfColors.indigo200,
                               fontSize: 7.5,
@@ -1079,7 +1079,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                                 _modernChip(
                                   Icons.school,
                                   'Class',
-                                  '$className – $sectionName',
+                                  '$className - $sectionName',
                                   primary,
                                 ),
                                 if (student.user != null && student.user!.email.isNotEmpty)
@@ -1357,7 +1357,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text(
-                      '$schoolName  ·  Issued ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
+                      '$schoolName  |  Issued ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
                       style: const pw.TextStyle(
                         fontSize: 7,
                         color: PdfColors.white,
@@ -1382,7 +1382,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // TEMPLATE 3 – MINIMAL
+  // TEMPLATE 3 - MINIMAL
   // Elegant double-border monochrome: centered letterhead, strong
   // typographic hierarchy, ruled table, formal numbered instructions,
   // three signature blocks with official seal placeholder.
@@ -1567,7 +1567,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                               ),
                               pw.SizedBox(width: 16),
                               pw.Expanded(
-                                child: _minimalField('Class / Section', '$className – $sectionName'),
+                                child: _minimalField('Class / Section', '$className - $sectionName'),
                               ),
                             ],
                           ),
@@ -1658,7 +1658,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                               textColor: PdfColors.black,
                             ),
                             _tCell(
-                              a.examinerName.isNotEmpty ? a.examinerName : '—',
+                              a.examinerName.isNotEmpty ? a.examinerName : '-',
                               textColor: PdfColors.black,
                             ),
                           ],
@@ -1793,7 +1793,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // TEMPLATE 4 – COMPACT  (no exam schedule · 6 cards per A4 page)
+  // TEMPLATE 4 - COMPACT  (no exam schedule · 6 cards per A4 page)
   // ═══════════════════════════════════════════════════════════════════════════
   pw.Widget _buildCompactCard({
     required Student student,
@@ -1944,11 +1944,11 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         ),
                         pw.SizedBox(height: 4),
                         _cRow('Roll No.', student.rollId, primary),
-                        _cRow('Class', '$className – $sectionName', primary),
+                        _cRow('Class', '$className - $sectionName', primary),
                         if (widget.exam.startDate != null)
                           _cRow(
                             'Period',
-                            '${DateFormat('dd/MM/yy').format(widget.exam.startDate!)} – '
+                            '${DateFormat('dd/MM/yy').format(widget.exam.startDate!)} - '
                                 '${DateFormat('dd/MM/yy').format(widget.exam.endDate ?? widget.exam.startDate!)}',
                             primary,
                           ),
@@ -2299,7 +2299,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         title: Text(
-          'Admit Card — ${widget.exam.name}',
+          'Admit Card - ${widget.exam.name}',
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.primaryAdmin,
