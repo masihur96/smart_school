@@ -97,7 +97,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
   String? _selectedClassId;
   String? _selectedSectionId;
   late List<Student> _currentStudents;
-  bool _isLoading = false;
+  bool _isLoading = true;
+  String? _errorMsg;
   Uint8List? _pdfBytes;
   pdfx.PdfControllerPinch? _pdfController;
   AdmitCardTemplate _selectedTemplate = AdmitCardTemplate.classic;
@@ -140,10 +141,18 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             document: pdfx.PdfDocument.openData(bytes),
           );
           _isLoading = false;
+          _errorMsg = null;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _isLoading = false);
+    } catch (e, st) {
+      print('PDF Generation Error: $e');
+      print(st);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMsg = e.toString();
+        });
+      }
     }
   }
 
@@ -159,8 +168,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
         .then((_) {
           if (mounted) {
             setState(() {
-              _currentStudents =
-                  List.from(context.read<StudentsNotifier>().students);
+              _currentStudents = List.from(
+                context.read<StudentsNotifier>().students,
+              );
             });
             _generatePdf();
           }
@@ -183,9 +193,10 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             .name;
       } catch (_) {
         // fall back to assignment name
-        final a = widget.exam.assignments
-            .firstWhere((a) => a.classId == _selectedClassId,
-                orElse: () => widget.exam.assignments.first);
+        final a = widget.exam.assignments.firstWhere(
+          (a) => a.classId == _selectedClassId,
+          orElse: () => widget.exam.assignments.first,
+        );
         resolvedClassName = a.className;
       }
     }
@@ -199,8 +210,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             .name;
       } catch (_) {
         final a = widget.exam.assignments.firstWhere(
-            (a) => a.sectionId == _selectedSectionId,
-            orElse: () => widget.exam.assignments.first);
+          (a) => a.sectionId == _selectedSectionId,
+          orElse: () => widget.exam.assignments.first,
+        );
         resolvedSectionName = a.sectionName ?? 'N/A';
       }
     }
@@ -284,8 +296,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             return false;
           }
           return true;
-        }).toList()
-          ..sort((a, b) => a.date.compareTo(b.date));
+        }).toList()..sort((a, b) => a.date.compareTo(b.date));
 
     // ── COMPACT: 6 cards per A4 page ──────────────────────────────────────
     if (_selectedTemplate == AdmitCardTemplate.compact) {
@@ -604,16 +615,29 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        _classicField('Student Name', student.user?.name ?? 'N/A', primary: primary, big: true),
+                        _classicField(
+                          'Student Name',
+                          student.user?.name ?? 'N/A',
+                          primary: primary,
+                          big: true,
+                        ),
                         pw.SizedBox(height: 6),
                         pw.Row(
                           children: [
                             pw.Expanded(
-                              child: _classicField('Roll Number', student.rollId, primary: primary),
+                              child: _classicField(
+                                'Roll Number',
+                                student.rollId,
+                                primary: primary,
+                              ),
                             ),
                             pw.SizedBox(width: 12),
                             pw.Expanded(
-                              child: _classicField('Class', '$className  -  $sectionName', primary: primary),
+                              child: _classicField(
+                                'Class',
+                                '$className  -  $sectionName',
+                                primary: primary,
+                              ),
                             ),
                           ],
                         ),
@@ -621,11 +645,21 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         pw.Row(
                           children: [
                             pw.Expanded(
-                              child: _classicField('Guardian Contact', student.guardianContact.isNotEmpty ? student.guardianContact : (student.user?.phone ?? 'N/A'), primary: primary),
+                              child: _classicField(
+                                'Guardian Contact',
+                                student.guardianContact.isNotEmpty
+                                    ? student.guardianContact
+                                    : (student.user?.phone ?? 'N/A'),
+                                primary: primary,
+                              ),
                             ),
                             pw.SizedBox(width: 12),
                             pw.Expanded(
-                              child: _classicField('Email', student.user?.email ?? 'N/A', primary: primary),
+                              child: _classicField(
+                                'Email',
+                                student.user?.email ?? 'N/A',
+                                primary: primary,
+                              ),
                             ),
                           ],
                         ),
@@ -685,7 +719,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 ),
                 decoration: pw.BoxDecoration(
                   color: accent,
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(4),
+                  ),
                 ),
                 child: pw.Text(
                   '${subjects.length} Subject${subjects.length == 1 ? '' : 's'}',
@@ -709,16 +745,16 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               ),
               child: pw.Text(
                 'No subjects scheduled for this class/section.',
-                style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
+                style: const pw.TextStyle(
+                  fontSize: 9,
+                  color: PdfColors.grey600,
+                ),
                 textAlign: pw.TextAlign.center,
               ),
             )
           else
             pw.Table(
-              border: pw.TableBorder.all(
-                color: PdfColors.grey300,
-                width: 0.5,
-              ),
+              border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
               columnWidths: const {
                 0: pw.FixedColumnWidth(28),
                 1: pw.FlexColumnWidth(2.5),
@@ -748,17 +784,13 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       _tCell(
                         '${DateFormat('dd MMM yyyy').format(a.date)}\n${DateFormat('EEEE').format(a.date)}',
                       ),
-                      _tCell(
-                        a.examinerName.isNotEmpty ? a.examinerName : '-',
-                      ),
+                      _tCell(a.examinerName.isNotEmpty ? a.examinerName : '-'),
                     ],
                   );
                 }),
               ],
             ),
-
-          pw.Spacer(),
-
+          pw.SizedBox(height: 20),
           // ── Instructions ─────────────────────────────────────────────────
           pw.Container(
             padding: const pw.EdgeInsets.all(10),
@@ -824,11 +856,17 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             children: [
               pw.Text(
                 'This admit card is issued by $schoolName.',
-                style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600),
+                style: const pw.TextStyle(
+                  fontSize: 7,
+                  color: PdfColors.grey600,
+                ),
               ),
               pw.Text(
                 'Issued: ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
-                style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600),
+                style: const pw.TextStyle(
+                  fontSize: 7,
+                  color: PdfColors.grey600,
+                ),
               ),
             ],
           ),
@@ -855,9 +893,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     required pw.ImageProvider? avatar,
     required List<ExamAssignment> subjects,
   }) {
-    const primary = PdfColor.fromInt(0xFF1A237E);   // deep indigo
+    const primary = PdfColor.fromInt(0xFF1A237E); // deep indigo
     const secondary = PdfColor.fromInt(0xFF00695C); // deep teal
-    const accent = PdfColor.fromInt(0xFFFFA000);    // amber
+    const accent = PdfColor.fromInt(0xFFFFA000); // amber
     const bgLight = PdfColor.fromInt(0xFFF3F4FF);
 
     return pw.Stack(
@@ -870,10 +908,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           top: 0,
           left: 0,
           right: 0,
-          child: pw.SizedBox(
-            height: 175,
-            child: pw.Container(color: primary),
-          ),
+          child: pw.SizedBox(height: 175, child: pw.Container(color: primary)),
         ),
 
         // ── Decorative side bar (right) ──
@@ -881,10 +916,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           top: 0,
           right: 0,
           bottom: 0,
-          child: pw.SizedBox(
-            width: 8,
-            child: pw.Container(color: secondary),
-          ),
+          child: pw.SizedBox(width: 8, child: pw.Container(color: secondary)),
         ),
 
         // ── Main content ──
@@ -958,8 +990,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         ),
                         decoration: pw.BoxDecoration(
                           color: accent,
-                          borderRadius:
-                              const pw.BorderRadius.all(pw.Radius.circular(4)),
+                          borderRadius: const pw.BorderRadius.all(
+                            pw.Radius.circular(4),
+                          ),
                         ),
                         child: pw.Text(
                           'ADMIT CARD',
@@ -990,8 +1023,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               pw.Container(
                 decoration: pw.BoxDecoration(
                   color: PdfColors.white,
-                  borderRadius:
-                      const pw.BorderRadius.all(pw.Radius.circular(10)),
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(10),
+                  ),
                   boxShadow: const [
                     pw.BoxShadow(
                       color: PdfColors.grey400,
@@ -1001,11 +1035,12 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   ],
                 ),
                 child: pw.Row(
-                  crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     // Left accent bar
                     pw.Container(
                       width: 6,
+                      height: 130, // Fixed height to replace stretch
                       decoration: const pw.BoxDecoration(
                         color: secondary,
                         borderRadius: pw.BorderRadius.only(
@@ -1021,8 +1056,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       height: 105,
                       margin: const pw.EdgeInsets.all(12),
                       decoration: pw.BoxDecoration(
-                        borderRadius:
-                            const pw.BorderRadius.all(pw.Radius.circular(6)),
+                        borderRadius: const pw.BorderRadius.all(
+                          pw.Radius.circular(6),
+                        ),
                         border: pw.Border.all(color: secondary, width: 2),
                         color: bgLight,
                       ),
@@ -1082,7 +1118,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                                   '$className - $sectionName',
                                   primary,
                                 ),
-                                if (student.user != null && student.user!.email.isNotEmpty)
+                                if (student.user != null &&
+                                    student.user!.email.isNotEmpty)
                                   _modernChip(
                                     Icons.email,
                                     'Email',
@@ -1120,9 +1157,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     pw.SizedBox(width: 10),
                     _modernInfoPill(
                       'Exam End',
-                      DateFormat('dd MMM yyyy').format(
-                        widget.exam.endDate ?? widget.exam.startDate!,
-                      ),
+                      DateFormat(
+                        'dd MMM yyyy',
+                      ).format(widget.exam.endDate ?? widget.exam.startDate!),
                       primary,
                     ),
                     pw.SizedBox(width: 10),
@@ -1161,8 +1198,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   padding: const pw.EdgeInsets.all(12),
                   decoration: pw.BoxDecoration(
                     color: bgLight,
-                    borderRadius:
-                        const pw.BorderRadius.all(pw.Radius.circular(6)),
+                    borderRadius: const pw.BorderRadius.all(
+                      pw.Radius.circular(6),
+                    ),
                   ),
                   child: pw.Text(
                     'No subjects scheduled.',
@@ -1196,8 +1234,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                           color: PdfColors.grey200,
                           width: 0.5,
                         ),
-                        borderRadius:
-                            const pw.BorderRadius.all(pw.Radius.circular(6)),
+                        borderRadius: const pw.BorderRadius.all(
+                          pw.Radius.circular(6),
+                        ),
                       ),
                       child: pw.Row(
                         children: [
@@ -1242,7 +1281,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                                   ),
                                   pw.SizedBox(height: 2),
                                   pw.Text(
-                                    DateFormat('EEE, dd MMM yyyy').format(a.date),
+                                    DateFormat(
+                                      'EEE, dd MMM yyyy',
+                                    ).format(a.date),
                                     style: const pw.TextStyle(
                                       fontSize: 7.5,
                                       color: PdfColors.grey700,
@@ -1265,15 +1306,15 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     );
                   }).toList(),
                 ),
-
-              pw.Spacer(),
-
+              pw.SizedBox(height: 20),
               // ── Instructions ─────────────────────────────────────────────
               pw.Container(
                 padding: const pw.EdgeInsets.all(10),
                 decoration: pw.BoxDecoration(
                   color: bgLight,
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(6),
+                  ),
                   border: pw.Border.all(color: PdfColors.indigo100, width: 0.5),
                 ),
                 child: pw.Column(
@@ -1558,16 +1599,26 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       child: pw.Column(
                         crossAxisAlignment: pw.CrossAxisAlignment.start,
                         children: [
-                          _minimalField('Name of Student', student.user?.name ?? 'N/A', big: true),
+                          _minimalField(
+                            'Name of Student',
+                            student.user?.name ?? 'N/A',
+                            big: true,
+                          ),
                           pw.SizedBox(height: 5),
                           pw.Row(
                             children: [
                               pw.Expanded(
-                                child: _minimalField('Roll No.', student.rollId),
+                                child: _minimalField(
+                                  'Roll No.',
+                                  student.rollId,
+                                ),
                               ),
                               pw.SizedBox(width: 16),
                               pw.Expanded(
-                                child: _minimalField('Class / Section', '$className - $sectionName'),
+                                child: _minimalField(
+                                  'Class / Section',
+                                  '$className - $sectionName',
+                                ),
                               ),
                             ],
                           ),
@@ -1647,11 +1698,17 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       ...subjects.asMap().entries.map((e) {
                         final i = e.key;
                         final a = e.value;
-                        final bg = i.isEven ? PdfColors.white : PdfColors.grey100;
+                        final bg = i.isEven
+                            ? PdfColors.white
+                            : PdfColors.grey100;
                         return pw.TableRow(
                           decoration: pw.BoxDecoration(color: bg),
                           children: [
-                            _tCell('${i + 1}', centered: true, textColor: PdfColors.black),
+                            _tCell(
+                              '${i + 1}',
+                              centered: true,
+                              textColor: PdfColors.black,
+                            ),
                             _tCell(a.subjectName, textColor: PdfColors.black),
                             _tCell(
                               '${DateFormat('dd/MM/yyyy').format(a.date)}  (${DateFormat('EEE').format(a.date)})',
@@ -1686,53 +1743,55 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     2: pw.FixedColumnWidth(12),
                     3: pw.FlexColumnWidth(1),
                   },
-                  children: List.generate(
-                    (_instructions.length / 2).ceil(),
-                    (row) {
-                      final left = row * 2;
-                      final right = left + 1;
-                      return pw.TableRow(
-                        children: [
-                          pw.Padding(
-                            padding: const pw.EdgeInsets.only(bottom: 2),
-                            child: pw.Text(
-                              '${left + 1}.',
-                              style: pw.TextStyle(
-                                fontWeight: pw.FontWeight.bold,
-                                fontSize: 7.5,
-                              ),
+                  children: List.generate((_instructions.length / 2).ceil(), (
+                    row,
+                  ) {
+                    final left = row * 2;
+                    final right = left + 1;
+                    return pw.TableRow(
+                      children: [
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.only(bottom: 2),
+                          child: pw.Text(
+                            '${left + 1}.',
+                            style: pw.TextStyle(
+                              fontWeight: pw.FontWeight.bold,
+                              fontSize: 7.5,
                             ),
                           ),
-                          pw.Padding(
-                            padding: const pw.EdgeInsets.only(bottom: 2, right: 10),
-                            child: pw.Text(
-                              _instructions[left],
-                              style: const pw.TextStyle(fontSize: 7.5),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.only(
+                            bottom: 2,
+                            right: 10,
+                          ),
+                          child: pw.Text(
+                            _instructions[left],
+                            style: const pw.TextStyle(fontSize: 7.5),
+                          ),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.only(bottom: 2),
+                          child: pw.Text(
+                            right < _instructions.length ? '${right + 1}.' : '',
+                            style: pw.TextStyle(
+                              fontWeight: pw.FontWeight.bold,
+                              fontSize: 7.5,
                             ),
                           ),
-                          pw.Padding(
-                            padding: const pw.EdgeInsets.only(bottom: 2),
-                            child: pw.Text(
-                              right < _instructions.length ? '${right + 1}.' : '',
-                              style: pw.TextStyle(
-                                fontWeight: pw.FontWeight.bold,
-                                fontSize: 7.5,
-                              ),
-                            ),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.only(bottom: 2),
+                          child: pw.Text(
+                            right < _instructions.length
+                                ? _instructions[right]
+                                : '',
+                            style: const pw.TextStyle(fontSize: 7.5),
                           ),
-                          pw.Padding(
-                            padding: const pw.EdgeInsets.only(bottom: 2),
-                            child: pw.Text(
-                              right < _instructions.length
-                                  ? _instructions[right]
-                                  : '',
-                              style: const pw.TextStyle(fontSize: 7.5),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
+                        ),
+                      ],
+                    );
+                  }),
                 ),
 
                 pw.SizedBox(height: 12),
@@ -1803,9 +1862,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     required pw.ImageProvider? schoolLogo,
     required pw.ImageProvider? avatar,
   }) {
-    const primary = PdfColor.fromInt(0xFF00695C);  // teal 800
-    const accent = PdfColor.fromInt(0xFFFFA000);   // amber 700
-    const bgLight = PdfColor.fromInt(0xFFE0F2F1);  // teal 50
+    const primary = PdfColor.fromInt(0xFF00695C); // teal 800
+    const accent = PdfColor.fromInt(0xFFFFA000); // amber 700
+    const bgLight = PdfColor.fromInt(0xFFE0F2F1); // teal 50
 
     return pw.Container(
       decoration: pw.BoxDecoration(
@@ -1873,8 +1932,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   ),
                   decoration: pw.BoxDecoration(
                     color: accent,
-                    borderRadius:
-                        const pw.BorderRadius.all(pw.Radius.circular(3)),
+                    borderRadius: const pw.BorderRadius.all(
+                      pw.Radius.circular(3),
+                    ),
                   ),
                   child: pw.Text(
                     widget.exam.name,
@@ -1904,8 +1964,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     margin: const pw.EdgeInsets.only(right: 9),
                     decoration: pw.BoxDecoration(
                       border: pw.Border.all(color: primary, width: 1),
-                      borderRadius:
-                          const pw.BorderRadius.all(pw.Radius.circular(4)),
+                      borderRadius: const pw.BorderRadius.all(
+                        pw.Radius.circular(4),
+                      ),
                       color: bgLight,
                     ),
                     child: avatar != null
@@ -1980,7 +2041,10 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   children: [
                     pw.Container(
                       width: 72,
-                      child: pw.Divider(color: PdfColors.grey500, thickness: 0.5),
+                      child: pw.Divider(
+                        color: PdfColors.grey500,
+                        thickness: 0.5,
+                      ),
                     ),
                     pw.Text(
                       "Student",
@@ -1996,7 +2060,10 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   children: [
                     pw.Container(
                       width: 72,
-                      child: pw.Divider(color: PdfColors.grey500, thickness: 0.5),
+                      child: pw.Divider(
+                        color: PdfColors.grey500,
+                        thickness: 0.5,
+                      ),
                     ),
                     pw.Text(
                       "Principal",
@@ -2312,9 +2379,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             onPressed: _pdfBytes == null
                 ? null
                 : () async {
-                    await Printing.layoutPdf(
-                      onLayout: (_) async => _pdfBytes!,
-                    );
+                    await Printing.layoutPdf(onLayout: (_) async => _pdfBytes!);
                   },
           ),
           IconButton(
@@ -2405,8 +2470,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       children: [
                         Icon(
                           t.icon,
-                          color:
-                              isSelected ? t.accentColor : Colors.grey.shade400,
+                          color: isSelected
+                              ? t.accentColor
+                              : Colors.grey.shade400,
                           size: 22,
                         ),
                         const SizedBox(height: 5),
@@ -2467,7 +2533,11 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.filter_list, size: 16, color: AppColors.primaryAdmin),
+          const Icon(
+            Icons.filter_list,
+            size: 16,
+            color: AppColors.primaryAdmin,
+          ),
           const SizedBox(width: 8),
 
           // ── Class dropdown ──────────────────────────────────────────────
@@ -2599,7 +2669,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
 
   // ── PDF preview ───────────────────────────────────────────────────────────
   Widget _buildPreviewArea() {
-    if (_isLoading || _pdfBytes == null) {
+    if (_isLoading) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -2614,13 +2684,28 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
         ),
       );
     }
-    if (_currentStudents.isEmpty) {
+    if (_errorMsg != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Text(
+            'Error generating PDF:\n$_errorMsg',
+            style: const TextStyle(color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+    if (_pdfBytes == null || _currentStudents.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.person_off_outlined,
-                size: 64, color: Colors.grey.shade300),
+            Icon(
+              Icons.person_off_outlined,
+              size: 64,
+              color: Colors.grey.shade300,
+            ),
             const SizedBox(height: 16),
             Text(
               'No students found for the selected class / section.',
