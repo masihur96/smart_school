@@ -172,9 +172,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
   // ───────────────────────────────────────────────────────────────────────────
 
   Future<Uint8List> _buildPdf(PdfPageFormat format, School? school) async {
-    final pdf = pw.Document();
-
-    // Resolve class / section names
+    // ── Resolve class / section display names ─────────────────────────────
     String resolvedClassName = 'N/A';
     if (_selectedClassId != null) {
       try {
@@ -183,7 +181,13 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             .classes
             .firstWhere((c) => c.id == _selectedClassId)
             .name;
-      } catch (_) {}
+      } catch (_) {
+        // fall back to assignment name
+        final a = widget.exam.assignments
+            .firstWhere((a) => a.classId == _selectedClassId,
+                orElse: () => widget.exam.assignments.first);
+        resolvedClassName = a.className;
+      }
     }
     String resolvedSectionName = 'N/A';
     if (_selectedSectionId != null) {
@@ -193,34 +197,80 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             .sections
             .firstWhere((s) => s.id == _selectedSectionId)
             .name;
-      } catch (_) {}
+      } catch (_) {
+        final a = widget.exam.assignments.firstWhere(
+            (a) => a.sectionId == _selectedSectionId,
+            orElse: () => widget.exam.assignments.first);
+        resolvedSectionName = a.sectionName ?? 'N/A';
+      }
     }
 
-    // School metadata
+    // ── School metadata ───────────────────────────────────────────────────
     final schoolName = school?.name ?? 'School Name';
     final schoolAddress = school?.address ?? '';
     final schoolPhone = school?.phone ?? '';
     final schoolEmail = school?.email ?? '';
     final schoolLogoUrl = school?.avatar ?? '';
 
-    pw.ImageProvider? schoolLogo;
-    if (schoolLogoUrl.isNotEmpty) {
+    // ── PARALLEL: load fonts + school logo + all student avatars at once ──
+    Future<pw.ImageProvider?> safeImage(String url) async {
+      if (url.isEmpty) return null;
       try {
-        schoolLogo = await PdfImageHelper.getCachedImageProvider(schoolLogoUrl);
-      } catch (_) {}
-    }
-
-    // Student avatars
-    final Map<String, pw.ImageProvider> avatars = {};
-    for (final student in _currentStudents) {
-      final url = student.user?.avatar ?? '';
-      if (url.isNotEmpty) {
-        try {
-          avatars[student.userId] =
-              await PdfImageHelper.getCachedImageProvider(url);
-        } catch (_) {}
+        return await PdfImageHelper.getCachedImageProvider(url);
+      } catch (_) {
+        return null;
       }
     }
+
+    Future<pw.Font?> safeFont(Future<pw.Font> loader) async {
+      try {
+        return await loader;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    // Collect all futures simultaneously
+    final fontRegFuture = safeFont(PdfGoogleFonts.notoSansBengaliRegular());
+    final fontBoldFuture = safeFont(PdfGoogleFonts.notoSansBengaliBold());
+    final logoFuture = safeImage(schoolLogoUrl);
+
+    final studentIds = <String>[];
+    final avatarFutures = <Future<pw.ImageProvider?>>[];
+    for (final student in _currentStudents) {
+      final url = student.user?.avatar ?? '';
+      studentIds.add(student.userId);
+      avatarFutures.add(safeImage(url));
+    }
+
+    // Wait for ALL in parallel — fastest possible loading
+    final allResults = await Future.wait<Object?>([
+      fontRegFuture,
+      fontBoldFuture,
+      logoFuture,
+      ...avatarFutures,
+    ]);
+
+    final fontReg = allResults[0] as pw.Font?;
+    final fontBold = allResults[1] as pw.Font?;
+    final schoolLogo = allResults[2] as pw.ImageProvider?;
+    final Map<String, pw.ImageProvider> avatars = {};
+    for (var i = 0; i < studentIds.length; i++) {
+      final img = allResults[3 + i] as pw.ImageProvider?;
+      if (img != null) avatars[studentIds[i]] = img;
+    }
+
+    // ── Create document with Bengali font theme (supports any language) ───
+    final pdf = pw.Document(
+      theme: fontReg != null
+          ? pw.ThemeData.withFont(
+              base: fontReg,
+              bold: fontBold ?? fontReg,
+              italic: fontReg,
+              boldItalic: fontBold ?? fontReg,
+            )
+          : pw.ThemeData(),
+    );
 
     // Filtered subject assignments
     final List<ExamAssignment> subjectAssignments =
@@ -2216,14 +2266,32 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     final allClasses = context.watch<ClassSetupNotifier>().classes;
     final allSections = context.watch<SectionSetupNotifier>().sections;
 
+    // ── Build class list: setup notifier + exam assignments as fallback ──────
     final uniqueClasses = <String, String>{};
     for (final c in allClasses) {
       uniqueClasses[c.id] = c.name;
     }
+    // Seed from exam assignments so classes always show even before setup loads
+    for (final a in widget.exam.assignments) {
+      if (!uniqueClasses.containsKey(a.classId) && a.className.isNotEmpty) {
+        uniqueClasses[a.classId] = a.className;
+      }
+    }
+
+    // ── Build section list for the selected class ────────────────────────────
     final uniqueSections = <String, String>{};
     if (_selectedClassId != null) {
       for (final s in allSections) {
         if (s.classId == _selectedClassId) uniqueSections[s.id] = s.name;
+      }
+      // Seed from exam assignments for this class
+      for (final a in widget.exam.assignments) {
+        if (a.classId == _selectedClassId &&
+            a.sectionId != null &&
+            a.sectionName != null &&
+            !uniqueSections.containsKey(a.sectionId)) {
+          uniqueSections[a.sectionId!] = a.sectionName!;
+        }
       }
     }
 
@@ -2383,6 +2451,14 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     Map<String, String> uniqueClasses,
     Map<String, String> uniqueSections,
   ) {
+    // Ensure the current value is valid for the dropdown or fall back to null
+    final classDropdownValue = uniqueClasses.containsKey(_selectedClassId)
+        ? _selectedClassId
+        : null;
+    final sectionDropdownValue = uniqueSections.containsKey(_selectedSectionId)
+        ? _selectedSectionId
+        : null;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
@@ -2393,21 +2469,22 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
         children: [
           const Icon(Icons.filter_list, size: 16, color: AppColors.primaryAdmin),
           const SizedBox(width: 8),
+
+          // ── Class dropdown ──────────────────────────────────────────────
           Expanded(
             child: _buildDropdown<String?>(
               label: 'Class',
-              value: uniqueClasses.containsKey(_selectedClassId)
-                  ? _selectedClassId
-                  : null,
+              value: classDropdownValue,
               items: [
-                if (!uniqueClasses.containsKey(_selectedClassId) &&
-                    _selectedClassId != null)
-                  DropdownMenuItem(
-                    value: _selectedClassId,
-                    child: const Text('Unknown Class'),
-                  ),
+                const DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text('Select Class'),
+                ),
                 ...uniqueClasses.entries.map(
-                  (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
+                  (e) => DropdownMenuItem<String?>(
+                    value: e.key,
+                    child: Text(e.value),
+                  ),
                 ),
               ],
               onChanged: (val) {
@@ -2416,27 +2493,29 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     _selectedClassId = val;
                     _selectedSectionId = null;
                   });
-                  _fetchStudents();
+                  if (val != null) _fetchStudents();
                 }
               },
             ),
           ),
+
+          // ── Section dropdown (only when sections exist for the class) ───
           if (uniqueSections.isNotEmpty) ...[
             const SizedBox(width: 12),
             Expanded(
               child: _buildDropdown<String?>(
                 label: 'Section',
-                value: uniqueSections.containsKey(_selectedSectionId)
-                    ? _selectedSectionId
-                    : null,
+                value: sectionDropdownValue,
                 items: [
                   const DropdownMenuItem<String?>(
                     value: null,
                     child: Text('All Sections'),
                   ),
                   ...uniqueSections.entries.map(
-                    (e) =>
-                        DropdownMenuItem(value: e.key, child: Text(e.value)),
+                    (e) => DropdownMenuItem<String?>(
+                      value: e.key,
+                      child: Text(e.value),
+                    ),
                   ),
                 ],
                 onChanged: (val) {
@@ -2448,8 +2527,10 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               ),
             ),
           ],
+
           const SizedBox(width: 12),
-          // Student count badge
+
+          // ── Student count badge ─────────────────────────────────────────
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
