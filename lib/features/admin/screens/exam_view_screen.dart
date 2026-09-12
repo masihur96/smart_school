@@ -251,7 +251,9 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
             if (students.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(AppLocalizations.of(context)!.noStudentsForExamSection),
+                  content: Text(
+                    AppLocalizations.of(context)!.noStudentsForExamSection,
+                  ),
                 ),
               );
               return;
@@ -838,9 +840,9 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
     final schoolId = authNotifier.user?.schoolId;
 
     if (schoolId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.schoolIdNotFound)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.schoolIdNotFound)),
+      );
       return;
     }
 
