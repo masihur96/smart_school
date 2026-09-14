@@ -284,19 +284,32 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           : pw.ThemeData(),
     );
 
-    // Filtered subject assignments
-    final List<ExamAssignment> subjectAssignments =
-        widget.exam.assignments.where((a) {
-          if (_selectedClassId != null && a.classId != _selectedClassId) {
-            return false;
-          }
-          if (_selectedSectionId != null &&
-              a.sectionId != null &&
-              a.sectionId != _selectedSectionId) {
-            return false;
-          }
-          return true;
-        }).toList()..sort((a, b) => a.date.compareTo(b.date));
+    // ── Build per-student subject list ────────────────────────────────────
+    // A student can belong to multiple classes (e.g. Class One AND Nurani).
+    // For each student we collect ExamAssignments for ALL their classes so
+    // that their admit card always shows every subject they are enrolled in,
+    // regardless of which class was used as the filter to pull this cohort.
+    //
+    // IMPORTANT: We use student.user?.classIds (the full list stored on the
+    // user record) rather than student.embeddedClasses, because the API
+    // endpoint that fetches students by a specific class only populates
+    // embeddedClasses with the filtered class — it does NOT return all classes
+    // the student belongs to. user.classIds always contains every assigned
+    // class ID regardless of which filter was used.
+    List<ExamAssignment> subjectsForStudent(Student student) {
+      final Set<String> studentClassIds = {
+        student.classId,
+        // user.classIds is the complete list of all enrolled classes
+        ...?student.user?.classIds,
+        // embeddedClasses as fallback (may be partial)
+        ...student.embeddedClasses.map((c) => c.id),
+      }.where((id) => id.isNotEmpty).toSet();
+
+      return widget.exam.assignments
+          .where((a) => studentClassIds.contains(a.classId))
+          .toList()
+        ..sort((a, b) => a.date.compareTo(b.date));
+    }
 
     // ── COMPACT: 6 cards per A4 page ──────────────────────────────────────
     if (_selectedTemplate == AdmitCardTemplate.compact) {
@@ -347,6 +360,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           : resolvedSectionName;
       final avatar = avatars[student.userId];
 
+      // Subjects for this specific student (all their enrolled classes).
+      final studentSubjects = subjectsForStudent(student);
+
       pdf.addPage(
         pw.Page(
           pageFormat: format,
@@ -364,7 +380,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   schoolEmail: schoolEmail,
                   schoolLogo: schoolLogo,
                   avatar: avatar,
-                  subjects: subjectAssignments,
+                  subjects: studentSubjects,
                 );
               case AdmitCardTemplate.modern:
                 return _buildModernTemplate(
@@ -377,7 +393,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   schoolEmail: schoolEmail,
                   schoolLogo: schoolLogo,
                   avatar: avatar,
-                  subjects: subjectAssignments,
+                  subjects: studentSubjects,
                 );
               case AdmitCardTemplate.minimal:
                 return _buildMinimalTemplate(
@@ -390,7 +406,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   schoolEmail: schoolEmail,
                   schoolLogo: schoolLogo,
                   avatar: avatar,
-                  subjects: subjectAssignments,
+                  subjects: studentSubjects,
                 );
               case AdmitCardTemplate.compact:
                 return pw.SizedBox(); // handled above
