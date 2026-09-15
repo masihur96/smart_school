@@ -102,9 +102,12 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
   Uint8List? _pdfBytes;
   pdfx.PdfControllerPinch? _pdfController;
   AdmitCardTemplate _selectedTemplate = AdmitCardTemplate.classic;
+  final TextEditingController _instructionController = TextEditingController();
+  String _topInstruction = '';
 
   @override
   void dispose() {
+    _instructionController.dispose();
     _pdfController?.dispose();
     super.dispose();
   }
@@ -610,6 +613,11 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
 
           pw.SizedBox(height: 16),
 
+          if (_topInstruction.isNotEmpty) ...[
+            pw.Text(_topInstruction, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10, color: primary)),
+            pw.SizedBox(height: 8),
+          ],
+
           // ── Schedule heading ────────────────────────────────────────────
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -918,6 +926,11 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
 
               pw.SizedBox(height: 16),
 
+              if (_topInstruction.isNotEmpty) ...[
+                pw.Text(_topInstruction, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10, color: primary)),
+                pw.SizedBox(height: 8),
+              ],
+
               // ── Schedule heading ──────────────────────────────────────────
               pw.Row(children: [
                 pw.Container(width: 4, height: 16, color: secondary),
@@ -1170,6 +1183,11 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 pw.SizedBox(height: 12),
                 pw.Divider(thickness: 0.5, color: PdfColors.black),
                 pw.SizedBox(height: 8),
+
+                if (_topInstruction.isNotEmpty) ...[
+                  pw.Text(_topInstruction, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10, color: PdfColors.black)),
+                  pw.SizedBox(height: 8),
+                ],
 
                 // ── Schedule ────────────────────────────────────────────────
                 pw.Text(
@@ -1783,6 +1801,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
         children: [
           _buildTemplateSelector(),
           _buildFilters(uniqueClasses, uniqueSections),
+          _buildInstructionInput(),
           Expanded(child: _buildPreviewArea()),
         ],
       ),
@@ -1999,6 +2018,39 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ── Top Instruction Input ──────────────────────────────────────────────────
+  Widget _buildInstructionInput() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: Colors.white,
+      child: TextField(
+        controller: _instructionController,
+        decoration: InputDecoration(
+          labelText: 'Top Instruction (Optional)',
+          hintText: 'e.g. Please bring your ID card...',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          isDense: true,
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.check_circle_outline, color: AppColors.primaryAdmin),
+            onPressed: () {
+              if (_topInstruction != _instructionController.text) {
+                setState(() => _topInstruction = _instructionController.text);
+                _generatePdf();
+              }
+            },
+          ),
+        ),
+        onSubmitted: (value) {
+          if (_topInstruction != value) {
+            setState(() => _topInstruction = value);
+            _generatePdf();
+          }
+        },
       ),
     );
   }
