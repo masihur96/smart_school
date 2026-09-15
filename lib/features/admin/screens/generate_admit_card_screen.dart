@@ -104,6 +104,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
   AdmitCardTemplate _selectedTemplate = AdmitCardTemplate.classic;
   final TextEditingController _instructionController = TextEditingController();
   String _topInstruction = '';
+  List<Student> _allFetchedStudents = [];
+  List<String> _excludedStudentIds = [];
 
   @override
   void dispose() {
@@ -116,6 +118,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
   void initState() {
     super.initState();
     _currentStudents = List.from(widget.students);
+    _allFetchedStudents = List.from(widget.students);
     if (_currentStudents.isNotEmpty) {
       _selectedClassId = _currentStudents.first.classId;
       _selectedSectionId = _currentStudents.first.sectionId;
@@ -171,9 +174,11 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
         .then((_) {
           if (mounted) {
             setState(() {
-              _currentStudents = List.from(
+              _excludedStudentIds.clear();
+              _allFetchedStudents = List.from(
                 context.read<StudentsNotifier>().students,
               );
+              _currentStudents = List.from(_allFetchedStudents);
             });
             _generatePdf();
           }
@@ -1823,6 +1828,11 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
         elevation: 0,
         actions: [
           IconButton(
+            icon: const Icon(Icons.playlist_remove_rounded),
+            tooltip: 'Include/Exclude Students',
+            onPressed: _allFetchedStudents.isEmpty ? null : _showExcludeStudentsDialog,
+          ),
+          IconButton(
             icon: const Icon(Icons.print_outlined),
             tooltip: 'Print',
             onPressed: _pdfBytes == null
@@ -2101,6 +2111,69 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           }
         },
       ),
+    );
+  }
+
+  // ── Exclude Students Dialog ────────────────────────────────────────────────
+  void _showExcludeStudentsDialog() {
+    if (_allFetchedStudents.isEmpty) return;
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setStateDialog) {
+            return AlertDialog(
+              title: const Text('Include / Exclude Students', style: TextStyle(fontSize: 16)),
+              content: Container(
+                width: 400,
+                height: MediaQuery.of(context).size.height * 0.6,
+                child: ListView.builder(
+                  shrinkWrap: false,
+                  itemCount: _allFetchedStudents.length,
+                  itemBuilder: (context, index) {
+                    final student = _allFetchedStudents[index];
+                      final isExcluded = _excludedStudentIds.contains(student.userId);
+                    return CheckboxListTile(
+                      value: !isExcluded,
+                      dense: true,
+                      title: Text(student.user?.name ?? 'Unknown', style: const TextStyle(fontSize: 14)),
+                      subtitle: Text('Roll: ${student.rollId}', style: const TextStyle(fontSize: 12)),
+                      onChanged: (val) {
+                        setStateDialog(() {
+                          if (val == true) {
+                            _excludedStudentIds.remove(student.userId);
+                          } else {
+                            _excludedStudentIds.add(student.userId);
+                          }
+                        });
+                      },
+                    );
+                  },
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    setState(() {
+                      _currentStudents = _allFetchedStudents
+                          .where((s) => !_excludedStudentIds.contains(s.userId))
+                          .toList();
+                    });
+                    _generatePdf();
+                  },
+                  child: const Text('Apply'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
