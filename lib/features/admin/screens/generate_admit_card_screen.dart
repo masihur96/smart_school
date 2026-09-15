@@ -614,8 +614,25 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           pw.SizedBox(height: 16),
 
           if (_topInstruction.isNotEmpty) ...[
-            pw.Text(_topInstruction, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10, color: primary)),
-            pw.SizedBox(height: 8),
+            pw.Container(
+              width: double.infinity,
+              padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.amber50,
+                border: pw.Border.all(color: accent, width: 1),
+                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+              ),
+              child: pw.Text(
+                _topInstruction,
+                textAlign: pw.TextAlign.center,
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 10.5,
+                  color: primary,
+                ),
+              ),
+            ),
+            pw.SizedBox(height: 16),
           ],
 
           // ── Schedule heading ────────────────────────────────────────────
@@ -927,8 +944,23 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               pw.SizedBox(height: 16),
 
               if (_topInstruction.isNotEmpty) ...[
-                pw.Text(_topInstruction, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10, color: primary)),
-                pw.SizedBox(height: 8),
+                pw.Container(
+                  width: double.infinity,
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: pw.BoxDecoration(
+                    color: bgLight,
+                    border: const pw.Border(left: pw.BorderSide(color: secondary, width: 4)),
+                  ),
+                  child: pw.Text(
+                    _topInstruction,
+                    style: pw.TextStyle(
+                      fontWeight: pw.FontWeight.bold,
+                      fontSize: 10.5,
+                      color: primary,
+                    ),
+                  ),
+                ),
+                pw.SizedBox(height: 16),
               ],
 
               // ── Schedule heading ──────────────────────────────────────────
@@ -1185,8 +1217,25 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 pw.SizedBox(height: 8),
 
                 if (_topInstruction.isNotEmpty) ...[
-                  pw.Text(_topInstruction, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10, color: PdfColors.black)),
-                  pw.SizedBox(height: 8),
+                  pw.Container(
+                    width: double.infinity,
+                    padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.grey100,
+                      border: pw.Border.all(color: PdfColors.grey400, width: 1),
+                      borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+                    ),
+                    child: pw.Text(
+                      _topInstruction,
+                      textAlign: pw.TextAlign.center,
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 10.5,
+                        color: PdfColors.black,
+                      ),
+                    ),
+                  ),
+                  pw.SizedBox(height: 12),
                 ],
 
                 // ── Schedule ────────────────────────────────────────────────
