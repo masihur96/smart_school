@@ -32,6 +32,8 @@ class GenerateTranscriptScreen extends StatefulWidget {
 class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
   String? _selectedClassId;
   String? _selectedSectionId;
+  String _selectedTemplate = 'Default';
+  final List<String> _templates = ['Default', 'Modern', 'Classic', 'Minimalist'];
   late List<Student> _currentStudents;
   final Map<String, List<Result>> _fetchedExamResults = {};
   bool _isLoading = false;
@@ -203,6 +205,24 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
       child: Row(
         children: [
           Expanded(
+            child: _buildDropdown<String>(
+              label: 'Template',
+              value: _selectedTemplate,
+              items: _templates
+                  .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                  .toList(),
+              onChanged: (val) {
+                if (val != null && val != _selectedTemplate) {
+                  setState(() {
+                    _selectedTemplate = val;
+                  });
+                  _generatePdf();
+                }
+              },
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
             child: _buildDropdown<String?>(
               label: AppLocalizations.of(context)!.className,
               value: uniqueClasses.containsKey(_selectedClassId) ? _selectedClassId : null,
@@ -325,6 +345,30 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
         pageFormat: format,
         margin: const pw.EdgeInsets.all(24),
         buildBackground: (pw.Context context) {
+          if (_selectedTemplate == 'Minimalist') {
+            return pw.SizedBox();
+          } else if (_selectedTemplate == 'Classic') {
+            return pw.FullPage(
+              ignoreMargins: true,
+              child: pw.Container(
+                margin: const pw.EdgeInsets.all(24),
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.black, width: 2),
+                ),
+              ),
+            );
+          } else if (_selectedTemplate == 'Modern') {
+            return pw.FullPage(
+              ignoreMargins: true,
+              child: pw.Container(
+                margin: const pw.EdgeInsets.all(24),
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.teal, width: 2),
+                  borderRadius: pw.BorderRadius.circular(16),
+                ),
+              ),
+            );
+          }
           return pw.FullPage(
             ignoreMargins: true,
             child: pw.Container(
@@ -369,7 +413,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
       dummyPdf.addPage(
         pw.MultiPage(
           pageTheme: makePageTheme(),
-          build: (pw.Context pwContext) => _buildTranscriptPage(
+          build: (pw.Context pwContext) => _buildSelectedTranscriptPage(
             pwContext,
             student,
             studentExamsWithResults,
@@ -416,7 +460,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
             },
           ),
           build: (pw.Context pwContext) {
-            return _buildTranscriptPage(
+            return _buildSelectedTranscriptPage(
               pwContext,
               student,
               studentExamsWithResults,
@@ -444,7 +488,35 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
     return pdf.save();
   }
 
-  List<pw.Widget> _buildTranscriptPage(
+  List<pw.Widget> _buildSelectedTranscriptPage(
+    pw.Context pwContext,
+    Student student,
+    Map<Exam, List<Result>> studentExamsWithResults,
+    String schoolName,
+    pw.ImageProvider? schoolLogo,
+    String schoolAddress,
+    String schoolPhone,
+    String schoolEmail,
+  ) {
+    if (_selectedTemplate == 'Modern') {
+      return _buildModernTranscriptPage(
+        pwContext, student, studentExamsWithResults, schoolName, schoolLogo, schoolAddress, schoolPhone, schoolEmail,
+      );
+    } else if (_selectedTemplate == 'Classic') {
+      return _buildClassicTranscriptPage(
+        pwContext, student, studentExamsWithResults, schoolName, schoolLogo, schoolAddress, schoolPhone, schoolEmail,
+      );
+    } else if (_selectedTemplate == 'Minimalist') {
+      return _buildMinimalistTranscriptPage(
+        pwContext, student, studentExamsWithResults, schoolName, schoolLogo, schoolAddress, schoolPhone, schoolEmail,
+      );
+    }
+    return _buildDefaultTranscriptPage(
+      pwContext, student, studentExamsWithResults, schoolName, schoolLogo, schoolAddress, schoolPhone, schoolEmail,
+    );
+  }
+
+  List<pw.Widget> _buildDefaultTranscriptPage(
     pw.Context pwContext,
     Student student,
     Map<Exam, List<Result>> studentExamsWithResults,
@@ -639,5 +711,546 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
     if (gpa >= 2.0) return 'Average';
     if (gpa >= 1.0) return 'Pass';
     return 'Fail';
+  }
+
+  // --- MODERN TEMPLATE ---
+  List<pw.Widget> _buildModernTranscriptPage(
+    pw.Context pwContext,
+    Student student,
+    Map<Exam, List<Result>> studentExamsWithResults,
+    String schoolName,
+    pw.ImageProvider? schoolLogo,
+    String schoolAddress,
+    String schoolPhone,
+    String schoolEmail,
+  ) {
+    double grandTotalMarks = 0;
+    double grandMarksObtained = 0;
+
+    for (var results in studentExamsWithResults.values) {
+      for (var r in results) {
+        grandTotalMarks += r.totalMarks;
+        grandMarksObtained += r.marksObtained;
+      }
+    }
+
+    final double percentage = grandTotalMarks > 0 ? (grandMarksObtained / grandTotalMarks) * 100 : 0.0;
+    final String overallGrade = _calculateGrade(percentage);
+    final double overallGPA = _calculateGPA(percentage);
+
+    String className = student.className ?? 'N/A';
+    if (_selectedClassId != null) {
+      try {
+        className = this.context.read<ClassSetupNotifier>().classes.firstWhere((c) => c.id == _selectedClassId).name;
+      } catch (_) {}
+    }
+
+    return [
+      pw.Padding(
+        padding: const pw.EdgeInsets.all(32),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            // Header: Teal accent, left aligned
+            pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                if (schoolLogo != null)
+                  pw.Container(
+                    height: 60,
+                    width: 60,
+                    margin: const pw.EdgeInsets.only(right: 16),
+                    child: pw.Image(schoolLogo),
+                  ),
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        schoolName.toUpperCase(),
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 24,
+                          color: PdfColors.teal900,
+                        ),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        'OFFICIAL ACADEMIC TRANSCRIPT',
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 12,
+                          color: PdfColors.teal600,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      pw.SizedBox(height: 2),
+                      if (schoolAddress.isNotEmpty) pw.Text(schoolAddress, style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+                      if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty)
+                        pw.Text('$schoolPhone ${schoolEmail.isNotEmpty ? '| $schoolEmail' : ''}', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            pw.SizedBox(height: 24),
+            pw.Divider(color: PdfColors.teal100, thickness: 2),
+            pw.SizedBox(height: 24),
+
+            // Student Info in Cards
+            pw.Row(
+              children: [
+                pw.Expanded(
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(12),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.teal50,
+                      borderRadius: pw.BorderRadius.circular(8),
+                    ),
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text('STUDENT DETAILS', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.teal900)),
+                        pw.SizedBox(height: 8),
+                        _buildInfoRow('Name', student.user?.name ?? 'N/A'),
+                        pw.SizedBox(height: 4),
+                        _buildInfoRow('ID', student.rollId),
+                        pw.SizedBox(height: 4),
+                        _buildInfoRow('Class', className),
+                      ],
+                    ),
+                  ),
+                ),
+                pw.SizedBox(width: 16),
+                pw.Expanded(
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(12),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.teal50,
+                      borderRadius: pw.BorderRadius.circular(8),
+                    ),
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text('ACADEMIC SUMMARY', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.teal900)),
+                        pw.SizedBox(height: 8),
+                        _buildInfoRow('Cumulative GPA', overallGPA.toStringAsFixed(2)),
+                        pw.SizedBox(height: 4),
+                        _buildInfoRow('Overall Grade', overallGrade),
+                        pw.SizedBox(height: 4),
+                        _buildInfoRow('Status', percentage >= 33 ? 'Passed' : 'Failed'),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            pw.SizedBox(height: 24),
+
+            // Results Table
+            pw.TableHelper.fromTextArray(
+              border: pw.TableBorder.all(color: PdfColors.teal100),
+              headerDecoration: const pw.BoxDecoration(color: PdfColors.teal),
+              headerStyle: pw.TextStyle(
+                color: PdfColors.white,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 10,
+              ),
+              cellStyle: const pw.TextStyle(fontSize: 10),
+              cellAlignment: pw.Alignment.center,
+              headers: ['Exam', 'Class', 'GPA', 'Grade', 'Remarks'],
+              data: [
+                ...studentExamsWithResults.entries.map((entry) {
+                  final exam = entry.key;
+                  final results = entry.value;
+
+                  double totalMarks = 0;
+                  double marksObtained = 0;
+                  for (var r in results) {
+                    totalMarks += r.totalMarks;
+                    marksObtained += r.marksObtained;
+                  }
+
+                  final pct = totalMarks > 0 ? (marksObtained / totalMarks) * 100 : 0.0;
+                  final grade = _calculateGrade(pct);
+                  final gpa = _calculateGPA(pct);
+
+                  return [
+                    exam.name,
+                    className,
+                    gpa.toStringAsFixed(2),
+                    grade,
+                    _getRemarks(gpa),
+                  ];
+                }),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  // --- CLASSIC TEMPLATE ---
+  List<pw.Widget> _buildClassicTranscriptPage(
+    pw.Context pwContext,
+    Student student,
+    Map<Exam, List<Result>> studentExamsWithResults,
+    String schoolName,
+    pw.ImageProvider? schoolLogo,
+    String schoolAddress,
+    String schoolPhone,
+    String schoolEmail,
+  ) {
+    double grandTotalMarks = 0;
+    double grandMarksObtained = 0;
+
+    for (var results in studentExamsWithResults.values) {
+      for (var r in results) {
+        grandTotalMarks += r.totalMarks;
+        grandMarksObtained += r.marksObtained;
+      }
+    }
+
+    final double percentage = grandTotalMarks > 0 ? (grandMarksObtained / grandTotalMarks) * 100 : 0.0;
+    final String overallGrade = _calculateGrade(percentage);
+    final double overallGPA = _calculateGPA(percentage);
+
+    String className = student.className ?? 'N/A';
+    if (_selectedClassId != null) {
+      try {
+        className = this.context.read<ClassSetupNotifier>().classes.firstWhere((c) => c.id == _selectedClassId).name;
+      } catch (_) {}
+    }
+
+    return [
+      pw.Padding(
+        padding: const pw.EdgeInsets.all(32),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            // Center Aligned Header
+            if (schoolLogo != null)
+              pw.Container(
+                height: 70,
+                width: 70,
+                margin: const pw.EdgeInsets.only(bottom: 12),
+                child: pw.Image(schoolLogo),
+              ),
+            pw.Text(
+              schoolName,
+              style: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 26,
+              ),
+            ),
+            pw.SizedBox(height: 4),
+            pw.Text(
+              schoolAddress,
+              style: const pw.TextStyle(fontSize: 10),
+            ),
+            pw.SizedBox(height: 16),
+            pw.Container(
+              padding: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              decoration: pw.BoxDecoration(
+                border: pw.Border.all(color: PdfColors.black, width: 1),
+              ),
+              child: pw.Text(
+                'STUDENT TRANSCRIPT',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 14,
+                  letterSpacing: 2,
+                ),
+              ),
+            ),
+            pw.SizedBox(height: 32),
+
+            // Student Info
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    _buildInfoRow('Student Name', student.user?.name ?? 'N/A'),
+                    pw.SizedBox(height: 6),
+                    _buildInfoRow('Student ID', student.rollId),
+                  ],
+                ),
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    _buildInfoRow('Class', className),
+                    pw.SizedBox(height: 6),
+                    _buildInfoRow('Issue Date', '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}'),
+                  ],
+                ),
+              ],
+            ),
+            pw.SizedBox(height: 24),
+            pw.Divider(color: PdfColors.black, thickness: 1),
+            pw.SizedBox(height: 24),
+
+            // Table with classic borders
+            pw.TableHelper.fromTextArray(
+              border: pw.TableBorder.all(color: PdfColors.black, width: 1),
+              headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
+              headerStyle: pw.TextStyle(
+                color: PdfColors.black,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 11,
+              ),
+              cellStyle: const pw.TextStyle(fontSize: 11),
+              cellAlignment: pw.Alignment.center,
+              headers: ['Examination', 'Class', 'GPA', 'Grade', 'Remarks'],
+              data: [
+                ...studentExamsWithResults.entries.map((entry) {
+                  final exam = entry.key;
+                  final results = entry.value;
+
+                  double totalMarks = 0;
+                  double marksObtained = 0;
+                  for (var r in results) {
+                    totalMarks += r.totalMarks;
+                    marksObtained += r.marksObtained;
+                  }
+
+                  final pct = totalMarks > 0 ? (marksObtained / totalMarks) * 100 : 0.0;
+                  final grade = _calculateGrade(pct);
+                  final gpa = _calculateGPA(pct);
+
+                  return [
+                    exam.name,
+                    className,
+                    gpa.toStringAsFixed(2),
+                    grade,
+                    _getRemarks(gpa),
+                  ];
+                }),
+              ],
+            ),
+            pw.SizedBox(height: 32),
+
+            // Final Result Summary Classic
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.end,
+              children: [
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(12),
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(color: PdfColors.black, width: 1),
+                  ),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text('FINAL RESULT', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12)),
+                      pw.SizedBox(height: 8),
+                      pw.Row(children: [
+                        pw.SizedBox(width: 80, child: pw.Text('CGPA:', style: const pw.TextStyle(fontSize: 11))),
+                        pw.Text(overallGPA.toStringAsFixed(2), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11)),
+                      ]),
+                      pw.SizedBox(height: 4),
+                      pw.Row(children: [
+                        pw.SizedBox(width: 80, child: pw.Text('Overall Grade:', style: const pw.TextStyle(fontSize: 11))),
+                        pw.Text(overallGrade, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11)),
+                      ]),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  // --- MINIMALIST TEMPLATE ---
+  List<pw.Widget> _buildMinimalistTranscriptPage(
+    pw.Context pwContext,
+    Student student,
+    Map<Exam, List<Result>> studentExamsWithResults,
+    String schoolName,
+    pw.ImageProvider? schoolLogo,
+    String schoolAddress,
+    String schoolPhone,
+    String schoolEmail,
+  ) {
+    double grandTotalMarks = 0;
+    double grandMarksObtained = 0;
+
+    for (var results in studentExamsWithResults.values) {
+      for (var r in results) {
+        grandTotalMarks += r.totalMarks;
+        grandMarksObtained += r.marksObtained;
+      }
+    }
+
+    final double percentage = grandTotalMarks > 0 ? (grandMarksObtained / grandTotalMarks) * 100 : 0.0;
+    final String overallGrade = _calculateGrade(percentage);
+    final double overallGPA = _calculateGPA(percentage);
+
+    String className = student.className ?? 'N/A';
+    if (_selectedClassId != null) {
+      try {
+        className = this.context.read<ClassSetupNotifier>().classes.firstWhere((c) => c.id == _selectedClassId).name;
+      } catch (_) {}
+    }
+
+    return [
+      pw.Padding(
+        padding: const pw.EdgeInsets.all(32),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            // Minimal Header
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        schoolName,
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        'Academic Transcript',
+                        style: const pw.TextStyle(
+                          fontSize: 12,
+                          color: PdfColors.grey700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (schoolLogo != null)
+                  pw.Container(
+                    height: 40,
+                    width: 40,
+                    child: pw.Image(schoolLogo),
+                  ),
+              ],
+            ),
+            pw.SizedBox(height: 24),
+
+            // Minimal Info
+            pw.Row(
+              children: [
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text('Student', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+                      pw.SizedBox(height: 2),
+                      pw.Text(student.user?.name ?? 'N/A', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text('ID', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+                      pw.SizedBox(height: 2),
+                      pw.Text(student.rollId, style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text('Class', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+                      pw.SizedBox(height: 2),
+                      pw.Text(className, style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            pw.SizedBox(height: 32),
+
+            // Minimal Table (lines only on bottom)
+            pw.TableHelper.fromTextArray(
+              border: const pw.TableBorder(
+                horizontalInside: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
+                bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
+              ),
+              headerDecoration: const pw.BoxDecoration(
+                border: pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
+              ),
+              headerStyle: pw.TextStyle(
+                color: PdfColors.black,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 10,
+              ),
+              cellStyle: const pw.TextStyle(fontSize: 10, color: PdfColors.grey800),
+              cellAlignment: pw.Alignment.centerLeft,
+              headers: ['Exam', 'Class', 'GPA', 'Grade', 'Remarks'],
+              data: [
+                ...studentExamsWithResults.entries.map((entry) {
+                  final exam = entry.key;
+                  final results = entry.value;
+
+                  double totalMarks = 0;
+                  double marksObtained = 0;
+                  for (var r in results) {
+                    totalMarks += r.totalMarks;
+                    marksObtained += r.marksObtained;
+                  }
+
+                  final pct = totalMarks > 0 ? (marksObtained / totalMarks) * 100 : 0.0;
+                  final grade = _calculateGrade(pct);
+                  final gpa = _calculateGPA(pct);
+
+                  return [
+                    exam.name,
+                    className,
+                    gpa.toStringAsFixed(2),
+                    grade,
+                    _getRemarks(gpa),
+                  ];
+                }),
+              ],
+            ),
+            pw.SizedBox(height: 48),
+
+            // Minimal Footer Summary
+            pw.Row(
+              children: [
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text('CGPA', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+                      pw.SizedBox(height: 2),
+                      pw.Text(overallGPA.toStringAsFixed(2), style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text('Overall Grade', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+                      pw.SizedBox(height: 2),
+                      pw.Text(overallGrade, style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ];
   }
 }
