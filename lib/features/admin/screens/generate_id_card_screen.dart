@@ -320,10 +320,16 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
   ) async {
     pw.Font? fontReg;
     pw.Font? fontBold;
+    pw.Font? signatureFont;
     try {
       fontReg = await PdfGoogleFonts.notoSansBengaliRegular();
       fontBold = await PdfGoogleFonts.notoSansBengaliBold();
     } catch (_) {}
+    try {
+      signatureFont = await PdfGoogleFonts.dancingScriptBold();
+    } catch (_) {}
+
+    final signatoryName = context.read<AuthNotifier>().user?.name ?? 'Principal';
 
     final pdf = pw.Document(
       theme: fontReg != null
@@ -422,6 +428,8 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                   schoolEmail,
                   resolvedClassName,
                   resolvedSectionName,
+                  signatoryName,
+                  signatureFont,
                 );
               }).toList(),
             );
@@ -445,15 +453,17 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
     String schoolEmail,
     String resolvedClassName,
     String resolvedSectionName,
+    String signatoryName,
+    pw.Font? signatureFont,
   ) {
     if (_selectedTemplate == 'Modern') {
-      return _buildModernIdCard(student, schoolName, schoolLogo, studentAvatar, width, height, schoolAddress, schoolPhone, schoolEmail, resolvedClassName, resolvedSectionName);
+      return _buildModernIdCard(student, schoolName, schoolLogo, studentAvatar, width, height, schoolAddress, schoolPhone, schoolEmail, resolvedClassName, resolvedSectionName, signatoryName, signatureFont);
     } else if (_selectedTemplate == 'Classic') {
-      return _buildClassicIdCard(student, schoolName, schoolLogo, studentAvatar, width, height, schoolAddress, schoolPhone, schoolEmail, resolvedClassName, resolvedSectionName);
+      return _buildClassicIdCard(student, schoolName, schoolLogo, studentAvatar, width, height, schoolAddress, schoolPhone, schoolEmail, resolvedClassName, resolvedSectionName, signatoryName, signatureFont);
     } else if (_selectedTemplate == 'Minimalist') {
-      return _buildMinimalistIdCard(student, schoolName, schoolLogo, studentAvatar, width, height, schoolAddress, schoolPhone, schoolEmail, resolvedClassName, resolvedSectionName);
+      return _buildMinimalistIdCard(student, schoolName, schoolLogo, studentAvatar, width, height, schoolAddress, schoolPhone, schoolEmail, resolvedClassName, resolvedSectionName, signatoryName, signatureFont);
     }
-    return _buildDefaultIdCard(student, schoolName, schoolLogo, studentAvatar, width, height, schoolAddress, schoolPhone, schoolEmail, resolvedClassName, resolvedSectionName);
+    return _buildDefaultIdCard(student, schoolName, schoolLogo, studentAvatar, width, height, schoolAddress, schoolPhone, schoolEmail, resolvedClassName, resolvedSectionName, signatoryName, signatureFont);
   }
 
   pw.Widget _buildDefaultIdCard(
@@ -468,6 +478,8 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
     String schoolEmail,
     String resolvedClassName,
     String resolvedSectionName,
+    String signatoryName,
+    pw.Font? signatureFont,
   ) {
     final className = student.className?.isNotEmpty == true
         ? student.className!
@@ -684,21 +696,25 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                     color: PdfColors.black,
                   ),
                 ),
-                // Principal Signature
+                // Authorized Signature
                 pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    pw.Container(
-                      width: 60,
-                      child: pw.Divider(color: PdfColors.black, thickness: 1),
-                    ),
-                    pw.SizedBox(height: 2),
                     pw.Text(
-                      'Principal',
+                      signatoryName,
                       style: pw.TextStyle(
-                        fontSize: 8,
-                        fontWeight: pw.FontWeight.bold,
+                        font: signatureFont,
+                        fontSize: 16,
                         color: PdfColors.deepPurple,
                       ),
+                    ),
+                    pw.Container(
+                      width: 70,
+                      child: pw.Divider(color: PdfColors.deepPurple, thickness: 0.8),
+                    ),
+                    pw.Text(
+                      'Authorized Signature',
+                      style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey700),
                     ),
                   ],
                 ),
@@ -779,6 +795,8 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
     String schoolEmail,
     String resolvedClassName,
     String resolvedSectionName,
+    String signatoryName,
+    pw.Font? signatureFont,
   ) {
     final className = student.className?.isNotEmpty == true ? student.className! : resolvedClassName;
     final sectionName = student.sectionName?.isNotEmpty == true ? student.sectionName! : resolvedSectionName;
@@ -975,18 +993,23 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                   ),
                 ),
                 pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    pw.Container(
-                      width: 60,
-                      child: pw.Divider(color: PdfColors.indigo700, thickness: 1),
-                    ),
                     pw.Text(
-                      'Principal',
+                      signatoryName,
                       style: pw.TextStyle(
-                        fontSize: 8,
-                        fontWeight: pw.FontWeight.bold,
+                        font: signatureFont,
+                        fontSize: 16,
                         color: PdfColors.indigo700,
                       ),
+                    ),
+                    pw.Container(
+                      width: 70,
+                      child: pw.Divider(color: PdfColors.indigo700, thickness: 0.8),
+                    ),
+                    pw.Text(
+                      'Authorized Signature',
+                      style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey600),
                     ),
                   ],
                 ),
@@ -1031,6 +1054,8 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
     String schoolEmail,
     String resolvedClassName,
     String resolvedSectionName,
+    String signatoryName,
+    pw.Font? signatureFont,
   ) {
     final className = student.className?.isNotEmpty == true ? student.className! : resolvedClassName;
     final sectionName = student.sectionName?.isNotEmpty == true ? student.sectionName! : resolvedSectionName;
@@ -1164,10 +1189,24 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                   ),
                 ),
                 pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    pw.Container(width: 60, child: pw.Divider(color: PdfColors.blue900, thickness: 1)),
-                    pw.SizedBox(height: 2),
-                    pw.Text('Principal', style: pw.TextStyle(fontSize: 8, color: PdfColors.blue900, fontWeight: pw.FontWeight.bold)),
+                    pw.Text(
+                      signatoryName,
+                      style: pw.TextStyle(
+                        font: signatureFont,
+                        fontSize: 16,
+                        color: PdfColors.blue900,
+                      ),
+                    ),
+                    pw.Container(
+                      width: 70,
+                      child: pw.Divider(color: PdfColors.blue900, thickness: 0.8),
+                    ),
+                    pw.Text(
+                      'Authorized Signature',
+                      style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey700),
+                    ),
                   ],
                 ),
               ],
@@ -1205,6 +1244,8 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
     String schoolEmail,
     String resolvedClassName,
     String resolvedSectionName,
+    String signatoryName,
+    pw.Font? signatureFont,
   ) {
     final className = student.className?.isNotEmpty == true ? student.className! : resolvedClassName;
     final sectionName = student.sectionName?.isNotEmpty == true ? student.sectionName! : resolvedSectionName;
@@ -1356,10 +1397,24 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                 ),
               ),
               pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
                 children: [
-                  pw.Container(width: 60, child: pw.Divider(color: PdfColors.grey800, thickness: 1)),
-                  pw.SizedBox(height: 4),
-                  pw.Text('Authorized Signature', style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey700)),
+                  pw.Text(
+                    signatoryName,
+                    style: pw.TextStyle(
+                      font: signatureFont,
+                      fontSize: 16,
+                      color: PdfColors.grey800,
+                    ),
+                  ),
+                  pw.Container(
+                    width: 70,
+                    child: pw.Divider(color: PdfColors.grey600, thickness: 0.8),
+                  ),
+                  pw.Text(
+                    'Authorized Signature',
+                    style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey600),
+                  ),
                 ],
               ),
             ],
