@@ -72,7 +72,8 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
           _isLoading = false;
         });
       }
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('❌ PDF Generation Error: $e\n$st');
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -793,60 +794,69 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
       width: width,
       height: height,
       decoration: pw.BoxDecoration(
+        border: pw.Border.all(color: PdfColors.indigo700, width: 3),
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(12)),
         color: PdfColors.white,
-        borderRadius: pw.BorderRadius.circular(12),
-        border: pw.Border.all(color: PdfColors.indigo200, width: 1.5),
       ),
       child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
         children: [
-          // ── Header ──────────────────────────────────────────
+          // ── Header ──
           pw.Container(
-            padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 8),
             decoration: const pw.BoxDecoration(
               color: PdfColors.indigo700,
               borderRadius: pw.BorderRadius.only(
-                topLeft: pw.Radius.circular(11),
-                topRight: pw.Radius.circular(11),
+                topLeft: pw.Radius.circular(9),
+                topRight: pw.Radius.circular(9),
               ),
             ),
             child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.center,
               crossAxisAlignment: pw.CrossAxisAlignment.center,
               children: [
                 if (schoolLogo != null)
                   pw.Container(
-                    height: 36,
-                    width: 36,
-                    decoration: const pw.BoxDecoration(
+                    height: 35,
+                    width: 35,
+                    margin: const pw.EdgeInsets.only(right: 8),
+                    decoration: pw.BoxDecoration(
                       shape: pw.BoxShape.circle,
                       color: PdfColors.white,
-                    ),
-                    child: pw.ClipOval(
-                      child: pw.Image(schoolLogo, fit: pw.BoxFit.contain),
+                      image: pw.DecorationImage(
+                        image: schoolLogo,
+                        fit: pw.BoxFit.contain,
+                      ),
                     ),
                   ),
-                pw.SizedBox(width: 8),
                 pw.Expanded(
                   child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
                       pw.Text(
                         schoolName,
                         style: pw.TextStyle(
                           color: PdfColors.white,
                           fontWeight: pw.FontWeight.bold,
-                          fontSize: 11,
+                          fontSize: 10,
                         ),
+                        textAlign: pw.TextAlign.center,
                       ),
-                      if (schoolPhone.isNotEmpty)
+                      if (schoolAddress.isNotEmpty)
                         pw.Text(
-                          'Ph: $schoolPhone',
-                          style:  pw.TextStyle(color: PdfColors.white, fontSize: 7),
+                          schoolAddress,
+                          style: const pw.TextStyle(color: PdfColors.white, fontSize: 6),
+                          textAlign: pw.TextAlign.center,
+                          maxLines: 1,
                         ),
-                      if (schoolEmail.isNotEmpty)
+                      if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty)
                         pw.Text(
-                          schoolEmail,
-                          style:  pw.TextStyle(color: PdfColors.white, fontSize: 7),
+                          [
+                            if (schoolPhone.isNotEmpty) 'Ph: $schoolPhone',
+                            if (schoolEmail.isNotEmpty) schoolEmail,
+                          ].join(' | '),
+                          style: const pw.TextStyle(color: PdfColors.amber, fontSize: 5),
+                          textAlign: pw.TextAlign.center,
+                          maxLines: 1,
                         ),
                     ],
                   ),
@@ -855,112 +865,101 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
             ),
           ),
 
-          // ── Photo ────────────────────────────────────────────
-          pw.Center(
-            child: pw.Container(
-              margin: const pw.EdgeInsets.only(top: 12),
-              height: 72,
-              width: 72,
-              decoration: pw.BoxDecoration(
-                shape: pw.BoxShape.circle,
-                border: pw.Border.all(color: PdfColors.indigo700, width: 3),
-                color: PdfColors.grey200,
-              ),
-              child: studentAvatar != null
-                  ? pw.ClipOval(
-                      child: pw.Image(studentAvatar, fit: pw.BoxFit.cover),
-                    )
-                  : pw.Center(
-                      child: pw.Text(
-                        student.user?.name.isNotEmpty == true
-                            ? student.user!.name[0]
-                            : '?',
-                        style: pw.TextStyle(
-                          fontSize: 28,
-                          fontWeight: pw.FontWeight.bold,
-                          color: PdfColors.indigo700,
-                        ),
-                      ),
-                    ),
-            ),
-          ),
-
-          pw.SizedBox(height: 8),
-
-          // ── Student Name + Badge ─────────────────────────────
-          pw.Center(
+          // ── Identity Card Banner ──
+          pw.Container(
+            width: double.infinity,
+            color: PdfColors.amber,
+            padding: const pw.EdgeInsets.symmetric(vertical: 4),
             child: pw.Text(
-              student.user?.name ?? 'Unknown',
+              'IDENTITY CARD',
               style: pw.TextStyle(
-                fontWeight: pw.FontWeight.bold,
-                fontSize: 13,
                 color: PdfColors.indigo900,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 9,
+                letterSpacing: 1.5,
               ),
               textAlign: pw.TextAlign.center,
             ),
           ),
-          pw.SizedBox(height: 4),
-          pw.Center(
-            child: pw.Container(
-              padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-              decoration: pw.BoxDecoration(
-                color: PdfColors.indigo700,
-                borderRadius: pw.BorderRadius.circular(10),
-              ),
-              child: pw.Text(
-                'STUDENT',
-                style: pw.TextStyle(
-                  fontSize: 7,
-                  color: PdfColors.white,
-                  fontWeight: pw.FontWeight.bold,
-                  letterSpacing: 1.5,
-                ),
-              ),
+
+          pw.SizedBox(height: 10),
+
+          // ── Photo ──
+          pw.Container(
+            height: 80,
+            width: 80,
+            decoration: pw.BoxDecoration(
+              shape: pw.BoxShape.circle,
+              border: pw.Border.all(color: PdfColors.indigo700, width: 3),
+              color: PdfColors.grey200,
             ),
+            child: studentAvatar != null
+                ? pw.ClipOval(child: pw.Image(studentAvatar, fit: pw.BoxFit.cover))
+                : pw.Center(
+                    child: pw.Text(
+                      student.user?.name.isNotEmpty == true
+                          ? student.user!.name[0]
+                          : '?',
+                      style: pw.TextStyle(
+                        fontSize: 30,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.indigo700,
+                      ),
+                    ),
+                  ),
+          ),
+
+          pw.SizedBox(height: 8),
+
+          // ── Student Name ──
+          pw.Text(
+            student.user?.name ?? 'Unknown',
+            style: pw.TextStyle(
+              fontWeight: pw.FontWeight.bold,
+              fontSize: 13,
+              color: PdfColors.indigo900,
+            ),
+            textAlign: pw.TextAlign.center,
+            maxLines: 1,
+          ),
+          pw.Text(
+            'STUDENT',
+            style: pw.TextStyle(
+              fontSize: 8,
+              color: PdfColors.indigo700,
+              fontWeight: pw.FontWeight.bold,
+              letterSpacing: 1.5,
+            ),
+            textAlign: pw.TextAlign.center,
           ),
 
           pw.SizedBox(height: 10),
-          pw.Padding(
-            padding: const pw.EdgeInsets.symmetric(horizontal: 8),
-            child: pw.Divider(color: PdfColors.indigo100, thickness: 1),
-          ),
-          pw.SizedBox(height: 6),
+          pw.Divider(color: PdfColors.indigo100),
+          pw.SizedBox(height: 4),
 
-          // ── Details ──────────────────────────────────────────
+          // ── Details ──
           pw.Padding(
             padding: const pw.EdgeInsets.symmetric(horizontal: 16),
             child: pw.Column(
               children: [
-                _buildModernDetailRow('ID', student.rollId),
-                _buildModernDetailRow('Class', '$className - $sectionName'),
-                _buildModernDetailRow(
+                _buildDetailRow('ID', student.rollId),
+                _buildDetailRow('Class', '$className - $sectionName'),
+                _buildDetailRow(
                   'Phone',
-                  student.user?.phone?.isNotEmpty == true
-                      ? student.user!.phone!
-                      : (student.guardianContact.isNotEmpty
-                          ? student.guardianContact
-                          : 'N/A'),
+                  student.guardianContact.isNotEmpty
+                      ? student.guardianContact
+                      : (student.user?.phone ?? 'N/A'),
                 ),
-                _buildModernDetailRow('Email', student.user?.email ?? 'N/A'),
+                _buildDetailRow('Email', student.user?.email ?? 'N/A'),
               ],
             ),
           ),
 
           pw.Spacer(),
 
-          // ── Footer ───────────────────────────────────────────
-          pw.Container(
-            padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: const pw.BoxDecoration(
-              color: PdfColors.indigo50,
-              borderRadius: pw.BorderRadius.only(
-                bottomLeft: pw.Radius.circular(11),
-                bottomRight: pw.Radius.circular(11),
-              ),
-              border: pw.Border(
-                top: pw.BorderSide(color: PdfColors.indigo200, width: 1),
-              ),
-            ),
+          // ── Footer ──
+          pw.Padding(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               crossAxisAlignment: pw.CrossAxisAlignment.end,
@@ -976,9 +975,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                   ),
                 ),
                 pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    pw.SizedBox(height: 18),
                     pw.Container(
                       width: 60,
                       child: pw.Divider(color: PdfColors.indigo700, thickness: 1),
@@ -986,9 +983,9 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                     pw.Text(
                       'Principal',
                       style: pw.TextStyle(
-                        fontSize: 7,
-                        color: PdfColors.indigo900,
+                        fontSize: 8,
                         fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.indigo700,
                       ),
                     ),
                   ],
