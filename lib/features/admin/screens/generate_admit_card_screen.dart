@@ -253,7 +253,11 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     // Collect all futures simultaneously
     final fontRegFuture = safeFont(PdfGoogleFonts.notoSansBengaliRegular());
     final fontBoldFuture = safeFont(PdfGoogleFonts.notoSansBengaliBold());
+    final signatureFontFuture = safeFont(PdfGoogleFonts.dancingScriptBold());
     final logoFuture = safeImage(schoolLogoUrl);
+
+    final signatoryName =
+        context.read<AuthNotifier>().user?.name ?? 'Principal';
 
     final studentIds = <String>[];
     final avatarFutures = <Future<pw.ImageProvider?>>[];
@@ -267,16 +271,18 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     final allResults = await Future.wait<Object?>([
       fontRegFuture,
       fontBoldFuture,
+      signatureFontFuture,
       logoFuture,
       ...avatarFutures,
     ]);
 
     final fontReg = allResults[0] as pw.Font?;
     final fontBold = allResults[1] as pw.Font?;
-    final schoolLogo = allResults[2] as pw.ImageProvider?;
+    final signatureFont = allResults[2] as pw.Font?;
+    final schoolLogo = allResults[3] as pw.ImageProvider?;
     final Map<String, pw.ImageProvider> avatars = {};
     for (var i = 0; i < studentIds.length; i++) {
-      final img = allResults[3 + i] as pw.ImageProvider?;
+      final img = allResults[4 + i] as pw.ImageProvider?;
       if (img != null) avatars[studentIds[i]] = img;
     }
 
@@ -351,6 +357,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     avatar: avatars[student.userId],
                     subjects: studentSubjects,
                     instruction: _topInstruction,
+                    signatoryName: signatoryName,
+                    signatureFont: signatureFont,
                   );
                 }).toList(),
               );
@@ -369,10 +377,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       final sectionName = student.sectionName?.isNotEmpty == true
           ? student.sectionName!
           : resolvedSectionName;
-      final avatar = avatars[student.userId];
-
-      // Subjects for this specific student (all their enrolled classes).
       final studentSubjects = subjectsForStudent(student);
+      final avatar = avatars[student.userId];
 
       pdf.addPage(
         pw.Page(
@@ -392,6 +398,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   schoolLogo: schoolLogo,
                   avatar: avatar,
                   subjects: studentSubjects,
+                  signatoryName: signatoryName,
+                  signatureFont: signatureFont,
                 );
               case AdmitCardTemplate.modern:
                 return _buildModernTemplate(
@@ -405,6 +413,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   schoolLogo: schoolLogo,
                   avatar: avatar,
                   subjects: studentSubjects,
+                  signatoryName: signatoryName,
+                  signatureFont: signatureFont,
                 );
               case AdmitCardTemplate.minimal:
                 return _buildMinimalTemplate(
@@ -418,6 +428,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   schoolLogo: schoolLogo,
                   avatar: avatar,
                   subjects: studentSubjects,
+                  signatoryName: signatoryName,
+                  signatureFont: signatureFont,
                 );
               case AdmitCardTemplate.compact:
                 return pw.SizedBox(); // handled above
@@ -444,6 +456,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     required pw.ImageProvider? schoolLogo,
     required pw.ImageProvider? avatar,
     required List<ExamAssignment> subjects,
+    String? signatoryName,
+    pw.Font? signatureFont,
   }) {
     const primary = PdfColors.deepPurple800;
     const accent = PdfColors.amber700;
@@ -509,7 +523,10 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   decoration: pw.BoxDecoration(
                     shape: pw.BoxShape.circle,
                     border: pw.Border.all(color: primary, width: 2),
-                    image: pw.DecorationImage(image: schoolLogo, fit: pw.BoxFit.contain),
+                    image: pw.DecorationImage(
+                      image: schoolLogo,
+                      fit: pw.BoxFit.contain,
+                    ),
                   ),
                 ),
               pw.Expanded(
@@ -519,23 +536,42 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     pw.Text(
                       schoolName.toUpperCase(),
                       textAlign: pw.TextAlign.center,
-                      style: pw.TextStyle(color: primary, fontWeight: pw.FontWeight.bold, fontSize: 16, letterSpacing: 1.2),
+                      style: pw.TextStyle(
+                        color: primary,
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 16,
+                        letterSpacing: 1.2,
+                      ),
                     ),
                     pw.SizedBox(height: 3),
                     if (schoolAddress.isNotEmpty)
-                      pw.Text(schoolAddress, textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+                      pw.Text(
+                        schoolAddress,
+                        textAlign: pw.TextAlign.center,
+                        style: const pw.TextStyle(
+                          fontSize: 9,
+                          color: PdfColors.grey700,
+                        ),
+                      ),
                     if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty) ...[
                       pw.SizedBox(height: 2),
                       pw.Text(
-                        [if (schoolPhone.isNotEmpty) 'Ph: $schoolPhone', if (schoolEmail.isNotEmpty) 'Email: $schoolEmail'].join('   |   '),
+                        [
+                          if (schoolPhone.isNotEmpty) 'Ph: $schoolPhone',
+                          if (schoolEmail.isNotEmpty) 'Email: $schoolEmail',
+                        ].join('   |   '),
                         textAlign: pw.TextAlign.center,
-                        style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.grey600),
+                        style: const pw.TextStyle(
+                          fontSize: 8.5,
+                          color: PdfColors.grey600,
+                        ),
                       ),
                     ],
                   ],
                 ),
               ),
-              if (schoolLogo != null) pw.SizedBox(width: 70), // Balance logo on left
+              if (schoolLogo != null)
+                pw.SizedBox(width: 70), // Balance logo on left
             ],
           ),
 
@@ -548,23 +584,46 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
-              pw.Text(widget.exam.name.toUpperCase(),
-                style: pw.TextStyle(color: primary, fontWeight: pw.FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
+              pw.Text(
+                widget.exam.name.toUpperCase(),
+                style: pw.TextStyle(
+                  color: primary,
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 13,
+                  letterSpacing: 1.5,
+                ),
+              ),
               if (widget.exam.startDate != null) ...[
                 pw.SizedBox(height: 4),
                 pw.Text(
                   '${DateFormat('dd MMM yyyy').format(widget.exam.startDate!)}  –  ${DateFormat('dd MMM yyyy').format(widget.exam.endDate ?? widget.exam.startDate!)}',
-                  style: const pw.TextStyle(fontSize: 9.5, color: PdfColors.grey700)),
+                  style: const pw.TextStyle(
+                    fontSize: 9.5,
+                    color: PdfColors.grey700,
+                  ),
+                ),
               ],
               pw.SizedBox(height: 10),
               pw.Container(
-                padding: const pw.EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 6,
+                ),
                 decoration: pw.BoxDecoration(
                   color: primary,
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(6),
+                  ),
                 ),
-                child: pw.Text('ADMIT CARD',
-                  style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold, fontSize: 14, letterSpacing: 5)),
+                child: pw.Text(
+                  'ADMIT CARD',
+                  style: pw.TextStyle(
+                    color: PdfColors.white,
+                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 14,
+                    letterSpacing: 5,
+                  ),
+                ),
               ),
             ],
           ),
@@ -581,37 +640,93 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Container(
-                  width: 80, height: 100,
+                  width: 80,
+                  height: 100,
                   decoration: pw.BoxDecoration(
                     color: light,
-                    borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                    borderRadius: const pw.BorderRadius.all(
+                      pw.Radius.circular(6),
+                    ),
                     border: pw.Border.all(color: PdfColors.grey400),
                   ),
                   child: avatar != null
-                      ? pw.ClipRRect(horizontalRadius: 5, verticalRadius: 5, child: pw.Image(avatar, fit: pw.BoxFit.cover))
-                      : pw.Center(child: pw.Text(
-                          student.user?.name.isNotEmpty == true ? student.user!.name[0].toUpperCase() : '?',
-                          style: pw.TextStyle(fontSize: 32, fontWeight: pw.FontWeight.bold, color: primary))),
+                      ? pw.ClipRRect(
+                          horizontalRadius: 5,
+                          verticalRadius: 5,
+                          child: pw.Image(avatar, fit: pw.BoxFit.cover),
+                        )
+                      : pw.Center(
+                          child: pw.Text(
+                            student.user?.name.isNotEmpty == true
+                                ? student.user!.name[0].toUpperCase()
+                                : '?',
+                            style: pw.TextStyle(
+                              fontSize: 32,
+                              fontWeight: pw.FontWeight.bold,
+                              color: primary,
+                            ),
+                          ),
+                        ),
                 ),
                 pw.SizedBox(width: 16),
                 pw.Expanded(
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(student.user?.name ?? 'N/A',
-                        style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: primary)),
+                      pw.Text(
+                        student.user?.name ?? 'N/A',
+                        style: pw.TextStyle(
+                          fontSize: 14,
+                          fontWeight: pw.FontWeight.bold,
+                          color: primary,
+                        ),
+                      ),
                       pw.SizedBox(height: 10),
-                      pw.Row(children: [
-                        pw.Expanded(child: _classicField('Roll No.', student.rollId, primary: primary, big: true)),
-                        pw.SizedBox(width: 12),
-                        pw.Expanded(child: _classicField('Class / Section', '$className  –  $sectionName', primary: primary, big: true)),
-                      ]),
+                      pw.Row(
+                        children: [
+                          pw.Expanded(
+                            child: _classicField(
+                              'Roll No.',
+                              student.rollId,
+                              primary: primary,
+                              big: true,
+                            ),
+                          ),
+                          pw.SizedBox(width: 12),
+                          pw.Expanded(
+                            child: _classicField(
+                              'Class / Section',
+                              '$className  –  $sectionName',
+                              primary: primary,
+                              big: true,
+                            ),
+                          ),
+                        ],
+                      ),
                       pw.SizedBox(height: 10),
-                      pw.Row(children: [
-                        pw.Expanded(child: _classicField('Contact', student.guardianContact.isNotEmpty ? student.guardianContact : (student.user?.phone ?? 'N/A'), primary: primary, big: true)),
-                        pw.SizedBox(width: 12),
-                        pw.Expanded(child: _classicField('Email', student.user?.email ?? 'N/A', primary: primary, big: true)),
-                      ]),
+                      pw.Row(
+                        children: [
+                          pw.Expanded(
+                            child: _classicField(
+                              'Contact',
+                              student.guardianContact.isNotEmpty
+                                  ? student.guardianContact
+                                  : (student.user?.phone ?? 'N/A'),
+                              primary: primary,
+                              big: true,
+                            ),
+                          ),
+                          pw.SizedBox(width: 12),
+                          pw.Expanded(
+                            child: _classicField(
+                              'Email',
+                              student.user?.email ?? 'N/A',
+                              primary: primary,
+                              big: true,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -624,7 +739,10 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           if (_topInstruction.isNotEmpty) ...[
             pw.Container(
               width: double.infinity,
-              padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const pw.EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
               decoration: pw.BoxDecoration(
                 color: PdfColors.amber50,
                 border: pw.Border.all(color: accent, width: 1),
@@ -648,13 +766,34 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
-              pw.Text('EXAMINATION SCHEDULE',
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11, color: primary, letterSpacing: 1)),
+              pw.Text(
+                'EXAMINATION SCHEDULE',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 11,
+                  color: primary,
+                  letterSpacing: 1,
+                ),
+              ),
               pw.Container(
-                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: pw.BoxDecoration(color: accent, borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4))),
-                child: pw.Text('${subjects.length} Subject${subjects.length == 1 ? '' : 's'}',
-                  style: pw.TextStyle(fontSize: 8.5, fontWeight: pw.FontWeight.bold, color: PdfColors.black)),
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: pw.BoxDecoration(
+                  color: accent,
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(4),
+                  ),
+                ),
+                child: pw.Text(
+                  '${subjects.length} Subject${subjects.length == 1 ? '' : 's'}',
+                  style: pw.TextStyle(
+                    fontSize: 8.5,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.black,
+                  ),
+                ),
               ),
             ],
           ),
@@ -665,7 +804,14 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             pw.Container(
               padding: const pw.EdgeInsets.all(12),
               color: PdfColors.grey100,
-              child: pw.Text('No subjects scheduled.', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600), textAlign: pw.TextAlign.center),
+              child: pw.Text(
+                'No subjects scheduled.',
+                style: const pw.TextStyle(
+                  fontSize: 10,
+                  color: PdfColors.grey600,
+                ),
+                textAlign: pw.TextAlign.center,
+              ),
             )
           else
             pw.Row(
@@ -690,8 +836,15 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Text('IMPORTANT INSTRUCTIONS',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5, color: primary, letterSpacing: 0.5)),
+                pw.Text(
+                  'IMPORTANT INSTRUCTIONS',
+                  style: pw.TextStyle(
+                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 9.5,
+                    color: primary,
+                    letterSpacing: 0.5,
+                  ),
+                ),
                 pw.SizedBox(height: 6),
                 pw.Wrap(
                   spacing: 24,
@@ -699,15 +852,19 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   children: _instructions.asMap().entries.map((e) {
                     return pw.SizedBox(
                       width: 220,
-                      child: pw.Text('${e.key + 1}.  ${e.value}',
-                        style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey800)),
+                      child: pw.Text(
+                        '${e.key + 1}.  ${e.value}',
+                        style: const pw.TextStyle(
+                          fontSize: 8,
+                          color: PdfColors.grey800,
+                        ),
+                      ),
                     );
                   }).toList(),
                 ),
               ],
             ),
           ),
-
 
           pw.SizedBox(height: 10),
 
@@ -718,7 +875,12 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             children: [
               _sigBlock('Student Signature', primary),
               _sigBlock('Parent / Guardian', primary),
-              _sigBlock('Principal Signature', primary),
+              _sigBlock(
+                'Principal Signature',
+                primary,
+                signatoryName: signatoryName,
+                signatureFont: signatureFont,
+              ),
             ],
           ),
 
@@ -729,8 +891,20 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text('Issued by $schoolName', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600)),
-              pw.Text('Date: ${DateFormat('dd MMM yyyy').format(DateTime.now())}', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600)),
+              pw.Text(
+                'Issued by $schoolName',
+                style: const pw.TextStyle(
+                  fontSize: 8,
+                  color: PdfColors.grey600,
+                ),
+              ),
+              pw.Text(
+                'Date: ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
+                style: const pw.TextStyle(
+                  fontSize: 8,
+                  color: PdfColors.grey600,
+                ),
+              ),
             ],
           ),
         ],
@@ -752,6 +926,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     required pw.ImageProvider? schoolLogo,
     required pw.ImageProvider? avatar,
     required List<ExamAssignment> subjects,
+    String? signatoryName,
+    pw.Font? signatureFont,
   }) {
     const primary = PdfColor.fromInt(0xFF1A237E);
     const secondary = PdfColor.fromInt(0xFF00695C);
@@ -763,7 +939,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     final rightSubjects = subjects.skip(half).toList();
 
     final rowColors = <PdfColor>[
-      secondary, primary,
+      secondary,
+      primary,
       const PdfColor.fromInt(0xFF6A1B9A),
       const PdfColor.fromInt(0xFF1565C0),
       const PdfColor.fromInt(0xFF558B2F),
@@ -777,11 +954,43 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           pw.Container(
             padding: const pw.EdgeInsets.symmetric(horizontal: 5, vertical: 4),
             color: primary,
-            child: pw.Row(children: [
-              pw.SizedBox(width: 20, child: pw.Text('#', style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold, fontSize: 8.5))),
-              pw.Expanded(flex: 3, child: pw.Text('Subject', style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold, fontSize: 8.5))),
-              pw.Expanded(flex: 2, child: pw.Text('Date & Day', style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold, fontSize: 8.5))),
-            ]),
+            child: pw.Row(
+              children: [
+                pw.SizedBox(
+                  width: 20,
+                  child: pw.Text(
+                    '#',
+                    style: pw.TextStyle(
+                      color: PdfColors.white,
+                      fontWeight: pw.FontWeight.bold,
+                      fontSize: 8.5,
+                    ),
+                  ),
+                ),
+                pw.Expanded(
+                  flex: 3,
+                  child: pw.Text(
+                    'Subject',
+                    style: pw.TextStyle(
+                      color: PdfColors.white,
+                      fontWeight: pw.FontWeight.bold,
+                      fontSize: 8.5,
+                    ),
+                  ),
+                ),
+                pw.Expanded(
+                  flex: 2,
+                  child: pw.Text(
+                    'Date & Day',
+                    style: pw.TextStyle(
+                      color: PdfColors.white,
+                      fontWeight: pw.FontWeight.bold,
+                      fontSize: 8.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           ...rows.asMap().entries.map((e) {
             final idx = startIndex + e.key;
@@ -790,27 +999,63 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             return pw.Container(
               decoration: pw.BoxDecoration(
                 color: idx.isEven ? PdfColors.white : bgLight,
-                border: const pw.Border(bottom: pw.BorderSide(color: PdfColors.grey200, width: 0.3)),
-              ),
-              child: pw.Row(children: [
-                pw.Container(
-                  width: 20,
-                  padding: const pw.EdgeInsets.symmetric(vertical: 4),
-                  color: color,
-                  child: pw.Center(child: pw.Text('${idx + 1}',
-                    style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold, fontSize: 8.5))),
+                border: const pw.Border(
+                  bottom: pw.BorderSide(color: PdfColors.grey200, width: 0.3),
                 ),
-                pw.Expanded(flex: 3, child: pw.Padding(
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                  child: pw.Text(a.subjectName,
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8.5, color: primary), maxLines: 1),
-                )),
-                pw.Expanded(flex: 2, child: pw.Padding(
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-                  child: pw.Text('${DateFormat('dd/MM/yy').format(a.date)} (${DateFormat('EEE').format(a.date)})',
-                    style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.grey700)),
-                )),
-              ]),
+              ),
+              child: pw.Row(
+                children: [
+                  pw.Container(
+                    width: 20,
+                    padding: const pw.EdgeInsets.symmetric(vertical: 4),
+                    color: color,
+                    child: pw.Center(
+                      child: pw.Text(
+                        '${idx + 1}',
+                        style: pw.TextStyle(
+                          color: PdfColors.white,
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 8.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                  pw.Expanded(
+                    flex: 3,
+                    child: pw.Padding(
+                      padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 3,
+                      ),
+                      child: pw.Text(
+                        a.subjectName,
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 8.5,
+                          color: primary,
+                        ),
+                        maxLines: 1,
+                      ),
+                    ),
+                  ),
+                  pw.Expanded(
+                    flex: 2,
+                    child: pw.Padding(
+                      padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 3,
+                      ),
+                      child: pw.Text(
+                        '${DateFormat('dd/MM/yy').format(a.date)} (${DateFormat('EEE').format(a.date)})',
+                        style: const pw.TextStyle(
+                          fontSize: 8.5,
+                          color: PdfColors.grey700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             );
           }),
         ],
@@ -820,10 +1065,18 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     return pw.Stack(
       children: [
         pw.Positioned.fill(child: pw.Container(color: PdfColors.white)),
-        pw.Positioned(top: 0, left: 0, right: 0,
-          child: pw.SizedBox(height: 90, child: pw.Container(color: primary))),
-        pw.Positioned(top: 0, right: 0, bottom: 0,
-          child: pw.SizedBox(width: 6, child: pw.Container(color: secondary))),
+        pw.Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: pw.SizedBox(height: 90, child: pw.Container(color: primary)),
+        ),
+        pw.Positioned(
+          top: 0,
+          right: 0,
+          bottom: 0,
+          child: pw.SizedBox(width: 6, child: pw.Container(color: secondary)),
+        ),
 
         pw.Padding(
           padding: const pw.EdgeInsets.fromLTRB(26, 16, 36, 16),
@@ -836,26 +1089,54 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 children: [
                   if (schoolLogo != null)
                     pw.Container(
-                      width: 50, height: 50,
+                      width: 50,
+                      height: 50,
                       margin: const pw.EdgeInsets.only(right: 12),
                       decoration: pw.BoxDecoration(
-                        shape: pw.BoxShape.circle, color: PdfColors.white,
+                        shape: pw.BoxShape.circle,
+                        color: PdfColors.white,
                         border: pw.Border.all(color: accent, width: 2),
-                        image: pw.DecorationImage(image: schoolLogo, fit: pw.BoxFit.contain),
+                        image: pw.DecorationImage(
+                          image: schoolLogo,
+                          fit: pw.BoxFit.contain,
+                        ),
                       ),
                     ),
                   pw.Expanded(
-                    child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-                      pw.Text(schoolName.toUpperCase(),
-                        style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold, fontSize: 15, letterSpacing: 0.5)),
-                      pw.SizedBox(height: 2),
-                      if (schoolAddress.isNotEmpty)
-                        pw.Text(schoolAddress, style: const pw.TextStyle(color: PdfColors.indigo100, fontSize: 8.5)),
-                      if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty)
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
                         pw.Text(
-                          [if (schoolPhone.isNotEmpty) schoolPhone, if (schoolEmail.isNotEmpty) schoolEmail].join('  |  '),
-                          style: const pw.TextStyle(color: PdfColors.indigo200, fontSize: 8)),
-                    ]),
+                          schoolName.toUpperCase(),
+                          style: pw.TextStyle(
+                            color: PdfColors.white,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 15,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        pw.SizedBox(height: 2),
+                        if (schoolAddress.isNotEmpty)
+                          pw.Text(
+                            schoolAddress,
+                            style: const pw.TextStyle(
+                              color: PdfColors.indigo100,
+                              fontSize: 8.5,
+                            ),
+                          ),
+                        if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty)
+                          pw.Text(
+                            [
+                              if (schoolPhone.isNotEmpty) schoolPhone,
+                              if (schoolEmail.isNotEmpty) schoolEmail,
+                            ].join('  |  '),
+                            style: const pw.TextStyle(
+                              color: PdfColors.indigo200,
+                              fontSize: 8,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -868,20 +1149,46 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 mainAxisAlignment: pw.MainAxisAlignment.center,
                 children: [
                   pw.SizedBox(height: 24),
-                  pw.Text(widget.exam.name.toUpperCase(),
-                    style: pw.TextStyle(color: primary, fontWeight: pw.FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
+                  pw.Text(
+                    widget.exam.name.toUpperCase(),
+                    style: pw.TextStyle(
+                      color: primary,
+                      fontWeight: pw.FontWeight.bold,
+                      fontSize: 13,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
                   if (widget.exam.startDate != null) ...[
                     pw.SizedBox(height: 4),
                     pw.Text(
                       '${DateFormat('dd MMM yyyy').format(widget.exam.startDate!)}  –  ${DateFormat('dd MMM yyyy').format(widget.exam.endDate ?? widget.exam.startDate!)}',
-                      style: const pw.TextStyle(fontSize: 9.5, color: PdfColors.grey700)),
+                      style: const pw.TextStyle(
+                        fontSize: 9.5,
+                        color: PdfColors.grey700,
+                      ),
+                    ),
                   ],
                   pw.SizedBox(height: 8),
                   pw.Container(
-                    padding: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-                    decoration: pw.BoxDecoration(color: accent, borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6))),
-                    child: pw.Text('ADMIT CARD',
-                      style: pw.TextStyle(color: PdfColors.black, fontWeight: pw.FontWeight.bold, fontSize: 12, letterSpacing: 4)),
+                    padding: const pw.EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 6,
+                    ),
+                    decoration: pw.BoxDecoration(
+                      color: accent,
+                      borderRadius: const pw.BorderRadius.all(
+                        pw.Radius.circular(6),
+                      ),
+                    ),
+                    child: pw.Text(
+                      'ADMIT CARD',
+                      style: pw.TextStyle(
+                        color: PdfColors.black,
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 12,
+                        letterSpacing: 4,
+                      ),
+                    ),
                   ),
                   pw.SizedBox(height: 24),
                 ],
@@ -893,31 +1200,60 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               pw.Container(
                 decoration: pw.BoxDecoration(
                   color: primary,
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(10)),
-                  boxShadow: const [pw.BoxShadow(color: PdfColors.grey400, blurRadius: 6, offset: PdfPoint(0, 3))],
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(10),
+                  ),
+                  boxShadow: const [
+                    pw.BoxShadow(
+                      color: PdfColors.grey400,
+                      blurRadius: 6,
+                      offset: PdfPoint(0, 3),
+                    ),
+                  ],
                 ),
                 child: pw.Row(
                   crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    pw.Container(width: 8, height: 110,
+                    pw.Container(
+                      width: 8,
+                      height: 110,
                       decoration: const pw.BoxDecoration(
                         color: secondary,
-                        borderRadius: pw.BorderRadius.only(topLeft: pw.Radius.circular(10), bottomLeft: pw.Radius.circular(10)),
+                        borderRadius: pw.BorderRadius.only(
+                          topLeft: pw.Radius.circular(10),
+                          bottomLeft: pw.Radius.circular(10),
+                        ),
                       ),
                     ),
                     pw.Container(
-                      width: 80, height: 96,
+                      width: 80,
+                      height: 96,
                       margin: const pw.EdgeInsets.all(10),
                       decoration: pw.BoxDecoration(
-                        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                        borderRadius: const pw.BorderRadius.all(
+                          pw.Radius.circular(6),
+                        ),
                         border: pw.Border.all(color: secondary, width: 1.5),
                         color: bgLight,
                       ),
                       child: avatar != null
-                          ? pw.ClipRRect(horizontalRadius: 5, verticalRadius: 5, child: pw.Image(avatar, fit: pw.BoxFit.cover))
-                          : pw.Center(child: pw.Text(
-                              student.user?.name.isNotEmpty == true ? student.user!.name[0].toUpperCase() : '?',
-                              style: pw.TextStyle(fontSize: 32, fontWeight: pw.FontWeight.bold, color: primary))),
+                          ? pw.ClipRRect(
+                              horizontalRadius: 5,
+                              verticalRadius: 5,
+                              child: pw.Image(avatar, fit: pw.BoxFit.cover),
+                            )
+                          : pw.Center(
+                              child: pw.Text(
+                                student.user?.name.isNotEmpty == true
+                                    ? student.user!.name[0].toUpperCase()
+                                    : '?',
+                                style: pw.TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: pw.FontWeight.bold,
+                                  color: primary,
+                                ),
+                              ),
+                            ),
                     ),
                     pw.Expanded(
                       child: pw.Padding(
@@ -925,22 +1261,70 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         child: pw.Column(
                           crossAxisAlignment: pw.CrossAxisAlignment.start,
                           children: [
-                            pw.Text(student.user?.name ?? 'N/A',
-                              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 15, color: PdfColors.white)),
+                            pw.Text(
+                              student.user?.name ?? 'N/A',
+                              style: pw.TextStyle(
+                                fontWeight: pw.FontWeight.bold,
+                                fontSize: 15,
+                                color: PdfColors.white,
+                              ),
+                            ),
                             pw.SizedBox(height: 8),
-                            pw.Row(children: [
-                              pw.Expanded(child: _modernChip(Icons.tag, 'Roll No.', student.rollId, PdfColors.black, big: true, whiteText: true)),
-                              pw.SizedBox(width: 10),
-                              pw.Expanded(child: _modernChip(Icons.school, 'Class', '$className - $sectionName', PdfColors.black, big: true, whiteText: true)),
-                            ]),
+                            pw.Row(
+                              children: [
+                                pw.Expanded(
+                                  child: _modernChip(
+                                    Icons.tag,
+                                    'Roll No.',
+                                    student.rollId,
+                                    PdfColors.black,
+                                    big: true,
+                                    whiteText: true,
+                                  ),
+                                ),
+                                pw.SizedBox(width: 10),
+                                pw.Expanded(
+                                  child: _modernChip(
+                                    Icons.school,
+                                    'Class',
+                                    '$className - $sectionName',
+                                    PdfColors.black,
+                                    big: true,
+                                    whiteText: true,
+                                  ),
+                                ),
+                              ],
+                            ),
                             pw.SizedBox(height: 8),
-                            pw.Row(children: [
-                              if (student.guardianContact.isNotEmpty)
-                                pw.Expanded(child: _modernChip(Icons.phone, 'Contact', student.guardianContact,PdfColors.black, big: true, whiteText: true)),
-                              if (student.guardianContact.isNotEmpty) pw.SizedBox(width: 10),
-                              if (student.user != null && student.user!.email.isNotEmpty)
-                                pw.Expanded(child: _modernChip(Icons.email, 'Email', student.user!.email, PdfColors.black, big: true, whiteText: true)),
-                            ]),
+                            pw.Row(
+                              children: [
+                                if (student.guardianContact.isNotEmpty)
+                                  pw.Expanded(
+                                    child: _modernChip(
+                                      Icons.phone,
+                                      'Contact',
+                                      student.guardianContact,
+                                      PdfColors.black,
+                                      big: true,
+                                      whiteText: true,
+                                    ),
+                                  ),
+                                if (student.guardianContact.isNotEmpty)
+                                  pw.SizedBox(width: 10),
+                                if (student.user != null &&
+                                    student.user!.email.isNotEmpty)
+                                  pw.Expanded(
+                                    child: _modernChip(
+                                      Icons.email,
+                                      'Email',
+                                      student.user!.email,
+                                      PdfColors.black,
+                                      big: true,
+                                      whiteText: true,
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -954,10 +1338,15 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               if (_topInstruction.isNotEmpty) ...[
                 pw.Container(
                   width: double.infinity,
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const pw.EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   decoration: pw.BoxDecoration(
                     color: bgLight,
-                    border: const pw.Border(left: pw.BorderSide(color: secondary, width: 4)),
+                    border: const pw.Border(
+                      left: pw.BorderSide(color: secondary, width: 4),
+                    ),
                   ),
                   child: pw.Text(
                     _topInstruction,
@@ -972,25 +1361,57 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               ],
 
               // ── Schedule heading ──────────────────────────────────────────
-              pw.Row(children: [
-                pw.Container(width: 4, height: 16, color: secondary),
-                pw.SizedBox(width: 8),
-                pw.Text('EXAMINATION SCHEDULE',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11, color: primary, letterSpacing: 1)),
-                pw.Spacer(),
-                pw.Container(
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: pw.BoxDecoration(color: accent, borderRadius: const pw.BorderRadius.all(pw.Radius.circular(10))),
-                  child: pw.Text('${subjects.length} Subjects',
-                    style: pw.TextStyle(fontSize: 8.5, fontWeight: pw.FontWeight.bold, color: PdfColors.black)),
-                ),
-              ]),
+              pw.Row(
+                children: [
+                  pw.Container(width: 4, height: 16, color: secondary),
+                  pw.SizedBox(width: 8),
+                  pw.Text(
+                    'EXAMINATION SCHEDULE',
+                    style: pw.TextStyle(
+                      fontWeight: pw.FontWeight.bold,
+                      fontSize: 11,
+                      color: primary,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  pw.Spacer(),
+                  pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: pw.BoxDecoration(
+                      color: accent,
+                      borderRadius: const pw.BorderRadius.all(
+                        pw.Radius.circular(10),
+                      ),
+                    ),
+                    child: pw.Text(
+                      '${subjects.length} Subjects',
+                      style: pw.TextStyle(
+                        fontSize: 8.5,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.black,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               pw.SizedBox(height: 6),
 
               // ── 2-col subject table ───────────────────────────────────────
               if (subjects.isEmpty)
-                pw.Container(padding: const pw.EdgeInsets.all(12), color: bgLight,
-                  child: pw.Text('No subjects scheduled.', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600)))
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(12),
+                  color: bgLight,
+                  child: pw.Text(
+                    'No subjects scheduled.',
+                    style: const pw.TextStyle(
+                      fontSize: 10,
+                      color: PdfColors.grey600,
+                    ),
+                  ),
+                )
               else
                 pw.Row(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -1008,52 +1429,111 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 padding: const pw.EdgeInsets.all(12),
                 decoration: pw.BoxDecoration(
                   color: bgLight,
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(6),
+                  ),
                   border: pw.Border.all(color: PdfColors.indigo100, width: 0.5),
                 ),
-                child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-                  pw.Text('INSTRUCTIONS',
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5, color: primary, letterSpacing: 0.5)),
-                  pw.SizedBox(height: 6),
-                  pw.Wrap(spacing: 24, runSpacing: 4, children: _instructions.asMap().entries.map((e) {
-                    return pw.SizedBox(
-                      width: 220,
-                      child: pw.Text('${e.key + 1}.  ${e.value}', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey800)),
-                    );
-                  }).toList()),
-                ]),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      'INSTRUCTIONS',
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 9.5,
+                        color: primary,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    pw.SizedBox(height: 6),
+                    pw.Wrap(
+                      spacing: 24,
+                      runSpacing: 4,
+                      children: _instructions.asMap().entries.map((e) {
+                        return pw.SizedBox(
+                          width: 220,
+                          child: pw.Text(
+                            '${e.key + 1}.  ${e.value}',
+                            style: const pw.TextStyle(
+                              fontSize: 8,
+                              color: PdfColors.grey800,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
               ),
               pw.SizedBox(height: 10),
 
               // ── Signatures + barcode ──────────────────────────────────────
-              pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.end, mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
-                _sigBlock('Student Signature', primary),
-                pw.Column(children: [
-                  pw.BarcodeWidget(
-                    data: student.userId.isNotEmpty ? student.userId : student.rollId,
-                    barcode: pw.Barcode.code128(),
-                    width: 90, height: 26,
-                    drawText: false,
-                    color: primary,
+              pw.Row(
+                crossAxisAlignment: pw.CrossAxisAlignment.end,
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  _sigBlock('Student Signature', primary),
+                  pw.Column(
+                    children: [
+                      pw.BarcodeWidget(
+                        data: student.userId.isNotEmpty
+                            ? student.userId
+                            : student.rollId,
+                        barcode: pw.Barcode.code128(),
+                        width: 90,
+                        height: 26,
+                        drawText: false,
+                        color: primary,
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        student.rollId,
+                        style: const pw.TextStyle(
+                          fontSize: 8,
+                          color: PdfColors.grey600,
+                        ),
+                      ),
+                    ],
                   ),
-                  pw.SizedBox(height: 4),
-                  pw.Text(student.rollId, style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600)),
-                ]),
-                _sigBlock('Principal Signature', primary),
-              ]),
+                  _sigBlock(
+                    'Principal Signature',
+                    primary,
+                    signatoryName: signatoryName,
+                    signatureFont: signatureFont,
+                  ),
+                ],
+              ),
 
               pw.SizedBox(height: 10),
 
               // ── Footer ────────────────────────────────────────────────────
               pw.Container(
-                padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: const pw.BoxDecoration(color: primary),
-                child: pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
-                  pw.Text('$schoolName  |  Issued ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
-                    style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.white)),
-                  pw.Text('NOT VALID WITHOUT OFFICIAL SEAL',
-                    style: pw.TextStyle(fontSize: 8.5, color: accent, fontWeight: pw.FontWeight.bold)),
-                ]),
+                child: pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text(
+                      '$schoolName  |  Issued ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
+                      style: const pw.TextStyle(
+                        fontSize: 8.5,
+                        color: PdfColors.white,
+                      ),
+                    ),
+                    pw.Text(
+                      'NOT VALID WITHOUT OFFICIAL SEAL',
+                      style: pw.TextStyle(
+                        fontSize: 8.5,
+                        color: accent,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -1076,6 +1556,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     required pw.ImageProvider? schoolLogo,
     required pw.ImageProvider? avatar,
     required List<ExamAssignment> subjects,
+    String? signatoryName,
+    pw.Font? signatureFont,
   }) {
     final half = (subjects.length / 2).ceil();
     final leftSubjects = subjects.take(half).toList();
@@ -1106,10 +1588,22 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             return pw.TableRow(
               decoration: pw.BoxDecoration(color: bg),
               children: [
-                _tCell('${idx + 1}', centered: true, textColor: PdfColors.black, fontSize: 8.5),
-                _tCell(a.subjectName, textColor: PdfColors.black, fontSize: 8.5),
-                _tCell('${DateFormat('dd/MM/yy').format(a.date)} (${DateFormat('EEE').format(a.date)})',
-                  textColor: PdfColors.black, fontSize: 8.5),
+                _tCell(
+                  '${idx + 1}',
+                  centered: true,
+                  textColor: PdfColors.black,
+                  fontSize: 8.5,
+                ),
+                _tCell(
+                  a.subjectName,
+                  textColor: PdfColors.black,
+                  fontSize: 8.5,
+                ),
+                _tCell(
+                  '${DateFormat('dd/MM/yy').format(a.date)} (${DateFormat('EEE').format(a.date)})',
+                  textColor: PdfColors.black,
+                  fontSize: 8.5,
+                ),
               ],
             );
           }),
@@ -1122,12 +1616,20 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       child: pw.Stack(
         children: [
           pw.Positioned.fill(
-            child: pw.Container(margin: const pw.EdgeInsets.all(12),
-              decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.black, width: 2))),
+            child: pw.Container(
+              margin: const pw.EdgeInsets.all(12),
+              decoration: pw.BoxDecoration(
+                border: pw.Border.all(color: PdfColors.black, width: 2),
+              ),
+            ),
           ),
           pw.Positioned.fill(
-            child: pw.Container(margin: const pw.EdgeInsets.all(16),
-              decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.black, width: 0.5))),
+            child: pw.Container(
+              margin: const pw.EdgeInsets.all(16),
+              decoration: pw.BoxDecoration(
+                border: pw.Border.all(color: PdfColors.black, width: 0.5),
+              ),
+            ),
           ),
 
           pw.Padding(
@@ -1141,23 +1643,51 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   mainAxisAlignment: pw.MainAxisAlignment.center,
                   children: [
                     if (schoolLogo != null)
-                      pw.Container(width: 50, height: 50, margin: const pw.EdgeInsets.only(right: 15),
-                        child: pw.Image(schoolLogo, fit: pw.BoxFit.contain)),
-                    pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.center, children: [
-                      pw.Text(schoolName.toUpperCase(), textAlign: pw.TextAlign.center,
-                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16, letterSpacing: 1.5)),
-                      pw.SizedBox(height: 3),
-                      if (schoolAddress.isNotEmpty)
-                        pw.Text(schoolAddress, textAlign: pw.TextAlign.center,
-                          style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
-                      if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty) ...[
-                        pw.SizedBox(height: 2),
+                      pw.Container(
+                        width: 50,
+                        height: 50,
+                        margin: const pw.EdgeInsets.only(right: 15),
+                        child: pw.Image(schoolLogo, fit: pw.BoxFit.contain),
+                      ),
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.center,
+                      children: [
                         pw.Text(
-                          [if (schoolPhone.isNotEmpty) 'Ph: $schoolPhone', if (schoolEmail.isNotEmpty) schoolEmail].join('     '),
+                          schoolName.toUpperCase(),
                           textAlign: pw.TextAlign.center,
-                          style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.grey600)),
+                          style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 16,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        pw.SizedBox(height: 3),
+                        if (schoolAddress.isNotEmpty)
+                          pw.Text(
+                            schoolAddress,
+                            textAlign: pw.TextAlign.center,
+                            style: const pw.TextStyle(
+                              fontSize: 9,
+                              color: PdfColors.grey700,
+                            ),
+                          ),
+                        if (schoolPhone.isNotEmpty ||
+                            schoolEmail.isNotEmpty) ...[
+                          pw.SizedBox(height: 2),
+                          pw.Text(
+                            [
+                              if (schoolPhone.isNotEmpty) 'Ph: $schoolPhone',
+                              if (schoolEmail.isNotEmpty) schoolEmail,
+                            ].join('     '),
+                            textAlign: pw.TextAlign.center,
+                            style: const pw.TextStyle(
+                              fontSize: 8.5,
+                              color: PdfColors.grey600,
+                            ),
+                          ),
+                        ],
                       ],
-                    ]),
+                    ),
                   ],
                 ),
 
@@ -1170,17 +1700,33 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    pw.Text(widget.exam.name.toUpperCase(),
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
+                    pw.Text(
+                      widget.exam.name.toUpperCase(),
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 13,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
                     if (widget.exam.startDate != null) ...[
                       pw.SizedBox(height: 4),
                       pw.Text(
                         '${DateFormat('dd MMM yyyy').format(widget.exam.startDate!)}  –  ${DateFormat('dd MMM yyyy').format(widget.exam.endDate ?? widget.exam.startDate!)}',
-                        style: const pw.TextStyle(fontSize: 9.5, color: PdfColors.grey700)),
+                        style: const pw.TextStyle(
+                          fontSize: 9.5,
+                          color: PdfColors.grey700,
+                        ),
+                      ),
                     ],
                     pw.SizedBox(height: 10),
-                    pw.Text('ADMIT CARD',
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16, letterSpacing: 6)),
+                    pw.Text(
+                      'ADMIT CARD',
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 16,
+                        letterSpacing: 6,
+                      ),
+                    ),
                   ],
                 ),
 
@@ -1189,35 +1735,85 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 pw.SizedBox(height: 12),
 
                 // ── Student info + photo ────────────────────────────────────
-                pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-                  pw.Container(
-                    width: 80, height: 100,
-                    margin: const pw.EdgeInsets.only(right: 16),
-                    decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.black, width: 1)),
-                    child: avatar != null
-                        ? pw.Image(avatar, fit: pw.BoxFit.cover)
-                        : pw.Center(child: pw.Text('PHOTO',
-                            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10, color: PdfColors.grey500))),
-                  ),
-                  pw.Expanded(
-                    child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-                      _minimalField('Name of Student', student.user?.name ?? 'N/A', big: true),
-                      pw.SizedBox(height: 6),
-                      pw.Row(children: [
-                        pw.Expanded(child: _minimalField('Roll No.', student.rollId, big: true)),
-                        pw.SizedBox(width: 14),
-                        pw.Expanded(child: _minimalField('Class / Section', '$className - $sectionName', big: true)),
-                      ]),
-                      pw.SizedBox(height: 6),
-                      pw.Row(children: [
-                        pw.Expanded(child: _minimalField('Guardian Contact',
-                          student.guardianContact.isNotEmpty ? student.guardianContact : (student.user?.phone ?? 'N/A'), big: true)),
-                        pw.SizedBox(width: 14),
-                        pw.Expanded(child: _minimalField('Email', student.user?.email ?? 'N/A', big: true)),
-                      ]),
-                    ]),
-                  ),
-                ]),
+                pw.Row(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Container(
+                      width: 80,
+                      height: 100,
+                      margin: const pw.EdgeInsets.only(right: 16),
+                      decoration: pw.BoxDecoration(
+                        border: pw.Border.all(color: PdfColors.black, width: 1),
+                      ),
+                      child: avatar != null
+                          ? pw.Image(avatar, fit: pw.BoxFit.cover)
+                          : pw.Center(
+                              child: pw.Text(
+                                'PHOTO',
+                                style: pw.TextStyle(
+                                  fontWeight: pw.FontWeight.bold,
+                                  fontSize: 10,
+                                  color: PdfColors.grey500,
+                                ),
+                              ),
+                            ),
+                    ),
+                    pw.Expanded(
+                      child: pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          _minimalField(
+                            'Name of Student',
+                            student.user?.name ?? 'N/A',
+                            big: true,
+                          ),
+                          pw.SizedBox(height: 6),
+                          pw.Row(
+                            children: [
+                              pw.Expanded(
+                                child: _minimalField(
+                                  'Roll No.',
+                                  student.rollId,
+                                  big: true,
+                                ),
+                              ),
+                              pw.SizedBox(width: 14),
+                              pw.Expanded(
+                                child: _minimalField(
+                                  'Class / Section',
+                                  '$className - $sectionName',
+                                  big: true,
+                                ),
+                              ),
+                            ],
+                          ),
+                          pw.SizedBox(height: 6),
+                          pw.Row(
+                            children: [
+                              pw.Expanded(
+                                child: _minimalField(
+                                  'Guardian Contact',
+                                  student.guardianContact.isNotEmpty
+                                      ? student.guardianContact
+                                      : (student.user?.phone ?? 'N/A'),
+                                  big: true,
+                                ),
+                              ),
+                              pw.SizedBox(width: 14),
+                              pw.Expanded(
+                                child: _minimalField(
+                                  'Email',
+                                  student.user?.email ?? 'N/A',
+                                  big: true,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
 
                 pw.SizedBox(height: 12),
                 pw.Divider(thickness: 0.5, color: PdfColors.black),
@@ -1226,11 +1822,16 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 if (_topInstruction.isNotEmpty) ...[
                   pw.Container(
                     width: double.infinity,
-                    padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const pw.EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     decoration: pw.BoxDecoration(
                       color: PdfColors.grey100,
                       border: pw.Border.all(color: PdfColors.grey400, width: 1),
-                      borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+                      borderRadius: const pw.BorderRadius.all(
+                        pw.Radius.circular(4),
+                      ),
                     ),
                     child: pw.Text(
                       _topInstruction,
@@ -1248,27 +1849,48 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 // ── Schedule ────────────────────────────────────────────────
                 pw.Text(
                   'EXAMINATION SCHEDULE  (${subjects.length} Subject${subjects.length == 1 ? '' : 's'})',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10, letterSpacing: 0.5)),
+                  style: pw.TextStyle(
+                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 10,
+                    letterSpacing: 0.5,
+                  ),
+                ),
                 pw.SizedBox(height: 6),
 
                 if (subjects.isEmpty)
                   pw.Container(
                     padding: const pw.EdgeInsets.all(12),
                     color: PdfColors.grey100,
-                    child: pw.Text('No subjects scheduled.', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600), textAlign: pw.TextAlign.center),
+                    child: pw.Text(
+                      'No subjects scheduled.',
+                      style: const pw.TextStyle(
+                        fontSize: 10,
+                        color: PdfColors.grey600,
+                      ),
+                      textAlign: pw.TextAlign.center,
+                    ),
                   )
                 else
-                  pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-                    pw.Expanded(child: minSubjectTable(leftSubjects, 0)),
-                    pw.SizedBox(width: 10),
-                    pw.Expanded(child: minSubjectTable(rightSubjects, half)),
-                  ]),
+                  pw.Row(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Expanded(child: minSubjectTable(leftSubjects, 0)),
+                      pw.SizedBox(width: 10),
+                      pw.Expanded(child: minSubjectTable(rightSubjects, half)),
+                    ],
+                  ),
 
                 pw.Spacer(),
 
                 // ── Instructions ────────────────────────────────────────────
-                pw.Text('INSTRUCTIONS TO CANDIDATES:',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5, letterSpacing: 0.4)),
+                pw.Text(
+                  'INSTRUCTIONS TO CANDIDATES:',
+                  style: pw.TextStyle(
+                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 9.5,
+                    letterSpacing: 0.4,
+                  ),
+                ),
                 pw.SizedBox(height: 6),
                 pw.Table(
                   columnWidths: const {
@@ -1277,27 +1899,59 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     2: pw.FixedColumnWidth(14),
                     3: pw.FlexColumnWidth(1),
                   },
-                  children: List.generate((_instructions.length / 2).ceil(), (row) {
+                  children: List.generate((_instructions.length / 2).ceil(), (
+                    row,
+                  ) {
                     final left = row * 2;
                     final right = left + 1;
-                    return pw.TableRow(children: [
-                      pw.Padding(padding: const pw.EdgeInsets.only(bottom: 4),
-                        child: pw.Text('${left + 1}.', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8))),
-                      pw.Padding(padding: const pw.EdgeInsets.only(bottom: 4, right: 12),
-                        child: pw.Text(_instructions[left], style: const pw.TextStyle(fontSize: 8))),
-                      pw.Padding(padding: const pw.EdgeInsets.only(bottom: 4),
-                        child: pw.Text(right < _instructions.length ? '${right + 1}.' : '',
-                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8))),
-                      pw.Padding(padding: const pw.EdgeInsets.only(bottom: 4),
-                        child: pw.Text(right < _instructions.length ? _instructions[right] : '',
-                          style: const pw.TextStyle(fontSize: 8))),
-                    ]);
+                    return pw.TableRow(
+                      children: [
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.only(bottom: 4),
+                          child: pw.Text(
+                            '${left + 1}.',
+                            style: pw.TextStyle(
+                              fontWeight: pw.FontWeight.bold,
+                              fontSize: 8,
+                            ),
+                          ),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.only(
+                            bottom: 4,
+                            right: 12,
+                          ),
+                          child: pw.Text(
+                            _instructions[left],
+                            style: const pw.TextStyle(fontSize: 8),
+                          ),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.only(bottom: 4),
+                          child: pw.Text(
+                            right < _instructions.length ? '${right + 1}.' : '',
+                            style: pw.TextStyle(
+                              fontWeight: pw.FontWeight.bold,
+                              fontSize: 8,
+                            ),
+                          ),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.only(bottom: 4),
+                          child: pw.Text(
+                            right < _instructions.length
+                                ? _instructions[right]
+                                : '',
+                            style: const pw.TextStyle(fontSize: 8),
+                          ),
+                        ),
+                      ],
+                    );
                   }),
                 ),
 
                 pw.SizedBox(height: 10),
                 pw.Divider(thickness: 0.5, color: PdfColors.black),
-
 
                 // ── Signatures ──────────────────────────────────────────────
                 pw.Row(
@@ -1306,7 +1960,11 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   children: [
                     _minimalSigBlock("Student's Signature"),
 
-                    _minimalSigBlock("Principal's Signature"),
+                    _minimalSigBlock(
+                      "Principal's Signature",
+                      signatoryName: signatoryName,
+                      signatureFont: signatureFont,
+                    ),
                   ],
                 ),
 
@@ -1317,7 +1975,11 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   child: pw.Text(
                     'Computer-generated by $schoolName. Issued on ${DateFormat('dd MMMM yyyy').format(DateTime.now())}.',
                     textAlign: pw.TextAlign.center,
-                    style: const pw.TextStyle(fontSize: 6.5, color: PdfColors.grey500)),
+                    style: const pw.TextStyle(
+                      fontSize: 6.5,
+                      color: PdfColors.grey500,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -1326,6 +1988,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       ),
     );
   }
+
   // ═══════════════════════════════════════════════════════════════════════════
   // TEMPLATE 4 - COMPACT  (no exam schedule · 6 cards per A4 page)
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1338,12 +2001,17 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     required pw.ImageProvider? avatar,
     required List<ExamAssignment> subjects,
     required String instruction,
+    String? signatoryName,
+    pw.Font? signatureFont,
   }) {
     const primary = PdfColor.fromInt(0xFF00695C); // teal 800
     const accent = PdfColor.fromInt(0xFFFFA000); // amber 700
     const bgLight = PdfColor.fromInt(0xFFE0F2F1); // teal 50
 
-    pw.Widget _minCompactSubjectTable(List<ExamAssignment> rows, PdfColor primaryColor) {
+    pw.Widget _minCompactSubjectTable(
+      List<ExamAssignment> rows,
+      PdfColor primaryColor,
+    ) {
       if (rows.isEmpty) return pw.SizedBox();
       return pw.Table(
         border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5),
@@ -1355,15 +2023,51 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           pw.TableRow(
             decoration: pw.BoxDecoration(color: primaryColor),
             children: [
-              pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('Subject', style: pw.TextStyle(color: PdfColors.white, fontSize: 5, fontWeight: pw.FontWeight.bold))),
-              pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('Date', style: pw.TextStyle(color: PdfColors.white, fontSize: 5, fontWeight: pw.FontWeight.bold))),
+              pw.Padding(
+                padding: const pw.EdgeInsets.all(2),
+                child: pw.Text(
+                  'Subject',
+                  style: pw.TextStyle(
+                    color: PdfColors.white,
+                    fontSize: 5,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              ),
+              pw.Padding(
+                padding: const pw.EdgeInsets.all(2),
+                child: pw.Text(
+                  'Date',
+                  style: pw.TextStyle(
+                    color: PdfColors.white,
+                    fontSize: 5,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              ),
             ],
           ),
           ...rows.map((a) {
             return pw.TableRow(
               children: [
-                pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text(a.subjectName, style: pw.TextStyle(fontSize: 5, color: primaryColor), maxLines: 1)),
-                pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text(DateFormat('dd/MM').format(a.date), style: const pw.TextStyle(fontSize: 5, color: PdfColors.grey700))),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(2),
+                  child: pw.Text(
+                    a.subjectName,
+                    style: pw.TextStyle(fontSize: 5, color: primaryColor),
+                    maxLines: 1,
+                  ),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(2),
+                  child: pw.Text(
+                    DateFormat('dd/MM').format(a.date),
+                    style: const pw.TextStyle(
+                      fontSize: 5,
+                      color: PdfColors.grey700,
+                    ),
+                  ),
+                ),
               ],
             );
           }),
@@ -1541,12 +2245,18 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       decoration: pw.BoxDecoration(
                         color: PdfColors.amber50,
                         border: pw.Border.all(color: accent, width: 0.5),
-                        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(3)),
+                        borderRadius: const pw.BorderRadius.all(
+                          pw.Radius.circular(3),
+                        ),
                       ),
                       child: pw.Text(
                         instruction,
                         textAlign: pw.TextAlign.center,
-                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 5.5, color: primary),
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 5.5,
+                          color: primary,
+                        ),
                       ),
                     ),
                   ],
@@ -1555,9 +2265,23 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       child: pw.Row(
                         crossAxisAlignment: pw.CrossAxisAlignment.start,
                         children: [
-                          pw.Expanded(child: _minCompactSubjectTable(subjects.take((subjects.length / 2).ceil()).toList(), primary)),
+                          pw.Expanded(
+                            child: _minCompactSubjectTable(
+                              subjects
+                                  .take((subjects.length / 2).ceil())
+                                  .toList(),
+                              primary,
+                            ),
+                          ),
                           pw.SizedBox(width: 4),
-                          pw.Expanded(child: _minCompactSubjectTable(subjects.skip((subjects.length / 2).ceil()).toList(), primary)),
+                          pw.Expanded(
+                            child: _minCompactSubjectTable(
+                              subjects
+                                  .skip((subjects.length / 2).ceil())
+                                  .toList(),
+                              primary,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -1601,6 +2325,20 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.end,
                   children: [
+                    pw.Container(
+                      height: 20, // signature space
+                      alignment: pw.Alignment.bottomRight,
+                      child: (signatoryName != null && signatureFont != null)
+                          ? pw.Text(
+                              signatoryName,
+                              style: pw.TextStyle(
+                                font: signatureFont,
+                                fontSize: 14,
+                                color: PdfColors.black,
+                              ),
+                            )
+                          : pw.SizedBox(),
+                    ),
                     pw.Container(
                       width: 72,
                       child: pw.Divider(
@@ -1704,7 +2442,10 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     final valueColor = whiteText ? PdfColors.white : PdfColors.black;
 
     return pw.Container(
-      padding: pw.EdgeInsets.symmetric(horizontal: big ? 12 : 8, vertical: big ? 6 : 4),
+      padding: pw.EdgeInsets.symmetric(
+        horizontal: big ? 12 : 8,
+        vertical: big ? 6 : 4,
+      ),
       decoration: pw.BoxDecoration(
         color: bgColor,
         border: pw.Border.all(color: borderColor, width: 0.5),
@@ -1740,7 +2481,6 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       ),
     );
   }
-
 
   /// Table cell used by Classic and Minimal schedule tables
   pw.Widget _tCell(
@@ -1792,10 +2532,30 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
   }
 
   /// Signature block used by Classic and Modern
-  pw.Widget _sigBlock(String label, PdfColor lineColor) {
+  pw.Widget _sigBlock(
+    String label,
+    PdfColor lineColor, {
+    String? signatoryName,
+    pw.Font? signatureFont,
+  }) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.center,
       children: [
+        pw.Container(
+          width: 120,
+          height: 30, // reserved space for signature
+          alignment: pw.Alignment.bottomCenter,
+          child: (signatoryName != null && signatureFont != null)
+              ? pw.Text(
+                  signatoryName,
+                  style: pw.TextStyle(
+                    font: signatureFont,
+                    fontSize: 20,
+                    color: PdfColors.black,
+                  ),
+                )
+              : pw.SizedBox(),
+        ),
         pw.Container(
           width: 120,
           child: pw.Divider(color: lineColor, thickness: 0.8),
@@ -1811,12 +2571,29 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
   }
 
   /// Signature block for Minimal template
-  pw.Widget _minimalSigBlock(String label) {
+  pw.Widget _minimalSigBlock(
+    String label, {
+    String? signatoryName,
+    pw.Font? signatureFont,
+  }) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.center,
       children: [
-        pw.Container(width: 130),
-        pw.SizedBox(height: 30),
+        pw.Container(
+          width: 130,
+          height: 30, // reserved space for signature
+          alignment: pw.Alignment.bottomCenter,
+          child: (signatoryName != null && signatureFont != null)
+              ? pw.Text(
+                  signatoryName,
+                  style: pw.TextStyle(
+                    font: signatureFont,
+                    fontSize: 20,
+                    color: PdfColors.black,
+                  ),
+                )
+              : pw.SizedBox(),
+        ),
         pw.Container(
           width: 130,
           child: pw.Divider(color: PdfColors.black, thickness: 0.8),
@@ -1891,7 +2668,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           IconButton(
             icon: const Icon(Icons.playlist_remove_rounded),
             tooltip: 'Include/Exclude Students',
-            onPressed: _allFetchedStudents.isEmpty ? null : _showExcludeStudentsDialog,
+            onPressed: _allFetchedStudents.isEmpty
+                ? null
+                : _showExcludeStudentsDialog,
           ),
           IconButton(
             icon: const Icon(Icons.print_outlined),
@@ -2153,10 +2932,16 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           labelText: 'Top Instruction (Optional)',
           hintText: 'e.g. Please bring your ID card...',
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 12,
+          ),
           isDense: true,
           suffixIcon: IconButton(
-            icon: const Icon(Icons.check_circle_outline, color: AppColors.primaryAdmin),
+            icon: const Icon(
+              Icons.check_circle_outline,
+              color: AppColors.primaryAdmin,
+            ),
             onPressed: () {
               if (_topInstruction != _instructionController.text) {
                 setState(() => _topInstruction = _instructionController.text);
@@ -2185,7 +2970,10 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
         return StatefulBuilder(
           builder: (ctx, setStateDialog) {
             return AlertDialog(
-              title: const Text('Include / Exclude Students', style: TextStyle(fontSize: 16)),
+              title: const Text(
+                'Include / Exclude Students',
+                style: TextStyle(fontSize: 16),
+              ),
               content: Container(
                 width: 400,
                 height: MediaQuery.of(context).size.height * 0.6,
@@ -2194,12 +2982,20 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   itemCount: _allFetchedStudents.length,
                   itemBuilder: (context, index) {
                     final student = _allFetchedStudents[index];
-                      final isExcluded = _excludedStudentIds.contains(student.userId);
+                    final isExcluded = _excludedStudentIds.contains(
+                      student.userId,
+                    );
                     return CheckboxListTile(
                       value: !isExcluded,
                       dense: true,
-                      title: Text(student.user?.name ?? 'Unknown', style: const TextStyle(fontSize: 14)),
-                      subtitle: Text('Roll: ${student.rollId}', style: const TextStyle(fontSize: 12)),
+                      title: Text(
+                        student.user?.name ?? 'Unknown',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      subtitle: Text(
+                        'Roll: ${student.rollId}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
                       onChanged: (val) {
                         setStateDialog(() {
                           if (val == true) {
