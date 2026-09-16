@@ -28,6 +28,8 @@ class GenerateIdCardScreen extends StatefulWidget {
 class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
   String? _selectedClassId;
   String? _selectedSectionId;
+  String _selectedTemplate = 'Default';
+  final List<String> _templates = ['Default', 'Modern', 'Classic', 'Minimalist'];
   late List<Student> _currentStudents;
   bool _isLoading = false;
   Uint8List? _pdfBytes;
@@ -177,6 +179,24 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
       child: Row(
         children: [
           Expanded(
+            child: _buildDropdown<String>(
+              label: 'Template',
+              value: _selectedTemplate,
+              items: _templates
+                  .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                  .toList(),
+              onChanged: (val) {
+                if (val != null && val != _selectedTemplate) {
+                  setState(() {
+                    _selectedTemplate = val;
+                  });
+                  _generatePdf();
+                }
+              },
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
             child: _buildDropdown<String?>(
               label: AppLocalizations.of(context)!.className,
               value: uniqueClasses.containsKey(_selectedClassId)
@@ -297,7 +317,23 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
     PdfPageFormat format,
     School? school,
   ) async {
-    final pdf = pw.Document();
+    pw.Font? fontReg;
+    pw.Font? fontBold;
+    try {
+      fontReg = await PdfGoogleFonts.notoSansBengaliRegular();
+      fontBold = await PdfGoogleFonts.notoSansBengaliBold();
+    } catch (_) {}
+
+    final pdf = pw.Document(
+      theme: fontReg != null
+          ? pw.ThemeData.withFont(
+              base: fontReg,
+              bold: fontBold ?? fontReg,
+              italic: fontReg,
+              boldItalic: fontBold ?? fontReg,
+            )
+          : pw.ThemeData(),
+    );
 
     String resolvedClassName = 'N/A';
     if (_selectedClassId != null) {
@@ -373,7 +409,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
               spacing: 20,
               runSpacing: 20,
               children: pageStudents.map((student) {
-                return _buildIdCard(
+                return _buildSelectedIdCard(
                   student,
                   schoolName,
                   schoolLogo,
@@ -396,7 +432,30 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
     return pdf.save();
   }
 
-  pw.Widget _buildIdCard(
+  pw.Widget _buildSelectedIdCard(
+    Student student,
+    String schoolName,
+    pw.ImageProvider? schoolLogo,
+    pw.ImageProvider? studentAvatar,
+    double width,
+    double height,
+    String schoolAddress,
+    String schoolPhone,
+    String schoolEmail,
+    String resolvedClassName,
+    String resolvedSectionName,
+  ) {
+    if (_selectedTemplate == 'Modern') {
+      return _buildModernIdCard(student, schoolName, schoolLogo, studentAvatar, width, height, schoolAddress, schoolPhone, schoolEmail, resolvedClassName, resolvedSectionName);
+    } else if (_selectedTemplate == 'Classic') {
+      return _buildClassicIdCard(student, schoolName, schoolLogo, studentAvatar, width, height, schoolAddress, schoolPhone, schoolEmail, resolvedClassName, resolvedSectionName);
+    } else if (_selectedTemplate == 'Minimalist') {
+      return _buildMinimalistIdCard(student, schoolName, schoolLogo, studentAvatar, width, height, schoolAddress, schoolPhone, schoolEmail, resolvedClassName, resolvedSectionName);
+    }
+    return _buildDefaultIdCard(student, schoolName, schoolLogo, studentAvatar, width, height, schoolAddress, schoolPhone, schoolEmail, resolvedClassName, resolvedSectionName);
+  }
+
+  pw.Widget _buildDefaultIdCard(
     Student student,
     String schoolName,
     pw.ImageProvider? schoolLogo,
@@ -415,6 +474,14 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
     final sectionName = student.sectionName?.isNotEmpty == true
         ? student.sectionName!
         : resolvedSectionName;
+    
+    final barcodeData = 'ID: ${student.rollId}\n'
+        'Name: ${student.user?.name ?? 'N/A'}\n'
+        'Class: $className-$sectionName\n'
+        'Phone: ${student.user?.phone ?? student.guardianContact}\n'
+        'Email: ${student.user?.email ?? 'N/A'}\n'
+        'School Ph: $schoolPhone\n'
+        'School Email: $schoolEmail';
 
     return pw.Container(
       width: width,
@@ -459,7 +526,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                     crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
                       pw.Text(
-                        schoolName.toUpperCase(),
+                        schoolName,
                         style: pw.TextStyle(
                           color: PdfColors.white,
                           fontWeight: pw.FontWeight.bold,
@@ -538,7 +605,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                 : pw.Center(
                     child: pw.Text(
                       student.user?.name.isNotEmpty == true
-                          ? student.user!.name[0].toUpperCase()
+                          ? student.user!.name[0]
                           : '?',
                       style: pw.TextStyle(
                         fontSize: 32,
@@ -553,7 +620,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
 
           // Student Name
           pw.Text(
-            student.user?.name.toUpperCase() ?? 'UNKNOWN',
+            student.user?.name ?? 'UNKNOWN',
             style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 14,
@@ -607,13 +674,11 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
               children: [
                 // Barcode
                 pw.Container(
-                  width: 50,
-                  height: 30,
+                  width: 40,
+                  height: 40,
                   child: pw.BarcodeWidget(
-                    data: student.userId.isNotEmpty
-                        ? student.userId
-                        : 'UNKNOWN',
-                    barcode: pw.Barcode.code128(),
+                    data: barcodeData,
+                    barcode: pw.Barcode.qrCode(),
                     drawText: false,
                     color: PdfColors.black,
                   ),
@@ -694,6 +759,613 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
               style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
               maxLines: 1,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- MODERN TEMPLATE ---
+  pw.Widget _buildModernIdCard(
+    Student student,
+    String schoolName,
+    pw.ImageProvider? schoolLogo,
+    pw.ImageProvider? studentAvatar,
+    double width,
+    double height,
+    String schoolAddress,
+    String schoolPhone,
+    String schoolEmail,
+    String resolvedClassName,
+    String resolvedSectionName,
+  ) {
+    final className = student.className?.isNotEmpty == true ? student.className! : resolvedClassName;
+    final sectionName = student.sectionName?.isNotEmpty == true ? student.sectionName! : resolvedSectionName;
+    final barcodeData = 'ID: ${student.rollId}\n'
+        'Name: ${student.user?.name ?? 'N/A'}\n'
+        'Class: $className-$sectionName\n'
+        'Phone: ${student.user?.phone ?? student.guardianContact}\n'
+        'Email: ${student.user?.email ?? 'N/A'}\n'
+        'School Ph: $schoolPhone\n'
+        'School Email: $schoolEmail';
+
+    return pw.Container(
+      width: width,
+      height: height,
+      decoration: pw.BoxDecoration(
+        color: PdfColors.white,
+        borderRadius: pw.BorderRadius.circular(12),
+        border: pw.Border.all(color: PdfColors.indigo200, width: 1.5),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+        children: [
+          // ── Header ──────────────────────────────────────────
+          pw.Container(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: const pw.BoxDecoration(
+              color: PdfColors.indigo700,
+              borderRadius: pw.BorderRadius.only(
+                topLeft: pw.Radius.circular(11),
+                topRight: pw.Radius.circular(11),
+              ),
+            ),
+            child: pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
+              children: [
+                if (schoolLogo != null)
+                  pw.Container(
+                    height: 36,
+                    width: 36,
+                    decoration: const pw.BoxDecoration(
+                      shape: pw.BoxShape.circle,
+                      color: PdfColors.white,
+                    ),
+                    child: pw.ClipOval(
+                      child: pw.Image(schoolLogo, fit: pw.BoxFit.contain),
+                    ),
+                  ),
+                pw.SizedBox(width: 8),
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        schoolName,
+                        style: pw.TextStyle(
+                          color: PdfColors.white,
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      ),
+                      if (schoolPhone.isNotEmpty)
+                        pw.Text(
+                          'Ph: $schoolPhone',
+                          style:  pw.TextStyle(color: PdfColors.white, fontSize: 7),
+                        ),
+                      if (schoolEmail.isNotEmpty)
+                        pw.Text(
+                          schoolEmail,
+                          style:  pw.TextStyle(color: PdfColors.white, fontSize: 7),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Photo ────────────────────────────────────────────
+          pw.Center(
+            child: pw.Container(
+              margin: const pw.EdgeInsets.only(top: 12),
+              height: 72,
+              width: 72,
+              decoration: pw.BoxDecoration(
+                shape: pw.BoxShape.circle,
+                border: pw.Border.all(color: PdfColors.indigo700, width: 3),
+                color: PdfColors.grey200,
+              ),
+              child: studentAvatar != null
+                  ? pw.ClipOval(
+                      child: pw.Image(studentAvatar, fit: pw.BoxFit.cover),
+                    )
+                  : pw.Center(
+                      child: pw.Text(
+                        student.user?.name.isNotEmpty == true
+                            ? student.user!.name[0]
+                            : '?',
+                        style: pw.TextStyle(
+                          fontSize: 28,
+                          fontWeight: pw.FontWeight.bold,
+                          color: PdfColors.indigo700,
+                        ),
+                      ),
+                    ),
+            ),
+          ),
+
+          pw.SizedBox(height: 8),
+
+          // ── Student Name + Badge ─────────────────────────────
+          pw.Center(
+            child: pw.Text(
+              student.user?.name ?? 'Unknown',
+              style: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 13,
+                color: PdfColors.indigo900,
+              ),
+              textAlign: pw.TextAlign.center,
+            ),
+          ),
+          pw.SizedBox(height: 4),
+          pw.Center(
+            child: pw.Container(
+              padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.indigo700,
+                borderRadius: pw.BorderRadius.circular(10),
+              ),
+              child: pw.Text(
+                'STUDENT',
+                style: pw.TextStyle(
+                  fontSize: 7,
+                  color: PdfColors.white,
+                  fontWeight: pw.FontWeight.bold,
+                  letterSpacing: 1.5,
+                ),
+              ),
+            ),
+          ),
+
+          pw.SizedBox(height: 10),
+          pw.Padding(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 8),
+            child: pw.Divider(color: PdfColors.indigo100, thickness: 1),
+          ),
+          pw.SizedBox(height: 6),
+
+          // ── Details ──────────────────────────────────────────
+          pw.Padding(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 16),
+            child: pw.Column(
+              children: [
+                _buildModernDetailRow('ID', student.rollId),
+                _buildModernDetailRow('Class', '$className - $sectionName'),
+                _buildModernDetailRow(
+                  'Phone',
+                  student.user?.phone?.isNotEmpty == true
+                      ? student.user!.phone!
+                      : (student.guardianContact.isNotEmpty
+                          ? student.guardianContact
+                          : 'N/A'),
+                ),
+                _buildModernDetailRow('Email', student.user?.email ?? 'N/A'),
+              ],
+            ),
+          ),
+
+          pw.Spacer(),
+
+          // ── Footer ───────────────────────────────────────────
+          pw.Container(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: const pw.BoxDecoration(
+              color: PdfColors.indigo50,
+              borderRadius: pw.BorderRadius.only(
+                bottomLeft: pw.Radius.circular(11),
+                bottomRight: pw.Radius.circular(11),
+              ),
+              border: pw.Border(
+                top: pw.BorderSide(color: PdfColors.indigo200, width: 1),
+              ),
+            ),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              children: [
+                pw.Container(
+                  width: 42,
+                  height: 42,
+                  child: pw.BarcodeWidget(
+                    data: barcodeData,
+                    barcode: pw.Barcode.qrCode(),
+                    drawText: false,
+                    color: PdfColors.indigo900,
+                  ),
+                ),
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.center,
+                  children: [
+                    pw.SizedBox(height: 18),
+                    pw.Container(
+                      width: 60,
+                      child: pw.Divider(color: PdfColors.indigo700, thickness: 1),
+                    ),
+                    pw.Text(
+                      'Principal',
+                      style: pw.TextStyle(
+                        fontSize: 7,
+                        color: PdfColors.indigo900,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildModernDetailRow(String label, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 3),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.center,
+        children: [
+          pw.Expanded(
+            flex: 2,
+            child: pw.Text(label, style: pw.TextStyle(fontSize: 8, color: PdfColors.grey600, fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.right),
+          ),
+          pw.SizedBox(width: 8),
+          pw.Expanded(
+            flex: 3,
+            child: pw.Text(value, style: pw.TextStyle(fontSize: 9, color: PdfColors.grey900, fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.left),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- CLASSIC TEMPLATE ---
+  pw.Widget _buildClassicIdCard(
+    Student student,
+    String schoolName,
+    pw.ImageProvider? schoolLogo,
+    pw.ImageProvider? studentAvatar,
+    double width,
+    double height,
+    String schoolAddress,
+    String schoolPhone,
+    String schoolEmail,
+    String resolvedClassName,
+    String resolvedSectionName,
+  ) {
+    final className = student.className?.isNotEmpty == true ? student.className! : resolvedClassName;
+    final sectionName = student.sectionName?.isNotEmpty == true ? student.sectionName! : resolvedSectionName;
+    final barcodeData = 'ID: ${student.rollId}\n'
+        'Name: ${student.user?.name ?? 'N/A'}\n'
+        'Class: $className-$sectionName\n'
+        'Phone: ${student.user?.phone ?? student.guardianContact}\n'
+        'Email: ${student.user?.email ?? 'N/A'}\n'
+        'School Ph: $schoolPhone\n'
+        'School Email: $schoolEmail';
+
+    return pw.Container(
+      width: width,
+      height: height,
+      decoration: pw.BoxDecoration(
+        color: PdfColors.white,
+        border: pw.Border.all(color: PdfColors.blue900, width: 3),
+      ),
+      child: pw.Column(
+        children: [
+          // Header
+          pw.Container(
+            padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            decoration: const pw.BoxDecoration(color: PdfColors.blue900),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.center,
+              children: [
+                if (schoolLogo != null)
+                  pw.Container(
+                    height: 35,
+                    width: 35,
+                    margin: const pw.EdgeInsets.only(right: 8),
+                    decoration: const pw.BoxDecoration(shape: pw.BoxShape.circle, color: PdfColors.white),
+                    child: pw.ClipOval(child: pw.Image(schoolLogo, fit: pw.BoxFit.contain)),
+                  ),
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
+                    children: [
+                      pw.Text(
+                        schoolName,
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 13, color: PdfColors.white),
+                        textAlign: pw.TextAlign.center,
+                      ),
+                      if (schoolAddress.isNotEmpty)
+                        pw.Text(
+                          schoolAddress,
+                          style: const pw.TextStyle(fontSize: 6, color: PdfColors.white),
+                          textAlign: pw.TextAlign.center,
+                          maxLines: 1,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          pw.Container(
+            width: double.infinity,
+            padding: const pw.EdgeInsets.symmetric(vertical: 4),
+            decoration: const pw.BoxDecoration(color: PdfColors.amber),
+            child: pw.Text(
+              'STUDENT IDENTITY CARD',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9, color: PdfColors.blue900, letterSpacing: 1.5),
+              textAlign: pw.TextAlign.center,
+            ),
+          ),
+          pw.SizedBox(height: 12),
+          
+          pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // Photo Left
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(left: 12),
+                child: pw.Container(
+                  height: 80,
+                  width: 65,
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(color: PdfColors.amber, width: 2),
+                    color: PdfColors.grey200,
+                  ),
+                  child: studentAvatar != null
+                      ? pw.Image(studentAvatar, fit: pw.BoxFit.cover)
+                      : pw.Center(child: pw.Text('Photo', style: const pw.TextStyle(color: PdfColors.grey600, fontSize: 8))),
+                ),
+              ),
+              pw.SizedBox(width: 12),
+              // Details Right
+              pw.Expanded(
+                child: pw.Padding(
+                  padding: const pw.EdgeInsets.only(right: 12),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        student.user?.name ?? 'UNKNOWN',
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12, color: PdfColors.blue900),
+                      ),
+                      pw.SizedBox(height: 2),
+                      pw.Divider(color: PdfColors.amber, thickness: 1),
+                      pw.SizedBox(height: 4),
+                      _buildClassicDetailRow('ID', student.rollId),
+                      _buildClassicDetailRow('Class', '$className - $sectionName'),
+
+                      _buildClassicDetailRow('Contact', student.guardianContact.isNotEmpty ? student.guardianContact : (student.user?.phone ?? 'N/A')),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          pw.Spacer(),
+          // Footer
+          pw.Padding(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              children: [
+                pw.Container(
+                  width: 35,
+                  height: 35,
+                  child: pw.BarcodeWidget(
+                    data: barcodeData,
+                    barcode: pw.Barcode.qrCode(),
+                    drawText: false,
+                    color: PdfColors.blue900,
+                  ),
+                ),
+                pw.Column(
+                  children: [
+                    pw.Container(width: 60, child: pw.Divider(color: PdfColors.blue900, thickness: 1)),
+                    pw.SizedBox(height: 2),
+                    pw.Text('Principal', style: pw.TextStyle(fontSize: 8, color: PdfColors.blue900, fontWeight: pw.FontWeight.bold)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildClassicDetailRow(String label, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.only(bottom: 3),
+      child: pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.SizedBox(width: 35, child: pw.Text(label, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8, color: PdfColors.blue900))),
+          pw.Text(': ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8, color: PdfColors.blue900)),
+          pw.Expanded(child: pw.Text(value, style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold, color: PdfColors.black))),
+        ],
+      ),
+    );
+  }
+
+  // --- MINIMALIST TEMPLATE ---
+  pw.Widget _buildMinimalistIdCard(
+    Student student,
+    String schoolName,
+    pw.ImageProvider? schoolLogo,
+    pw.ImageProvider? studentAvatar,
+    double width,
+    double height,
+    String schoolAddress,
+    String schoolPhone,
+    String schoolEmail,
+    String resolvedClassName,
+    String resolvedSectionName,
+  ) {
+    final className = student.className?.isNotEmpty == true ? student.className! : resolvedClassName;
+    final sectionName = student.sectionName?.isNotEmpty == true ? student.sectionName! : resolvedSectionName;
+    final barcodeData = 'ID: ${student.rollId}\n'
+        'Name: ${student.user?.name ?? 'N/A'}\n'
+        'Class: $className-$sectionName\n'
+        'Phone: ${student.user?.phone ?? student.guardianContact}\n'
+        'Email: ${student.user?.email ?? 'N/A'}\n'
+        'School Ph: $schoolPhone\n'
+        'School Email: $schoolEmail';
+
+    return pw.Container(
+      width: width,
+      height: height,
+      decoration: pw.BoxDecoration(
+        color: PdfColors.white,
+        border: pw.Border.all(color: PdfColors.grey400, width: 1),
+        borderRadius: pw.BorderRadius.circular(16),
+      ),
+      padding: const pw.EdgeInsets.all(16),
+      child: pw.Column(
+        children: [
+          // Header
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Expanded(
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      schoolName,
+                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11, color: PdfColors.grey900, letterSpacing: 1),
+                      maxLines: 3,
+                    ),
+                    if (schoolAddress.isNotEmpty) ...[
+                      pw.SizedBox(height: 2),
+                      pw.Text(
+                        schoolAddress,
+                        style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey700),
+                        maxLines: 1,
+                      ),
+                    ],
+                    if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty) ...[
+                      pw.SizedBox(height: 2),
+                      pw.Text(
+                        [if (schoolPhone.isNotEmpty) 'Ph: $schoolPhone', if (schoolEmail.isNotEmpty) schoolEmail].join(' | '),
+                        style: const pw.TextStyle(fontSize: 5, color: PdfColors.grey700),
+                        maxLines: 1,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (schoolLogo != null)
+                pw.Container(
+                  height: 30,
+                  width: 30,
+                  margin: const pw.EdgeInsets.only(left: 8),
+                  child: pw.Image(schoolLogo, fit: pw.BoxFit.contain),
+                ),
+            ],
+          ),
+          pw.SizedBox(height: 6),
+          pw.Divider(color: PdfColors.grey300, thickness: 1),
+          pw.SizedBox(height: 10),
+          
+          // Photo & Name Row
+          pw.Row(
+            children: [
+              pw.Container(
+                height: 65,
+                width: 65,
+                decoration: pw.BoxDecoration(
+                  shape: pw.BoxShape.circle,
+                  color: PdfColors.grey100,
+                  border: pw.Border.all(color: PdfColors.grey300, width: 1),
+                ),
+                child: studentAvatar != null
+                    ? pw.ClipOval(child: pw.Image(studentAvatar, fit: pw.BoxFit.cover))
+                    : pw.Center(child: pw.Text(student.user?.name.isNotEmpty == true ? student.user!.name[0] : '?', style: const pw.TextStyle(color: PdfColors.grey400, fontSize: 24))),
+              ),
+              pw.SizedBox(width: 16),
+              pw.Expanded(
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      student.user?.name ?? 'Unknown',
+                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14, color: PdfColors.black),
+                    ),
+                    pw.SizedBox(height: 2),
+                    pw.Text('STUDENT', style: pw.TextStyle(fontSize: 8, color: PdfColors.grey600, fontWeight: pw.FontWeight.bold, letterSpacing: 1.5)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          
+          pw.SizedBox(height: 20),
+          
+          // Details
+          pw.Row(
+            children: [
+              pw.Expanded(
+                flex: 2,
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text('ID Number', style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600)),
+                    pw.Text(student.rollId, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.grey900)),
+                    pw.SizedBox(height: 8),
+                    pw.Text('Class & Section', style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600)),
+                    pw.Text('$className - $sectionName', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.grey900)),
+                  ],
+                ),
+              ),
+              pw.Expanded(
+                flex: 2,
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text('Email', style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600)),
+                    pw.Text(student.user?.email ?? 'N/A', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.grey900)),
+                    pw.SizedBox(height: 8),
+                    pw.Text('Contact', style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600)),
+                    pw.Text(student.guardianContact.isNotEmpty ? student.guardianContact : (student.user?.phone ?? 'N/A'), style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.grey900)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          
+          pw.Spacer(),
+          // Footer
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: pw.CrossAxisAlignment.end,
+            children: [
+              pw.Container(
+                width: 45,
+                height: 45,
+                child: pw.BarcodeWidget(
+                  data: barcodeData,
+                  barcode: pw.Barcode.qrCode(),
+                  drawText: false,
+                  color: PdfColors.grey800,
+                ),
+              ),
+              pw.Column(
+                children: [
+                  pw.Container(width: 60, child: pw.Divider(color: PdfColors.grey800, thickness: 1)),
+                  pw.SizedBox(height: 4),
+                  pw.Text('Authorized Signature', style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey700)),
+                ],
+              ),
+            ],
           ),
         ],
       ),

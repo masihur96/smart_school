@@ -323,7 +323,23 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
     School? school,
     List<Exam> exams,
   ) async {
-    final pdf = pw.Document();
+    pw.Font? fontReg;
+    pw.Font? fontBold;
+    try {
+      fontReg = await PdfGoogleFonts.notoSansBengaliRegular();
+      fontBold = await PdfGoogleFonts.notoSansBengaliBold();
+    } catch (_) {}
+
+    final pdf = pw.Document(
+      theme: fontReg != null
+          ? pw.ThemeData.withFont(
+              base: fontReg,
+              bold: fontBold ?? fontReg,
+              italic: fontReg,
+              boldItalic: fontBold ?? fontReg,
+            )
+          : pw.ThemeData(),
+    );
 
     final schoolName = school?.name ?? 'Unknown School';
     final schoolLogoUrl = school?.avatar ?? '';
