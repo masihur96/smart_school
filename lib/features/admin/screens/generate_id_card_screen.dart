@@ -30,6 +30,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
   String? _selectedSectionId;
   String _selectedTemplate = 'Default';
   final List<String> _templates = ['Default', 'Modern', 'Classic', 'Minimalist'];
+  Set<String> _selectedStudentIds = {};
   late List<Student> _currentStudents;
   bool _isLoading = false;
   Uint8List? _pdfBytes;
@@ -45,6 +46,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
   void initState() {
     super.initState();
     _currentStudents = widget.students;
+    _selectedStudentIds = _currentStudents.map((s) => s.userId).toSet();
     if (_currentStudents.isNotEmpty) {
       _selectedClassId = _currentStudents.first.classId;
       _selectedSectionId = _currentStudents.first.sectionId;
@@ -56,6 +58,15 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
   }
 
   Future<void> _generatePdf() async {
+    if (_selectedStudentIds.isEmpty) {
+      if (mounted) {
+        setState(() {
+          _pdfBytes = null;
+          _isLoading = false;
+        });
+      }
+      return;
+    }
     setState(() => _isLoading = true);
     final authNotifier = context.read<AuthNotifier>();
     final school = authNotifier.user?.school;
@@ -95,6 +106,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
               _currentStudents = List.from(
                 context.read<StudentsNotifier>().students,
               );
+              _selectedStudentIds = _currentStudents.map((s) => s.userId).toSet();
             });
             _generatePdf();
           }
@@ -123,9 +135,11 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _currentStudents.length == 1
-              ? 'ID Card Preview'
-              : 'ID Cards Preview (${_currentStudents.length})',
+          _selectedStudentIds.length == 1
+              ? 'ID Card – ${_currentStudents.firstWhere((s) => s.userId == _selectedStudentIds.first, orElse: () => _currentStudents.first).user?.name ?? 'Student'}'
+              : _selectedStudentIds.length == _currentStudents.length
+                  ? 'ID Cards Preview (${_currentStudents.length})'
+                  : 'ID Cards Preview (${_selectedStudentIds.length} Selected)',
         ),
         backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
@@ -157,12 +171,16 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
         children: [
           _buildFilters(uniqueClasses, uniqueSections),
           Expanded(
-            child: _isLoading || _pdfBytes == null
+            child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _currentStudents.isEmpty
                 ? Center(
                     child: Text(AppLocalizations.of(context)!.noStudentsForIdCards),
                   )
+                : _selectedStudentIds.isEmpty
+                ? const Center(child: Text('No students selected. Please select at least one student.'))
+                : _pdfBytes == null
+                ? const Center(child: CircularProgressIndicator())
                 : pdfx.PdfViewPinch(controller: _pdfController!),
           ),
         ],
@@ -177,96 +195,219 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       color: AppColors.primaryAdmin.withValues(alpha: 0.05),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: _buildDropdown<String>(
-              label: 'Template',
-              value: _selectedTemplate,
-              items: _templates
-                  .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                  .toList(),
-              onChanged: (val) {
-                if (val != null && val != _selectedTemplate) {
-                  setState(() {
-                    _selectedTemplate = val;
-                  });
-                  _generatePdf();
-                }
-              },
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _buildDropdown<String?>(
-              label: AppLocalizations.of(context)!.className,
-              value: uniqueClasses.containsKey(_selectedClassId)
-                  ? _selectedClassId
-                  : null,
-              items: [
-                if (!uniqueClasses.containsKey(_selectedClassId) &&
-                    _selectedClassId != null)
-                  DropdownMenuItem(
-                    value: _selectedClassId,
-                    child: Text(AppLocalizations.of(context)!.unknownClass),
+          // ── Row 1: Template, Class, Section ──
+          Row(
+            children: [
+              Expanded(
+                child: _buildDropdown<String>(
+                  label: 'Template',
+                  value: _selectedTemplate,
+                  items: _templates
+                      .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                      .toList(),
+                  onChanged: (val) {
+                    if (val != null && val != _selectedTemplate) {
+                      setState(() {
+                        _selectedTemplate = val;
+                      });
+                      _generatePdf();
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildDropdown<String?>(
+                  label: AppLocalizations.of(context)!.className,
+                  value: uniqueClasses.containsKey(_selectedClassId)
+                      ? _selectedClassId
+                      : null,
+                  items: [
+                    if (!uniqueClasses.containsKey(_selectedClassId) &&
+                        _selectedClassId != null)
+                      DropdownMenuItem(
+                        value: _selectedClassId,
+                        child: Text(AppLocalizations.of(context)!.unknownClass),
+                      ),
+                    if (!uniqueClasses.containsKey(_selectedClassId) &&
+                        _selectedClassId == null)
+                      DropdownMenuItem(
+                        value: null,
+                        child: Text(AppLocalizations.of(context)!.selectClass),
+                      ),
+                    ...uniqueClasses.entries.map(
+                      (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
+                    ),
+                  ],
+                  onChanged: (val) {
+                    if (val != _selectedClassId) {
+                      setState(() {
+                        _selectedClassId = val;
+                        _selectedSectionId = null;
+                      });
+                      _fetchStudents();
+                    }
+                  },
+                ),
+              ),
+              if (uniqueSections.isNotEmpty) ...[
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildDropdown<String?>(
+                    label: AppLocalizations.of(context)!.section,
+                    value: uniqueSections.containsKey(_selectedSectionId)
+                        ? _selectedSectionId
+                        : null,
+                    items: [
+                      DropdownMenuItem(
+                        value: null,
+                        child: Text(AppLocalizations.of(context)!.allSections),
+                      ),
+                      if (!uniqueSections.containsKey(_selectedSectionId) &&
+                          _selectedSectionId != null)
+                        DropdownMenuItem(
+                          value: _selectedSectionId,
+                          child: Text(AppLocalizations.of(context)!.unknownSection),
+                        ),
+                      ...uniqueSections.entries.map(
+                        (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      if (val != _selectedSectionId) {
+                        setState(() {
+                          _selectedSectionId = val;
+                        });
+                        _fetchStudents();
+                      }
+                    },
                   ),
-                if (!uniqueClasses.containsKey(_selectedClassId) &&
-                    _selectedClassId == null)
-                  DropdownMenuItem(
-                    value: null,
-                    child: Text(AppLocalizations.of(context)!.selectClass),
-                  ),
-                ...uniqueClasses.entries.map(
-                  (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
                 ),
               ],
-              onChanged: (val) {
-                if (val != _selectedClassId) {
-                  setState(() {
-                    _selectedClassId = val;
-                    _selectedSectionId = null;
-                  });
-                  _fetchStudents();
-                }
-              },
-            ),
+            ],
           ),
-          if (uniqueSections.isNotEmpty) ...[
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildDropdown<String?>(
-                label: AppLocalizations.of(context)!.section,
-                value: uniqueSections.containsKey(_selectedSectionId)
-                    ? _selectedSectionId
-                    : null,
-                items: [
-                  DropdownMenuItem(
-                    value: null,
-                    child: Text(AppLocalizations.of(context)!.allSections),
+          // ── Row 2: Student selector ──
+          if (_currentStudents.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Generate For', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                      const SizedBox(height: 4),
+                      InkWell(
+                        onTap: () => _showMultiSelectDialog(context),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade400),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                _selectedStudentIds.length == _currentStudents.length
+                                    ? 'All Students (${_currentStudents.length})'
+                                    : '${_selectedStudentIds.length} Selected',
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              const Icon(Icons.arrow_drop_down),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  if (!uniqueSections.containsKey(_selectedSectionId) &&
-                      _selectedSectionId != null)
-                    DropdownMenuItem(
-                      value: _selectedSectionId,
-                      child: Text(AppLocalizations.of(context)!.unknownSection),
-                    ),
-                  ...uniqueSections.entries.map(
-                    (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
-                  ),
-                ],
-                onChanged: (val) {
-                  if (val != _selectedSectionId) {
-                    setState(() {
-                      _selectedSectionId = val;
-                    });
-                    _fetchStudents();
-                  }
-                },
-              ),
+                ),
+              ],
             ),
           ],
         ],
       ),
+    );
+  }
+
+  void _showMultiSelectDialog(BuildContext context) {
+    Set<String> tempSelection = Set.from(_selectedStudentIds);
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Select Students', style: TextStyle(fontSize: 18)),
+                  TextButton(
+                    onPressed: () {
+                      setDialogState(() {
+                        if (tempSelection.length == _currentStudents.length) {
+                          tempSelection.clear();
+                        } else {
+                          tempSelection = _currentStudents.map((s) => s.userId).toSet();
+                        }
+                      });
+                    },
+                    child: Text(tempSelection.length == _currentStudents.length ? 'Deselect All' : 'Select All'),
+                  ),
+                ],
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 400,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _currentStudents.length,
+                  itemBuilder: (context, index) {
+                    final student = _currentStudents[index];
+                    return CheckboxListTile(
+                      value: tempSelection.contains(student.userId),
+                      title: Text(student.user?.name ?? student.rollId),
+                      subtitle: Text('ID: ${student.rollId}'),
+                      onChanged: (bool? value) {
+                        setDialogState(() {
+                          if (value == true) {
+                            tempSelection.add(student.userId);
+                          } else {
+                            tempSelection.remove(student.userId);
+                          }
+                        });
+                      },
+                    );
+                  },
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    if (_selectedStudentIds.length != tempSelection.length ||
+                        !_selectedStudentIds.containsAll(tempSelection)) {
+                      setState(() {
+                        _selectedStudentIds = Set.from(tempSelection);
+                      });
+                      _generatePdf();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryAdmin, foregroundColor: Colors.white),
+                  child: const Text('Apply'),
+                ),
+              ],
+            );
+          }
+        );
+      }
     );
   }
 
@@ -400,12 +541,17 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
       }
     }
 
+    // Apply multi-student filter
+    final studentsToRender = _currentStudents
+        .where((s) => _selectedStudentIds.contains(s.userId))
+        .toList();
+
     // Group students into pages (4 per page on A4)
     // A4 is 595 x 842 points.
     // We can fit 2 columns, 2 rows = 4 cards.
     final itemsPerPage = 4;
-    for (var i = 0; i < _currentStudents.length; i += itemsPerPage) {
-      final pageStudents = _currentStudents.skip(i).take(itemsPerPage).toList();
+    for (var i = 0; i < studentsToRender.length; i += itemsPerPage) {
+      final pageStudents = studentsToRender.skip(i).take(itemsPerPage).toList();
 
       pdf.addPage(
         pw.Page(

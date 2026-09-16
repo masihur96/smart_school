@@ -155,10 +155,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                     );
                   },
                 ),
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () => context.push('/admin/students/add'),
-                ),
+
               ],
             ),
       body: Padding(
