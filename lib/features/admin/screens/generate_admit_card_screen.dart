@@ -19,7 +19,7 @@ import '../providers/student_provider.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 // Enum - available admit card templates
 // ─────────────────────────────────────────────────────────────────────────────
-enum AdmitCardTemplate { classic, modern, minimal, compact }
+enum AdmitCardTemplate { classic, modern, minimal, compact, halfPage }
 
 extension AdmitCardTemplateExt on AdmitCardTemplate {
   String get label {
@@ -32,6 +32,8 @@ extension AdmitCardTemplateExt on AdmitCardTemplate {
         return 'Minimal';
       case AdmitCardTemplate.compact:
         return 'Compact\n(6/page)';
+      case AdmitCardTemplate.halfPage:
+        return 'Half Page\n(2/page)';
     }
   }
 
@@ -45,6 +47,8 @@ extension AdmitCardTemplateExt on AdmitCardTemplate {
         return Icons.article_outlined;
       case AdmitCardTemplate.compact:
         return Icons.dashboard_outlined;
+      case AdmitCardTemplate.halfPage:
+        return Icons.view_agenda_outlined;
     }
   }
 
@@ -58,6 +62,8 @@ extension AdmitCardTemplateExt on AdmitCardTemplate {
         return Colors.blueGrey;
       case AdmitCardTemplate.compact:
         return Colors.teal;
+      case AdmitCardTemplate.halfPage:
+        return Colors.indigo;
     }
   }
 
@@ -71,6 +77,8 @@ extension AdmitCardTemplateExt on AdmitCardTemplate {
         return 'Elegant monochrome layout';
       case AdmitCardTemplate.compact:
         return '6 cards per page, no routine';
+      case AdmitCardTemplate.halfPage:
+        return '2 cards per page, clear UI';
     }
   }
 }
@@ -325,6 +333,68 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
         ..sort((a, b) => a.date.compareTo(b.date));
     }
 
+    // ── HALF-PAGE: 2 cards per A4 page ──────────────────────────────────────
+    if (_selectedTemplate == AdmitCardTemplate.halfPage) {
+      const int perPage = 2;
+      for (var i = 0; i < _currentStudents.length; i += perPage) {
+        final pageStudents = _currentStudents.skip(i).take(perPage).toList();
+        pdf.addPage(
+          pw.Page(
+            pageFormat: format,
+            margin: const pw.EdgeInsets.all(20),
+            build: (pw.Context ctx) {
+              return pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                children: [
+                  pw.Expanded(
+                    child: _buildHalfPageCard(
+                      student: pageStudents[0],
+                      className: pageStudents[0].className?.isNotEmpty == true
+                          ? pageStudents[0].className!
+                          : resolvedClassName,
+                      sectionName: pageStudents[0].sectionName?.isNotEmpty == true
+                          ? pageStudents[0].sectionName!
+                          : resolvedSectionName,
+                      schoolName: schoolName,
+                      schoolLogo: schoolLogo,
+                      avatar: avatars[pageStudents[0].userId],
+                      subjects: subjectsForStudent(pageStudents[0]),
+                      instruction: _topInstruction,
+                      signatoryName: signatoryName,
+                      signatureFont: signatureFont,
+                    ),
+                  ),
+                  if (pageStudents.length > 1) ...[
+                    pw.SizedBox(height: 20),
+                    pw.Expanded(
+                      child: _buildHalfPageCard(
+                        student: pageStudents[1],
+                        className: pageStudents[1].className?.isNotEmpty == true
+                            ? pageStudents[1].className!
+                            : resolvedClassName,
+                        sectionName: pageStudents[1].sectionName?.isNotEmpty == true
+                            ? pageStudents[1].sectionName!
+                            : resolvedSectionName,
+                        schoolName: schoolName,
+                        schoolLogo: schoolLogo,
+                        avatar: avatars[pageStudents[1].userId],
+                        subjects: subjectsForStudent(pageStudents[1]),
+                        instruction: _topInstruction,
+                        signatoryName: signatoryName,
+                        signatureFont: signatureFont,
+                      ),
+                    ),
+                  ] else
+                    pw.Expanded(child: pw.SizedBox()),
+                ],
+              );
+            },
+          ),
+        );
+      }
+      return pdf.save();
+    }
+
     // ── COMPACT: 6 cards per A4 page ──────────────────────────────────────
     if (_selectedTemplate == AdmitCardTemplate.compact) {
       const int perPage = 6;
@@ -432,6 +502,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   signatureFont: signatureFont,
                 );
               case AdmitCardTemplate.compact:
+              case AdmitCardTemplate.halfPage:
                 return pw.SizedBox(); // handled above
             }
           },
@@ -1983,6 +2054,305 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TEMPLATE 5 - HALF PAGE (2 cards per A4 page)
+  // ═══════════════════════════════════════════════════════════════════════════
+  pw.Widget _buildHalfPageCard({
+    required Student student,
+    required String className,
+    required String sectionName,
+    required String schoolName,
+    required pw.ImageProvider? schoolLogo,
+    required pw.ImageProvider? avatar,
+    required List<ExamAssignment> subjects,
+    required String instruction,
+    String? signatoryName,
+    pw.Font? signatureFont,
+  }) {
+    const primary = PdfColors.indigo700;
+    const accent = PdfColors.amber700;
+    const light = PdfColors.indigo50;
+
+    final half = (subjects.length / 2).ceil();
+    final leftSubjects = subjects.take(half).toList();
+    final rightSubjects = subjects.skip(half).toList();
+
+    pw.Widget subjectTable(List<ExamAssignment> rows, int startIndex) {
+      if (rows.isEmpty) return pw.SizedBox();
+      return pw.Table(
+        border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+        columnWidths: const {
+          0: pw.FixedColumnWidth(22),
+          1: pw.FlexColumnWidth(2.5),
+          2: pw.FlexColumnWidth(2.2),
+        },
+        children: [
+          pw.TableRow(
+            decoration: const pw.BoxDecoration(color: primary),
+            children: [
+              _tCell('#', isHeader: true, fontSize: 8),
+              _tCell('Subject', isHeader: true, fontSize: 8),
+              _tCell('Date / Day', isHeader: true, fontSize: 8),
+            ],
+          ),
+          ...rows.asMap().entries.map((e) {
+            final idx = startIndex + e.key;
+            final a = e.value;
+            final bg = idx.isEven ? PdfColors.white : light;
+            return pw.TableRow(
+              decoration: pw.BoxDecoration(color: bg),
+              children: [
+                _tCell('${idx + 1}', centered: true, fontSize: 8),
+                _tCell(a.subjectName, fontSize: 8),
+                _tCell(
+                  '${DateFormat('dd/MM/yy').format(a.date)} (${DateFormat('EEE').format(a.date)})',
+                  fontSize: 8,
+                ),
+              ],
+            );
+          }),
+        ],
+      );
+    }
+
+    return pw.Container(
+      margin: const pw.EdgeInsets.only(bottom: 20),
+      padding: const pw.EdgeInsets.all(16),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.white,
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(12)),
+        border: pw.Border.all(color: primary, width: 2),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+        children: [
+          // Top Section: Student Info (Left) & School Info (Right)
+          pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // Student Info
+              pw.Expanded(
+                flex: 5,
+                child: pw.Row(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Container(
+                      width: 60,
+                      height: 75,
+                      decoration: pw.BoxDecoration(
+                        color: light,
+                        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                        border: pw.Border.all(color: PdfColors.grey400),
+                      ),
+                      child: avatar != null
+                          ? pw.ClipRRect(
+                              horizontalRadius: 5,
+                              verticalRadius: 5,
+                              child: pw.Image(avatar, fit: pw.BoxFit.cover),
+                            )
+                          : pw.Center(
+                              child: pw.Text(
+                                student.user?.name.isNotEmpty == true
+                                    ? student.user!.name[0].toUpperCase()
+                                    : '?',
+                                style: pw.TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: pw.FontWeight.bold,
+                                  color: primary,
+                                ),
+                              ),
+                            ),
+                    ),
+                    pw.SizedBox(width: 12),
+                    pw.Expanded(
+                      child: pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text(
+                            student.user?.name ?? 'N/A',
+                            style: pw.TextStyle(
+                              fontSize: 12,
+                              fontWeight: pw.FontWeight.bold,
+                              color: primary,
+                            ),
+                          ),
+                          pw.SizedBox(height: 6),
+                          pw.Row(
+                            children: [
+                              pw.Expanded(
+                                child: _classicField('Roll No.', student.rollId, primary: primary),
+                              ),
+                              pw.Expanded(
+                                child: _classicField('Class', '$className – $sectionName', primary: primary),
+                              ),
+                            ],
+                          ),
+                          pw.SizedBox(height: 6),
+                          pw.Row(
+                            children: [
+                              pw.Expanded(
+                                child: _classicField('Contact', student.guardianContact.isNotEmpty ? student.guardianContact : (student.user?.phone ?? 'N/A'), primary: primary),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Vertical Divider
+              pw.Container(
+                width: 1,
+                height: 75,
+                color: PdfColors.grey300,
+                margin: const pw.EdgeInsets.symmetric(horizontal: 12),
+              ),
+
+              // School Info
+              pw.Expanded(
+                flex: 4,
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  children: [
+                    if (schoolLogo != null)
+                      pw.Container(
+                        width: 40,
+                        height: 40,
+                        margin: const pw.EdgeInsets.only(bottom: 6),
+                        decoration: pw.BoxDecoration(
+                          shape: pw.BoxShape.circle,
+                          border: pw.Border.all(color: primary, width: 1.5),
+                          image: pw.DecorationImage(
+                            image: schoolLogo,
+                            fit: pw.BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    pw.Text(
+                      schoolName.toUpperCase(),
+                      textAlign: pw.TextAlign.right,
+                      style: pw.TextStyle(
+                        color: primary,
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 11,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    pw.SizedBox(height: 2),
+                    pw.Text(
+                      'ADMIT CARD',
+                      textAlign: pw.TextAlign.right,
+                      style: pw.TextStyle(
+                        color: primary,
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 9,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    pw.SizedBox(height: 1),
+                    pw.Text(
+                      widget.exam.name.toUpperCase(),
+                      textAlign: pw.TextAlign.right,
+                      style: pw.TextStyle(
+                        color: PdfColors.grey700,
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 8,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          pw.SizedBox(height: 12),
+
+          if (instruction.isNotEmpty) ...[
+            pw.Container(
+              width: double.infinity,
+              padding: const pw.EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 6,
+              ),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.amber50,
+                border: pw.Border.all(color: accent, width: 1),
+                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+              ),
+              child: pw.Text(
+                instruction,
+                textAlign: pw.TextAlign.center,
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 9,
+                  color: primary,
+                ),
+              ),
+            ),
+            pw.SizedBox(height: 10),
+          ],
+
+          // Schedule Heading
+          pw.Text(
+            'EXAMINATION SCHEDULE',
+            style: pw.TextStyle(
+              fontWeight: pw.FontWeight.bold,
+              fontSize: 10,
+              color: primary,
+              letterSpacing: 1,
+            ),
+          ),
+          pw.SizedBox(height: 6),
+
+          // 2-column subject table
+          if (subjects.isEmpty)
+            pw.Container(
+              padding: const pw.EdgeInsets.all(12),
+              color: PdfColors.grey100,
+              child: pw.Text(
+                'No subjects scheduled.',
+                style: const pw.TextStyle(
+                  fontSize: 10,
+                  color: PdfColors.grey600,
+                ),
+                textAlign: pw.TextAlign.center,
+              ),
+            )
+          else
+            pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Expanded(child: subjectTable(leftSubjects, 0)),
+                pw.SizedBox(width: 10),
+                pw.Expanded(child: subjectTable(rightSubjects, half)),
+              ],
+            ),
+
+          pw.Spacer(),
+          pw.Container(height: 1, color: PdfColors.grey300),
+          pw.SizedBox(height: 8),
+
+          // Signatures
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: pw.CrossAxisAlignment.end,
+            children: [
+              _sigBlock('Student Signature', primary),
+              _sigBlock(
+                'Principal Signature',
+                primary,
+                signatoryName: signatoryName,
+                signatureFont: signatureFont,
+              ),
+            ],
           ),
         ],
       ),
