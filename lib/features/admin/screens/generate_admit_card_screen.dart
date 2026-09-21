@@ -2312,12 +2312,12 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     ],
                     pw.Expanded(
                       child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.end,
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
                         mainAxisAlignment: pw.MainAxisAlignment.center,
                         children: [
                           pw.Text(
                             schoolName.toUpperCase(),
-                            textAlign: pw.TextAlign.right,
+                            textAlign: pw.TextAlign.left,
                             maxLines: 2,
                             style: pw.TextStyle(
                               color: primary,
@@ -2329,7 +2329,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                           if (schoolAddress.isNotEmpty)
                             pw.Text(
                               schoolAddress,
-                              textAlign: pw.TextAlign.right,
+                              textAlign: pw.TextAlign.left,
                               maxLines: 1,
                               style: const pw.TextStyle(
                                 color: PdfColors.grey700,
@@ -2339,7 +2339,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                           if (schoolPhone.isNotEmpty)
                             pw.Text(
                               schoolPhone,
-                              textAlign: pw.TextAlign.right,
+                              textAlign: pw.TextAlign.left,
                               maxLines: 1,
                               style: const pw.TextStyle(
                                 color: PdfColors.grey700,
