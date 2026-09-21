@@ -20,6 +20,8 @@ class _AssignmentDraft {
   String? subjectId;
   String? examinerId;
   DateTime date;
+  TimeOfDay startTime;
+  TimeOfDay endTime;
   String? syllabus;
 
   _AssignmentDraft({
@@ -28,8 +30,12 @@ class _AssignmentDraft {
     this.subjectId,
     this.examinerId,
     DateTime? date,
+    TimeOfDay? startTime,
+    TimeOfDay? endTime,
     this.syllabus,
-  }) : date = date ?? DateTime.now().add(const Duration(days: 1));
+  })  : date = date ?? DateTime.now().add(const Duration(days: 1)),
+        startTime = startTime ?? const TimeOfDay(hour: 9, minute: 0),
+        endTime = endTime ?? const TimeOfDay(hour: 11, minute: 0);
 }
 
 class AddEditExamScreen extends StatefulWidget {
@@ -73,6 +79,18 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
             subjectId: a.subjectId,
             examinerId: a.examinerId,
             date: a.date,
+            startTime: a.startTime != null
+                ? TimeOfDay(
+                    hour: int.parse(a.startTime!.split(':')[0]),
+                    minute: int.parse(a.startTime!.split(':')[1]),
+                  )
+                : null,
+            endTime: a.endTime != null
+                ? TimeOfDay(
+                    hour: int.parse(a.endTime!.split(':')[0]),
+                    minute: int.parse(a.endTime!.split(':')[1]),
+                  )
+                : null,
             syllabus: a.syllabus,
           ),
         );
@@ -348,6 +366,8 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
     String? subjectId = draft.subjectId;
     String? examinerId = draft.examinerId;
     DateTime date = draft.date;
+    TimeOfDay startTime = draft.startTime;
+    TimeOfDay endTime = draft.endTime;
     String? syllabus = draft.syllabus;
 
     final syllabusController = TextEditingController(text: syllabus);
@@ -480,6 +500,70 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                         ),
                       ),
                       const SizedBox(height: 14),
+                      // Start Time picker
+                      InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () async {
+                          final t = await showTimePicker(
+                            context: context,
+                            initialTime: startTime,
+                            builder: (ctx, child) => Theme(
+                              data: Theme.of(ctx).copyWith(
+                                colorScheme: const ColorScheme.light(
+                                  primary: Colors.purple,
+                                  onPrimary: Colors.white,
+                                  onSurface: Colors.black,
+                                ),
+                              ),
+                              child: child!,
+                            ),
+                          );
+                          if (t != null) setBS(() => startTime = t);
+                        },
+                        child: InputDecorator(
+                          decoration: _dropDeco(
+                            'Start Time',
+                            Icons.access_time,
+                          ),
+                          child: Text(
+                            startTime.format(context),
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      // End Time picker
+                      InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () async {
+                          final t = await showTimePicker(
+                            context: context,
+                            initialTime: endTime,
+                            builder: (ctx, child) => Theme(
+                              data: Theme.of(ctx).copyWith(
+                                colorScheme: const ColorScheme.light(
+                                  primary: Colors.purple,
+                                  onPrimary: Colors.white,
+                                  onSurface: Colors.black,
+                                ),
+                              ),
+                              child: child!,
+                            ),
+                          );
+                          if (t != null) setBS(() => endTime = t);
+                        },
+                        child: InputDecorator(
+                          decoration: _dropDeco(
+                            'End Time',
+                            Icons.access_time_filled,
+                          ),
+                          child: Text(
+                            endTime.format(context),
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
                       // Syllabus
                       TextFormField(
                         controller: syllabusController,
@@ -507,6 +591,8 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                                         ..subjectId = subjectId
                                         ..examinerId = examinerId
                                         ..date = date
+                                        ..startTime = startTime
+                                        ..endTime = endTime
                                         ..syllabus = syllabus;
                                     } else {
                                       _assignments.add(
@@ -516,6 +602,8 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                                           subjectId: subjectId,
                                           examinerId: examinerId,
                                           date: date,
+                                          startTime: startTime,
+                                          endTime: endTime,
                                           syllabus: syllabus,
                                         ),
                                       );
@@ -611,6 +699,10 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
               'subject_uid': a.subjectId!,
               'examiner_uid': a.examinerId!,
               'date': a.date,
+              'start_time':
+                  '${a.startTime.hour.toString().padLeft(2, '0')}:${a.startTime.minute.toString().padLeft(2, '0')}:00',
+              'end_time':
+                  '${a.endTime.hour.toString().padLeft(2, '0')}:${a.endTime.minute.toString().padLeft(2, '0')}:00',
               'syllabus': a.syllabus,
             },
           )
@@ -933,6 +1025,14 @@ class _AssignmentCard extends StatelessWidget {
               DateFormat('MMM dd, yyyy').format(draft.date),
               style: TextStyle(
                 color: Colors.purple.shade300,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Text(
+              '${draft.startTime.format(context)}  –  ${draft.endTime.format(context)}',
+              style: TextStyle(
+                color: Colors.teal.shade600,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),

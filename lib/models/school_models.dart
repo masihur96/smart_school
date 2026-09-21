@@ -725,6 +725,8 @@ class ExamAssignment {
   final String examinerId;
   final String examinerName;
   final DateTime date;
+  final String? startTime;
+  final String? endTime;
   final String? syllabus;
 
   ExamAssignment({
@@ -739,6 +741,8 @@ class ExamAssignment {
     required this.examinerId,
     required this.examinerName,
     required this.date,
+    this.startTime,
+    this.endTime,
     this.syllabus,
   });
 
@@ -801,6 +805,8 @@ class ExamAssignment {
           json['examiner_name'] ??
           '',
       date: DateTime.tryParse(json['date']?.toString() ?? '') ?? DateTime.now(),
+      startTime: json['start_time']?.toString(),
+      endTime: json['end_time']?.toString(),
       syllabus: json['syllabus']?.toString(),
     );
   }
