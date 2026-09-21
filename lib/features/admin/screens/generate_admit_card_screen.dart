@@ -352,7 +352,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       className: pageStudents[0].className?.isNotEmpty == true
                           ? pageStudents[0].className!
                           : resolvedClassName,
-                      sectionName: pageStudents[0].sectionName?.isNotEmpty == true
+                      sectionName:
+                          pageStudents[0].sectionName?.isNotEmpty == true
                           ? pageStudents[0].sectionName!
                           : resolvedSectionName,
                       schoolName: schoolName,
@@ -372,7 +373,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         className: pageStudents[1].className?.isNotEmpty == true
                             ? pageStudents[1].className!
                             : resolvedClassName,
-                        sectionName: pageStudents[1].sectionName?.isNotEmpty == true
+                        sectionName:
+                            pageStudents[1].sectionName?.isNotEmpty == true
                             ? pageStudents[1].sectionName!
                             : resolvedSectionName,
                         schoolName: schoolName,
@@ -2147,7 +2149,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       height: 75,
                       decoration: pw.BoxDecoration(
                         color: light,
-                        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                        borderRadius: const pw.BorderRadius.all(
+                          pw.Radius.circular(6),
+                        ),
                         border: pw.Border.all(color: PdfColors.grey400),
                       ),
                       child: avatar != null
@@ -2186,10 +2190,18 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                           pw.Row(
                             children: [
                               pw.Expanded(
-                                child: _classicField('Roll No.', student.rollId, primary: primary),
+                                child: _classicField(
+                                  'Roll No.',
+                                  student.rollId,
+                                  primary: primary,
+                                ),
                               ),
                               pw.Expanded(
-                                child: _classicField('Class', '$className – $sectionName', primary: primary),
+                                child: _classicField(
+                                  'Class',
+                                  '$className – $sectionName',
+                                  primary: primary,
+                                ),
                               ),
                             ],
                           ),
@@ -2197,7 +2209,13 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                           pw.Row(
                             children: [
                               pw.Expanded(
-                                child: _classicField('Contact', student.guardianContact.isNotEmpty ? student.guardianContact : (student.user?.phone ?? 'N/A'), primary: primary),
+                                child: _classicField(
+                                  'Contact',
+                                  student.guardianContact.isNotEmpty
+                                      ? student.guardianContact
+                                      : (student.user?.phone ?? 'N/A'),
+                                  primary: primary,
+                                ),
                               ),
                             ],
                           ),
@@ -2337,8 +2355,6 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             ),
 
           pw.Spacer(),
-          pw.Container(height: 1, color: PdfColors.grey300),
-          pw.SizedBox(height: 8),
 
           // Signatures
           pw.Row(
