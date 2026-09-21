@@ -165,8 +165,13 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
   // ── STEP 2: Assignments ────────────────────────────────────────────────────
   Widget _buildStep2() {
     final allClasses = context.read<ClassSetupNotifier>().classes;
-    final uniqueClassIds = _assignments.map((a) => a.classId).whereType<String>().toSet();
-    final filterClasses = allClasses.where((c) => uniqueClassIds.contains(c.id)).toList();
+    final uniqueClassIds = _assignments
+        .map((a) => a.classId)
+        .whereType<String>()
+        .toSet();
+    final filterClasses = allClasses
+        .where((c) => uniqueClassIds.contains(c.id))
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,7 +268,9 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                       label: Text(c.name),
                       selected: _selectedFilterClassId == c.id,
                       onSelected: (val) {
-                        setState(() => _selectedFilterClassId = val ? c.id : null);
+                        setState(
+                          () => _selectedFilterClassId = val ? c.id : null,
+                        );
                       },
                       selectedColor: Colors.purple.shade100,
                     ),
@@ -300,16 +307,24 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
             ),
           )
         else
-          ..._assignments.asMap().entries.where((e) => _selectedFilterClassId == null || e.value.classId == _selectedFilterClassId).map((e) {
-            final i = e.key;
-            final a = e.value;
-            return _AssignmentCard(
-              index: i,
-              draft: a,
-              onEdit: () => _addAssignmentSheet(index: i),
-              onDelete: () => setState(() => _assignments.removeAt(i)),
-            );
-          }),
+          ..._assignments
+              .asMap()
+              .entries
+              .where(
+                (e) =>
+                    _selectedFilterClassId == null ||
+                    e.value.classId == _selectedFilterClassId,
+              )
+              .map((e) {
+                final i = e.key;
+                final a = e.value;
+                return _AssignmentCard(
+                  index: i,
+                  draft: a,
+                  onEdit: () => _addAssignmentSheet(index: i),
+                  onDelete: () => setState(() => _assignments.removeAt(i)),
+                );
+              }),
       ],
     );
   }
@@ -388,7 +403,10 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                     children: [
                       // Class dropdown
                       DropdownButtonFormField<String>(
-                        decoration: _dropDeco(AppLocalizations.of(context)!.className, Icons.class_outlined),
+                        decoration: _dropDeco(
+                          AppLocalizations.of(context)!.className,
+                          Icons.class_outlined,
+                        ),
                         initialValue: classId,
                         items: classes
                             .map(
@@ -406,7 +424,10 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                       const SizedBox(height: 14),
                       // Subject dropdown (filtered by class)
                       DropdownButtonFormField<String>(
-                        decoration: _dropDeco(AppLocalizations.of(context)!.subjectName, Icons.book_outlined),
+                        decoration: _dropDeco(
+                          AppLocalizations.of(context)!.subjectName,
+                          Icons.book_outlined,
+                        ),
                         initialValue: subjectId,
                         items: allSubjects
                             .where(
