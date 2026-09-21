@@ -699,10 +699,20 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
               'subject_uid': a.subjectId!,
               'examiner_uid': a.examinerId!,
               'date': a.date,
-              'start_time':
-                  '${a.startTime.hour.toString().padLeft(2, '0')}:${a.startTime.minute.toString().padLeft(2, '0')}:00',
-              'end_time':
-                  '${a.endTime.hour.toString().padLeft(2, '0')}:${a.endTime.minute.toString().padLeft(2, '0')}:00',
+              'start_time': DateTime(
+                a.date.year,
+                a.date.month,
+                a.date.day,
+                a.startTime.hour,
+                a.startTime.minute,
+              ).toIso8601String(),
+              'end_time': DateTime(
+                a.date.year,
+                a.date.month,
+                a.date.day,
+                a.endTime.hour,
+                a.endTime.minute,
+              ).toIso8601String(),
               'syllabus': a.syllabus,
             },
           )

@@ -181,6 +181,8 @@ class ExamsNotifier extends ChangeNotifier {
                 'subject_uid': a['subject_uid'],
                 'examiner_uid': a['examiner_uid'],
                 'date': DateFormat('yyyy-MM-dd').format(a['date']),
+                'start_time': a['start_time'],
+                'end_time': a['end_time'],
                 'syllabus': a['syllabus'],
               },
             )
