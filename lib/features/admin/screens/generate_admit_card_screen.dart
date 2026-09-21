@@ -2134,24 +2134,22 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.stretch,
         children: [
-          // Top Section: Student Info (Left) & School Info (Right)
+          // Top Section: Student Info (Left), Exam Info (Center) & School Info (Right)
           pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
-              // Student Info
+              // 1. Student Info (Left)
               pw.Expanded(
-                flex: 5,
+                flex: 9,
                 child: pw.Row(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Container(
-                      width: 60,
-                      height: 75,
+                      width: 55,
+                      height: 70,
                       decoration: pw.BoxDecoration(
                         color: light,
-                        borderRadius: const pw.BorderRadius.all(
-                          pw.Radius.circular(6),
-                        ),
+                        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
                         border: pw.Border.all(color: PdfColors.grey400),
                       ),
                       child: avatar != null
@@ -2166,14 +2164,14 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                                     ? student.user!.name[0].toUpperCase()
                                     : '?',
                                 style: pw.TextStyle(
-                                  fontSize: 24,
+                                  fontSize: 22,
                                   fontWeight: pw.FontWeight.bold,
                                   color: primary,
                                 ),
                               ),
                             ),
                     ),
-                    pw.SizedBox(width: 12),
+                    pw.SizedBox(width: 10),
                     pw.Expanded(
                       child: pw.Column(
                         crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -2181,41 +2179,27 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                           pw.Text(
                             student.user?.name ?? 'N/A',
                             style: pw.TextStyle(
-                              fontSize: 12,
+                              fontSize: 11,
                               fontWeight: pw.FontWeight.bold,
                               color: primary,
                             ),
                           ),
-                          pw.SizedBox(height: 6),
+                          pw.SizedBox(height: 5),
                           pw.Row(
                             children: [
                               pw.Expanded(
-                                child: _classicField(
-                                  'Roll No.',
-                                  student.rollId,
-                                  primary: primary,
-                                ),
+                                child: _classicField('Roll No.', student.rollId, primary: primary),
                               ),
                               pw.Expanded(
-                                child: _classicField(
-                                  'Class',
-                                  '$className – $sectionName',
-                                  primary: primary,
-                                ),
+                                child: _classicField('Class', '$className – $sectionName', primary: primary),
                               ),
                             ],
                           ),
-                          pw.SizedBox(height: 6),
+                          pw.SizedBox(height: 5),
                           pw.Row(
                             children: [
                               pw.Expanded(
-                                child: _classicField(
-                                  'Contact',
-                                  student.guardianContact.isNotEmpty
-                                      ? student.guardianContact
-                                      : (student.user?.phone ?? 'N/A'),
-                                  primary: primary,
-                                ),
+                                child: _classicField('Contact', student.guardianContact.isNotEmpty ? student.guardianContact : (student.user?.phone ?? 'N/A'), primary: primary),
                               ),
                             ],
                           ),
@@ -2226,24 +2210,64 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 ),
               ),
 
-              // Vertical Divider
+              // Vertical Divider 1
               pw.Container(
                 width: 1,
-                height: 75,
+                height: 70,
                 color: PdfColors.grey300,
-                margin: const pw.EdgeInsets.symmetric(horizontal: 12),
+                margin: const pw.EdgeInsets.symmetric(horizontal: 10),
               ),
 
-              // School Info
+              // 2. Exam Info (Center)
               pw.Expanded(
-                flex: 4,
+                flex: 5,
+                child: pw.Column(
+                  mainAxisAlignment: pw.MainAxisAlignment.center,
+                  crossAxisAlignment: pw.CrossAxisAlignment.center,
+                  children: [
+                    pw.Text(
+                      'ADMIT CARD',
+                      textAlign: pw.TextAlign.center,
+                      style: pw.TextStyle(
+                        color: primary,
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 10,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    pw.SizedBox(height: 6),
+                    pw.Text(
+                      widget.exam.name.toUpperCase(),
+                      textAlign: pw.TextAlign.center,
+                      style: pw.TextStyle(
+                        color: PdfColors.grey700,
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 8.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Vertical Divider 2
+              pw.Container(
+                width: 1,
+                height: 70,
+                color: PdfColors.grey300,
+                margin: const pw.EdgeInsets.symmetric(horizontal: 10),
+              ),
+
+              // 3. School Info (Right)
+              pw.Expanded(
+                flex: 6,
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  mainAxisAlignment: pw.MainAxisAlignment.center,
                   children: [
                     if (schoolLogo != null)
                       pw.Container(
-                        width: 40,
-                        height: 40,
+                        width: 45,
+                        height: 45,
                         margin: const pw.EdgeInsets.only(bottom: 6),
                         decoration: pw.BoxDecoration(
                           shape: pw.BoxShape.circle,
@@ -2260,29 +2284,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       style: pw.TextStyle(
                         color: primary,
                         fontWeight: pw.FontWeight.bold,
-                        fontSize: 11,
+                        fontSize: 10,
                         letterSpacing: 0.5,
-                      ),
-                    ),
-                    pw.SizedBox(height: 2),
-                    pw.Text(
-                      'ADMIT CARD',
-                      textAlign: pw.TextAlign.right,
-                      style: pw.TextStyle(
-                        color: primary,
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 9,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                    pw.SizedBox(height: 1),
-                    pw.Text(
-                      widget.exam.name.toUpperCase(),
-                      textAlign: pw.TextAlign.right,
-                      style: pw.TextStyle(
-                        color: PdfColors.grey700,
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 8,
                       ),
                     ),
                   ],
