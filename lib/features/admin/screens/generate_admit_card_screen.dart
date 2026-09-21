@@ -2149,7 +2149,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       height: 70,
                       decoration: pw.BoxDecoration(
                         color: light,
-                        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                        borderRadius: const pw.BorderRadius.all(
+                          pw.Radius.circular(6),
+                        ),
                         border: pw.Border.all(color: PdfColors.grey400),
                       ),
                       child: avatar != null
@@ -2188,10 +2190,18 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                           pw.Row(
                             children: [
                               pw.Expanded(
-                                child: _classicField('Roll No.', student.rollId, primary: primary),
+                                child: _classicField(
+                                  'Roll No.',
+                                  student.rollId,
+                                  primary: primary,
+                                ),
                               ),
                               pw.Expanded(
-                                child: _classicField('Class', '$className – $sectionName', primary: primary),
+                                child: _classicField(
+                                  'Class',
+                                  '$className – $sectionName',
+                                  primary: primary,
+                                ),
                               ),
                             ],
                           ),
@@ -2199,7 +2209,13 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                           pw.Row(
                             children: [
                               pw.Expanded(
-                                child: _classicField('Contact', student.guardianContact.isNotEmpty ? student.guardianContact : (student.user?.phone ?? 'N/A'), primary: primary),
+                                child: _classicField(
+                                  'Contact',
+                                  student.guardianContact.isNotEmpty
+                                      ? student.guardianContact
+                                      : (student.user?.phone ?? 'N/A'),
+                                  primary: primary,
+                                ),
                               ),
                             ],
                           ),
@@ -2260,7 +2276,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               // 3. School Info (Right)
               pw.Expanded(
                 flex: 6,
-                child: pw.Column(
+                child: pw.Row(
                   crossAxisAlignment: pw.CrossAxisAlignment.end,
                   mainAxisAlignment: pw.MainAxisAlignment.center,
                   children: [
@@ -2278,15 +2294,29 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                           ),
                         ),
                       ),
-                    pw.Text(
-                      schoolName.toUpperCase(),
-                      textAlign: pw.TextAlign.right,
-                      style: pw.TextStyle(
-                        color: primary,
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 10,
-                        letterSpacing: 0.5,
-                      ),
+                    pw.Column(
+                      children: [
+                        pw.Text(
+                          schoolName.toUpperCase(),
+                          textAlign: pw.TextAlign.right,
+                          style: pw.TextStyle(
+                            color: primary,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 10,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        pw.Text(
+                          schoolName.toUpperCase(),
+                          textAlign: pw.TextAlign.right,
+                          style: pw.TextStyle(
+                            color: primary,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 10,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
