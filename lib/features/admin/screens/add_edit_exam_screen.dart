@@ -62,6 +62,22 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
 
   bool get isEditing => widget.exam != null;
 
+  /// Parses a time string that is either a full ISO 8601 datetime
+  /// (e.g. "2026-09-27T09:00:00.000") or a plain "HH:mm:ss" / "HH:mm" string.
+  TimeOfDay _parseTimeOfDay(String raw) {
+    // Try ISO 8601 / full DateTime first
+    try {
+      final dt = DateTime.parse(raw);
+      return TimeOfDay(hour: dt.hour, minute: dt.minute);
+    } catch (_) {}
+    // Fallback: "HH:mm:ss" or "HH:mm"
+    final parts = raw.split(':');
+    return TimeOfDay(
+      hour: int.parse(parts[0].trim()),
+      minute: int.parse(parts[1].trim()),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -80,16 +96,10 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
             examinerId: a.examinerId,
             date: a.date,
             startTime: a.startTime != null
-                ? TimeOfDay(
-                    hour: int.parse(a.startTime!.split(':')[0]),
-                    minute: int.parse(a.startTime!.split(':')[1]),
-                  )
+                ? _parseTimeOfDay(a.startTime!)
                 : null,
             endTime: a.endTime != null
-                ? TimeOfDay(
-                    hour: int.parse(a.endTime!.split(':')[0]),
-                    minute: int.parse(a.endTime!.split(':')[1]),
-                  )
+                ? _parseTimeOfDay(a.endTime!)
                 : null,
             syllabus: a.syllabus,
           ),
@@ -720,7 +730,6 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
 
       if (isEditing) {
         await examsNotifier.updateExamOnAPI(
-          receiverUuids: receiverUuids,
           examId: widget.exam!.id,
           examName: _nameController.text.trim(),
           description: _descController.text.trim(),

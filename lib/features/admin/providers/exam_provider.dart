@@ -153,7 +153,6 @@ class ExamsNotifier extends ChangeNotifier {
   }
 
   Future<void> updateExamOnAPI({
-    List<String> receiverUuids = const [],
     required String examId,
     required String examName,
     required String description,
@@ -199,23 +198,13 @@ class ExamsNotifier extends ChangeNotifier {
       if (response != null && response.statusCode == 200) {
         log('Exam updated successfully');
 
-        // Topic-based notification
+        // Topic-based notification (single broadcast to all exam subscribers)
         NotificationService().triggerNotification(
           title: 'Exam Schedule Updated',
           body: 'The schedule for "$examName" has been updated.',
           topic: 'exam',
           data: {'type': 'exam_update', 'id': examId},
         );
-
-        // Individual notifications to all teachers & students
-        if (receiverUuids.isNotEmpty) {
-          NotificationService().sendBulkNotification(
-            receiverUuids: receiverUuids,
-            title: '📝 Exam Schedule Updated',
-            message: 'The schedule for "$examName" has been updated. Please review the new details.',
-            additionalData: {'type': 'exam_update', 'id': examId},
-          );
-        }
 
         await _load();
       } else {
