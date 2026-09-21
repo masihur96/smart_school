@@ -2932,12 +2932,16 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           height: 30, // reserved space for signature
           alignment: pw.Alignment.bottomCenter,
           child: (signatoryName != null && signatureFont != null)
-              ? pw.Text(
-                  signatoryName,
-                  style: pw.TextStyle(
-                    font: signatureFont,
-                    fontSize: 20,
-                    color: PdfColors.black,
+              ? pw.FittedBox(
+                  fit: pw.BoxFit.scaleDown,
+                  child: pw.Text(
+                    signatoryName,
+                    maxLines: 1,
+                    style: pw.TextStyle(
+                      font: signatureFont,
+                      fontSize: 20,
+                      color: PdfColors.black,
+                    ),
                   ),
                 )
               : pw.SizedBox(),
