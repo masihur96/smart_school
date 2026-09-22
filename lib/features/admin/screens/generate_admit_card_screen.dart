@@ -2129,9 +2129,83 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       );
     }
 
+    // ── School Info Header (letterhead at top of each card) ─────────────
+    pw.Widget schoolHeader = pw.Container(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+      decoration: pw.BoxDecoration(
+        color: primary,
+        borderRadius: const pw.BorderRadius.only(
+          topLeft: pw.Radius.circular(10),
+          topRight: pw.Radius.circular(10),
+        ),
+      ),
+      child: pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.center,
+        children: [
+          if (schoolLogo != null) ...[
+            pw.Container(
+              width: 42,
+              height: 42,
+              decoration: pw.BoxDecoration(
+                shape: pw.BoxShape.circle,
+                color: PdfColors.white,
+                border: pw.Border.all(color: accent, width: 1.5),
+                image: pw.DecorationImage(
+                  image: schoolLogo,
+                  fit: pw.BoxFit.contain,
+                ),
+              ),
+            ),
+            pw.SizedBox(width: 10),
+          ],
+          pw.Expanded(
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
+              children: [
+                pw.Text(
+                  schoolName.toUpperCase(),
+                  textAlign: pw.TextAlign.center,
+                  style: pw.TextStyle(
+                    color: PdfColors.white,
+                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 13,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                if (schoolAddress.isNotEmpty) ...[
+                  pw.SizedBox(height: 2),
+                  pw.Text(
+                    schoolAddress,
+                    textAlign: pw.TextAlign.center,
+                    maxLines: 1,
+                    style: const pw.TextStyle(
+                      color: PdfColors.indigo100,
+                      fontSize: 8,
+                    ),
+                  ),
+                ],
+                if (schoolPhone.isNotEmpty) ...[
+                  pw.SizedBox(height: 1),
+                  pw.Text(
+                    'Ph: $schoolPhone',
+                    textAlign: pw.TextAlign.center,
+                    style: const pw.TextStyle(
+                      color: PdfColors.indigo200,
+                      fontSize: 7.5,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          // Mirror logo space so text stays centered
+          if (schoolLogo != null) pw.SizedBox(width: 52),
+        ],
+      ),
+    );
+
     return pw.Container(
       margin: const pw.EdgeInsets.only(bottom: 20),
-      padding: const pw.EdgeInsets.all(16),
       decoration: pw.BoxDecoration(
         color: PdfColors.white,
         borderRadius: const pw.BorderRadius.all(pw.Radius.circular(12)),
@@ -2140,19 +2214,22 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.stretch,
         children: [
-          // Top Section: Student Info (Left), Exam Info (Center) & School Info (Right)
-          pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.center,
-            children: [
-              // 1. Student Info (Left)
-              pw.Expanded(
-                flex: 9,
-                child: pw.Row(
+          // ── 1. School Info at the very top ────────────────────────────
+          schoolHeader,
+
+          pw.Padding(
+            padding: const pw.EdgeInsets.fromLTRB(14, 10, 14, 14),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+              children: [
+                // ── 2. Student Info + Exam Info in a Row ──────────────
+                pw.Row(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
+                    // Student photo
                     pw.Container(
                       width: 55,
-                      height: 70,
+                      height: 72,
                       decoration: pw.BoxDecoration(
                         color: light,
                         borderRadius: const pw.BorderRadius.all(
@@ -2180,7 +2257,10 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                             ),
                     ),
                     pw.SizedBox(width: 10),
+
+                    // Student details
                     pw.Expanded(
+                      flex: 5,
                       child: pw.Column(
                         crossAxisAlignment: pw.CrossAxisAlignment.start,
                         children: [
@@ -2202,6 +2282,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                                   primary: primary,
                                 ),
                               ),
+                              pw.SizedBox(width: 6),
                               pw.Expanded(
                                 child: _classicField(
                                   'Class',
@@ -2212,227 +2293,161 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                             ],
                           ),
                           pw.SizedBox(height: 5),
-                          pw.Row(
-                            children: [
-                              pw.Expanded(
-                                child: _classicField(
-                                  'Contact',
-                                  student.guardianContact.isNotEmpty
-                                      ? student.guardianContact
-                                      : (student.user?.phone ?? 'N/A'),
-                                  primary: primary,
-                                ),
-                              ),
-                            ],
+                          _classicField(
+                            'Contact',
+                            student.guardianContact.isNotEmpty
+                                ? student.guardianContact
+                                : (student.user?.phone ?? 'N/A'),
+                            primary: primary,
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
 
-              // Vertical Divider 1
-              pw.Container(
-                width: 1,
-                height: 70,
-                color: PdfColors.grey300,
-                margin: const pw.EdgeInsets.symmetric(horizontal: 10),
-              ),
-
-              // 2. Exam Info (Center)
-              pw.Expanded(
-                flex: 5,
-                child: pw.Column(
-                  mainAxisAlignment: pw.MainAxisAlignment.center,
-                  crossAxisAlignment: pw.CrossAxisAlignment.center,
-                  children: [
+                    // Vertical Divider
                     pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: const pw.BoxDecoration(
-                        color: primary,
-                        borderRadius: pw.BorderRadius.all(pw.Radius.circular(4)),
-                      ),
-                      child: pw.Text(
-                        'ADMIT CARD',
-                        textAlign: pw.TextAlign.center,
-                        style: pw.TextStyle(
-                          color: PdfColors.white,
-                          fontWeight: pw.FontWeight.bold,
-                          fontSize: 11,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
+                      width: 1,
+                      height: 72,
+                      color: PdfColors.grey300,
+                      margin: const pw.EdgeInsets.symmetric(horizontal: 10),
                     ),
-                    pw.SizedBox(height: 6),
-                    pw.Text(
-                      widget.exam.name.toUpperCase(),
-                      textAlign: pw.TextAlign.center,
-                      maxLines: 2,
-                      style: pw.TextStyle(
-                        color: PdfColors.black,
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 9.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
 
-              // Vertical Divider 2
-              pw.Container(
-                width: 1,
-                height: 70,
-                color: PdfColors.grey300,
-                margin: const pw.EdgeInsets.symmetric(horizontal: 10),
-              ),
-
-              // 3. School Info (Right)
-              pw.Expanded(
-                flex: 6,
-                child: pw.Row(
-                  crossAxisAlignment: pw.CrossAxisAlignment.center,
-                  mainAxisAlignment: pw.MainAxisAlignment.end,
-                  children: [
-                    if (schoolLogo != null) ...[
-                      pw.Container(
-                        width: 45,
-                        height: 45,
-                        decoration: pw.BoxDecoration(
-                          shape: pw.BoxShape.circle,
-                          border: pw.Border.all(color: primary, width: 1.5),
-                          image: pw.DecorationImage(
-                            image: schoolLogo,
-                            fit: pw.BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                      pw.SizedBox(width: 8),
-                    ],
+                    // Exam Info
                     pw.Expanded(
+                      flex: 3,
                       child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.start,
                         mainAxisAlignment: pw.MainAxisAlignment.center,
+                        crossAxisAlignment: pw.CrossAxisAlignment.center,
                         children: [
+                          pw.Container(
+                            padding: const pw.EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: const pw.BoxDecoration(
+                              color: primary,
+                              borderRadius: pw.BorderRadius.all(
+                                  pw.Radius.circular(4)),
+                            ),
+                            child: pw.Text(
+                              'ADMIT CARD',
+                              textAlign: pw.TextAlign.center,
+                              style: pw.TextStyle(
+                                color: PdfColors.white,
+                                fontWeight: pw.FontWeight.bold,
+                                fontSize: 9,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ),
+                          pw.SizedBox(height: 6),
                           pw.Text(
-                            schoolName.toUpperCase(),
-                            textAlign: pw.TextAlign.left,
+                            widget.exam.name.toUpperCase(),
+                            textAlign: pw.TextAlign.center,
                             maxLines: 2,
                             style: pw.TextStyle(
                               color: primary,
                               fontWeight: pw.FontWeight.bold,
-                              fontSize: 10,
-                              letterSpacing: 0.5,
+                              fontSize: 8.5,
                             ),
                           ),
-                          if (schoolAddress.isNotEmpty)
+                          if (widget.exam.startDate != null) ...[
+                            pw.SizedBox(height: 4),
                             pw.Text(
-                              schoolAddress,
-                              textAlign: pw.TextAlign.left,
-                              maxLines: 1,
+                              '${DateFormat('dd MMM yy').format(widget.exam.startDate!)} – ${DateFormat('dd MMM yy').format(widget.exam.endDate ?? widget.exam.startDate!)}',
+                              textAlign: pw.TextAlign.center,
                               style: const pw.TextStyle(
-                                color: PdfColors.grey700,
-                                fontSize: 8,
+                                fontSize: 7,
+                                color: PdfColors.grey600,
                               ),
                             ),
-                          if (schoolPhone.isNotEmpty)
-                            pw.Text(
-                              schoolPhone,
-                              textAlign: pw.TextAlign.left,
-                              maxLines: 1,
-                              style: const pw.TextStyle(
-                                color: PdfColors.grey700,
-                                fontSize: 8,
-                              ),
-                            ),
+                          ],
                         ],
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
 
-          pw.SizedBox(height: 12),
+                pw.SizedBox(height: 10),
 
-          if (instruction.isNotEmpty) ...[
-            pw.Container(
-              width: double.infinity,
-              padding: const pw.EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ),
-              decoration: pw.BoxDecoration(
-                color: PdfColors.amber50,
-                border: pw.Border.all(color: accent, width: 1),
-                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
-              ),
-              child: pw.Text(
-                instruction,
-                textAlign: pw.TextAlign.center,
-                style: pw.TextStyle(
-                  fontWeight: pw.FontWeight.bold,
-                  fontSize: 9,
-                  color: primary,
+                if (instruction.isNotEmpty) ...[
+                  pw.Container(
+                    width: double.infinity,
+                    padding: const pw.EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 5,
+                    ),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.amber50,
+                      border: pw.Border.all(color: accent, width: 1),
+                      borderRadius:
+                          const pw.BorderRadius.all(pw.Radius.circular(5)),
+                    ),
+                    child: pw.Text(
+                      instruction,
+                      textAlign: pw.TextAlign.center,
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 8.5,
+                        color: primary,
+                      ),
+                    ),
+                  ),
+                  pw.SizedBox(height: 8),
+                ],
+
+                // ── 3. Schedule Heading ──────────────────────────────────
+                pw.Text(
+                  'EXAMINATION SCHEDULE',
+                  style: pw.TextStyle(
+                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 9.5,
+                    color: primary,
+                    letterSpacing: 1,
+                  ),
                 ),
-              ),
-            ),
-            pw.SizedBox(height: 10),
-          ],
+                pw.SizedBox(height: 5),
 
-          // Schedule Heading
-          pw.Text(
-            'EXAMINATION SCHEDULE',
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 10,
-              color: primary,
-              letterSpacing: 1,
-            ),
-          ),
-          pw.SizedBox(height: 6),
+                // ── 4. 2-column subject table ────────────────────────────
+                if (subjects.isEmpty)
+                  pw.Container(
+                    padding: const pw.EdgeInsets.all(10),
+                    color: PdfColors.grey100,
+                    child: pw.Text(
+                      'No subjects scheduled.',
+                      style: const pw.TextStyle(
+                        fontSize: 9,
+                        color: PdfColors.grey600,
+                      ),
+                      textAlign: pw.TextAlign.center,
+                    ),
+                  )
+                else
+                  pw.Row(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Expanded(child: subjectTable(leftSubjects, 0)),
+                      pw.SizedBox(width: 8),
+                      pw.Expanded(child: subjectTable(rightSubjects, half)),
+                    ],
+                  ),
 
-          // 2-column subject table
-          if (subjects.isEmpty)
-            pw.Container(
-              padding: const pw.EdgeInsets.all(12),
-              color: PdfColors.grey100,
-              child: pw.Text(
-                'No subjects scheduled.',
-                style: const pw.TextStyle(
-                  fontSize: 10,
-                  color: PdfColors.grey600,
+                pw.SizedBox(height: 10),
+
+                // ── 5. Signatures ────────────────────────────────────────
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  children: [
+                    _sigBlock('Student Signature', primary),
+                    _sigBlock(
+                      'Principal Signature',
+                      primary,
+                      signatoryName: signatoryName,
+                      signatureFont: signatureFont,
+                    ),
+                  ],
                 ),
-                textAlign: pw.TextAlign.center,
-              ),
-            )
-          else
-            pw.Row(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Expanded(child: subjectTable(leftSubjects, 0)),
-                pw.SizedBox(width: 10),
-                pw.Expanded(child: subjectTable(rightSubjects, half)),
               ],
             ),
-
-          pw.Spacer(),
-
-          // Signatures
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: pw.CrossAxisAlignment.end,
-            children: [
-              _sigBlock('Student Signature', primary),
-              _sigBlock(
-                'Principal Signature',
-                primary,
-                signatoryName: signatoryName,
-                signatureFont: signatureFont,
-              ),
-            ],
           ),
         ],
       ),
