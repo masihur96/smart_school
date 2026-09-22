@@ -2268,18 +2268,26 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     letterSpacing: 0.8,
                   ),
                 ),
-                if (schoolAddress.isNotEmpty || schoolPhone.isNotEmpty) ...[
+                if (schoolAddress.isNotEmpty) ...[
                   pw.SizedBox(height: 2),
                   pw.Text(
-                    [
-                      if (schoolAddress.isNotEmpty) schoolAddress,
-                      if (schoolPhone.isNotEmpty) 'Ph: $schoolPhone',
-                    ].join('  •  '),
+                    schoolAddress,
                     textAlign: pw.TextAlign.center,
                     maxLines: 1,
                     style: const pw.TextStyle(
                       color: PdfColors.indigo100,
                       fontSize: 8,
+                    ),
+                  ),
+                ],
+                if (schoolPhone.isNotEmpty) ...[
+                  pw.SizedBox(height: 1),
+                  pw.Text(
+                    'Ph: $schoolPhone',
+                    textAlign: pw.TextAlign.center,
+                    style: const pw.TextStyle(
+                      color: PdfColors.indigo200,
+                      fontSize: 7.5,
                     ),
                   ),
                 ],
@@ -2356,7 +2364,15 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         color: primary,
                       ),
                     ),
-                    pw.SizedBox(height: 6),
+                    pw.SizedBox(height: 2),
+                    pw.Text(
+                      'Ph: ${student.guardianContact.isNotEmpty ? student.guardianContact : (student.user?.phone ?? 'N/A')}',
+                      style: const pw.TextStyle(
+                        fontSize: 8,
+                        color: PdfColors.grey700,
+                      ),
+                    ),
+                    pw.SizedBox(height: 5),
                     pw.Row(
                       children: [
                         _classicField('Roll No.', student.rollId,
