@@ -2093,6 +2093,24 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       final key = DateFormat('yyyy-MM-dd').format(a.date);
       groupedByDate.putIfAbsent(key, () => []).add(a);
     }
+    
+    // Sort subjects within each day by start time
+    for (final key in groupedByDate.keys) {
+      groupedByDate[key]!.sort((a, b) {
+        if (a.startTime == null && b.startTime == null) return 0;
+        if (a.startTime == null) return 1;
+        if (b.startTime == null) return -1;
+        
+        final dtA = DateTime.tryParse(a.startTime!);
+        final dtB = DateTime.tryParse(b.startTime!);
+        
+        if (dtA != null && dtB != null) {
+          return dtA.compareTo(dtB);
+        }
+        return a.startTime!.compareTo(b.startTime!);
+      });
+    }
+    
     final dateKeys = groupedByDate.keys.toList();
 
     // ── Build the schedule table ──────────────────────────────────────────
