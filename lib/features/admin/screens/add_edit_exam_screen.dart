@@ -360,21 +360,35 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
   // ── Add/Edit assignment bottom sheet ────────────────────────────────────
   void _addAssignmentSheet({int? index}) {
     final user = context.read<AuthNotifier>().user;
-    final classes = context
+    
+    // Deduplicate to avoid multiple DropdownMenuItems with the same value
+    final rawClasses = context
         .read<ClassSetupNotifier>()
         .classes
-        .where((c) => c.schoolId == user?.schoolId)
-        .toList();
-    final allSubjects = context.read<SubjectSetupNotifier>().subjects;
-    final teachers = context.read<TeachersNotifier>().teachers;
+        .where((c) => c.schoolId == user?.schoolId);
+    final classes = {for (var c in rawClasses) c.id: c}.values.toList();
+    
+    final allSubjects = {
+      for (var s in context.read<SubjectSetupNotifier>().subjects) s.id: s
+    }.values.toList();
+    
+    final teachers = {
+      for (var t in context.read<TeachersNotifier>().teachers) t.userId: t
+    }.values.toList();
 
     final editing = index != null;
     final draft = editing ? _assignments[index] : _AssignmentDraft();
 
     String? id = draft.id;
+    
     String? classId = draft.classId;
+    if (classId != null && !classes.any((c) => c.id == classId)) classId = null;
+    
     String? subjectId = draft.subjectId;
+    if (subjectId != null && !allSubjects.any((s) => s.id == subjectId)) subjectId = null;
+    
     String? examinerId = draft.examinerId;
+    if (examinerId != null && !teachers.any((t) => t.userId == examinerId)) examinerId = null;
     DateTime date = draft.date;
     TimeOfDay startTime = draft.startTime;
     TimeOfDay endTime = draft.endTime;
