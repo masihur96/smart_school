@@ -2514,43 +2514,6 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             ),
           ),
 
-          pw.SizedBox(height: 10),
-
-          // ── 3. Optional instruction banner ────────────────────────────
-          if (instruction.isNotEmpty) ...[
-            pw.Row(
-              children: [
-                pw.SizedBox(width: 14),
-                pw.Expanded(
-                  child: pw.Container(
-                    padding: const pw.EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: pw.BoxDecoration(
-                      color: PdfColors.amber50,
-                      border: pw.Border.all(color: accent, width: 1),
-                      borderRadius: const pw.BorderRadius.all(
-                        pw.Radius.circular(5),
-                      ),
-                    ),
-                    child: pw.Text(
-                      instruction,
-                      textAlign: pw.TextAlign.center,
-                      style: pw.TextStyle(
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 8,
-                        color: primary,
-                      ),
-                    ),
-                  ),
-                ),
-                pw.SizedBox(width: 14),
-              ],
-            ),
-            pw.SizedBox(height: 8),
-          ],
-
           // ── 4. Schedule heading ────────────────────────────────────────
           pw.Row(
             children: [
