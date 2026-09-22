@@ -2128,9 +2128,18 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
 
         // Each subject on its own line: "Bangla (9:00 AM to 12:00 PM)"
         final subjectLines = items.map((a) {
+          String formatTime(String? raw) {
+            if (raw == null || raw.isEmpty) return '';
+            final dt = DateTime.tryParse(raw);
+            if (dt != null) return DateFormat('h:mm a').format(dt);
+            return raw; // already a plain time string like "9:00 AM"
+          }
+
+          final start = formatTime(a.startTime);
+          final end = formatTime(a.endTime);
           final timeParts = <String>[
-            if (a.startTime?.isNotEmpty == true) a.startTime!,
-            if (a.endTime?.isNotEmpty == true) a.endTime!,
+            if (start.isNotEmpty) start,
+            if (end.isNotEmpty) end,
           ];
           final timeStr = timeParts.join(' to ');
           return timeStr.isNotEmpty
