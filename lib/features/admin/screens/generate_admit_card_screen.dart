@@ -2096,17 +2096,15 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     final dateKeys = groupedByDate.keys.toList();
 
     // ── Build the grouped schedule table ─────────────────────────────────
-    // One pw.TableRow per subject. Date+Day shown only for the first subject
-    // in each date group. Plain 'Time:' label (no emoji — unsupported by font).
+    // IMPORTANT: pw.Column inside pw.Table cells causes silent layout failure
+    // in the pdf package. All cells must use simple pw.Padding → pw.Text only.
     pw.Widget scheduleTable() {
       if (subjects.isEmpty) {
-        return pw.Container(
-          padding: const pw.EdgeInsets.all(10),
-          color: PdfColors.grey100,
+        return pw.Padding(
+          padding: const pw.EdgeInsets.symmetric(vertical: 6),
           child: pw.Text(
             'No subjects scheduled.',
             style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
-            textAlign: pw.TextAlign.center,
           ),
         );
       }
@@ -2114,8 +2112,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       final headerRow = pw.TableRow(
         decoration: const pw.BoxDecoration(color: primary),
         children: [
-          _tCell('Date & Day', isHeader: true, fontSize: 8),
-          _tCell('Subject  /  Time', isHeader: true, fontSize: 8),
+          _tCell('Date / Day', isHeader: true, fontSize: 8),
+          _tCell('Subject', isHeader: true, fontSize: 8),
+          _tCell('Time', isHeader: true, fontSize: 8),
         ],
       );
 
@@ -2133,73 +2132,57 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           final isFirst = si == 0;
           final bg = rowIdx.isEven ? PdfColors.white : light;
 
-          // Left cell — date & day (only on first row of each date group)
-          final dateCell = pw.Container(
-            padding: const pw.EdgeInsets.fromLTRB(8, 6, 6, 6),
-            color: bg,
-            child: isFirst
-                ? pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text(
-                        dateLabel,
-                        style: pw.TextStyle(
-                          fontWeight: pw.FontWeight.bold,
-                          fontSize: 8.5,
-                          color: primary,
-                        ),
-                      ),
-                      pw.SizedBox(height: 3),
-                      pw.Text(
-                        dayLabel,
-                        style: pw.TextStyle(
-                          fontWeight: pw.FontWeight.bold,
-                          fontSize: 8,
-                          color: accent,
-                        ),
-                      ),
-                    ],
-                  )
-                : pw.Text('', style: const pw.TextStyle(fontSize: 8)),
-          );
+          // Date+Day cell — shown only on first row of each date group
+          final dateCellText = isFirst ? '$dateLabel\n$dayLabel' : '';
 
-          // Right cell — subject name + time label
-          final hasTime = (a.startTime?.isNotEmpty == true) ||
-              (a.endTime?.isNotEmpty == true);
+          // Time cell
           final timeStr = [
             if (a.startTime?.isNotEmpty == true) a.startTime!,
             if (a.endTime?.isNotEmpty == true) a.endTime!,
           ].join(' - ');
 
-          final subjectCell = pw.Container(
-            padding: const pw.EdgeInsets.fromLTRB(8, 6, 8, 6),
-            color: bg,
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
+          dataRows.add(
+            pw.TableRow(
+              decoration: pw.BoxDecoration(color: bg),
               children: [
-                pw.Text(
-                  a.subjectName,
-                  style: pw.TextStyle(
-                    fontWeight: pw.FontWeight.bold,
-                    fontSize: 8.5,
-                    color: PdfColors.grey900,
+                // Date & Day — two lines in one Text via \n
+                pw.Padding(
+                  padding: const pw.EdgeInsets.fromLTRB(6, 5, 4, 5),
+                  child: pw.Text(
+                    dateCellText,
+                    style: pw.TextStyle(
+                      fontSize: 8,
+                      fontWeight: pw.FontWeight.bold,
+                      color: isFirst ? primary : PdfColors.white,
+                    ),
                   ),
                 ),
-                if (hasTime) ...[
-                  pw.SizedBox(height: 2),
-                  pw.Text(
-                    'Time: $timeStr',
+                // Subject name
+                pw.Padding(
+                  padding: const pw.EdgeInsets.fromLTRB(6, 5, 4, 5),
+                  child: pw.Text(
+                    a.subjectName,
+                    style: pw.TextStyle(
+                      fontSize: 8,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.grey900,
+                    ),
+                  ),
+                ),
+                // Time
+                pw.Padding(
+                  padding: const pw.EdgeInsets.fromLTRB(6, 5, 6, 5),
+                  child: pw.Text(
+                    timeStr.isNotEmpty ? timeStr : '-',
                     style: const pw.TextStyle(
                       fontSize: 7.5,
                       color: PdfColors.grey700,
                     ),
                   ),
-                ],
+                ),
               ],
             ),
           );
-
-          dataRows.add(pw.TableRow(children: [dateCell, subjectCell]));
           rowIdx++;
         }
       }
@@ -2207,8 +2190,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       return pw.Table(
         border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
         columnWidths: const {
-          0: pw.FixedColumnWidth(105),
-          1: pw.FlexColumnWidth(1),
+          0: pw.FixedColumnWidth(85),  // date column
+          1: pw.FlexColumnWidth(1.8),  // subject column (widest)
+          2: pw.FlexColumnWidth(1.2),  // time column
         },
         children: [headerRow, ...dataRows],
       );
@@ -2444,48 +2428,62 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
 
           // ── 3. Optional instruction banner ────────────────────────────
           if (instruction.isNotEmpty) ...[
-            pw.Container(
-              margin: const pw.EdgeInsets.symmetric(horizontal: 14),
-              padding: const pw.EdgeInsets.symmetric(
-                  horizontal: 10, vertical: 5),
-              decoration: pw.BoxDecoration(
-                color: PdfColors.amber50,
-                border: pw.Border.all(color: accent, width: 1),
-                borderRadius:
-                    const pw.BorderRadius.all(pw.Radius.circular(5)),
-              ),
-              child: pw.Text(
-                instruction,
-                textAlign: pw.TextAlign.center,
-                style: pw.TextStyle(
-                  fontWeight: pw.FontWeight.bold,
-                  fontSize: 8,
-                  color: primary,
+            pw.Row(
+              children: [
+                pw.SizedBox(width: 14),
+                pw.Expanded(
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 5),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.amber50,
+                      border: pw.Border.all(color: accent, width: 1),
+                      borderRadius:
+                          const pw.BorderRadius.all(pw.Radius.circular(5)),
+                    ),
+                    child: pw.Text(
+                      instruction,
+                      textAlign: pw.TextAlign.center,
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 8,
+                        color: primary,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                pw.SizedBox(width: 14),
+              ],
             ),
             pw.SizedBox(height: 8),
           ],
 
           // ── 4. Schedule heading ────────────────────────────────────────
-          pw.Container(
-            margin: const pw.EdgeInsets.symmetric(horizontal: 14),
-            child: pw.Text(
-              'EXAMINATION SCHEDULE',
-              style: pw.TextStyle(
-                fontWeight: pw.FontWeight.bold,
-                fontSize: 9,
-                color: primary,
-                letterSpacing: 0.8,
+          pw.Row(
+            children: [
+              pw.SizedBox(width: 14),
+              pw.Text(
+                'EXAMINATION SCHEDULE',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 9,
+                  color: primary,
+                  letterSpacing: 0.8,
+                ),
               ),
-            ),
+            ],
           ),
           pw.SizedBox(height: 4),
 
           // ── 5. Date-grouped schedule table ────────────────────────────
-          pw.Container(
-            margin: const pw.EdgeInsets.symmetric(horizontal: 14),
-            child: scheduleTable(),
+          // pw.Table needs pw.Expanded inside pw.Row to resolve column widths.
+          // This matches the pattern used by all working templates.
+          pw.Row(
+            children: [
+              pw.SizedBox(width: 14),
+              pw.Expanded(child: scheduleTable()),
+              pw.SizedBox(width: 14),
+            ],
           ),
 
           pw.Spacer(),
