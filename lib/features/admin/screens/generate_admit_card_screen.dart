@@ -2107,14 +2107,11 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
         return raw;
       }
 
-      // Helper: build "SubjectName (start to end)\n..." for a list of assignments
+      // Helper: build "SubjectName (start time)\n..." for a list of assignments
       String subjectLines(List<ExamAssignment> items) {
         return items.map((a) {
           final start = formatTime(a.startTime);
-          final end = formatTime(a.endTime);
-          final parts = [if (start.isNotEmpty) start, if (end.isNotEmpty) end];
-          final timeStr = parts.join(' to ');
-          return timeStr.isNotEmpty ? '${a.subjectName} ($timeStr)' : a.subjectName;
+          return start.isNotEmpty ? '${a.subjectName} ($start)' : a.subjectName;
         }).join('\n');
       }
 
@@ -2385,7 +2382,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
 
                 // Exam info panel
                 pw.Container(
-                  width: 110,
+                  width: 165,
                   padding: const pw.EdgeInsets.all(6),
                   decoration: pw.BoxDecoration(
                     color: PdfColors.indigo50,
@@ -2442,6 +2439,18 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                               fontSize: 6,
                               color: PdfColors.grey700,
                               fontWeight: pw.FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        pw.SizedBox(height: 4),
+                        pw.FittedBox(
+                          fit: pw.BoxFit.scaleDown,
+                          child: pw.Text(
+                            'Morning: 9:00 AM - 12:00 PM • Evening: 2:30 PM - 4:30 PM',
+                            textAlign: pw.TextAlign.center,
+                            style: const pw.TextStyle(
+                              fontSize: 5.5,
+                              color: PdfColors.grey700,
                             ),
                           ),
                         ),
