@@ -2096,8 +2096,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     final dateKeys = groupedByDate.keys.toList();
 
     // ── Build the grouped schedule table ─────────────────────────────────
-    // IMPORTANT: pw.Column inside pw.Table cells causes silent layout failure
-    // in the pdf package. All cells must use simple pw.Padding → pw.Text only.
+    // One row per DATE. All subjects that day are stacked via '\n' in one Text.
+    // Cells: pw.Padding → pw.Text only (no pw.Column — causes silent failure).
     pw.Widget scheduleTable() {
       if (subjects.isEmpty) {
         return pw.Padding(
@@ -2112,87 +2112,68 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       final headerRow = pw.TableRow(
         decoration: const pw.BoxDecoration(color: primary),
         children: [
-          _tCell('Date / Day', isHeader: true, fontSize: 8),
-          _tCell('Subject', isHeader: true, fontSize: 8),
-          _tCell('Time', isHeader: true, fontSize: 8),
+          _tCell('Date', isHeader: true, fontSize: 8),
+          _tCell('Subject (Time)', isHeader: true, fontSize: 8),
         ],
       );
 
-      final dataRows = <pw.TableRow>[];
       var rowIdx = 0;
-
-      for (final key in dateKeys) {
+      final dataRows = dateKeys.map((key) {
         final items = groupedByDate[key]!;
         final date = items.first.date;
-        final dateLabel = DateFormat('dd MMM yyyy').format(date);
-        final dayLabel = DateFormat('EEEE').format(date);
 
-        for (var si = 0; si < items.length; si++) {
-          final a = items[si];
-          final isFirst = si == 0;
-          final bg = rowIdx.isEven ? PdfColors.white : light;
+        // "24 Sep (Thursday)"
+        final dateCellText =
+            '${DateFormat('dd MMM').format(date)} (${DateFormat('EEEE').format(date)})';
 
-          // Date+Day cell — shown only on first row of each date group
-          final dateCellText = isFirst ? '$dateLabel\n$dayLabel' : '';
-
-          // Time cell
-          final timeStr = [
+        // Each subject on its own line: "Bangla (9:00 AM to 12:00 PM)"
+        final subjectLines = items.map((a) {
+          final timeParts = <String>[
             if (a.startTime?.isNotEmpty == true) a.startTime!,
             if (a.endTime?.isNotEmpty == true) a.endTime!,
-          ].join(' - ');
+          ];
+          final timeStr = timeParts.join(' to ');
+          return timeStr.isNotEmpty
+              ? '${a.subjectName} ($timeStr)'
+              : a.subjectName;
+        }).join('\n');
 
-          dataRows.add(
-            pw.TableRow(
-              decoration: pw.BoxDecoration(color: bg),
-              children: [
-                // Date & Day — two lines in one Text via \n
-                pw.Padding(
-                  padding: const pw.EdgeInsets.fromLTRB(6, 5, 4, 5),
-                  child: pw.Text(
-                    dateCellText,
-                    style: pw.TextStyle(
-                      fontSize: 8,
-                      fontWeight: pw.FontWeight.bold,
-                      color: isFirst ? primary : PdfColors.white,
-                    ),
-                  ),
+        final bg = rowIdx.isEven ? PdfColors.white : light;
+        rowIdx++;
+
+        return pw.TableRow(
+          decoration: pw.BoxDecoration(color: bg),
+          children: [
+            pw.Padding(
+              padding: const pw.EdgeInsets.fromLTRB(7, 6, 5, 6),
+              child: pw.Text(
+                dateCellText,
+                style: pw.TextStyle(
+                  fontSize: 8,
+                  fontWeight: pw.FontWeight.bold,
+                  color: primary,
                 ),
-                // Subject name
-                pw.Padding(
-                  padding: const pw.EdgeInsets.fromLTRB(6, 5, 4, 5),
-                  child: pw.Text(
-                    a.subjectName,
-                    style: pw.TextStyle(
-                      fontSize: 8,
-                      fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.grey900,
-                    ),
-                  ),
-                ),
-                // Time
-                pw.Padding(
-                  padding: const pw.EdgeInsets.fromLTRB(6, 5, 6, 5),
-                  child: pw.Text(
-                    timeStr.isNotEmpty ? timeStr : '-',
-                    style: const pw.TextStyle(
-                      fontSize: 7.5,
-                      color: PdfColors.grey700,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          );
-          rowIdx++;
-        }
-      }
+            pw.Padding(
+              padding: const pw.EdgeInsets.fromLTRB(7, 6, 7, 6),
+              child: pw.Text(
+                subjectLines,
+                style: pw.TextStyle(
+                  fontSize: 8,
+                  color: PdfColors.grey900,
+                ),
+              ),
+            ),
+          ],
+        );
+      }).toList();
 
       return pw.Table(
         border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
         columnWidths: const {
-          0: pw.FixedColumnWidth(85),  // date column
-          1: pw.FlexColumnWidth(1.8),  // subject column (widest)
-          2: pw.FlexColumnWidth(1.2),  // time column
+          0: pw.FlexColumnWidth(1.1), // date column
+          1: pw.FlexColumnWidth(1.9), // subject(s) column — wider
         },
         children: [headerRow, ...dataRows],
       );
