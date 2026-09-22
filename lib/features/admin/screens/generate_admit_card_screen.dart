@@ -2093,24 +2093,24 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       final key = DateFormat('yyyy-MM-dd').format(a.date);
       groupedByDate.putIfAbsent(key, () => []).add(a);
     }
-    
+
     // Sort subjects within each day by start time
     for (final key in groupedByDate.keys) {
       groupedByDate[key]!.sort((a, b) {
         if (a.startTime == null && b.startTime == null) return 0;
         if (a.startTime == null) return 1;
         if (b.startTime == null) return -1;
-        
+
         final dtA = DateTime.tryParse(a.startTime!);
         final dtB = DateTime.tryParse(b.startTime!);
-        
+
         if (dtA != null && dtB != null) {
           return dtA.compareTo(dtB);
         }
         return a.startTime!.compareTo(b.startTime!);
       });
     }
-    
+
     final dateKeys = groupedByDate.keys.toList();
 
     // ── Build the schedule table ──────────────────────────────────────────
@@ -2127,10 +2127,14 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
 
       // Helper: build "SubjectName (start time)\n..." for a list of assignments
       String subjectLines(List<ExamAssignment> items) {
-        return items.map((a) {
-          final start = formatTime(a.startTime);
-          return start.isNotEmpty ? '${a.subjectName} ($start)' : a.subjectName;
-        }).join('\n');
+        return items
+            .map((a) {
+              final start = formatTime(a.startTime);
+              return start.isNotEmpty
+                  ? '${a.subjectName} ($start)'
+                  : a.subjectName;
+            })
+            .join('\n');
       }
 
       if (subjects.isEmpty) {
@@ -2177,8 +2181,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 return '${DateFormat('dd MMM').format(d)}\n(${DateFormat('EEEE').format(d)})';
               }()
             : '';
-        final subjects2 =
-            hasRight ? subjectLines(groupedByDate[dateKeys[i + 1]]!) : '';
+        final subjects2 = hasRight
+            ? subjectLines(groupedByDate[dateKeys[i + 1]]!)
+            : '';
 
         dataRows.add(
           pw.TableRow(
@@ -2346,7 +2351,8 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   decoration: pw.BoxDecoration(
                     color: light,
                     borderRadius: const pw.BorderRadius.all(
-                        pw.Radius.circular(5)),
+                      pw.Radius.circular(5),
+                    ),
                     border: pw.Border.all(color: PdfColors.grey400),
                   ),
                   child: avatar != null
@@ -2393,12 +2399,17 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     pw.SizedBox(height: 5),
                     pw.Row(
                       children: [
-                        _classicField('Roll No.', student.rollId,
-                            primary: primary),
+                        _classicField(
+                          'Roll No.',
+                          student.rollId,
+                          primary: primary,
+                        ),
                         pw.SizedBox(width: 16),
-                        _classicField('Class',
-                            '$className – $sectionName',
-                            primary: primary),
+                        _classicField(
+                          'Class',
+                          '$className – $sectionName',
+                          primary: primary,
+                        ),
                       ],
                     ),
                   ],
@@ -2420,7 +2431,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   padding: const pw.EdgeInsets.all(6),
                   decoration: pw.BoxDecoration(
                     color: PdfColors.indigo50,
-                    borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                    borderRadius: const pw.BorderRadius.all(
+                      pw.Radius.circular(6),
+                    ),
                     border: pw.Border.all(color: primary, width: 0.5),
                   ),
                   child: pw.Column(
@@ -2429,12 +2442,12 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     children: [
                       pw.Container(
                         width: double.infinity,
-                        padding: const pw.EdgeInsets.symmetric(
-                            vertical: 3),
+                        padding: const pw.EdgeInsets.symmetric(vertical: 3),
                         decoration: const pw.BoxDecoration(
                           color: primary,
                           borderRadius: pw.BorderRadius.all(
-                              pw.Radius.circular(3)),
+                            pw.Radius.circular(3),
+                          ),
                         ),
                         child: pw.Text(
                           'ADMIT CARD',
@@ -2461,15 +2474,20 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       if (widget.exam.startDate != null) ...[
                         pw.SizedBox(height: 4),
                         pw.Container(
-                          padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                          padding: const pw.EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 2,
+                          ),
                           decoration: const pw.BoxDecoration(
                             color: PdfColors.white,
-                            borderRadius: pw.BorderRadius.all(pw.Radius.circular(3)),
+                            borderRadius: pw.BorderRadius.all(
+                              pw.Radius.circular(3),
+                            ),
                           ),
                           child: pw.Text(
                             '${DateFormat('dd MMM yy').format(widget.exam.startDate!)} – ${DateFormat('dd MMM yy').format(widget.exam.endDate ?? widget.exam.startDate!)}',
                             textAlign: pw.TextAlign.center,
-                            style: const pw.TextStyle(
+                            style: pw.TextStyle(
                               fontSize: 6,
                               color: PdfColors.grey700,
                               fontWeight: pw.FontWeight.bold,
@@ -2506,12 +2524,15 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 pw.Expanded(
                   child: pw.Container(
                     padding: const pw.EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 5),
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: pw.BoxDecoration(
                       color: PdfColors.amber50,
                       border: pw.Border.all(color: accent, width: 1),
-                      borderRadius:
-                          const pw.BorderRadius.all(pw.Radius.circular(5)),
+                      borderRadius: const pw.BorderRadius.all(
+                        pw.Radius.circular(5),
+                      ),
                     ),
                     child: pw.Text(
                       instruction,
