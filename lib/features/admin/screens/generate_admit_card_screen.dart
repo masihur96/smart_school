@@ -2095,10 +2095,29 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     }
     final dateKeys = groupedByDate.keys.toList();
 
-    // ── Build the grouped schedule table ─────────────────────────────────
-    // One row per DATE. All subjects that day are stacked via '\n' in one Text.
-    // Cells: pw.Padding → pw.Text only (no pw.Column — causes silent failure).
+    // ── Build the schedule table ──────────────────────────────────────────
+    // 4-column layout: Date | Subject(Time) | Date | Subject(Time)
+    // Two date-groups per table row. Cells: pw.Padding → pw.Text only.
     pw.Widget scheduleTable() {
+      // Helper: format "9:00 AM" from a raw datetime or time string
+      String formatTime(String? raw) {
+        if (raw == null || raw.isEmpty) return '';
+        final dt = DateTime.tryParse(raw);
+        if (dt != null) return DateFormat('h:mm a').format(dt);
+        return raw;
+      }
+
+      // Helper: build "SubjectName (start to end)\n..." for a list of assignments
+      String subjectLines(List<ExamAssignment> items) {
+        return items.map((a) {
+          final start = formatTime(a.startTime);
+          final end = formatTime(a.endTime);
+          final parts = [if (start.isNotEmpty) start, if (end.isNotEmpty) end];
+          final timeStr = parts.join(' to ');
+          return timeStr.isNotEmpty ? '${a.subjectName} ($timeStr)' : a.subjectName;
+        }).join('\n');
+      }
+
       if (subjects.isEmpty) {
         return pw.Padding(
           padding: const pw.EdgeInsets.symmetric(vertical: 6),
@@ -2109,80 +2128,101 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
         );
       }
 
+      // Header — 4 columns
       final headerRow = pw.TableRow(
         decoration: const pw.BoxDecoration(color: primary),
         children: [
-          _tCell('Date', isHeader: true, fontSize: 8),
-          _tCell('Subject (Time)', isHeader: true, fontSize: 8),
+          _tCell('Date', isHeader: true, fontSize: 7.5),
+          _tCell('Subject (Time)', isHeader: true, fontSize: 7.5),
+          _tCell('Date', isHeader: true, fontSize: 7.5),
+          _tCell('Subject (Time)', isHeader: true, fontSize: 7.5),
         ],
       );
 
-      var rowIdx = 0;
-      final dataRows = dateKeys.map((key) {
-        final items = groupedByDate[key]!;
-        final date = items.first.date;
+      // Pair up dates: row i shows dateKeys[2i] and dateKeys[2i+1]
+      const cellPad = pw.EdgeInsets.fromLTRB(5, 5, 4, 5);
 
-        // "24 Sep (Thursday)"
-        final dateCellText =
-            '${DateFormat('dd MMM').format(date)} (${DateFormat('EEEE').format(date)})';
+      final dataRows = <pw.TableRow>[];
+      for (var i = 0; i < dateKeys.length; i += 2) {
+        final bg = (i ~/ 2).isEven ? PdfColors.white : light;
 
-        // Each subject on its own line: "Bangla (9:00 AM to 12:00 PM)"
-        final subjectLines = items.map((a) {
-          String formatTime(String? raw) {
-            if (raw == null || raw.isEmpty) return '';
-            final dt = DateTime.tryParse(raw);
-            if (dt != null) return DateFormat('h:mm a').format(dt);
-            return raw; // already a plain time string like "9:00 AM"
-          }
+        // ── Left pair ──────────────────────────────────────────────────────
+        final key1 = dateKeys[i];
+        final items1 = groupedByDate[key1]!;
+        final date1 = items1.first.date;
+        final dateText1 =
+            '${DateFormat('dd MMM').format(date1)}\n(${DateFormat('EEEE').format(date1)})';
+        final subjects1 = subjectLines(items1);
 
-          final start = formatTime(a.startTime);
-          final end = formatTime(a.endTime);
-          final timeParts = <String>[
-            if (start.isNotEmpty) start,
-            if (end.isNotEmpty) end,
-          ];
-          final timeStr = timeParts.join(' to ');
-          return timeStr.isNotEmpty
-              ? '${a.subjectName} ($timeStr)'
-              : a.subjectName;
-        }).join('\n');
+        // ── Right pair (may not exist for odd count) ───────────────────────
+        final hasRight = i + 1 < dateKeys.length;
+        final dateText2 = hasRight
+            ? () {
+                final d = groupedByDate[dateKeys[i + 1]]!.first.date;
+                return '${DateFormat('dd MMM').format(d)}\n(${DateFormat('EEEE').format(d)})';
+              }()
+            : '';
+        final subjects2 =
+            hasRight ? subjectLines(groupedByDate[dateKeys[i + 1]]!) : '';
 
-        final bg = rowIdx.isEven ? PdfColors.white : light;
-        rowIdx++;
-
-        return pw.TableRow(
-          decoration: pw.BoxDecoration(color: bg),
-          children: [
-            pw.Padding(
-              padding: const pw.EdgeInsets.fromLTRB(7, 6, 5, 6),
-              child: pw.Text(
-                dateCellText,
-                style: pw.TextStyle(
-                  fontSize: 8,
-                  fontWeight: pw.FontWeight.bold,
-                  color: primary,
+        dataRows.add(
+          pw.TableRow(
+            decoration: pw.BoxDecoration(color: bg),
+            children: [
+              pw.Padding(
+                padding: cellPad,
+                child: pw.Text(
+                  dateText1,
+                  style: pw.TextStyle(
+                    fontSize: 7.5,
+                    fontWeight: pw.FontWeight.bold,
+                    color: primary,
+                  ),
                 ),
               ),
-            ),
-            pw.Padding(
-              padding: const pw.EdgeInsets.fromLTRB(7, 6, 7, 6),
-              child: pw.Text(
-                subjectLines,
-                style: pw.TextStyle(
-                  fontSize: 8,
-                  color: PdfColors.grey900,
+              pw.Padding(
+                padding: cellPad,
+                child: pw.Text(
+                  subjects1,
+                  style: const pw.TextStyle(
+                    fontSize: 7.5,
+                    color: PdfColors.grey900,
+                  ),
                 ),
               ),
-            ),
-          ],
+              pw.Padding(
+                padding: cellPad,
+                child: pw.Text(
+                  dateText2,
+                  style: pw.TextStyle(
+                    fontSize: 7.5,
+                    fontWeight: pw.FontWeight.bold,
+                    color: primary,
+                  ),
+                ),
+              ),
+              pw.Padding(
+                padding: cellPad,
+                child: pw.Text(
+                  subjects2,
+                  style: const pw.TextStyle(
+                    fontSize: 7.5,
+                    color: PdfColors.grey900,
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
-      }).toList();
+      }
 
       return pw.Table(
         border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
         columnWidths: const {
-          0: pw.FlexColumnWidth(1.1), // date column
-          1: pw.FlexColumnWidth(1.9), // subject(s) column — wider
+          0: pw.FlexColumnWidth(1.0), // date 1
+          1: pw.FlexColumnWidth(1.6), // subject 1
+          2: pw.FlexColumnWidth(1.0), // date 2
+          3: pw.FlexColumnWidth(1.6), // subject 2
         },
         children: [headerRow, ...dataRows],
       );
