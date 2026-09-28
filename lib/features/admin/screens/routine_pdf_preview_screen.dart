@@ -456,7 +456,9 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                         ElevatedButton.icon(
                           onPressed: _generatePdf,
                           icon: const Icon(Icons.refresh),
-                          label: Text(AppLocalizations.of(context)!.generatePdf),
+                          label: Text(
+                            AppLocalizations.of(context)!.generatePdf,
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryAdmin,
                             foregroundColor: Colors.white,
