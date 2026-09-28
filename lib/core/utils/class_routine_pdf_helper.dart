@@ -265,6 +265,11 @@ class ClassRoutinePdfHelper {
           margin: const pw.EdgeInsets.symmetric(horizontal: 22, vertical: 18),
           theme: theme,
           build: (pw.Context context) {
+            // Fixed-height elements: header ~50, banner ~40, spacing ~20, sigs ~45, footer ~20 = ~175
+            const double fixedH = 175.0;
+            final pageH = PdfPageFormat.a4.landscape.availableHeight - 36; // margins
+            final tableH = (pageH - fixedH).clamp(80.0, 9999.0);
+
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.stretch,
               children: [
@@ -298,29 +303,29 @@ class ClassRoutinePdfHelper {
 
                 // 3. The Master All-Class Matrix Grid Table
                 if (sortedTimeSlots.isEmpty)
-                  pw.Expanded(
-                    child: pw.Center(
-                      child: pw.Text(
-                        'No periods scheduled for the selected classes.',
-                        style: pw.TextStyle(
-                          fontSize: 13,
-                          fontWeight: pw.FontWeight.bold,
-                          color: primaryColor,
-                        ),
+                  pw.Container(
+                    height: tableH,
+                    alignment: pw.Alignment.center,
+                    child: pw.Text(
+                      'No periods scheduled for the selected classes.',
+                      style: pw.TextStyle(
+                        fontSize: 13,
+                        fontWeight: pw.FontWeight.bold,
+                        color: primaryColor,
                       ),
                     ),
                   )
                 else
-                  pw.Expanded(
+                  pw.SizedBox(
+                    height: tableH,
                     child: pw.Table(
                       border: pw.TableBorder.all(color: borderTint, width: 0.8),
                       columnWidths: {
-                        0: const pw.FlexColumnWidth(2.0), // Class column
+                        0: const pw.FlexColumnWidth(2.0),
                         for (int i = 0; i < sortedTimeSlots.length; i++)
                           (i + 1): const pw.FlexColumnWidth(2.6),
                       },
                       children: [
-                        // ── HEADER ROW: CLASS / 1ST PERIOD / 2ND PERIOD / 3RD PERIOD...
                         pw.TableRow(
                           decoration: pw.BoxDecoration(color: primaryColor),
                           children: [
@@ -362,8 +367,7 @@ class ClassRoutinePdfHelper {
                                 ),
                                 alignment: pw.Alignment.center,
                                 child: pw.Column(
-                                  mainAxisAlignment:
-                                      pw.MainAxisAlignment.center,
+                                  mainAxisAlignment: pw.MainAxisAlignment.center,
                                   children: [
                                     pw.Text(
                                       _getPeriodOrdinal(pIndex).toUpperCase(),
@@ -388,8 +392,6 @@ class ClassRoutinePdfHelper {
                             }),
                           ],
                         ),
-
-                        // ── DATA ROWS: EACH CLASS
                         ...currentChunkClasses.asMap().entries.map((rowItem) {
                           final rowIdx = rowItem.key;
                           final clsName = rowItem.value;
@@ -398,7 +400,6 @@ class ClassRoutinePdfHelper {
 
                           return pw.TableRow(
                             children: [
-                              // Class Name Column
                               pw.Container(
                                 padding: const pw.EdgeInsets.symmetric(
                                   horizontal: 6,
@@ -421,8 +422,6 @@ class ClassRoutinePdfHelper {
                                   maxLines: 2,
                                 ),
                               ),
-
-                              // Period Cells for this Class
                               ...sortedTimeSlots.map((slot) {
                                 final slotStartMin = _parseTimeToMinutes(
                                   slot.split('-').first.trim(),
@@ -446,9 +445,7 @@ class ClassRoutinePdfHelper {
                                     padding: const pw.EdgeInsets.all(4),
                                     alignment: pw.Alignment.center,
                                     decoration: pw.BoxDecoration(
-                                      color: isEvenRow
-                                          ? PdfColors.white
-                                          : bgTint,
+                                      color: isEvenRow ? PdfColors.white : bgTint,
                                     ),
                                     child: pw.Text(
                                       '--',
@@ -467,27 +464,13 @@ class ClassRoutinePdfHelper {
                                 for (final m in matchingEntries) {
                                   final s = _resolveSubjectName(m, subjects);
                                   final t = _resolveTeacherName(m, teachers);
-                                  if (s.isNotEmpty && !subList.contains(s)) {
-                                    subList.add(s);
-                                  }
-                                  if (t.isNotEmpty &&
-                                      t != 'Not Assigned' &&
-                                      !teachList.contains(t)) {
-                                    teachList.add(t);
-                                  }
-                                  if (m.roomNumber != null &&
-                                      m.roomNumber!.isNotEmpty &&
-                                      !roomList.contains(m.roomNumber)) {
-                                    roomList.add(m.roomNumber!);
-                                  }
+                                  if (s.isNotEmpty && !subList.contains(s)) subList.add(s);
+                                  if (t.isNotEmpty && t != 'Not Assigned' && !teachList.contains(t)) teachList.add(t);
+                                  if (m.roomNumber != null && m.roomNumber!.isNotEmpty && !roomList.contains(m.roomNumber)) roomList.add(m.roomNumber!);
                                 }
 
-                                final subText = subList.isNotEmpty
-                                    ? subList.join(' / ')
-                                    : 'Subject';
-                                final teachText = teachList.isNotEmpty
-                                    ? teachList.join(' / ')
-                                    : 'Teacher';
+                                final subText = subList.isNotEmpty ? subList.join(' / ') : 'Subject';
+                                final teachText = teachList.isNotEmpty ? teachList.join(' / ') : 'Teacher';
 
                                 return pw.Container(
                                   padding: const pw.EdgeInsets.symmetric(
@@ -498,12 +481,9 @@ class ClassRoutinePdfHelper {
                                     color: isEvenRow ? PdfColors.white : bgTint,
                                   ),
                                   child: pw.Column(
-                                    mainAxisAlignment:
-                                        pw.MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        pw.CrossAxisAlignment.center,
+                                    mainAxisAlignment: pw.MainAxisAlignment.center,
+                                    crossAxisAlignment: pw.CrossAxisAlignment.center,
                                     children: [
-                                      // Subject Name (Line 1, Bold)
                                       pw.Text(
                                         subText,
                                         style: pw.TextStyle(
@@ -515,7 +495,6 @@ class ClassRoutinePdfHelper {
                                         maxLines: 2,
                                       ),
                                       pw.SizedBox(height: 2),
-                                      // Teacher Name (Line 2)
                                       pw.Text(
                                         teachText,
                                         style: const pw.TextStyle(
@@ -525,21 +504,13 @@ class ClassRoutinePdfHelper {
                                         textAlign: pw.TextAlign.center,
                                         maxLines: 1,
                                       ),
-                                      // Room Number (Optional, Line 3)
                                       if (roomList.isNotEmpty) ...[
                                         pw.SizedBox(height: 1.5),
                                         pw.Container(
-                                          padding:
-                                              const pw.EdgeInsets.symmetric(
-                                                horizontal: 3.5,
-                                                vertical: 1,
-                                              ),
+                                          padding: const pw.EdgeInsets.symmetric(horizontal: 3.5, vertical: 1),
                                           decoration: pw.BoxDecoration(
                                             color: PdfColor.fromHex('#E2E8F0'),
-                                            borderRadius:
-                                                const pw.BorderRadius.all(
-                                                  pw.Radius.circular(2),
-                                                ),
+                                            borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
                                           ),
                                           child: pw.Text(
                                             'Rm ${roomList.join(", ")}',
@@ -602,6 +573,51 @@ class ClassRoutinePdfHelper {
     final bgTint = PdfColor.fromHex('#F8FAFC');
     final borderTint = PdfColor.fromHex('#CBD5E1');
 
+    if (groups.isEmpty) {
+      pdf.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4.landscape,
+          margin: const pw.EdgeInsets.all(32),
+          theme: theme,
+          build: (context) => pw.Center(
+            child: pw.Column(
+              mainAxisAlignment: pw.MainAxisAlignment.center,
+              children: [
+                _buildInstitutionalHeader(
+                  school: school,
+                  schoolLogo: schoolLogo,
+                  primaryColor: primaryColor,
+                  accentColor: accentColor,
+                  bgTint: bgTint,
+                  borderTint: borderTint,
+                  isLandscape: true,
+                ),
+                pw.SizedBox(height: 40),
+                pw.Text(
+                  'No Routine Entries Scheduled',
+                  style: pw.TextStyle(
+                    fontSize: 16,
+                    fontWeight: pw.FontWeight.bold,
+                    color: primaryColor,
+                  ),
+                ),
+                pw.SizedBox(height: 6),
+                pw.Text(
+                  'No routine entries were found matching the selected class criteria.',
+                  style: const pw.TextStyle(
+                    fontSize: 11,
+                    color: PdfColors.grey600,
+                  ),
+                  textAlign: pw.TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+
     for (final group in groups) {
       final className = group.className;
       final sectionName = group.sectionName;
@@ -633,6 +649,10 @@ class ClassRoutinePdfHelper {
           margin: const pw.EdgeInsets.all(22),
           theme: theme,
           build: (pw.Context context) {
+            const double fixedH = 175.0;
+            final pageH = PdfPageFormat.a4.landscape.availableHeight - 44;
+            final tableH = (pageH - fixedH).clamp(80.0, 9999.0);
+
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.stretch,
               children: [
@@ -661,78 +681,26 @@ class ClassRoutinePdfHelper {
                 ),
                 pw.SizedBox(height: 10),
                 if (sortedTimeSlots.isEmpty)
-                  pw.Expanded(
-                    child: pw.Center(
-                      child: pw.Text(
-                        'No routine entries found for $className.',
-                        style: pw.TextStyle(
-                          fontSize: 13,
-                          fontWeight: pw.FontWeight.bold,
-                          color: primaryColor,
-                        ),
+                  pw.Container(
+                    height: tableH,
+                    alignment: pw.Alignment.center,
+                    child: pw.Text(
+                      'No routine entries found for $className.',
+                      style: pw.TextStyle(
+                        fontSize: 13,
+                        fontWeight: pw.FontWeight.bold,
+                        color: primaryColor,
                       ),
                     ),
                   )
                 else
-                  pw.Expanded(
+                  pw.SizedBox(
+                    height: tableH,
                     child: pw.Table(
                       border: pw.TableBorder.all(color: borderTint, width: 0.8),
-                      children: [
-                        pw.TableRow(
-                          decoration: pw.BoxDecoration(color: primaryColor),
-                          children: [
-                            pw.Container(
-                              padding: const pw.EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 6,
-                              ),
-                              alignment: pw.Alignment.center,
-                              child: pw.Text(
-                                'DAY / TIME',
-                                style: pw.TextStyle(
-                                  color: PdfColors.white,
-                                  fontWeight: pw.FontWeight.bold,
-                                  fontSize: 8,
-                                ),
-                              ),
-                            ),
-                            ...sortedTimeSlots.asMap().entries.map((slotItem) {
-                              final pIdx = slotItem.key;
-                              final slotStr = slotItem.value;
-                              return pw.Container(
-                                padding: const pw.EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                  vertical: 6,
-                                ),
-                                alignment: pw.Alignment.center,
-                                child: pw.Column(
-                                  children: [
-                                    pw.Text(
-                                      _getPeriodOrdinal(pIdx).toUpperCase(),
-                                      style: pw.TextStyle(
-                                        color: PdfColors.white,
-                                        fontWeight: pw.FontWeight.bold,
-                                        fontSize: 7.5,
-                                      ),
-                                    ),
-                                    pw.SizedBox(height: 1),
-                                    pw.Text(
-                                      slotStr,
-                                      style: const pw.TextStyle(
-                                        color: PdfColors.grey300,
-                                        fontSize: 6.5,
-                                      ),
-                                      textAlign: pw.TextAlign.center,
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }),
-                          ],
-                        ),
-                        ...activeDays.map((day) {
-                          final dayColor = _getDayPdfColor(day);
-                          return pw.TableRow(
+                        children: [
+                          pw.TableRow(
+                            decoration: pw.BoxDecoration(color: primaryColor),
                             children: [
                               pw.Container(
                                 padding: const pw.EdgeInsets.symmetric(
@@ -740,135 +708,188 @@ class ClassRoutinePdfHelper {
                                   vertical: 6,
                                 ),
                                 alignment: pw.Alignment.center,
-                                decoration: pw.BoxDecoration(color: dayColor),
                                 child: pw.Text(
-                                  day.substring(0, 3).toUpperCase(),
+                                  'DAY / TIME',
                                   style: pw.TextStyle(
                                     color: PdfColors.white,
                                     fontWeight: pw.FontWeight.bold,
-                                    fontSize: 9,
+                                    fontSize: 8,
                                   ),
                                 ),
                               ),
-                              ...sortedTimeSlots.map((slot) {
-                                final slotStartMin = _parseTimeToMinutes(
-                                  slot.split('-').first.trim(),
-                                );
-
-                                final slotEntry = entries.firstWhere(
-                                  (e) =>
-                                      e.day.toLowerCase() ==
-                                          day.toLowerCase() &&
-                                      (formatSlotDisplay(
-                                                e.startTime,
-                                                e.endTime,
-                                              ) ==
-                                              slot ||
-                                          _parseTimeToMinutes(e.startTime) ==
-                                              slotStartMin),
-                                  orElse: () => RoutineEntry(
-                                    day: '',
-                                    startTime: '',
-                                    endTime: '',
-                                    subjectId: '',
-                                    teacherId: '',
-                                  ),
-                                );
-
-                                if (slotEntry.subjectId.isEmpty) {
-                                  return pw.Container(
-                                    padding: const pw.EdgeInsets.all(4),
-                                    alignment: pw.Alignment.center,
-                                    decoration: pw.BoxDecoration(color: bgTint),
-                                    child: pw.Text(
-                                      '--',
-                                      style: const pw.TextStyle(
-                                        color: PdfColors.grey400,
-                                        fontSize: 9,
-                                      ),
-                                    ),
-                                  );
-                                }
-
-                                final subName = _resolveSubjectName(
-                                  slotEntry,
-                                  subjects,
-                                );
-                                final teachName = _resolveTeacherName(
-                                  slotEntry,
-                                  teachers,
-                                );
-
+                              ...sortedTimeSlots.asMap().entries.map((slotItem) {
+                                final pIdx = slotItem.key;
+                                final slotStr = slotItem.value;
                                 return pw.Container(
-                                  padding: const pw.EdgeInsets.all(4),
-                                  decoration: const pw.BoxDecoration(
-                                    color: PdfColors.white,
+                                  padding: const pw.EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 6,
                                   ),
+                                  alignment: pw.Alignment.center,
                                   child: pw.Column(
-                                    mainAxisAlignment:
-                                        pw.MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        pw.CrossAxisAlignment.center,
                                     children: [
                                       pw.Text(
-                                        subName,
+                                        _getPeriodOrdinal(pIdx).toUpperCase(),
                                         style: pw.TextStyle(
-                                          fontSize: 8,
+                                          color: PdfColors.white,
                                           fontWeight: pw.FontWeight.bold,
-                                          color: primaryColor,
+                                          fontSize: 7.5,
                                         ),
-                                        textAlign: pw.TextAlign.center,
-                                        maxLines: 2,
                                       ),
-                                      pw.SizedBox(height: 2),
+                                      pw.SizedBox(height: 1),
                                       pw.Text(
-                                        teachName,
+                                        slotStr,
                                         style: const pw.TextStyle(
+                                          color: PdfColors.grey300,
                                           fontSize: 6.5,
-                                          color: PdfColors.grey700,
                                         ),
                                         textAlign: pw.TextAlign.center,
-                                        maxLines: 1,
                                       ),
-                                      if (slotEntry.roomNumber != null &&
-                                          slotEntry.roomNumber!.isNotEmpty) ...[
-                                        pw.SizedBox(height: 2),
-                                        pw.Container(
-                                          padding:
-                                              const pw.EdgeInsets.symmetric(
-                                                horizontal: 4,
-                                                vertical: 1,
-                                              ),
-                                          decoration: pw.BoxDecoration(
-                                            color: bgTint,
-                                            border: pw.Border.all(
-                                              color: borderTint,
-                                              width: 0.5,
-                                            ),
-                                            borderRadius:
-                                                const pw.BorderRadius.all(
-                                                  pw.Radius.circular(2),
-                                                ),
-                                          ),
-                                          child: pw.Text(
-                                            'Rm ${slotEntry.roomNumber}',
-                                            style: const pw.TextStyle(
-                                              fontSize: 5.5,
-                                              color: PdfColors.grey800,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
                                     ],
                                   ),
                                 );
                               }),
                             ],
-                          );
-                        }),
-                      ],
+                          ),
+                          ...activeDays.map((day) {
+                            final dayColor = _getDayPdfColor(day);
+                            return pw.TableRow(
+                              children: [
+                                pw.Container(
+                                  padding: const pw.EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 6,
+                                  ),
+                                  alignment: pw.Alignment.center,
+                                  decoration: pw.BoxDecoration(color: dayColor),
+                                  child: pw.Text(
+                                    day.substring(0, 3).toUpperCase(),
+                                    style: pw.TextStyle(
+                                      color: PdfColors.white,
+                                      fontWeight: pw.FontWeight.bold,
+                                      fontSize: 9,
+                                    ),
+                                  ),
+                                ),
+                                ...sortedTimeSlots.map((slot) {
+                                  final slotStartMin = _parseTimeToMinutes(
+                                    slot.split('-').first.trim(),
+                                  );
+
+                                  final slotEntry = entries.firstWhere(
+                                    (e) =>
+                                        e.day.toLowerCase() ==
+                                            day.toLowerCase() &&
+                                        (formatSlotDisplay(
+                                                  e.startTime,
+                                                  e.endTime,
+                                                ) ==
+                                                slot ||
+                                            _parseTimeToMinutes(e.startTime) ==
+                                                slotStartMin),
+                                    orElse: () => RoutineEntry(
+                                      day: '',
+                                      startTime: '',
+                                      endTime: '',
+                                      subjectId: '',
+                                      teacherId: '',
+                                    ),
+                                  );
+
+                                  if (slotEntry.subjectId.isEmpty) {
+                                    return pw.Container(
+                                      padding: const pw.EdgeInsets.all(4),
+                                      alignment: pw.Alignment.center,
+                                      decoration: pw.BoxDecoration(color: bgTint),
+                                      child: pw.Text(
+                                        '--',
+                                        style: const pw.TextStyle(
+                                          color: PdfColors.grey400,
+                                          fontSize: 9,
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+                                  final subName = _resolveSubjectName(
+                                    slotEntry,
+                                    subjects,
+                                  );
+                                  final teachName = _resolveTeacherName(
+                                    slotEntry,
+                                    teachers,
+                                  );
+
+                                  return pw.Container(
+                                    padding: const pw.EdgeInsets.all(4),
+                                    decoration: const pw.BoxDecoration(
+                                      color: PdfColors.white,
+                                    ),
+                                    child: pw.Column(
+                                      mainAxisAlignment:
+                                          pw.MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          pw.CrossAxisAlignment.center,
+                                      children: [
+                                        pw.Text(
+                                          subName,
+                                          style: pw.TextStyle(
+                                            fontSize: 8,
+                                            fontWeight: pw.FontWeight.bold,
+                                            color: primaryColor,
+                                          ),
+                                          textAlign: pw.TextAlign.center,
+                                          maxLines: 2,
+                                        ),
+                                        pw.SizedBox(height: 2),
+                                        pw.Text(
+                                          teachName,
+                                          style: const pw.TextStyle(
+                                            fontSize: 6.5,
+                                            color: PdfColors.grey700,
+                                          ),
+                                          textAlign: pw.TextAlign.center,
+                                          maxLines: 1,
+                                        ),
+                                        if (slotEntry.roomNumber != null &&
+                                            slotEntry.roomNumber!.isNotEmpty) ...[
+                                          pw.SizedBox(height: 2),
+                                          pw.Container(
+                                            padding:
+                                                const pw.EdgeInsets.symmetric(
+                                                  horizontal: 4,
+                                                  vertical: 1,
+                                                ),
+                                            decoration: pw.BoxDecoration(
+                                              color: bgTint,
+                                              border: pw.Border.all(
+                                                color: borderTint,
+                                                width: 0.5,
+                                              ),
+                                              borderRadius:
+                                                  const pw.BorderRadius.all(
+                                                    pw.Radius.circular(2),
+                                                  ),
+                                            ),
+                                            child: pw.Text(
+                                              'Rm ${slotEntry.roomNumber}',
+                                              style: const pw.TextStyle(
+                                                fontSize: 5.5,
+                                                color: PdfColors.grey800,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  );
+                                }),
+                              ],
+                            );
+                          }),
+                        ],
+                      ),
                     ),
-                  ),
                 pw.SizedBox(height: 8),
                 _buildSignaturesBlock(
                   primaryColor: primaryColor,

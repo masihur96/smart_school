@@ -38,6 +38,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
   bool _isLoading = false;
   Uint8List? _pdfBytes;
   pdfx.PdfControllerPinch? _pdfController;
+  int _pdfViewerKey = 0; // incremented on each PDF generation to force PdfViewPinch rebuild
   int _pageCount = 0;
   int _currentPage = 1;
   int _totalGroupsCount = 0;
@@ -311,6 +312,8 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
           _pdfController = pdfx.PdfControllerPinch(
             document: pdfx.PdfDocument.openData(bytes),
           );
+          _pdfViewerKey++; // force PdfViewPinch to fully rebuild
+          _pageCount = 0;
           _currentPage = 1;
           _isLoading = false;
         });
@@ -468,6 +471,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                     ),
                   )
                 : Container(
+                    key: ValueKey(_pdfViewerKey),
                     color: const Color(0xFFF1F5F9),
                     child: Stack(
                       children: [
@@ -478,6 +482,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
                             minScale: 0.5,
                             maxScale: 5.0,
                             child: pdfx.PdfViewPinch(
+                              key: ValueKey(_pdfViewerKey),
                               controller: _pdfController!,
                               onPageChanged: (page) {
                                 setState(() => _currentPage = page);
