@@ -5,6 +5,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/utils/bangla_text_renderer.dart';
 import 'package:smart_school/core/utils/pdf_image_helper.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/school_models.dart';
@@ -41,29 +42,11 @@ class GenerateTcScreen extends StatelessWidget {
   }
 
   Future<Uint8List> _generateTcPdf(PdfPageFormat format, School? school) async {
-    // Load Noto Sans Bengali — supports both Latin and Bangla characters
-    pw.Font? fontReg;
-    pw.Font? fontBold;
-    try {
-      fontReg = await PdfGoogleFonts.notoSansBengaliRegular();
-      fontBold = await PdfGoogleFonts.notoSansBengaliBold();
-    } catch (_) {}
-
-    final pdf = pw.Document(
-      theme: fontReg != null
-          ? pw.ThemeData.withFont(
-              base: fontReg,
-              bold: fontBold ?? fontReg,
-              italic: fontReg,
-              boldItalic: fontBold ?? fontReg,
-            )
-          : pw.ThemeData(),
-    );
+    final pdf = pw.Document();
 
     final schoolName = school?.name ?? 'Unknown School';
     final schoolAddress = school?.address ?? 'Unknown Address';
     final schoolLogoUrl = school?.avatar ?? '';
-    print("schoolLogoUrl:: $schoolLogoUrl");
 
     pw.ImageProvider? schoolLogo;
     if (schoolLogoUrl.isNotEmpty) {
@@ -74,6 +57,17 @@ class GenerateTcScreen extends StatelessWidget {
       }
     }
 
+    final studentName = student.user?.name ?? 'Unknown';
+    final contactNo = student.guardianContact.isNotEmpty
+        ? student.guardianContact
+        : (student.user?.phone ?? 'N/A');
+
+    // ── Pre-render all strings that may contain Bengali ──────────────────────
+    final rendered = await BanglaTextRenderer.preRenderBatch(
+      [schoolName, schoolAddress, studentName, student.rollId, className, sectionName, contactNo],
+      fontSize: 12,
+      maxWidth: 350,
+    );
 
     pdf.addPage(
       pw.Page(
@@ -98,19 +92,17 @@ class GenerateTcScreen extends StatelessWidget {
                           child: pw.Image(schoolLogo),
                         ),
                       if (schoolLogo != null) pw.SizedBox(height: 10),
-                      pw.Text(
+                      BanglaTextRenderer.fromBytes(
+                        rendered[schoolName],
                         schoolName.toUpperCase(),
-                        style: pw.TextStyle(
-                          fontSize: 24,
-                          fontWeight: pw.FontWeight.bold,
-                        ),
-                        textAlign: pw.TextAlign.center,
+                        fontSize: 24,
+                        bold: true,
                       ),
                       pw.SizedBox(height: 8),
-                      pw.Text(
+                      BanglaTextRenderer.fromBytes(
+                        rendered[schoolAddress],
                         schoolAddress,
-                        style: const pw.TextStyle(fontSize: 12),
-                        textAlign: pw.TextAlign.center,
+                        fontSize: 12,
                       ),
                       pw.SizedBox(height: 20),
                       pw.Text(
@@ -126,23 +118,12 @@ class GenerateTcScreen extends StatelessWidget {
                 ),
                 pw.SizedBox(height: 40),
 
-                // Content
-                _buildPdfRow(
-                  '1. Name of the Pupil:',
-                  student.user?.name ?? 'Unknown',
-                ),
-                _buildPdfRow('2. Admission/Roll Number:', student.rollId),
-                _buildPdfRow(
-                  '3. Class in which pupil last studied:',
-                  className,
-                ),
-                _buildPdfRow('4. Section:', sectionName),
-                _buildPdfRow(
-                  '5. Contact Number:',
-                  student.guardianContact.isNotEmpty
-                      ? student.guardianContact
-                      : (student.user?.phone ?? 'N/A'),
-                ),
+                // Content rows
+                _buildPdfRow('1. Name of the Pupil:', studentName, renderedBytes: rendered[studentName]),
+                _buildPdfRow('2. Admission/Roll Number:', student.rollId, renderedBytes: rendered[student.rollId]),
+                _buildPdfRow('3. Class in which pupil last studied:', className, renderedBytes: rendered[className]),
+                _buildPdfRow('4. Section:', sectionName, renderedBytes: rendered[sectionName]),
+                _buildPdfRow('5. Contact Number:', contactNo, renderedBytes: rendered[contactNo]),
                 _buildPdfRow('6. Email Address:', student.user?.email ?? 'N/A'),
 
                 pw.SizedBox(height: 20),
@@ -161,44 +142,30 @@ class GenerateTcScreen extends StatelessWidget {
                     pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.center,
                       children: [
-                        // Placeholder for signature image if available
                         pw.SizedBox(height: 40),
                         pw.Container(
                           width: 120,
-                          child: pw.Divider(
-                            color: PdfColors.black,
-                            thickness: 1,
-                          ),
+                          child: pw.Divider(color: PdfColors.black, thickness: 1),
                         ),
                         pw.SizedBox(height: 4),
                         pw.Text(
                           'Class Teacher Signature',
-                          style: pw.TextStyle(
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 10,
-                          ),
+                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10),
                         ),
                       ],
                     ),
                     pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.center,
                       children: [
-                        // Placeholder for signature image if available
                         pw.SizedBox(height: 40),
                         pw.Container(
                           width: 120,
-                          child: pw.Divider(
-                            color: PdfColors.black,
-                            thickness: 1,
-                          ),
+                          child: pw.Divider(color: PdfColors.black, thickness: 1),
                         ),
                         pw.SizedBox(height: 4),
                         pw.Text(
                           'Principal Signature',
-                          style: pw.TextStyle(
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 10,
-                          ),
+                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10),
                         ),
                       ],
                     ),
@@ -221,7 +188,7 @@ class GenerateTcScreen extends StatelessWidget {
     return pdf.save();
   }
 
-  pw.Widget _buildPdfRow(String label, String value) {
+  pw.Widget _buildPdfRow(String label, String value, {Uint8List? renderedBytes}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.only(bottom: 12),
       child: pw.Row(
@@ -229,12 +196,11 @@ class GenerateTcScreen extends StatelessWidget {
         children: [
           pw.SizedBox(
             width: 200,
-            child: pw.Text(
-              label,
-              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-            ),
+            child: pw.Text(label, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
           ),
-          pw.Expanded(child: pw.Text(value, style: const pw.TextStyle())),
+          pw.Expanded(
+            child: BanglaTextRenderer.fromBytes(renderedBytes, value, fontSize: 12),
+          ),
         ],
       ),
     );

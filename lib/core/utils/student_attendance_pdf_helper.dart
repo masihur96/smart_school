@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:smart_school/core/utils/bangla_text_renderer.dart';
 import 'package:smart_school/models/period_attendance_model.dart';
 
 class StudentAttendancePdfHelper {
@@ -14,29 +17,33 @@ class StudentAttendancePdfHelper {
     DateTime? endDate,
     required String schoolName,
   }) async {
+    // ── Collect all strings that may contain Bengali ─────────────────────────
+    final strings = <String>{
+      schoolName,
+      if (className != null) className,
+      if (sectionName != null) sectionName,
+      if (subjectName != null) subjectName,
+      for (final r in attendanceList) ...[
+        r.studentName,
+        r.subjectInfo?.name ?? '',
+        r.teacherInfo?.name ?? '',
+      ],
+    };
+    strings.removeWhere((s) => s.trim().isEmpty);
+
+    // ── Pre-render Bengali text via Flutter's shaping engine ─────────────────
+    final rendered = await BanglaTextRenderer.preRenderBatch(
+      strings,
+      fontSize: 10,
+      maxWidth: 300,
+    );
+
     final pdf = pw.Document();
-    
-    // Use Noto Sans Bengali as the base font — supports both Latin and Bangla
-    pw.Font fontReg;
-    pw.Font fontBold;
-    try {
-      fontReg = await PdfGoogleFonts.notoSansBengaliRegular();
-      fontBold = await PdfGoogleFonts.notoSansBengaliBold();
-    } catch (_) {
-      fontReg = await PdfGoogleFonts.robotoRegular();
-      fontBold = await PdfGoogleFonts.robotoBold();
-    }
 
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
-        theme: pw.ThemeData.withFont(
-          base: fontReg,
-          bold: fontBold,
-          italic: fontReg,
-          boldItalic: fontBold,
-        ),
         build: (pw.Context context) {
           return [
             _buildHeader(
@@ -46,9 +53,10 @@ class StudentAttendancePdfHelper {
               subjectName: subjectName,
               startDate: startDate,
               endDate: endDate,
+              rendered: rendered,
             ),
             pw.SizedBox(height: 20),
-            _buildAttendanceTable(attendanceList),
+            _buildAttendanceTable(attendanceList, rendered),
           ];
         },
         footer: (pw.Context context) => _buildFooter(context),
@@ -68,18 +76,25 @@ class StudentAttendancePdfHelper {
     String? subjectName,
     DateTime? startDate,
     DateTime? endDate,
+    Map<String, Uint8List?> rendered = const {},
   }) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text(
+        BanglaTextRenderer.fromBytes(
+          rendered[schoolName],
           schoolName,
-          style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+          fontSize: 24,
+          bold: true,
         ),
         pw.SizedBox(height: 8),
         pw.Text(
           'Student Attendance Report',
-          style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: PdfColors.grey700),
+          style: pw.TextStyle(
+            fontSize: 18,
+            fontWeight: pw.FontWeight.bold,
+            color: PdfColors.grey700,
+          ),
         ),
         pw.Divider(thickness: 2),
         pw.SizedBox(height: 10),
@@ -89,9 +104,24 @@ class StudentAttendancePdfHelper {
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                if (className != null) pw.Text('Class: $className'),
-                if (sectionName != null) pw.Text('Section: $sectionName'),
-                if (subjectName != null) pw.Text('Subject: $subjectName'),
+                if (className != null)
+                  BanglaTextRenderer.fromBytes(
+                    rendered[className],
+                    'Class: $className',
+                    fontSize: 10,
+                  ),
+                if (sectionName != null)
+                  BanglaTextRenderer.fromBytes(
+                    rendered[sectionName],
+                    'Section: $sectionName',
+                    fontSize: 10,
+                  ),
+                if (subjectName != null)
+                  BanglaTextRenderer.fromBytes(
+                    rendered[subjectName],
+                    'Subject: $subjectName',
+                    fontSize: 10,
+                  ),
               ],
             ),
             pw.Column(
@@ -111,47 +141,82 @@ class StudentAttendancePdfHelper {
     );
   }
 
-  static pw.Widget _buildAttendanceTable(List<PeriodAttendance> attendanceList) {
-    final headers = ['Date', 'Student Name', 'Subject', 'Teacher', 'Status'];
+  static pw.Widget _buildAttendanceTable(
+    List<PeriodAttendance> attendanceList,
+    Map<String, Uint8List?> rendered,
+  ) {
+    pw.Widget headerCell(String text) => pw.Container(
+          padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+          child: pw.Text(
+            text,
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 10),
+          ),
+        );
 
-    return pw.TableHelper.fromTextArray(
-      headers: headers,
-      data: attendanceList.map((record) {
-        String formattedDate = record.date;
-        if (record.date.isNotEmpty) {
-          try {
-            final parsedDate = DateTime.parse(record.date).toLocal();
-            formattedDate = DateFormat('dd MMM yyyy').format(parsedDate);
-          } catch (e) {
-            // Keep original string if parsing fails
-          }
-        } else {
-          formattedDate = 'N/A';
-        }
+    pw.Widget cell(pw.Widget child, {bool center = false}) => pw.Container(
+          padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+          height: 30,
+          alignment: center ? pw.Alignment.center : pw.Alignment.centerLeft,
+          child: child,
+        );
 
-        return [
-          formattedDate,
-          record.studentName.isNotEmpty ? record.studentName : 'N/A',
-          record.subjectInfo?.name ?? 'N/A',
-          record.teacherInfo?.name ?? 'N/A',
-          record.status.isNotEmpty ? record.status.toUpperCase() : 'N/A',
-        ];
-      }).toList(),
+    return pw.Table(
       border: pw.TableBorder.all(color: PdfColors.grey300),
-      headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
-      headerDecoration: const pw.BoxDecoration(color: PdfColors.indigo600),
-      cellHeight: 30,
-      cellAlignments: {
-        0: pw.Alignment.centerLeft,
-        1: pw.Alignment.centerLeft,
-        2: pw.Alignment.centerLeft,
-        3: pw.Alignment.centerLeft,
-        4: pw.Alignment.center,
+      columnWidths: const {
+        0: pw.FlexColumnWidth(2),
+        1: pw.FlexColumnWidth(3),
+        2: pw.FlexColumnWidth(2.5),
+        3: pw.FlexColumnWidth(2.5),
+        4: pw.FlexColumnWidth(1.5),
       },
-      cellStyle: const pw.TextStyle(fontSize: 10),
-      rowDecoration: const pw.BoxDecoration(
-        border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5)),
-      ),
+      children: [
+        pw.TableRow(
+          decoration: const pw.BoxDecoration(color: PdfColors.indigo600),
+          children: [
+            headerCell('Date'),
+            headerCell('Student Name'),
+            headerCell('Subject'),
+            headerCell('Teacher'),
+            headerCell('Status'),
+          ],
+        ),
+        ...attendanceList.asMap().entries.map((entry) {
+          final idx = entry.key;
+          final record = entry.value;
+          final bg = idx.isEven ? PdfColors.white : PdfColors.grey50;
+
+          String formattedDate = record.date;
+          if (record.date.isNotEmpty) {
+            try {
+              final parsedDate = DateTime.parse(record.date).toLocal();
+              formattedDate = DateFormat('dd MMM yyyy').format(parsedDate);
+            } catch (_) {}
+          } else {
+            formattedDate = 'N/A';
+          }
+
+          final studentName = record.studentName.isNotEmpty ? record.studentName : 'N/A';
+          final subject = record.subjectInfo?.name ?? 'N/A';
+          final teacher = record.teacherInfo?.name ?? 'N/A';
+          final status = record.status.isNotEmpty ? record.status.toUpperCase() : 'N/A';
+
+          return pw.TableRow(
+            decoration: pw.BoxDecoration(
+              color: bg,
+              border: const pw.Border(
+                bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
+              ),
+            ),
+            children: [
+              cell(pw.Text(formattedDate, style: const pw.TextStyle(fontSize: 10))),
+              cell(BanglaTextRenderer.fromBytes(rendered[record.studentName], studentName, fontSize: 10)),
+              cell(BanglaTextRenderer.fromBytes(rendered[record.subjectInfo?.name ?? ''], subject, fontSize: 10)),
+              cell(BanglaTextRenderer.fromBytes(rendered[record.teacherInfo?.name ?? ''], teacher, fontSize: 10)),
+              cell(pw.Text(status, style: const pw.TextStyle(fontSize: 10)), center: true),
+            ],
+          );
+        }),
+      ],
     );
   }
 

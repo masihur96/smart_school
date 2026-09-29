@@ -7,6 +7,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:pdfx/pdfx.dart' as pdfx;
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/core/utils/bangla_text_renderer.dart';
 import 'package:smart_school/core/utils/pdf_image_helper.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
@@ -327,24 +328,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
     List<ClassRoom> allClasses,
     List<Section> allSections,
   ) async {
-    // Load Noto Sans Bengali — supports both Latin and Bangla characters
-    pw.Font? fontReg;
-    pw.Font? fontBold;
-    try {
-      fontReg = await PdfGoogleFonts.notoSansBengaliRegular();
-      fontBold = await PdfGoogleFonts.notoSansBengaliBold();
-    } catch (_) {}
-
-    final pdf = pw.Document(
-      theme: fontReg != null
-          ? pw.ThemeData.withFont(
-              base: fontReg,
-              bold: fontBold ?? fontReg,
-              italic: fontReg,
-              boldItalic: fontBold ?? fontReg,
-            )
-          : pw.ThemeData(),
-    );
+    final pdf = pw.Document();
 
     final schoolName = school?.name ?? 'Smart School';
     final schoolLogoUrl = school?.avatar ?? '';
@@ -361,14 +345,14 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
       }
     }
 
-
     final allResults = [...widget.exam.results, ..._fetchedResults];
 
     bool matchesStudent(Result r, Student student) {
       if (r.studentId.isNotEmpty) {
         if (r.studentId == student.userId) return true;
-        if (student.user != null && r.studentId == student.user!.id)
+        if (student.user != null && r.studentId == student.user!.id) {
           return true;
+        }
         if (r.studentId == student.rollId) return true;
       }
       return false;
@@ -397,12 +381,65 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
       studentRanks[sortedStudentIds[i]] = currentRank;
     }
 
+    // ── Collect all strings that might contain Bengali ──────────────────────
+    final allBengaliStrings = <String>{
+      schoolName,
+      schoolAddress,
+      widget.exam.name,
+    };
+
+    for (var student in _currentStudents) {
+      allBengaliStrings.add(student.user?.name ?? '');
+      allBengaliStrings.add(student.rollId);
+
+      final className = _resolveClassName(
+        student, _selectedClassId, allClasses, widget.exam.assignments,
+      );
+      final sectionName = _resolveSectionName(
+        student, _selectedSectionId, allSections, widget.exam.assignments,
+      );
+      allBengaliStrings.add(className);
+      allBengaliStrings.add(sectionName);
+      allBengaliStrings.add('$className - $sectionName');
+
+      final results = allResults
+          .where((r) => matchesStudent(r, student))
+          .toList();
+      for (var r in results) {
+        String subjectName = r.subject?.name ?? '';
+        if (subjectName.isEmpty || subjectName == 'Unknown') {
+          try {
+            subjectName = widget.exam.assignments
+                .firstWhere((a) => a.subjectId == r.subjectId)
+                .subjectName;
+          } catch (_) {}
+        }
+        if (subjectName.isEmpty || subjectName == 'Unknown') {
+          try {
+            subjectName =
+                allSubjects.firstWhere((s) => s.id == r.subjectId).name;
+          } catch (_) {}
+        }
+        allBengaliStrings.add(subjectName);
+        if (r.remarks.isNotEmpty) allBengaliStrings.add(r.remarks);
+      }
+    }
+    allBengaliStrings.removeWhere((s) => s.trim().isEmpty);
+
+    // ── Pre-render all Bengali strings in parallel ───────────────────────────
+    final rendered = await BanglaTextRenderer.preRenderBatch(
+      allBengaliStrings,
+      fontSize: 9,
+      maxWidth: 400,
+    );
+
+    // ── Build PDF pages ──────────────────────────────────────────────────────
     for (var student in _currentStudents) {
       final studentResults = allResults
           .where((r) => matchesStudent(r, student))
           .toList();
 
-      if (studentResults.isEmpty) continue; // Skip if no marks
+      if (studentResults.isEmpty) continue;
 
       pdf.addPage(
         pw.Page(
@@ -422,13 +459,13 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
               allSubjects: allSubjects,
               allClasses: allClasses,
               allSections: allSections,
+              rendered: rendered,
             );
           },
         ),
       );
     }
 
-    // If no students had results
     if (pdf.document.pdfPageList.pages.isEmpty) {
       pdf.addPage(
         pw.Page(
@@ -464,6 +501,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
     required List<Subject> allSubjects,
     required List<ClassRoom> allClasses,
     required List<Section> allSections,
+    Map<String, Uint8List?> rendered = const {},
   }) {
     double totalMarksAll = 0;
     double marksObtainedAll = 0;
@@ -540,22 +578,18 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text(
+                    BanglaTextRenderer.fromBytes(
+                      rendered[schoolName],
                       schoolName.toUpperCase(),
-                      style: pw.TextStyle(
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 15,
-                        color: primaryColor,
-                      ),
+                      fontSize: 15,
+                      bold: true,
                     ),
                     pw.SizedBox(height: 2),
                     if (schoolAddress.isNotEmpty)
-                      pw.Text(
+                      BanglaTextRenderer.fromBytes(
+                        rendered[schoolAddress],
                         schoolAddress,
-                        style: pw.TextStyle(
-                          fontSize: 8,
-                          color: PdfColors.grey700,
-                        ),
+                        fontSize: 8,
                       ),
                     if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty)
                       pw.Text(
@@ -628,13 +662,11 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                     fontWeight: pw.FontWeight.bold,
                   ),
                 ),
-                pw.Text(
+                BanglaTextRenderer.fromBytes(
+                  rendered[widget.exam.name],
                   widget.exam.name.toUpperCase(),
-                  style: pw.TextStyle(
-                    color: goldColor,
-                    fontSize: 10,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
+                  fontSize: 10,
+                  bold: true,
                 ),
               ],
             ),
@@ -660,16 +692,19 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                         'Student Name',
                         student.user?.name ?? 'N/A',
                         isBold: true,
+                        renderedValueBytes: rendered[student.user?.name ?? ''],
                       ),
                       pw.SizedBox(height: 4),
                       _buildProfileRow(
                         'Roll Number',
                         student.rollId.isNotEmpty ? student.rollId : 'N/A',
+                        renderedValueBytes: rendered[student.rollId],
                       ),
                       pw.SizedBox(height: 4),
                       _buildProfileRow(
                         'Class & Sec',
                         '$className - $sectionName',
+                        renderedValueBytes: rendered['$className - $sectionName'],
                       ),
                     ],
                   ),
@@ -694,9 +729,6 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
                       _buildProfileRow(
                         'Result Status',
                         percentage >= 40 ? 'PASSED' : 'NEEDS ATTENTION',
-                        valueColor: percentage >= 40
-                            ? PdfColor.fromHex('#15803D')
-                            : PdfColor.fromHex('#B91C1C'),
                         isBold: true,
                       ),
                     ],
@@ -708,69 +740,67 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
 
           pw.SizedBox(height: 10),
 
-          // 4. MARKS TABLE
-          pw.TableHelper.fromTextArray(
-            headerDecoration: pw.BoxDecoration(color: primaryColor),
-            headerStyle: pw.TextStyle(
-              color: PdfColors.white,
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 8.5,
-            ),
-            headerHeight: 22,
-            cellHeight: 18,
-            cellAlignment: pw.Alignment.centerLeft,
-            cellStyle: const pw.TextStyle(fontSize: 8),
-            cellAlignments: {
-              0: pw.Alignment.centerLeft,
-              1: pw.Alignment.center,
-              2: pw.Alignment.center,
-              3: pw.Alignment.center,
-              4: pw.Alignment.center,
-              5: pw.Alignment.centerLeft,
+          // 4. MARKS TABLE — uses pw.Table so Bengali subject names render correctly
+          pw.Table(
+            border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+            columnWidths: const {
+              0: pw.FlexColumnWidth(3),
+              1: pw.FlexColumnWidth(1.5),
+              2: pw.FlexColumnWidth(1.5),
+              3: pw.FlexColumnWidth(1.5),
+              4: pw.FlexColumnWidth(1),
+              5: pw.FlexColumnWidth(2),
             },
-            headers: [
-              'SUBJECT',
-              'MAX MARKS',
-              'PASS MARKS',
-              'OBTAINED',
-              'GRADE',
-              'REMARKS',
-            ],
-            data: [
-              ...results.map((r) {
-                final pct = r.totalMarks > 0
-                    ? (r.marksObtained / r.totalMarks) * 100
-                    : 0.0;
+            children: [
+              // Header row
+              pw.TableRow(
+                decoration: pw.BoxDecoration(color: primaryColor),
+                children: ['SUBJECT','MAX MARKS','PASS MARKS','OBTAINED','GRADE','REMARKS'].map((h) =>
+                  pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 5),
+                    child: pw.Text(h, style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold, fontSize: 8)),
+                  ),
+                ).toList(),
+              ),
+              // Data rows
+              ...results.asMap().entries.map((entry) {
+                final idx = entry.key;
+                final r = entry.value;
+                final pct = r.totalMarks > 0 ? (r.marksObtained / r.totalMarks) * 100 : 0.0;
                 final grade = _calculateGrade(pct);
                 final passMarks = (r.totalMarks * 0.4).toStringAsFixed(0);
+                final bg = idx.isEven ? PdfColors.white : PdfColors.grey50;
 
                 String subjectName = r.subject?.name ?? '';
                 if (subjectName.isEmpty || subjectName == 'Unknown') {
                   try {
-                    subjectName = widget.exam.assignments
-                        .firstWhere((a) => a.subjectId == r.subjectId)
-                        .subjectName;
+                    subjectName = widget.exam.assignments.firstWhere((a) => a.subjectId == r.subjectId).subjectName;
                   } catch (_) {}
                 }
                 if (subjectName.isEmpty || subjectName == 'Unknown') {
                   try {
-                    subjectName = allSubjects
-                        .firstWhere((s) => s.id == r.subjectId)
-                        .name;
+                    subjectName = allSubjects.firstWhere((s) => s.id == r.subjectId).name;
                   } catch (_) {}
                 }
-                if (subjectName.isEmpty) {
-                  subjectName = AppLocalizations.of(context)!.subjectName;
-                }
+                if (subjectName.isEmpty) subjectName = AppLocalizations.of(context)!.subjectName;
 
-                return [
-                  subjectName,
-                  r.totalMarks.toStringAsFixed(0),
-                  passMarks,
-                  r.marksObtained.toStringAsFixed(1),
-                  grade,
-                  r.remarks.isNotEmpty ? r.remarks : '-',
-                ];
+                final remarkText = r.remarks.isNotEmpty ? r.remarks : '-';
+
+                pw.Widget cell(pw.Widget child, {bool center = false}) => pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+                  color: bg,
+                  alignment: center ? pw.Alignment.center : pw.Alignment.centerLeft,
+                  child: child,
+                );
+
+                return pw.TableRow(children: [
+                  cell(BanglaTextRenderer.fromBytes(rendered[subjectName], subjectName, fontSize: 8)),
+                  cell(pw.Text(r.totalMarks.toStringAsFixed(0), style: const pw.TextStyle(fontSize: 8)), center: true),
+                  cell(pw.Text(passMarks, style: const pw.TextStyle(fontSize: 8)), center: true),
+                  cell(pw.Text(r.marksObtained.toStringAsFixed(1), style: const pw.TextStyle(fontSize: 8)), center: true),
+                  cell(pw.Text(grade, style: const pw.TextStyle(fontSize: 8)), center: true),
+                  cell(BanglaTextRenderer.fromBytes(rendered[remarkText], remarkText, fontSize: 8)),
+                ]);
               }),
             ],
           ),
@@ -949,7 +979,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
     String label,
     String value, {
     bool isBold = false,
-    PdfColor? valueColor,
+    Uint8List? renderedValueBytes,
   }) {
     return pw.Row(
       children: [
@@ -965,13 +995,11 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
           ),
         ),
         pw.Expanded(
-          child: pw.Text(
+          child: BanglaTextRenderer.fromBytes(
+            renderedValueBytes,
             value,
-            style: pw.TextStyle(
-              fontSize: 8.5,
-              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
-              color: valueColor ?? PdfColors.black,
-            ),
+            fontSize: 8.5,
+            bold: isBold,
           ),
         ),
       ],
