@@ -398,11 +398,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
         headerSliverBuilder: (context, _) => [
           _buildSliverHeader(context, classes, filteredSections),
         ],
-        body: RefreshIndicator(
-          onRefresh: _refreshAllData,
-          color: AppColors.primaryAdmin,
-          child: isFiltered ? _buildTimetableBody() : _buildEmptyState(),
-        ),
+        body: isFiltered ? _buildTimetableBody() : _buildEmptyState(),
       ),
       floatingActionButton: isFiltered
           ? FloatingActionButton.extended(
@@ -449,6 +445,10 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
       foregroundColor: Colors.white,
       elevation: 0,
       actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh_rounded),
+          onPressed: _refreshAllData,
+        ),
         IconButton(
           icon: const Icon(Icons.picture_as_pdf_rounded),
           tooltip: l10n.generatePrintRoutinePdfTooltip,
@@ -912,32 +912,43 @@ class _DayRoutineTab extends StatelessWidget {
     final entries = allEntries.where((e) => e.day == day).toList();
 
     if (entries.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.school_outlined,
-              size: 48,
-              color: color.withOpacity(0.4),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              AppLocalizations.of(
-                context,
-              )!.noClassesOnDay(_getLocalizedDayName(context, day)),
-              style: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              height: constraints.maxHeight,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.school_outlined,
+                      size: 48,
+                      color: color.withOpacity(0.4),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      AppLocalizations.of(
+                        context,
+                      )!.noClassesOnDay(_getLocalizedDayName(context, day)),
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          );
+        },
       );
     }
 
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(top: 10, bottom: 20),
       itemCount: entries.length,
       itemBuilder: (context, index) {

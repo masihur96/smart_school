@@ -327,7 +327,24 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
     List<ClassRoom> allClasses,
     List<Section> allSections,
   ) async {
-    final pdf = pw.Document();
+    // Load Noto Sans Bengali — supports both Latin and Bangla characters
+    pw.Font? fontReg;
+    pw.Font? fontBold;
+    try {
+      fontReg = await PdfGoogleFonts.notoSansBengaliRegular();
+      fontBold = await PdfGoogleFonts.notoSansBengaliBold();
+    } catch (_) {}
+
+    final pdf = pw.Document(
+      theme: fontReg != null
+          ? pw.ThemeData.withFont(
+              base: fontReg,
+              bold: fontBold ?? fontReg,
+              italic: fontReg,
+              boldItalic: fontBold ?? fontReg,
+            )
+          : pw.ThemeData(),
+    );
 
     final schoolName = school?.name ?? 'Smart School';
     final schoolLogoUrl = school?.avatar ?? '';
@@ -343,6 +360,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
         // Fallback if image fails to load
       }
     }
+
 
     final allResults = [...widget.exam.results, ..._fetchedResults];
 

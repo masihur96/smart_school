@@ -16,17 +16,26 @@ class StudentAttendancePdfHelper {
   }) async {
     final pdf = pw.Document();
     
-    // Use a standard font to avoid null-check issues in default font lookup
-    final font = await PdfGoogleFonts.robotoRegular();
-    final boldFont = await PdfGoogleFonts.robotoBold();
+    // Use Noto Sans Bengali as the base font — supports both Latin and Bangla
+    pw.Font fontReg;
+    pw.Font fontBold;
+    try {
+      fontReg = await PdfGoogleFonts.notoSansBengaliRegular();
+      fontBold = await PdfGoogleFonts.notoSansBengaliBold();
+    } catch (_) {
+      fontReg = await PdfGoogleFonts.robotoRegular();
+      fontBold = await PdfGoogleFonts.robotoBold();
+    }
 
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
         theme: pw.ThemeData.withFont(
-          base: font,
-          bold: boldFont,
+          base: fontReg,
+          bold: fontBold,
+          italic: fontReg,
+          boldItalic: fontBold,
         ),
         build: (pw.Context context) {
           return [

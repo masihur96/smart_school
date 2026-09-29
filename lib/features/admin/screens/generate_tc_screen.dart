@@ -41,7 +41,24 @@ class GenerateTcScreen extends StatelessWidget {
   }
 
   Future<Uint8List> _generateTcPdf(PdfPageFormat format, School? school) async {
-    final pdf = pw.Document();
+    // Load Noto Sans Bengali — supports both Latin and Bangla characters
+    pw.Font? fontReg;
+    pw.Font? fontBold;
+    try {
+      fontReg = await PdfGoogleFonts.notoSansBengaliRegular();
+      fontBold = await PdfGoogleFonts.notoSansBengaliBold();
+    } catch (_) {}
+
+    final pdf = pw.Document(
+      theme: fontReg != null
+          ? pw.ThemeData.withFont(
+              base: fontReg,
+              bold: fontBold ?? fontReg,
+              italic: fontReg,
+              boldItalic: fontBold ?? fontReg,
+            )
+          : pw.ThemeData(),
+    );
 
     final schoolName = school?.name ?? 'Unknown School';
     final schoolAddress = school?.address ?? 'Unknown Address';
@@ -56,6 +73,7 @@ class GenerateTcScreen extends StatelessWidget {
         // Fallback if image fails to load
       }
     }
+
 
     pdf.addPage(
       pw.Page(

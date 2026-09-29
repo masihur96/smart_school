@@ -54,18 +54,19 @@ class ClassRoutinePdfHelper {
     pw.Font? bengaliFont;
     pw.Font? bengaliBold;
     try {
-      bengaliFont = await PdfGoogleFonts.hindSiliguriRegular();
-      bengaliBold = await PdfGoogleFonts.hindSiliguriBold();
+      bengaliFont = await PdfGoogleFonts.notoSansBengaliRegular();
+      bengaliBold = await PdfGoogleFonts.notoSansBengaliBold();
     } catch (_) {}
 
     final theme = pw.ThemeData.withFont(
-      base: font,
-      bold: boldFont,
+      base: bengaliFont ?? font,
+      bold: bengaliBold ?? boldFont,
       italic: italicFont,
-      boldItalic: boldFont,
+      boldItalic: bengaliBold ?? boldFont,
       fontFallback: [
         if (bengaliFont != null) bengaliFont,
         if (bengaliBold != null) bengaliBold,
+        font,
         mediumFont,
       ],
     );
