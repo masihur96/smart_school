@@ -174,21 +174,28 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
       final authNotifier = context.read<AuthNotifier>();
       final schoolId = authNotifier.user?.schoolId;
 
       if (schoolId != null) {
-        log('Initiating data fetch for routine management: schoolId=$schoolId');
+        final subjectNotifier = context.read<SubjectSetupNotifier>();
+        final teacherNotifier = context.read<TeachersNotifier>();
+        final routineNotifier = context.read<RoutineNotifier>();
 
-        // Fetch classes and sections first to enable auto-selection if not already selected
-        await Future.wait([
-          classNotifier.fetchClasses(schoolId),
-          sectionNotifier.fetchSections(),
-        ]);
+        // Only fetch classes/sections if not already loaded
+        final needsClasses = classNotifier.classes.isEmpty;
+        final needsSections = sectionNotifier.sections.isEmpty;
 
-        if (mounted &&
-            _selectedClassId == null &&
-            classNotifier.classes.isNotEmpty) {
+        if (needsClasses || needsSections) {
+          log('Fetching classes/sections (empty in cache)');
+          await Future.wait([
+            if (needsClasses) classNotifier.fetchClasses(schoolId),
+            if (needsSections) sectionNotifier.fetchSections(),
+          ]);
+        }
+
+        if (mounted && _selectedClassId == null && classNotifier.classes.isNotEmpty) {
           setState(() {
             _selectedClassId = classNotifier.classes.first.id;
             final filteredSections = sectionNotifier.sections
@@ -200,21 +207,69 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
           });
         }
 
-        // Fetch other dependencies
+        // Only fetch subjects, teachers, routines if not already loaded
         if (mounted) {
-          Future.wait([
-            context.read<SubjectSetupNotifier>().fetchSubjects(schoolId),
-            context.read<TeachersNotifier>().fetchTeachers(),
-            context.read<RoutineNotifier>().fetchAllRoutines(schoolId),
-          ]);
+          final futures = <Future<void>>[];
+          if (subjectNotifier.subjects.isEmpty) {
+            log('Fetching subjects (empty in cache)');
+            futures.add(subjectNotifier.fetchSubjects(schoolId));
+          }
+          if (teacherNotifier.teachers.isEmpty) {
+            log('Fetching teachers (empty in cache)');
+            futures.add(teacherNotifier.fetchTeachers());
+          }
+          if (routineNotifier.state.isEmpty) {
+            log('Fetching routines (empty in cache)');
+            futures.add(routineNotifier.fetchAllRoutines(schoolId));
+          }
+          if (futures.isNotEmpty) Future.wait(futures);
+
+          // Attendance & homework are date-dependent — always load for current date
           _loadCompletionData();
         }
       } else {
-        log(
-          'Warning: No schoolId found in AuthNotifier during routine management init',
-        );
+        log('Warning: No schoolId found in AuthNotifier during routine management init');
       }
     });
+  }
+
+  /// Force-refreshes all data (called by pull-to-refresh).
+  Future<void> _refreshAllData() async {
+    if (!mounted) return;
+    final authNotifier = context.read<AuthNotifier>();
+    final schoolId = authNotifier.user?.schoolId;
+    if (schoolId == null) return;
+
+    log('Pull-to-refresh: force-fetching all routine management data');
+
+    final classNotifier = context.read<ClassSetupNotifier>();
+    final sectionNotifier = context.read<SectionSetupNotifier>();
+
+    await Future.wait([
+      classNotifier.fetchClasses(schoolId),
+      sectionNotifier.fetchSections(),
+    ]);
+
+    if (mounted && _selectedClassId == null && classNotifier.classes.isNotEmpty) {
+      setState(() {
+        _selectedClassId = classNotifier.classes.first.id;
+        final filteredSections = sectionNotifier.sections
+            .where((s) => s.classId == _selectedClassId)
+            .toList();
+        if (filteredSections.isNotEmpty) {
+          _selectedSectionId = filteredSections.first.id;
+        }
+      });
+    }
+
+    if (mounted) {
+      await Future.wait([
+        context.read<SubjectSetupNotifier>().fetchSubjects(schoolId),
+        context.read<TeachersNotifier>().fetchTeachers(),
+        context.read<RoutineNotifier>().fetchAllRoutines(schoolId),
+      ]);
+      _loadCompletionData();
+    }
   }
 
   void _onTabChanged() {
@@ -343,7 +398,11 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
         headerSliverBuilder: (context, _) => [
           _buildSliverHeader(context, classes, filteredSections),
         ],
-        body: isFiltered ? _buildTimetableBody() : _buildEmptyState(),
+        body: RefreshIndicator(
+          onRefresh: _refreshAllData,
+          color: AppColors.primaryAdmin,
+          child: isFiltered ? _buildTimetableBody() : _buildEmptyState(),
+        ),
       ),
       floatingActionButton: isFiltered
           ? FloatingActionButton.extended(
@@ -745,32 +804,44 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
 
   Widget _buildEmptyState() {
     final l10n = AppLocalizations.of(context)!;
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              color: const Color(0xFF7C3AED).withOpacity(0.08),
-              shape: BoxShape.circle,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          // AlwaysScrollableScrollPhysics ensures the RefreshIndicator
+          // pull gesture is captured even though content fits on screen.
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: SizedBox(
+            height: constraints.maxHeight,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF7C3AED).withOpacity(0.08),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.calendar_month_outlined, size: 50),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    l10n.selectClass,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.chooseClassToViewRoutine,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey[500], height: 1.5),
+                  ),
+                ],
+              ),
             ),
-            child: const Icon(Icons.calendar_month_outlined, size: 50),
           ),
-          const SizedBox(height: 20),
-          Text(
-            l10n.selectClass,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.chooseClassToViewRoutine,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey[500], height: 1.5),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
