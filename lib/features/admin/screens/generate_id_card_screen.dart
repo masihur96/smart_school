@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+import 'package:smart_school/core/utils/bangla_text_renderer.dart';
+
 
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
@@ -472,16 +474,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
 
     final signatoryName = context.read<AuthNotifier>().user?.name ?? 'Principal';
 
-    final pdf = pw.Document(
-      theme: fontReg != null
-          ? pw.ThemeData.withFont(
-              base: fontReg,
-              bold: fontBold ?? fontReg,
-              italic: fontReg,
-              boldItalic: fontBold ?? fontReg,
-            )
-          : pw.ThemeData(),
-    );
+    final pdf = pw.Document();
 
     String resolvedClassName = 'N/A';
     if (_selectedClassId != null) {
@@ -510,6 +503,27 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
     final schoolAddress = school?.address ?? '';
     final schoolPhone = school?.phone ?? '';
     final schoolEmail = school?.email ?? '';
+
+    // ── Pre-render all strings that may contain Bengali ──────────────────────
+    final strings = <String>{
+      schoolName,
+      schoolAddress,
+      resolvedClassName,
+      resolvedSectionName,
+      signatoryName,
+    };
+    for (final student in _currentStudents) {
+      if (student.className?.isNotEmpty == true) strings.add(student.className!);
+      if (student.sectionName?.isNotEmpty == true) strings.add(student.sectionName!);
+      strings.add(student.user?.name ?? 'Unknown');
+      strings.add(student.rollId);
+      strings.add(student.guardianContact);
+      strings.add(student.user?.phone ?? '');
+      strings.add(student.user?.email ?? '');
+    }
+    strings.removeWhere((s) => s.trim().isEmpty);
+    await BanglaTextRenderer.preRenderBatchToGlobal(strings, fontSize: 10, maxWidth: 300);
+
 
     pw.ImageProvider? schoolLogo;
     if (schoolLogoUrl.isNotEmpty) {
@@ -684,7 +698,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         schoolName,
                         style: pw.TextStyle(
                           color: PdfColors.white,
@@ -694,7 +708,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                         textAlign: pw.TextAlign.center,
                       ),
                       if (schoolAddress.isNotEmpty)
-                        pw.Text(
+                        BanglaTextRenderer.cachedWidget(
                           schoolAddress,
                           style: const pw.TextStyle(
                             color: PdfColors.white,
@@ -704,7 +718,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                           maxLines: 2,
                         ),
                       if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty)
-                        pw.Text(
+                        BanglaTextRenderer.cachedWidget(
                           [
                             if (schoolPhone.isNotEmpty) 'Ph: $schoolPhone',
                             if (schoolEmail.isNotEmpty) 'Email: $schoolEmail',
@@ -728,7 +742,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
             width: double.infinity,
             color: PdfColors.amber,
             padding: const pw.EdgeInsets.symmetric(vertical: 4),
-            child: pw.Text(
+            child: BanglaTextRenderer.cachedWidget(
               'IDENTITY CARD',
               style: pw.TextStyle(
                 color: PdfColors.black,
@@ -762,7 +776,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                     child: pw.Image(studentAvatar, fit: pw.BoxFit.cover),
                   )
                 : pw.Center(
-                    child: pw.Text(
+                    child: BanglaTextRenderer.cachedWidget(
                       student.user?.name.isNotEmpty == true
                           ? student.user!.name[0]
                           : '?',
@@ -778,7 +792,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
           pw.SizedBox(height: 12),
 
           // Student Name
-          pw.Text(
+          BanglaTextRenderer.cachedWidget(
             student.user?.name ?? 'UNKNOWN',
             style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
@@ -788,7 +802,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
             textAlign: pw.TextAlign.center,
             maxLines: 1,
           ),
-          pw.Text(
+          BanglaTextRenderer.cachedWidget(
             'STUDENT',
             style: pw.TextStyle(
               fontSize: 9,
@@ -846,7 +860,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                 pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       signatoryName,
                       style: pw.TextStyle(
                         font: signatureFont,
@@ -858,7 +872,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                       width: 70,
                       child: pw.Divider(color: PdfColors.deepPurple, thickness: 0.8),
                     ),
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       'Authorized Signature',
                       style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey700),
                     ),
@@ -880,7 +894,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
               ),
             ),
             child: pw.Center(
-              child: pw.Text(
+              child: BanglaTextRenderer.cachedWidget(
                 'Valid for Current Academic Session',
                 style: const pw.TextStyle(color: PdfColors.white, fontSize: 7),
               ),
@@ -899,7 +913,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
         children: [
           pw.SizedBox(
             width: 55,
-            child: pw.Text(
+            child: BanglaTextRenderer.cachedWidget(
               label,
               style: pw.TextStyle(
                 fontWeight: pw.FontWeight.bold,
@@ -908,7 +922,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
               ),
             ),
           ),
-          pw.Text(
+          BanglaTextRenderer.cachedWidget(
             ': ',
             style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
@@ -917,7 +931,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
             ),
           ),
           pw.Expanded(
-            child: pw.Text(
+            child: BanglaTextRenderer.cachedWidget(
               value,
               style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
               maxLines: 1,
@@ -996,7 +1010,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         schoolName,
                         style: pw.TextStyle(
                           color: PdfColors.white,
@@ -1006,14 +1020,14 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                         textAlign: pw.TextAlign.center,
                       ),
                       if (schoolAddress.isNotEmpty)
-                        pw.Text(
+                        BanglaTextRenderer.cachedWidget(
                           schoolAddress,
                           style: const pw.TextStyle(color: PdfColors.white, fontSize: 6),
                           textAlign: pw.TextAlign.center,
                           maxLines: 1,
                         ),
                       if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty)
-                        pw.Text(
+                        BanglaTextRenderer.cachedWidget(
                           [
                             if (schoolPhone.isNotEmpty) 'Ph: $schoolPhone',
                             if (schoolEmail.isNotEmpty) schoolEmail,
@@ -1034,7 +1048,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
             width: double.infinity,
             color: PdfColors.amber,
             padding: const pw.EdgeInsets.symmetric(vertical: 4),
-            child: pw.Text(
+            child: BanglaTextRenderer.cachedWidget(
               'IDENTITY CARD',
               style: pw.TextStyle(
                 color: PdfColors.indigo900,
@@ -1060,7 +1074,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
             child: studentAvatar != null
                 ? pw.ClipOval(child: pw.Image(studentAvatar, fit: pw.BoxFit.cover))
                 : pw.Center(
-                    child: pw.Text(
+                    child: BanglaTextRenderer.cachedWidget(
                       student.user?.name.isNotEmpty == true
                           ? student.user!.name[0]
                           : '?',
@@ -1076,7 +1090,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
           pw.SizedBox(height: 8),
 
           // ── Student Name ──
-          pw.Text(
+          BanglaTextRenderer.cachedWidget(
             student.user?.name ?? 'Unknown',
             style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
@@ -1086,7 +1100,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
             textAlign: pw.TextAlign.center,
             maxLines: 1,
           ),
-          pw.Text(
+          BanglaTextRenderer.cachedWidget(
             'STUDENT',
             style: pw.TextStyle(
               fontSize: 8,
@@ -1141,7 +1155,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                 pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       signatoryName,
                       style: pw.TextStyle(
                         font: signatureFont,
@@ -1153,7 +1167,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                       width: 70,
                       child: pw.Divider(color: PdfColors.indigo700, thickness: 0.8),
                     ),
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       'Authorized Signature',
                       style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey600),
                     ),
@@ -1175,12 +1189,12 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
         children: [
           pw.Expanded(
             flex: 2,
-            child: pw.Text(label, style: pw.TextStyle(fontSize: 8, color: PdfColors.grey600, fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.right),
+            child: BanglaTextRenderer.cachedWidget(label, style: pw.TextStyle(fontSize: 8, color: PdfColors.grey600, fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.right),
           ),
           pw.SizedBox(width: 8),
           pw.Expanded(
             flex: 3,
-            child: pw.Text(value, style: pw.TextStyle(fontSize: 9, color: PdfColors.grey900, fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.left),
+            child: BanglaTextRenderer.cachedWidget(value, style: pw.TextStyle(fontSize: 9, color: PdfColors.grey900, fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.left),
           ),
         ],
       ),
@@ -1241,13 +1255,13 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         schoolName,
                         style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 13, color: PdfColors.white),
                         textAlign: pw.TextAlign.center,
                       ),
                       if (schoolAddress.isNotEmpty)
-                        pw.Text(
+                        BanglaTextRenderer.cachedWidget(
                           schoolAddress,
                           style: const pw.TextStyle(fontSize: 6, color: PdfColors.white),
                           textAlign: pw.TextAlign.center,
@@ -1264,7 +1278,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
             width: double.infinity,
             padding: const pw.EdgeInsets.symmetric(vertical: 4),
             decoration: const pw.BoxDecoration(color: PdfColors.amber),
-            child: pw.Text(
+            child: BanglaTextRenderer.cachedWidget(
               'STUDENT IDENTITY CARD',
               style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9, color: PdfColors.blue900, letterSpacing: 1.5),
               textAlign: pw.TextAlign.center,
@@ -1287,7 +1301,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                   ),
                   child: studentAvatar != null
                       ? pw.Image(studentAvatar, fit: pw.BoxFit.cover)
-                      : pw.Center(child: pw.Text('Photo', style: const pw.TextStyle(color: PdfColors.grey600, fontSize: 8))),
+                      : pw.Center(child: BanglaTextRenderer.cachedWidget('Photo', style: const pw.TextStyle(color: PdfColors.grey600, fontSize: 8))),
                 ),
               ),
               pw.SizedBox(width: 12),
@@ -1298,7 +1312,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         student.user?.name ?? 'UNKNOWN',
                         style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12, color: PdfColors.blue900),
                       ),
@@ -1337,7 +1351,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                 pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       signatoryName,
                       style: pw.TextStyle(
                         font: signatureFont,
@@ -1349,7 +1363,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                       width: 70,
                       child: pw.Divider(color: PdfColors.blue900, thickness: 0.8),
                     ),
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       'Authorized Signature',
                       style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey700),
                     ),
@@ -1369,9 +1383,9 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
       child: pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.SizedBox(width: 35, child: pw.Text(label, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8, color: PdfColors.blue900))),
-          pw.Text(': ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8, color: PdfColors.blue900)),
-          pw.Expanded(child: pw.Text(value, style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold, color: PdfColors.black))),
+          pw.SizedBox(width: 35, child: BanglaTextRenderer.cachedWidget(label, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8, color: PdfColors.blue900))),
+          BanglaTextRenderer.cachedWidget(': ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8, color: PdfColors.blue900)),
+          pw.Expanded(child: BanglaTextRenderer.cachedWidget(value, style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold, color: PdfColors.black))),
         ],
       ),
     );
@@ -1423,14 +1437,14 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       schoolName,
                       style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11, color: PdfColors.grey900, letterSpacing: 1),
                       maxLines: 3,
                     ),
                     if (schoolAddress.isNotEmpty) ...[
                       pw.SizedBox(height: 2),
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         schoolAddress,
                         style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey700),
                         maxLines: 1,
@@ -1438,7 +1452,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                     ],
                     if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty) ...[
                       pw.SizedBox(height: 2),
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         [if (schoolPhone.isNotEmpty) 'Ph: $schoolPhone', if (schoolEmail.isNotEmpty) schoolEmail].join(' | '),
                         style: const pw.TextStyle(fontSize: 5, color: PdfColors.grey700),
                         maxLines: 1,
@@ -1473,19 +1487,19 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                 ),
                 child: studentAvatar != null
                     ? pw.ClipOval(child: pw.Image(studentAvatar, fit: pw.BoxFit.cover))
-                    : pw.Center(child: pw.Text(student.user?.name.isNotEmpty == true ? student.user!.name[0] : '?', style: const pw.TextStyle(color: PdfColors.grey400, fontSize: 24))),
+                    : pw.Center(child: BanglaTextRenderer.cachedWidget(student.user?.name.isNotEmpty == true ? student.user!.name[0] : '?', style: const pw.TextStyle(color: PdfColors.grey400, fontSize: 24))),
               ),
               pw.SizedBox(width: 16),
               pw.Expanded(
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       student.user?.name ?? 'Unknown',
                       style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14, color: PdfColors.black),
                     ),
                     pw.SizedBox(height: 2),
-                    pw.Text('STUDENT', style: pw.TextStyle(fontSize: 8, color: PdfColors.grey600, fontWeight: pw.FontWeight.bold, letterSpacing: 1.5)),
+                    BanglaTextRenderer.cachedWidget('STUDENT', style: pw.TextStyle(fontSize: 8, color: PdfColors.grey600, fontWeight: pw.FontWeight.bold, letterSpacing: 1.5)),
                   ],
                 ),
               ),
@@ -1502,11 +1516,11 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text('ID Number', style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600)),
-                    pw.Text(student.rollId, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.grey900)),
+                    BanglaTextRenderer.cachedWidget('ID Number', style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600)),
+                    BanglaTextRenderer.cachedWidget(student.rollId, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.grey900)),
                     pw.SizedBox(height: 8),
-                    pw.Text('Class & Section', style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600)),
-                    pw.Text('$className - $sectionName', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.grey900)),
+                    BanglaTextRenderer.cachedWidget('Class & Section', style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600)),
+                    BanglaTextRenderer.cachedWidget('$className - $sectionName', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.grey900)),
                   ],
                 ),
               ),
@@ -1515,11 +1529,11 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text('Email', style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600)),
-                    pw.Text(student.user?.email ?? 'N/A', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.grey900)),
+                    BanglaTextRenderer.cachedWidget('Email', style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600)),
+                    BanglaTextRenderer.cachedWidget(student.user?.email ?? 'N/A', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.grey900)),
                     pw.SizedBox(height: 8),
-                    pw.Text('Contact', style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600)),
-                    pw.Text(student.guardianContact.isNotEmpty ? student.guardianContact : (student.user?.phone ?? 'N/A'), style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.grey900)),
+                    BanglaTextRenderer.cachedWidget('Contact', style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600)),
+                    BanglaTextRenderer.cachedWidget(student.guardianContact.isNotEmpty ? student.guardianContact : (student.user?.phone ?? 'N/A'), style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.grey900)),
                   ],
                 ),
               ),
@@ -1545,7 +1559,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
               pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.center,
                 children: [
-                  pw.Text(
+                  BanglaTextRenderer.cachedWidget(
                     signatoryName,
                     style: pw.TextStyle(
                       font: signatureFont,
@@ -1557,7 +1571,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                     width: 70,
                     child: pw.Divider(color: PdfColors.grey600, thickness: 0.8),
                   ),
-                  pw.Text(
+                  BanglaTextRenderer.cachedWidget(
                     'Authorized Signature',
                     style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey600),
                   ),

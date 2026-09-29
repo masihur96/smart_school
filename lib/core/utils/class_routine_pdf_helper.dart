@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+import 'package:smart_school/core/utils/bangla_text_renderer.dart';
+
 
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -70,6 +72,31 @@ class ClassRoutinePdfHelper {
         mediumFont,
       ],
     );
+
+    // ── Pre-render all strings that may contain Bengali ──────────────────────
+    final strings = <String>{
+      school?.name ?? '',
+      school?.address ?? '',
+      if (sectionFilterName != null) sectionFilterName,
+      'শ্রেণি',
+    };
+    for (final s in subjects) {
+      strings.add(s.name);
+    }
+    for (final t in teachers) {
+      strings.add(t.user?.name ?? '');
+    }
+    for (final g in groups) {
+      strings.add(g.className);
+      if (g.sectionName != null) strings.add(g.sectionName!);
+      for (final e in g.entries) {
+        strings.add(e.subjectEntity?.name ?? '');
+        strings.add(e.teacherEntity?.name ?? '');
+        strings.add(e.roomNumber ?? '');
+      }
+    }
+    strings.removeWhere((s) => s.trim().isEmpty);
+    await BanglaTextRenderer.preRenderBatchToGlobal(strings, fontSize: 10, maxWidth: 300);
 
     pw.ImageProvider? schoolLogo;
     if (school?.avatar != null && school!.avatar.isNotEmpty) {
@@ -193,7 +220,7 @@ class ClassRoutinePdfHelper {
                   customSubtitle: 'WEEKLY MASTER TIMETABLE',
                 ),
                 pw.SizedBox(height: 40),
-                pw.Text(
+                BanglaTextRenderer.cachedWidget(
                   'No Routine Entries Scheduled',
                   style: pw.TextStyle(
                     fontSize: 16,
@@ -202,7 +229,7 @@ class ClassRoutinePdfHelper {
                   ),
                 ),
                 pw.SizedBox(height: 6),
-                pw.Text(
+                BanglaTextRenderer.cachedWidget(
                   'No routine entries found matching the selected classes.',
                   style: const pw.TextStyle(
                     fontSize: 11,
@@ -307,7 +334,7 @@ class ClassRoutinePdfHelper {
                   pw.Container(
                     height: tableH,
                     alignment: pw.Alignment.center,
-                    child: pw.Text(
+                    child: BanglaTextRenderer.cachedWidget(
                       'No periods scheduled for the selected classes.',
                       style: pw.TextStyle(
                         fontSize: 13,
@@ -339,7 +366,7 @@ class ClassRoutinePdfHelper {
                               child: pw.Column(
                                 mainAxisAlignment: pw.MainAxisAlignment.center,
                                 children: [
-                                  pw.Text(
+                                  BanglaTextRenderer.cachedWidget(
                                     'CLASS',
                                     style: pw.TextStyle(
                                       color: PdfColors.white,
@@ -348,7 +375,7 @@ class ClassRoutinePdfHelper {
                                     ),
                                   ),
                                   pw.SizedBox(height: 1),
-                                  pw.Text(
+                                  BanglaTextRenderer.cachedWidget(
                                     'শ্রেণি',
                                     style: const pw.TextStyle(
                                       color: PdfColors.grey300,
@@ -370,7 +397,7 @@ class ClassRoutinePdfHelper {
                                 child: pw.Column(
                                   mainAxisAlignment: pw.MainAxisAlignment.center,
                                   children: [
-                                    pw.Text(
+                                    BanglaTextRenderer.cachedWidget(
                                       _getPeriodOrdinal(pIndex).toUpperCase(),
                                       style: pw.TextStyle(
                                         color: PdfColors.white,
@@ -379,7 +406,7 @@ class ClassRoutinePdfHelper {
                                       ),
                                     ),
                                     pw.SizedBox(height: 1),
-                                    pw.Text(
+                                    BanglaTextRenderer.cachedWidget(
                                       slotStr,
                                       style: const pw.TextStyle(
                                         color: PdfColors.grey300,
@@ -412,7 +439,7 @@ class ClassRoutinePdfHelper {
                                       ? PdfColor.fromHex('#F1F5F9')
                                       : PdfColor.fromHex('#E2E8F0'),
                                 ),
-                                child: pw.Text(
+                                child: BanglaTextRenderer.cachedWidget(
                                   clsName,
                                   style: pw.TextStyle(
                                     fontWeight: pw.FontWeight.bold,
@@ -448,7 +475,7 @@ class ClassRoutinePdfHelper {
                                     decoration: pw.BoxDecoration(
                                       color: isEvenRow ? PdfColors.white : bgTint,
                                     ),
-                                    child: pw.Text(
+                                    child: BanglaTextRenderer.cachedWidget(
                                       '--',
                                       style: const pw.TextStyle(
                                         color: PdfColors.grey400,
@@ -485,7 +512,7 @@ class ClassRoutinePdfHelper {
                                     mainAxisAlignment: pw.MainAxisAlignment.center,
                                     crossAxisAlignment: pw.CrossAxisAlignment.center,
                                     children: [
-                                      pw.Text(
+                                      BanglaTextRenderer.cachedWidget(
                                         subText,
                                         style: pw.TextStyle(
                                           fontSize: 7.5,
@@ -496,7 +523,7 @@ class ClassRoutinePdfHelper {
                                         maxLines: 2,
                                       ),
                                       pw.SizedBox(height: 2),
-                                      pw.Text(
+                                      BanglaTextRenderer.cachedWidget(
                                         teachText,
                                         style: const pw.TextStyle(
                                           fontSize: 6.5,
@@ -513,7 +540,7 @@ class ClassRoutinePdfHelper {
                                             color: PdfColor.fromHex('#E2E8F0'),
                                             borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
                                           ),
-                                          child: pw.Text(
+                                          child: BanglaTextRenderer.cachedWidget(
                                             'Rm ${roomList.join(", ")}',
                                             style: pw.TextStyle(
                                               fontSize: 5.5,
@@ -594,7 +621,7 @@ class ClassRoutinePdfHelper {
                   isLandscape: true,
                 ),
                 pw.SizedBox(height: 40),
-                pw.Text(
+                BanglaTextRenderer.cachedWidget(
                   'No Routine Entries Scheduled',
                   style: pw.TextStyle(
                     fontSize: 16,
@@ -603,7 +630,7 @@ class ClassRoutinePdfHelper {
                   ),
                 ),
                 pw.SizedBox(height: 6),
-                pw.Text(
+                BanglaTextRenderer.cachedWidget(
                   'No routine entries were found matching the selected class criteria.',
                   style: const pw.TextStyle(
                     fontSize: 11,
@@ -685,7 +712,7 @@ class ClassRoutinePdfHelper {
                   pw.Container(
                     height: tableH,
                     alignment: pw.Alignment.center,
-                    child: pw.Text(
+                    child: BanglaTextRenderer.cachedWidget(
                       'No routine entries found for $className.',
                       style: pw.TextStyle(
                         fontSize: 13,
@@ -709,7 +736,7 @@ class ClassRoutinePdfHelper {
                                   vertical: 6,
                                 ),
                                 alignment: pw.Alignment.center,
-                                child: pw.Text(
+                                child: BanglaTextRenderer.cachedWidget(
                                   'DAY / TIME',
                                   style: pw.TextStyle(
                                     color: PdfColors.white,
@@ -729,7 +756,7 @@ class ClassRoutinePdfHelper {
                                   alignment: pw.Alignment.center,
                                   child: pw.Column(
                                     children: [
-                                      pw.Text(
+                                      BanglaTextRenderer.cachedWidget(
                                         _getPeriodOrdinal(pIdx).toUpperCase(),
                                         style: pw.TextStyle(
                                           color: PdfColors.white,
@@ -738,7 +765,7 @@ class ClassRoutinePdfHelper {
                                         ),
                                       ),
                                       pw.SizedBox(height: 1),
-                                      pw.Text(
+                                      BanglaTextRenderer.cachedWidget(
                                         slotStr,
                                         style: const pw.TextStyle(
                                           color: PdfColors.grey300,
@@ -763,7 +790,7 @@ class ClassRoutinePdfHelper {
                                   ),
                                   alignment: pw.Alignment.center,
                                   decoration: pw.BoxDecoration(color: dayColor),
-                                  child: pw.Text(
+                                  child: BanglaTextRenderer.cachedWidget(
                                     day.substring(0, 3).toUpperCase(),
                                     style: pw.TextStyle(
                                       color: PdfColors.white,
@@ -802,7 +829,7 @@ class ClassRoutinePdfHelper {
                                       padding: const pw.EdgeInsets.all(4),
                                       alignment: pw.Alignment.center,
                                       decoration: pw.BoxDecoration(color: bgTint),
-                                      child: pw.Text(
+                                      child: BanglaTextRenderer.cachedWidget(
                                         '--',
                                         style: const pw.TextStyle(
                                           color: PdfColors.grey400,
@@ -832,7 +859,7 @@ class ClassRoutinePdfHelper {
                                       crossAxisAlignment:
                                           pw.CrossAxisAlignment.center,
                                       children: [
-                                        pw.Text(
+                                        BanglaTextRenderer.cachedWidget(
                                           subName,
                                           style: pw.TextStyle(
                                             fontSize: 8,
@@ -843,7 +870,7 @@ class ClassRoutinePdfHelper {
                                           maxLines: 2,
                                         ),
                                         pw.SizedBox(height: 2),
-                                        pw.Text(
+                                        BanglaTextRenderer.cachedWidget(
                                           teachName,
                                           style: const pw.TextStyle(
                                             fontSize: 6.5,
@@ -872,7 +899,7 @@ class ClassRoutinePdfHelper {
                                                     pw.Radius.circular(2),
                                                   ),
                                             ),
-                                            child: pw.Text(
+                                            child: BanglaTextRenderer.cachedWidget(
                                               'Rm ${slotEntry.roomNumber}',
                                               style: const pw.TextStyle(
                                                 fontSize: 5.5,
@@ -944,7 +971,7 @@ class ClassRoutinePdfHelper {
                   borderTint: borderTint,
                 ),
                 pw.SizedBox(height: 40),
-                pw.Text(
+                BanglaTextRenderer.cachedWidget(
                   'No Routine Entries Scheduled',
                   style: pw.TextStyle(
                     fontSize: 16,
@@ -953,7 +980,7 @@ class ClassRoutinePdfHelper {
                   ),
                 ),
                 pw.SizedBox(height: 6),
-                pw.Text(
+                BanglaTextRenderer.cachedWidget(
                   'No routine entries were found matching the selected class criteria.',
                   style: const pw.TextStyle(
                     fontSize: 11,
@@ -1016,7 +1043,7 @@ class ClassRoutinePdfHelper {
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       '${school?.name ?? 'Smart School'} - Class Routine',
                       style: pw.TextStyle(
                         fontSize: 9,
@@ -1024,7 +1051,7 @@ class ClassRoutinePdfHelper {
                         color: primaryColor,
                       ),
                     ),
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       'Class: $className',
                       style: const pw.TextStyle(
                         fontSize: 9,
@@ -1075,7 +1102,7 @@ class ClassRoutinePdfHelper {
                   ),
                   child: pw.Column(
                     children: [
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         'No Routine Entries Scheduled for $className',
                         style: pw.TextStyle(
                           fontSize: 13,
@@ -1084,7 +1111,7 @@ class ClassRoutinePdfHelper {
                         ),
                       ),
                       pw.SizedBox(height: 4),
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         'There are currently no class routine entries added.',
                         style: const pw.TextStyle(
                           fontSize: 10,
@@ -1126,7 +1153,7 @@ class ClassRoutinePdfHelper {
                             mainAxisAlignment:
                                 pw.MainAxisAlignment.spaceBetween,
                             children: [
-                              pw.Text(
+                              BanglaTextRenderer.cachedWidget(
                                 dayName.toUpperCase(),
                                 style: pw.TextStyle(
                                   fontSize: 10,
@@ -1135,7 +1162,7 @@ class ClassRoutinePdfHelper {
                                   letterSpacing: 0.5,
                                 ),
                               ),
-                              pw.Text(
+                              BanglaTextRenderer.cachedWidget(
                                 '${dayEntries.length} ${dayEntries.length == 1 ? 'Period' : 'Periods'}',
                                 style: pw.TextStyle(
                                   fontSize: 9,
@@ -1330,7 +1357,7 @@ class ClassRoutinePdfHelper {
               shape: pw.BoxShape.circle,
             ),
             child: pw.Center(
-              child: pw.Text(
+              child: BanglaTextRenderer.cachedWidget(
                 schoolName.isNotEmpty ? schoolName[0].toUpperCase() : 'S',
                 style: pw.TextStyle(
                   color: PdfColors.white,
@@ -1346,7 +1373,7 @@ class ClassRoutinePdfHelper {
           child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text(
+              BanglaTextRenderer.cachedWidget(
                 schoolName.toUpperCase(),
                 style: pw.TextStyle(
                   fontWeight: pw.FontWeight.bold,
@@ -1357,7 +1384,7 @@ class ClassRoutinePdfHelper {
               ),
               if (address.isNotEmpty) ...[
                 pw.SizedBox(height: 1),
-                pw.Text(
+                BanglaTextRenderer.cachedWidget(
                   address,
                   style: const pw.TextStyle(
                     fontSize: 7.5,
@@ -1367,7 +1394,7 @@ class ClassRoutinePdfHelper {
               ],
               if (phone.isNotEmpty || email.isNotEmpty) ...[
                 pw.SizedBox(height: 1),
-                pw.Text(
+                BanglaTextRenderer.cachedWidget(
                   [
                     if (phone.isNotEmpty) 'Tel: $phone',
                     if (email.isNotEmpty) 'Email: $email',
@@ -1393,7 +1420,7 @@ class ClassRoutinePdfHelper {
           child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
-              pw.Text(
+              BanglaTextRenderer.cachedWidget(
                 'ACADEMIC TIMETABLE',
                 style: pw.TextStyle(
                   fontSize: 7.5,
@@ -1401,7 +1428,7 @@ class ClassRoutinePdfHelper {
                   color: primaryColor,
                 ),
               ),
-              pw.Text(
+              BanglaTextRenderer.cachedWidget(
                 customSubtitle ?? 'OFFICIAL CLASS ROUTINE',
                 style: pw.TextStyle(
                   fontSize: 6.5,
@@ -1453,7 +1480,7 @@ class ClassRoutinePdfHelper {
                     pw.Radius.circular(3),
                   ),
                 ),
-                child: pw.Text(
+                child: BanglaTextRenderer.cachedWidget(
                   'ALL CLASSES MASTER ROUTINE',
                   style: pw.TextStyle(
                     fontSize: 8.5,
@@ -1465,7 +1492,7 @@ class ClassRoutinePdfHelper {
               ),
               if (pageChunkInfo != null) ...[
                 pw.SizedBox(width: 6),
-                pw.Text(
+                BanglaTextRenderer.cachedWidget(
                   '($pageChunkInfo)',
                   style: const pw.TextStyle(
                     fontSize: 7.5,
@@ -1529,7 +1556,7 @@ class ClassRoutinePdfHelper {
               color: primaryColor,
               borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
             ),
-            child: pw.Text(
+            child: BanglaTextRenderer.cachedWidget(
               'CLASS: $className',
               style: pw.TextStyle(
                 fontSize: 8.5,
@@ -1577,11 +1604,11 @@ class ClassRoutinePdfHelper {
       child: pw.Row(
         mainAxisSize: pw.MainAxisSize.min,
         children: [
-          pw.Text(
+          BanglaTextRenderer.cachedWidget(
             '$label: ',
             style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600),
           ),
-          pw.Text(
+          BanglaTextRenderer.cachedWidget(
             value,
             style: pw.TextStyle(
               fontSize: 7,
@@ -1600,7 +1627,7 @@ class ClassRoutinePdfHelper {
   }) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      child: pw.Text(
+      child: BanglaTextRenderer.cachedWidget(
         text,
         textAlign: align,
         style: pw.TextStyle(
@@ -1629,7 +1656,7 @@ class ClassRoutinePdfHelper {
               color: PdfColor.fromHex('#EEF2F6'),
               borderRadius: const pw.BorderRadius.all(pw.Radius.circular(3)),
             ),
-            child: pw.Text(
+            child: BanglaTextRenderer.cachedWidget(
               text,
               style: pw.TextStyle(
                 fontSize: 7.5,
@@ -1644,7 +1671,7 @@ class ClassRoutinePdfHelper {
 
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      child: pw.Text(
+      child: BanglaTextRenderer.cachedWidget(
         text,
         textAlign: align,
         style: pw.TextStyle(
@@ -1700,7 +1727,7 @@ class ClassRoutinePdfHelper {
                 top: pw.Radius.circular(5),
               ),
             ),
-            child: pw.Text(
+            child: BanglaTextRenderer.cachedWidget(
               'SUBJECT & FACULTY ALLOCATION SUMMARY',
               style: pw.TextStyle(
                 fontSize: 8.5,
@@ -1777,7 +1804,7 @@ class ClassRoutinePdfHelper {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(
+          BanglaTextRenderer.cachedWidget(
             'IMPORTANT ACADEMIC GUIDELINES & INSTRUCTIONS',
             style: pw.TextStyle(
               fontSize: 7.5,
@@ -1786,7 +1813,7 @@ class ClassRoutinePdfHelper {
             ),
           ),
           pw.SizedBox(height: 3),
-          pw.Text(
+          BanglaTextRenderer.cachedWidget(
             '1. Students must occupy their designated classrooms at least 5 minutes before the first period commences.\n'
             '2. Practical and laboratory periods require proper equipment, lab manuals, and safety compliance.\n'
             '3. Any changes, teacher substitutes, or room shifts are updated instantly on the SchoolCare mobile application.',
@@ -1842,7 +1869,7 @@ class ClassRoutinePdfHelper {
               ),
               borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
             ),
-            child: pw.Text(
+            child: BanglaTextRenderer.cachedWidget(
               '[ Official Seal ]',
               style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey500),
             ),
@@ -1852,7 +1879,7 @@ class ClassRoutinePdfHelper {
           pw.SizedBox(height: isLandscape ? 25 : 32),
         pw.Container(width: lineWidth, height: 0.8, color: PdfColors.grey800),
         pw.SizedBox(height: 3),
-        pw.Text(
+        BanglaTextRenderer.cachedWidget(
           title,
           style: pw.TextStyle(
             fontSize: 7.5,
@@ -1879,11 +1906,11 @@ class ClassRoutinePdfHelper {
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text(
+          BanglaTextRenderer.cachedWidget(
             'Generated on $formattedNow  |  SchoolCare Smart School System',
             style: const pw.TextStyle(fontSize: 6.5, color: PdfColors.grey600),
           ),
-          pw.Text(
+          BanglaTextRenderer.cachedWidget(
             'Page ${context.pageNumber} of ${context.pagesCount}',
             style: const pw.TextStyle(fontSize: 6.5, color: PdfColors.grey600),
           ),

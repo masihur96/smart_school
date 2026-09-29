@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+import 'package:smart_school/core/utils/bangla_text_renderer.dart';
+
 import 'package:smart_school/l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -470,22 +472,63 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
       fontBold = await PdfGoogleFonts.notoSansBengaliBold();
     } catch (_) {}
 
-    final pdf = pw.Document(
-      theme: fontReg != null
-          ? pw.ThemeData.withFont(
-              base: fontReg,
-              bold: fontBold ?? fontReg,
-              italic: fontReg,
-              boldItalic: fontBold ?? fontReg,
-            )
-          : pw.ThemeData(),
-    );
+    final pdf = pw.Document();
 
     final schoolName = school?.name ?? 'Unknown School';
     final schoolLogoUrl = school?.avatar ?? '';
     final schoolAddress = school?.address ?? '';
     final schoolPhone = school?.phone ?? '';
     final schoolEmail = school?.email ?? '';
+
+    String resolvedClassName = 'N/A';
+    if (_selectedClassId != null) {
+      try {
+        resolvedClassName = context.read<ClassSetupNotifier>().classes.firstWhere((c) => c.id == _selectedClassId).name;
+      } catch (_) {}
+    }
+    String resolvedSectionName = 'N/A';
+    if (_selectedSectionId != null) {
+      try {
+        resolvedSectionName = context.read<SectionSetupNotifier>().sections.firstWhere((s) => s.id == _selectedSectionId).name;
+      } catch (_) {}
+    }
+
+    // ── Pre-render all strings that may contain Bengali ──────────────────────
+    final strings = <String>{
+      schoolName,
+      schoolAddress,
+      resolvedClassName,
+      resolvedSectionName,
+    };
+    for (final exam in exams) {
+      strings.add(exam.name);
+    }
+    for (final student in _currentStudents) {
+      if (student.className?.isNotEmpty == true) strings.add(student.className!);
+      if (student.sectionName?.isNotEmpty == true) strings.add(student.sectionName!);
+      strings.add(student.user?.name ?? 'Unknown');
+      strings.add(student.rollId);
+      
+      for (var exam in exams) {
+        final allResults = [...exam.results, ...?_fetchedExamResults[exam.id]];
+        for (var r in allResults) {
+          if (r.studentId == student.userId || (student.user != null && r.studentId == student.user!.id) || r.studentId == student.rollId) {
+            String subjectName = r.subject?.name ?? '';
+            if (subjectName.isEmpty || subjectName == 'Unknown') {
+              try {
+                subjectName = exam.assignments.firstWhere((a) => a.subjectId == r.subjectId).subjectName;
+              } catch (_) {}
+            }
+            strings.add(subjectName);
+            if (r.remarks.isNotEmpty) strings.add(r.remarks);
+          }
+        }
+      }
+    }
+    strings.removeWhere((s) => s.trim().isEmpty);
+    await BanglaTextRenderer.preRenderBatchToGlobal(strings, fontSize: 10, maxWidth: 350);
+
+
 
     pw.ImageProvider? schoolLogo;
     if (schoolLogoUrl.isNotEmpty) {
@@ -607,7 +650,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                           child: pw.Divider(color: PdfColors.black, thickness: 1),
                         ),
                         pw.SizedBox(height: 4),
-                        pw.Text(
+                        BanglaTextRenderer.cachedWidget(
                           'Principal',
                           style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                         ),
@@ -639,7 +682,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
       pdf.addPage(
         pw.Page(
           build: (pw.Context pwContext) => pw.Center(
-            child: pw.Text(AppLocalizations.of(context)!.noResultsSelectedStudents),
+            child: BanglaTextRenderer.cachedWidget(AppLocalizations.of(context)!.noResultsSelectedStudents),
           ),
         ),
       );
@@ -730,7 +773,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                 pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       schoolName,
                       style: pw.TextStyle(
                         fontWeight: pw.FontWeight.bold,
@@ -739,7 +782,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                       ),
                     ),
                     pw.SizedBox(height: 4),
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       'ACADEMIC TRANSCRIPT',
                       style: pw.TextStyle(
                         fontWeight: pw.FontWeight.bold,
@@ -810,7 +853,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                 borderRadius: pw.BorderRadius.circular(4),
               ),
               child: pw.Center(
-                child: pw.Text(
+                child: BanglaTextRenderer.cachedWidget(
                   'CGPA : ${overallGPA.toStringAsFixed(2)} ($overallGrade)',
                   style: pw.TextStyle(
                     fontWeight: pw.FontWeight.bold,
@@ -831,12 +874,12 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
       children: [
         pw.SizedBox(
           width: 100,
-          child: pw.Text(
+          child: BanglaTextRenderer.cachedWidget(
             label,
             style: const pw.TextStyle(fontSize: 10),
           ),
         ),
-        pw.Text(
+        BanglaTextRenderer.cachedWidget(
           ': $value',
           style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
         ),
@@ -926,7 +969,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         schoolName.toUpperCase(),
                         style: pw.TextStyle(
                           fontWeight: pw.FontWeight.bold,
@@ -935,7 +978,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                         ),
                       ),
                       pw.SizedBox(height: 4),
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         'OFFICIAL ACADEMIC TRANSCRIPT',
                         style: pw.TextStyle(
                           fontWeight: pw.FontWeight.bold,
@@ -945,9 +988,9 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                         ),
                       ),
                       pw.SizedBox(height: 2),
-                      if (schoolAddress.isNotEmpty) pw.Text(schoolAddress, style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+                      if (schoolAddress.isNotEmpty) BanglaTextRenderer.cachedWidget(schoolAddress, style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
                       if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty)
-                        pw.Text('$schoolPhone ${schoolEmail.isNotEmpty ? '| $schoolEmail' : ''}', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+                        BanglaTextRenderer.cachedWidget('$schoolPhone ${schoolEmail.isNotEmpty ? '| $schoolEmail' : ''}', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
                     ],
                   ),
                 ),
@@ -970,7 +1013,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('STUDENT DETAILS', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.teal900)),
+                        BanglaTextRenderer.cachedWidget('STUDENT DETAILS', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.teal900)),
                         pw.SizedBox(height: 8),
                         _buildInfoRow('Name', student.user?.name ?? 'N/A'),
                         pw.SizedBox(height: 4),
@@ -992,7 +1035,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('ACADEMIC SUMMARY', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.teal900)),
+                        BanglaTextRenderer.cachedWidget('ACADEMIC SUMMARY', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.teal900)),
                         pw.SizedBox(height: 8),
                         _buildInfoRow('Cumulative GPA', overallGPA.toStringAsFixed(2)),
                         pw.SizedBox(height: 4),
@@ -1097,7 +1140,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                 margin: const pw.EdgeInsets.only(bottom: 12),
                 child: pw.Image(schoolLogo),
               ),
-            pw.Text(
+            BanglaTextRenderer.cachedWidget(
               schoolName,
               style: pw.TextStyle(
                 fontWeight: pw.FontWeight.bold,
@@ -1105,7 +1148,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
               ),
             ),
             pw.SizedBox(height: 4),
-            pw.Text(
+            BanglaTextRenderer.cachedWidget(
               schoolAddress,
               style: const pw.TextStyle(fontSize: 10),
             ),
@@ -1115,7 +1158,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
               decoration: pw.BoxDecoration(
                 border: pw.Border.all(color: PdfColors.black, width: 1),
               ),
-              child: pw.Text(
+              child: BanglaTextRenderer.cachedWidget(
                 'STUDENT TRANSCRIPT',
                 style: pw.TextStyle(
                   fontWeight: pw.FontWeight.bold,
@@ -1204,16 +1247,16 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text('FINAL RESULT', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12)),
+                      BanglaTextRenderer.cachedWidget('FINAL RESULT', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12)),
                       pw.SizedBox(height: 8),
                       pw.Row(children: [
-                        pw.SizedBox(width: 80, child: pw.Text('CGPA:', style: const pw.TextStyle(fontSize: 11))),
-                        pw.Text(overallGPA.toStringAsFixed(2), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11)),
+                        pw.SizedBox(width: 80, child: BanglaTextRenderer.cachedWidget('CGPA:', style: const pw.TextStyle(fontSize: 11))),
+                        BanglaTextRenderer.cachedWidget(overallGPA.toStringAsFixed(2), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11)),
                       ]),
                       pw.SizedBox(height: 4),
                       pw.Row(children: [
-                        pw.SizedBox(width: 80, child: pw.Text('Overall Grade:', style: const pw.TextStyle(fontSize: 11))),
-                        pw.Text(overallGrade, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11)),
+                        pw.SizedBox(width: 80, child: BanglaTextRenderer.cachedWidget('Overall Grade:', style: const pw.TextStyle(fontSize: 11))),
+                        BanglaTextRenderer.cachedWidget(overallGrade, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11)),
                       ]),
                     ],
                   ),
@@ -1273,7 +1316,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         schoolName,
                         style: pw.TextStyle(
                           fontWeight: pw.FontWeight.bold,
@@ -1281,7 +1324,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                         ),
                       ),
                       pw.SizedBox(height: 4),
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         'Academic Transcript',
                         style: const pw.TextStyle(
                           fontSize: 12,
@@ -1308,9 +1351,9 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text('Student', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+                      BanglaTextRenderer.cachedWidget('Student', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
                       pw.SizedBox(height: 2),
-                      pw.Text(student.user?.name ?? 'N/A', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                      BanglaTextRenderer.cachedWidget(student.user?.name ?? 'N/A', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -1318,9 +1361,9 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text('ID', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+                      BanglaTextRenderer.cachedWidget('ID', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
                       pw.SizedBox(height: 2),
-                      pw.Text(student.rollId, style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                      BanglaTextRenderer.cachedWidget(student.rollId, style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -1328,9 +1371,9 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text('Class', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+                      BanglaTextRenderer.cachedWidget('Class', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
                       pw.SizedBox(height: 2),
-                      pw.Text(className, style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                      BanglaTextRenderer.cachedWidget(className, style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -1390,9 +1433,9 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text('CGPA', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+                      BanglaTextRenderer.cachedWidget('CGPA', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
                       pw.SizedBox(height: 2),
-                      pw.Text(overallGPA.toStringAsFixed(2), style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                      BanglaTextRenderer.cachedWidget(overallGPA.toStringAsFixed(2), style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -1400,9 +1443,9 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text('Overall Grade', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+                      BanglaTextRenderer.cachedWidget('Overall Grade', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
                       pw.SizedBox(height: 2),
-                      pw.Text(overallGrade, style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                      BanglaTextRenderer.cachedWidget(overallGrade, style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
                     ],
                   ),
                 ),

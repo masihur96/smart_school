@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 /// Renders Bengali (Bangla) text correctly inside PDF documents.
@@ -148,22 +149,31 @@ class BanglaTextRenderer {
     );
   }
 
+  /// A global cache to simplify usage in complex PDF builders.
+  /// Call [preRenderBatchToGlobal] before building the PDF, then use [cachedWidget].
+  static final Map<String, Uint8List?> _globalCache = {};
+
   /// Synchronous widget from pre-rendered bytes (use after [preRenderBatch]).
   static pw.Widget fromBytes(
     Uint8List? bytes,
     String fallbackText, {
     double fontSize = 10.0,
     bool bold = false,
-    pw.TextStyle? fallbackStyle,
+    pw.TextStyle? style,
+    pw.TextAlign textAlign = pw.TextAlign.left,
+    PdfColor? color,
+    int? maxLines,
   }) {
     if (bytes == null) {
       return pw.Text(
         fallbackText,
-        style: fallbackStyle ??
+        textAlign: textAlign,
+        maxLines: maxLines,
+        style: style ??
             pw.TextStyle(
               fontSize: fontSize,
-              fontWeight:
-                  bold ? pw.FontWeight.bold : pw.FontWeight.normal,
+              fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal,
+              color: color,
             ),
       );
     }
@@ -172,6 +182,57 @@ class BanglaTextRenderer {
       height: fontSize * 1.6,
       fit: pw.BoxFit.contain,
     );
+  }
+
+  /// Synchronous widget using the global cache (use after [preRenderBatchToGlobal]).
+  static pw.Widget cachedWidget(
+    String text, {
+    double fontSize = 10.0,
+    bool bold = false,
+    pw.TextStyle? style,
+    pw.TextAlign textAlign = pw.TextAlign.left,
+    PdfColor? color,
+    int? maxLines,
+  }) {
+    return fromBytes(
+      _globalCache[text],
+      text,
+      fontSize: fontSize,
+      bold: bold,
+      style: style,
+      textAlign: textAlign,
+      color: color,
+      maxLines: maxLines,
+    );
+  }
+
+  /// Pre-renders a batch of strings in parallel and stores them in the global cache.
+  static Future<void> preRenderBatchToGlobal(
+    Iterable<String> texts, {
+    double fontSize = 10.0,
+    bool bold = false,
+    Color color = Colors.black,
+    double maxWidth = 500.0,
+  }) async {
+    final unique = texts.toSet();
+    final futures = unique.map(
+      (t) async => MapEntry(
+        t,
+        hasBengali(t)
+            ? await renderToImageBytes(
+                t,
+                fontSize: fontSize,
+                bold: bold,
+                color: color,
+                maxWidth: maxWidth,
+              )
+            : null,
+      ),
+    );
+    final entries = await Future.wait(futures);
+    for (final entry in entries) {
+      _globalCache[entry.key] = entry.value;
+    }
   }
 
   /// Pre-renders a batch of strings in parallel BEFORE building PDF pages.

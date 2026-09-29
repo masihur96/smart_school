@@ -8,6 +8,7 @@ import 'package:pdfx/pdfx.dart' as pdfx;
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/core/utils/bangla_text_renderer.dart';
 import 'package:smart_school/core/utils/pdf_image_helper.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/models/school_models.dart';
@@ -294,36 +295,11 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       if (img != null) avatars[studentIds[i]] = img;
     }
 
-    // ── Create document with Bengali font theme (supports any language) ───
-    final pdf = pw.Document(
-      theme: fontReg != null
-          ? pw.ThemeData.withFont(
-              base: fontReg,
-              bold: fontBold ?? fontReg,
-              italic: fontReg,
-              boldItalic: fontBold ?? fontReg,
-            )
-          : pw.ThemeData(),
-    );
-
     // ── Build per-student subject list ────────────────────────────────────
-    // A student can belong to multiple classes (e.g. Class One AND Nurani).
-    // For each student we collect ExamAssignments for ALL their classes so
-    // that their admit card always shows every subject they are enrolled in,
-    // regardless of which class was used as the filter to pull this cohort.
-    //
-    // IMPORTANT: We use student.user?.classIds (the full list stored on the
-    // user record) rather than student.embeddedClasses, because the API
-    // endpoint that fetches students by a specific class only populates
-    // embeddedClasses with the filtered class — it does NOT return all classes
-    // the student belongs to. user.classIds always contains every assigned
-    // class ID regardless of which filter was used.
     List<ExamAssignment> subjectsForStudent(Student student) {
       final Set<String> studentClassIds = {
         student.classId,
-        // user.classIds is the complete list of all enrolled classes
         ...?student.user?.classIds,
-        // embeddedClasses as fallback (may be partial)
         ...student.embeddedClasses.map((c) => c.id),
       }.where((id) => id.isNotEmpty).toSet();
 
@@ -332,6 +308,33 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           .toList()
         ..sort((a, b) => a.date.compareTo(b.date));
     }
+
+    // ── Pre-render all strings that may contain Bengali ──────────────────────
+    final strings = <String>{
+      schoolName,
+      schoolAddress,
+      widget.exam.name,
+      resolvedClassName,
+      resolvedSectionName,
+      _topInstruction,
+      signatoryName,
+    };
+    for (final student in _currentStudents) {
+      if (student.className?.isNotEmpty == true) strings.add(student.className!);
+      if (student.sectionName?.isNotEmpty == true) strings.add(student.sectionName!);
+      strings.add(student.user?.name ?? 'Unknown');
+      strings.add(student.rollId);
+      final subs = subjectsForStudent(student);
+      for (final s in subs) {
+        strings.add(s.subjectName);
+      }
+    }
+    strings.removeWhere((s) => s.trim().isEmpty);
+    await BanglaTextRenderer.preRenderBatchToGlobal(strings, fontSize: 10, maxWidth: 400);
+
+    // ── Create document ───
+    final pdf = pw.Document();
+
 
     // ── HALF-PAGE: 2 cards per A4 page ──────────────────────────────────────
     if (_selectedTemplate == AdmitCardTemplate.halfPage) {
@@ -610,7 +613,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       schoolName.toUpperCase(),
                       textAlign: pw.TextAlign.center,
                       style: pw.TextStyle(
@@ -622,7 +625,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     ),
                     pw.SizedBox(height: 3),
                     if (schoolAddress.isNotEmpty)
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         schoolAddress,
                         textAlign: pw.TextAlign.center,
                         style: const pw.TextStyle(
@@ -632,7 +635,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       ),
                     if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty) ...[
                       pw.SizedBox(height: 2),
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         [
                           if (schoolPhone.isNotEmpty) 'Ph: $schoolPhone',
                           if (schoolEmail.isNotEmpty) 'Email: $schoolEmail',
@@ -661,7 +664,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
-              pw.Text(
+              BanglaTextRenderer.cachedWidget(
                 widget.exam.name.toUpperCase(),
                 style: pw.TextStyle(
                   color: primary,
@@ -672,7 +675,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               ),
               if (widget.exam.startDate != null) ...[
                 pw.SizedBox(height: 4),
-                pw.Text(
+                BanglaTextRenderer.cachedWidget(
                   '${DateFormat('dd MMM yyyy').format(widget.exam.startDate!)}  –  ${DateFormat('dd MMM yyyy').format(widget.exam.endDate ?? widget.exam.startDate!)}',
                   style: const pw.TextStyle(
                     fontSize: 9.5,
@@ -692,7 +695,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     pw.Radius.circular(6),
                   ),
                 ),
-                child: pw.Text(
+                child: BanglaTextRenderer.cachedWidget(
                   'ADMIT CARD',
                   style: pw.TextStyle(
                     color: PdfColors.white,
@@ -733,7 +736,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                           child: pw.Image(avatar, fit: pw.BoxFit.cover),
                         )
                       : pw.Center(
-                          child: pw.Text(
+                          child: BanglaTextRenderer.cachedWidget(
                             student.user?.name.isNotEmpty == true
                                 ? student.user!.name[0].toUpperCase()
                                 : '?',
@@ -750,7 +753,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         student.user?.name ?? 'N/A',
                         style: pw.TextStyle(
                           fontSize: 14,
@@ -825,7 +828,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 border: pw.Border.all(color: accent, width: 1),
                 borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
               ),
-              child: pw.Text(
+              child: BanglaTextRenderer.cachedWidget(
                 _topInstruction,
                 textAlign: pw.TextAlign.center,
                 style: pw.TextStyle(
@@ -843,7 +846,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
-              pw.Text(
+              BanglaTextRenderer.cachedWidget(
                 'EXAMINATION SCHEDULE',
                 style: pw.TextStyle(
                   fontWeight: pw.FontWeight.bold,
@@ -863,7 +866,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     pw.Radius.circular(4),
                   ),
                 ),
-                child: pw.Text(
+                child: BanglaTextRenderer.cachedWidget(
                   '${subjects.length} Subject${subjects.length == 1 ? '' : 's'}',
                   style: pw.TextStyle(
                     fontSize: 8.5,
@@ -881,7 +884,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             pw.Container(
               padding: const pw.EdgeInsets.all(12),
               color: PdfColors.grey100,
-              child: pw.Text(
+              child: BanglaTextRenderer.cachedWidget(
                 'No subjects scheduled.',
                 style: const pw.TextStyle(
                   fontSize: 10,
@@ -913,7 +916,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Text(
+                BanglaTextRenderer.cachedWidget(
                   'IMPORTANT INSTRUCTIONS',
                   style: pw.TextStyle(
                     fontWeight: pw.FontWeight.bold,
@@ -929,7 +932,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   children: _instructions.asMap().entries.map((e) {
                     return pw.SizedBox(
                       width: 220,
-                      child: pw.Text(
+                      child: BanglaTextRenderer.cachedWidget(
                         '${e.key + 1}.  ${e.value}',
                         style: const pw.TextStyle(
                           fontSize: 8,
@@ -968,14 +971,14 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text(
+              BanglaTextRenderer.cachedWidget(
                 'Issued by $schoolName',
                 style: const pw.TextStyle(
                   fontSize: 8,
                   color: PdfColors.grey600,
                 ),
               ),
-              pw.Text(
+              BanglaTextRenderer.cachedWidget(
                 'Date: ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
                 style: const pw.TextStyle(
                   fontSize: 8,
@@ -1035,7 +1038,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               children: [
                 pw.SizedBox(
                   width: 20,
-                  child: pw.Text(
+                  child: BanglaTextRenderer.cachedWidget(
                     '#',
                     style: pw.TextStyle(
                       color: PdfColors.white,
@@ -1046,7 +1049,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 ),
                 pw.Expanded(
                   flex: 3,
-                  child: pw.Text(
+                  child: BanglaTextRenderer.cachedWidget(
                     'Subject',
                     style: pw.TextStyle(
                       color: PdfColors.white,
@@ -1057,7 +1060,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 ),
                 pw.Expanded(
                   flex: 2,
-                  child: pw.Text(
+                  child: BanglaTextRenderer.cachedWidget(
                     'Date & Day',
                     style: pw.TextStyle(
                       color: PdfColors.white,
@@ -1087,7 +1090,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     padding: const pw.EdgeInsets.symmetric(vertical: 4),
                     color: color,
                     child: pw.Center(
-                      child: pw.Text(
+                      child: BanglaTextRenderer.cachedWidget(
                         '${idx + 1}',
                         style: pw.TextStyle(
                           color: PdfColors.white,
@@ -1104,7 +1107,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         horizontal: 6,
                         vertical: 3,
                       ),
-                      child: pw.Text(
+                      child: BanglaTextRenderer.cachedWidget(
                         a.subjectName,
                         style: pw.TextStyle(
                           fontWeight: pw.FontWeight.bold,
@@ -1122,7 +1125,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         horizontal: 4,
                         vertical: 3,
                       ),
-                      child: pw.Text(
+                      child: BanglaTextRenderer.cachedWidget(
                         '${DateFormat('dd/MM/yy').format(a.date)} (${DateFormat('EEE').format(a.date)})',
                         style: const pw.TextStyle(
                           fontSize: 8.5,
@@ -1183,7 +1186,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text(
+                        BanglaTextRenderer.cachedWidget(
                           schoolName.toUpperCase(),
                           style: pw.TextStyle(
                             color: PdfColors.white,
@@ -1194,7 +1197,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         ),
                         pw.SizedBox(height: 2),
                         if (schoolAddress.isNotEmpty)
-                          pw.Text(
+                          BanglaTextRenderer.cachedWidget(
                             schoolAddress,
                             style: const pw.TextStyle(
                               color: PdfColors.indigo100,
@@ -1202,7 +1205,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                             ),
                           ),
                         if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty)
-                          pw.Text(
+                          BanglaTextRenderer.cachedWidget(
                             [
                               if (schoolPhone.isNotEmpty) schoolPhone,
                               if (schoolEmail.isNotEmpty) schoolEmail,
@@ -1226,7 +1229,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 mainAxisAlignment: pw.MainAxisAlignment.center,
                 children: [
                   pw.SizedBox(height: 24),
-                  pw.Text(
+                  BanglaTextRenderer.cachedWidget(
                     widget.exam.name.toUpperCase(),
                     style: pw.TextStyle(
                       color: primary,
@@ -1237,7 +1240,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   ),
                   if (widget.exam.startDate != null) ...[
                     pw.SizedBox(height: 4),
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       '${DateFormat('dd MMM yyyy').format(widget.exam.startDate!)}  –  ${DateFormat('dd MMM yyyy').format(widget.exam.endDate ?? widget.exam.startDate!)}',
                       style: const pw.TextStyle(
                         fontSize: 9.5,
@@ -1257,7 +1260,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         pw.Radius.circular(6),
                       ),
                     ),
-                    child: pw.Text(
+                    child: BanglaTextRenderer.cachedWidget(
                       'ADMIT CARD',
                       style: pw.TextStyle(
                         color: PdfColors.black,
@@ -1320,7 +1323,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                               child: pw.Image(avatar, fit: pw.BoxFit.cover),
                             )
                           : pw.Center(
-                              child: pw.Text(
+                              child: BanglaTextRenderer.cachedWidget(
                                 student.user?.name.isNotEmpty == true
                                     ? student.user!.name[0].toUpperCase()
                                     : '?',
@@ -1338,7 +1341,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         child: pw.Column(
                           crossAxisAlignment: pw.CrossAxisAlignment.start,
                           children: [
-                            pw.Text(
+                            BanglaTextRenderer.cachedWidget(
                               student.user?.name ?? 'N/A',
                               style: pw.TextStyle(
                                 fontWeight: pw.FontWeight.bold,
@@ -1425,7 +1428,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       left: pw.BorderSide(color: secondary, width: 4),
                     ),
                   ),
-                  child: pw.Text(
+                  child: BanglaTextRenderer.cachedWidget(
                     _topInstruction,
                     style: pw.TextStyle(
                       fontWeight: pw.FontWeight.bold,
@@ -1442,7 +1445,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 children: [
                   pw.Container(width: 4, height: 16, color: secondary),
                   pw.SizedBox(width: 8),
-                  pw.Text(
+                  BanglaTextRenderer.cachedWidget(
                     'EXAMINATION SCHEDULE',
                     style: pw.TextStyle(
                       fontWeight: pw.FontWeight.bold,
@@ -1463,7 +1466,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         pw.Radius.circular(10),
                       ),
                     ),
-                    child: pw.Text(
+                    child: BanglaTextRenderer.cachedWidget(
                       '${subjects.length} Subjects',
                       style: pw.TextStyle(
                         fontSize: 8.5,
@@ -1481,7 +1484,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 pw.Container(
                   padding: const pw.EdgeInsets.all(12),
                   color: bgLight,
-                  child: pw.Text(
+                  child: BanglaTextRenderer.cachedWidget(
                     'No subjects scheduled.',
                     style: const pw.TextStyle(
                       fontSize: 10,
@@ -1514,7 +1517,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       'INSTRUCTIONS',
                       style: pw.TextStyle(
                         fontWeight: pw.FontWeight.bold,
@@ -1530,7 +1533,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       children: _instructions.asMap().entries.map((e) {
                         return pw.SizedBox(
                           width: 220,
-                          child: pw.Text(
+                          child: BanglaTextRenderer.cachedWidget(
                             '${e.key + 1}.  ${e.value}',
                             style: const pw.TextStyle(
                               fontSize: 8,
@@ -1564,7 +1567,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         color: primary,
                       ),
                       pw.SizedBox(height: 4),
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         student.rollId,
                         style: const pw.TextStyle(
                           fontSize: 8,
@@ -1594,14 +1597,14 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       '$schoolName  |  Issued ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
                       style: const pw.TextStyle(
                         fontSize: 8.5,
                         color: PdfColors.white,
                       ),
                     ),
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       'NOT VALID WITHOUT OFFICIAL SEAL',
                       style: pw.TextStyle(
                         fontSize: 8.5,
@@ -1729,7 +1732,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.center,
                       children: [
-                        pw.Text(
+                        BanglaTextRenderer.cachedWidget(
                           schoolName.toUpperCase(),
                           textAlign: pw.TextAlign.center,
                           style: pw.TextStyle(
@@ -1740,7 +1743,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         ),
                         pw.SizedBox(height: 3),
                         if (schoolAddress.isNotEmpty)
-                          pw.Text(
+                          BanglaTextRenderer.cachedWidget(
                             schoolAddress,
                             textAlign: pw.TextAlign.center,
                             style: const pw.TextStyle(
@@ -1751,7 +1754,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         if (schoolPhone.isNotEmpty ||
                             schoolEmail.isNotEmpty) ...[
                           pw.SizedBox(height: 2),
-                          pw.Text(
+                          BanglaTextRenderer.cachedWidget(
                             [
                               if (schoolPhone.isNotEmpty) 'Ph: $schoolPhone',
                               if (schoolEmail.isNotEmpty) schoolEmail,
@@ -1777,7 +1780,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       widget.exam.name.toUpperCase(),
                       style: pw.TextStyle(
                         fontWeight: pw.FontWeight.bold,
@@ -1787,7 +1790,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     ),
                     if (widget.exam.startDate != null) ...[
                       pw.SizedBox(height: 4),
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         '${DateFormat('dd MMM yyyy').format(widget.exam.startDate!)}  –  ${DateFormat('dd MMM yyyy').format(widget.exam.endDate ?? widget.exam.startDate!)}',
                         style: const pw.TextStyle(
                           fontSize: 9.5,
@@ -1796,7 +1799,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       ),
                     ],
                     pw.SizedBox(height: 10),
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       'ADMIT CARD',
                       style: pw.TextStyle(
                         fontWeight: pw.FontWeight.bold,
@@ -1825,7 +1828,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       child: avatar != null
                           ? pw.Image(avatar, fit: pw.BoxFit.cover)
                           : pw.Center(
-                              child: pw.Text(
+                              child: BanglaTextRenderer.cachedWidget(
                                 'PHOTO',
                                 style: pw.TextStyle(
                                   fontWeight: pw.FontWeight.bold,
@@ -1910,7 +1913,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         pw.Radius.circular(4),
                       ),
                     ),
-                    child: pw.Text(
+                    child: BanglaTextRenderer.cachedWidget(
                       _topInstruction,
                       textAlign: pw.TextAlign.center,
                       style: pw.TextStyle(
@@ -1924,7 +1927,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 ],
 
                 // ── Schedule ────────────────────────────────────────────────
-                pw.Text(
+                BanglaTextRenderer.cachedWidget(
                   'EXAMINATION SCHEDULE  (${subjects.length} Subject${subjects.length == 1 ? '' : 's'})',
                   style: pw.TextStyle(
                     fontWeight: pw.FontWeight.bold,
@@ -1938,7 +1941,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   pw.Container(
                     padding: const pw.EdgeInsets.all(12),
                     color: PdfColors.grey100,
-                    child: pw.Text(
+                    child: BanglaTextRenderer.cachedWidget(
                       'No subjects scheduled.',
                       style: const pw.TextStyle(
                         fontSize: 10,
@@ -1960,7 +1963,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 pw.Spacer(),
 
                 // ── Instructions ────────────────────────────────────────────
-                pw.Text(
+                BanglaTextRenderer.cachedWidget(
                   'INSTRUCTIONS TO CANDIDATES:',
                   style: pw.TextStyle(
                     fontWeight: pw.FontWeight.bold,
@@ -1985,7 +1988,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       children: [
                         pw.Padding(
                           padding: const pw.EdgeInsets.only(bottom: 4),
-                          child: pw.Text(
+                          child: BanglaTextRenderer.cachedWidget(
                             '${left + 1}.',
                             style: pw.TextStyle(
                               fontWeight: pw.FontWeight.bold,
@@ -1998,14 +2001,14 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                             bottom: 4,
                             right: 12,
                           ),
-                          child: pw.Text(
+                          child: BanglaTextRenderer.cachedWidget(
                             _instructions[left],
                             style: const pw.TextStyle(fontSize: 8),
                           ),
                         ),
                         pw.Padding(
                           padding: const pw.EdgeInsets.only(bottom: 4),
-                          child: pw.Text(
+                          child: BanglaTextRenderer.cachedWidget(
                             right < _instructions.length ? '${right + 1}.' : '',
                             style: pw.TextStyle(
                               fontWeight: pw.FontWeight.bold,
@@ -2015,7 +2018,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         ),
                         pw.Padding(
                           padding: const pw.EdgeInsets.only(bottom: 4),
-                          child: pw.Text(
+                          child: BanglaTextRenderer.cachedWidget(
                             right < _instructions.length
                                 ? _instructions[right]
                                 : '',
@@ -2049,7 +2052,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 pw.Divider(thickness: 0.5),
                 pw.SizedBox(height: 2),
                 pw.Center(
-                  child: pw.Text(
+                  child: BanglaTextRenderer.cachedWidget(
                     'Computer-generated by $schoolName. Issued on ${DateFormat('dd MMMM yyyy').format(DateTime.now())}.',
                     textAlign: pw.TextAlign.center,
                     style: const pw.TextStyle(
@@ -2140,7 +2143,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       if (subjects.isEmpty) {
         return pw.Padding(
           padding: const pw.EdgeInsets.symmetric(vertical: 6),
-          child: pw.Text(
+          child: BanglaTextRenderer.cachedWidget(
             'No subjects scheduled.',
             style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
           ),
@@ -2191,7 +2194,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             children: [
               pw.Padding(
                 padding: cellPad,
-                child: pw.Text(
+                child: BanglaTextRenderer.cachedWidget(
                   dateText1,
                   style: pw.TextStyle(
                     fontSize: 7.5,
@@ -2202,7 +2205,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               ),
               pw.Padding(
                 padding: cellPad,
-                child: pw.Text(
+                child: BanglaTextRenderer.cachedWidget(
                   subjects1,
                   style: const pw.TextStyle(
                     fontSize: 7.5,
@@ -2212,7 +2215,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               ),
               pw.Padding(
                 padding: cellPad,
-                child: pw.Text(
+                child: BanglaTextRenderer.cachedWidget(
                   dateText2,
                   style: pw.TextStyle(
                     fontSize: 7.5,
@@ -2223,7 +2226,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               ),
               pw.Padding(
                 padding: cellPad,
-                child: pw.Text(
+                child: BanglaTextRenderer.cachedWidget(
                   subjects2,
                   style: const pw.TextStyle(
                     fontSize: 7.5,
@@ -2281,7 +2284,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.center,
               children: [
-                pw.Text(
+                BanglaTextRenderer.cachedWidget(
                   schoolName.toUpperCase(),
                   textAlign: pw.TextAlign.center,
                   style: pw.TextStyle(
@@ -2293,7 +2296,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 ),
                 if (schoolAddress.isNotEmpty) ...[
                   pw.SizedBox(height: 2),
-                  pw.Text(
+                  BanglaTextRenderer.cachedWidget(
                     schoolAddress,
                     textAlign: pw.TextAlign.center,
                     maxLines: 1,
@@ -2305,7 +2308,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 ],
                 if (schoolPhone.isNotEmpty) ...[
                   pw.SizedBox(height: 1),
-                  pw.Text(
+                  BanglaTextRenderer.cachedWidget(
                     'Ph: $schoolPhone',
                     textAlign: pw.TextAlign.center,
                     style: const pw.TextStyle(
@@ -2362,7 +2365,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                           child: pw.Image(avatar, fit: pw.BoxFit.cover),
                         )
                       : pw.Center(
-                          child: pw.Text(
+                          child: BanglaTextRenderer.cachedWidget(
                             student.user?.name.isNotEmpty == true
                                 ? student.user!.name[0].toUpperCase()
                                 : '?',
@@ -2380,7 +2383,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       student.user?.name ?? 'N/A',
                       style: pw.TextStyle(
                         fontSize: 11,
@@ -2389,7 +2392,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       ),
                     ),
                     pw.SizedBox(height: 2),
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       'Ph: ${student.guardianContact.isNotEmpty ? student.guardianContact : (student.user?.phone ?? 'N/A')}',
                       style: const pw.TextStyle(
                         fontSize: 8,
@@ -2449,7 +2452,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                             pw.Radius.circular(3),
                           ),
                         ),
-                        child: pw.Text(
+                        child: BanglaTextRenderer.cachedWidget(
                           'ADMIT CARD',
                           textAlign: pw.TextAlign.center,
                           style: pw.TextStyle(
@@ -2461,7 +2464,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         ),
                       ),
                       pw.SizedBox(height: 5),
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         widget.exam.name.toUpperCase(),
                         textAlign: pw.TextAlign.center,
                         maxLines: 2,
@@ -2484,7 +2487,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                               pw.Radius.circular(3),
                             ),
                           ),
-                          child: pw.Text(
+                          child: BanglaTextRenderer.cachedWidget(
                             '${DateFormat('dd MMM yy').format(widget.exam.startDate!)} – ${DateFormat('dd MMM yy').format(widget.exam.endDate ?? widget.exam.startDate!)}',
                             textAlign: pw.TextAlign.center,
                             style: pw.TextStyle(
@@ -2497,7 +2500,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         pw.SizedBox(height: 4),
                         pw.FittedBox(
                           fit: pw.BoxFit.scaleDown,
-                          child: pw.Text(
+                          child: BanglaTextRenderer.cachedWidget(
                             'Morning: 9:00 AM - 12:00 PM • Evening: 2:30 PM - 4:30 PM',
                             textAlign: pw.TextAlign.center,
                             style: const pw.TextStyle(
@@ -2518,7 +2521,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           pw.Row(
             children: [
               pw.SizedBox(width: 14),
-              pw.Text(
+              BanglaTextRenderer.cachedWidget(
                 'EXAMINATION SCHEDULE',
                 style: pw.TextStyle(
                   fontWeight: pw.FontWeight.bold,
@@ -2602,7 +2605,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             children: [
               pw.Padding(
                 padding: const pw.EdgeInsets.all(2),
-                child: pw.Text(
+                child: BanglaTextRenderer.cachedWidget(
                   'Subject',
                   style: pw.TextStyle(
                     color: PdfColors.white,
@@ -2613,7 +2616,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               ),
               pw.Padding(
                 padding: const pw.EdgeInsets.all(2),
-                child: pw.Text(
+                child: BanglaTextRenderer.cachedWidget(
                   'Date',
                   style: pw.TextStyle(
                     color: PdfColors.white,
@@ -2629,7 +2632,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               children: [
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(2),
-                  child: pw.Text(
+                  child: BanglaTextRenderer.cachedWidget(
                     a.subjectName,
                     style: pw.TextStyle(fontSize: 5, color: primaryColor),
                     maxLines: 1,
@@ -2637,7 +2640,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(2),
-                  child: pw.Text(
+                  child: BanglaTextRenderer.cachedWidget(
                     DateFormat('dd/MM').format(a.date),
                     style: const pw.TextStyle(
                       fontSize: 5,
@@ -2691,7 +2694,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         schoolName.toUpperCase(),
                         style: pw.TextStyle(
                           color: PdfColors.white,
@@ -2700,7 +2703,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         ),
                         maxLines: 1,
                       ),
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         'ADMIT CARD',
                         style: const pw.TextStyle(
                           color: PdfColors.teal100,
@@ -2722,7 +2725,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       pw.Radius.circular(3),
                     ),
                   ),
-                  child: pw.Text(
+                  child: BanglaTextRenderer.cachedWidget(
                     widget.exam.name,
                     style: pw.TextStyle(
                       fontSize: 5.5,
@@ -2761,7 +2764,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                           child: pw.Image(avatar, fit: pw.BoxFit.cover),
                         )
                       : pw.Center(
-                          child: pw.Text(
+                          child: BanglaTextRenderer.cachedWidget(
                             student.user?.name.isNotEmpty == true
                                 ? student.user!.name[0].toUpperCase()
                                 : '?',
@@ -2779,7 +2782,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     mainAxisAlignment: pw.MainAxisAlignment.center,
                     children: [
-                      pw.Text(
+                      BanglaTextRenderer.cachedWidget(
                         student.user?.name ?? 'N/A',
                         style: pw.TextStyle(
                           fontWeight: pw.FontWeight.bold,
@@ -2826,7 +2829,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                           pw.Radius.circular(3),
                         ),
                       ),
-                      child: pw.Text(
+                      child: BanglaTextRenderer.cachedWidget(
                         instruction,
                         textAlign: pw.TextAlign.center,
                         style: pw.TextStyle(
@@ -2890,7 +2893,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         thickness: 0.5,
                       ),
                     ),
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       "Student",
                       style: const pw.TextStyle(
                         fontSize: 6,
@@ -2906,7 +2909,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                       height: 20, // signature space
                       alignment: pw.Alignment.bottomRight,
                       child: (signatoryName != null && signatureFont != null)
-                          ? pw.Text(
+                          ? BanglaTextRenderer.cachedWidget(
                               signatoryName,
                               style: pw.TextStyle(
                                 font: signatureFont,
@@ -2923,7 +2926,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                         thickness: 0.5,
                       ),
                     ),
-                    pw.Text(
+                    BanglaTextRenderer.cachedWidget(
                       "Principal",
                       style: const pw.TextStyle(
                         fontSize: 6,
@@ -2954,7 +2957,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text(
+        BanglaTextRenderer.cachedWidget(
           label.toUpperCase(),
           style: pw.TextStyle(
             fontSize: 7,
@@ -2964,7 +2967,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           ),
         ),
         pw.SizedBox(height: 2),
-        pw.Text(
+        BanglaTextRenderer.cachedWidget(
           value,
           style: pw.TextStyle(
             fontSize: big ? 12 : 9.5,
@@ -2983,12 +2986,12 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text(
+        BanglaTextRenderer.cachedWidget(
           label,
           style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600),
         ),
         pw.SizedBox(height: 1),
-        pw.Text(
+        BanglaTextRenderer.cachedWidget(
           value,
           style: pw.TextStyle(
             fontSize: big ? 11 : 9,
@@ -3034,7 +3037,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text(
+              BanglaTextRenderer.cachedWidget(
                 label.toUpperCase(),
                 style: pw.TextStyle(
                   fontSize: big ? 7.5 : 5.5,
@@ -3044,7 +3047,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 ),
               ),
               pw.SizedBox(height: 1),
-              pw.Text(
+              BanglaTextRenderer.cachedWidget(
                 value,
                 style: pw.TextStyle(
                   fontSize: big ? 11 : 8,
@@ -3069,7 +3072,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
   }) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-      child: pw.Text(
+      child: BanglaTextRenderer.cachedWidget(
         text,
         textAlign: centered ? pw.TextAlign.center : pw.TextAlign.left,
         style: pw.TextStyle(
@@ -3088,7 +3091,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       child: pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(
+          BanglaTextRenderer.cachedWidget(
             '$label: ',
             style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
@@ -3097,7 +3100,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
             ),
           ),
           pw.Expanded(
-            child: pw.Text(
+            child: BanglaTextRenderer.cachedWidget(
               value,
               style: const pw.TextStyle(fontSize: 7, color: PdfColors.black),
               maxLines: 1,
@@ -3125,7 +3128,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           child: (signatoryName != null && signatureFont != null)
               ? pw.FittedBox(
                   fit: pw.BoxFit.scaleDown,
-                  child: pw.Text(
+                  child: BanglaTextRenderer.cachedWidget(
                     signatoryName,
                     maxLines: 1,
                     style: pw.TextStyle(
@@ -3142,7 +3145,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           child: pw.Divider(color: lineColor, thickness: 0.8),
         ),
         pw.SizedBox(height: 4),
-        pw.Text(
+        BanglaTextRenderer.cachedWidget(
           label,
           style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
           textAlign: pw.TextAlign.center,
@@ -3165,7 +3168,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           height: 30, // reserved space for signature
           alignment: pw.Alignment.bottomCenter,
           child: (signatoryName != null && signatureFont != null)
-              ? pw.Text(
+              ? BanglaTextRenderer.cachedWidget(
                   signatoryName,
                   style: pw.TextStyle(
                     font: signatureFont,
@@ -3180,7 +3183,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
           child: pw.Divider(color: PdfColors.black, thickness: 0.8),
         ),
         pw.SizedBox(height: 2),
-        pw.Text(
+        BanglaTextRenderer.cachedWidget(
           label,
           style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
         ),
