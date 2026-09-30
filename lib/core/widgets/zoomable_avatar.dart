@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -64,61 +66,68 @@ class ZoomableAvatar extends StatelessWidget {
 
     showDialog(
       context: context,
-      barrierColor: Colors.black87,
-      builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: EdgeInsets.zero,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            GestureDetector(
-              onDoubleTapDown: (details) => doubleTapDetails = details,
-              onDoubleTap: () {
-                if (transformationController.value != Matrix4.identity()) {
-                  transformationController.value = Matrix4.identity();
-                } else {
-                  final position = doubleTapDetails!.localPosition;
-                  transformationController.value = Matrix4.identity()
-                    ..translate(-position.dx * 2, -position.dy * 2)
-                    ..scale(3.0);
-                }
-              },
-              child: InteractiveViewer(
-                transformationController: transformationController,
-                panEnabled: true,
-                minScale: 1.0,
-                maxScale: 5.0,
-                child: Hero(
-                  tag: heroTag,
-                  child: _hasValidImage
-                      ? CachedNetworkImage(
-                          imageUrl: imageUrl!,
-                          cacheKey: imageUrl!.split('?').first,
-                          fit: BoxFit.contain,
-                          placeholder: (_, __) => const Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
+      barrierColor: Colors.black26,
+      builder: (ctx) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.zero,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              GestureDetector(
+                onDoubleTapDown: (details) => doubleTapDetails = details,
+                onDoubleTap: () {
+                  if (transformationController.value != Matrix4.identity()) {
+                    transformationController.value = Matrix4.identity();
+                  } else {
+                    final position = doubleTapDetails!.localPosition;
+                    transformationController.value = Matrix4.identity()
+                      ..translate(-position.dx * 2, -position.dy * 2)
+                      ..scale(3.0);
+                  }
+                },
+                child: InteractiveViewer(
+                  transformationController: transformationController,
+                  panEnabled: true,
+                  minScale: 1.0,
+                  maxScale: 5.0,
+                  child: Hero(
+                    tag: heroTag,
+                    child: _hasValidImage
+                        ? ClipOval(
+                            child: CachedNetworkImage(
+                              imageUrl: imageUrl!,
+                              cacheKey: imageUrl!.split('?').first,
+                              fit: BoxFit.cover,
+                              width: MediaQuery.of(context).size.width,
+                              height: MediaQuery.of(context).size.width,
+                              placeholder: (_, __) => const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              errorWidget: (_, __, ___) => _buildZoomedFallback(),
                             ),
-                          ),
-                          errorWidget: (_, __, ___) => _buildZoomedFallback(),
-                        )
-                      : _buildZoomedFallback(),
+                          )
+                        : _buildZoomedFallback(),
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              top: 40,
-              right: 16,
-              child: IconButton(
-                onPressed: () => Navigator.pop(ctx),
-                icon: const Icon(Icons.close, color: Colors.white, size: 30),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.black45,
-                  shape: const CircleBorder(),
+              Positioned(
+                top: 40,
+                right: 16,
+                child: IconButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.black45,
+                    shape: const CircleBorder(),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
