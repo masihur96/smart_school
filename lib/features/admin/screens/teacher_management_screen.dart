@@ -29,6 +29,7 @@ class TeacherManagementScreen extends StatefulWidget {
 
 class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
   final ScrollController _scrollController = ScrollController();
+  bool _isFilterExpanded = false;
   String? _selectedClass;
   String? _selectedSection;
   String? _selectedStatus = 'All';
@@ -121,7 +122,6 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              // color: Colors.white,
               borderRadius: const BorderRadius.vertical(
                 bottom: Radius.circular(24),
               ),
@@ -139,7 +139,6 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                 Row(
                   children: [
                     Expanded(
-                      flex: 2,
                       child: TextField(
                         controller: _searchController,
                         decoration: InputDecoration(
@@ -173,52 +172,80 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                         },
                       ),
                     ),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.status,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                    const SizedBox(width: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: _isFilterExpanded ? AppColors.primaryAdmin.withValues(alpha: 0.1) : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _isFilterExpanded ? AppColors.primaryAdmin : Colors.grey.shade300,
                         ),
-                        initialValue: _selectedStatus,
-                        items: [AppLocalizations.of(context)!.all, 'Active', 'Inactive']
-                            .map(
-                              (s) => DropdownMenuItem(value: s, child: Text(s)),
-                            )
-                            .toList(),
-                        onChanged: (val) {
-                          setState(() => _selectedStatus = val);
-                          _fetchTeachers();
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.filter_list,
+                          color: _isFilterExpanded ? AppColors.primaryAdmin : Colors.grey.shade700,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isFilterExpanded = !_isFilterExpanded;
+                          });
                         },
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          l10n.total,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '${context.watch<TeachersNotifier>().totalCount}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
+                if (_isFilterExpanded) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context)!.status,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          initialValue: _selectedStatus,
+                          items: [AppLocalizations.of(context)!.all, 'Active', 'Inactive']
+                              .map(
+                                (s) => DropdownMenuItem(value: s, child: Text(s)),
+                              )
+                              .toList(),
+                          onChanged: (val) {
+                            setState(() => _selectedStatus = val);
+                            _fetchTeachers();
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            l10n.total,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            '${context.watch<TeachersNotifier>().totalCount}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -364,529 +391,450 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
 
     // Classes string
     final classesStr = teacher.embeddedClasses.isNotEmpty
-        ? teacher.embeddedClasses.map((c) => c.name).join(', ')
+        ? teacher.embeddedClasses.map((c) => c.name).toSet().join(', ')
         : '';
     // Sections string
     final sectionsStr = teacher.embeddedSections.isNotEmpty
-        ? teacher.embeddedSections.map((s) => s.name).join(', ')
+        ? teacher.embeddedSections.map((s) => s.name).toSet().join(', ')
         : '';
     // Assigned subjects count
     final subjectCount = teacher.assignedSubjects.length;
 
     return Card(
-      elevation: 0,
-      margin: const EdgeInsets.only(bottom: 12),
+      key: ValueKey(teacher.userId),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      elevation: 2,
+      shadowColor: Colors.black.withValues(alpha: 0.1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
           color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+          width: 1,
         ),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () => _showTeacherDetails(context, teacher),
         child: Padding(
-          padding: const EdgeInsets.all(14.0),
-          child: Column(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Header: Avatar, Name, Badges, Action Menu ──
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // ── Left Column: Avatar, Place & Designation ──
+              Column(
                 children: [
                   ZoomableAvatar(
                     imageUrl: user?.avatar,
                     name: teacherName,
                     heroTag: 'teacher-avatar-${teacher.userId}',
-                    radius: 24,
+                    radius: 28,
                     backgroundColor: AppColors.primaryAdmin.withValues(
                       alpha: 0.12,
                     ),
                     textColor: AppColors.primaryAdmin,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
+                  if (hasLatLon) ...[
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: 60,
+                      child: FutureBuilder<String>(
+                        future: GeocodingService().getPlaceName(
+                          lat.toString(),
+                          lon.toString(),
+                        ),
+                        builder: (context, snapshot) {
+                          final place = snapshot.connectionState == ConnectionState.waiting
+                              ? '...'
+                              : (snapshot.data ?? '${lat.toStringAsFixed(2)}, ${lon.toStringAsFixed(2)}');
+                          return Text(
+                            place,
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                  if (designation.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.blue.shade900.withValues(alpha: 0.3) : Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        designation,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.blue.shade300 : Colors.blue.shade700,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(width: 16),
+              
+              // ── Right Column: Name, Phone/Email/Status, Academic Info ──
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Name and Menu
+                    Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          teacherName,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
+                        Expanded(
+                          child: Text(
+                            teacherName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 5),
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 4,
-                          children: [
-                            // Designation Badge
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isDark
-                                    ? Colors.blue.shade900.withValues(
-                                        alpha: 0.3,
-                                      )
-                                    : Colors.blue.shade50,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.badge_outlined,
-                                    size: 11,
-                                    color: isDark
-                                        ? Colors.blue.shade300
-                                        : Colors.blue.shade700,
+                        const SizedBox(width: 8),
+                        // Menu
+                        SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: PopupMenuButton<String>(
+                            padding: EdgeInsets.zero,
+                            icon: const Icon(Icons.more_vert, size: 20),
+                            onSelected: (value) async {
+                              if (value == 'view') {
+                                _showTeacherDetails(context, teacher);
+                              } else if (value == 'notify') {
+                                _showNotificationDialog(context, teacher);
+                              } else if (value == 'edit') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        AddEditTeacherScreen(teacher: teacher),
                                   ),
-                                  const SizedBox(width: 3),
-                                  Text(
-                                    designation,
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDark
-                                          ? Colors.blue.shade300
-                                          : Colors.blue.shade700,
+                                ).then((_) => _fetchTeachers());
+                              } else if (value == 'status') {
+                                await context
+                                    .read<TeachersNotifier>()
+                                    .toggleTeacherStatus(teacher.userId);
+                              } else if (value == 'delete') {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: Text(l10n.deleteTeacher),
+                                    content: const Text(
+                                      'Are you sure you want to delete this teacher?',
                                     ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(ctx, false),
+                                        child: Text(l10n.cancel),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () => Navigator.pop(ctx, true),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                        ),
+                                        child: Text(
+                                          l10n.delete,
+                                          style: const TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ),
-                            // Status Badge
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: teacher.isActive
-                                    ? (isDark
-                                          ? Colors.green.shade900.withValues(
-                                              alpha: 0.3,
-                                            )
-                                          : Colors.green.shade50)
-                                    : (isDark
-                                          ? Colors.red.shade900.withValues(
-                                              alpha: 0.3,
-                                            )
-                                          : Colors.red.shade50),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 6,
-                                    height: 6,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: teacher.isActive
-                                          ? Colors.green
-                                          : Colors.red,
-                                    ),
+                                );
+                                if (confirm == true && context.mounted) {
+                                  await context.read<TeachersNotifier>().deleteTeacher(
+                                    teacher.userId,
+                                  );
+                                }
+                              }
+                            },
+                            itemBuilder: (context) {
+                              return [
+                                PopupMenuItem(
+                                  value: 'view',
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.visibility_outlined,
+                                        color: Colors.purple,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(l10n.viewProfile),
+                                    ],
                                   ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    teacher.isActive ? 'Active' : 'Inactive',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: teacher.isActive
-                                          ? Colors.green
-                                          : Colors.red,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'notify',
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.notifications_active_outlined,
+                                        color: Colors.purple,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(l10n.sendNotification),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ),
-                          ],
+                                ),
+                                PopupMenuItem(
+                                  value: 'edit',
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.edit_outlined,
+                                        color: Colors.blue,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(l10n.editTeacher),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'status',
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        teacher.isActive
+                                            ? Icons.block
+                                            : Icons.check_circle_outline,
+                                        color: teacher.isActive
+                                            ? Colors.orange
+                                            : Colors.green,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        teacher.isActive ? 'Deactivate' : 'Activate',
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'delete',
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.delete_outline,
+                                        color: Colors.red,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        l10n.delete,
+                                        style: const TextStyle(color: Colors.red),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ];
+                            },
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                  PopupMenuButton<String>(
-                    padding: EdgeInsets.zero,
-                    icon: const Icon(Icons.more_vert, size: 20),
-                    onSelected: (value) async {
-                      if (value == 'view') {
-                        _showTeacherDetails(context, teacher);
-                      } else if (value == 'notify') {
-                        _showNotificationDialog(context, teacher);
-                      } else if (value == 'edit') {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                AddEditTeacherScreen(teacher: teacher),
-                          ),
-                        ).then((_) => _fetchTeachers());
-                      } else if (value == 'status') {
-                        await context
-                            .read<TeachersNotifier>()
-                            .toggleTeacherStatus(teacher.userId);
-                      } else if (value == 'delete') {
-                        final l10n = AppLocalizations.of(context)!;
-                        final confirm = await showDialog<bool>(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            title: Text(l10n.deleteTeacher),
-                            content: const Text(
-                              'Are you sure you want to delete this teacher?',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(ctx, false),
-                                child: Text(l10n.cancel),
-                              ),
-                              ElevatedButton(
-                                onPressed: () => Navigator.pop(ctx, true),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
+                    const SizedBox(height: 6),
+                    
+                    // Phone, Email & Status
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        // Phone
+                        if (teacherPhone.isNotEmpty)
+                          InkWell(
+                            onTap: () {
+                              _launchUrl('tel:$teacherPhone');
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.phone_outlined,
+                                  size: 14,
+                                  color: AppColors.primaryAdmin,
                                 ),
-                                child: Text(
-                                  l10n.delete,
-                                  style: const TextStyle(color: Colors.white),
+                                const SizedBox(width: 4),
+                                Text(
+                                  teacherPhone,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isDark ? Colors.grey.shade300 : Colors.grey.shade800,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          
+                        // Email
+                        if (email.isNotEmpty)
+                          InkWell(
+                            onTap: () {
+                              _launchUrl('mailto:$email');
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.email_outlined,
+                                  size: 14,
+                                  color: Colors.blue.withValues(alpha: 0.8),
+                                ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    email,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: isDark ? Colors.grey.shade300 : Colors.grey.shade800,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          
+                        // Status
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: teacher.isActive
+                                ? (isDark
+                                    ? Colors.green.shade900.withValues(
+                                        alpha: 0.3,
+                                      )
+                                    : Colors.green.shade50)
+                                : (isDark
+                                    ? Colors.red.shade900.withValues(
+                                        alpha: 0.3,
+                                      )
+                                    : Colors.red.shade50),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: teacher.isActive
+                                      ? Colors.green
+                                      : Colors.red,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                teacher.isActive ? 'Active' : 'Inactive',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: teacher.isActive
+                                      ? Colors.green
+                                      : Colors.red,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ],
                           ),
-                        );
-                        if (confirm == true && context.mounted) {
-                          await context.read<TeachersNotifier>().deleteTeacher(
-                            teacher.userId,
-                          );
-                        }
-                      }
-                    },
-                    itemBuilder: (context) {
-                      final l10n = AppLocalizations.of(context)!;
-                      return [
-                        PopupMenuItem(
-                          value: 'view',
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.visibility_outlined,
-                                color: Colors.purple,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(l10n.viewProfile),
-                            ],
-                          ),
                         ),
-                        PopupMenuItem(
-                          value: 'notify',
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.notifications_active_outlined,
-                                color: Colors.purple,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(l10n.sendNotification),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.edit_outlined,
-                                color: Colors.blue,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(l10n.editTeacher),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'status',
-                          child: Row(
-                            children: [
-                              Icon(
-                                teacher.isActive
-                                    ? Icons.block
-                                    : Icons.check_circle_outline,
-                                color: teacher.isActive
-                                    ? Colors.orange
-                                    : Colors.green,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                teacher.isActive ? 'Deactivate' : 'Activate',
-                              ),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.delete_outline,
-                                color: Colors.red,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                l10n.delete,
-                                style: const TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ];
-                    },
-                  ),
-                ],
-              ),
-
-              // ── Academic & Subject Badges Row ──
-              if (classesStr.isNotEmpty ||
-                  sectionsStr.isNotEmpty ||
-                  subjectCount > 0) ...[
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 4,
-                  children: [
-                    if (classesStr.isNotEmpty)
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 12),
+                    
+                    // Academic Info Organized Container
+                    if (classesStr.isNotEmpty || sectionsStr.isNotEmpty || subjectCount > 0)
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryAdmin.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(6),
+                          color: isDark ? Colors.grey.shade800.withValues(alpha: 0.5) : Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
+                          ),
                         ),
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              Icons.school_outlined,
-                              size: 13,
-                              color: AppColors.primaryAdmin,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              classesStr,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: AppColors.primaryAdmin,
-                                fontWeight: FontWeight.w600,
+                            if (classesStr.isNotEmpty) ...[
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Class', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                    const SizedBox(height: 2),
+                                    Text(classesStr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  ]
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    if (sectionsStr.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.teal.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.grid_view_rounded,
-                              size: 12,
-                              color: Colors.teal.shade700,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Sec: $sectionsStr',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.teal.shade700,
-                                fontWeight: FontWeight.w600,
+                              if (sectionsStr.isNotEmpty || subjectCount > 0)
+                                Container(width: 1, height: 24, color: isDark ? Colors.grey.shade700 : Colors.grey.shade300, margin: const EdgeInsets.symmetric(horizontal: 8)),
+                            ],
+                            
+                            if (sectionsStr.isNotEmpty) ...[
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Section', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                    const SizedBox(height: 2),
+                                    Text(sectionsStr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  ]
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    if (subjectCount > 0)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.indigo.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.menu_book_outlined,
-                              size: 12,
-                              color: Colors.indigo.shade700,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '$subjectCount ${subjectCount == 1 ? AppLocalizations.of(context)!.subjectName : "Subjects"}',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.indigo.shade700,
-                                fontWeight: FontWeight.w600,
+                              if (subjectCount > 0)
+                                Container(width: 1, height: 24, color: isDark ? Colors.grey.shade700 : Colors.grey.shade300, margin: const EdgeInsets.symmetric(horizontal: 8)),
+                            ],
+                            
+                            if (subjectCount > 0) ...[
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Subjects', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                    const SizedBox(height: 2),
+                                    Text('$subjectCount', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  ]
+                                ),
                               ),
-                            ),
+                            ]
                           ],
                         ),
                       ),
                   ],
                 ),
-              ],
-
-              const SizedBox(height: 10),
-              Divider(
-                height: 1,
-                color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
               ),
-              const SizedBox(height: 8),
-
-              // ── Contact & Location Details ──
-              // Phone number row
-              if (teacherPhone.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 5.0),
-                  child: InkWell(
-                    onTap: () => _launchUrl('tel:$teacherPhone'),
-                    borderRadius: BorderRadius.circular(4),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.phone_outlined,
-                          size: 14,
-                          color: AppColors.primaryAdmin.withValues(alpha: 0.8),
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            teacherPhone,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: isDark
-                                  ? Colors.grey.shade300
-                                  : Colors.grey.shade800,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Icon(
-                          Icons.call_outlined,
-                          size: 13,
-                          color: Colors.grey.shade400,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-              // Address / Location row
-              if (hasLatLon)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 4.0),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        size: 14,
-                        color: Colors.redAccent.withValues(alpha: 0.8),
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: FutureBuilder<String>(
-                          future: GeocodingService().getPlaceName(
-                            lat.toString(),
-                            lon.toString(),
-                          ),
-                          builder: (context, snapshot) {
-                            final place =
-                                snapshot.connectionState ==
-                                    ConnectionState.waiting
-                                ? 'Locating...'
-                                : (snapshot.data ??
-                                      '${lat.toStringAsFixed(3)}, ${lon.toStringAsFixed(3)}');
-                            return Text(
-                              place,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isDark
-                                    ? Colors.grey.shade400
-                                    : Colors.grey.shade600,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-              // Email row
-              if (email.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 2.0),
-                  child: InkWell(
-                    onTap: () => _launchUrl('mailto:$email'),
-                    borderRadius: BorderRadius.circular(4),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.email_outlined,
-                          size: 14,
-                          color: Colors.blue.withValues(alpha: 0.8),
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            email,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: isDark
-                                  ? Colors.grey.shade400
-                                  : Colors.grey.shade600,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
             ],
           ),
         ),
       ),
     );
   }
-
   void _showTeacherDetails(BuildContext context, Teacher teacher) {
     final user = teacher.user;
 
