@@ -516,7 +516,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Left Column: Avatar & Place ──
+              // ── Left Column: Avatar, Place & Roll ──
               Column(
                 children: [
                   ZoomableAvatar(
@@ -565,6 +565,24 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
+                    ),
+                  ],
+                  if (student.rollId.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.blue.shade900.withValues(alpha: 0.3) : Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        'Roll #${student.rollId}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.blue.shade300 : Colors.blue.shade700,
+                        ),
+                      ),
                     ),
                   ],
                 ],
@@ -831,52 +849,42 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                     const SizedBox(height: 12),
                     
                     // Academic Info Organized Container
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.grey.shade800.withValues(alpha: 0.5) : Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
+                    if (classesStr.isNotEmpty || sectionsStr.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.grey.shade800.withValues(alpha: 0.5) : Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Class', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                  const SizedBox(height: 2),
+                                  Text(classesStr.isNotEmpty ? classesStr : '-', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                ]
+                              ),
+                            ),
+                            Container(width: 1, height: 24, color: isDark ? Colors.grey.shade700 : Colors.grey.shade300, margin: const EdgeInsets.symmetric(horizontal: 12)),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Section', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                  const SizedBox(height: 2),
+                                  Text(sectionsStr.isNotEmpty ? sectionsStr : '-', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                ]
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('Class', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                                const SizedBox(height: 2),
-                                Text(classesStr.isNotEmpty ? classesStr : '-', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
-                              ]
-                            ),
-                          ),
-                          Container(width: 1, height: 24, color: isDark ? Colors.grey.shade700 : Colors.grey.shade300, margin: const EdgeInsets.symmetric(horizontal: 8)),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('Section', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                                const SizedBox(height: 2),
-                                Text(sectionsStr.isNotEmpty ? sectionsStr : '-', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
-                              ]
-                            ),
-                          ),
-                          Container(width: 1, height: 24, color: isDark ? Colors.grey.shade700 : Colors.grey.shade300, margin: const EdgeInsets.symmetric(horizontal: 8)),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('Roll', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                                const SizedBox(height: 2),
-                                Text(student.rollId.isNotEmpty ? student.rollId : '-', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
-                              ]
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
               ),
