@@ -491,12 +491,14 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
 
     return Card(
       key: ValueKey(student.userId),
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      elevation: 0,
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      elevation: 2,
+      shadowColor: Colors.black.withValues(alpha: 0.1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
           color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+          width: 1,
         ),
       ),
       child: InkWell(
@@ -510,501 +512,374 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
           ).then((_) => _applyFilters());
         },
         child: Padding(
-          padding: const EdgeInsets.all(14.0),
-          child: Column(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Header: Avatar, Name, Badges, Action Menu ──
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // ── Left Column: Avatar & Place ──
+              Column(
                 children: [
                   ZoomableAvatar(
                     imageUrl: user?.avatar,
                     name: studentName,
                     heroTag: 'student-avatar-${student.userId}',
-                    radius: 24,
+                    radius: 28,
                     backgroundColor: AppColors.primaryAdmin.withValues(
                       alpha: 0.12,
                     ),
                     textColor: AppColors.primaryAdmin,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          studentName,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 5),
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 4,
-                          children: [
-                            // Roll Badge
-                            if (student.rollId.isNotEmpty)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 7,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? Colors.blue.shade900.withValues(
-                                          alpha: 0.3,
-                                        )
-                                      : Colors.blue.shade50,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  'Roll #${student.rollId}',
+                  if (hasLatLon || hasAddressText) ...[
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: 60,
+                      child: hasLatLon
+                          ? FutureBuilder<String>(
+                              future: GeocodingService().getPlaceName(
+                                user.lat.toString(),
+                                user.lon.toString(),
+                              ),
+                              builder: (context, snapshot) {
+                                final place = snapshot.connectionState == ConnectionState.waiting
+                                    ? '...'
+                                    : (snapshot.data ?? '${user.lat?.toStringAsFixed(2)}, ${user.lon?.toStringAsFixed(2)}');
+                                return Text(
+                                  place,
                                   style: TextStyle(
                                     fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark
-                                        ? Colors.blue.shade300
-                                        : Colors.blue.shade700,
+                                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                                   ),
-                                ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                );
+                              },
+                            )
+                          : Text(
+                              user?.designation?.trim() ?? '',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                               ),
-                            // Status Badge
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: student.isActive
-                                    ? (isDark
-                                          ? Colors.green.shade900.withValues(
-                                              alpha: 0.3,
-                                            )
-                                          : Colors.green.shade50)
-                                    : (isDark
-                                          ? Colors.red.shade900.withValues(
-                                              alpha: 0.3,
-                                            )
-                                          : Colors.red.shade50),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 6,
-                                    height: 6,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: student.isActive
-                                          ? Colors.green
-                                          : Colors.red,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    student.isActive ? 'Active' : 'Inactive',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: student.isActive
-                                          ? Colors.green
-                                          : Colors.red,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ],
-                        ),
-                      ],
                     ),
-                  ),
-                  PopupMenuButton<String>(
-                    padding: EdgeInsets.zero,
-                    icon: const Icon(Icons.more_vert, size: 20),
-                    onSelected: (value) {
-                      if (value == 'view') {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                StudentDetailScreen(student: student),
-                          ),
-                        ).then((_) => _applyFilters());
-                      } else if (value == 'notify') {
-                        _showNotificationDialog(context, student);
-                      } else if (value == 'edit') {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                AddEditStudentScreen(student: student),
-                          ),
-                        ).then((_) => _applyFilters());
-                      } else if (value == 'status') {
-                        context.read<StudentsNotifier>().toggleStudentStatus(
-                          student.userId,
-                        );
-                      } else if (value == 'delete') {
-                        showDialog(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            title: Text(l10n.deleteStudent),
-                            content: const Text(
-                              'Are you sure you want to delete this student?',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(ctx),
-                                child: Text(l10n.cancel),
-                              ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  context
-                                      .read<StudentsNotifier>()
-                                      .deleteStudent(student.userId);
-                                  Navigator.pop(ctx);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                ),
-                                child: Text(
-                                  l10n.delete,
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                    },
-                    itemBuilder: (BuildContext context) {
-                      return <PopupMenuEntry<String>>[
-                        PopupMenuItem<String>(
-                          value: 'view',
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.visibility_outlined,
-                                color: Colors.purple,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(l10n.viewDetails),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem<String>(
-                          value: 'notify',
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.notifications_active_outlined,
-                                color: Colors.purple,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(l10n.sendNotification),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem<String>(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.edit_outlined,
-                                color: Colors.blue,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(l10n.edit),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem<String>(
-                          value: 'status',
-                          child: Row(
-                            children: [
-                              Icon(
-                                student.isActive
-                                    ? Icons.block
-                                    : Icons.check_circle_outline,
-                                color: student.isActive
-                                    ? Colors.orange
-                                    : Colors.green,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                student.isActive ? 'Deactivate' : 'Activate',
-                              ),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem<String>(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.delete_outline,
-                                color: Colors.red,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                l10n.delete,
-                                style: const TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ];
-                    },
-                  ),
+                  ],
                 ],
               ),
-
-              // ── Academic Info Row (Class & Section Chips) ──
-              if (classesStr.isNotEmpty || sectionsStr.isNotEmpty) ...[
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 4,
+              const SizedBox(width: 16),
+              
+              // ── Right Column: Name, Phone/Status, Academic Info ──
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (classesStr.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryAdmin.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.school_outlined,
-                              size: 13,
-                              color: AppColors.primaryAdmin,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              classesStr,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: AppColors.primaryAdmin,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    if (sectionsStr.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.teal.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.grid_view_rounded,
-                              size: 12,
-                              color: Colors.teal.shade700,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Sec: $sectionsStr',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.teal.shade700,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-
-              const SizedBox(height: 10),
-              Divider(
-                height: 1,
-                color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-              ),
-              const SizedBox(height: 8),
-
-              // ── Contact & Location Details ──
-              // Phone number row
-              if (studentPhone.isNotEmpty || guardianPhone.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 5.0),
-                  child: InkWell(
-                    onTap: () {
-                      final targetPhone = studentPhone.isNotEmpty
-                          ? studentPhone
-                          : guardianPhone;
-                      _launchUrl('tel:$targetPhone');
-                    },
-                    borderRadius: BorderRadius.circular(4),
-                    child: Row(
+                    // Name and Menu
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.phone_outlined,
-                          size: 14,
-                          color: AppColors.primaryAdmin.withValues(alpha: 0.8),
-                        ),
-                        const SizedBox(width: 6),
                         Expanded(
-                          child: Text.rich(
-                            TextSpan(
-                              children: [
-                                if (studentPhone.isNotEmpty) ...[
-                                  TextSpan(
-                                    text: studentPhone,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: isDark
-                                          ? Colors.grey.shade300
-                                          : Colors.grey.shade800,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  if (guardianPhone.isNotEmpty &&
-                                      guardianPhone != studentPhone)
-                                    TextSpan(
-                                      text: '  (Guardian: $guardianPhone)',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey.shade500,
-                                      ),
-                                    ),
-                                ] else if (guardianPhone.isNotEmpty) ...[
-                                  TextSpan(
-                                    text: 'Guardian: $guardianPhone',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: isDark
-                                          ? Colors.grey.shade300
-                                          : Colors.grey.shade800,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ],
+                          child: Text(
+                            studentName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        Icon(
-                          Icons.call_outlined,
-                          size: 13,
-                          color: Colors.grey.shade400,
+                        const SizedBox(width: 8),
+                        // Menu
+                        SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: PopupMenuButton<String>(
+                            padding: EdgeInsets.zero,
+                            icon: const Icon(Icons.more_vert, size: 20),
+                            onSelected: (value) {
+                              if (value == 'view') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        StudentDetailScreen(student: student),
+                                  ),
+                                ).then((_) => _applyFilters());
+                              } else if (value == 'notify') {
+                                _showNotificationDialog(context, student);
+                              } else if (value == 'edit') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        AddEditStudentScreen(student: student),
+                                  ),
+                                ).then((_) => _applyFilters());
+                              } else if (value == 'status') {
+                                context.read<StudentsNotifier>().toggleStudentStatus(
+                                  student.userId,
+                                );
+                              } else if (value == 'delete') {
+                                showDialog(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: Text(l10n.deleteStudent),
+                                    content: const Text(
+                                      'Are you sure you want to delete this student?',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(ctx),
+                                        child: Text(l10n.cancel),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          context
+                                              .read<StudentsNotifier>()
+                                              .deleteStudent(student.userId);
+                                          Navigator.pop(ctx);
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                        ),
+                                        child: Text(
+                                          l10n.delete,
+                                          style: const TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+                            },
+                            itemBuilder: (BuildContext context) {
+                              return <PopupMenuEntry<String>>[
+                                PopupMenuItem<String>(
+                                  value: 'view',
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.visibility_outlined,
+                                        color: Colors.purple,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(l10n.viewDetails),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem<String>(
+                                  value: 'notify',
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.notifications_active_outlined,
+                                        color: Colors.purple,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(l10n.sendNotification),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem<String>(
+                                  value: 'edit',
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.edit_outlined,
+                                        color: Colors.blue,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(l10n.edit),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem<String>(
+                                  value: 'status',
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        student.isActive
+                                            ? Icons.block
+                                            : Icons.check_circle_outline,
+                                        color: student.isActive
+                                            ? Colors.orange
+                                            : Colors.green,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        student.isActive ? 'Deactivate' : 'Activate',
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem<String>(
+                                  value: 'delete',
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.delete_outline,
+                                        color: Colors.red,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        l10n.delete,
+                                        style: const TextStyle(color: Colors.red),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ];
+                            },
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-
-              // Address / Location row
-              if (hasLatLon || hasAddressText)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 4.0),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        size: 14,
-                        color: Colors.redAccent.withValues(alpha: 0.8),
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: hasLatLon
-                            ? FutureBuilder<String>(
-                                future: GeocodingService().getPlaceName(
-                                  user.lat.toString(),
-                                  user.lon.toString(),
+                    const SizedBox(height: 6),
+                    
+                    // Phone & Status
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        // Phone
+                        if (studentPhone.isNotEmpty || guardianPhone.isNotEmpty)
+                          InkWell(
+                            onTap: () {
+                              final targetPhone = studentPhone.isNotEmpty ? studentPhone : guardianPhone;
+                              _launchUrl('tel:$targetPhone');
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.phone_outlined,
+                                  size: 14,
+                                  color: AppColors.primaryAdmin,
                                 ),
-                                builder: (context, snapshot) {
-                                  final place =
-                                      snapshot.connectionState ==
-                                          ConnectionState.waiting
-                                      ? 'Locating...'
-                                      : (snapshot.data ??
-                                            '${user.lat?.toStringAsFixed(3)}, ${user.lon?.toStringAsFixed(3)}');
-                                  return Text(
-                                    place,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: isDark
-                                          ? Colors.grey.shade400
-                                          : Colors.grey.shade600,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  );
-                                },
-                              )
-                            : Text(
-                                user?.designation?.trim() ?? '',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: isDark
-                                      ? Colors.grey.shade400
-                                      : Colors.grey.shade600,
+                                const SizedBox(width: 4),
+                                Text(
+                                  studentPhone.isNotEmpty ? studentPhone : guardianPhone,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isDark ? Colors.grey.shade300 : Colors.grey.shade800,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                      ),
-                    ],
-                  ),
-                ),
-
-              // Email row
-              if (email.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 2.0),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.email_outlined,
-                        size: 14,
-                        color: Colors.blue.withValues(alpha: 0.8),
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          email,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: isDark
-                                ? Colors.grey.shade400
-                                : Colors.grey.shade600,
+                              ],
+                            ),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          
+                        // Status
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: student.isActive
+                                ? (isDark
+                                    ? Colors.green.shade900.withValues(
+                                        alpha: 0.3,
+                                      )
+                                    : Colors.green.shade50)
+                                : (isDark
+                                    ? Colors.red.shade900.withValues(
+                                        alpha: 0.3,
+                                      )
+                                    : Colors.red.shade50),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: student.isActive
+                                      ? Colors.green
+                                      : Colors.red,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                student.isActive ? 'Active' : 'Inactive',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: student.isActive
+                                      ? Colors.green
+                                      : Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 12),
+                    
+                    // Academic Info Organized Container
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.grey.shade800.withValues(alpha: 0.5) : Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
                         ),
                       ),
-                    ],
-                  ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Class', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                const SizedBox(height: 2),
+                                Text(classesStr.isNotEmpty ? classesStr : '-', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              ]
+                            ),
+                          ),
+                          Container(width: 1, height: 24, color: isDark ? Colors.grey.shade700 : Colors.grey.shade300, margin: const EdgeInsets.symmetric(horizontal: 8)),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Section', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                const SizedBox(height: 2),
+                                Text(sectionsStr.isNotEmpty ? sectionsStr : '-', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              ]
+                            ),
+                          ),
+                          Container(width: 1, height: 24, color: isDark ? Colors.grey.shade700 : Colors.grey.shade300, margin: const EdgeInsets.symmetric(horizontal: 8)),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Roll', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                const SizedBox(height: 2),
+                                Text(student.rollId.isNotEmpty ? student.rollId : '-', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              ]
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
+              ),
             ],
           ),
         ),
