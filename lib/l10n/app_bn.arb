@@ -1481,5 +1481,29 @@
   "classReq": "ক্লাস *",
   "cancelText": "বাতিল",
   "endDate": "শেষ তারিখ",
-  "setCredentials": "ক্রেডেনশিয়াল সেট করুন"
+  "setCredentials": "ক্রেডেনশিয়াল সেট করুন",
+  "paymentDetails": "পেমেন্ট বিস্তারিত",
+  "paymentInstructions": "দয়া করে নিচের যেকোনো একটি মাধ্যম ব্যবহার করে {amount} প্রদান করুন। তারপর অনুরোধটি জমা দিতে আপনার ট্রানজ্যাকশন আইডি লিখুন।",
+  "@paymentInstructions": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "selectPaymentMethod": "পেমেন্ট মাধ্যম নির্বাচন করুন",
+  "sendMoneyTo": "টাকা পাঠান ({method})",
+  "@sendMoneyTo": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "amount": "পরিমাণ",
+  "transactionId": "ট্রানজ্যাকশন আইডি",
+  "enterTransactionId": "ট্রানজ্যাকশন আইডি লিখুন",
+  "pleaseEnterTransactionId": "দয়া করে ট্রানজ্যাকশন আইডি লিখুন",
+  "submitPayment": "পেমেন্ট জমা দিন",
+  "paymentSubmittedSuccessfully": "পেমেন্ট সফলভাবে জমা দেওয়া হয়েছে!"
 }

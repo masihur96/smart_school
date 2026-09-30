@@ -1725,5 +1725,29 @@
   "classReq": "Class *",
   "cancelText": "Cancel",
   "endDate": "End Date",
-  "setCredentials": "Set Credentials"
+  "setCredentials": "Set Credentials",
+  "paymentDetails": "Payment Details",
+  "paymentInstructions": "Please pay {amount} using one of the methods below. Then enter your Transaction ID to submit the request.",
+  "@paymentInstructions": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "selectPaymentMethod": "Select Payment Method",
+  "sendMoneyTo": "Send Money To ({method})",
+  "@sendMoneyTo": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "amount": "Amount",
+  "transactionId": "Transaction ID",
+  "enterTransactionId": "Enter Transaction ID",
+  "pleaseEnterTransactionId": "Please enter Transaction ID",
+  "submitPayment": "Submit Payment",
+  "paymentSubmittedSuccessfully": "Payment submitted successfully!"
 }

@@ -3465,4 +3465,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setCredentials => 'Set Credentials';
+
+  @override
+  String get paymentDetails => 'Payment Details';
+
+  @override
+  String paymentInstructions(String amount) {
+    return 'Please pay $amount using one of the methods below. Then enter your Transaction ID to submit the request.';
+  }
+
+  @override
+  String get selectPaymentMethod => 'Select Payment Method';
+
+  @override
+  String sendMoneyTo(String method) {
+    return 'Send Money To ($method)';
+  }
+
+  @override
+  String get amount => 'Amount';
+
+  @override
+  String get transactionId => 'Transaction ID';
+
+  @override
+  String get enterTransactionId => 'Enter Transaction ID';
+
+  @override
+  String get pleaseEnterTransactionId => 'Please enter Transaction ID';
+
+  @override
+  String get submitPayment => 'Submit Payment';
+
+  @override
+  String get paymentSubmittedSuccessfully => 'Payment submitted successfully!';
 }

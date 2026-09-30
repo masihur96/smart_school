@@ -447,7 +447,14 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
           auth: auth,
           onSuccess: (method, trxId) {
             Navigator.pop(context);
-            _showSuccessDialog(context, auth, plan, paymentMethod: method, trxId: trxId);
+            final l10n = AppLocalizations.of(context)!;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(l10n.paymentSubmittedSuccessfully),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
           },
         ),
       ),
@@ -614,10 +621,10 @@ class _PaymentBottomSheetContentState extends State<_PaymentBottomSheetContent> 
   bool _isLoading = false;
 
   final Map<String, String> _paymentNumbers = {
-    'bKash': '+8801700000000',
-    'Nagad': '+8801800000000',
-    'Rocket': '+8801900000000',
-    'Bank': 'City Bank, Acc: 1234567890',
+    'bKash': '01740719204',
+    'Nagad': '01740719204',
+    'Rocket': '01740719204',
+    'Bank': '01740719204',
   };
 
   @override
@@ -640,7 +647,7 @@ class _PaymentBottomSheetContentState extends State<_PaymentBottomSheetContent> 
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Payment Details',
+                l10n.paymentDetails,
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               IconButton(
@@ -658,12 +665,12 @@ class _PaymentBottomSheetContentState extends State<_PaymentBottomSheetContent> 
               border: Border.all(color: AppColors.primaryAdmin.withOpacity(0.3)),
             ),
             child: Text(
-              'Please pay \$${widget.plan.pricePerMonth} using one of the methods below. Then enter your Transaction ID to submit the request.',
+              l10n.paymentInstructions('\$${widget.plan.pricePerMonth}'),
               style: TextStyle(fontSize: 14, color: AppColors.primaryAdmin),
             ),
           ),
           const SizedBox(height: 20),
-          const Text('Select Payment Method', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(l10n.selectPaymentMethod, style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -682,48 +689,58 @@ class _PaymentBottomSheetContentState extends State<_PaymentBottomSheetContent> 
             }).toList(),
           ),
           const SizedBox(height: 20),
-          Text('Send Money To ($_selectedMethod)', style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(l10n.sendMoneyTo(_selectedMethod), style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           TextFormField(
             key: ValueKey(_selectedMethod),
             initialValue: _paymentNumbers[_selectedMethod],
             readOnly: true,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
             decoration: InputDecoration(
               filled: true,
-              fillColor: Colors.grey.shade200,
+              fillColor: Colors.transparent,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
+                borderSide: BorderSide(color: Colors.grey.shade400),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              suffixIcon: const Icon(Icons.copy, size: 20),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade400),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              suffixIcon: const Icon(Icons.copy, size: 20, color: Colors.grey),
             ),
           ),
           const SizedBox(height: 16),
-          const Text('Amount', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(l10n.amount, style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           TextFormField(
             initialValue: '\$${widget.plan.pricePerMonth}',
             readOnly: true,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
             decoration: InputDecoration(
               filled: true,
-              fillColor: Colors.grey.shade200,
+              fillColor: Colors.transparent,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
+                borderSide: BorderSide(color: Colors.grey.shade400),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade400),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
           ),
           const SizedBox(height: 16),
-          const Text('Transaction ID', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(l10n.transactionId, style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           TextFormField(
             controller: _trxIdController,
             decoration: InputDecoration(
-              hintText: 'Enter Transaction ID',
+              hintText: l10n.enterTransactionId,
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
           ),
           const SizedBox(height: 24),
@@ -733,7 +750,7 @@ class _PaymentBottomSheetContentState extends State<_PaymentBottomSheetContent> 
               onPressed: _isLoading ? null : () async {
                 if (_trxIdController.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please enter Transaction ID')),
+                    SnackBar(content: Text(l10n.pleaseEnterTransactionId)),
                   );
                   return;
                 }
@@ -766,7 +783,7 @@ class _PaymentBottomSheetContentState extends State<_PaymentBottomSheetContent> 
               ),
               child: _isLoading 
                 ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : const Text('Submit Payment', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                : Text(l10n.submitPayment, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
             ),
           ),
           const SizedBox(height: 16),

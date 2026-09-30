@@ -3477,4 +3477,39 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get setCredentials => 'ক্রেডেনশিয়াল সেট করুন';
+
+  @override
+  String get paymentDetails => 'পেমেন্ট বিস্তারিত';
+
+  @override
+  String paymentInstructions(String amount) {
+    return 'দয়া করে নিচের যেকোনো একটি মাধ্যম ব্যবহার করে $amount প্রদান করুন। তারপর অনুরোধটি জমা দিতে আপনার ট্রানজ্যাকশন আইডি লিখুন।';
+  }
+
+  @override
+  String get selectPaymentMethod => 'পেমেন্ট মাধ্যম নির্বাচন করুন';
+
+  @override
+  String sendMoneyTo(String method) {
+    return 'টাকা পাঠান ($method)';
+  }
+
+  @override
+  String get amount => 'পরিমাণ';
+
+  @override
+  String get transactionId => 'ট্রানজ্যাকশন আইডি';
+
+  @override
+  String get enterTransactionId => 'ট্রানজ্যাকশন আইডি লিখুন';
+
+  @override
+  String get pleaseEnterTransactionId => 'দয়া করে ট্রানজ্যাকশন আইডি লিখুন';
+
+  @override
+  String get submitPayment => 'পেমেন্ট জমা দিন';
+
+  @override
+  String get paymentSubmittedSuccessfully =>
+      'পেমেন্ট সফলভাবে জমা দেওয়া হয়েছে!';
 }

@@ -6485,6 +6485,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set Credentials'**
   String get setCredentials;
+
+  /// No description provided for @paymentDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Details'**
+  String get paymentDetails;
+
+  /// No description provided for @paymentInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Please pay {amount} using one of the methods below. Then enter your Transaction ID to submit the request.'**
+  String paymentInstructions(String amount);
+
+  /// No description provided for @selectPaymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Payment Method'**
+  String get selectPaymentMethod;
+
+  /// No description provided for @sendMoneyTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Money To ({method})'**
+  String sendMoneyTo(String method);
+
+  /// No description provided for @amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get amount;
+
+  /// No description provided for @transactionId.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction ID'**
+  String get transactionId;
+
+  /// No description provided for @enterTransactionId.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Transaction ID'**
+  String get enterTransactionId;
+
+  /// No description provided for @pleaseEnterTransactionId.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Transaction ID'**
+  String get pleaseEnterTransactionId;
+
+  /// No description provided for @submitPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Payment'**
+  String get submitPayment;
+
+  /// No description provided for @paymentSubmittedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment submitted successfully!'**
+  String get paymentSubmittedSuccessfully;
 }
 
 class _AppLocalizationsDelegate
