@@ -356,7 +356,11 @@ class AuthNotifier extends ChangeNotifier {
         await _fetchAdminSubscription(_user!.schoolId!);
         return true;
       } else {
-        _error = 'Failed to assign plan: ${response?.statusCode}';
+        String? errorMessage;
+        if (response?.data != null && response!.data is Map) {
+          errorMessage = response.data['message']?.toString();
+        }
+        _error = errorMessage ?? 'Failed to assign plan: ${response?.statusCode}';
         log('Error assigning subscription: ${response?.data}');
         return false;
       }
