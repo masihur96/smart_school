@@ -40,6 +40,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
   final ScrollController _scrollController = ScrollController();
+  bool _isFilterExpanded = false;
 
   @override
   void initState() {
@@ -103,7 +104,15 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
   @override
   Widget build(BuildContext context) {
     final studentsNotifier = context.watch<StudentsNotifier>();
-    final students = studentsNotifier.students;
+    final students = studentsNotifier.students.toList()
+      ..sort((a, b) {
+        final rollA = int.tryParse(a.rollId) ?? 999999;
+        final rollB = int.tryParse(b.rollId) ?? 999999;
+        if (rollA != 999999 || rollB != 999999) {
+          return rollA.compareTo(rollB);
+        }
+        return a.rollId.compareTo(b.rollId);
+      });
     final classes = context.watch<ClassSetupNotifier>().classes;
     final sections = context.watch<SectionSetupNotifier>().sections;
 
@@ -164,46 +173,25 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
           children: [
             Column(
               children: [
-                // Search bar
-                TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.searchByName,
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() => _searchQuery = '');
-                              _applyFilters();
-                            },
-                          )
-                        : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                  ),
-                  onChanged: (val) {
-                    setState(() => _searchQuery = val.trim());
-                    if (_debounce?.isActive ?? false) _debounce!.cancel();
-                    _debounce = Timer(
-                      const Duration(milliseconds: 500),
-                      _applyFilters,
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
+                // Search bar and Filter Icon
                 Row(
                   children: [
                     Expanded(
-                      child: DropdownButtonFormField<String>(
+                      child: TextField(
+                        controller: _searchController,
                         decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.classLabel,
+                          labelText: AppLocalizations.of(context)!.searchByName,
+                          prefixIcon: const Icon(Icons.search),
+                          suffixIcon: _searchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() => _searchQuery = '');
+                                    _applyFilters();
+                                  },
+                                )
+                              : null,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -212,136 +200,186 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                             vertical: 8,
                           ),
                         ),
-                        items: [
-                          DropdownMenuItem<String>(
-                            value: null,
-                            child: Text(
-                              AppLocalizations.of(context)!.allClasses,
-                            ),
-                          ),
-                          ...classes.map(
-                            (c) => DropdownMenuItem(
-                              value: c.id,
-                              child: Text(c.name),
-                            ),
-                          ),
-                        ],
-                        initialValue: _selectedClassId,
                         onChanged: (val) {
+                          setState(() => _searchQuery = val.trim());
+                          if (_debounce?.isActive ?? false) _debounce!.cancel();
+                          _debounce = Timer(
+                            const Duration(milliseconds: 500),
+                            _applyFilters,
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: _isFilterExpanded ? AppColors.primaryAdmin.withValues(alpha: 0.1) : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _isFilterExpanded ? AppColors.primaryAdmin : Colors.grey.shade300,
+                        ),
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.filter_list,
+                          color: _isFilterExpanded ? AppColors.primaryAdmin : Colors.grey.shade700,
+                        ),
+                        onPressed: () {
                           setState(() {
-                            _selectedClassId = val;
-                            _selectedSectionId = null; // reset section
+                            _isFilterExpanded = !_isFilterExpanded;
                           });
-                          _applyFilters();
                         },
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.section,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
-                        items: [
-                          DropdownMenuItem<String>(
-                            value: null,
-                            child: Text(
-                              AppLocalizations.of(context)!.allSections,
+                  ],
+                ),
+                if (_isFilterExpanded) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context)!.classLabel,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
                             ),
                           ),
-                          ...sections
-                              .where((s) => s.classId == _selectedClassId)
-                              .map(
-                                (s) => DropdownMenuItem(
-                                  value: s.id,
-                                  child: Text(s.name),
-                                ),
+                          items: [
+                            DropdownMenuItem<String>(
+                              value: null,
+                              child: Text(
+                                AppLocalizations.of(context)!.allClasses,
                               ),
-                        ],
-                        initialValue: _selectedSectionId,
-                        onChanged: (val) {
-                          setState(() => _selectedSectionId = val);
-                          _applyFilters();
-                        },
+                            ),
+                            ...classes.map(
+                              (c) => DropdownMenuItem(
+                                value: c.id,
+                                child: Text(c.name),
+                              ),
+                            ),
+                          ],
+                          initialValue: _selectedClassId,
+                          onChanged: (val) {
+                            setState(() {
+                              _selectedClassId = val;
+                              _selectedSectionId = null; // reset section
+                            });
+                            _applyFilters();
+                          },
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<bool?>(
-                        decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.status,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context)!.section,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
+                          items: [
+                            DropdownMenuItem<String>(
+                              value: null,
+                              child: Text(
+                                AppLocalizations.of(context)!.allSections,
+                              ),
+                            ),
+                            ...sections
+                                .where((s) => s.classId == _selectedClassId)
+                                .map(
+                                  (s) => DropdownMenuItem(
+                                    value: s.id,
+                                    child: Text(s.name),
+                                  ),
+                                ),
+                          ],
+                          initialValue: _selectedSectionId,
+                          onChanged: (val) {
+                            setState(() => _selectedSectionId = val);
+                            _applyFilters();
+                          },
                         ),
-                        items: [
-                          DropdownMenuItem<bool?>(
-                            value: null,
-                            child: Text(
-                              AppLocalizations.of(context)!.allStatus,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<bool?>(
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context)!.status,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
                             ),
                           ),
-                          DropdownMenuItem<bool?>(
-                            value: true,
-                            child: Text(
-                              AppLocalizations.of(context)!.activeOnly,
+                          items: [
+                            DropdownMenuItem<bool?>(
+                              value: null,
+                              child: Text(
+                                AppLocalizations.of(context)!.allStatus,
+                              ),
+                            ),
+                            DropdownMenuItem<bool?>(
+                              value: true,
+                              child: Text(
+                                AppLocalizations.of(context)!.activeOnly,
+                              ),
+                            ),
+                            DropdownMenuItem<bool?>(
+                              value: false,
+                              child: Text(
+                                AppLocalizations.of(context)!.inactiveOnly,
+                              ),
+                            ),
+                          ],
+                          initialValue: _selectedStatus,
+                          onChanged: (val) {
+                            setState(() => _selectedStatus = val);
+                            _applyFilters();
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.total,
+                            style: const TextStyle(
+                              fontSize: 12,
+  
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          DropdownMenuItem<bool?>(
-                            value: false,
-                            child: Text(
-                              AppLocalizations.of(context)!.inactiveOnly,
+                          Text(
+                            '${studentsNotifier.totalCount}',
+                            style: const TextStyle(
+                              fontSize: 16,
+  
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
-                        initialValue: _selectedStatus,
-                        onChanged: (val) {
-                          setState(() => _selectedStatus = val);
-                          _applyFilters();
-                        },
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.total,
-                          style: const TextStyle(
-                            fontSize: 12,
-
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '${studentsNotifier.totalCount}',
-                          style: const TextStyle(
-                            fontSize: 16,
-
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+                ],
             ),
             Expanded(
               child: RefreshIndicator(
@@ -482,11 +520,11 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
 
     // Classes string
     final classesStr = student.embeddedClasses.isNotEmpty
-        ? student.embeddedClasses.map((c) => c.name).join(', ')
+        ? student.embeddedClasses.map((c) => c.name).toSet().join(', ')
         : '';
     // Sections string
     final sectionsStr = student.embeddedSections.isNotEmpty
-        ? student.embeddedSections.map((s) => s.name).join(', ')
+        ? student.embeddedSections.map((s) => s.name).toSet().join(', ')
         : '';
 
     return Card(
