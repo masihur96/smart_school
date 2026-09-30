@@ -72,61 +72,63 @@ class ZoomableAvatar extends StatelessWidget {
         child: Dialog(
           backgroundColor: Colors.transparent,
           insetPadding: EdgeInsets.zero,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              GestureDetector(
-                onDoubleTapDown: (details) => doubleTapDetails = details,
-                onDoubleTap: () {
-                  if (transformationController.value != Matrix4.identity()) {
-                    transformationController.value = Matrix4.identity();
-                  } else {
-                    final position = doubleTapDetails!.localPosition;
-                    transformationController.value = Matrix4.identity()
-                      ..translate(-position.dx * 2, -position.dy * 2)
-                      ..scale(3.0);
-                  }
-                },
-                child: InteractiveViewer(
-                  transformationController: transformationController,
-                  panEnabled: true,
-                  minScale: 1.0,
-                  maxScale: 5.0,
-                  child: Hero(
-                    tag: heroTag,
-                    child: _hasValidImage
-                        ? ClipOval(
-                            child: CachedNetworkImage(
-                              imageUrl: imageUrl!,
-                              cacheKey: imageUrl!.split('?').first,
-                              fit: BoxFit.cover,
-                              width: MediaQuery.of(context).size.width,
-                              height: MediaQuery.of(context).size.width,
-                              placeholder: (_, __) => const Center(
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
+          child: SizedBox.expand(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                GestureDetector(
+                  onDoubleTapDown: (details) => doubleTapDetails = details,
+                  onDoubleTap: () {
+                    if (transformationController.value != Matrix4.identity()) {
+                      transformationController.value = Matrix4.identity();
+                    } else {
+                      final position = doubleTapDetails!.localPosition;
+                      transformationController.value = Matrix4.identity()
+                        ..translate(-position.dx * 2, -position.dy * 2)
+                        ..scale(3.0);
+                    }
+                  },
+                  child: InteractiveViewer(
+                    transformationController: transformationController,
+                    panEnabled: true,
+                    minScale: 1.0,
+                    maxScale: 5.0,
+                    child: Hero(
+                      tag: heroTag,
+                      child: _hasValidImage
+                          ? ClipOval(
+                              child: CachedNetworkImage(
+                                imageUrl: imageUrl!,
+                                cacheKey: imageUrl!.split('?').first,
+                                fit: BoxFit.cover,
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.width,
+                                placeholder: (_, __) => const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
                                 ),
+                                errorWidget: (_, __, ___) => _buildZoomedFallback(),
                               ),
-                              errorWidget: (_, __, ___) => _buildZoomedFallback(),
-                            ),
-                          )
-                        : _buildZoomedFallback(),
+                            )
+                          : _buildZoomedFallback(),
+                    ),
                   ),
                 ),
-              ),
-              Positioned(
-                top: 40,
-                right: 16,
-                child: IconButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  icon: const Icon(Icons.close, color: Colors.white, size: 30),
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.black45,
-                    shape: const CircleBorder(),
+                Positioned(
+                  top: 40,
+                  right: 16,
+                  child: IconButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black45,
+                      shape: const CircleBorder(),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
