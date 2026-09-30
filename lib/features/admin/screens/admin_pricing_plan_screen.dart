@@ -339,54 +339,52 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
             onTap: _isLoading || widget.isAlreadyUsedFreePlan
                 ? null
                 : () async {
-                    setState(() {
-                      _isLoading = true;
-                    });
                     final auth = context.read<AuthNotifier>();
                     final isFree =
                         widget.plan.pricePerMonth == '0' ||
                         widget.plan.name.toLowerCase().contains('free');
 
-                    final success = await auth.assignPricingPlan(
-                      widget.plan.id!,
-                      isFree,
-                    );
-
-                    if (mounted) {
+                    if (isFree) {
                       setState(() {
-                        _isLoading = false;
+                        _isLoading = true;
                       });
-                    }
 
-                    if (success && context.mounted) {
-                      if (isFree) {
-                        // Direct navigation for Free plans as they are auto-activated
+                      final success = await auth.assignPricingPlan(
+                        widget.plan.id!,
+                        true,
+                      );
+
+                      if (mounted) {
+                        setState(() {
+                          _isLoading = false;
+                        });
+                      }
+
+                      if (success && context.mounted) {
                         if (auth.isSubscriptionValid) {
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  const AdminDashboardScreen(),
+                              builder: (context) => const AdminDashboardScreen(),
                             ),
                             (route) => false,
                           );
                         }
-                      } else {
-                        // Show professional success dialog for paid plans
-                        _showSuccessDialog(context, auth, widget.plan);
-                      }
-                    } else if (context.mounted) {
-                      final l10n = AppLocalizations.of(context)!;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(auth.error ?? l10n.failedToAssignPlan),
-                          backgroundColor: Colors.red,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      } else if (context.mounted) {
+                        final l10n = AppLocalizations.of(context)!;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(auth.error ?? l10n.failedToAssignPlan),
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
+                    } else {
+                      _showPaymentBottomSheet(context, widget.plan, auth);
                     }
                   },
             child: Container(
@@ -433,11 +431,36 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
     );
   }
 
+  void _showPaymentBottomSheet(BuildContext context, PricingPlan plan, AuthNotifier auth) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: _PaymentBottomSheetContent(
+          plan: plan,
+          auth: auth,
+          onSuccess: (method, trxId) {
+            Navigator.pop(context);
+            _showSuccessDialog(context, auth, plan, paymentMethod: method, trxId: trxId);
+          },
+        ),
+      ),
+    );
+  }
+
   void _showSuccessDialog(
     BuildContext context,
     AuthNotifier auth,
-    PricingPlan plan,
-  ) {
+    PricingPlan plan, {
+    String? paymentMethod,
+    String? trxId,
+  }) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -488,7 +511,7 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () {
-                        _sendRequestEmail(auth, plan);
+                        _sendRequestEmail(auth, plan, paymentMethod: paymentMethod, trxId: trxId);
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -520,22 +543,30 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
     );
   }
 
-  Future<void> _sendRequestEmail(AuthNotifier auth, PricingPlan plan) async {
+  Future<void> _sendRequestEmail(AuthNotifier auth, PricingPlan plan, {String? paymentMethod, String? trxId}) async {
     final user = auth.user;
     final String subject = Uri.encodeComponent(
       'Plan Activation Request: ${plan.name}',
     );
-    final String body = Uri.encodeComponent(
-      'Hello Admin,\n\n'
-      'I have selected the ${plan.name} plan for my school.\n'
-      'Please accept my registration and activate the plan.\n\n'
-      'User Details:\n'
-      'Name: ${user?.name}\n'
-      'Email: ${user?.email}\n'
-      'School ID: ${user?.schoolId}\n\n'
-      'Regards,\n'
-      '${user?.name}',
-    );
+
+    String bodyText = 'Hello Admin,\n\n'
+        'I have selected the ${plan.name} plan for my school.\n'
+        'Please accept my registration and activate the plan.\n\n';
+
+    if (paymentMethod != null && trxId != null) {
+      bodyText += 'Payment Details:\n'
+          'Method: $paymentMethod\n'
+          'Transaction ID: $trxId\n\n';
+    }
+
+    bodyText += 'User Details:\n'
+        'Name: ${user?.name}\n'
+        'Email: ${user?.email}\n'
+        'School ID: ${user?.schoolId}\n\n'
+        'Regards,\n'
+        '${user?.name}';
+
+    final String body = Uri.encodeComponent(bodyText);
 
     final Uri emailUri = Uri.parse(
       'mailto:masihur.work@gmail.com?subject=$subject&body=$body',
@@ -558,6 +589,189 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ],
+    );
+  }
+}
+
+class _PaymentBottomSheetContent extends StatefulWidget {
+  final PricingPlan plan;
+  final AuthNotifier auth;
+  final Function(String paymentMethod, String trxId) onSuccess;
+
+  const _PaymentBottomSheetContent({
+    required this.plan,
+    required this.auth,
+    required this.onSuccess,
+  });
+
+  @override
+  State<_PaymentBottomSheetContent> createState() => _PaymentBottomSheetContentState();
+}
+
+class _PaymentBottomSheetContentState extends State<_PaymentBottomSheetContent> {
+  String _selectedMethod = 'bKash';
+  final _trxIdController = TextEditingController();
+  bool _isLoading = false;
+
+  final Map<String, String> _paymentNumbers = {
+    'bKash': '+8801700000000',
+    'Nagad': '+8801800000000',
+    'Rocket': '+8801900000000',
+    'Bank': 'City Bank, Acc: 1234567890',
+  };
+
+  @override
+  void dispose() {
+    _trxIdController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Payment Details',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primaryAdmin.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.primaryAdmin.withOpacity(0.3)),
+            ),
+            child: Text(
+              'Please pay \$${widget.plan.pricePerMonth} using one of the methods below. Then enter your Transaction ID to submit the request.',
+              style: TextStyle(fontSize: 14, color: AppColors.primaryAdmin),
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text('Select Payment Method', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: _paymentNumbers.keys.map((method) {
+              final isSelected = _selectedMethod == method;
+              return ChoiceChip(
+                label: Text(method),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() => _selectedMethod = method);
+                  }
+                },
+                selectedColor: AppColors.primaryAdmin.withOpacity(0.2),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 20),
+          Text('Send Money To ($_selectedMethod)', style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          TextFormField(
+            key: ValueKey(_selectedMethod),
+            initialValue: _paymentNumbers[_selectedMethod],
+            readOnly: true,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.grey.shade200,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              suffixIcon: const Icon(Icons.copy, size: 20),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text('Amount', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          TextFormField(
+            initialValue: '\$${widget.plan.pricePerMonth}',
+            readOnly: true,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.grey.shade200,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text('Transaction ID', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _trxIdController,
+            decoration: InputDecoration(
+              hintText: 'Enter Transaction ID',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : () async {
+                if (_trxIdController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please enter Transaction ID')),
+                  );
+                  return;
+                }
+                setState(() => _isLoading = true);
+                
+                final success = await widget.auth.assignPricingPlan(
+                  widget.plan.id!,
+                  false,
+                );
+                
+                if (mounted) {
+                  setState(() => _isLoading = false);
+                }
+                
+                if (success && mounted) {
+                  widget.onSuccess(_selectedMethod, _trxIdController.text.trim());
+                } else if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(widget.auth.error ?? l10n.failedToAssignPlan),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryAdmin,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: _isLoading 
+                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                : const Text('Submit Payment', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
     );
   }
 }
