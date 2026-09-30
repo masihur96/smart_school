@@ -202,6 +202,83 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context)!.classLabel,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                          ),
+                          items: [
+                            DropdownMenuItem<String>(
+                              value: null,
+                              child: Text(
+                                AppLocalizations.of(context)!.allClasses,
+                              ),
+                            ),
+                            ...context.watch<ClassSetupNotifier>().classes.map(
+                              (c) => DropdownMenuItem(
+                                value: c.id,
+                                child: Text(c.name),
+                              ),
+                            ),
+                          ],
+                          initialValue: _selectedClass,
+                          onChanged: (val) {
+                            setState(() {
+                              _selectedClass = val;
+                              _selectedSection = null;
+                            });
+                            _fetchTeachers();
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context)!.section,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                          ),
+                          items: [
+                            DropdownMenuItem<String>(
+                              value: null,
+                              child: Text(
+                                AppLocalizations.of(context)!.allSections,
+                              ),
+                            ),
+                            ...context.watch<SectionSetupNotifier>().sections
+                                .where((s) => s.classId == _selectedClass)
+                                .map(
+                                  (s) => DropdownMenuItem(
+                                    value: s.id,
+                                    child: Text(s.name),
+                                  ),
+                                ),
+                          ],
+                          initialValue: _selectedSection,
+                          onChanged: (val) {
+                            setState(() => _selectedSection = val);
+                            _fetchTeachers();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
                             labelText: AppLocalizations.of(context)!.status,
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12,
