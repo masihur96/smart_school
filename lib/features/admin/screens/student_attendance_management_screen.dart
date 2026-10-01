@@ -37,6 +37,7 @@ class _StudentAttendanceManagementScreenState
   String? _selectedSectionId;
   String? _selectedSubjectId;
   String _selectedStatus = 'ALL';
+  bool _isFilterExpanded = false;
 
   @override
   void initState() {
@@ -233,15 +234,44 @@ class _StudentAttendanceManagementScreenState
                         },
                         icon: const Icon(Icons.clear, color: Colors.red),
                       ),
+                    const SizedBox(width: 8),
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          _isFilterExpanded = !_isFilterExpanded;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: (_isFilterExpanded ||
+                                  _selectedClassId != null ||
+                                  _selectedSectionId != null ||
+                                  _selectedSubjectId != null)
+                              ? AppColors.primaryAdmin
+                              : AppColors.primaryAdmin.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.filter_list,
+                          color: (_isFilterExpanded ||
+                                  _selectedClassId != null ||
+                                  _selectedSectionId != null ||
+                                  _selectedSubjectId != null)
+                              ? Colors.white
+                              : AppColors.primaryAdmin,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
-
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildFilterDropdown<ClassRoom>(
+                if (_isFilterExpanded) ...[
+                  const SizedBox(height: 12),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildFilterDropdown<ClassRoom>(
                         hint: l10n.classLabel2,
                         allHint: l10n.allClassHint,
                         value: _selectedClassId,
@@ -292,6 +322,7 @@ class _StudentAttendanceManagementScreenState
                     ],
                   ),
                 ),
+                ],
                 const SizedBox(height: 12),
 
                 // Status Filter Chips
