@@ -169,7 +169,7 @@ class _TeacherSelfAttendanceDetailScreenState
                 ...teachers.map(
                   (t) => DropdownMenuItem(
                     value: t.userId,
-                    child: Text(t.user?.name ?? 'Unknown'),
+                    child: Text(t.user?.name ?? AppLocalizations.of(context)!.unknown),
                   ),
                 ),
               ],

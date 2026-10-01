@@ -914,7 +914,7 @@ class _ResultTabState extends State<_ResultTab> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('Class $c'),
+                          Text(AppLocalizations.of(context)!.classWithParam(c.toString())),
                           const SizedBox(width: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(

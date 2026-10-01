@@ -1914,5 +1914,21 @@
   "receiptDocumentAttachmentOptional": "Receipt / Document Attachment (Optional)",
   "studentAttendanceReport": "Student Attendance Report",
   "teacherAttendanceReport": "Teacher Attendance Report",
-  "classText": "Class"
+  "classText": "Class",
+  "noStudentsFoundIn": "No students found in\n{name}",
+  "@noStudentsFoundIn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "classWithParam": "Class {name}",
+  "@classWithParam": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

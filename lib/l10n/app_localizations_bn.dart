@@ -4059,4 +4059,14 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get classText => 'Class';
+
+  @override
+  String noStudentsFoundIn(String name) {
+    return '$name-এ কোনো শিক্ষার্থী পাওয়া যায়নি';
+  }
+
+  @override
+  String classWithParam(String name) {
+    return 'ক্লাস $name';
+  }
 }

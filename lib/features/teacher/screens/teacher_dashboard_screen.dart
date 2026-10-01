@@ -1371,7 +1371,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
 
   Widget _buildNoticeCard(BuildContext context, Notice notice) {
     bool isNew = false;
-    String timeAgo = 'Unknown';
+    String timeAgo = AppLocalizations.of(context)!.unknown;
     if (notice.createdAt != null) {
       final diff = DateTime.now().difference(notice.createdAt!);
       isNew = diff.inDays <= 3;
@@ -3433,7 +3433,7 @@ class _ClassPerformanceCardWithSubjectDropdownState
                               items: subjects.map((subj) {
                                 return DropdownMenuItem<String>(
                                   value: subj['id'],
-                                  child: Text(subj['name'] ?? 'Unknown'),
+                                  child: Text(subj['name'] ?? AppLocalizations.of(context)!.unknown),
                                 );
                               }).toList(),
                               onChanged: (val) {

@@ -4046,4 +4046,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get classText => 'Class';
+
+  @override
+  String noStudentsFoundIn(String name) {
+    return 'No students found in\n$name';
+  }
+
+  @override
+  String classWithParam(String name) {
+    return 'Class $name';
+  }
 }

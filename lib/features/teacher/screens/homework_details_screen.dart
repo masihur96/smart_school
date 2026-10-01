@@ -508,7 +508,7 @@ class _HomeworkDetailsScreenState extends State<HomeworkDetailsScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : Text(isBulk ? 'Bulk Update' : 'Update'),
+                      : Text(isBulk ? AppLocalizations.of(context)!.bulkUpdate : AppLocalizations.of(context)!.update),
                 ),
               ],
             );

@@ -7542,6 +7542,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Class'**
   String get classText;
+
+  /// No description provided for @noStudentsFoundIn.
+  ///
+  /// In en, this message translates to:
+  /// **'No students found in\n{name}'**
+  String noStudentsFoundIn(String name);
+
+  /// No description provided for @classWithParam.
+  ///
+  /// In en, this message translates to:
+  /// **'Class {name}'**
+  String classWithParam(String name);
 }
 
 class _AppLocalizationsDelegate

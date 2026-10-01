@@ -422,7 +422,7 @@ class _AttendanceTab extends StatelessWidget {
               : students.isEmpty
               ? _EmptyState(
                   icon: Icons.people_outline,
-                  message: 'No students found in\n${classRoom.name}',
+                  message: AppLocalizations.of(context)!.noStudentsFoundIn(classRoom.name),
                 )
               : ListView.separated(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),

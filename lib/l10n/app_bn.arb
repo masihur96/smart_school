@@ -1670,5 +1670,21 @@
   "receiptDocumentAttachmentOptional": "Receipt / Document Attachment (Optional)",
   "studentAttendanceReport": "Student Attendance Report",
   "teacherAttendanceReport": "Teacher Attendance Report",
-  "classText": "Class"
+  "classText": "Class",
+  "noStudentsFoundIn": "{name}-এ কোনো শিক্ষার্থী পাওয়া যায়নি",
+  "@noStudentsFoundIn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "classWithParam": "ক্লাস {name}",
+  "@classWithParam": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }
