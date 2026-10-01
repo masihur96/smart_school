@@ -1047,88 +1047,218 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
 
     return Card(
       margin: const EdgeInsets.only(right: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SizedBox(
-          width: screenSize(context, .75),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    subject,
-                    style: TextStyle(
-                      color: Colors.green.shade700,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isDone
-                          ? Colors.green.withOpacity(0.1)
-                          : Colors.orange.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      hwData.status.toUpperCase(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _showHomeworkDetailsBottomSheet(context, hwData),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SizedBox(
+            width: screenSize(context, .75),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      subject,
                       style: TextStyle(
-                        color: isDone ? Colors.green : Colors.orange,
-                        fontSize: 10,
+                        color: Colors.green.shade700,
                         fontWeight: FontWeight.bold,
+                        fontSize: 12,
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                homework?.title ?? '',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                homework?.description ?? '',
-                style: const TextStyle(fontSize: 12),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const Spacer(),
-              Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 12,
-                    color: Colors.red.shade400,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    homework?.dueDate != null
-                        ? DateFormat('dd MMM yyyy').format(homework!.dueDate)
-                        : "N/A",
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.red.shade400,
-                      fontWeight: FontWeight.w600,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDone
+                            ? Colors.green.withOpacity(0.1)
+                            : Colors.orange.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        hwData.status.toUpperCase(),
+                        style: TextStyle(
+                          color: isDone ? Colors.green : Colors.orange,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  homework?.title ?? '',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
-                ],
-              ),
-            ],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  homework?.description ?? '',
+                  style: const TextStyle(fontSize: 12),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const Spacer(),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
+                      size: 12,
+                      color: Colors.red.shade400,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      homework?.dueDate != null
+                          ? DateFormat('dd MMM yyyy').format(homework!.dueDate)
+                          : "N/A",
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.red.shade400,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  void _showHomeworkDetailsBottomSheet(BuildContext context, StudentHomework hwData) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = const Color(0xFF3B82F6);
+    final homework = hwData.homework;
+    final subject = homework?.subjectInfo?.name ?? AppLocalizations.of(context)!.subjectName;
+    final isDone = hwData.status == 'done';
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  height: 4,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              subject,
+                              style: TextStyle(
+                                color: Colors.green.shade700,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isDone
+                                    ? Colors.green.withOpacity(0.1)
+                                    : Colors.orange.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                hwData.status.toUpperCase(),
+                                style: TextStyle(
+                                  color: isDone ? Colors.green : Colors.orange,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          homework?.title ?? '',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).textTheme.titleLarge?.color,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Icon(Icons.calendar_today_rounded, size: 18, color: Colors.red.shade400),
+                            const SizedBox(width: 8),
+                            Text(
+                              homework?.dueDate != null
+                                  ? 'Due: ${DateFormat('dd MMM yyyy').format(homework!.dueDate)}'
+                                  : 'Due: N/A',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.red.shade400,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        if (homework?.description != null && homework!.description!.isNotEmpty) ...[
+                          Text(
+                            homework.description!,
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -1554,70 +1684,141 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
   }
 
   void _showNoticeDetails(BuildContext context, Notice notice, String timeAgo) {
-    showDialog(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            if (notice.isImportant)
-              const Padding(
-                padding: EdgeInsets.only(right: 8),
-                child: Icon(Icons.priority_high, color: Colors.amber, size: 20),
-              ),
-            Expanded(child: Text(notice.title)),
-          ],
-        ),
-        content: SingleChildScrollView(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Posted by ${notice.postedBy ?? 'Admin'} • $timeAgo',
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              // Handle bar
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  height: 4,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
               ),
-              const SizedBox(height: 16),
-              Text(notice.content, style: const TextStyle(fontSize: 15)),
-              if (notice.fileUrl != null && notice.fileUrl!.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                OutlinedButton.icon(
-                  onPressed: () async {
-                    final url = Uri.parse(notice.fileUrl!);
-                    try {
-                      if (!await launchUrl(
-                        url,
-                        mode: LaunchMode.externalApplication,
-                      )) {
-                        await launchUrl(url, mode: LaunchMode.platformDefault);
-                      }
-                    } catch (_) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.couldNotOpenAttachment,
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (notice.isImportant)
+                              const Padding(
+                                padding: EdgeInsets.only(right: 8, top: 4),
+                                child: Icon(Icons.priority_high, color: Colors.amber, size: 24),
+                              ),
+                            Expanded(
+                              child: Text(
+                                notice.title,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).textTheme.titleLarge?.color,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Icon(Icons.person, size: 16, color: Colors.grey.shade500),
+                            const SizedBox(width: 6),
+                            Text(
+                              notice.postedBy ?? 'Admin',
+                              style: TextStyle(fontSize: 14, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
+                            ),
+                            const Spacer(),
+                            Icon(Icons.access_time, size: 16, color: Colors.grey.shade500),
+                            const SizedBox(width: 6),
+                            Text(
+                              timeAgo,
+                              style: TextStyle(fontSize: 14, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          notice.content,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: isDark ? Colors.grey.shade300 : Colors.grey.shade800,
+                            height: 1.5,
+                          ),
+                        ),
+                        if (notice.fileUrl != null && notice.fileUrl!.isNotEmpty) ...[
+                          const SizedBox(height: 24),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () async {
+                                final url = Uri.parse(notice.fileUrl!);
+                                try {
+                                  if (!await launchUrl(
+                                    url,
+                                    mode: LaunchMode.externalApplication,
+                                  )) {
+                                    await launchUrl(url, mode: LaunchMode.platformDefault);
+                                  }
+                                } catch (_) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          AppLocalizations.of(context)!.couldNotOpenAttachment,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                              icon: const Icon(Icons.attachment),
+                              label: Text(
+                                AppLocalizations.of(context)!.viewAttachment,
+                                style: const TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
                             ),
                           ),
-                        );
-                      }
-                    }
-                  },
-                  icon: const Icon(Icons.attachment),
-                  label: Text(AppLocalizations.of(context)!.viewAttachment),
+                        ],
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
                 ),
-              ],
+              ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)!.close),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
