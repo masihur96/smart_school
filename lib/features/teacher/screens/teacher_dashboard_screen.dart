@@ -2431,94 +2431,146 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
 
   Widget _buildExamCard(BuildContext context, Exam exam) {
     final assignmentsCount = exam.assignments.length;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final startDateStr = exam.startDate != null
         ? DateFormat('MMM dd, yyyy').format(exam.startDate!)
         : 'N/A';
 
+    final Color accentColor = exam.isPublished ? const Color(0xFF10B981) : const Color(0xFFF59E0B);
+    final Color accentLight = accentColor.withValues(alpha: isDark ? 0.2 : 0.1);
+
     return Card(
+      margin: EdgeInsets.zero,
+      elevation: 2,
+      shadowColor: Colors.black26,
       clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+          width: 1,
+        ),
+      ),
       child: InkWell(
         onTap: () {
           _showExamDetailsBottomSheet(context, exam, startDateStr);
         },
-        child: SizedBox(
+        child: Container(
           width: screenSize(context, .88),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                color: accentColor,
+                width: 4,
+              ),
+            ),
+          ),
           child: Stack(
             children: [
               Positioned(
                 right: -20,
-                top: -20,
+                top: -10,
                 child: Icon(
-                  Icons.assignment_rounded,
-                  size: 100,
-                  color: Colors.white.withOpacity(0.1),
+                  Icons.text_snippet_rounded,
+                  size: 110,
+                  color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.03),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: Text(
-                            exam.name,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                exam.name,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).textTheme.titleLarge?.color,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (exam.description != null && exam.description!.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  exam.description!,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                    height: 1.2,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Card(
-                          color: exam.isPublished
-                              ? Colors.green.shade600
-                              : Colors.orange.shade600,
-
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 4.0,
-                              vertical: 2.0,
-                            ),
-                            child: Text(
-                              exam.isPublished ? AppLocalizations.of(context)!.publishedText : AppLocalizations.of(context)!.upcomingText,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
+                        const SizedBox(width: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: accentLight,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            exam.isPublished ? AppLocalizations.of(context)!.publishedText : AppLocalizations.of(context)!.upcomingText,
+                            style: TextStyle(
+                              color: accentColor,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    Text(
-                      exam.description ?? '',
-                      style: TextStyle(fontSize: 12),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    const SizedBox(height: 12),
+                    Divider(height: 1, thickness: 1, color: isDark ? Colors.white10 : Colors.grey.shade100),
+                    const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
                           children: [
-                            Text(
-                              AppLocalizations.of(context)!.startsOn,
-                              style: TextStyle(fontSize: 10),
-                            ),
-                            Text(
-                              startDateStr,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(8),
                               ),
+                              child: Icon(Icons.calendar_today_rounded, size: 14, color: isDark ? Colors.grey.shade300 : Colors.grey.shade600),
+                            ),
+                            const SizedBox(width: 8),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  AppLocalizations.of(context)!.startsOn,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
+                                  ),
+                                ),
+                                Text(
+                                  startDateStr,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -2529,25 +2581,28 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
-                              vertical: 6,
+                              vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
+                              color: isDark ? Colors.deepPurple.shade300.withValues(alpha: 0.15) : Colors.deepPurple.shade50.withValues(alpha: 0.8),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isDark ? Colors.deepPurple.shade300.withValues(alpha: 0.3) : Colors.deepPurple.shade200,
+                              ),
                             ),
                             child: Row(
                               children: [
                                 Icon(
-                                  Icons.menu_book,
+                                  Icons.menu_book_rounded,
                                   size: 14,
-                                  color: Colors.deepPurple.shade900,
+                                  color: isDark ? Colors.deepPurple.shade200 : Colors.deepPurple.shade700,
                                 ),
-                                const SizedBox(width: 4),
+                                const SizedBox(width: 6),
                                 Text(
                                   AppLocalizations.of(context)!.routinesCount(assignmentsCount),
                                   style: TextStyle(
-                                    color: Colors.deepPurple.shade900,
-                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.deepPurple.shade200 : Colors.deepPurple.shade700,
+                                    fontWeight: FontWeight.w700,
                                     fontSize: 12,
                                   ),
                                 ),
