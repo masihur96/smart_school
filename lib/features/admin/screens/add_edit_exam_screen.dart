@@ -293,6 +293,7 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                   (c) => Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: ChoiceChip(
+
                       label: Text(c.name),
                       selected: _selectedFilterClassId == c.id,
                       onSelected: (val) {
