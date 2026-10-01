@@ -679,21 +679,80 @@ class _AttendanceRecordCard extends StatelessWidget {
                     vertical: 8,
                   ),
                   childrenPadding: EdgeInsets.zero,
-                  leading: ZoomableAvatar(
-                    imageUrl: record.student?['avatar']?.toString(),
-                    name: record.studentName,
-                    heroTag: 'student_avatar_${record.id}',
-                    radius: 25,
-                    backgroundColor: statusColor.withOpacity(0.1),
-                    textColor: statusColor,
-                  ),
-                  title: Text(
-                    record.studentName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.black87,
+                  leading: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ZoomableAvatar(
+                          imageUrl: record.student?['avatar']?.toString(),
+                          name: record.studentName,
+                          heroTag: 'student_avatar_${record.id}',
+                          radius: 18,
+                          backgroundColor: statusColor.withOpacity(0.1),
+                          textColor: statusColor,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          DateFormat('MMM dd').format(DateTime.parse(record.date)),
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                  title: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          record.studentName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.black87,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: statusColor.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              statusIcon,
+                              size: 12,
+                              color: statusColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              record.status.toUpperCase(),
+                              style: TextStyle(
+                                color: statusColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 6.0),
@@ -741,60 +800,6 @@ class _AttendanceRecordCard extends StatelessWidget {
                                   fontWeight: FontWeight.w500,
                                 ),
                                 overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: statusColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: statusColor.withOpacity(0.3),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    statusIcon,
-                                    size: 12,
-                                    color: statusColor,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    record.status.toUpperCase(),
-                                    style: TextStyle(
-                                      color: statusColor,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              Icons.access_time,
-                              size: 12,
-                              color: Colors.grey.shade400,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              DateFormat(
-                                'MMM dd, yyyy',
-                              ).format(DateTime.parse(record.date)),
-                              style: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontSize: 12,
                               ),
                             ),
                           ],
