@@ -25,6 +25,7 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
   String? _selectedSection;
   String? _selectedSubject;
   bool _isLoading = false;
+  bool _showFilter = false;
 
   @override
   void initState() {
@@ -101,12 +102,23 @@ class _HomeworkManagementScreenState extends State<HomeworkManagementScreen> {
               backgroundColor: AppColors.primaryTeacher,
               foregroundColor: Colors.white,
               elevation: 0,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.filter_list),
+                  onPressed: () {
+                    setState(() {
+                      _showFilter = !_showFilter;
+                    });
+                  },
+                ),
+              ],
             ),
 
       body: Column(
         children: [
           // Filter Bar
-          Container(
+          if (_showFilter)
+            Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               // color: Colors.white,
