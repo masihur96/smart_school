@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -268,146 +269,135 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     final sectionProvider = context.watch<SectionSetupNotifier>();
     final subjectProvider = context.watch<SubjectSetupNotifier>();
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-      decoration: BoxDecoration(
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Search Bar & Filter Toggle
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 5,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    onSubmitted: (_) => _fetchData(),
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context)!.searchByStudentName,
+                      hintStyle: TextStyle(color: Colors.grey.shade400),
+                      prefixIcon: Icon(
+                        CupertinoIcons.search,
+                        color: Colors.grey.shade500,
+                      ),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 20),
+                              onPressed: () {
+                                _searchController.clear();
+                                _fetchData();
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                    ),
+                    onChanged: (val) => setState(() {}),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.filter_list,
 
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
-        ),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isFilterExpanded = !_isFilterExpanded;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
 
-      ),
-      child: AnimatedSize(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Search Bar & Filter Toggle
+          if (_isFilterExpanded) ...[
+            const SizedBox(height: 16),
+            // Dropdowns Row 1
             Row(
               children: [
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 5,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      onSubmitted: (_) => _fetchData(),
-                      textInputAction: TextInputAction.search,
-                      decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context)!.searchByStudentName,
-                        hintStyle: TextStyle(color: Colors.grey.shade400),
-                        prefixIcon: Icon(
-                          CupertinoIcons.search,
-                          color: Colors.grey.shade500,
-                        ),
-                        suffixIcon: _searchController.text.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear, size: 20),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  _fetchData();
-                                },
-                              )
-                            : null,
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                      ),
-                      onChanged: (val) => setState(() {}),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.filter_list,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
+                  child: _buildDropdown<String>(
+                    hint: AppLocalizations.of(context)!.className,
+                    value: _selectedClassId,
+                    icon: Icons.class_outlined,
+                    items: classProvider.classes
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c.id,
+                            child: Text(c.name),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
                       setState(() {
-                        _isFilterExpanded = !_isFilterExpanded;
+                        _selectedClassId = value;
+                        _selectedSectionId = null;
+                        _selectedSubjectId = null;
                       });
+                      _fetchData();
                     },
                   ),
                 ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildDropdown<String>(
+                    hint: 'Section',
+                    value: _selectedSectionId,
+                    icon: Icons.groups_outlined,
+                    items: sectionProvider.sections
+                        .where((s) => s.classId == _selectedClassId)
+                        .map(
+                          (s) => DropdownMenuItem(
+                            value: s.id,
+                            child: Text(s.name),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() => _selectedSectionId = value);
+                      _fetchData();
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                _buildDateRangePicker(),
               ],
             ),
-
-            if (_isFilterExpanded) ...[
-              const SizedBox(height: 16),
-              // Dropdowns Row 1
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildDropdown<String>(
-                      hint: AppLocalizations.of(context)!.className,
-                      value: _selectedClassId,
-                      icon: Icons.class_outlined,
-                      items: classProvider.classes
-                          .map(
-                            (c) => DropdownMenuItem(
-                              value: c.id,
-                              child: Text(c.name),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedClassId = value;
-                          _selectedSectionId = null;
-                          _selectedSubjectId = null;
-                        });
-                        _fetchData();
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildDropdown<String>(
-                      hint: 'Section',
-                      value: _selectedSectionId,
-                      icon: Icons.groups_outlined,
-                      items: sectionProvider.sections
-                          .where((s) => s.classId == _selectedClassId)
-                          .map(
-                            (s) => DropdownMenuItem(
-                              value: s.id,
-                              child: Text(s.name),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() => _selectedSectionId = value);
-                        _fetchData();
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  _buildDateRangePicker(),
-                ],
-              ),
-            ],
-
           ],
-        ),
+
+        ],
       ),
     );
   }
@@ -623,6 +613,21 @@ class _AttendanceRecordCard extends StatelessWidget {
   final PeriodAttendance record;
   const _AttendanceRecordCard({required this.record});
 
+  String _formatTime(String? timeStr) {
+    if (timeStr == null || timeStr.isEmpty) return '--';
+    try {
+      final parts = timeStr.split(':');
+      if (parts.length >= 2) {
+        final now = DateTime.now();
+        final dt = DateTime(now.year, now.month, now.day, int.parse(parts[0]), int.parse(parts[1]));
+        return DateFormat('hh:mm a').format(dt);
+      }
+      return timeStr;
+    } catch (e) {
+      return timeStr;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final statusColor = _getStatusColor(record.status);
@@ -667,50 +672,13 @@ class _AttendanceRecordCard extends StatelessWidget {
                     vertical: 8,
                   ),
                   childrenPadding: EdgeInsets.zero,
-                  leading: Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: statusColor.withOpacity(0.2),
-                        width: 1,
-                      ),
-                    ),
-                    clipBehavior: Clip.hardEdge,
-                    child: (record.student?['avatar'] != null && record.student!['avatar'].toString().isNotEmpty)
-                        ? CachedNetworkImage(
-                            imageUrl: record.student!['avatar'].toString(),
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => const Center(
-                              child: CupertinoActivityIndicator(),
-                            ),
-                            errorWidget: (context, url, error) => Center(
-                              child: Text(
-                                record.studentName.isNotEmpty
-                                    ? record.studentName[0].toUpperCase()
-                                    : '?',
-                                style: TextStyle(
-                                  color: statusColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                ),
-                              ),
-                            ),
-                          )
-                        : Center(
-                            child: Text(
-                              record.studentName.isNotEmpty
-                                  ? record.studentName[0].toUpperCase()
-                                  : '?',
-                              style: TextStyle(
-                                color: statusColor,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
-                            ),
-                          ),
+                  leading: ZoomableAvatar(
+                    imageUrl: record.student?['avatar']?.toString(),
+                    name: record.studentName,
+                    heroTag: 'student_avatar_${record.id}',
+                    radius: 25,
+                    backgroundColor: statusColor.withOpacity(0.1),
+                    textColor: statusColor,
                   ),
                   title: Text(
                     record.studentName,
@@ -831,7 +799,7 @@ class _AttendanceRecordCard extends StatelessWidget {
                           _buildInfoRow(
                             Icons.schedule_outlined,
                             'Routine',
-                            '${record.routineInfo?.startTime ?? "--"} - ${record.routineInfo?.endTime ?? "--"}',
+                            '${_formatTime(record.routineInfo?.startTime)} - ${_formatTime(record.routineInfo?.endTime)}',
                           ),
                           const SizedBox(height: 12),
                           _buildInfoRow(
