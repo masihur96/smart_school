@@ -1546,32 +1546,44 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 12),
-                          ...examData.myMarks.map((mark) => Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    (mark.subject?.name != null && mark.subject!.name.isNotEmpty) 
-                                        ? mark.subject!.name 
-                                        : 'Unknown Subject',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: isDark ? Colors.grey.shade300 : Colors.grey.shade800,
+                          ...examData.myMarks.map((mark) {
+                            final subjectName = (mark.subject?.name != null && mark.subject!.name.isNotEmpty)
+                                ? mark.subject!.name
+                                : 'Unknown Subject';
+                            final marksText = mark.marksObtained.truncateToDouble() == mark.marksObtained
+                                ? mark.marksObtained.toInt().toString()
+                                : mark.marksObtained.toStringAsFixed(1);
+                            final totalText = mark.totalMarks.truncateToDouble() == mark.totalMarks
+                                ? mark.totalMarks.toInt().toString()
+                                : mark.totalMarks.toStringAsFixed(1);
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      subjectName,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: isDark ? Colors.grey.shade300 : Colors.grey.shade800,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                ),
-                                Text(
-                                  '${mark.marksObtained} / ${mark.totalMarks}',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
+                                  Text(
+                                    '$marksText / $totalText',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          )),
+                                ],
+                              ),
+                            );
+                          }),
                         ],
                         const SizedBox(height: 24),
                       ],
