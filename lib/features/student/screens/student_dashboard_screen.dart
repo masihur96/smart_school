@@ -609,7 +609,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
               AppLocalizations.of(
                 context,
               )!.seeAll, // Modify with l10n later if needed
-              style: TextStyle(color: AppColors.primaryStudent),
+
             ),
           ),
       ],
@@ -1423,7 +1423,9 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                               children: [
                                 Expanded(
                                   child: Text(
-                                    mark.subject?.name ?? 'Unknown Subject',
+                                    (mark.subject?.name != null && mark.subject!.name.isNotEmpty) 
+                                        ? mark.subject!.name 
+                                        : 'Unknown Subject',
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: isDark ? Colors.grey.shade300 : Colors.grey.shade800,

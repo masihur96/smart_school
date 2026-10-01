@@ -151,7 +151,7 @@ class Subject {
 
   factory Subject.fromJson(Map<String, dynamic> json) => Subject(
     id: json['uuid'] ?? json['id'] ?? json['_id'] ?? '',
-    name: json['name'] ?? '',
+    name: json['name'] ?? json['title'] ?? json['subject_name'] ?? json['subjectName'] ?? '',
     code: json['code'] ?? '',
     classId: json['classId'] ?? json['class_id'] ?? '',
     schoolId: json['schoolId'] ?? json['school_id'] ?? '',
@@ -931,6 +931,7 @@ class Result {
   });
 
   factory Result.fromJson(Map<String, dynamic> json) {
+    print("DEBUG_RESULT_JSON: $json");
     double parsedMarksObtained = 0.0;
     final rawObtained = json['marksObtained'] ?? json['marks_obtained'] ?? json['marks'];
     if (rawObtained != null) {
@@ -983,9 +984,20 @@ class Result {
       totalMarks: parsedTotalMarks,
       remarks: json['remarks']?.toString() ?? json['comment']?.toString() ?? '',
       exam: json['exam'] != null && json['exam'] is Map ? Exam.fromJson(json['exam']) : null,
-      subject: json['subject'] != null && json['subject'] is Map
-          ? Subject.fromJson(json['subject'])
-          : null,
+      subject: () {
+        if (json['subject'] != null && json['subject'] is Map) {
+          return Subject.fromJson(json['subject']);
+        } else if (json['subject'] is String) {
+          return Subject(id: subjectId ?? '', name: json['subject']);
+        } else if (json['subject_name'] != null) {
+          return Subject(id: subjectId ?? '', name: json['subject_name'].toString());
+        } else if (json['subjectName'] != null) {
+          return Subject(id: subjectId ?? '', name: json['subjectName'].toString());
+        } else if (json['subject_title'] != null) {
+          return Subject(id: subjectId ?? '', name: json['subject_title'].toString());
+        }
+        return null;
+      }(),
       teacher: json['teacher'] != null && json['teacher'] is Map
           ? Teacher.fromJson(json['teacher'])
           : null,
