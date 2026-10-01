@@ -37,6 +37,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
   Set<String> _selectedStudentIds = {};
   late List<Student> _currentStudents;
   bool _isLoading = false;
+  bool _isFiltersExpanded = false;
   Uint8List? _pdfBytes;
   pdfx.PdfControllerPinch? _pdfController;
 
@@ -149,6 +150,15 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
+            icon: Icon(_isFiltersExpanded ? Icons.filter_list_off : Icons.filter_list),
+            onPressed: () {
+              setState(() {
+                _isFiltersExpanded = !_isFiltersExpanded;
+              });
+            },
+            tooltip: 'Filter',
+          ),
+          IconButton(
             icon: const Icon(Icons.print),
             onPressed: () async {
               if (_pdfBytes != null) {
@@ -173,7 +183,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
       ),
       body: Column(
         children: [
-          _buildFilters(uniqueClasses, uniqueSections),
+          if (_isFiltersExpanded) _buildFilters(uniqueClasses, uniqueSections),
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
