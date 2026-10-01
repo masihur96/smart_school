@@ -43,8 +43,9 @@ class _BookGridCardState extends State<BookGridCard>
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final book = widget.book;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ScaleTransition(
       scale: _scaleAnim,
       child: GestureDetector(
@@ -52,15 +53,30 @@ class _BookGridCardState extends State<BookGridCard>
         onTapDown: _onTapDown,
         onTapUp: _onTapUp,
         onTapCancel: _onTapCancel,
-        child: Card(
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(15),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Cover image section
                 Expanded(
-                  flex: 6,
+                  flex: 65,
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
@@ -75,18 +91,18 @@ class _BookGridCardState extends State<BookGridCard>
                           return _CoverLoadingSkeleton();
                         },
                       ),
-                      // Gradient overlay at bottom
+                      // Gradient overlay for better badge visibility
                       Positioned(
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        height: 60,
+                        height: 50,
                         child: Container(
                           decoration: const BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
-                              colors: [Color(0xCC000000), Colors.transparent],
+                              colors: [Colors.black87, Colors.transparent],
                             ),
                           ),
                         ),
@@ -103,23 +119,23 @@ class _BookGridCardState extends State<BookGridCard>
                         left: 8,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 7,
+                            horizontal: 6,
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.22),
-                            borderRadius: BorderRadius.circular(6),
+                            color: Colors.black.withValues(alpha: 0.4),
+                            borderRadius: BorderRadius.circular(4),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.2),
                             ),
                           ),
                           child: Text(
-                            book.category,
+                            book.category.toUpperCase(),
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.3,
+                              fontSize: 8,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
                             ),
                           ),
                         ),
@@ -129,61 +145,45 @@ class _BookGridCardState extends State<BookGridCard>
                 ),
                 // Info section
                 Expanded(
-                  flex: 4,
+                  flex: 35,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         // Title
                         Text(
                           book.title,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-
-                            height: 1.3,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            height: 1.2,
+                            color: Theme.of(context).textTheme.titleLarge?.color,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        const SizedBox(height: 4),
                         // Author
                         Row(
                           children: [
-                            const Icon(Icons.person_rounded, size: 11),
-                            const SizedBox(width: 3),
+                            Icon(
+                              Icons.person_outline_rounded,
+                              size: 13,
+                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                            ),
+                            const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 book.author,
-                                style: const TextStyle(
-                                  fontSize: 11,
-
+                                style: TextStyle(
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w500,
+                                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          ],
-                        ),
-                        // Tap hint
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              l10n.viewDetails,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: const Color(0xFF2563EB).withOpacity(0.7),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(width: 2),
-                            Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              size: 9,
-                              color: const Color(0xFF2563EB).withOpacity(0.7),
                             ),
                           ],
                         ),

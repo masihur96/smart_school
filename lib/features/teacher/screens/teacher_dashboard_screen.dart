@@ -1208,7 +1208,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
         ),
       ],
     );
-  }n
+  }
 
   Widget _buildHomeworkCard(BuildContext context, Homework homework) {
     final bool isOverdue = homework.dueDate.isBefore(DateTime.now());
