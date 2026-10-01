@@ -196,7 +196,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
       ),
       body: Column(
         children: [
-          _buildFilters(uniqueClasses, uniqueSections),
+         // _buildFilters(uniqueClasses, uniqueSections),
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
