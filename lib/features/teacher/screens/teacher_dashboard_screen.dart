@@ -1208,164 +1208,326 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
         ),
       ],
     );
-  }
+  }n
 
   Widget _buildHomeworkCard(BuildContext context, Homework homework) {
     final bool isOverdue = homework.dueDate.isBefore(DateTime.now());
-    return Container(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final Color statusColor = isOverdue ? const Color(0xFFEF4444) : const Color(0xFF10B981);
+    final Color statusLight = statusColor.withValues(alpha: isDark ? 0.2 : 0.1);
+
+    return Card(
       margin: const EdgeInsets.only(right: 16, bottom: 4, top: 4),
-      width: screenSize(context, .8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+      elevation: 2,
+      shadowColor: Colors.black26,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.15)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        side: BorderSide(
+          color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+          width: 1,
+        ),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {
-            // Action to view homework details
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(14.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
+      child: InkWell(
+        onTap: () {
+          _showHomeworkDetailsBottomSheet(context, homework);
+        },
+        child: Container(
+          width: screenSize(context, .8),
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                color: statusColor,
+                width: 4,
+              ),
+            ),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                right: -20,
+                top: -20,
+                child: Icon(
+                  Icons.assignment_turned_in_rounded,
+                  size: 110,
+                  color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.03),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryTeacher.withValues(
-                              alpha: 0.1,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.assignment_outlined,
-                            size: 16,
-                            color: AppColors.primaryTeacher,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                homework.title,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).textTheme.titleLarge?.color,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (homework.description.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  homework.description,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                    height: 1.2,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: statusLight,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           child: Text(
-                            homework.title,
-                            style: const TextStyle(
+                            isOverdue ? 'Overdue' : 'Active', // Fallback or static text
+                            style: TextStyle(
+                              color: statusColor,
+                              fontSize: 11,
                               fontWeight: FontWeight.bold,
-                              fontSize: 15,
                             ),
-                            maxLines: homework.description.isEmpty ? 2 : 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 5),
-                    Text(
-                      homework.description,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade600,
-                        height: 1.3,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(height: 12),
+                    Divider(height: 1, thickness: 1, color: isDark ? Colors.white10 : Colors.grey.shade100),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              Icons.class_outlined,
-                              size: 14,
-                              color: Colors.grey.shade500,
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.class_outlined,
+                                  size: 13,
+                                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  homework.classInfo?.name ?? "--",
+                                  style: TextStyle(
+                                    color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(height: 2),
                             Text(
-                              homework.classInfo?.name ?? "--",
+                              homework.subjectInfo?.name ?? "--",
                               style: TextStyle(
-                                color: Colors.grey.shade700,
-                                fontSize: 12,
+                                color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
                         ),
-                        Text(
-                          homework.subjectInfo?.name ?? "",
-                          style: TextStyle(
-                            color: Colors.grey.shade700,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today_rounded,
+                              size: 12,
+                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              DateFormat('dd MMM').format(homework.dueDate),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showHomeworkDetailsBottomSheet(BuildContext context, Homework homework) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bool isOverdue = homework.dueDate.isBefore(DateTime.now());
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  height: 4,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            homework.title,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).textTheme.titleLarge?.color,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isOverdue ? Colors.red.shade600 : Colors.green.shade600,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            isOverdue ? 'Overdue' : 'Active',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isOverdue
-                            ? Colors.red.shade50
-                            : Colors.green.shade50,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: isOverdue
-                              ? Colors.red.shade100
-                              : Colors.green.shade100,
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Icon(Icons.class_outlined, size: 18, color: AppColors.primaryTeacher),
+                        const SizedBox(width: 8),
+                        Text(
+                          homework.classInfo?.name ?? "--",
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.menu_book_outlined, size: 18, color: AppColors.primaryTeacher),
+                        const SizedBox(width: 8),
+                        Text(
+                          homework.subjectInfo?.name ?? "--",
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.event_available_rounded, size: 18, color: isOverdue ? Colors.red.shade500 : Colors.green.shade600),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Due: ${DateFormat('dd MMM, EEEE').format(homework.dueDate)}',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: isOverdue ? Colors.red.shade600 : Colors.green.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    if (homework.description.isNotEmpty) ...[
+                      Text(
+                        homework.description,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+                          height: 1.4,
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today_outlined,
-                            size: 11,
-                            color: isOverdue
-                                ? Colors.red.shade700
-                                : Colors.green.shade700,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            DateFormat('dd MMM, EEEE').format(homework.dueDate),
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: isOverdue
-                                  ? Colors.red.shade700
-                                  : Colors.green.shade700,
+                      const SizedBox(height: 24),
+                    ],
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).cardColor,
+                          foregroundColor: Theme.of(context).textTheme.titleLarge?.color,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: isDark ? Colors.white12 : Colors.black12,
                             ),
                           ),
-                        ],
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)!.cancel,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
                       ),
                     ),
+                    const SizedBox(height: 24),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
