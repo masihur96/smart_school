@@ -382,7 +382,7 @@ class PricingPlanCard extends StatelessWidget {
                     context,
                     Icons.calendar_month_rounded,
                     'Monthly',
-                    '\$${plan.pricePerMonth}',
+                    '৳${plan.pricePerMonth}',
                     AppColors.success,
                   ),
                 ),
@@ -392,7 +392,7 @@ class PricingPlanCard extends StatelessWidget {
                     context,
                     Icons.person_outline_rounded,
                     'Per Student',
-                    '\$${plan.pricePerStudent}',
+                    '৳${plan.pricePerStudent}',
                     AppColors.primary,
                   ),
                 ),
@@ -752,7 +752,7 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
                   children: [
                     Expanded(
                       child: _buildTextField(
-                        'Price/Month (\$)',
+                        'Price/Month (৳)',
                         _priceMonthController,
                         Icons.monetization_on_outlined,
                         keyboardType: TextInputType.number,
@@ -761,7 +761,7 @@ class _AddPricingPlanBottomSheetState extends State<AddPricingPlanBottomSheet> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: _buildTextField(
-                        'Price/Student (\$)',
+                        'Price/Student (৳)',
                         _priceStudentController,
                         Icons.person_pin_circle_outlined,
                         keyboardType: TextInputType.number,
