@@ -969,7 +969,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
           children: [
             // Header: Teal accent, left aligned
             pw.Row(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
               children: [
                 if (schoolLogo != null)
                   pw.Container(
@@ -982,12 +982,16 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      BanglaTextRenderer.cachedWidget(
-                        schoolName.toUpperCase(),
-                        style: pw.TextStyle(
-                          fontWeight: pw.FontWeight.bold,
-                          fontSize: 24,
-                          color: PdfColors.teal900,
+                      pw.FittedBox(
+                        fit: pw.BoxFit.scaleDown,
+                        alignment: pw.Alignment.centerLeft,
+                        child: BanglaTextRenderer.cachedWidget(
+                          schoolName,
+                          style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 24,
+                            color: PdfColors.teal900,
+                          ),
                         ),
                       ),
                       pw.SizedBox(height: 4),
@@ -1000,10 +1004,20 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                           letterSpacing: 2,
                         ),
                       ),
-                      pw.SizedBox(height: 2),
-                      if (schoolAddress.isNotEmpty) BanglaTextRenderer.cachedWidget(schoolAddress, style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+                      pw.SizedBox(height: 4),
+                      if (schoolAddress.isNotEmpty)
+                        BanglaTextRenderer.cachedWidget(
+                          schoolAddress,
+                          style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                        ),
                       if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty)
-                        BanglaTextRenderer.cachedWidget('$schoolPhone ${schoolEmail.isNotEmpty ? '| $schoolEmail' : ''}', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.only(top: 2),
+                          child: BanglaTextRenderer.cachedWidget(
+                            '$schoolPhone ${schoolEmail.isNotEmpty ? '| $schoolEmail' : ''}',
+                            style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -1153,11 +1167,15 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                 margin: const pw.EdgeInsets.only(bottom: 12),
                 child: pw.Image(schoolLogo),
               ),
-            BanglaTextRenderer.cachedWidget(
-              schoolName,
-              style: pw.TextStyle(
-                fontWeight: pw.FontWeight.bold,
-                fontSize: 26,
+            pw.FittedBox(
+              fit: pw.BoxFit.scaleDown,
+              alignment: pw.Alignment.center,
+              child: BanglaTextRenderer.cachedWidget(
+                schoolName,
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 26,
+                ),
               ),
             ),
             pw.SizedBox(height: 4),
@@ -1165,6 +1183,14 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
               schoolAddress,
               style: const pw.TextStyle(fontSize: 10),
             ),
+            if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty)
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(top: 2),
+                child: BanglaTextRenderer.cachedWidget(
+                  '$schoolPhone ${schoolEmail.isNotEmpty ? '| $schoolEmail' : ''}',
+                  style: const pw.TextStyle(fontSize: 10),
+                ),
+              ),
             pw.SizedBox(height: 16),
             pw.Container(
               padding: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -1323,17 +1349,21 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
             // Minimal Header
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
               children: [
                 pw.Expanded(
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      BanglaTextRenderer.cachedWidget(
-                        schoolName,
-                        style: pw.TextStyle(
-                          fontWeight: pw.FontWeight.bold,
-                          fontSize: 20,
+                      pw.FittedBox(
+                        fit: pw.BoxFit.scaleDown,
+                        alignment: pw.Alignment.centerLeft,
+                        child: BanglaTextRenderer.cachedWidget(
+                          schoolName,
+                          style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 22,
+                          ),
                         ),
                       ),
                       pw.SizedBox(height: 4),
@@ -1344,13 +1374,30 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
                           color: PdfColors.grey700,
                         ),
                       ),
+                      if (schoolAddress.isNotEmpty)
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.only(top: 4),
+                          child: BanglaTextRenderer.cachedWidget(
+                            schoolAddress,
+                            style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                          ),
+                        ),
+                      if (schoolPhone.isNotEmpty || schoolEmail.isNotEmpty)
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.only(top: 2),
+                          child: BanglaTextRenderer.cachedWidget(
+                            '$schoolPhone ${schoolEmail.isNotEmpty ? '| $schoolEmail' : ''}',
+                            style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                          ),
+                        ),
                     ],
                   ),
                 ),
                 if (schoolLogo != null)
                   pw.Container(
-                    height: 40,
-                    width: 40,
+                    height: 50,
+                    width: 50,
+                    margin: const pw.EdgeInsets.only(left: 16),
                     child: pw.Image(schoolLogo),
                   ),
               ],
