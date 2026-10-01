@@ -613,7 +613,7 @@ class SubscriptionCard extends StatelessWidget {
                         _chip(
                           context,
                           Icons.payments_rounded,
-                          '\$${plan?.pricePerMonth ?? '0'}/mo',
+                          '৳${plan?.pricePerMonth ?? '0'}/mo',
                           AppColors.success,
                         ),
                         const SizedBox(width: 6),
@@ -712,7 +712,7 @@ class SubscriptionCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 3),
                               Text(
-                                'BDT ${subscription.amount}',
+                                '৳${subscription.amount}',
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.success,
