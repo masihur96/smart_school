@@ -51,6 +51,9 @@ class Subscription {
   final String endDate;
   final bool isActive;
   final int lastStudentCount;
+  final String? paymentMethod;
+  final String? transactionId;
+  final String? amount;
   final String createdAt;
   final String updatedAt;
   final PricingPlan? pricingPlan;
@@ -63,6 +66,9 @@ class Subscription {
     required this.endDate,
     required this.isActive,
     required this.lastStudentCount,
+    this.paymentMethod,
+    this.transactionId,
+    this.amount,
     required this.createdAt,
     required this.updatedAt,
     this.pricingPlan,
@@ -77,6 +83,9 @@ class Subscription {
       endDate: json['endDate'] ?? '',
       isActive: json['isActive'] ?? false,
       lastStudentCount: json['lastStudentCount'] ?? 0,
+      paymentMethod: json['paymentMethod'],
+      transactionId: json['transactionId'],
+      amount: json['amount'],
       createdAt: json['createdAt'] ?? '',
       updatedAt: json['updatedAt'] ?? '',
       pricingPlan: json['pricingPlan'] != null
@@ -96,6 +105,9 @@ class Subscription {
       'endDate': endDate,
       'isActive': isActive,
       'lastStudentCount': lastStudentCount,
+      'paymentMethod': paymentMethod,
+      'transactionId': transactionId,
+      'amount': amount,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'pricingPlan': pricingPlan?.toJson(),

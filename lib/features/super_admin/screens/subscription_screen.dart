@@ -630,7 +630,7 @@ class SubscriptionCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -661,9 +661,13 @@ class SubscriptionCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                const SizedBox(height: 16),
+                // ── Payment Info Panel ──────────────────────────────
+                _buildPaymentPanel(context),
               ],
             ),
           ),
+
 
           Divider(height: 1, color: AppColors.border.withOpacity(0.1)),
 
@@ -762,6 +766,208 @@ class SubscriptionCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPaymentPanel(BuildContext context) {
+    final hasPayment = subscription.paymentMethod != null ||
+        subscription.transactionId != null ||
+        subscription.amount != null;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: hasPayment
+            ? AppColors.white
+            : AppColors.white.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: hasPayment
+              ? AppColors.primary.withOpacity(0.2)
+              : AppColors.border.withOpacity(0.08),
+        ),
+      ),
+      child: hasPayment
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.receipt_long_rounded,
+                      size: 14,
+                      color: AppColors.primary,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Payment Info',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    // Payment Method badge
+                    if (subscription.paymentMethod != null) ...[
+                      _buildPaymentBadge(context, subscription.paymentMethod!),
+                      const SizedBox(width: 12),
+                    ],
+                    // Amount
+                    if (subscription.amount != null)
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.paid_rounded,
+                              size: 14,
+                              color: AppColors.success,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'BDT ${subscription.amount}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.success,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+                if (subscription.transactionId != null) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.lightGrey.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.tag_rounded,
+                          size: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'TXN: ',
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(color: AppColors.textSecondary),
+                        ),
+                        Expanded(
+                          child: Text(
+                            subscription.transactionId!,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                  fontFamily: 'monospace',
+                                ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        GestureDetector(
+                          onTap: () {
+                            Clipboard.setData(
+                              ClipboardData(
+                                text: subscription.transactionId!,
+                              ),
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('Transaction ID copied'),
+                                behavior: SnackBarBehavior.floating,
+                                duration: const Duration(seconds: 2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            );
+                          },
+                          child: Icon(
+                            Icons.copy_rounded,
+                            size: 14,
+                            color: AppColors.primary.withOpacity(0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            )
+          : Row(
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 14,
+                  color: AppColors.textSecondary.withOpacity(0.5),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'No payment info — free or auto-assigned plan',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary.withOpacity(0.5),
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildPaymentBadge(BuildContext context, String method) {
+    final Map<String, Color> methodColors = {
+      'bkash': const Color(0xFFE2136E),
+      'nagad': const Color(0xFFE6382A),
+      'rocket': const Color(0xFF8C3494),
+      'bank': const Color(0xFF1A73E8),
+      'credit_card': const Color(0xFF1A73E8),
+    };
+    final color =
+        methodColors[method.toLowerCase()] ?? AppColors.primary;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.credit_card_rounded, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            method,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

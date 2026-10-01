@@ -316,7 +316,13 @@ class AuthNotifier extends ChangeNotifier {
     }
   }
 
-  Future<bool> assignPricingPlan(String planId, bool isFree) async {
+  Future<bool> assignPricingPlan(
+    String planId,
+    bool isFree, {
+    String? paymentMethod,
+    String? transactionId,
+    num? amount,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -333,6 +339,18 @@ class AuthNotifier extends ChangeNotifier {
       final startDate = formatIso(now);
       final endDate = formatIso(now.add(const Duration(days: 30)));
 
+      final Map<String, dynamic> body = {
+        'schoolId': _user!.schoolId,
+        'pricingPlanId': planId,
+        'startDate': startDate,
+        'endDate': endDate,
+        'isActive': isFree,
+      };
+
+      if (paymentMethod != null) body['paymentMethod'] = paymentMethod;
+      if (transactionId != null) body['transactionId'] = transactionId;
+      if (amount != null) body['amount'] = amount;
+
       final response = await DataProvider().performRequest(
         'POST',
         APIPath.assignSubscription,
@@ -340,13 +358,7 @@ class AuthNotifier extends ChangeNotifier {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
-        data: {
-          'schoolId': _user!.schoolId,
-          'pricingPlanId': planId,
-          'startDate': startDate,
-          'endDate': endDate,
-          'isActive': isFree ? true : false,
-        },
+        data: body,
       );
 
       if (response != null &&

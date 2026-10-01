@@ -860,6 +860,9 @@ class _PaymentBottomSheetContentState
                         final success = await widget.auth.assignPricingPlan(
                           widget.plan.id!,
                           false,
+                          paymentMethod: _selectedMethod,
+                          transactionId: _trxIdController.text.trim(),
+                          amount: num.tryParse(widget.plan.pricePerMonth),
                         );
 
                         if (mounted) {
