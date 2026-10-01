@@ -77,6 +77,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final List<bool> _visitedTabs = [true, false, false, false, false];
+  final BottomBarController _bottomBarController = BottomBarController();
 
   int get _selectedIndex => _tabController.index;
 
@@ -126,6 +127,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
 
   @override
   void dispose() {
+    _bottomBarController.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -241,6 +243,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
           ],
         ),
         body: BottomBar(
+          controller: _bottomBarController,
           layout: BottomBarLayout(
             width: MediaQuery.of(context).size.width,
             offset: 10,
@@ -260,7 +263,22 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
               ],
             ),
           ),
-          scrollBehavior: const BottomBarScrollBehavior(hideOnScroll: true),
+          scrollBehavior: BottomBarScrollBehavior(
+            hideOnScroll: true,
+            showAtStart: true,
+            predicate: (notification) {
+              if (notification.metrics.axis != Axis.vertical) return true;
+              if (notification.metrics.pixels >= notification.metrics.maxScrollExtent) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted && _bottomBarController.isAttached && !_bottomBarController.isVisible) {
+                    _bottomBarController.show();
+                  }
+                });
+                return false;
+              }
+              return true;
+            },
+          ),
           showIcon: false,
           body: TabBarView(
             controller: _tabController,

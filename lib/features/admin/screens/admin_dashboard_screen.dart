@@ -72,6 +72,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
 
   /// Tracks which tabs have been opened at least once for lazy init.
   final Set<int> _tabsInitialized = {0};
+  final BottomBarController _bottomBarController = BottomBarController();
 
   /// Lazy-fetch guards — each performance section triggers its own
   /// provider fetch exactly once when it first becomes visible.
@@ -105,6 +106,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
 
   @override
   void dispose() {
+    _bottomBarController.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -235,6 +237,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
           ],
         ),
         body: BottomBar(
+          controller: _bottomBarController,
           layout: BottomBarLayout(
             width: MediaQuery.of(context).size.width,
             offset: 10,
@@ -254,7 +257,22 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
               ],
             ),
           ),
-          scrollBehavior: const BottomBarScrollBehavior(hideOnScroll: true),
+          scrollBehavior: BottomBarScrollBehavior(
+            hideOnScroll: true,
+            showAtStart: true,
+            predicate: (notification) {
+              if (notification.metrics.axis != Axis.vertical) return true;
+              if (notification.metrics.pixels >= notification.metrics.maxScrollExtent) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted && _bottomBarController.isAttached && !_bottomBarController.isVisible) {
+                    _bottomBarController.show();
+                  }
+                });
+                return false;
+              }
+              return true;
+            },
+          ),
           showIcon: false,
           body: TabBarView(
             controller: _tabController,
