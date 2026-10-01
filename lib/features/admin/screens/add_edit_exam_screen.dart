@@ -281,20 +281,40 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: ChoiceChip(
-                    label: Text(AppLocalizations.of(context)!.all),
+                    label: Text(
+                      AppLocalizations.of(context)!.all,
+                      style: TextStyle(
+                        color: _selectedFilterClassId == null
+                            ? Colors.black
+                            : (Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black),
+                      ),
+                    ),
                     selected: _selectedFilterClassId == null,
                     onSelected: (val) {
                       if (val) setState(() => _selectedFilterClassId = null);
                     },
                     selectedColor: Colors.purple.shade100,
+                    backgroundColor: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey.shade800
+                        : null,
                   ),
                 ),
                 ...filterClasses.map(
                   (c) => Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: ChoiceChip(
-
-                      label: Text(c.name),
+                      label: Text(
+                        c.name,
+                        style: TextStyle(
+                          color: _selectedFilterClassId == c.id
+                              ? Colors.black
+                              : (Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black),
+                        ),
+                      ),
                       selected: _selectedFilterClassId == c.id,
                       onSelected: (val) {
                         setState(
@@ -302,6 +322,9 @@ class _AddEditExamScreenState extends State<AddEditExamScreen> {
                         );
                       },
                       selectedColor: Colors.purple.shade100,
+                      backgroundColor: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey.shade800
+                          : null,
                     ),
                   ),
                 ),
