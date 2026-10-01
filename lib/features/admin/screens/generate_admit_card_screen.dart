@@ -117,6 +117,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
   String _topInstruction = '';
   List<Student> _allFetchedStudents = [];
   List<String> _excludedStudentIds = [];
+  bool _showConfig = true;
 
   @override
   void dispose() {
@@ -3261,11 +3262,13 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.playlist_remove_rounded),
-            tooltip: 'Include/Exclude Students',
-            onPressed: _allFetchedStudents.isEmpty
-                ? null
-                : _showExcludeStudentsDialog,
+            icon: Icon(_showConfig ? Icons.expand_less : Icons.expand_more),
+            tooltip: 'Toggle Configuration',
+            onPressed: () {
+              setState(() {
+                _showConfig = !_showConfig;
+              });
+            },
           ),
           IconButton(
             icon: const Icon(Icons.print_outlined),
@@ -3293,9 +3296,11 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
       ),
       body: Column(
         children: [
-          _buildTemplateSelector(),
-          _buildFilters(uniqueClasses, uniqueSections),
-          _buildInstructionInput(),
+          if (_showConfig) ...[
+            _buildTemplateSelector(),
+            _buildFilters(uniqueClasses, uniqueSections),
+            _buildInstructionInput(),
+          ],
           Expanded(child: _buildPreviewArea()),
         ],
       ),
@@ -3307,100 +3312,73 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(Icons.palette_outlined, size: 16, color: Colors.grey),
-              const SizedBox(width: 6),
-              const Text(
-                'Choose Template',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                _selectedTemplate.description,
-                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: AdmitCardTemplate.values.map((t) {
-              final isSelected = t == _selectedTemplate;
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    if (_selectedTemplate != t) {
-                      setState(() => _selectedTemplate = t);
-                      _generatePdf();
-                    }
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? t.accentColor.withValues(alpha: 0.08)
-                          : Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: isSelected
-                            ? t.accentColor
-                            : Colors.grey.shade200,
-                        width: isSelected ? 2 : 1,
+          Expanded(
+            flex: 5,
+            child: _buildDropdown<AdmitCardTemplate>(
+              label: 'Choose Template',
+              value: _selectedTemplate,
+              items: AdmitCardTemplate.values.map((t) {
+                return DropdownMenuItem<AdmitCardTemplate>(
+                  value: t,
+                  child: Row(
+                    children: [
+                      Icon(t.icon, size: 16, color: t.accentColor),
+                      const SizedBox(width: 8),
+                      Text(
+                        t.label.replaceAll('\n', ' '),
+                        style: const TextStyle(fontSize: 13),
                       ),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          t.icon,
-                          color: isSelected
-                              ? t.accentColor
-                              : Colors.grey.shade400,
-                          size: 22,
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          t.label,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.w500,
-                            color: isSelected
-                                ? t.accentColor
-                                : Colors.grey.shade600,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        if (isSelected) ...[
-                          const SizedBox(height: 4),
-                          Container(
-                            width: 20,
-                            height: 3,
-                            decoration: BoxDecoration(
-                              color: t.accentColor,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ],
-                      ],
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: (val) {
+                if (val != null && val != _selectedTemplate) {
+                  setState(() => _selectedTemplate = val);
+                  _generatePdf();
+                }
+              },
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            flex: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Students',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryAdmin,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: _allFetchedStudents.isEmpty
+                        ? null
+                        : _showExcludeStudentsDialog,
+                    icon: const Icon(Icons.playlist_remove_rounded, size: 16),
+                    label: const Text('Select'),
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: AppColors.primaryAdmin.withValues(alpha: 0.1),
+                      foregroundColor: AppColors.primaryAdmin,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
-              );
-            }).toList(),
+              ],
+            ),
           ),
         ],
       ),
@@ -3648,7 +3626,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
         ),
         const SizedBox(height: 3),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 15),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(8),
