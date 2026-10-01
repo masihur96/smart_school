@@ -1535,90 +1535,150 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
   }
 
   Widget _buildOnlineClassCard(BuildContext context, OnlineClass onlineClass) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = const Color(0xFF3B82F6); // Professional Blue
+    final primaryLight = primaryColor.withValues(alpha: isDark ? 0.2 : 0.1);
+
     return Card(
       margin: EdgeInsets.zero,
+      elevation: 2,
+      shadowColor: Colors.black26,
       clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+          width: 1,
+        ),
+      ),
       child: InkWell(
         onTap: () {
-          if (onlineClass.meetLink.isNotEmpty) {
-            try {
-              launchUrl(
-                Uri.parse(onlineClass.meetLink),
-                mode: LaunchMode.externalApplication,
-              );
-            } catch (_) {}
-          }
+          _showOnlineClassDetailsBottomSheet(context, onlineClass);
         },
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      onlineClass.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                color: primaryColor,
+                width: 4,
+              ),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(14.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: primaryLight,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      child: Icon(
+                        Icons.videocam_rounded,
+                        color: primaryColor,
+                        size: 22,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                onlineClass.description,
-                style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const Spacer(),
-              Row(
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        const Icon(Icons.class_, size: 12, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            onlineClass.className ?? AppLocalizations.of(context)!.meetingText,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: Colors.grey,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            onlineClass.title,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              color: Theme.of(context).textTheme.titleLarge?.color,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(
-                          Icons.access_time,
-                          size: 12,
-                          color: Colors.grey,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          DateFormat(
-                            'hh:mm a',
-                          ).format(onlineClass.scheduledTime),
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey,
+                          const SizedBox(height: 4),
+                          Text(
+                            onlineClass.description,
+                            style: TextStyle(
+                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                              fontSize: 13,
+                              height: 1.2,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  if (onlineClass.meetLink.isNotEmpty)
-                    Padding(
-                      padding: EdgeInsets.only(left: 8.0),
-                      child: ElevatedButton(
+                  ],
+                ),
+                
+                const Spacer(),
+                
+                Divider(
+                  height: 1, 
+                  thickness: 1, 
+                  color: isDark ? Colors.white10 : Colors.grey.shade100,
+                ),
+                
+                const Spacer(),
+                
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.group_outlined,
+                                size: 14,
+                                color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  onlineClass.className ?? AppLocalizations.of(context)!.meetingText,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time_rounded,
+                                size: 14,
+                                color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                DateFormat('hh:mm a').format(onlineClass.scheduledTime),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (onlineClass.meetLink.isNotEmpty)
+                      ElevatedButton.icon(
                         onPressed: () {
                           try {
                             launchUrl(
@@ -1627,28 +1687,155 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                             );
                           } catch (_) {}
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
-                          minimumSize: const Size(0, 28),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Text(
+                        icon: const Icon(Icons.video_call_rounded, size: 16),
+                        label: Text(
                           AppLocalizations.of(context)!.join,
-                          style: TextStyle(fontSize: 12),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700, 
+                            letterSpacing: 0.5,
+                            fontSize: 13,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                          elevation: 2,
+                          shadowColor: primaryColor.withValues(alpha: 0.4),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                         ),
                       ),
-                    ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  void _showOnlineClassDetailsBottomSheet(BuildContext context, OnlineClass onlineClass) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = const Color(0xFF3B82F6);
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  height: 4,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      onlineClass.title,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).textTheme.titleLarge?.color,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Icon(Icons.group_outlined, size: 18, color: primaryColor),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            onlineClass.className ?? AppLocalizations.of(context)!.meetingText,
+                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(Icons.access_time_rounded, size: 18, color: primaryColor),
+                        const SizedBox(width: 8),
+                        Text(
+                          DateFormat('hh:mm a, dd MMM yyyy').format(onlineClass.scheduledTime),
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      onlineClass.description,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    if (onlineClass.meetLink.isNotEmpty)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            try {
+                              launchUrl(
+                                Uri.parse(onlineClass.meetLink),
+                                mode: LaunchMode.externalApplication,
+                              );
+                            } catch (_) {}
+                          },
+                          icon: const Icon(Icons.video_call_rounded),
+                          label: Text(
+                            AppLocalizations.of(context)!.join,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
