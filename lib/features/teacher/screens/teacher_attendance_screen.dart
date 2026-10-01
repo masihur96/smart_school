@@ -148,6 +148,13 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                   return _buildEmptyState();
                 }
 
+                final sortedRecords = List<PeriodAttendance>.from(provider.periodAttendanceRecords);
+                sortedRecords.sort((a, b) {
+                  final rollA = int.tryParse(a.student?['rollNumber']?.toString() ?? a.student?['roll_no']?.toString() ?? '0') ?? 0;
+                  final rollB = int.tryParse(b.student?['rollNumber']?.toString() ?? b.student?['roll_no']?.toString() ?? '0') ?? 0;
+                  return rollA.compareTo(rollB);
+                });
+
                 return RefreshIndicator(
                   onRefresh: () => _fetchData(page: 1),
                   color: AppColors.primaryTeacher,
@@ -158,11 +165,11 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                       vertical: 16,
                     ),
                     itemCount:
-                        provider.periodAttendanceRecords.length +
+                        sortedRecords.length +
                         (provider.page < provider.totalPages ? 1 : 0),
                     itemBuilder: (context, index) {
-                      if (index < provider.periodAttendanceRecords.length) {
-                        final record = provider.periodAttendanceRecords[index];
+                      if (index < sortedRecords.length) {
+                        final record = sortedRecords[index];
                         return _AttendanceRecordCard(record: record);
                       } else {
                         return const Padding(
@@ -694,6 +701,28 @@ class _AttendanceRecordCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.class_outlined,
+                              size: 14,
+                              color: Colors.grey.shade500,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                'Roll: ${record.student?['rollNumber'] ?? record.student?['roll_no'] ?? '--'} | Class: ${record.classInfo?.name ?? '--'} | Sec: ${record.sectionInfo?.name ?? '--'}',
+                                style: TextStyle(
+                                  color: Colors.grey.shade700,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
                         Row(
                           children: [
                             Icon(
