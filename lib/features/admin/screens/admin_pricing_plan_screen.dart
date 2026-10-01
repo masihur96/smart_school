@@ -324,7 +324,7 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                 Row(
                   children: [
                     Text(
-                      '\$${widget.plan.pricePerMonth}',
+                      '৳${widget.plan.pricePerMonth}',
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -696,7 +696,7 @@ class _PaymentBottomSheetContentState
                 ),
               ),
               child: Text(
-                l10n.paymentInstructions('\$${widget.plan.pricePerMonth}'),
+                l10n.paymentInstructions('৳${widget.plan.pricePerMonth}'),
                 style: TextStyle(fontSize: 14, color: AppColors.primaryAdmin),
               ),
             ),
@@ -762,7 +762,7 @@ class _PaymentBottomSheetContentState
             ),
             const SizedBox(height: 8),
             TextFormField(
-              initialValue: '\$${widget.plan.pricePerMonth}',
+              initialValue: '৳${widget.plan.pricePerMonth}',
               readOnly: true,
               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               decoration: InputDecoration(
