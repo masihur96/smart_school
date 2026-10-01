@@ -4141,4 +4141,83 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get totalText => 'Total';
+
+  @override
+  String get pleaseEnterYourFullName => 'Please enter your full name';
+
+  @override
+  String get nameMustBeAtLeast2Characters =>
+      'Name must be at least 2 characters';
+
+  @override
+  String get pleaseEnterYourEmailAddress => 'Please enter your email address';
+
+  @override
+  String get pleaseEnterAValidEmailAddress =>
+      'Please enter a valid email address';
+
+  @override
+  String get pleaseEnterYourPhoneNumber => 'Please enter your phone number';
+
+  @override
+  String get pleaseEnterAValidPhoneNumber =>
+      'Please enter a valid phone number';
+
+  @override
+  String get pleaseEnterYourPassword => 'Please enter your password';
+
+  @override
+  String get passwordMustBeAtLeast6Characters =>
+      'Password must be at least 6 characters';
+
+  @override
+  String get accountCreatedSuccessfully => 'Account created successfully!';
+
+  @override
+  String get joinSchoolCare => 'Join SchoolCare';
+
+  @override
+  String get iAcceptThe => 'I accept the ';
+
+  @override
+  String get termsConditions => 'Terms & Conditions';
+
+  @override
+  String get andText => ' and ';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get pleaseEnterYourEmailOrPhoneNumber =>
+      'Please enter your email or phone number';
+
+  @override
+  String get pleaseEnterAValidEmailOrPhoneNumber =>
+      'Please enter a valid email or phone number';
+
+  @override
+  String get accountInactive => 'Account Inactive';
+
+  @override
+  String get accountInactiveMessage =>
+      'Your account is currently inactive. Please communicate with your principal or administrator for assistance.';
+
+  @override
+  String get schoolInactive => 'School Inactive';
+
+  @override
+  String get schoolInactiveMessage =>
+      'Your school account is currently inactive. Please communicate with SchoolCare support for assistance.';
+
+  @override
+  String get biometricCredentialsExpired =>
+      'Biometric credentials expired. Please log in manually.';
+
+  @override
+  String get signInToManageYourSchool =>
+      'Sign in to manage your school and academic workspace.';
+
+  @override
+  String get dontHaveAnAccount => 'Don\'t have an account?';
 }

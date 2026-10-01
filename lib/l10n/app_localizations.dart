@@ -7692,6 +7692,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total'**
   String get totalText;
+
+  /// No description provided for @pleaseEnterYourFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your full name'**
+  String get pleaseEnterYourFullName;
+
+  /// No description provided for @nameMustBeAtLeast2Characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Name must be at least 2 characters'**
+  String get nameMustBeAtLeast2Characters;
+
+  /// No description provided for @pleaseEnterYourEmailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email address'**
+  String get pleaseEnterYourEmailAddress;
+
+  /// No description provided for @pleaseEnterAValidEmailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address'**
+  String get pleaseEnterAValidEmailAddress;
+
+  /// No description provided for @pleaseEnterYourPhoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your phone number'**
+  String get pleaseEnterYourPhoneNumber;
+
+  /// No description provided for @pleaseEnterAValidPhoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid phone number'**
+  String get pleaseEnterAValidPhoneNumber;
+
+  /// No description provided for @pleaseEnterYourPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your password'**
+  String get pleaseEnterYourPassword;
+
+  /// No description provided for @passwordMustBeAtLeast6Characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordMustBeAtLeast6Characters;
+
+  /// No description provided for @accountCreatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created successfully!'**
+  String get accountCreatedSuccessfully;
+
+  /// No description provided for @joinSchoolCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Join SchoolCare'**
+  String get joinSchoolCare;
+
+  /// No description provided for @iAcceptThe.
+  ///
+  /// In en, this message translates to:
+  /// **'I accept the '**
+  String get iAcceptThe;
+
+  /// No description provided for @termsConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms & Conditions'**
+  String get termsConditions;
+
+  /// No description provided for @andText.
+  ///
+  /// In en, this message translates to:
+  /// **' and '**
+  String get andText;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @pleaseEnterYourEmailOrPhoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email or phone number'**
+  String get pleaseEnterYourEmailOrPhoneNumber;
+
+  /// No description provided for @pleaseEnterAValidEmailOrPhoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email or phone number'**
+  String get pleaseEnterAValidEmailOrPhoneNumber;
+
+  /// No description provided for @accountInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Inactive'**
+  String get accountInactive;
+
+  /// No description provided for @accountInactiveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is currently inactive. Please communicate with your principal or administrator for assistance.'**
+  String get accountInactiveMessage;
+
+  /// No description provided for @schoolInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'School Inactive'**
+  String get schoolInactive;
+
+  /// No description provided for @schoolInactiveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your school account is currently inactive. Please communicate with SchoolCare support for assistance.'**
+  String get schoolInactiveMessage;
+
+  /// No description provided for @biometricCredentialsExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric credentials expired. Please log in manually.'**
+  String get biometricCredentialsExpired;
+
+  /// No description provided for @signInToManageYourSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to manage your school and academic workspace.'**
+  String get signInToManageYourSchool;
+
+  /// No description provided for @dontHaveAnAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account?'**
+  String get dontHaveAnAccount;
 }
 
 class _AppLocalizationsDelegate

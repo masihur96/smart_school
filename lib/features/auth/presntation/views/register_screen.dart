@@ -27,45 +27,45 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   String? _validateName(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Please enter your full name';
+      return AppLocalizations.of(context)!.pleaseEnterYourFullName;
     }
     if (value.trim().length < 2) {
-      return 'Name must be at least 2 characters';
+      return AppLocalizations.of(context)!.nameMustBeAtLeast2Characters;
     }
     return null;
   }
 
   String? _validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Please enter your email address';
+      return AppLocalizations.of(context)!.pleaseEnterYourEmailAddress;
     }
     final emailRegex = RegExp(
       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
     );
     if (!emailRegex.hasMatch(value.trim())) {
-      return 'Please enter a valid email address';
+      return AppLocalizations.of(context)!.pleaseEnterAValidEmailAddress;
     }
     return null;
   }
 
   String? _validatePhone(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Please enter your phone number';
+      return AppLocalizations.of(context)!.pleaseEnterYourPhoneNumber;
     }
     final cleanPhone = value.trim().replaceAll(RegExp(r'[\s-]'), '');
     final phoneRegex = RegExp(r'^\+?[0-9]{10,15}$');
     if (!phoneRegex.hasMatch(cleanPhone)) {
-      return 'Please enter a valid phone number';
+      return AppLocalizations.of(context)!.pleaseEnterAValidPhoneNumber;
     }
     return null;
   }
 
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter your password';
+      return AppLocalizations.of(context)!.pleaseEnterYourPassword;
     }
     if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+      return AppLocalizations.of(context)!.passwordMustBeAtLeast6Characters;
     }
     return null;
   }
@@ -82,9 +82,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _register() async {
     if (!_termsAccepted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Please accept the Terms & Conditions and Privacy Policy to proceed.',
+            AppLocalizations.of(context)!.pleaseAcceptTheTermsConditionsAndPrivacyPolicyToProceed,
           ),
           backgroundColor: Colors.red,
         ),
@@ -117,7 +117,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             SnackBar(
               content: Text(
                 AppLocalizations.of(context)?.registrationSuccessful ??
-                    'Account created successfully!',
+                    AppLocalizations.of(context)!.accountCreatedSuccessfully,
               ),
               backgroundColor: Colors.green,
             ),
@@ -160,8 +160,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       backgroundColor:
           isDark ? AppColors.backgroundDark : const Color(0xFFF8F9FD),
       appBar: AppBar(
-        title: const Text(
-          'Principal Registration',
+        title: Text(
+          AppLocalizations.of(context)!.principalRegistration,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -226,8 +226,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: Colors.purple.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: const Text(
-                          'STEP 1 OF 2 • PRINCIPAL ACCOUNT',
+                        child: Text(
+                          AppLocalizations.of(context)!.step1Of2PrincipalAccount,
                           style: TextStyle(
                             color: Colors.purple,
                             fontSize: 11.5,
@@ -238,7 +238,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Join SchoolCare',
+                        AppLocalizations.of(context)!.joinSchoolCare,
                         style: Theme.of(context)
                             .textTheme
                             .headlineSmall
@@ -250,7 +250,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Create your administrator account to register and manage your institution.',
+                        AppLocalizations.of(context)!.createYourAdministratorAccountToRegisterAndManageYourInstitution,
                         style: TextStyle(
                           fontSize: 13.5,
                           color: isDark ? Colors.grey[400] : Colors.grey[600],
@@ -281,8 +281,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Full Name
-                      const Text(
-                        'Full Name',
+                      Text(
+                        AppLocalizations.of(context)!.fullName,
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 13.5,
@@ -331,8 +331,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 16),
 
                       // Email Address
-                      const Text(
-                        'Email Address',
+                      Text(
+                        AppLocalizations.of(context)!.emailAddress,
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 13.5,
@@ -382,8 +382,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 16),
 
                       // Phone Number
-                      const Text(
-                        'Phone Number',
+                      Text(
+                        AppLocalizations.of(context)!.phoneNumber,
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 13.5,
@@ -433,8 +433,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 16),
 
                       // Password
-                      const Text(
-                        'Password',
+                      Text(
+                        AppLocalizations.of(context)!.password,
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 13.5,
@@ -544,9 +544,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               height: 1.3,
                             ),
                             children: [
-                              const TextSpan(text: 'I accept the '),
+                              TextSpan(text: AppLocalizations.of(context)!.iAcceptThe),
                               TextSpan(
-                                text: 'Terms & Conditions',
+                                text: AppLocalizations.of(context)!.termsConditions,
                                 style: const TextStyle(
                                   color: Colors.purple,
                                   fontWeight: FontWeight.bold,
@@ -558,18 +558,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            const WebviewScreen(
+                                            WebviewScreen(
                                           url:
                                               'https://school-care-web.vercel.app/terms',
-                                          title: 'Terms & Conditions',
+                                          title: AppLocalizations.of(context)!.termsConditions,
                                         ),
                                       ),
                                     );
                                   },
                               ),
-                              const TextSpan(text: ' and '),
+                              TextSpan(text: AppLocalizations.of(context)!.andText),
                               TextSpan(
-                                text: 'Privacy Policy',
+                                text: AppLocalizations.of(context)!.privacyPolicy,
                                 style: const TextStyle(
                                   color: Colors.purple,
                                   fontWeight: FontWeight.bold,
@@ -581,10 +581,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            const WebviewScreen(
+                                            WebviewScreen(
                                           url:
                                               'https://school-care-web.vercel.app/privacy',
-                                          title: 'Privacy Policy',
+                                          title: AppLocalizations.of(context)!.privacyPolicy,
                                         ),
                                       ),
                                     );
@@ -622,11 +622,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             strokeWidth: 2.5,
                           ),
                         )
-                      : const Row(
+                      : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'CONTINUE TO SCHOOL SETUP',
+                              AppLocalizations.of(context)!.continueToSchoolSetup,
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
@@ -645,7 +645,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Already registered?",
+                      AppLocalizations.of(context)!.alreadyRegistered,
                       style: TextStyle(
                         fontSize: 13.5,
                         color: isDark ? Colors.grey[400] : Colors.grey[600],
@@ -653,8 +653,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        'Log In',
+                      child: Text(
+                        AppLocalizations.of(context)!.logIn,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,

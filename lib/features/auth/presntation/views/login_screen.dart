@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_school/features/admin/providers/settings_provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/utils/biometric_service.dart';
 import 'package:smart_school/core/utils/storage_service.dart';
@@ -38,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String? _validateEmailOrPhone(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Please enter your email or phone number';
+      return AppLocalizations.of(context)!.pleaseEnterYourEmailOrPhoneNumber;
     }
 
     final trimmed = value.trim();
@@ -57,11 +58,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (!isEmail && !isPhone) {
       if (trimmed.contains('@')) {
-        return 'Please enter a valid email address';
+        return AppLocalizations.of(context)!.pleaseEnterAValidEmailAddress;
       } else if (RegExp(r'^[0-9+]').hasMatch(trimmed)) {
-        return 'Please enter a valid phone number';
+        return AppLocalizations.of(context)!.pleaseEnterAValidPhoneNumber;
       }
-      return 'Please enter a valid email or phone number';
+      return AppLocalizations.of(context)!.pleaseEnterAValidEmailOrPhoneNumber;
     }
 
     return null;
@@ -69,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter your password';
+      return AppLocalizations.of(context)!.pleaseEnterYourPassword;
     }
     return null;
   }
@@ -114,9 +115,9 @@ class _LoginScreenState extends State<LoginScreen> {
       _isNavigating = false;
       if (!mounted) return;
       _showInactiveDialog(
-        title: 'Account Inactive',
+        title: AppLocalizations.of(context)!.accountInactive,
         message:
-            'Your account is currently inactive. Please communicate with your principal or administrator for assistance.',
+            AppLocalizations.of(context)!.accountInactiveMessage,
       );
       return;
     }
@@ -126,9 +127,9 @@ class _LoginScreenState extends State<LoginScreen> {
       _isNavigating = false;
       if (!mounted) return;
       _showInactiveDialog(
-        title: 'School Inactive',
+        title: AppLocalizations.of(context)!.schoolInactive,
         message:
-            'Your school account is currently inactive. Please communicate with SchoolCare support for assistance.',
+            AppLocalizations.of(context)!.schoolInactiveMessage,
       );
       return;
     }
@@ -234,9 +235,9 @@ class _LoginScreenState extends State<LoginScreen> {
           if (mounted) {
             setState(() => _canUseBiometrics = false);
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
+              SnackBar(
                 content: Text(
-                  'Biometric credentials expired. Please log in manually.',
+                  AppLocalizations.of(context)!.biometricCredentialsExpired,
                 ),
                 backgroundColor: Colors.orange,
               ),
@@ -251,8 +252,30 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // ─── Build ──────────────────────────────────────────────────────────────────
 
+
+  Widget _buildLanguageDropdown(bool isDark) {
+    final settings = context.watch<SettingsProvider>();
+    return PopupMenuButton<String>(
+      icon: Icon(Icons.language, color: isDark ? Colors.white : Colors.black87),
+      onSelected: (String langCode) {
+        settings.setLocale(Locale(langCode));
+      },
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+        const PopupMenuItem<String>(
+          value: 'en',
+          child: Text('English'),
+        ),
+        const PopupMenuItem<String>(
+          value: 'bn',
+          child: Text('বাংলা'),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+
     final authNotifier = context.watch<AuthNotifier>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -280,7 +303,9 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor:
           isDark ? AppColors.backgroundDark : const Color(0xFFF8F9FD),
       body: SafeArea(
-        child: Center(
+        child: Stack(
+          children: [
+            Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
               horizontal: 20.0,
@@ -341,8 +366,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: Colors.purple.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: const Text(
-                            'SCHOOLCARE DIGITAL CAMPUS',
+                          child: Text(
+                            AppLocalizations.of(context)!.schoolcareDigitalCampus,
                             style: TextStyle(
                               color: Colors.purple,
                               fontSize: 11.5,
@@ -353,7 +378,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Welcome Back',
+                          AppLocalizations.of(context)!.welcomeBack,
                           style: Theme.of(context)
                               .textTheme
                               .headlineSmall
@@ -365,7 +390,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Sign in to manage your school and academic workspace.',
+                          AppLocalizations.of(context)!.signInToManageYourSchool,
                           style: TextStyle(
                             fontSize: 13.5,
                             color:
@@ -397,8 +422,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Email or Phone Label
-                        const Text(
-                          'Email or Phone Number',
+                        Text(
+                          AppLocalizations.of(context)!.emailOrPhoneNumber,
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 13.5,
@@ -448,8 +473,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 16),
 
                         // Password Label
-                        const Text(
-                          'Password',
+                        Text(
+                          AppLocalizations.of(context)!.password,
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 13.5,
@@ -552,7 +577,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     Text(
                                       AppLocalizations.of(context)
                                               ?.loginButton ??
-                                          'LOG IN',
+                                          AppLocalizations.of(context)!.logIn.toUpperCase(),
                                       style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
@@ -638,7 +663,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "Don't have an account?",
+                          AppLocalizations.of(context)!.dontHaveAnAccount,
                           style: TextStyle(
                             fontSize: 13.5,
                             color: isDark
@@ -654,8 +679,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               builder: (_) => const RegisterScreen(),
                             ),
                           ),
-                          child: const Text(
-                            'Register Now',
+                          child: Text(
+                            AppLocalizations.of(context)!.registerNow,
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -670,6 +695,13 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: _buildLanguageDropdown(isDark),
+            ),
+          ],
         ),
       ),
     );

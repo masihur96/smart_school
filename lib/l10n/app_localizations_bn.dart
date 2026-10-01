@@ -4154,4 +4154,83 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get totalText => 'মোট';
+
+  @override
+  String get pleaseEnterYourFullName => 'অনুগ্রহ করে আপনার পুরো নাম লিখুন';
+
+  @override
+  String get nameMustBeAtLeast2Characters => 'নাম কমপক্ষে ২ অক্ষরের হতে হবে';
+
+  @override
+  String get pleaseEnterYourEmailAddress =>
+      'অনুগ্রহ করে আপনার ইমেল ঠিকানা লিখুন';
+
+  @override
+  String get pleaseEnterAValidEmailAddress =>
+      'অনুগ্রহ করে একটি বৈধ ইমেল ঠিকানা লিখুন';
+
+  @override
+  String get pleaseEnterYourPhoneNumber => 'অনুগ্রহ করে আপনার ফোন নম্বর লিখুন';
+
+  @override
+  String get pleaseEnterAValidPhoneNumber =>
+      'অনুগ্রহ করে একটি বৈধ ফোন নম্বর লিখুন';
+
+  @override
+  String get pleaseEnterYourPassword => 'অনুগ্রহ করে আপনার পাসওয়ার্ড লিখুন';
+
+  @override
+  String get passwordMustBeAtLeast6Characters =>
+      'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে';
+
+  @override
+  String get accountCreatedSuccessfully => 'অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!';
+
+  @override
+  String get joinSchoolCare => 'স্কুলকেয়ার-এ যোগ দিন';
+
+  @override
+  String get iAcceptThe => 'আমি মেনে নিচ্ছি ';
+
+  @override
+  String get termsConditions => 'শর্তাবলী';
+
+  @override
+  String get andText => ' এবং ';
+
+  @override
+  String get privacyPolicy => 'গোপনীয়তা নীতি';
+
+  @override
+  String get pleaseEnterYourEmailOrPhoneNumber =>
+      'অনুগ্রহ করে আপনার ইমেল বা ফোন নম্বর লিখুন';
+
+  @override
+  String get pleaseEnterAValidEmailOrPhoneNumber =>
+      'অনুগ্রহ করে একটি বৈধ ইমেল বা ফোন নম্বর লিখুন';
+
+  @override
+  String get accountInactive => 'অ্যাকাউন্ট নিষ্ক্রিয়';
+
+  @override
+  String get accountInactiveMessage =>
+      'আপনার অ্যাকাউন্ট বর্তমানে নিষ্ক্রিয়। সহায়তার জন্য অনুগ্রহ করে আপনার অধ্যক্ষ বা প্রশাসকের সাথে যোগাযোগ করুন।';
+
+  @override
+  String get schoolInactive => 'স্কুল নিষ্ক্রিয়';
+
+  @override
+  String get schoolInactiveMessage =>
+      'আপনার স্কুল অ্যাকাউন্ট বর্তমানে নিষ্ক্রিয়। সহায়তার জন্য অনুগ্রহ করে স্কুলকেয়ার সাপোর্টের সাথে যোগাযোগ করুন।';
+
+  @override
+  String get biometricCredentialsExpired =>
+      'বায়োমেট্রিক শংসাপত্রগুলির মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ করে ম্যানুয়ালি লগ ইন করুন।';
+
+  @override
+  String get signInToManageYourSchool =>
+      'আপনার স্কুল এবং একাডেমিক কাজের জায়গা পরিচালনা করতে সাইন ইন করুন।';
+
+  @override
+  String get dontHaveAnAccount => 'কোনো অ্যাকাউন্ট নেই?';
 }
