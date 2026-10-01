@@ -39,6 +39,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
   late List<Student> _currentStudents;
   List<Result> _fetchedResults = [];
   bool _isLoading = false;
+  bool _showFilters = true;
   Uint8List? _pdfBytes;
   pdfx.PdfControllerPinch? _pdfController;
 
@@ -180,6 +181,15 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
+            icon: Icon(_showFilters ? Icons.filter_alt_off : Icons.filter_alt),
+            onPressed: () {
+              setState(() {
+                _showFilters = !_showFilters;
+              });
+            },
+            tooltip: _showFilters ? 'Hide Filters' : 'Show Filters',
+          ),
+          IconButton(
             icon: const Icon(Icons.print),
             onPressed: () async {
               if (_pdfBytes != null) {
@@ -204,7 +214,7 @@ class _GenerateReportCardScreenState extends State<GenerateReportCardScreen> {
       ),
       body: Column(
         children: [
-          _buildFilters(uniqueClasses, uniqueSections),
+          if (_showFilters) _buildFilters(uniqueClasses, uniqueSections),
           Expanded(
             child: _isLoading || _pdfBytes == null
                 ? const Center(child: CircularProgressIndicator())

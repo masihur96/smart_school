@@ -36,6 +36,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
   RoutinePdfLayout _selectedLayout = RoutinePdfLayout.dayByDay;
 
   bool _isLoading = false;
+  bool _showFilters = true;
   Uint8List? _pdfBytes;
   pdfx.PdfControllerPinch? _pdfController;
   int _pdfViewerKey = 0; // incremented on each PDF generation to force PdfViewPinch rebuild
@@ -399,6 +400,15 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
+          IconButton(
+            icon: Icon(_showFilters ? Icons.filter_alt_off : Icons.filter_alt),
+            tooltip: _showFilters ? 'Hide Filters' : 'Show Filters',
+            onPressed: () {
+              setState(() {
+                _showFilters = !_showFilters;
+              });
+            },
+          ),
           // Direct Print
           IconButton(
             icon: const Icon(Icons.print_rounded),
@@ -417,7 +427,7 @@ class _RoutinePdfPreviewScreenState extends State<RoutinePdfPreviewScreen> {
       body: Column(
         children: [
           // Filter & Layout Controls
-          _buildFilterBar(classes, allSections),
+          if (_showFilters) _buildFilterBar(classes, allSections),
 
           // Main PDF Previewer with Interactive Zoom & Navigation
           Expanded(
