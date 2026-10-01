@@ -416,486 +416,164 @@ class SubscriptionCard extends StatelessWidget {
     final statusColor = isExpired
         ? AppColors.warning
         : (isActive ? AppColors.success : AppColors.error);
-    final statusBgColor = isExpired
-        ? AppColors.warning.withOpacity(0.1)
-        : (isActive
-              ? AppColors.success.withOpacity(0.1)
-              : AppColors.error.withOpacity(0.1));
     final statusText = isExpired
         ? 'Expired'
         : (isActive ? 'Active' : 'Inactive');
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: AppColors.border.withOpacity(0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header: School Info & Status
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 56,
-                  width: 56,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.business_rounded,
-                      color: AppColors.primary,
-                      size: 28,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              school?.name ?? 'Unknown School',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: statusBgColor,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              statusText,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: statusColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      InkWell(
-                        onTap: () {
-                          Clipboard.setData(
-                            ClipboardData(text: subscription.schoolId),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                AppLocalizations.of(context)!.schoolUuidCopied,
-                              ),
-                              behavior: SnackBarBehavior.floating,
-                              duration: const Duration(seconds: 2),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(4),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'ID: ${subscription.schoolId.length > 8 ? '${subscription.schoolId.substring(0, 8)}...' : subscription.schoolId}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                                fontFamily: 'monospace',
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.copy_rounded,
-                              size: 14,
-                              color: AppColors.primary.withOpacity(0.6),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.email_outlined,
-                            size: 14,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              school?.email ?? 'No email',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (school?.phone != null &&
-                          school!.phone.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.phone_outlined,
-                              size: 14,
-                              color: AppColors.textSecondary,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              school.phone,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          Divider(height: 1, color: AppColors.border.withOpacity(0.1)),
-
-          // Body: Plan Details
-          Container(
-            padding: const EdgeInsets.all(20),
-            color: AppColors.lightGrey.withOpacity(0.5),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildInfoItem(
-                        context,
-                        'Plan',
-                        plan?.name ?? 'N/A',
-                        Icons.workspace_premium_rounded,
-                        AppColors.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildInfoItem(
-                        context,
-                        'Students',
-                        '${subscription.lastStudentCount} / ${plan?.maxStudents ?? '∞'}',
-                        Icons.groups_rounded,
-                        const Color(0xFF022B3A),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildInfoItem(
-                        context,
-                        'Monthly',
-                        '\$${plan?.pricePerMonth ?? '0'}',
-                        Icons.payments_rounded,
-                        AppColors.success,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.border.withOpacity(0.1),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildDateSection(
-                        context,
-                        'Start Date',
-                        _formatDate(subscription.startDate),
-                      ),
-                      Container(
-                        width: 1,
-                        height: 24,
-                        color: AppColors.border.withOpacity(0.2),
-                      ),
-                      _buildDateSection(
-                        context,
-                        'End Date',
-                        _formatDate(subscription.endDate),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // ── Payment Info Panel ──────────────────────────────
-                _buildPaymentPanel(context),
-              ],
-            ),
-          ),
-
-
-          Divider(height: 1, color: AppColors.border.withOpacity(0.1)),
-
-          // Footer: Actions
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Created: ${_formatDate(subscription.createdAt)}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary.withOpacity(0.7),
-                  ),
-                ),
-                Row(
-                  children: [
-                    if (!isExpired)
-                      _ActionButton(
-                        icon: isActive
-                            ? Icons.pause_circle_outline
-                            : Icons.play_circle_outline,
-                        label: isActive ? 'Deactivate' : 'Activate',
-                        color: isActive ? AppColors.warning : AppColors.success,
-                        onTap: () => _updateStatus(context, !isActive),
-                      ),
-                    const SizedBox(width: 8),
-                    _ActionButton(
-                      icon: Icons.delete_outline,
-                      label: AppLocalizations.of(context)!.delete,
-                      color: AppColors.error,
-                      onTap: () => _confirmDelete(context),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoItem(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-    Color iconColor,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, size: 14, color: iconColor),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDateSection(BuildContext context, String label, String date) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: Theme.of(
-            context,
-          ).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          date,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPaymentPanel(BuildContext context) {
     final hasPayment = subscription.paymentMethod != null ||
         subscription.transactionId != null ||
         subscription.amount != null;
 
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: hasPayment
-            ? AppColors.white
-            : AppColors.white.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: hasPayment
-              ? AppColors.primary.withOpacity(0.2)
-              : AppColors.border.withOpacity(0.08),
-        ),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+        border: Border.all(color: AppColors.border.withOpacity(0.12)),
       ),
-      child: hasPayment
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.receipt_long_rounded,
-                      size: 14,
-                      color: AppColors.primary,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Payment Info',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                  ],
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Left accent bar
+            Container(
+              width: 4,
+              decoration: BoxDecoration(
+                color: statusColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(14),
+                  bottomLeft: Radius.circular(14),
                 ),
-                const SizedBox(height: 12),
-                Row(
+              ),
+            ),
+            // Card content
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Payment Method badge
-                    if (subscription.paymentMethod != null) ...[
-                      _buildPaymentBadge(context, subscription.paymentMethod!),
-                      const SizedBox(width: 12),
-                    ],
-                    // Amount
-                    if (subscription.amount != null)
-                      Expanded(
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.paid_rounded,
-                              size: 14,
-                              color: AppColors.success,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'BDT ${subscription.amount}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.success,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-                if (subscription.transactionId != null) ...[
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.lightGrey.withOpacity(0.6),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
+                    // ── Row 1: Icon + School Name + Status ──────────
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.tag_rounded,
-                          size: 13,
-                          color: AppColors.textSecondary,
+                        Container(
+                          height: 40,
+                          width: 40,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.business_rounded,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'TXN: ',
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelSmall
-                              ?.copyWith(color: AppColors.textSecondary),
-                        ),
+                        const SizedBox(width: 10),
                         Expanded(
-                          child: Text(
-                            subscription.transactionId!,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w600,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                school?.name ?? 'Unknown School',
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
                                   color: AppColors.textPrimary,
-                                  fontFamily: 'monospace',
+                                  height: 1.2,
                                 ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              if (school?.address != null &&
+                                  school!.address.isNotEmpty)
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.location_on_outlined,
+                                      size: 11,
+                                      color: AppColors.textSecondary
+                                          .withOpacity(0.7),
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Expanded(
+                                      child: Text(
+                                        school.address,
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                          color: AppColors.textSecondary
+                                              .withOpacity(0.7),
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
                           ),
                         ),
                         const SizedBox(width: 6),
-                        GestureDetector(
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            statusText,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: statusColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // ── Row 2: Email · Phone · School ID ────────────
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 2,
+                      children: [
+                        if (school?.email != null)
+                          _iconText(
+                            context,
+                            Icons.email_outlined,
+                            school!.email,
+                          ),
+                        if (school?.phone != null &&
+                            school!.phone.isNotEmpty)
+                          _iconText(
+                            context,
+                            Icons.phone_outlined,
+                            school.phone,
+                          ),
+                        InkWell(
                           onTap: () {
                             Clipboard.setData(
-                              ClipboardData(
-                                text: subscription.transactionId!,
-                              ),
+                              ClipboardData(text: subscription.schoolId),
                             );
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: const Text('Transaction ID copied'),
+                                content: Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.schoolUuidCopied,
+                                ),
                                 behavior: SnackBarBehavior.floating,
                                 duration: const Duration(seconds: 2),
                                 shape: RoundedRectangleBorder(
@@ -904,62 +582,281 @@ class SubscriptionCard extends StatelessWidget {
                               ),
                             );
                           },
-                          child: Icon(
-                            Icons.copy_rounded,
-                            size: 14,
-                            color: AppColors.primary.withOpacity(0.7),
+                          child: _iconText(
+                            context,
+                            Icons.fingerprint_rounded,
+                            '${subscription.schoolId.substring(0, 8)}…',
+                            color: AppColors.primary.withOpacity(0.8),
+                            trailingIcon: Icons.copy_rounded,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ],
-            )
-          : Row(
-              children: [
-                Icon(
-                  Icons.info_outline_rounded,
-                  size: 14,
-                  color: AppColors.textSecondary.withOpacity(0.5),
+
+                    const SizedBox(height: 10),
+                    Divider(
+                      height: 1,
+                      color: AppColors.border.withOpacity(0.15),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // ── Row 3: Plan · Price · Students ──────────────
+                    Row(
+                      children: [
+                        _chip(
+                          context,
+                          Icons.workspace_premium_rounded,
+                          plan?.name ?? 'N/A',
+                          AppColors.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        _chip(
+                          context,
+                          Icons.payments_rounded,
+                          '\$${plan?.pricePerMonth ?? '0'}/mo',
+                          AppColors.success,
+                        ),
+                        const SizedBox(width: 6),
+                        _chip(
+                          context,
+                          Icons.groups_rounded,
+                          '${subscription.lastStudentCount}/${plan?.maxStudents ?? '∞'}',
+                          const Color(0xFF022B3A),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // ── Row 4: Dates ─────────────────────────────────
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 7,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.lightGrey.withOpacity(0.6),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today_rounded,
+                            size: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            _formatDate(subscription.startDate),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            child: Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          Text(
+                            _formatDate(subscription.endDate),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: isExpired
+                                  ? AppColors.error
+                                  : AppColors.textPrimary,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            'Created ${_formatDate(subscription.createdAt)}',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: AppColors.textSecondary.withOpacity(0.6),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // ── Row 5: Payment (only when present) ───────────
+                    if (hasPayment) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.04),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppColors.primary.withOpacity(0.12),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            // Method badge
+                            if (subscription.paymentMethod != null)
+                              _paymentBadge(subscription.paymentMethod!),
+                            if (subscription.paymentMethod != null)
+                              const SizedBox(width: 8),
+                            // Amount
+                            if (subscription.amount != null) ...[
+                              Icon(
+                                Icons.paid_rounded,
+                                size: 12,
+                                color: AppColors.success,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                'BDT ${subscription.amount}',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.success,
+                                ),
+                              ),
+                            ],
+                            const Spacer(),
+                            // TXN ID
+                            if (subscription.transactionId != null) ...[
+                              Icon(
+                                Icons.tag_rounded,
+                                size: 11,
+                                color: AppColors.textSecondary,
+                              ),
+                              const SizedBox(width: 2),
+                              ConstrainedBox(
+                                constraints:
+                                    const BoxConstraints(maxWidth: 100),
+                                child: Text(
+                                  subscription.transactionId!,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontFamily: 'monospace',
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              GestureDetector(
+                                onTap: () {
+                                  Clipboard.setData(ClipboardData(
+                                    text: subscription.transactionId!,
+                                  ));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content:
+                                          const Text('Transaction ID copied'),
+                                      behavior: SnackBarBehavior.floating,
+                                      duration: const Duration(seconds: 2),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Icon(
+                                  Icons.copy_rounded,
+                                  size: 13,
+                                  color: AppColors.primary.withOpacity(0.6),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    const SizedBox(height: 10),
+                    Divider(
+                      height: 1,
+                      color: AppColors.border.withOpacity(0.15),
+                    ),
+                    const SizedBox(height: 6),
+
+                    // ── Row 6: Actions ───────────────────────────────
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        if (!isExpired) ...[
+                          _ActionButton(
+                            icon: isActive
+                                ? Icons.pause_circle_outline
+                                : Icons.play_circle_outline,
+                            label: isActive ? 'Deactivate' : 'Activate',
+                            color: isActive
+                                ? AppColors.warning
+                                : AppColors.success,
+                            onTap: () => _updateStatus(context, !isActive),
+                          ),
+                          const SizedBox(width: 4),
+                        ],
+                        _ActionButton(
+                          icon: Icons.delete_outline,
+                          label: AppLocalizations.of(context)!.delete,
+                          color: AppColors.error,
+                          onTap: () => _confirmDelete(context),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 6),
-                Text(
-                  'No payment info — free or auto-assigned plan',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary.withOpacity(0.5),
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ],
+              ),
             ),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildPaymentBadge(BuildContext context, String method) {
-    final Map<String, Color> methodColors = {
-      'bkash': const Color(0xFFE2136E),
-      'nagad': const Color(0xFFE6382A),
-      'rocket': const Color(0xFF8C3494),
-      'bank': const Color(0xFF1A73E8),
-      'credit_card': const Color(0xFF1A73E8),
-    };
-    final color =
-        methodColors[method.toLowerCase()] ?? AppColors.primary;
+  Widget _iconText(
+    BuildContext context,
+    IconData icon,
+    String text, {
+    Color? color,
+    IconData? trailingIcon,
+  }) {
+    final c = color ?? AppColors.textSecondary;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 11, color: c),
+        const SizedBox(width: 3),
+        Text(
+          text,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(color: c),
+        ),
+        if (trailingIcon != null) ...[
+          const SizedBox(width: 2),
+          Icon(trailingIcon, size: 10, color: c),
+        ],
+      ],
+    );
+  }
+
+  Widget _chip(
+    BuildContext context,
+    IconData icon,
+    String label,
+    Color color,
+  ) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.credit_card_rounded, size: 12, color: color),
+          Icon(icon, size: 11, color: color),
           const SizedBox(width: 4),
           Text(
-            method,
+            label,
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
@@ -967,6 +864,33 @@ class SubscriptionCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _paymentBadge(String method) {
+    final Map<String, Color> methodColors = {
+      'bkash': const Color(0xFFE2136E),
+      'nagad': const Color(0xFFE6382A),
+      'rocket': const Color(0xFF8C3494),
+      'bank': const Color(0xFF1A73E8),
+      'credit_card': const Color(0xFF1A73E8),
+    };
+    final color = methodColors[method.toLowerCase()] ?? AppColors.primary;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: color.withOpacity(0.25)),
+      ),
+      child: Text(
+        method,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
       ),
     );
   }
