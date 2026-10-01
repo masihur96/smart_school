@@ -1931,16 +1931,16 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     final startAmPm = _formatTimeAmPm(classInfo.startTime);
     final endAmPm = _formatTimeAmPm(classInfo.endTime);
 
-    // Color palette: green for active, indigo for regular
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Professional Color Palette
     final Color accentColor = isActive
-        ? const Color(0xFF16A34A)
-        : const Color(0xFF4F46E5);
-    final Color accentLight = isActive
-        ? const Color(0xFFDCFCE7)
-        : const Color(0xFFEDE9FE);
+        ? const Color(0xFF10B981) // Emerald Green for active
+        : (isPassed ? Colors.grey.shade500 : const Color(0xFF6366F1)); // Gray for passed, Indigo for upcoming
     final Color accentMid = isActive
-        ? const Color(0xFF22C55E)
-        : const Color(0xFF6366F1);
+        ? const Color(0xFF34D399)
+        : (isPassed ? Colors.grey.shade400 : const Color(0xFF818CF8));
+    final Color accentLight = accentColor.withValues(alpha: isDark ? 0.25 : 0.12);
 
     return GestureDetector(
       onTap: () {
@@ -1958,107 +1958,69 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
       },
       child: Card(
         margin: EdgeInsets.zero,
+        elevation: isActive ? 6 : 2,
+        shadowColor: isActive ? accentColor.withValues(alpha: 0.4) : Colors.black26,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: isActive ? accentColor.withValues(alpha: 0.5) : (isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+            width: 1,
+          ),
+        ),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          width: screenSize(context, .65),
+          width: screenSize(context, .75), // Slightly wider to fit content better
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isActive
-                  ? accentColor.withValues(alpha: 0.6)
-                  : Colors.transparent,
-              width: 1.8,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: accentColor.withValues(alpha: isActive ? 0.18 : 0.06),
-                blurRadius: isActive ? 16 : 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            color: Theme.of(context).cardColor,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Top accent strip ───────────────────────────────────────────
               Container(
-                height: 5,
+                height: 6,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(colors: [accentColor, accentMid]),
                   borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(19),
+                    top: Radius.circular(20),
                   ),
                 ),
               ),
 
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                  padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ── Header row: time badge + live badge ────────────────
+                      // ── Header row: Status badge + Time ────────────────
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Time chip
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 9,
-                              vertical: 5,
-                            ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-
-                              children: [
-                                Text(
-                                  startAmPm,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 11,
-                                    letterSpacing: 0.2,
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Text(
-                                  endAmPm,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 10,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const Spacer(),
-
                           // Status badge
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
+                              horizontal: 10,
+                              vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: accentColor,
-                              borderRadius: BorderRadius.circular(8),
+                              color: accentLight,
+                              borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 if (isActive) ...[
                                   Container(
-                                    width: 5,
-                                    height: 5,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
+                                    width: 6,
+                                    height: 6,
+                                    decoration: BoxDecoration(
+                                      color: accentColor,
                                       shape: BoxShape.circle,
                                     ),
                                   ),
-                                  const SizedBox(width: 4),
+                                  const SizedBox(width: 6),
                                 ],
                                 Text(
                                   isActive
@@ -2066,40 +2028,56 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                                       : (isUpcoming
                                             ? AppLocalizations.of(context)!.upcomingText
                                             : (isPassed ? AppLocalizations.of(context)!.passedText : '')),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 0.8,
+                                  style: TextStyle(
+                                    color: accentColor,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
                                   ),
                                 ),
                               ],
                             ),
                           ),
+                          // Time
+                          Row(
+                            children: [
+                              Icon(Icons.access_time_rounded, size: 14, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+                              const SizedBox(width: 4),
+                              Text(
+                                '$startAmPm - $endAmPm',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
 
                       // ── Subject name ───────────────────────────────────────
                       Text(
                         subjectName,
                         style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: Theme.of(context).textTheme.bodySmall?.color,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
 
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 4),
 
                       // ── Class / Section ────────────────────────────────────
                       Text(
                         className,
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
-                          fontSize: 16,
+                          fontSize: 18,
                           letterSpacing: -0.3,
                           color: Theme.of(context).textTheme.titleLarge?.color,
                         ),
@@ -2109,67 +2087,70 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
 
                       const Spacer(),
 
-                      // ── Room number (if available) ─────────────────────────
-                      if (classInfo.roomNumber != null &&
-                          classInfo.roomNumber!.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.door_front_door_outlined,
-                                size: 12,
-                                color: Colors.grey.shade500,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                AppLocalizations.of(context)!.roomNum(classInfo.roomNumber.toString()),
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey.shade600,
-                                  fontWeight: FontWeight.w500,
+                      // ── Bottom Info Row ────────────────────────────────────
+                      Row(
+                        children: [
+                          if (classInfo.roomNumber != null &&
+                              classInfo.roomNumber!.isNotEmpty) ...[
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.meeting_room_outlined,
+                                  size: 16,
+                                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                      // ── Teacher row ────────────────────────────────────────
-                      if (classInfo.teacherEntity != null)
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 9,
-                              backgroundColor: accentLight,
-                              child: Icon(Icons.person, size: 11),
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                classInfo.teacherEntity!.name,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey.shade600,
-                                  fontWeight: FontWeight.w500,
+                                const SizedBox(width: 4),
+                                Text(
+                                  AppLocalizations.of(context)!.roomNum(classInfo.roomNumber.toString()),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                              ],
                             ),
+                            const SizedBox(width: 16),
                           ],
-                        ),
+                          if (classInfo.teacherEntity != null)
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.person_outline_rounded,
+                                    size: 16,
+                                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      classInfo.teacherEntity!.name,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
 
                       // ── Progress bar (only when class is active) ───────────
                       if (isActive) ...[
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 12),
                         Row(
                           children: [
                             Expanded(
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(6),
                                 child: LinearProgressIndicator(
                                   value: progress,
-                                  minHeight: 5,
+                                  minHeight: 6,
                                   backgroundColor: accentLight,
                                   valueColor: AlwaysStoppedAnimation<Color>(
                                     accentColor,
@@ -2177,11 +2158,11 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 6),
+                            const SizedBox(width: 8),
                             Text(
                               '${(progress * 100).toStringAsFixed(0)}%',
                               style: TextStyle(
-                                fontSize: 9,
+                                fontSize: 11,
                                 color: accentColor,
                                 fontWeight: FontWeight.w700,
                               ),
