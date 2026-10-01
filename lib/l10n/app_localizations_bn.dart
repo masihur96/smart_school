@@ -3949,43 +3949,43 @@ class AppLocalizationsBn extends AppLocalizations {
       'Biometric credentials expired. Please log in manually.';
 
   @override
-  String get schoolcareDigitalCampus => 'SCHOOLCARE DIGITAL CAMPUS';
+  String get schoolcareDigitalCampus => 'স্কুলকেয়ার ডিজিটাল ক্যাম্পাস';
 
   @override
   String get signInToManageYourSchoolAndAcademicWorkspace =>
-      'Sign in to manage your school and academic workspace.';
+      'আপনার স্কুল এবং একাডেমিক কাজের জায়গা পরিচালনা করতে সাইন ইন করুন।';
 
   @override
-  String get emailOrPhoneNumber => 'Email or Phone Number';
+  String get emailOrPhoneNumber => 'ইমেল বা ফোন নম্বর';
 
   @override
-  String get registerNow => 'Register Now';
+  String get registerNow => 'এখন নিবন্ধন করুন';
 
   @override
   String get pleaseAcceptTheTermsConditionsAndPrivacyPolicyToProceed =>
-      'Please accept the Terms & Conditions and Privacy Policy to proceed.';
+      'এগিয়ে যেতে অনুগ্রহ করে শর্তাবলী এবং গোপনীয়তা নীতি গ্রহণ করুন।';
 
   @override
-  String get principalRegistration => 'Principal Registration';
+  String get principalRegistration => 'অধ্যক্ষ নিবন্ধন';
 
   @override
-  String get step1Of2PrincipalAccount => 'STEP 1 OF 2 • PRINCIPAL ACCOUNT';
+  String get step1Of2PrincipalAccount => 'ধাপ ১ এর ২ • অধ্যক্ষ অ্যাকাউন্ট';
 
   @override
-  String get joinSchoolcare => 'Join SchoolCare';
+  String get joinSchoolcare => 'স্কুলকেয়ার-এ যোগ দিন';
 
   @override
   String get createYourAdministratorAccountToRegisterAndManageYourInstitution =>
-      'Create your administrator account to register and manage your institution.';
+      'আপনার প্রতিষ্ঠান নিবন্ধন এবং পরিচালনা করতে আপনার প্রশাসক অ্যাকাউন্ট তৈরি করুন।';
 
   @override
-  String get continueToSchoolSetup => 'CONTINUE TO SCHOOL SETUP';
+  String get continueToSchoolSetup => 'স্কুল সেটআপ চালিয়ে যান';
 
   @override
-  String get alreadyRegistered => 'Already registered?';
+  String get alreadyRegistered => 'ইতিমধ্যে নিবন্ধিত?';
 
   @override
-  String get logIn => 'Log In';
+  String get logIn => 'লগ ইন';
 
   @override
   String get yourNewPasswordShouldBeDifferentFromYourCurrentPassword =>
