@@ -2401,27 +2401,17 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              l10n.upcomingExams,
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
 
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const TeacherExamScreen()),
-                );
-              },
-              child: Text(l10n.viewAll),
-            ),
-          ],
+        _buildSectionHeader(
+        l10n.upcomingExams,
+          onSeeAll: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const TeacherExamScreen()),
+            );
+          },
         ),
+
         const SizedBox(height: 12),
         SizedBox(
           height: 165,
@@ -2447,127 +2437,284 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
         : 'N/A';
 
     return Card(
-      child: SizedBox(
-        width: screenSize(context, .88),
-        child: Stack(
-          children: [
-            Positioned(
-              right: -20,
-              top: -20,
-              child: Icon(
-                Icons.assignment_rounded,
-                size: 100,
-                color: Colors.white.withOpacity(0.1),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          _showExamDetailsBottomSheet(context, exam, startDateStr);
+        },
+        child: SizedBox(
+          width: screenSize(context, .88),
+          child: Stack(
+            children: [
+              Positioned(
+                right: -20,
+                top: -20,
+                child: Icon(
+                  Icons.assignment_rounded,
+                  size: 100,
+                  color: Colors.white.withOpacity(0.1),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          exam.name,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            exam.name,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Card(
-                        color: exam.isPublished
-                            ? Colors.green.shade600
-                            : Colors.orange.shade600,
+                        const SizedBox(width: 8),
+                        Card(
+                          color: exam.isPublished
+                              ? Colors.green.shade600
+                              : Colors.orange.shade600,
 
-                        child: Padding(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4.0,
+                              vertical: 2.0,
+                            ),
+                            child: Text(
+                              exam.isPublished ? AppLocalizations.of(context)!.publishedText : AppLocalizations.of(context)!.upcomingText,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      exam.description ?? '',
+                      style: TextStyle(fontSize: 12),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.startsOn,
+                              style: TextStyle(fontSize: 10),
+                            ),
+                            Text(
+                              startDateStr,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            _showExamRoutinesDialog(context, exam);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.menu_book,
+                                  size: 14,
+                                  color: Colors.deepPurple.shade900,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  AppLocalizations.of(context)!.routinesCount(assignmentsCount),
+                                  style: TextStyle(
+                                    color: Colors.deepPurple.shade900,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showExamDetailsBottomSheet(BuildContext context, Exam exam, String startDateStr) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  height: 4,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            exam.name,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).textTheme.titleLarge?.color,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 4.0,
-                            vertical: 2.0,
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: exam.isPublished ? Colors.green.shade600 : Colors.orange.shade600,
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             exam.isPublished ? AppLocalizations.of(context)!.publishedText : AppLocalizations.of(context)!.upcomingText,
                             style: const TextStyle(
-                              fontSize: 10,
+                              color: Colors.white,
+                              fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    exam.description ?? '',
-                    style: TextStyle(fontSize: 12),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_month_outlined, size: 18, color: Colors.blue.shade600),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${AppLocalizations.of(context)!.startsOn}: $startDateStr',
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                    if (exam.endDate != null) ...[
+                      const SizedBox(height: 8),
+                      Row(
                         children: [
+                          Icon(Icons.event_available_rounded, size: 18, color: Colors.blue.shade600),
+                          const SizedBox(width: 8),
                           Text(
-                            AppLocalizations.of(context)!.startsOn,
-                            style: TextStyle(fontSize: 10),
-                          ),
-                          Text(
-                            startDateStr,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            'Ends: ${DateFormat('MMM dd, yyyy').format(exam.endDate!)}',
+                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                           ),
                         ],
                       ),
-                      GestureDetector(
-                        onTap: () {
+                    ],
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(Icons.assignment_outlined, size: 18, color: Colors.blue.shade600),
+                        const SizedBox(width: 8),
+                        Text(
+                          AppLocalizations.of(context)!.routinesCount(exam.assignments.length),
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    if (exam.description != null && exam.description!.isNotEmpty) ...[
+                      Text(
+                        exam.description!,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
                           _showExamRoutinesDialog(context, exam);
                         },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
+                        icon: const Icon(Icons.list_alt_rounded),
+                        label: Text(
+                          "View Routines",
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple.shade600,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.menu_book,
-                                size: 14,
-                                color: Colors.deepPurple.shade900,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                AppLocalizations.of(context)!.routinesCount(assignmentsCount),
-                                style: TextStyle(
-                                  color: Colors.deepPurple.shade900,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 
