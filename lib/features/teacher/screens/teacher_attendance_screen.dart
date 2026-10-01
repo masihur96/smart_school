@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -270,18 +271,12 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
       decoration: BoxDecoration(
-        color: AppColors.primaryTeacher,
+
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(32),
           bottomRight: Radius.circular(32),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryTeacher.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+
       ),
       child: AnimatedSize(
         duration: const Duration(milliseconds: 300),
@@ -289,47 +284,71 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Search Bar
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: TextField(
-                controller: _searchController,
-                onSubmitted: (_) => _fetchData(),
-                textInputAction: TextInputAction.search,
-                decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context)!.searchByStudentName,
-                  hintStyle: TextStyle(color: Colors.grey.shade400),
-                  prefixIcon: Icon(
-                    CupertinoIcons.search,
-                    color: Colors.grey.shade500,
-                  ),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, size: 20),
-                          onPressed: () {
-                            _searchController.clear();
-                            _fetchData();
-                          },
-                        )
-                      : null,
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
+            // Search Bar & Filter Toggle
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 5,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      onSubmitted: (_) => _fetchData(),
+                      textInputAction: TextInputAction.search,
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context)!.searchByStudentName,
+                        hintStyle: TextStyle(color: Colors.grey.shade400),
+                        prefixIcon: Icon(
+                          CupertinoIcons.search,
+                          color: Colors.grey.shade500,
+                        ),
+                        suffixIcon: _searchController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear, size: 20),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  _fetchData();
+                                },
+                              )
+                            : null,
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
+                      onChanged: (val) => setState(() {}),
+                    ),
                   ),
                 ),
-                onChanged: (val) => setState(() {}),
-              ),
+                const SizedBox(width: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.filter_list,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isFilterExpanded = !_isFilterExpanded;
+                      });
+                    },
+                  ),
+                ),
+              ],
             ),
 
             if (_isFilterExpanded) ...[
@@ -387,35 +406,6 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
               ),
             ],
 
-            const SizedBox(height: 16),
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isFilterExpanded = !_isFilterExpanded;
-                });
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _isFilterExpanded ? 'Hide Filters' : 'Show Filters',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    _isFilterExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),
@@ -688,18 +678,39 @@ class _AttendanceRecordCard extends StatelessWidget {
                         width: 1,
                       ),
                     ),
-                    child: Center(
-                      child: Text(
-                        record.studentName.isNotEmpty
-                            ? record.studentName[0].toUpperCase()
-                            : '?',
-                        style: TextStyle(
-                          color: statusColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ),
+                    clipBehavior: Clip.hardEdge,
+                    child: (record.student?['avatar'] != null && record.student!['avatar'].toString().isNotEmpty)
+                        ? CachedNetworkImage(
+                            imageUrl: record.student!['avatar'].toString(),
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Center(
+                              child: CupertinoActivityIndicator(),
+                            ),
+                            errorWidget: (context, url, error) => Center(
+                              child: Text(
+                                record.studentName.isNotEmpty
+                                    ? record.studentName[0].toUpperCase()
+                                    : '?',
+                                style: TextStyle(
+                                  color: statusColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ),
+                          )
+                        : Center(
+                            child: Text(
+                              record.studentName.isNotEmpty
+                                  ? record.studentName[0].toUpperCase()
+                                  : '?',
+                              style: TextStyle(
+                                color: statusColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ),
                   ),
                   title: Text(
                     record.studentName,
