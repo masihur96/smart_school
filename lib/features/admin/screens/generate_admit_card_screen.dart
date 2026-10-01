@@ -261,8 +261,17 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
     }
 
     // Collect all futures simultaneously
-    final fontRegFuture = safeFont(PdfGoogleFonts.notoSansBengaliRegular());
-    final fontBoldFuture = safeFont(PdfGoogleFonts.notoSansBengaliBold());
+    Future<pw.Font?> safeOfflineFont(String path) async {
+      try {
+        final data = await rootBundle.load(path);
+        return pw.Font.ttf(data);
+      } catch (_) {
+        return null;
+      }
+    }
+
+    final fontRegFuture = safeOfflineFont('assets/fonts/NotoSansBengali-Regular.ttf');
+    final fontBoldFuture = safeOfflineFont('assets/fonts/NotoSansBengali-Bold.ttf');
     final signatureFontFuture = safeFont(PdfGoogleFonts.dancingScriptBold());
     final logoFuture = safeImage(schoolLogoUrl);
 

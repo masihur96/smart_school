@@ -42,9 +42,9 @@ class BanglaTextRenderer {
       final scaledFontSize = fontSize * pixelRatio;
       final scaledMaxWidth = maxWidth * pixelRatio;
 
-      // GoogleFonts.hindSiliguri() tells Flutter's font system which font
-      // family to use. Flutter's ICU shaper will pick it up automatically.
-      final fontFamily = GoogleFonts.hindSiliguri().fontFamily;
+      // Using the bundled offline font to ensure perfect Bangla rendering
+      // without needing an active internet connection to download Google Fonts.
+      final fontFamily = 'NotoSansBengali';
 
       final paragraphStyle = ui.ParagraphStyle(
         textDirection: ui.TextDirection.ltr,

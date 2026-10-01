@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:flutter/services.dart';
 import 'package:smart_school/core/utils/bangla_text_renderer.dart';
 
 
@@ -56,8 +57,10 @@ class ClassRoutinePdfHelper {
     pw.Font? bengaliFont;
     pw.Font? bengaliBold;
     try {
-      bengaliFont = await PdfGoogleFonts.notoSansBengaliRegular();
-      bengaliBold = await PdfGoogleFonts.notoSansBengaliBold();
+      final regData = await rootBundle.load('assets/fonts/NotoSansBengali-Regular.ttf');
+      final boldData = await rootBundle.load('assets/fonts/NotoSansBengali-Bold.ttf');
+      bengaliFont = pw.Font.ttf(regData);
+      bengaliBold = pw.Font.ttf(boldData);
     } catch (_) {}
 
     final theme = pw.ThemeData.withFont(

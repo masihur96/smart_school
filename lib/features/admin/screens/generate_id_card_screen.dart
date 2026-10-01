@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:flutter/services.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/core/utils/bangla_text_renderer.dart';
 
@@ -466,8 +467,10 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
     pw.Font? fontBold;
     pw.Font? signatureFont;
     try {
-      fontReg = await PdfGoogleFonts.notoSansBengaliRegular();
-      fontBold = await PdfGoogleFonts.notoSansBengaliBold();
+      final regData = await rootBundle.load('assets/fonts/NotoSansBengali-Regular.ttf');
+      final boldData = await rootBundle.load('assets/fonts/NotoSansBengali-Bold.ttf');
+      fontReg = pw.Font.ttf(regData);
+      fontBold = pw.Font.ttf(boldData);
     } catch (_) {}
     try {
       signatureFont = await PdfGoogleFonts.dancingScriptBold();
