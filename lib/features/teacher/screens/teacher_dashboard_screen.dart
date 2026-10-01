@@ -1553,73 +1553,138 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
       }
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color accentColor = notice.isImportant ? const Color(0xFFF59E0B) : const Color(0xFF3B82F6);
+    final Color accentLight = accentColor.withValues(alpha: isDark ? 0.2 : 0.1);
+
     return Card(
       margin: EdgeInsets.zero,
+      elevation: 2,
+      shadowColor: Colors.black26,
       clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+          width: 1,
+        ),
+      ),
       child: InkWell(
         onTap: () => _showNoticeDetails(context, notice, timeAgo),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                color: accentColor,
+                width: 4,
+              ),
+            ),
+          ),
+          child: Stack(
             children: [
-              Row(
-                children: [
-                  if (notice.isImportant)
-                    const Padding(
-                      padding: EdgeInsets.only(right: 8),
-                      child: Icon(
-                        Icons.priority_high,
-                        color: Colors.amber,
-                        size: 16,
-                      ),
+              Positioned(
+                right: -15,
+                top: -15,
+                child: Icon(
+                  notice.isImportant ? Icons.campaign_rounded : Icons.notifications_rounded,
+                  size: 90,
+                  color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.03),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (notice.isImportant)
+                          Container(
+                            margin: const EdgeInsets.only(right: 10, top: 2),
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: accentLight,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.priority_high_rounded,
+                              color: accentColor,
+                              size: 14,
+                            ),
+                          ),
+                        Expanded(
+                          child: Text(
+                            notice.title,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Theme.of(context).textTheme.titleLarge?.color,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (isNew) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade600,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              AppLocalizations.of(context)!.newLabel.toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                  Expanded(
-                    child: Text(
-                      notice.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                    const SizedBox(height: 8),
+                    Text(
+                      notice.content,
+                      style: TextStyle(
+                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                        fontSize: 13,
+                        height: 1.3,
                       ),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  if (isNew)
-                    Text(
-                      AppLocalizations.of(context)!.newLabel,
-                      style: TextStyle(
-                        color: Colors.blue.shade700,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Icon(Icons.person_outline_rounded, size: 14, color: isDark ? Colors.grey.shade500 : Colors.grey.shade500),
+                        const SizedBox(width: 4),
+                        Text(
+                          notice.postedBy ?? AppLocalizations.of(context)!.adminText,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(Icons.access_time_rounded, size: 14, color: isDark ? Colors.grey.shade500 : Colors.grey.shade500),
+                        const SizedBox(width: 4),
+                        Text(
+                          timeAgo,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
                     ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                notice.content,
-                style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const Spacer(),
-              Row(
-                children: [
-                  const Icon(Icons.person, size: 12, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text(
-                    notice.postedBy ?? AppLocalizations.of(context)!.adminText,
-                    style: const TextStyle(fontSize: 11, color: Colors.grey),
-                  ),
-                  const Spacer(),
-                  const Icon(Icons.access_time, size: 12, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text(
-                    timeAgo,
-                    style: const TextStyle(fontSize: 11, color: Colors.grey),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -1629,70 +1694,175 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
   }
 
   void _showNoticeDetails(BuildContext context, Notice notice, String timeAgo) {
-    showDialog(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = notice.isImportant ? const Color(0xFFF59E0B) : const Color(0xFF3B82F6);
+    
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            if (notice.isImportant)
-              const Padding(
-                padding: EdgeInsets.only(right: 8),
-                child: Icon(Icons.priority_high, color: Colors.amber, size: 20),
-              ),
-            Expanded(child: Text(notice.title)),
-          ],
-        ),
-        content: SingleChildScrollView(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Posted by ${notice.postedBy ?? AppLocalizations.of(context)!.adminText} • $timeAgo',
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  height: 4,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
               ),
-              const SizedBox(height: 16),
-              Text(notice.content, style: TextStyle(fontSize: 15)),
-              if (notice.fileUrl != null && notice.fileUrl!.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                OutlinedButton.icon(
-                  onPressed: () async {
-                    final url = Uri.parse(notice.fileUrl!);
-                    try {
-                      if (!await launchUrl(
-                        url,
-                        mode: LaunchMode.externalApplication,
-                      )) {
-                        await launchUrl(url, mode: LaunchMode.platformDefault);
-                      }
-                    } catch (_) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.couldNotOpenAttachment,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (notice.isImportant)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 12, top: 4),
+                            child: Icon(Icons.priority_high_rounded, color: primaryColor, size: 24),
+                          ),
+                        Expanded(
+                          child: Text(
+                            notice.title,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).textTheme.titleLarge?.color,
                             ),
                           ),
-                        );
-                      }
-                    }
-                  },
-                  icon: const Icon(Icons.attachment),
-                  label: Text(AppLocalizations.of(context)!.viewAttachment),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Icon(Icons.person_outline_rounded, size: 16, color: Colors.grey.shade500),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Posted by ${notice.postedBy ?? AppLocalizations.of(context)!.adminText}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.access_time_rounded, size: 16, color: Colors.grey.shade500),
+                        const SizedBox(width: 8),
+                        Text(
+                          timeAgo,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      notice.content,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: isDark ? Colors.grey.shade300 : Colors.grey.shade800,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    if (notice.fileUrl != null && notice.fileUrl!.isNotEmpty) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            final url = Uri.parse(notice.fileUrl!);
+                            try {
+                              if (!await launchUrl(
+                                url,
+                                mode: LaunchMode.externalApplication,
+                              )) {
+                                await launchUrl(url, mode: LaunchMode.platformDefault);
+                              }
+                            } catch (_) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      AppLocalizations.of(context)!.couldNotOpenAttachment,
+                                    ),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          icon: const Icon(Icons.attachment_rounded),
+                          label: Text(
+                            AppLocalizations.of(context)!.viewAttachment,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).cardColor,
+                          foregroundColor: Theme.of(context).textTheme.titleLarge?.color,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: isDark ? Colors.white12 : Colors.black12,
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)!.close,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                 ),
-              ],
+              ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)!.close),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
