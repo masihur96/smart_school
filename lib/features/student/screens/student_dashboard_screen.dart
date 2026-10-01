@@ -1556,6 +1556,8 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                             final totalText = mark.totalMarks.truncateToDouble() == mark.totalMarks
                                 ? mark.totalMarks.toInt().toString()
                                 : mark.totalMarks.toStringAsFixed(1);
+                            final isFailed = mark.totalMarks > 0 &&
+                                mark.marksObtained < mark.totalMarks * 0.4;
 
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 8.0),
@@ -1573,12 +1575,36 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  Text(
-                                    '$marksText / $totalText',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        '$marksText / $totalText',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      if (isFailed) ...[
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.shade50,
+                                            borderRadius: BorderRadius.circular(6),
+                                            border: Border.all(color: Colors.red.shade300),
+                                          ),
+                                          child: Text(
+                                            'Failed',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.red.shade700,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ],
                               ),
