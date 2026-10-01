@@ -1143,101 +1143,262 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
     final exam = examData.exam!;
     final result = examData.result!;
 
-    return Card(
-      margin: const EdgeInsets.only(right: 16, bottom: 8),
 
-      child: SizedBox(
-        width: screenSize(context, .85),
-        child: Stack(
-          children: [
-            Positioned(
-              right: -10,
-              top: -10,
-              child: Icon(
-                Icons.stars_rounded,
-                size: 100,
-                color: Colors.white.withOpacity(0.1),
+
+    return Card(
+
+      margin: const EdgeInsets.only(right: 16, bottom: 8),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _showExamResultBottomSheet(context, examData),
+        child: SizedBox(
+          width: screenSize(context, .85),
+          child: Stack(
+            children: [
+              Positioned(
+                right: -10,
+                top: -10,
+                child: Icon(
+                  Icons.stars_rounded,
+                  size: 100,
+                  color: Colors.white.withOpacity(0.1),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Row(
-                children: [
-                  Column(
-                    children: [
-                      CircularPercentIndicator(
-                        radius: 40.0,
-                        lineWidth: 8.0,
-                        animation: true,
-                        percent: result.percentage / 100,
-                        center: Text(
-                          "${result.percentage.toInt()}%",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                        circularStrokeCap: CircularStrokeCap.round,
-                        progressColor: Colors.amber,
-                        backgroundColor: Colors.white24,
-                      ),
-                      const SizedBox(height: 5),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.amber,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'Grade: ${result.grade}',
-                          style: TextStyle(
-                            color: Colors.deepPurple.shade900,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  children: [
+                    Column(
                       children: [
-                        Text(
-                          exam.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        CircularPercentIndicator(
+                          radius: 40.0,
+                          lineWidth: 8.0,
+                          animation: true,
+                          percent: result.percentage / 100,
+                          center: Text(
+                            "${result.percentage.toInt()}%",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          circularStrokeCap: CircularStrokeCap.round,
+                          progressColor: Colors.amber,
+                          backgroundColor: Colors.white24,
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          exam.description ?? "",
-                          style: const TextStyle(fontSize: 12),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Total Marks: ${result.totalObtained} / ${result.totalMax}',
-                          style: TextStyle(fontSize: 12),
+                        const SizedBox(height: 5),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.amber,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'Grade: ${result.grade}',
+                            style: TextStyle(
+                              color: Colors.deepPurple.shade900,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            exam.name,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (exam.startDate != null && exam.endDate != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              '${DateFormat('dd MMM yyyy').format(exam.startDate!)} - ${DateFormat('dd MMM yyyy').format(exam.endDate!)}',
+                              style: const TextStyle(fontSize: 11),
+                            ),
+                          ],
+                          const SizedBox(height: 6),
+                          Text(
+                            exam.description ?? "",
+                            style: const TextStyle(fontSize: 12),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            'Total Marks: ${result.totalObtained} / ${result.totalMax}',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  void _showExamResultBottomSheet(BuildContext context, MyRecentExamWithResult examData) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Colors.amber;
+    final exam = examData.exam!;
+    final result = examData.result!;
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  height: 4,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          exam.name,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).textTheme.titleLarge?.color,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Icon(Icons.date_range, size: 18, color: primaryColor),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                exam.startDate != null && exam.endDate != null 
+                                  ? '${DateFormat('dd MMM').format(exam.startDate!)} - ${DateFormat('dd MMM yyyy').format(exam.endDate!)}' 
+                                  : 'Date not available',
+                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Icon(Icons.score, size: 18, color: primaryColor),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Total Marks: ${result.totalObtained} / ${result.totalMax}',
+                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                            ),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.amber,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'Grade: ${result.grade}',
+                                style: TextStyle(
+                                  color: Colors.deepPurple.shade900,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        if (exam.description != null && exam.description!.isNotEmpty) ...[
+                          Text(
+                            exam.description!,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+                              height: 1.4,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                        // if (examData.myMarks.isNotEmpty) ...[
+                        //   const Text(
+                        //     'Subject Wise Results',
+                        //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        //   ),
+                        //   const SizedBox(height: 12),
+                        //   ...examData.myMarks.map((mark) => Padding(
+                        //     padding: const EdgeInsets.only(bottom: 8.0),
+                        //     child: Row(
+                        //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        //       children: [
+                        //         Expanded(
+                        //           child: Text(
+                        //             mark.subject?.name ?? 'Unknown Subject',
+                        //             style: TextStyle(
+                        //               fontSize: 14,
+                        //               color: isDark ? Colors.grey.shade300 : Colors.grey.shade800,
+                        //             ),
+                        //           ),
+                        //         ),
+                        //         Text(
+                        //           '${mark.marksObtained} / ${mark.totalMarks}',
+                        //           style: const TextStyle(
+                        //             fontSize: 14,
+                        //             fontWeight: FontWeight.bold,
+                        //           ),
+                        //         ),
+                        //       ],
+                        //     ),
+                        //   )),
+                        // ],
+                        // const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
