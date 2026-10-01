@@ -376,9 +376,12 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
           children: [
             SizedBox(height: 10),
             if (data?.marqueeData != null && data!.marqueeData!.text.isNotEmpty)
-              MarqueeNotice(
-                customText: data.marqueeData!.text,
-                color: AppColors.primaryStudent,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: MarqueeNotice(
+                  customText: data.marqueeData!.text,
+                  color: AppColors.primaryStudent,
+                ),
               ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -392,7 +395,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                     },
                   ),
                   _buildAttendanceSection(context, data, l10n),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 14),
                   if (upcomingClasses.isNotEmpty) ...[
                     _buildSectionHeader(
                       'Online Classes',
@@ -888,8 +891,7 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
               ),
             ],
             if (data?.myAttendanceList?.records.isNotEmpty ?? false) ...[
-              const SizedBox(height: 16),
-              Divider(color: Colors.grey.shade200),
+
               const SizedBox(height: 8),
               Text(
                 'Recent Records',
