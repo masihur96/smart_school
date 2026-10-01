@@ -142,99 +142,124 @@ class _NoticeManagementScreenState extends State<NoticeManagementScreen> {
 
   // ───────────────────────────── VIEW ──────────────────────────────────────
   void _viewNoticeDialog(BuildContext context, Notice notice) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Icon(
-              notice.isImportant ? Icons.priority_high : Icons.campaign,
-              color: notice.isImportant ? Colors.red : Colors.purple,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                notice.title,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              notice.content,
-              style: const TextStyle(fontSize: 14, height: 1.5),
-            ),
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 8),
-            _infoRow(
-              Icons.group_outlined,
-              'Audience',
-              notice.targetAudience ?? 'All',
-            ),
-            const SizedBox(height: 6),
-            _infoRow(Icons.person_outline, 'Posted by', notice.postedBy ?? '—'),
-            if (notice.isImportant) ...[
-              const SizedBox(height: 6),
-              _infoRow(Icons.warning_amber_rounded, 'Priority', 'Important'),
-            ],
-            if (notice.avatar != null) ...[
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final url = Uri.parse(notice.avatar!);
-                  try {
-                    bool launched = await launchUrl(
-                      url,
-                      mode: LaunchMode.externalApplication,
-                    );
-                    if (!launched) {
-                      launched = await launchUrl(url, mode: LaunchMode.platformDefault);
-                    }
-                    if (!launched && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(AppLocalizations.of(context)!.couldNotOpenAttachment)),
-                      );
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(AppLocalizations.of(context)!.couldNotOpenAttachment)),
-                      );
-                    }
-                  }
-                },
-                icon: const Icon(Icons.attach_file, size: 16),
-                label: Column(
-                  children: [
-                    Text(AppLocalizations.of(context)!.viewAttachment),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        notice.isImportant ? Icons.priority_high : Icons.campaign,
+                        color: notice.isImportant ? Colors.red : Colors.purple,
+                        size: 28,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          notice.title,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ],
-                ),
-
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple.withOpacity(0.1),
-                  foregroundColor: Colors.purple,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  Text(
+                    notice.content,
+                    style: const TextStyle(fontSize: 15, height: 1.5),
+                  ),
+                  const SizedBox(height: 24),
+                  const Divider(),
+                  const SizedBox(height: 16),
+                  _infoRow(
+                    Icons.group_outlined,
+                    'Audience',
+                    notice.targetAudience ?? 'All',
+                  ),
+                  const SizedBox(height: 10),
+                  _infoRow(Icons.person_outline, 'Posted by', notice.postedBy ?? '—'),
+                  if (notice.isImportant) ...[
+                    const SizedBox(height: 10),
+                    _infoRow(Icons.warning_amber_rounded, 'Priority', 'Important'),
+                  ],
+                  if (notice.avatar != null) ...[
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          final url = Uri.parse(notice.avatar!);
+                          try {
+                            bool launched = await launchUrl(
+                              url,
+                              mode: LaunchMode.externalApplication,
+                            );
+                            if (!launched) {
+                              launched = await launchUrl(url, mode: LaunchMode.platformDefault);
+                            }
+                            if (!launched && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(AppLocalizations.of(context)!.couldNotOpenAttachment)),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(AppLocalizations.of(context)!.couldNotOpenAttachment)),
+                              );
+                            }
+                          }
+                        },
+                        icon: const Icon(Icons.attach_file, size: 20),
+                        label: Text(AppLocalizations.of(context)!.viewAttachment),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple.withOpacity(0.1),
+                          foregroundColor: Colors.purple,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context)!.close,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)!.close),
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -696,8 +721,11 @@ class _NoticeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isImportant = notice.isImportant;
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 14, 4, 10),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onView,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 14, 4, 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -883,6 +911,7 @@ class _NoticeCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
