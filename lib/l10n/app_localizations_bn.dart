@@ -4069,4 +4069,89 @@ class AppLocalizationsBn extends AppLocalizations {
   String classWithParam(String name) {
     return 'ক্লাস $name';
   }
+
+  @override
+  String get libraryBooks => 'লাইব্রেরির বই';
+
+  @override
+  String get shiftInProgress => 'শিফট চলছে';
+
+  @override
+  String get shiftCompleted => 'শিফট সম্পন্ন হয়েছে';
+
+  @override
+  String get notStartedYet => 'এখনও শুরু হয়নি';
+
+  @override
+  String get notYet => 'এখনও না ';
+
+  @override
+  String get todayText => 'আজ';
+
+  @override
+  String get yesterdayText => 'গতকাল';
+
+  @override
+  String get adminText => 'অ্যাডমিন';
+
+  @override
+  String postedByNotice(String name, String timeAgo) {
+    return '$name দ্বারা পোস্ট করা হয়েছে • $timeAgo';
+  }
+
+  @override
+  String get meetingText => 'মিটিং';
+
+  @override
+  String confirmSubmitAttendance(String distance, String radius) {
+    return 'আপনি কি নিশ্চিত যে আপনি আপনার উপস্থিতি জমা দিতে চান?\\n\\nকেন্দ্র থেকে দূরত্ব: ${distance}m\\nঅনুমোদিত ব্যাসার্ধ: ${radius}m';
+  }
+
+  @override
+  String outOfRangeDetails(String baseMessage, String distance, String radius) {
+    return '$baseMessage (${distance}m দূরে)। অনুমোদিত ব্যাসার্ধ: ${radius}m';
+  }
+
+  @override
+  String classNum(String id) {
+    return 'ক্লাস $id';
+  }
+
+  @override
+  String subjectNum(String id) {
+    return 'বিষয় $id';
+  }
+
+  @override
+  String get nowText => 'এখন';
+
+  @override
+  String get upcomingText => 'আসন্ন';
+
+  @override
+  String get passedText => 'অতিবাহিত';
+
+  @override
+  String roomNum(String num) {
+    return 'কক্ষ $num';
+  }
+
+  @override
+  String get publishedText => 'প্রকাশিত';
+
+  @override
+  String routinesCount(int count) {
+    return '$count রুটিন';
+  }
+
+  @override
+  String failedToLoadClasses(String error) {
+    return 'ক্লাস লোড করতে ব্যর্থ: $error';
+  }
+
+  @override
+  String get syllabusLabel => 'সিলেবাস: ';
+
+  @override
+  String get totalText => 'মোট';
 }

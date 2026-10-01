@@ -7554,6 +7554,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Class {name}'**
   String classWithParam(String name);
+
+  /// No description provided for @libraryBooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Library Books'**
+  String get libraryBooks;
+
+  /// No description provided for @shiftInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Shift In Progress'**
+  String get shiftInProgress;
+
+  /// No description provided for @shiftCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Shift Completed'**
+  String get shiftCompleted;
+
+  /// No description provided for @notStartedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Started Yet'**
+  String get notStartedYet;
+
+  /// No description provided for @notYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Yet '**
+  String get notYet;
+
+  /// No description provided for @todayText.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todayText;
+
+  /// No description provided for @yesterdayText.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterdayText;
+
+  /// No description provided for @adminText.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get adminText;
+
+  /// No description provided for @postedByNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted by {name} • {timeAgo}'**
+  String postedByNotice(String name, String timeAgo);
+
+  /// No description provided for @meetingText.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting'**
+  String get meetingText;
+
+  /// No description provided for @confirmSubmitAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to submit your attendance?\\n\\nDistance from center: {distance}m\\nAllowed radius: {radius}m'**
+  String confirmSubmitAttendance(String distance, String radius);
+
+  /// No description provided for @outOfRangeDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'{baseMessage} ({distance}m away). Allowed radius: {radius}m'**
+  String outOfRangeDetails(String baseMessage, String distance, String radius);
+
+  /// No description provided for @classNum.
+  ///
+  /// In en, this message translates to:
+  /// **'Class {id}'**
+  String classNum(String id);
+
+  /// No description provided for @subjectNum.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject {id}'**
+  String subjectNum(String id);
+
+  /// No description provided for @nowText.
+  ///
+  /// In en, this message translates to:
+  /// **'NOW'**
+  String get nowText;
+
+  /// No description provided for @upcomingText.
+  ///
+  /// In en, this message translates to:
+  /// **'UPCOMING'**
+  String get upcomingText;
+
+  /// No description provided for @passedText.
+  ///
+  /// In en, this message translates to:
+  /// **'PASSED'**
+  String get passedText;
+
+  /// No description provided for @roomNum.
+  ///
+  /// In en, this message translates to:
+  /// **'Room {num}'**
+  String roomNum(String num);
+
+  /// No description provided for @publishedText.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get publishedText;
+
+  /// No description provided for @routinesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Routines'**
+  String routinesCount(int count);
+
+  /// No description provided for @failedToLoadClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load classes: {error}'**
+  String failedToLoadClasses(String error);
+
+  /// No description provided for @syllabusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Syllabus: '**
+  String get syllabusLabel;
+
+  /// No description provided for @totalText.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get totalText;
 }
 
 class _AppLocalizationsDelegate

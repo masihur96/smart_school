@@ -1930,5 +1930,96 @@
         "type": "String"
       }
     }
-  }
+  },
+  "libraryBooks": "Library Books",
+  "shiftInProgress": "Shift In Progress",
+  "shiftCompleted": "Shift Completed",
+  "notStartedYet": "Not Started Yet",
+  "notYet": "Not Yet ",
+  "todayText": "Today",
+  "yesterdayText": "Yesterday",
+  "adminText": "Admin",
+  "postedByNotice": "Posted by {name} • {timeAgo}",
+  "@postedByNotice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "timeAgo": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingText": "Meeting",
+  "confirmSubmitAttendance": "Are you sure you want to submit your attendance?\\n\\nDistance from center: {distance}m\\nAllowed radius: {radius}m",
+  "@confirmSubmitAttendance": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "radius": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfRangeDetails": "{baseMessage} ({distance}m away). Allowed radius: {radius}m",
+  "@outOfRangeDetails": {
+    "placeholders": {
+      "baseMessage": {
+        "type": "String"
+      },
+      "distance": {
+        "type": "String"
+      },
+      "radius": {
+        "type": "String"
+      }
+    }
+  },
+  "classNum": "Class {id}",
+  "@classNum": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "subjectNum": "Subject {id}",
+  "@subjectNum": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "nowText": "NOW",
+  "upcomingText": "UPCOMING",
+  "passedText": "PASSED",
+  "roomNum": "Room {num}",
+  "@roomNum": {
+    "placeholders": {
+      "num": {
+        "type": "String"
+      }
+    }
+  },
+  "publishedText": "Published",
+  "routinesCount": "{count} Routines",
+  "@routinesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToLoadClasses": "Failed to load classes: {error}",
+  "@failedToLoadClasses": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "syllabusLabel": "Syllabus: ",
+  "totalText": "Total"
 }

@@ -4056,4 +4056,89 @@ class AppLocalizationsEn extends AppLocalizations {
   String classWithParam(String name) {
     return 'Class $name';
   }
+
+  @override
+  String get libraryBooks => 'Library Books';
+
+  @override
+  String get shiftInProgress => 'Shift In Progress';
+
+  @override
+  String get shiftCompleted => 'Shift Completed';
+
+  @override
+  String get notStartedYet => 'Not Started Yet';
+
+  @override
+  String get notYet => 'Not Yet ';
+
+  @override
+  String get todayText => 'Today';
+
+  @override
+  String get yesterdayText => 'Yesterday';
+
+  @override
+  String get adminText => 'Admin';
+
+  @override
+  String postedByNotice(String name, String timeAgo) {
+    return 'Posted by $name • $timeAgo';
+  }
+
+  @override
+  String get meetingText => 'Meeting';
+
+  @override
+  String confirmSubmitAttendance(String distance, String radius) {
+    return 'Are you sure you want to submit your attendance?\\n\\nDistance from center: ${distance}m\\nAllowed radius: ${radius}m';
+  }
+
+  @override
+  String outOfRangeDetails(String baseMessage, String distance, String radius) {
+    return '$baseMessage (${distance}m away). Allowed radius: ${radius}m';
+  }
+
+  @override
+  String classNum(String id) {
+    return 'Class $id';
+  }
+
+  @override
+  String subjectNum(String id) {
+    return 'Subject $id';
+  }
+
+  @override
+  String get nowText => 'NOW';
+
+  @override
+  String get upcomingText => 'UPCOMING';
+
+  @override
+  String get passedText => 'PASSED';
+
+  @override
+  String roomNum(String num) {
+    return 'Room $num';
+  }
+
+  @override
+  String get publishedText => 'Published';
+
+  @override
+  String routinesCount(int count) {
+    return '$count Routines';
+  }
+
+  @override
+  String failedToLoadClasses(String error) {
+    return 'Failed to load classes: $error';
+  }
+
+  @override
+  String get syllabusLabel => 'Syllabus: ';
+
+  @override
+  String get totalText => 'Total';
 }

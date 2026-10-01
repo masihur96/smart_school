@@ -1686,5 +1686,96 @@
         "type": "String"
       }
     }
-  }
+  },
+  "libraryBooks": "লাইব্রেরির বই",
+  "shiftInProgress": "শিফট চলছে",
+  "shiftCompleted": "শিফট সম্পন্ন হয়েছে",
+  "notStartedYet": "এখনও শুরু হয়নি",
+  "notYet": "এখনও না ",
+  "todayText": "আজ",
+  "yesterdayText": "গতকাল",
+  "adminText": "অ্যাডমিন",
+  "postedByNotice": "{name} দ্বারা পোস্ট করা হয়েছে • {timeAgo}",
+  "@postedByNotice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "timeAgo": {
+        "type": "String"
+      }
+    }
+  },
+  "meetingText": "মিটিং",
+  "confirmSubmitAttendance": "আপনি কি নিশ্চিত যে আপনি আপনার উপস্থিতি জমা দিতে চান?\\n\\nকেন্দ্র থেকে দূরত্ব: {distance}m\\nঅনুমোদিত ব্যাসার্ধ: {radius}m",
+  "@confirmSubmitAttendance": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "radius": {
+        "type": "String"
+      }
+    }
+  },
+  "outOfRangeDetails": "{baseMessage} ({distance}m দূরে)। অনুমোদিত ব্যাসার্ধ: {radius}m",
+  "@outOfRangeDetails": {
+    "placeholders": {
+      "baseMessage": {
+        "type": "String"
+      },
+      "distance": {
+        "type": "String"
+      },
+      "radius": {
+        "type": "String"
+      }
+    }
+  },
+  "classNum": "ক্লাস {id}",
+  "@classNum": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "subjectNum": "বিষয় {id}",
+  "@subjectNum": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "nowText": "এখন",
+  "upcomingText": "আসন্ন",
+  "passedText": "অতিবাহিত",
+  "roomNum": "কক্ষ {num}",
+  "@roomNum": {
+    "placeholders": {
+      "num": {
+        "type": "String"
+      }
+    }
+  },
+  "publishedText": "প্রকাশিত",
+  "routinesCount": "{count} রুটিন",
+  "@routinesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToLoadClasses": "ক্লাস লোড করতে ব্যর্থ: {error}",
+  "@failedToLoadClasses": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "syllabusLabel": "সিলেবাস: ",
+  "totalText": "মোট"
 }

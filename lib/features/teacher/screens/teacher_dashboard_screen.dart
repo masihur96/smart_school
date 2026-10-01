@@ -207,7 +207,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                         ),
                       ),
                       Text(
-                        user?.designation ?? 'School Name',
+                        user?.designation ?? AppLocalizations.of(context)!.schoolName,
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.white70,
@@ -475,7 +475,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
               ],
               if (upcomingClasses.isNotEmpty) ...[
                 _buildSectionHeader(
-                  'Online Classes',
+                  AppLocalizations.of(context)!.onlineClasses,
                   onSeeAll: () {
                     Navigator.push(
                       context,
@@ -591,7 +591,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
 
                   if (availableBooks.isNotEmpty) ...[
                     _buildSectionHeader(
-                      'Library Books',
+                      AppLocalizations.of(context)!.libraryBooks,
                       onSeeAll: () {
                         Navigator.push(
                           context,
@@ -917,10 +917,10 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                     children: [
                       Text(
                         isClockedIn
-                            ? 'Shift In Progress'
+                            ? AppLocalizations.of(context)!.shiftInProgress
                             : (isClockedOut
-                                  ? 'Shift Completed'
-                                  : 'Not Started Yet'),
+                                  ? AppLocalizations.of(context)!.shiftCompleted
+                                  : AppLocalizations.of(context)!.notStartedYet),
                         style: TextStyle(
                           color: Colors.grey.shade600,
                           fontSize: 12,
@@ -1378,14 +1378,14 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
 
       if (diff.inDays == 0) {
         if (DateTime.now().day == notice.createdAt!.day) {
-          timeAgo = 'Today';
+          timeAgo = AppLocalizations.of(context)!.todayText;
         } else {
-          timeAgo = 'Yesterday';
+          timeAgo = AppLocalizations.of(context)!.yesterdayText;
         }
       } else if (diff.inDays == 1) {
-        timeAgo = 'Yesterday';
+        timeAgo = AppLocalizations.of(context)!.yesterdayText;
       } else if (diff.inDays < 7) {
-        timeAgo = '${diff.inDays} days ago';
+        timeAgo = AppLocalizations.of(context)!.daysAgo(diff.inDays);
       } else {
         timeAgo = DateFormat('MMM dd, yyyy').format(notice.createdAt!);
       }
@@ -1447,7 +1447,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                   const Icon(Icons.person, size: 12, color: Colors.grey),
                   const SizedBox(width: 4),
                   Text(
-                    notice.postedBy ?? 'Admin',
+                    notice.postedBy ?? AppLocalizations.of(context)!.adminText,
                     style: const TextStyle(fontSize: 11, color: Colors.grey),
                   ),
                   const Spacer(),
@@ -1486,7 +1486,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Posted by ${notice.postedBy ?? 'Admin'} • $timeAgo',
+                'Posted by ${notice.postedBy ?? AppLocalizations.of(context)!.adminText} • $timeAgo',
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 16),
@@ -1587,7 +1587,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            onlineClass.className ?? 'Meeting',
+                            onlineClass.className ?? AppLocalizations.of(context)!.meetingText,
                             style: const TextStyle(
                               fontSize: 11,
                               color: Colors.grey,
@@ -1819,7 +1819,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                '${l10n.outOfRange} (${distanceInMeters.toStringAsFixed(0)}m away). Allowed radius: ${user.radius}m',
+                AppLocalizations.of(context)!.outOfRangeDetails(l10n.outOfRange, distanceInMeters.toStringAsFixed(0), user.radius.toString()),
               ),
               backgroundColor: Colors.red,
             ),
@@ -1913,13 +1913,13 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
 
   Widget _buildClassCard(BuildContext context, RoutineEntry classInfo) {
     final classNameText =
-        classInfo.classEntity?.name ?? 'Class ${classInfo.classId}';
+        classInfo.classEntity?.name ?? AppLocalizations.of(context)!.classNum(classInfo.classId.toString());
     final sectionNameText = classInfo.sectionEntity?.name != null
         ? ' (${classInfo.sectionEntity!.name})'
         : '';
     final className = '$classNameText$sectionNameText';
     final subjectName =
-        classInfo.subjectEntity?.name ?? 'Subject ${classInfo.subjectId}';
+        classInfo.subjectEntity?.name ?? AppLocalizations.of(context)!.subjectNum(classInfo.subjectId.toString());
 
     final isActive = _isCurrentClass(classInfo.startTime, classInfo.endTime);
     final isUpcoming = _isUpcomingClass(classInfo.startTime);
@@ -2062,10 +2062,10 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                                 ],
                                 Text(
                                   isActive
-                                      ? 'NOW'
+                                      ? AppLocalizations.of(context)!.nowText
                                       : (isUpcoming
-                                            ? 'UPCOMING'
-                                            : (isPassed ? 'PASSED' : '')),
+                                            ? AppLocalizations.of(context)!.upcomingText
+                                            : (isPassed ? AppLocalizations.of(context)!.passedText : '')),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 9,
@@ -2123,7 +2123,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                'Room ${classInfo.roomNumber}',
+                                AppLocalizations.of(context)!.roomNum(classInfo.roomNumber.toString()),
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: Colors.grey.shade600,
@@ -2324,7 +2324,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                             vertical: 2.0,
                           ),
                           child: Text(
-                            exam.isPublished ? 'Published' : 'Upcoming',
+                            exam.isPublished ? AppLocalizations.of(context)!.publishedText : AppLocalizations.of(context)!.upcomingText,
                             style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
@@ -2381,7 +2381,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                '$assignmentsCount Routines',
+                                AppLocalizations.of(context)!.routinesCount(assignmentsCount),
                                 style: TextStyle(
                                   color: Colors.deepPurple.shade900,
                                   fontWeight: FontWeight.bold,
@@ -2430,7 +2430,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
         ),
         _buildActionGridItem(
           context,
-          'Academic Books',
+          AppLocalizations.of(context)!.academicBooks,
           Icons.menu_book_rounded,
           const Color(0xFF2563EB),
           onTap: () => Navigator.push(
@@ -2494,7 +2494,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
           const Icon(Icons.error_outline, color: Colors.red, size: 48),
           const SizedBox(height: 16),
           Text(
-            'Failed to load classes: $error',
+            AppLocalizations.of(context)!.failedToLoadClasses(error.toString()),
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.red),
           ),
@@ -3150,7 +3150,7 @@ class ExamRoutinesDialog extends StatelessWidget {
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
-                                        'Syllabus: ',
+                                        AppLocalizations.of(context)!.syllabusLabel,
                                         style: TextStyle(
                                           color: Colors.grey.shade600,
                                           fontSize: 13,
@@ -3373,7 +3373,7 @@ class _ClassPerformanceCardWithSubjectDropdownState
                                 Colors.orange,
                               ),
                               _buildStatItemLocal(
-                                'Total',
+                                AppLocalizations.of(context)!.totalText,
                                 stats.total.toString(),
                                 Colors.blue,
                               ),
