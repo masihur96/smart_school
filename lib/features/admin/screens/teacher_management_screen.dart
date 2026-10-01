@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -863,7 +864,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text('Class', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                    Text(AppLocalizations.of(context)!.classText, style: TextStyle(fontSize: 10, color: Colors.grey)),
                                     const SizedBox(height: 2),
                                     Text(classesStr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
                                   ]
@@ -878,7 +879,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text('Section', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                    Text(AppLocalizations.of(context)!.section, style: TextStyle(fontSize: 10, color: Colors.grey)),
                                     const SizedBox(height: 2),
                                     Text(sectionsStr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
                                   ]
@@ -893,7 +894,7 @@ class _TeacherManagementScreenState extends State<TeacherManagementScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text('Subjects', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                    Text(AppLocalizations.of(context)!.subjects, style: TextStyle(fontSize: 10, color: Colors.grey)),
                                     const SizedBox(height: 2),
                                     Text('$subjectCount', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
                                   ]

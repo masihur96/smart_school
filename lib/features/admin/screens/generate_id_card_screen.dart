@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/core/utils/bangla_text_renderer.dart';
 
 
@@ -180,7 +181,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                     child: Text(AppLocalizations.of(context)!.noStudentsForIdCards),
                   )
                 : _selectedStudentIds.isEmpty
-                ? const Center(child: Text('No students selected. Please select at least one student.'))
+                ? Center(child: Text(AppLocalizations.of(context)!.noStudentsSelectedPleaseSelectAtLeastOneStudent))
                 : _pdfBytes == null
                 ? const Center(child: CircularProgressIndicator())
                 : pdfx.PdfViewPinch(controller: _pdfController!),
@@ -299,7 +300,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Generate For', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                      Text(AppLocalizations.of(context)!.generateFor, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
                       const SizedBox(height: 4),
                       InkWell(
                         onTap: () => _showMultiSelectDialog(context),
@@ -346,7 +347,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Select Students', style: TextStyle(fontSize: 18)),
+                  Text(AppLocalizations.of(context)!.selectStudents, style: TextStyle(fontSize: 18)),
                   TextButton(
                     onPressed: () {
                       setDialogState(() {
@@ -389,7 +390,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
+                  child: Text(AppLocalizations.of(context)!.cancel),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -403,7 +404,7 @@ class _GenerateIdCardScreenState extends State<GenerateIdCardScreen> {
                     }
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryAdmin, foregroundColor: Colors.white),
-                  child: const Text('Apply'),
+                  child: Text(AppLocalizations.of(context)!.apply),
                 ),
               ],
             );

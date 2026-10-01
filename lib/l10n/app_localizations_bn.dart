@@ -806,7 +806,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String rollNumber(String roll) {
-    return 'রোল নম্বর';
+    return 'রোল নম্বর $roll';
   }
 
   @override
@@ -3512,4 +3512,551 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get paymentSubmittedSuccessfully =>
       'পেমেন্ট সফলভাবে জমা দেওয়া হয়েছে!';
+
+  @override
+  String get schoolcare => 'SchoolCare';
+
+  @override
+  String get excellenceInEducation => 'Excellence in Education';
+
+  @override
+  String get stayTuned => 'STAY TUNED';
+
+  @override
+  String get dateTime => 'Date & Time';
+
+  @override
+  String get meetingLink => 'Meeting Link';
+
+  @override
+  String get noAttendanceRecordsFound1 => 'No attendance records found';
+
+  @override
+  String get tryAdjustingYourFiltersOrDateSelection =>
+      'Try adjusting your filters or date selection.';
+
+  @override
+  String get oopsSomethingWentWrong => 'Oops! Something went wrong.';
+
+  @override
+  String get myHomeworks => 'My Homeworks';
+
+  @override
+  String get areYouSureYouWantToSubmitYourAttendanceNN =>
+      'Are you sure you want to submit your attendance?\\n\\n';
+
+  @override
+  String get syllabus1 => 'Syllabus: ';
+
+  @override
+  String get examSchedules => 'EXAM SCHEDULES';
+
+  @override
+  String get routinesSyllabus => 'Routines & Syllabus';
+
+  @override
+  String get noResultsPublishedYet => 'No results published yet.';
+
+  @override
+  String get weCouldn => 'We couldn\\';
+
+  @override
+  String get transferCertificate => 'TRANSFER CERTIFICATE';
+
+  @override
+  String
+  get thisIsToCertifyThatTheAboveMentionedStudentHasSuccessfullyCompletedTheirStudiesAtThisInstitutionUpToTheStatedClassTheirCharacterAndConductHaveBeenSatisfactoryDuringTheirTenure =>
+      'This is to certify that the above mentioned student has successfully completed their studies at this institution up to the stated class. Their character and conduct have been satisfactory during their tenure.';
+
+  @override
+  String get classTeacherSignature => 'Class Teacher Signature';
+
+  @override
+  String get principalSignature => 'Principal Signature';
+
+  @override
+  String get schedule => 'Schedule';
+
+  @override
+  String get noStudentsSelectedPleaseSelectAtLeastOneStudent =>
+      'No students selected. Please select at least one student.';
+
+  @override
+  String get generateFor => 'Generate For';
+
+  @override
+  String get selectStudents => 'Select Students';
+
+  @override
+  String get apply => 'Apply';
+
+  @override
+  String get endDateMustBeAfterStartDate =>
+      'End date must be after start date.';
+
+  @override
+  String get assignStudents => 'Assign Students';
+
+  @override
+  String get tapToAssignOneLongPressForMultiSelect =>
+      'Tap to assign one · Long-press for multi-select';
+
+  @override
+  String get selectMonth => 'Select Month';
+
+  @override
+  String get studentPerformance => 'Student Performance';
+
+  @override
+  String get studentPerforMance => 'Student Perfor mance';
+
+  @override
+  String get noStudentFound => 'No student found';
+
+  @override
+  String get noData => 'No data';
+
+  @override
+  String get tryAdjustingTheMonthOrYearFilter =>
+      'Try adjusting the month or year filter';
+
+  @override
+  String get examSelection => 'Exam Selection';
+
+  @override
+  String get saveAllMarks => 'Save All Marks';
+
+  @override
+  String
+  get youHaveReachedTheMaximumLimitOfYourCurrentPricingPlanPleaseUpgradeToAddMore =>
+      'You have reached the maximum limit of your current pricing plan. Please upgrade to add more.';
+
+  @override
+  String get upgrade => 'Upgrade';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get step2Of2SchoolProfile => 'STEP 2 OF 2 • SCHOOL PROFILE';
+
+  @override
+  String get enterYourSchoolNameAndAddressToConfigureYourInstitutionWorkspace =>
+      'Enter your school name and address to configure your institution workspace.';
+
+  @override
+  String get addLogo => 'Add Logo';
+
+  @override
+  String get schoolAddress => 'School Address';
+
+  @override
+  String get principalContactLinked => 'Principal Contact Linked';
+
+  @override
+  String get generateIdCard => 'Generate ID Card';
+
+  @override
+  String get generateTransferCertificateTc =>
+      'Generate Transfer Certificate (TC)';
+
+  @override
+  String get noResultsFoundForTheSelectedStudents =>
+      'No results found for the selected students.';
+
+  @override
+  String get academicReport => 'ACADEMIC REPORT';
+
+  @override
+  String get officialResult => 'OFFICIAL RESULT';
+
+  @override
+  String get studentProgressReport => 'STUDENT PROGRESS REPORT';
+
+  @override
+  String get gradingScale => 'GRADING SCALE';
+
+  @override
+  String get a90100A8089B7079Nc6069D5059F50 =>
+      'A+: 90-100% | A: 80-89% | B: 70-79%\\nC: 60-69%   | D: 50-59% | F: <50%';
+
+  @override
+  String get classTeacher => 'CLASS TEACHER\\';
+
+  @override
+  String get officialSeal => 'Official Seal';
+
+  @override
+  String get youHaveReachedYourStudentLimit =>
+      'You have reached your student limit ';
+
+  @override
+  String get areYouSureYouWantToDeleteThisTeacher =>
+      'Are you sure you want to delete this teacher?';
+
+  @override
+  String get subjects => 'Subjects';
+
+  @override
+  String get contactInformation => 'Contact Information';
+
+  @override
+  String get academicAssignment => 'Academic Assignment';
+
+  @override
+  String get generatingRoutinePdf => 'Generating Routine PDF...';
+
+  @override
+  String get noRoutinePreviewAvailable => 'No routine preview available.';
+
+  @override
+  String get nA => 'N/A';
+
+  @override
+  String get noNoticesPostedYet => 'No notices posted yet.';
+
+  @override
+  String get important1 => 'Important';
+
+  @override
+  String get pleaseDoNotCloseTheApp => 'Please do not close the app...';
+
+  @override
+  String get noTeacherFound => 'No teacher found';
+
+  @override
+  String get failedToLoadPerformance => 'Failed to load performance';
+
+  @override
+  String get noPerformanceData => 'No performance data';
+
+  @override
+  String get chooseTemplate => 'Choose Template';
+
+  @override
+  String get includeExcludeStudents => 'Include / Exclude Students';
+
+  @override
+  String get generatingAdmitCards => 'Generating admit cards…';
+
+  @override
+  String get noStudentsFoundForTheSelectedClassSection =>
+      'No students found for the selected class / section.';
+
+  @override
+  String get tryAdjustingYourFilters => 'Try adjusting your filters';
+
+  @override
+  String get pleaseSelectAPeriodBeforeSavingAttendance =>
+      'Please select a period before saving attendance.';
+
+  @override
+  String get overdue1 => 'OVERDUE';
+
+  @override
+  String get noPeriodsScheduledForThisSubjectOnThisDay =>
+      'No periods scheduled for this subject on this day';
+
+  @override
+  String get areYouSureYouWantToDeleteThisStudent =>
+      'Are you sure you want to delete this student?';
+
+  @override
+  String get readPdf => 'Read PDF';
+
+  @override
+  String get tapToChangeFile => 'Tap to change file';
+
+  @override
+  String get tapToSelectPdf => 'Tap to select PDF';
+
+  @override
+  String get onlyPdfFilesAreAllowed => 'Only PDF files are allowed';
+
+  @override
+  String get uploading => 'Uploading…';
+
+  @override
+  String get uploaded => 'Uploaded';
+
+  @override
+  String get change => 'Change';
+
+  @override
+  String get tapToPickCoverImage => 'Tap to pick cover image';
+
+  @override
+  String get jpgPngFromGallery => 'JPG, PNG from gallery';
+
+  @override
+  String get goToPage => 'Go to Page';
+
+  @override
+  String get go => 'Go';
+
+  @override
+  String get live => 'Live';
+
+  @override
+  String get manageGlobalBehaviorsAccessControlStorage =>
+      'Manage global behaviors, access control & storage';
+
+  @override
+  String get restartSystemServices => 'RESTART SYSTEM SERVICES';
+
+  @override
+  String get createPlan => 'Create Plan';
+
+  @override
+  String get pricingPlans => 'Pricing Plans';
+
+  @override
+  String get noPricingPlansFound => 'No pricing plans found';
+
+  @override
+  String get createANewPricingPlanToGetStarted =>
+      'Create a new pricing plan to get started.';
+
+  @override
+  String get custom => 'CUSTOM';
+
+  @override
+  String get customPlan1 => 'Custom Plan';
+
+  @override
+  String get allSystemsAreFunctioningNormally =>
+      'All systems are functioning normally';
+
+  @override
+  String get uptime => 'Uptime';
+
+  @override
+  String get subscriptions => 'Subscriptions';
+
+  @override
+  String get noSubscriptionsFound => 'No subscriptions found';
+
+  @override
+  String get tryChangingTheFilterOrYourSearchTerm =>
+      'Try changing the filter or your search term.';
+
+  @override
+  String get transactionIdCopied => 'Transaction ID copied';
+
+  @override
+  String
+  get areYouSureYouWantToDeleteThisSubscriptionThisActionCannotBeUndone =>
+      'Are you sure you want to delete this subscription? This action cannot be undone.';
+
+  @override
+  String get createSystemAnnouncement => 'Create System Announcement';
+
+  @override
+  String
+  get sendAPushNotificationToSpecificGroupsOrIndividualsAcrossThePlatform =>
+      'Send a push notification to specific groups or individuals across the platform.';
+
+  @override
+  String get selectTargetAudience => 'Select Target Audience';
+
+  @override
+  String get sendNotification1 => 'SEND NOTIFICATION';
+
+  @override
+  String get superAdmin1 => 'SUPER ADMIN';
+
+  @override
+  String get systemTrash => 'System Trash';
+
+  @override
+  String get manageAndRestoreSoftDeletedRecords =>
+      'Manage and restore soft-deleted records';
+
+  @override
+  String get switchToASpecificCategoryTabToUseBulkActions =>
+      'Switch to a specific category tab to use bulk actions.';
+
+  @override
+  String get restoreRecord => 'Restore Record';
+
+  @override
+  String get areYouSureYouWantToRestore => 'Are you sure you want to restore:';
+
+  @override
+  String get thisWillMakeTheRecordActiveAgainInTheSystem =>
+      'This will make the record active again in the system.';
+
+  @override
+  String get deletePermanently => 'Delete Permanently';
+
+  @override
+  String
+  get thisActionCannotBeUndoneTheRecordWillBePermanentlyRemovedFromTheDatabase =>
+      'This action cannot be undone. The record will be permanently removed from the database.';
+
+  @override
+  String get restoreRecords => 'Restore Records';
+
+  @override
+  String get selectedRecordsWillBecomeActiveAgainInTheSystem =>
+      'Selected records will become active again in the system.';
+
+  @override
+  String get allRecordsAreActiveNothingToRestore =>
+      'All records are active — nothing to restore.';
+
+  @override
+  String get securityCredentialsRequired => 'Security Credentials Required';
+
+  @override
+  String
+  get toDeleteASchoolYouMustFirstSetYourSecurityCredentialsEmailPasswordForDeletionVerification =>
+      'To delete a school you must first set your security credentials (email & password) for deletion verification.';
+
+  @override
+  String get securityCredentials => 'Security Credentials';
+
+  @override
+  String
+  get theseCredentialsAreStoredSecurelyOnYourDeviceAndAreUsedToVerifyYourIdentityBeforePerformingSensitiveActionsLikeDeletingASchool =>
+      'These credentials are stored securely on your device and are used to verify your identity before performing sensitive actions like deleting a school.';
+
+  @override
+  String get emailPhone => 'Email / Phone';
+
+  @override
+  String get aVerificationCodeHasBeenSentToYourRegisteredEmail =>
+      'A verification code has been sent to your registered email.';
+
+  @override
+  String get identityVerification => 'Identity Verification';
+
+  @override
+  String
+  get pleaseChooseAMethodToVerifyYourIdentityAndMarkYourAttendanceForToday =>
+      'Please choose a method to verify your identity and mark your attendance for today.';
+
+  @override
+  String get secureVerificationSystem2026 =>
+      'Secure Verification System © 2026';
+
+  @override
+  String get noteAttendanceCannotBeEditedOrDeleted =>
+      'Note: Attendance cannot be edited or deleted.';
+
+  @override
+  String get biometricCredentialsExpiredPleaseLogInManually =>
+      'Biometric credentials expired. Please log in manually.';
+
+  @override
+  String get schoolcareDigitalCampus => 'SCHOOLCARE DIGITAL CAMPUS';
+
+  @override
+  String get signInToManageYourSchoolAndAcademicWorkspace =>
+      'Sign in to manage your school and academic workspace.';
+
+  @override
+  String get emailOrPhoneNumber => 'Email or Phone Number';
+
+  @override
+  String get registerNow => 'Register Now';
+
+  @override
+  String get pleaseAcceptTheTermsConditionsAndPrivacyPolicyToProceed =>
+      'Please accept the Terms & Conditions and Privacy Policy to proceed.';
+
+  @override
+  String get principalRegistration => 'Principal Registration';
+
+  @override
+  String get step1Of2PrincipalAccount => 'STEP 1 OF 2 • PRINCIPAL ACCOUNT';
+
+  @override
+  String get joinSchoolcare => 'Join SchoolCare';
+
+  @override
+  String get createYourAdministratorAccountToRegisterAndManageYourInstitution =>
+      'Create your administrator account to register and manage your institution.';
+
+  @override
+  String get continueToSchoolSetup => 'CONTINUE TO SCHOOL SETUP';
+
+  @override
+  String get alreadyRegistered => 'Already registered?';
+
+  @override
+  String get logIn => 'Log In';
+
+  @override
+  String get yourNewPasswordShouldBeDifferentFromYourCurrentPassword =>
+      'Your new password should be different from your current password.';
+
+  @override
+  String get speechRecognitionIsNotAvailableOnThisDevice =>
+      'Speech recognition is not available on this device.';
+
+  @override
+  String get online => 'Online';
+
+  @override
+  String get noExamsFound1 => 'No exams found.';
+
+  @override
+  String get checkBackLaterForUpcomingExaminations =>
+      'Check back later for upcoming examinations.';
+
+  @override
+  String get tryAgain => 'Try Again';
+
+  @override
+  String get today1 => 'Today\\';
+
+  @override
+  String get recentRecords => 'Recent Records';
+
+  @override
+  String get allCaughtUp => 'All caught up!';
+
+  @override
+  String get teacher1 => 'Teacher\\';
+
+  @override
+  String get gotIt => 'Got it';
+
+  @override
+  String get overallPerformance => 'Overall Performance';
+
+  @override
+  String get transactionReceipt => 'Transaction Receipt';
+
+  @override
+  String get editEntry => 'Edit Entry';
+
+  @override
+  String get deleteTransaction => 'Delete Transaction';
+
+  @override
+  String get selectAttachmentSource => 'Select Attachment Source';
+
+  @override
+  String get addFeeIncome => '+ Add Fee / Income';
+
+  @override
+  String get addExpense1 => '- Add Expense';
+
+  @override
+  String get transactionDate => 'Transaction Date';
+
+  @override
+  String get receiptDocumentAttachmentOptional =>
+      'Receipt / Document Attachment (Optional)';
+
+  @override
+  String get studentAttendanceReport => 'Student Attendance Report';
+
+  @override
+  String get teacherAttendanceReport => 'Teacher Attendance Report';
+
+  @override
+  String get classText => 'Class';
 }

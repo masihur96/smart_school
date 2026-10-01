@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:smart_school/l10n/app_localizations.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -212,7 +213,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Go to Page',
+        title: Text(AppLocalizations.of(context)!.goToPage,
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -251,7 +252,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
                 Navigator.pop(ctx);
               }
             },
-            child: const Text('Go', style: TextStyle(color: Colors.white)),
+            child: Text(AppLocalizations.of(context)!.go, style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

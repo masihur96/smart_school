@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -750,7 +751,7 @@ class SubscriptionCard extends StatelessWidget {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content:
-                                          const Text('Transaction ID copied'),
+                                          Text(AppLocalizations.of(context)!.transactionIdCopied),
                                       behavior: SnackBarBehavior.floating,
                                       duration: const Duration(seconds: 2),
                                       shape: RoundedRectangleBorder(

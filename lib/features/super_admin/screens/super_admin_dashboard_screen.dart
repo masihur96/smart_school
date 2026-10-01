@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:provider/provider.dart';
@@ -539,7 +540,7 @@ class _SuperAdminDashboardContentState
       children: [
         Text(l10n.systemConfiguration, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Color(0xFF111827))),
         const SizedBox(height: 4),
-        Text('Manage global behaviors, access control & storage', style: TextStyle(fontSize: 13, color: Colors.grey.shade500)),
+        Text(AppLocalizations.of(context)!.manageGlobalBehaviorsAccessControlStorage, style: TextStyle(fontSize: 13, color: Colors.grey.shade500)),
         const SizedBox(height: 28),
         _sectionLabel('ACCESS CONTROL'),
         const SizedBox(height: 12),
@@ -649,7 +650,7 @@ class _SuperAdminDashboardContentState
       child: ElevatedButton.icon(
         onPressed: () {},
         icon: const Icon(Icons.restart_alt_rounded),
-        label: const Text('RESTART SYSTEM SERVICES', style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+        label: Text(AppLocalizations.of(context)!.restartSystemServices, style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0.8)),
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFDC2626),
           foregroundColor: Colors.white,

@@ -6545,6 +6545,1003 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Payment submitted successfully!'**
   String get paymentSubmittedSuccessfully;
+
+  /// No description provided for @schoolcare.
+  ///
+  /// In en, this message translates to:
+  /// **'SchoolCare'**
+  String get schoolcare;
+
+  /// No description provided for @excellenceInEducation.
+  ///
+  /// In en, this message translates to:
+  /// **'Excellence in Education'**
+  String get excellenceInEducation;
+
+  /// No description provided for @stayTuned.
+  ///
+  /// In en, this message translates to:
+  /// **'STAY TUNED'**
+  String get stayTuned;
+
+  /// No description provided for @dateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Date & Time'**
+  String get dateTime;
+
+  /// No description provided for @meetingLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting Link'**
+  String get meetingLink;
+
+  /// No description provided for @noAttendanceRecordsFound1.
+  ///
+  /// In en, this message translates to:
+  /// **'No attendance records found'**
+  String get noAttendanceRecordsFound1;
+
+  /// No description provided for @tryAdjustingYourFiltersOrDateSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Try adjusting your filters or date selection.'**
+  String get tryAdjustingYourFiltersOrDateSelection;
+
+  /// No description provided for @oopsSomethingWentWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Oops! Something went wrong.'**
+  String get oopsSomethingWentWrong;
+
+  /// No description provided for @myHomeworks.
+  ///
+  /// In en, this message translates to:
+  /// **'My Homeworks'**
+  String get myHomeworks;
+
+  /// No description provided for @areYouSureYouWantToSubmitYourAttendanceNN.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to submit your attendance?\\n\\n'**
+  String get areYouSureYouWantToSubmitYourAttendanceNN;
+
+  /// No description provided for @syllabus1.
+  ///
+  /// In en, this message translates to:
+  /// **'Syllabus: '**
+  String get syllabus1;
+
+  /// No description provided for @examSchedules.
+  ///
+  /// In en, this message translates to:
+  /// **'EXAM SCHEDULES'**
+  String get examSchedules;
+
+  /// No description provided for @routinesSyllabus.
+  ///
+  /// In en, this message translates to:
+  /// **'Routines & Syllabus'**
+  String get routinesSyllabus;
+
+  /// No description provided for @noResultsPublishedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No results published yet.'**
+  String get noResultsPublishedYet;
+
+  /// No description provided for @weCouldn.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\\'**
+  String get weCouldn;
+
+  /// No description provided for @transferCertificate.
+  ///
+  /// In en, this message translates to:
+  /// **'TRANSFER CERTIFICATE'**
+  String get transferCertificate;
+
+  /// No description provided for @thisIsToCertifyThatTheAboveMentionedStudentHasSuccessfullyCompletedTheirStudiesAtThisInstitutionUpToTheStatedClassTheirCharacterAndConductHaveBeenSatisfactoryDuringTheirTenure.
+  ///
+  /// In en, this message translates to:
+  /// **'This is to certify that the above mentioned student has successfully completed their studies at this institution up to the stated class. Their character and conduct have been satisfactory during their tenure.'**
+  String
+  get thisIsToCertifyThatTheAboveMentionedStudentHasSuccessfullyCompletedTheirStudiesAtThisInstitutionUpToTheStatedClassTheirCharacterAndConductHaveBeenSatisfactoryDuringTheirTenure;
+
+  /// No description provided for @classTeacherSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'Class Teacher Signature'**
+  String get classTeacherSignature;
+
+  /// No description provided for @principalSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal Signature'**
+  String get principalSignature;
+
+  /// No description provided for @schedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get schedule;
+
+  /// No description provided for @noStudentsSelectedPleaseSelectAtLeastOneStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'No students selected. Please select at least one student.'**
+  String get noStudentsSelectedPleaseSelectAtLeastOneStudent;
+
+  /// No description provided for @generateFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate For'**
+  String get generateFor;
+
+  /// No description provided for @selectStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Students'**
+  String get selectStudents;
+
+  /// No description provided for @apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get apply;
+
+  /// No description provided for @endDateMustBeAfterStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'End date must be after start date.'**
+  String get endDateMustBeAfterStartDate;
+
+  /// No description provided for @assignStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Students'**
+  String get assignStudents;
+
+  /// No description provided for @tapToAssignOneLongPressForMultiSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to assign one · Long-press for multi-select'**
+  String get tapToAssignOneLongPressForMultiSelect;
+
+  /// No description provided for @selectMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Month'**
+  String get selectMonth;
+
+  /// No description provided for @studentPerformance.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Performance'**
+  String get studentPerformance;
+
+  /// No description provided for @studentPerforMance.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Perfor mance'**
+  String get studentPerforMance;
+
+  /// No description provided for @noStudentFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No student found'**
+  String get noStudentFound;
+
+  /// No description provided for @noData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get noData;
+
+  /// No description provided for @tryAdjustingTheMonthOrYearFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Try adjusting the month or year filter'**
+  String get tryAdjustingTheMonthOrYearFilter;
+
+  /// No description provided for @examSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Selection'**
+  String get examSelection;
+
+  /// No description provided for @saveAllMarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Save All Marks'**
+  String get saveAllMarks;
+
+  /// No description provided for @youHaveReachedTheMaximumLimitOfYourCurrentPricingPlanPleaseUpgradeToAddMore.
+  ///
+  /// In en, this message translates to:
+  /// **'You have reached the maximum limit of your current pricing plan. Please upgrade to add more.'**
+  String
+  get youHaveReachedTheMaximumLimitOfYourCurrentPricingPlanPleaseUpgradeToAddMore;
+
+  /// No description provided for @upgrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade'**
+  String get upgrade;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// No description provided for @step2Of2SchoolProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'STEP 2 OF 2 • SCHOOL PROFILE'**
+  String get step2Of2SchoolProfile;
+
+  /// No description provided for @enterYourSchoolNameAndAddressToConfigureYourInstitutionWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your school name and address to configure your institution workspace.'**
+  String get enterYourSchoolNameAndAddressToConfigureYourInstitutionWorkspace;
+
+  /// No description provided for @addLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Logo'**
+  String get addLogo;
+
+  /// No description provided for @schoolAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'School Address'**
+  String get schoolAddress;
+
+  /// No description provided for @principalContactLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal Contact Linked'**
+  String get principalContactLinked;
+
+  /// No description provided for @generateIdCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate ID Card'**
+  String get generateIdCard;
+
+  /// No description provided for @generateTransferCertificateTc.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate Transfer Certificate (TC)'**
+  String get generateTransferCertificateTc;
+
+  /// No description provided for @noResultsFoundForTheSelectedStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found for the selected students.'**
+  String get noResultsFoundForTheSelectedStudents;
+
+  /// No description provided for @academicReport.
+  ///
+  /// In en, this message translates to:
+  /// **'ACADEMIC REPORT'**
+  String get academicReport;
+
+  /// No description provided for @officialResult.
+  ///
+  /// In en, this message translates to:
+  /// **'OFFICIAL RESULT'**
+  String get officialResult;
+
+  /// No description provided for @studentProgressReport.
+  ///
+  /// In en, this message translates to:
+  /// **'STUDENT PROGRESS REPORT'**
+  String get studentProgressReport;
+
+  /// No description provided for @gradingScale.
+  ///
+  /// In en, this message translates to:
+  /// **'GRADING SCALE'**
+  String get gradingScale;
+
+  /// No description provided for @a90100A8089B7079Nc6069D5059F50.
+  ///
+  /// In en, this message translates to:
+  /// **'A+: 90-100% | A: 80-89% | B: 70-79%\\nC: 60-69%   | D: 50-59% | F: <50%'**
+  String get a90100A8089B7079Nc6069D5059F50;
+
+  /// No description provided for @classTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'CLASS TEACHER\\'**
+  String get classTeacher;
+
+  /// No description provided for @officialSeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Official Seal'**
+  String get officialSeal;
+
+  /// No description provided for @youHaveReachedYourStudentLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'You have reached your student limit '**
+  String get youHaveReachedYourStudentLimit;
+
+  /// No description provided for @areYouSureYouWantToDeleteThisTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this teacher?'**
+  String get areYouSureYouWantToDeleteThisTeacher;
+
+  /// No description provided for @subjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Subjects'**
+  String get subjects;
+
+  /// No description provided for @contactInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Information'**
+  String get contactInformation;
+
+  /// No description provided for @academicAssignment.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Assignment'**
+  String get academicAssignment;
+
+  /// No description provided for @generatingRoutinePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating Routine PDF...'**
+  String get generatingRoutinePdf;
+
+  /// No description provided for @noRoutinePreviewAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No routine preview available.'**
+  String get noRoutinePreviewAvailable;
+
+  /// No description provided for @nA.
+  ///
+  /// In en, this message translates to:
+  /// **'N/A'**
+  String get nA;
+
+  /// No description provided for @noNoticesPostedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No notices posted yet.'**
+  String get noNoticesPostedYet;
+
+  /// No description provided for @important1.
+  ///
+  /// In en, this message translates to:
+  /// **'Important'**
+  String get important1;
+
+  /// No description provided for @pleaseDoNotCloseTheApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Please do not close the app...'**
+  String get pleaseDoNotCloseTheApp;
+
+  /// No description provided for @noTeacherFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No teacher found'**
+  String get noTeacherFound;
+
+  /// No description provided for @failedToLoadPerformance.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load performance'**
+  String get failedToLoadPerformance;
+
+  /// No description provided for @noPerformanceData.
+  ///
+  /// In en, this message translates to:
+  /// **'No performance data'**
+  String get noPerformanceData;
+
+  /// No description provided for @chooseTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Template'**
+  String get chooseTemplate;
+
+  /// No description provided for @includeExcludeStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Include / Exclude Students'**
+  String get includeExcludeStudents;
+
+  /// No description provided for @generatingAdmitCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating admit cards…'**
+  String get generatingAdmitCards;
+
+  /// No description provided for @noStudentsFoundForTheSelectedClassSection.
+  ///
+  /// In en, this message translates to:
+  /// **'No students found for the selected class / section.'**
+  String get noStudentsFoundForTheSelectedClassSection;
+
+  /// No description provided for @tryAdjustingYourFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Try adjusting your filters'**
+  String get tryAdjustingYourFilters;
+
+  /// No description provided for @pleaseSelectAPeriodBeforeSavingAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a period before saving attendance.'**
+  String get pleaseSelectAPeriodBeforeSavingAttendance;
+
+  /// No description provided for @overdue1.
+  ///
+  /// In en, this message translates to:
+  /// **'OVERDUE'**
+  String get overdue1;
+
+  /// No description provided for @noPeriodsScheduledForThisSubjectOnThisDay.
+  ///
+  /// In en, this message translates to:
+  /// **'No periods scheduled for this subject on this day'**
+  String get noPeriodsScheduledForThisSubjectOnThisDay;
+
+  /// No description provided for @areYouSureYouWantToDeleteThisStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this student?'**
+  String get areYouSureYouWantToDeleteThisStudent;
+
+  /// No description provided for @readPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Read PDF'**
+  String get readPdf;
+
+  /// No description provided for @tapToChangeFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to change file'**
+  String get tapToChangeFile;
+
+  /// No description provided for @tapToSelectPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to select PDF'**
+  String get tapToSelectPdf;
+
+  /// No description provided for @onlyPdfFilesAreAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Only PDF files are allowed'**
+  String get onlyPdfFilesAreAllowed;
+
+  /// No description provided for @uploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading…'**
+  String get uploading;
+
+  /// No description provided for @uploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded'**
+  String get uploaded;
+
+  /// No description provided for @change.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get change;
+
+  /// No description provided for @tapToPickCoverImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to pick cover image'**
+  String get tapToPickCoverImage;
+
+  /// No description provided for @jpgPngFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'JPG, PNG from gallery'**
+  String get jpgPngFromGallery;
+
+  /// No description provided for @goToPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Page'**
+  String get goToPage;
+
+  /// No description provided for @go.
+  ///
+  /// In en, this message translates to:
+  /// **'Go'**
+  String get go;
+
+  /// No description provided for @live.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get live;
+
+  /// No description provided for @manageGlobalBehaviorsAccessControlStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage global behaviors, access control & storage'**
+  String get manageGlobalBehaviorsAccessControlStorage;
+
+  /// No description provided for @restartSystemServices.
+  ///
+  /// In en, this message translates to:
+  /// **'RESTART SYSTEM SERVICES'**
+  String get restartSystemServices;
+
+  /// No description provided for @createPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Plan'**
+  String get createPlan;
+
+  /// No description provided for @pricingPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing Plans'**
+  String get pricingPlans;
+
+  /// No description provided for @noPricingPlansFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No pricing plans found'**
+  String get noPricingPlansFound;
+
+  /// No description provided for @createANewPricingPlanToGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new pricing plan to get started.'**
+  String get createANewPricingPlanToGetStarted;
+
+  /// No description provided for @custom.
+  ///
+  /// In en, this message translates to:
+  /// **'CUSTOM'**
+  String get custom;
+
+  /// No description provided for @customPlan1.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Plan'**
+  String get customPlan1;
+
+  /// No description provided for @allSystemsAreFunctioningNormally.
+  ///
+  /// In en, this message translates to:
+  /// **'All systems are functioning normally'**
+  String get allSystemsAreFunctioningNormally;
+
+  /// No description provided for @uptime.
+  ///
+  /// In en, this message translates to:
+  /// **'Uptime'**
+  String get uptime;
+
+  /// No description provided for @subscriptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions'**
+  String get subscriptions;
+
+  /// No description provided for @noSubscriptionsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No subscriptions found'**
+  String get noSubscriptionsFound;
+
+  /// No description provided for @tryChangingTheFilterOrYourSearchTerm.
+  ///
+  /// In en, this message translates to:
+  /// **'Try changing the filter or your search term.'**
+  String get tryChangingTheFilterOrYourSearchTerm;
+
+  /// No description provided for @transactionIdCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction ID copied'**
+  String get transactionIdCopied;
+
+  /// No description provided for @areYouSureYouWantToDeleteThisSubscriptionThisActionCannotBeUndone.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this subscription? This action cannot be undone.'**
+  String get areYouSureYouWantToDeleteThisSubscriptionThisActionCannotBeUndone;
+
+  /// No description provided for @createSystemAnnouncement.
+  ///
+  /// In en, this message translates to:
+  /// **'Create System Announcement'**
+  String get createSystemAnnouncement;
+
+  /// No description provided for @sendAPushNotificationToSpecificGroupsOrIndividualsAcrossThePlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a push notification to specific groups or individuals across the platform.'**
+  String
+  get sendAPushNotificationToSpecificGroupsOrIndividualsAcrossThePlatform;
+
+  /// No description provided for @selectTargetAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Target Audience'**
+  String get selectTargetAudience;
+
+  /// No description provided for @sendNotification1.
+  ///
+  /// In en, this message translates to:
+  /// **'SEND NOTIFICATION'**
+  String get sendNotification1;
+
+  /// No description provided for @superAdmin1.
+  ///
+  /// In en, this message translates to:
+  /// **'SUPER ADMIN'**
+  String get superAdmin1;
+
+  /// No description provided for @systemTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'System Trash'**
+  String get systemTrash;
+
+  /// No description provided for @manageAndRestoreSoftDeletedRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage and restore soft-deleted records'**
+  String get manageAndRestoreSoftDeletedRecords;
+
+  /// No description provided for @switchToASpecificCategoryTabToUseBulkActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to a specific category tab to use bulk actions.'**
+  String get switchToASpecificCategoryTabToUseBulkActions;
+
+  /// No description provided for @restoreRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Record'**
+  String get restoreRecord;
+
+  /// No description provided for @areYouSureYouWantToRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to restore:'**
+  String get areYouSureYouWantToRestore;
+
+  /// No description provided for @thisWillMakeTheRecordActiveAgainInTheSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'This will make the record active again in the system.'**
+  String get thisWillMakeTheRecordActiveAgainInTheSystem;
+
+  /// No description provided for @deletePermanently.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Permanently'**
+  String get deletePermanently;
+
+  /// No description provided for @thisActionCannotBeUndoneTheRecordWillBePermanentlyRemovedFromTheDatabase.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone. The record will be permanently removed from the database.'**
+  String
+  get thisActionCannotBeUndoneTheRecordWillBePermanentlyRemovedFromTheDatabase;
+
+  /// No description provided for @restoreRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Records'**
+  String get restoreRecords;
+
+  /// No description provided for @selectedRecordsWillBecomeActiveAgainInTheSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected records will become active again in the system.'**
+  String get selectedRecordsWillBecomeActiveAgainInTheSystem;
+
+  /// No description provided for @allRecordsAreActiveNothingToRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'All records are active — nothing to restore.'**
+  String get allRecordsAreActiveNothingToRestore;
+
+  /// No description provided for @securityCredentialsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Security Credentials Required'**
+  String get securityCredentialsRequired;
+
+  /// No description provided for @toDeleteASchoolYouMustFirstSetYourSecurityCredentialsEmailPasswordForDeletionVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'To delete a school you must first set your security credentials (email & password) for deletion verification.'**
+  String
+  get toDeleteASchoolYouMustFirstSetYourSecurityCredentialsEmailPasswordForDeletionVerification;
+
+  /// No description provided for @securityCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Security Credentials'**
+  String get securityCredentials;
+
+  /// No description provided for @theseCredentialsAreStoredSecurelyOnYourDeviceAndAreUsedToVerifyYourIdentityBeforePerformingSensitiveActionsLikeDeletingASchool.
+  ///
+  /// In en, this message translates to:
+  /// **'These credentials are stored securely on your device and are used to verify your identity before performing sensitive actions like deleting a school.'**
+  String
+  get theseCredentialsAreStoredSecurelyOnYourDeviceAndAreUsedToVerifyYourIdentityBeforePerformingSensitiveActionsLikeDeletingASchool;
+
+  /// No description provided for @emailPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Email / Phone'**
+  String get emailPhone;
+
+  /// No description provided for @aVerificationCodeHasBeenSentToYourRegisteredEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'A verification code has been sent to your registered email.'**
+  String get aVerificationCodeHasBeenSentToYourRegisteredEmail;
+
+  /// No description provided for @identityVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity Verification'**
+  String get identityVerification;
+
+  /// No description provided for @pleaseChooseAMethodToVerifyYourIdentityAndMarkYourAttendanceForToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a method to verify your identity and mark your attendance for today.'**
+  String
+  get pleaseChooseAMethodToVerifyYourIdentityAndMarkYourAttendanceForToday;
+
+  /// No description provided for @secureVerificationSystem2026.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure Verification System © 2026'**
+  String get secureVerificationSystem2026;
+
+  /// No description provided for @noteAttendanceCannotBeEditedOrDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Note: Attendance cannot be edited or deleted.'**
+  String get noteAttendanceCannotBeEditedOrDeleted;
+
+  /// No description provided for @biometricCredentialsExpiredPleaseLogInManually.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric credentials expired. Please log in manually.'**
+  String get biometricCredentialsExpiredPleaseLogInManually;
+
+  /// No description provided for @schoolcareDigitalCampus.
+  ///
+  /// In en, this message translates to:
+  /// **'SCHOOLCARE DIGITAL CAMPUS'**
+  String get schoolcareDigitalCampus;
+
+  /// No description provided for @signInToManageYourSchoolAndAcademicWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to manage your school and academic workspace.'**
+  String get signInToManageYourSchoolAndAcademicWorkspace;
+
+  /// No description provided for @emailOrPhoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Email or Phone Number'**
+  String get emailOrPhoneNumber;
+
+  /// No description provided for @registerNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Register Now'**
+  String get registerNow;
+
+  /// No description provided for @pleaseAcceptTheTermsConditionsAndPrivacyPolicyToProceed.
+  ///
+  /// In en, this message translates to:
+  /// **'Please accept the Terms & Conditions and Privacy Policy to proceed.'**
+  String get pleaseAcceptTheTermsConditionsAndPrivacyPolicyToProceed;
+
+  /// No description provided for @principalRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal Registration'**
+  String get principalRegistration;
+
+  /// No description provided for @step1Of2PrincipalAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'STEP 1 OF 2 • PRINCIPAL ACCOUNT'**
+  String get step1Of2PrincipalAccount;
+
+  /// No description provided for @joinSchoolcare.
+  ///
+  /// In en, this message translates to:
+  /// **'Join SchoolCare'**
+  String get joinSchoolcare;
+
+  /// No description provided for @createYourAdministratorAccountToRegisterAndManageYourInstitution.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your administrator account to register and manage your institution.'**
+  String get createYourAdministratorAccountToRegisterAndManageYourInstitution;
+
+  /// No description provided for @continueToSchoolSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'CONTINUE TO SCHOOL SETUP'**
+  String get continueToSchoolSetup;
+
+  /// No description provided for @alreadyRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'Already registered?'**
+  String get alreadyRegistered;
+
+  /// No description provided for @logIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Log In'**
+  String get logIn;
+
+  /// No description provided for @yourNewPasswordShouldBeDifferentFromYourCurrentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Your new password should be different from your current password.'**
+  String get yourNewPasswordShouldBeDifferentFromYourCurrentPassword;
+
+  /// No description provided for @speechRecognitionIsNotAvailableOnThisDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech recognition is not available on this device.'**
+  String get speechRecognitionIsNotAvailableOnThisDevice;
+
+  /// No description provided for @online.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get online;
+
+  /// No description provided for @noExamsFound1.
+  ///
+  /// In en, this message translates to:
+  /// **'No exams found.'**
+  String get noExamsFound1;
+
+  /// No description provided for @checkBackLaterForUpcomingExaminations.
+  ///
+  /// In en, this message translates to:
+  /// **'Check back later for upcoming examinations.'**
+  String get checkBackLaterForUpcomingExaminations;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get tryAgain;
+
+  /// No description provided for @today1.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\\'**
+  String get today1;
+
+  /// No description provided for @recentRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Records'**
+  String get recentRecords;
+
+  /// No description provided for @allCaughtUp.
+  ///
+  /// In en, this message translates to:
+  /// **'All caught up!'**
+  String get allCaughtUp;
+
+  /// No description provided for @teacher1.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher\\'**
+  String get teacher1;
+
+  /// No description provided for @gotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get gotIt;
+
+  /// No description provided for @overallPerformance.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall Performance'**
+  String get overallPerformance;
+
+  /// No description provided for @transactionReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Receipt'**
+  String get transactionReceipt;
+
+  /// No description provided for @editEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Entry'**
+  String get editEntry;
+
+  /// No description provided for @deleteTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Transaction'**
+  String get deleteTransaction;
+
+  /// No description provided for @selectAttachmentSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Attachment Source'**
+  String get selectAttachmentSource;
+
+  /// No description provided for @addFeeIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Add Fee / Income'**
+  String get addFeeIncome;
+
+  /// No description provided for @addExpense1.
+  ///
+  /// In en, this message translates to:
+  /// **'- Add Expense'**
+  String get addExpense1;
+
+  /// No description provided for @transactionDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Date'**
+  String get transactionDate;
+
+  /// No description provided for @receiptDocumentAttachmentOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt / Document Attachment (Optional)'**
+  String get receiptDocumentAttachmentOptional;
+
+  /// No description provided for @studentAttendanceReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Attendance Report'**
+  String get studentAttendanceReport;
+
+  /// No description provided for @teacherAttendanceReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher Attendance Report'**
+  String get teacherAttendanceReport;
+
+  /// No description provided for @classText.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get classText;
 }
 
 class _AppLocalizationsDelegate

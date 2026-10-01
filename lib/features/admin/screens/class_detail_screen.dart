@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -165,7 +166,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen>
     // if (_selectedRoutineId == null) {
     //   ScaffoldMessenger.of(context).showSnackBar(
     //     const SnackBar(
-    //       content: Text('Please select a period before saving attendance.'),
+    //       content: Text(AppLocalizations.of(context)!.pleaseSelectAPeriodBeforeSavingAttendance),
     //       backgroundColor: Colors.orange,
     //       behavior: SnackBarBehavior.floating,
     //     ),

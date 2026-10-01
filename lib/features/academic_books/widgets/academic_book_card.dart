@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/academic_book.dart';
 
@@ -304,10 +305,10 @@ class _AdminMenu extends StatelessWidget {
         PopupMenuItem(
           value: 'edit',
           child: Row(
-            children: const [
-              Icon(Icons.edit_rounded, size: 16, color: Color(0xFF2563EB)),
-              SizedBox(width: 8),
-              Text('Edit',
+            children: [
+              const Icon(Icons.edit_rounded, size: 16, color: Color(0xFF2563EB)),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.edit,
                   style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -318,10 +319,10 @@ class _AdminMenu extends StatelessWidget {
         PopupMenuItem(
           value: 'delete',
           child: Row(
-            children: const [
-              Icon(Icons.delete_rounded, size: 16, color: Color(0xFFEF4444)),
-              SizedBox(width: 8),
-              Text('Delete',
+            children: [
+              const Icon(Icons.delete_rounded, size: 16, color: Color(0xFFEF4444)),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.delete,
                   style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,

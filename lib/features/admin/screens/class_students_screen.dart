@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -81,7 +82,7 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Remove', style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)!.remove, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -111,7 +112,7 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen>
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Remove', style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)!.remove, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

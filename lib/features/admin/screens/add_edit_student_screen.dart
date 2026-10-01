@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -236,7 +237,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 ),
               );
             },
-            child: const Text('Upgrade', style: TextStyle(color: Colors.white)),
+            child: Text(AppLocalizations.of(context)!.upgrade, style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

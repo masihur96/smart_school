@@ -1,4 +1,5 @@
 import 'package:smart_school/core/widgets/zoomable_avatar.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import 'dart:async';
 
@@ -903,7 +904,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('Class', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                  Text(AppLocalizations.of(context)!.classText, style: TextStyle(fontSize: 10, color: Colors.grey)),
                                   const SizedBox(height: 2),
                                   Text(classesStr.isNotEmpty ? classesStr : '-', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
                                 ]
@@ -914,7 +915,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('Section', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                  Text(AppLocalizations.of(context)!.section, style: TextStyle(fontSize: 10, color: Colors.grey)),
                                   const SizedBox(height: 2),
                                   Text(sectionsStr.isNotEmpty ? sectionsStr : '-', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
                                 ]

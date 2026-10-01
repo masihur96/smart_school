@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
@@ -205,7 +206,7 @@ class _StudentPerformanceScreenState extends State<StudentPerformanceScreen> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Student Performance", style: TextStyle(fontSize: 16)),
+                  Text(AppLocalizations.of(context)!.studentPerformance, style: TextStyle(fontSize: 16)),
                   SizedBox(height: 5),
                   Row(
                     children: [

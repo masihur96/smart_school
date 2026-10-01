@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:smart_school/l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -3430,9 +3431,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               label: 'Class',
               value: classDropdownValue,
               items: [
-                const DropdownMenuItem<String?>(
+                DropdownMenuItem<String?>(
                   value: null,
-                  child: Text('Select Class'),
+                  child: Text(AppLocalizations.of(context)!.selectClass),
                 ),
                 ...uniqueClasses.entries.map(
                   (e) => DropdownMenuItem<String?>(
@@ -3461,9 +3462,9 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                 label: 'Section',
                 value: sectionDropdownValue,
                 items: [
-                  const DropdownMenuItem<String?>(
+                  DropdownMenuItem<String?>(
                     value: null,
-                    child: Text('All Sections'),
+                    child: Text(AppLocalizations.of(context)!.allSections),
                   ),
                   ...uniqueSections.entries.map(
                     (e) => DropdownMenuItem<String?>(
@@ -3596,7 +3597,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancel'),
+                  child: Text(AppLocalizations.of(context)!.cancel),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -3608,7 +3609,7 @@ class _GenerateAdmitCardScreenState extends State<GenerateAdmitCardScreen> {
                     });
                     _generatePdf();
                   },
-                  child: const Text('Apply'),
+                  child: Text(AppLocalizations.of(context)!.apply),
                 ),
               ],
             );
