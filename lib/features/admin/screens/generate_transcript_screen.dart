@@ -42,6 +42,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
   late List<Student> _currentStudents;
   final Map<String, List<Result>> _fetchedExamResults = {};
   bool _isLoading = false;
+  bool _isFiltersExpanded = false;
   Uint8List? _pdfBytes;
   pdfx.PdfControllerPinch? _pdfController;
 
@@ -173,7 +174,15 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
         actions: [
-
+          IconButton(
+            icon: Icon(_isFiltersExpanded ? Icons.filter_list_off : Icons.filter_list),
+            onPressed: () {
+              setState(() {
+                _isFiltersExpanded = !_isFiltersExpanded;
+              });
+            },
+            tooltip: 'Filter',
+          ),
           IconButton(
             icon: const Icon(Icons.print),
             onPressed: () async {
@@ -196,7 +205,7 @@ class _GenerateTranscriptScreenState extends State<GenerateTranscriptScreen> {
       ),
       body: Column(
         children: [
-         // _buildFilters(uniqueClasses, uniqueSections),
+          if (_isFiltersExpanded) _buildFilters(uniqueClasses, uniqueSections),
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
