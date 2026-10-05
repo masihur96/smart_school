@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -79,6 +80,31 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
   bool _teacherPerfFetched = false;
   bool _studentPerfFetched = false;
   bool _showYearlyChart = false;
+  final ScrollController _dailyChartScrollController = ScrollController();
+  bool _hasAutoScrolledDailyChart = false;
+  double _dailyChartViewportWidth = 300.0;
+
+  void _scrollToCurrentDay({
+    required int currentDay,
+    required double dayWidth,
+    required double viewportWidth,
+    required double chartWidth,
+    bool animated = true,
+  }) {
+    if (!_dailyChartScrollController.hasClients) return;
+    final dayCenter = (currentDay - 0.5) * dayWidth;
+    final maxScroll = _dailyChartScrollController.position.maxScrollExtent;
+    final targetOffset = (dayCenter - (viewportWidth / 2)).clamp(0.0, maxScroll);
+    if (animated) {
+      _dailyChartScrollController.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOutCubic,
+      );
+    } else {
+      _dailyChartScrollController.jumpTo(targetOffset);
+    }
+  }
 
   @override
   void initState() {
@@ -109,6 +135,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
   void dispose() {
     _bottomBarController.dispose();
     _tabController.dispose();
+    _dailyChartScrollController.dispose();
     super.dispose();
   }
 
@@ -465,7 +492,10 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
         if (data == null) return const SizedBox.shrink();
 
         return RefreshIndicator(
-          onRefresh: () => provider.fetchDashboardData(),
+          onRefresh: () async {
+            _hasAutoScrolledDailyChart = false;
+            await provider.fetchDashboardData();
+          },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16.0),
@@ -605,7 +635,10 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
       return _buildMonthlyAttendanceChart(
         provider.monthlyAttendanceOverview!,
         canToggle: hasDaily,
-        onToggle: () => setState(() => _showYearlyChart = false),
+        onToggle: () => setState(() {
+          _showYearlyChart = false;
+          _hasAutoScrolledDailyChart = false;
+        }),
       );
     }
 
@@ -634,6 +667,28 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     final daysInMonth =
         summary?.daysInMonth ?? (days.isNotEmpty ? days.length : 31);
 
+    final now = DateTime.now();
+    final todayStr = DateFormat('yyyy-MM-dd').format(now);
+
+    // Identify current day (1-31)
+    int currentDay = now.day;
+    final matchedTodayIndex = days.indexWhere((d) => d.date == todayStr);
+    if (matchedTodayIndex != -1) {
+      currentDay = days[matchedTodayIndex].day;
+    } else if (attendStudent.date.isNotEmpty) {
+      final matchedByDate = days.indexWhere((d) => d.date == attendStudent.date);
+      if (matchedByDate != -1) {
+        currentDay = days[matchedByDate].day;
+      } else {
+        final parsed = DateTime.tryParse(attendStudent.date);
+        if (parsed != null && parsed.day >= 1 && parsed.day <= daysInMonth) {
+          currentDay = parsed.day;
+        }
+      }
+    }
+    if (currentDay < 1) currentDay = 1;
+    if (currentDay > daysInMonth) currentDay = daysInMonth;
+
     final List<FlSpot> spots = [];
     for (final d in days) {
       if (d.hasData) {
@@ -651,6 +706,9 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     final rateColor = avgRate >= 75
         ? Colors.green
         : (avgRate >= 50 ? Colors.orange : Colors.red);
+
+    const double dayColumnWidth = 52.0;
+    const double chartHeight = 220.0;
 
     return Card(
       margin: EdgeInsets.zero,
@@ -673,7 +731,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                     size: 22,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -695,6 +753,43 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                     ],
                   ),
                 ),
+                // Today indicator button to quickly center current date
+                TextButton.icon(
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                    backgroundColor: Colors.purple.withOpacity(0.08),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: const Icon(
+                    Icons.my_location_rounded,
+                    size: 14,
+                    color: Colors.purple,
+                  ),
+                  label: Text(
+                    'Day $currentDay',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.purple,
+                    ),
+                  ),
+                  onPressed: () {
+                    _scrollToCurrentDay(
+                      currentDay: currentDay,
+                      dayWidth: dayColumnWidth,
+                      viewportWidth: _dailyChartViewportWidth,
+                      chartWidth: daysInMonth * dayColumnWidth,
+                      animated: true,
+                    );
+                  },
+                ),
+                const SizedBox(width: 4),
                 if (canToggle)
                   Padding(
                     padding: const EdgeInsets.only(right: 6.0),
@@ -775,10 +870,10 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
               ),
             ],
             const SizedBox(height: 16),
-            SizedBox(
-              height: 190,
-              child: spots.isEmpty
-                  ? Center(
+            spots.isEmpty
+                ? SizedBox(
+                    height: chartHeight,
+                    child: Center(
                       child: Text(
                         l10n.noRecordsForToday,
                         style: TextStyle(
@@ -786,168 +881,387 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                           fontSize: 12,
                         ),
                       ),
-                    )
-                  : LineChart(
-                      LineChartData(
-                        gridData: FlGridData(
-                          show: true,
-                          drawVerticalLine: false,
-                          horizontalInterval: 25,
-                          getDrawingHorizontalLine: (value) {
-                            return FlLine(
-                              color: Colors.grey.withOpacity(0.15),
-                              strokeWidth: 1,
-                              dashArray: [5, 5],
-                            );
-                          },
-                        ),
-                        titlesData: FlTitlesData(
-                          show: true,
-                          rightTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
-                          ),
-                          topTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
-                          ),
-                          bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              reservedSize: 26,
-                              interval: 5,
-                              getTitlesWidget: (value, meta) {
-                                final dayNum = value.toInt();
-                                if (dayNum >= 1 && dayNum <= daysInMonth) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(top: 6.0),
-                                    child: Text(
-                                      'D$dayNum',
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.grey.shade600,
+                    ),
+                  )
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      final availableWidth = constraints.maxWidth;
+                      const yAxisWidth = 34.0;
+                      final scrollViewportWidth =
+                          math.max(0.0, availableWidth - yAxisWidth);
+                      _dailyChartViewportWidth = scrollViewportWidth;
+                      final chartWidth = math.max(
+                        scrollViewportWidth,
+                        daysInMonth * dayColumnWidth,
+                      );
+
+                      // Center current date on initial layout
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!mounted) return;
+                        if (!_hasAutoScrolledDailyChart &&
+                            _dailyChartScrollController.hasClients) {
+                          _hasAutoScrolledDailyChart = true;
+                          _scrollToCurrentDay(
+                            currentDay: currentDay,
+                            dayWidth: dayColumnWidth,
+                            viewportWidth: scrollViewportWidth,
+                            chartWidth: chartWidth,
+                            animated: false,
+                          );
+                        }
+                      });
+
+                      return SizedBox(
+                        height: chartHeight,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Pinned Left Y-Axis
+                            SizedBox(
+                              width: yAxisWidth,
+                              height: chartHeight,
+                              child: LineChart(
+                                LineChartData(
+                                  minY: 0,
+                                  maxY: 100,
+                                  minX: 0,
+                                  maxX: 1,
+                                  gridData: const FlGridData(show: false),
+                                  borderData: FlBorderData(show: false),
+                                  titlesData: FlTitlesData(
+                                    rightTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                    topTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                    bottomTitles: const AxisTitles(
+                                      sideTitles: SideTitles(
+                                        showTitles: false,
+                                        reservedSize: 56,
                                       ),
                                     ),
-                                  );
-                                }
-                                return const Text('');
-                              },
-                            ),
-                          ),
-                          leftTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              interval: 25,
-                              reservedSize: 32,
-                              getTitlesWidget: (value, meta) {
-                                return Text(
-                                  '${value.toInt()}%',
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        borderData: FlBorderData(show: false),
-                        minX: 1,
-                        maxX: daysInMonth.toDouble(),
-                        minY: 0,
-                        maxY: 100,
-                        lineBarsData: [
-                          LineChartBarData(
-                            spots: spots,
-                            isCurved: spots.length > 2,
-                            curveSmoothness: 0.25,
-                            color: Colors.purple,
-                            barWidth: 3,
-                            isStrokeCapRound: true,
-                            dotData: FlDotData(
-                              show: true,
-                              getDotPainter: (spot, percent, barData, index) {
-                                return FlDotCirclePainter(
-                                  radius: 3.5,
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                  strokeColor: Colors.purple,
-                                );
-                              },
-                            ),
-                            belowBarData: BarAreaData(
-                              show: true,
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.purple.withOpacity(0.25),
-                                  Colors.purple.withOpacity(0.0),
-                                ],
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                              ),
-                            ),
-                          ),
-                        ],
-                        lineTouchData: LineTouchData(
-                          touchTooltipData: LineTouchTooltipData(
-                            getTooltipItems: (touchedSpots) {
-                              return touchedSpots.map((LineBarSpot touchedSpot) {
-                                final dayInt = touchedSpot.x.toInt();
-                                final matchedDay = days.firstWhere(
-                                  (d) => d.day == dayInt,
-                                  orElse: () => DailyAttendance(
-                                    date: '',
-                                    day: dayInt,
-                                    dayOfWeek: '',
-                                    present: 0,
-                                    late: 0,
-                                    absent: 0,
-                                    leave: 0,
-                                    totalPresent: 0,
-                                    total: 0,
-                                    attendanceRate: touchedSpot.y,
-                                    hasData: true,
-                                    isFuture: false,
-                                  ),
-                                );
-                                final dayLabel = matchedDay.dayOfWeek.isNotEmpty
-                                    ? 'Day $dayInt (${matchedDay.dayOfWeek})'
-                                    : 'Day $dayInt';
-                                return LineTooltipItem(
-                                  '$dayLabel\n',
-                                  const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text:
-                                          '${touchedSpot.y.toStringAsFixed(1)}%\n',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
+                                    leftTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                        showTitles: true,
+                                        interval: 25,
+                                        reservedSize: yAxisWidth,
+                                        getTitlesWidget: (value, meta) {
+                                          return Text(
+                                            '${value.toInt()}%',
+                                            textAlign: TextAlign.right,
+                                            style: TextStyle(
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.grey.shade600,
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ),
-                                    TextSpan(
-                                      text:
-                                          'P:${matchedDay.present} A:${matchedDay.absent} L:${matchedDay.leave}',
-                                      style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.normal,
-                                      ),
+                                  ),
+                                  lineTouchData: const LineTouchData(
+                                    enabled: false,
+                                  ),
+                                  lineBarsData: [
+                                    LineChartBarData(
+                                      spots: const [
+                                        FlSpot(0, 0),
+                                        FlSpot(1, 0),
+                                      ],
+                                      color: Colors.transparent,
+                                      dotData: const FlDotData(show: false),
                                     ),
                                   ],
-                                );
-                              }).toList();
-                            },
-                          ),
+                                ),
+                              ),
+                            ),
+                            // Horizontally Scrollable Chart
+                            Expanded(
+                              child: SingleChildScrollView(
+                                controller: _dailyChartScrollController,
+                                scrollDirection: Axis.horizontal,
+                                physics: const BouncingScrollPhysics(),
+                                child: SizedBox(
+                                  width: chartWidth,
+                                  height: chartHeight,
+                                  child: LineChart(
+                                    LineChartData(
+                                      gridData: FlGridData(
+                                        show: true,
+                                        drawVerticalLine: true,
+                                        verticalInterval: 1,
+                                        getDrawingVerticalLine: (value) {
+                                          return FlLine(
+                                            color: Colors.grey.withOpacity(0.08),
+                                            strokeWidth: 1,
+                                            dashArray: [3, 3],
+                                          );
+                                        },
+                                        horizontalInterval: 25,
+                                        getDrawingHorizontalLine: (value) {
+                                          return FlLine(
+                                            color: Colors.grey.withOpacity(0.12),
+                                            strokeWidth: 1,
+                                            dashArray: [5, 5],
+                                          );
+                                        },
+                                      ),
+                                      extraLinesData: ExtraLinesData(
+                                        verticalLines: [
+                                          VerticalLine(
+                                            x: currentDay.toDouble(),
+                                            color: Colors.purple.withOpacity(0.4),
+                                            strokeWidth: 1.5,
+                                            dashArray: [4, 4],
+                                          ),
+                                        ],
+                                      ),
+                                      titlesData: FlTitlesData(
+                                        show: true,
+                                        leftTitles: const AxisTitles(
+                                          sideTitles: SideTitles(showTitles: false),
+                                        ),
+                                        rightTitles: const AxisTitles(
+                                          sideTitles: SideTitles(showTitles: false),
+                                        ),
+                                        topTitles: const AxisTitles(
+                                          sideTitles: SideTitles(showTitles: false),
+                                        ),
+                                        bottomTitles: AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: true,
+                                            reservedSize: 56,
+                                            interval: 1,
+                                            getTitlesWidget: (value, meta) {
+                                              final dayNum = value.toInt();
+                                              if (dayNum < 1 || dayNum > daysInMonth) {
+                                                return const SizedBox.shrink();
+                                              }
+                                              final matchedDay = days.firstWhere(
+                                                (d) => d.day == dayNum,
+                                                orElse: () => DailyAttendance(
+                                                  date: '',
+                                                  day: dayNum,
+                                                  dayOfWeek: '',
+                                                  present: 0,
+                                                  late: 0,
+                                                  absent: 0,
+                                                  leave: 0,
+                                                  totalPresent: 0,
+                                                  total: 0,
+                                                  attendanceRate: 0,
+                                                  hasData: false,
+                                                  isFuture: dayNum > currentDay,
+                                                ),
+                                              );
+
+                                              final isToday = dayNum == currentDay;
+                                              final dayOfWeek = matchedDay.dayOfWeek;
+                                              final isWeekend = dayOfWeek == 'Fri' || dayOfWeek == 'Sun';
+
+                                              String rateText = '-';
+                                              Color rateColor = Colors.grey.shade400;
+                                              if (matchedDay.hasData) {
+                                                final rate = matchedDay.attendanceRate;
+                                                rateText = '${rate.toInt()}%';
+                                                rateColor = rate >= 75
+                                                    ? Colors.green.shade700
+                                                    : (rate >= 50
+                                                        ? Colors.orange.shade700
+                                                        : Colors.red.shade700);
+                                              } else if (matchedDay.isFuture) {
+                                                rateText = '';
+                                              }
+
+                                              return Padding(
+                                                padding: const EdgeInsets.only(top: 6.0),
+                                                child: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Text(
+                                                      dayOfWeek,
+                                                      style: TextStyle(
+                                                        fontSize: 9,
+                                                        fontWeight: isToday
+                                                            ? FontWeight.bold
+                                                            : FontWeight.w500,
+                                                        color: isToday
+                                                            ? Colors.purple
+                                                            : (isWeekend
+                                                                ? Colors.red.shade400
+                                                                : Colors.grey.shade600),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 2),
+                                                    Container(
+                                                      padding: const EdgeInsets.symmetric(
+                                                        horizontal: 6,
+                                                        vertical: 2,
+                                                      ),
+                                                      decoration: BoxDecoration(
+                                                        color: isToday
+                                                            ? Colors.purple
+                                                            : (matchedDay.hasData
+                                                                ? Colors.purple.withOpacity(0.08)
+                                                                : Colors.transparent),
+                                                        borderRadius:
+                                                            BorderRadius.circular(10),
+                                                        border: isToday
+                                                            ? Border.all(
+                                                                color: Colors.purple,
+                                                                width: 1.5,
+                                                              )
+                                                            : null,
+                                                      ),
+                                                      child: Text(
+                                                        '$dayNum',
+                                                        style: TextStyle(
+                                                          fontSize: 10,
+                                                          fontWeight: isToday
+                                                              ? FontWeight.bold
+                                                              : FontWeight.w600,
+                                                          color: isToday
+                                                              ? Colors.white
+                                                              : (matchedDay.isFuture
+                                                                  ? Colors.grey.shade400
+                                                                  : Colors.grey.shade800),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 2),
+                                                    if (rateText.isNotEmpty)
+                                                      Text(
+                                                        rateText,
+                                                        style: TextStyle(
+                                                          fontSize: 8.5,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: rateColor,
+                                                        ),
+                                                      )
+                                                    else
+                                                      const SizedBox(height: 11),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                      borderData: FlBorderData(show: false),
+                                      minX: 0.5,
+                                      maxX: daysInMonth + 0.5,
+                                      minY: 0,
+                                      maxY: 100,
+                                      lineBarsData: [
+                                        LineChartBarData(
+                                          spots: spots,
+                                          isCurved: spots.length > 2,
+                                          curveSmoothness: 0.25,
+                                          color: Colors.purple,
+                                          barWidth: 3,
+                                          isStrokeCapRound: true,
+                                          dotData: FlDotData(
+                                            show: true,
+                                            getDotPainter:
+                                                (spot, percent, barData, index) {
+                                              final isSpotToday =
+                                                  spot.x.toInt() == currentDay;
+                                              return FlDotCirclePainter(
+                                                radius: isSpotToday ? 4.5 : 3.5,
+                                                color: isSpotToday
+                                                    ? Colors.amber
+                                                    : Colors.white,
+                                                strokeWidth: isSpotToday ? 2.5 : 2,
+                                                strokeColor: Colors.purple,
+                                              );
+                                            },
+                                          ),
+                                          belowBarData: BarAreaData(
+                                            show: true,
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                Colors.purple.withOpacity(0.25),
+                                                Colors.purple.withOpacity(0.0),
+                                              ],
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                      lineTouchData: LineTouchData(
+                                        touchTooltipData: LineTouchTooltipData(
+                                          getTooltipItems: (touchedSpots) {
+                                            return touchedSpots
+                                                .map((LineBarSpot touchedSpot) {
+                                              final dayInt = touchedSpot.x.toInt();
+                                              final matchedDay = days.firstWhere(
+                                                (d) => d.day == dayInt,
+                                                orElse: () => DailyAttendance(
+                                                  date: '',
+                                                  day: dayInt,
+                                                  dayOfWeek: '',
+                                                  present: 0,
+                                                  late: 0,
+                                                  absent: 0,
+                                                  leave: 0,
+                                                  totalPresent: 0,
+                                                  total: 0,
+                                                  attendanceRate: touchedSpot.y,
+                                                  hasData: true,
+                                                  isFuture: false,
+                                                ),
+                                              );
+                                              final isSpotToday =
+                                                  dayInt == currentDay;
+                                              final dayLabel = matchedDay
+                                                      .dayOfWeek.isNotEmpty
+                                                  ? 'Day $dayInt (${matchedDay.dayOfWeek})${isSpotToday ? ' • TODAY' : ''}'
+                                                  : 'Day $dayInt${isSpotToday ? ' • TODAY' : ''}';
+                                              return LineTooltipItem(
+                                                '$dayLabel\n',
+                                                const TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12,
+                                                ),
+                                                children: [
+                                                  TextSpan(
+                                                    text:
+                                                        '${touchedSpot.y.toStringAsFixed(1)}%\n',
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  TextSpan(
+                                                    text:
+                                                        'P:${matchedDay.present}  A:${matchedDay.absent}  L:${matchedDay.leave}  Lt:${matchedDay.late}',
+                                                    style: const TextStyle(
+                                                      color: Colors.white70,
+                                                      fontSize: 9,
+                                                      fontWeight:
+                                                          FontWeight.normal,
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            }).toList();
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ),
-            ),
+                      );
+                    },
+                  ),
           ],
         ),
       ),
