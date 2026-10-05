@@ -13,9 +13,84 @@ class SubscriptionNotifier extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
+  SubscriptionHistoryData? _historyData;
+  bool _isHistoryLoading = false;
+  String? _historyError;
+
   List<Subscription> get subscriptions => _subscriptions;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  SubscriptionHistoryData? get historyData => _historyData;
+  bool get isHistoryLoading => _isHistoryLoading;
+  String? get historyError => _historyError;
+  Subscription? get activeSubscription => _historyData?.activeSubscription;
+  SubscriptionSummary? get historySummary => _historyData?.summary;
+  List<Subscription> get historySubscriptions =>
+      _historyData?.subscriptions ?? [];
+
+  Future<void> fetchSubscriptionHistory({
+    String? schoolId,
+    bool? isActive,
+    int page = 1,
+    int limit = 20,
+    String sortBy = 'createdAt',
+    String sortOrder = 'DESC',
+  }) async {
+    _isHistoryLoading = true;
+    _historyError = null;
+    notifyListeners();
+
+    try {
+      final token = await StorageService.getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final url = APIPath.adminSubscriptionHistory(
+        schoolId: schoolId,
+        isActive: isActive,
+        page: page,
+        limit: limit,
+        sortBy: sortBy,
+        sortOrder: sortOrder,
+      );
+
+      log('Fetching subscription history: $url');
+
+      final response = await DataProvider().performRequest(
+        'GET',
+        url,
+        header: {
+          'accept': '*/*',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final dynamic rawData = response.data;
+        final data = rawData is Map ? (rawData['data'] ?? rawData) : rawData;
+        if (data is Map<String, dynamic>) {
+          _historyData = SubscriptionHistoryData.fromJson(data);
+        } else if (data is Map) {
+          _historyData = SubscriptionHistoryData.fromJson(
+            Map<String, dynamic>.from(data),
+          );
+        }
+        log(
+          'Fetched subscription history: ${_historyData?.subscriptions.length ?? 0} items',
+        );
+      } else {
+        _historyError =
+            'Failed to fetch subscription history: ${response?.statusCode}';
+        log('Error fetching subscription history: ${response?.data}');
+      }
+    } catch (e) {
+      _historyError = 'Error: $e';
+      log('Exception fetching subscription history: $e');
+    } finally {
+      _isHistoryLoading = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> fetchSubscriptions() async {
     _isLoading = true;

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/configs/custom_size.dart';
@@ -10,7 +11,9 @@ import 'package:smart_school/features/admin/providers/teacher_provider.dart';
 import 'package:smart_school/features/admin/screens/admin_dashboard_screen.dart';
 import 'package:smart_school/features/auth/providers/auth_provider.dart';
 import 'package:smart_school/features/super_admin/models/pricing_plan_model.dart';
+import 'package:smart_school/features/super_admin/models/subscription_model.dart';
 import 'package:smart_school/features/super_admin/providers/pricing_notifier.dart';
+import 'package:smart_school/features/super_admin/providers/subscription_provider.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -23,13 +26,68 @@ class AdminPricingPlanScreen extends StatefulWidget {
   State<AdminPricingPlanScreen> createState() => _AdminPricingPlanScreenState();
 }
 
-class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
+class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  bool? _filterIsActive = true;
+
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PricingNotifier>().fetchPricingPlans();
+      _fetchData();
     });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _fetchData() {
+    final auth = context.read<AuthNotifier>();
+    final schoolId = auth.user?.schoolId ?? auth.adminSubscription?.schoolId;
+    context.read<PricingNotifier>().fetchPricingPlans();
+    context.read<SubscriptionNotifier>().fetchSubscriptionHistory(
+      schoolId: schoolId,
+      isActive: _filterIsActive,
+      page: 1,
+      limit: 20,
+      sortBy: 'createdAt',
+      sortOrder: 'DESC',
+    );
+  }
+
+  Future<void> _refreshHistory() async {
+    final auth = context.read<AuthNotifier>();
+    final schoolId = auth.user?.schoolId ?? auth.adminSubscription?.schoolId;
+    await context.read<SubscriptionNotifier>().fetchSubscriptionHistory(
+      schoolId: schoolId,
+      isActive: _filterIsActive,
+      page: 1,
+      limit: 20,
+      sortBy: 'createdAt',
+      sortOrder: 'DESC',
+    );
+  }
+
+  void _onFilterChanged(bool? isActive) {
+    if (_filterIsActive == isActive) return;
+    setState(() {
+      _filterIsActive = isActive;
+    });
+    final auth = context.read<AuthNotifier>();
+    final schoolId = auth.user?.schoolId ?? auth.adminSubscription?.schoolId;
+    context.read<SubscriptionNotifier>().fetchSubscriptionHistory(
+      schoolId: schoolId,
+      isActive: _filterIsActive,
+      page: 1,
+      limit: 20,
+      sortBy: 'createdAt',
+      sortOrder: 'DESC',
+    );
   }
 
   @override
@@ -37,19 +95,111 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
     final l10n = AppLocalizations.of(context)!;
     final authNotifier = context.watch<AuthNotifier>();
     final pricingNotifier = context.watch<PricingNotifier>();
-    final subscription = authNotifier.adminSubscription;
+    final subscriptionNotifier = context.watch<SubscriptionNotifier>();
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          _buildAppBar(l10n),
-          SliverToBoxAdapter(child: _buildStatusBanner(authNotifier, l10n)),
+      appBar: AppBar(
+        title: Text(
+          l10n.systemSubscription,
+          style: TextStyle(
+            fontSize: screenSize(context, .04),
+            fontWeight: FontWeight.bold,
+            color: AppColors.white,
+          ),
+        ),
+        backgroundColor: AppColors.primaryAdmin,
+        iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh',
+            onPressed: _fetchData,
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () async {
+              if (mounted) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  (route) => false,
+                );
+              }
+              await context.read<AuthNotifier>().logout();
+            },
+          ),
+        ],
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: Colors.white,
+          indicatorWeight: 3,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+          tabs: const [
+            Tab(
+              icon: Icon(Icons.layers_outlined),
+              text: 'Available Plans',
+            ),
+            Tab(
+              icon: Icon(Icons.history_rounded),
+              text: 'Plan History',
+            ),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildPlansTab(
+            pricingNotifier,
+            authNotifier,
+            subscriptionNotifier,
+            l10n,
+          ),
+          _buildHistoryTab(
+            subscriptionNotifier,
+            authNotifier,
+            l10n,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlansTab(
+    PricingNotifier pricingNotifier,
+    AuthNotifier authNotifier,
+    SubscriptionNotifier subscriptionNotifier,
+    AppLocalizations l10n,
+  ) {
+    final subscription = subscriptionNotifier.activeSubscription ??
+        authNotifier.adminSubscription;
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        _fetchData();
+      },
+      child: ListView(
+        padding: const EdgeInsets.only(bottom: 24),
+        children: [
+          _buildStatusBanner(
+            authNotifier,
+            l10n,
+            activeSub: subscriptionNotifier.activeSubscription,
+          ),
           if (pricingNotifier.isLoading)
-            const SliverFillRemaining(
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 48),
               child: Center(child: CircularProgressIndicator()),
             )
           else if (pricingNotifier.plans.isEmpty)
-            SliverFillRemaining(
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -70,17 +220,14 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
               ),
             )
           else
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final plan = pricingNotifier.plans[index];
-
-                  final isPlanFree =
-                      plan.pricePerMonth == '0' ||
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Column(
+                children: pricingNotifier.plans.map((plan) {
+                  final isPlanFree = plan.pricePerMonth == '0' ||
                       plan.name.toLowerCase().contains('free');
-                  final isSubscriptionExpired =
-                      subscription != null && !authNotifier.isSubscriptionValid;
+                  final isSubscriptionExpired = subscription != null &&
+                      !authNotifier.isSubscriptionValid;
 
                   // Hide free plan cards when any current plan is expired
                   if (isPlanFree && isSubscriptionExpired) {
@@ -94,11 +241,12 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
 
                   return _AdminPricingPlanCard(
                     plan: plan,
-                    currentCount: totalUser ?? 0,
+                    currentCount: totalUser,
                     isActive: subscription?.pricingPlan?.id == plan.id,
-                    isAlreadyUsedFreePlan: isPlanFree ? true : false,
+                    isAlreadyUsedFreePlan: isPlanFree,
+                    onPlanUpdated: _fetchData,
                   );
-                }, childCount: pricingNotifier.plans.length),
+                }).toList(),
               ),
             ),
         ],
@@ -106,37 +254,543 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
     );
   }
 
-  Widget _buildAppBar(AppLocalizations l10n) {
-    return SliverAppBar(
-      expandedHeight: 60,
-      pinned: true,
-      backgroundColor: AppColors.primaryAdmin,
+  Widget _buildHistoryTab(
+    SubscriptionNotifier subscriptionNotifier,
+    AuthNotifier authNotifier,
+    AppLocalizations l10n,
+  ) {
+    return RefreshIndicator(
+      onRefresh: _refreshHistory,
+      child: ListView(
+        padding: const EdgeInsets.only(bottom: 24),
+        children: [
+          _buildFilterChips(),
+          if (subscriptionNotifier.historySummary != null)
+            _buildHistorySummary(
+              subscriptionNotifier.historySummary!,
+              subscriptionNotifier.activeSubscription,
+            ),
+          if (subscriptionNotifier.isHistoryLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 48),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (subscriptionNotifier.historyError != null)
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Center(
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: Colors.red,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      subscriptionNotifier.historyError!,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: _refreshHistory,
+                      icon: const Icon(Icons.refresh),
+                      label: Text(l10n.retry),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryAdmin,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else if (subscriptionNotifier.historySubscriptions.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.receipt_long_outlined,
+                      size: 64,
+                      color: Colors.grey.shade400,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'No subscription history found',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _filterIsActive == true
+                          ? 'No active subscriptions found for this school.'
+                          : 'No subscription records found.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      onPressed: _refreshHistory,
+                      icon: const Icon(Icons.refresh, size: 18),
+                      label: const Text('Refresh'),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4, bottom: 8),
+                    child: Text(
+                      'Records (${subscriptionNotifier.historySubscriptions.length})',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ),
+                  ...subscriptionNotifier.historySubscriptions.map(
+                    (sub) => _buildHistoryCard(sub),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 
-      flexibleSpace: FlexibleSpaceBar(
-        centerTitle: true,
-        title: Text(
-          l10n.subscriptionRequired,
-          style: TextStyle(
-            fontSize: screenSize(context, .04),
-            color: AppColors.white,
+  Widget _buildFilterChips() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          _buildFilterChip(
+            label: 'Active Plans',
+            isSelected: _filterIsActive == true,
+            onSelected: () => _onFilterChanged(true),
           ),
+          const SizedBox(width: 8),
+          _buildFilterChip(
+            label: 'All History',
+            isSelected: _filterIsActive == null,
+            onSelected: () => _onFilterChanged(null),
+          ),
+          const SizedBox(width: 8),
+          _buildFilterChip(
+            label: 'Inactive / Expired',
+            isSelected: _filterIsActive == false,
+            onSelected: () => _onFilterChanged(false),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onSelected,
+  }) {
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) => onSelected(),
+      selectedColor: AppColors.primaryAdmin.withOpacity(0.2),
+      checkmarkColor: AppColors.primaryAdmin,
+      labelStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        color: isSelected ? AppColors.primaryAdmin : Colors.grey.shade700,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected ? AppColors.primaryAdmin : Colors.grey.shade300,
         ),
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.logout),
-          onPressed: () async {
-            if (mounted) {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-                (route) => false,
-              );
-            }
-            await context.read<AuthNotifier>().logout();
-          },
+    );
+  }
+
+  Widget _buildHistorySummary(
+    SubscriptionSummary summary,
+    Subscription? activeSub,
+  ) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.primaryAdmin.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primaryAdmin.withOpacity(0.15)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildSummaryMetric(
+              icon: Icons.receipt_long_outlined,
+              label: 'Total Plans',
+              value: '${summary.totalSubscriptions}',
+              color: AppColors.primaryAdmin,
+            ),
+          ),
+          Container(width: 1, height: 40, color: Colors.grey.shade300),
+          Expanded(
+            child: _buildSummaryMetric(
+              icon: Icons.payments_outlined,
+              label: 'Total Paid',
+              value: '৳${summary.totalAmountPaid}',
+              color: Colors.green.shade700,
+            ),
+          ),
+          Container(width: 1, height: 40, color: Colors.grey.shade300),
+          Expanded(
+            child: _buildSummaryMetric(
+              icon: summary.hasActiveSubscription
+                  ? Icons.verified
+                  : Icons.warning_amber_rounded,
+              label: 'Status',
+              value: summary.hasActiveSubscription ? 'Active' : 'Inactive',
+              color: summary.hasActiveSubscription ? Colors.green : Colors.red,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryMetric({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Column(
+      children: [
+        Icon(icon, size: 20, color: color),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey.shade600,
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildHistoryCard(Subscription item) {
+    final planName = item.pricingPlan?.name ?? 'Standard Plan';
+    final planDesc = item.pricingPlan?.description ?? '';
+    final isItemActive =
+        (item.isActive || item.status == 'active') && item.isExpired != true;
+
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isItemActive
+              ? Colors.green.withOpacity(0.4)
+              : Colors.grey.withOpacity(0.2),
+          width: isItemActive ? 1.5 : 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryAdmin.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.workspace_premium_rounded,
+                          color: AppColors.primaryAdmin,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Flexible(
+                        child: Text(
+                          planName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _buildStatusChip(item),
+              ],
+            ),
+            if (planDesc.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                planDesc,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(height: 1),
+            ),
+            Row(
+              children: [
+                const Icon(
+                  Icons.calendar_today_outlined,
+                  size: 15,
+                  color: Colors.grey,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '${formatDate(item.startDate)} - ${formatDate(item.endDate)}',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                if (item.daysRemaining != null &&
+                    (item.isActive || item.status == 'active'))
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '${item.daysRemaining} days left',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.blue,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.people_alt_outlined,
+                      size: 15,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '${item.lastStudentCount} students',
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ],
+                ),
+                if (item.amount != null ||
+                    item.pricingPlan?.pricePerMonth != null)
+                  Text(
+                    '৳${item.amount ?? item.pricingPlan?.pricePerMonth}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryAdmin,
+                    ),
+                  ),
+              ],
+            ),
+            if (item.paymentMethod != null ||
+                (item.transactionId != null &&
+                    item.transactionId!.isNotEmpty)) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Row(
+                  children: [
+                    if (item.paymentMethod != null) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryAdmin.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          item.paymentMethod!,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryAdmin,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    if (item.transactionId != null &&
+                        item.transactionId!.isNotEmpty) ...[
+                      Expanded(
+                        child: Text(
+                          'Trx: ${item.transactionId}',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'monospace',
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          Clipboard.setData(
+                            ClipboardData(text: item.transactionId!),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Transaction ID copied!'),
+                              duration: Duration(seconds: 1),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                        child: const Icon(
+                          Icons.copy,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Created: ${formatDate(item.createdAt)}',
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                ),
+                if (item.school?.name != null &&
+                    item.school!.name.isNotEmpty)
+                  Flexible(
+                    child: Text(
+                      item.school!.name,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade500,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusChip(Subscription item) {
+    final status = item.status?.toLowerCase();
+    final isExpired = item.isExpired == true;
+    final isActive = (item.isActive || status == 'active') && !isExpired;
+
+    Color color;
+    String label;
+    IconData icon;
+
+    if (isActive) {
+      color = Colors.green;
+      label = 'Active';
+      icon = Icons.check_circle_outline;
+    } else if (status == 'pending') {
+      color = Colors.orange;
+      label = 'Pending';
+      icon = Icons.hourglass_top_outlined;
+    } else {
+      color = Colors.red;
+      label = 'Expired';
+      icon = Icons.cancel_outlined;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -145,14 +799,24 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
       return '--';
     }
 
-    final localDate = DateTime.parse(utcDate).toLocal();
-
-    return DateFormat('dd MMM yyyy').format(localDate);
+    try {
+      final localDate = DateTime.parse(utcDate).toLocal();
+      return DateFormat('dd MMM yyyy').format(localDate);
+    } catch (_) {
+      return utcDate.split('T')[0];
+    }
   }
 
-  Widget _buildStatusBanner(AuthNotifier auth, AppLocalizations l10n) {
-    final sub = auth.adminSubscription;
-    final isValid = auth.isSubscriptionValid;
+  Widget _buildStatusBanner(
+    AuthNotifier auth,
+    AppLocalizations l10n, {
+    Subscription? activeSub,
+  }) {
+    final sub = activeSub ?? auth.adminSubscription;
+    final isValid = activeSub != null
+        ? ((activeSub.isActive || activeSub.status == 'active') &&
+            activeSub.isExpired != true)
+        : auth.isSubscriptionValid;
 
     String title = l10n.noActiveSubscription;
     String message = l10n.noActiveSubscriptionDesc;
@@ -161,10 +825,11 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
 
     if (isValid && sub != null) {
       title = l10n.activeSubscription;
-      message = l10n.activeSubscriptionDesc(
-        sub.pricingPlan?.name ?? 'Standard',
-        formatDate(sub.endDate),
-      );
+      final remainingInfo = sub.daysRemaining != null
+          ? ' (${sub.daysRemaining} days remaining)'
+          : '';
+      message =
+          '${l10n.activeSubscriptionDesc(sub.pricingPlan?.name ?? 'Standard', formatDate(sub.endDate))}$remainingInfo';
       color = AppColors.primaryAdmin;
       icon = Icons.check_circle_rounded;
     } else if (sub != null && !isValid) {
@@ -173,7 +838,7 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
     }
 
     return Card(
-      margin: EdgeInsets.all(16),
+      margin: const EdgeInsets.all(16),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -195,7 +860,7 @@ class _AdminPricingPlanScreenState extends State<AdminPricingPlanScreen> {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 14),
             ),
           ],
         ),
@@ -209,12 +874,14 @@ class _AdminPricingPlanCard extends StatefulWidget {
   final int currentCount;
   final bool isActive;
   final bool isAlreadyUsedFreePlan;
+  final VoidCallback? onPlanUpdated;
 
   const _AdminPricingPlanCard({
     required this.plan,
     required this.currentCount,
     required this.isActive,
     this.isAlreadyUsedFreePlan = false,
+    this.onPlanUpdated,
   });
 
   @override
@@ -362,6 +1029,7 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
                       }
 
                       if (success && context.mounted) {
+                        widget.onPlanUpdated?.call();
                         if (auth.isSubscriptionValid) {
                           Navigator.pushAndRemoveUntil(
                             context,
@@ -455,6 +1123,7 @@ class _AdminPricingPlanCardState extends State<_AdminPricingPlanCard> {
           auth: auth,
           onSuccess: (method, trxId) {
             Navigator.pop(context);
+            widget.onPlanUpdated?.call();
             final l10n = AppLocalizations.of(context)!;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

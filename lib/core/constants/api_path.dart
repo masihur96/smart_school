@@ -59,6 +59,25 @@ class APIPath {
   static String assignSubscription = "$baseUrl/subscriptions/assign";
   static String updateSubscription(String id) => "$baseUrl/subscriptions/$id";
   static String deleteSubscription(String id) => "$baseUrl/subscriptions/$id";
+  static String adminSubscriptionHistory({
+    String? schoolId,
+    bool? isActive,
+    int page = 1,
+    int limit = 20,
+    String sortBy = 'createdAt',
+    String sortOrder = 'DESC',
+  }) {
+    final queryParams = <String, String>{
+      if (schoolId != null && schoolId.isNotEmpty) 'schoolId': schoolId,
+      if (isActive != null) 'isActive': isActive.toString(),
+      'page': page.toString(),
+      'limit': limit.toString(),
+      'sortBy': sortBy,
+      'sortOrder': sortOrder,
+    };
+    final queryString = Uri(queryParameters: queryParams).query;
+    return "$baseUrl/admin/subscriptions/history?$queryString";
+  }
 
   static String updateClass(String id) => "$baseUrl/admin/classes/$id";
   static String deleteClass(String id) => "$baseUrl/admin/classes/$id";
