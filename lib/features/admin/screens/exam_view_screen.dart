@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -737,7 +738,6 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
                             ),
                           ),
                         ),
-
                     ],
                   ),
                   trailing: _getMarksController(student.userId).text.isNotEmpty
