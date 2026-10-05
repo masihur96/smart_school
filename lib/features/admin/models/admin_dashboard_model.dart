@@ -1,9 +1,12 @@
+import '../../../models/online_class_model.dart';
+
 class AdminDashboardData {
   final AttendTeacher attendTeacher;
   final AttendStudent attendStudent;
   final List<RecentHomework> recentHomework;
   final List<RecentNotice> recentNotice;
   final List<CurrentExam> currentExam;
+  final List<OnlineClass> onlineClasses;
 
   AdminDashboardData({
     required this.attendTeacher,
@@ -11,6 +14,7 @@ class AdminDashboardData {
     required this.recentHomework,
     required this.recentNotice,
     required this.currentExam,
+    this.onlineClasses = const [],
   });
 
   factory AdminDashboardData.fromJson(Map<String, dynamic> json) {
@@ -27,6 +31,12 @@ class AdminDashboardData {
           [],
       currentExam: (json['currentExam'] as List<dynamic>?)
               ?.map((e) => CurrentExam.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      onlineClasses: (json['onlineClasses'] as List<dynamic>? ??
+                      json['onlineClass'] as List<dynamic>? ??
+                      json['meetings'] as List<dynamic>?)
+              ?.map((e) => OnlineClass.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
     );
@@ -218,27 +228,41 @@ class StudentAttendanceRecord {
   final String id;
   final String studentId;
   final String studentName;
+  final String? avatar;
   final String rollNumber;
   final String designation;
   final String status;
   final String date;
   final String className;
+  final String? classId;
   final String sectionName;
+  final String? sectionId;
   final String? subjectId;
   final String? subjectName;
+  final String? subjectCode;
+  final String? teacherId;
+  final String? teacherName;
+  final String? routineId;
 
   StudentAttendanceRecord({
     required this.id,
     required this.studentId,
     required this.studentName,
+    this.avatar,
     required this.rollNumber,
     required this.designation,
     required this.status,
     required this.date,
     required this.className,
+    this.classId,
     this.sectionName = '',
+    this.sectionId,
     this.subjectId,
     this.subjectName,
+    this.subjectCode,
+    this.teacherId,
+    this.teacherName,
+    this.routineId,
   });
 
   factory StudentAttendanceRecord.fromJson(Map<String, dynamic> json) {
@@ -281,16 +305,23 @@ class StudentAttendanceRecord {
 
     return StudentAttendanceRecord(
       id: json['id']?.toString() ?? '',
-      studentId: json['studentId']?.toString() ?? '',
+      studentId: json['studentId']?.toString() ?? json['student']?['id']?.toString() ?? '',
       studentName: json['studentName']?.toString() ?? json['student']?['name']?.toString() ?? 'Unknown',
-      rollNumber: json['student']?['rollNumber']?.toString() ?? '',
-      designation: json['student']?['designation']?.toString() ?? '',
+      avatar: json['student']?['avatar']?.toString() ?? json['avatar']?.toString(),
+      rollNumber: json['student']?['rollNumber']?.toString() ?? json['rollNumber']?.toString() ?? '',
+      designation: json['student']?['designation']?.toString() ?? json['designation']?.toString() ?? '',
       status: json['status']?.toString() ?? '',
       date: json['date']?.toString() ?? '',
       className: json['class']?['name']?.toString() ?? json['className']?.toString() ?? json['classInfo']?['name']?.toString() ?? '',
+      classId: json['classId']?.toString() ?? json['class']?['id']?.toString(),
       sectionName: extractSectionName(json),
-      subjectId: json['subjectId']?.toString(),
+      sectionId: json['sectionId']?.toString(),
+      subjectId: json['subjectId']?.toString() ?? json['subject']?['id']?.toString(),
       subjectName: json['subject']?['name']?.toString() ?? json['subjectInfo']?['name']?.toString(),
+      subjectCode: json['subject']?['code']?.toString() ?? json['subjectInfo']?['code']?.toString(),
+      teacherId: json['teacherId']?.toString() ?? json['teacher']?['id']?.toString(),
+      teacherName: json['teacher']?['name']?.toString() ?? json['teacherName']?.toString(),
+      routineId: json['routineId']?.toString(),
     );
   }
 }
@@ -440,8 +471,11 @@ class ExamAssignmentSummary {
   final String id;
   final String examId;
   final String className;
+  final String? classId;
   final String subjectName;
+  final String? subjectId;
   final String examinerName;
+  final String? examinerId;
   final String date;
   final String? startTime;
   final String? endTime;
@@ -451,8 +485,11 @@ class ExamAssignmentSummary {
     required this.id,
     required this.examId,
     required this.className,
+    this.classId,
     required this.subjectName,
+    this.subjectId,
     required this.examinerName,
+    this.examinerId,
     required this.date,
     this.startTime,
     this.endTime,
@@ -463,12 +500,27 @@ class ExamAssignmentSummary {
     return ExamAssignmentSummary(
       id: json['id']?.toString() ?? '',
       examId: json['examId']?.toString() ?? '',
-      className: json['class']?['name']?.toString() ?? '',
-      subjectName: json['subject']?['name']?.toString() ?? '',
-      examinerName: json['examiner']?['name']?.toString() ?? '',
+      className: json['class'] is Map
+          ? (json['class']['name']?.toString() ?? '')
+          : (json['className']?.toString() ?? ''),
+      classId: json['class'] is Map
+          ? (json['class']['uuid']?.toString() ?? json['class']['id']?.toString())
+          : (json['classId']?.toString()),
+      subjectName: json['subject'] is Map
+          ? (json['subject']['name']?.toString() ?? '')
+          : (json['subjectName']?.toString() ?? ''),
+      subjectId: json['subject'] is Map
+          ? (json['subject']['uuid']?.toString() ?? json['subject']['id']?.toString())
+          : (json['subjectId']?.toString()),
+      examinerName: json['examiner'] is Map
+          ? (json['examiner']['name']?.toString() ?? '')
+          : (json['examinerName']?.toString() ?? ''),
+      examinerId: json['examiner'] is Map
+          ? (json['examiner']['uuid']?.toString() ?? json['examiner']['id']?.toString())
+          : (json['examinerId']?.toString()),
       date: json['date']?.toString() ?? '',
-      startTime: json['start_time']?.toString(),
-      endTime: json['end_time']?.toString(),
+      startTime: json['start_time']?.toString() ?? json['startTime']?.toString(),
+      endTime: json['end_time']?.toString() ?? json['endTime']?.toString(),
       syllabus: json['syllabus']?.toString() ?? '',
     );
   }
@@ -476,7 +528,9 @@ class ExamAssignmentSummary {
 
 class TeacherRecentRecord {
   final String id;
+  final String? teacherId;
   final String teacherName;
+  final String? teacherAvatar;
   final String designation;
   final String date;
   final String time;
@@ -485,10 +539,14 @@ class TeacherRecentRecord {
   final String status;
   final String lat;
   final String lon;
+  final double? distanceFromCenter;
+  final String? schoolId;
 
   TeacherRecentRecord({
     required this.id,
+    this.teacherId,
     required this.teacherName,
+    this.teacherAvatar,
     required this.designation,
     required this.date,
     required this.time,
@@ -497,13 +555,17 @@ class TeacherRecentRecord {
     required this.status,
     required this.lat,
     required this.lon,
+    this.distanceFromCenter,
+    this.schoolId,
   });
 
   factory TeacherRecentRecord.fromJson(Map<String, dynamic> json) {
     return TeacherRecentRecord(
       id: json['id']?.toString() ?? '',
-      teacherName: json['teacher']?['name']?.toString() ?? 'Unknown',
-      designation: json['teacher']?['designation']?.toString() ?? '',
+      teacherId: json['teacherId']?.toString() ?? json['teacher']?['id']?.toString(),
+      teacherName: json['teacher']?['name']?.toString() ?? json['teacherName']?.toString() ?? 'Unknown',
+      teacherAvatar: json['teacher']?['avatar']?.toString() ?? json['avatar']?.toString(),
+      designation: json['teacher']?['designation']?.toString() ?? json['designation']?.toString() ?? '',
       date: json['date']?.toString() ?? '',
       time: json['time']?.toString() ?? '',
       startTime: json['startTime']?.toString() ?? '',
@@ -511,6 +573,8 @@ class TeacherRecentRecord {
       status: json['status']?.toString() ?? '',
       lat: json['lat']?.toString() ?? '',
       lon: json['lon']?.toString() ?? '',
+      distanceFromCenter: double.tryParse(json['distanceFromCenter']?.toString() ?? ''),
+      schoolId: json['schoolId']?.toString(),
     );
   }
 }

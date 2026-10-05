@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,8 +15,12 @@ import 'package:smart_school/features/admin/providers/student_performance_provid
 import 'package:smart_school/features/admin/providers/teacher_performance_provider.dart';
 import 'package:smart_school/features/admin/screens/student_performance_screen.dart';
 import 'package:smart_school/features/admin/screens/teacher_performance_screen.dart';
+import 'package:smart_school/features/online_class/presentation/screens/online_class_list_screen.dart';
+import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
 import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
+import 'package:smart_school/models/online_class_model.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/services/geocoding_service.dart';
 import '../../../core/widgets/app_drawer.dart';
@@ -131,6 +136,10 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
       context.read<NotificationNotifier>().fetchNotifications();
       context.read<StudentsNotifier>().fetchStudents();
       context.read<TeachersNotifier>().fetchTeachers();
+      final onlineClassProvider = context.read<OnlineClassProvider>();
+      if (onlineClassProvider.onlineClasses.isEmpty) {
+        onlineClassProvider.fetchOnlineClasses();
+      }
     });
   }
 
@@ -497,10 +506,31 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
         final data = provider.dashboardData;
         if (data == null) return const SizedBox.shrink();
 
+        final onlineClassProvider = context.watch<OnlineClassProvider>();
+        final allOnlineClasses = <String, OnlineClass>{};
+        for (final c in data.onlineClasses) {
+          allOnlineClasses[c.id] = c;
+        }
+        for (final c in onlineClassProvider.onlineClasses) {
+          allOnlineClasses[c.id] = c;
+        }
+        final upcomingClasses =
+            allOnlineClasses.values
+                .where(
+                  (c) => c.scheduledTime.isAfter(
+                    DateTime.now().subtract(const Duration(minutes: 30)),
+                  ),
+                )
+                .toList()
+              ..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
+
         return RefreshIndicator(
           onRefresh: () async {
             _hasAutoScrolledDailyChart = false;
-            await provider.fetchDashboardData();
+            await Future.wait([
+              provider.fetchDashboardData(),
+              context.read<OnlineClassProvider>().fetchOnlineClasses(),
+            ]);
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -508,11 +538,52 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 24),
                 _buildAttendanceOverviewSection(data, provider),
                 const SizedBox(height: 24),
                 _buildAttendanceCards(data),
+                if (upcomingClasses.isNotEmpty) ...[
+                  _buildSectionTitle(
+                    AppLocalizations.of(context)!.onlineClasses,
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const OnlineClassListScreen(
+                              isAdminOrTeacher: true,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Text(l10n.viewAll),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 150,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: upcomingClasses.length > 5
+                          ? 5
+                          : upcomingClasses.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 12.0),
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width - 48,
+                            child: _buildOnlineClassCard(
+                              context,
+                              upcomingClasses[index],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 24),
+
                 if (data.recentHomework.isNotEmpty) ...[
                   _buildSectionTitle(
                     l10n.recentHomework,
@@ -593,34 +664,6 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         trailing,
-      ],
-    );
-  }
-
-  Widget _buildStatsOverview(AdminDashboardData data) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildGradientStatCard(
-            title: 'Total Students',
-            value: data.attendStudent.totalStudents.toString(),
-            icon: Icons.people_outline,
-            gradient: const LinearGradient(
-              colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildGradientStatCard(
-            title: 'Total Teachers',
-            value: data.attendTeacher.totalTeachers.toString(),
-            icon: Icons.person_outline,
-            gradient: const LinearGradient(
-              colors: [Color(0xFF8B5CF6), Color(0xFF6D28D9)],
-            ),
-          ),
-        ),
       ],
     );
   }
@@ -1685,8 +1728,13 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                           ),
                         ),
                         Text(
-                          formatDate(data.date),
-                          style: TextStyle(fontSize: 11),
+                          data.recorded > 0 && data.recorded != total
+                              ? '${formatDate(data.date)} • ${data.recorded}/$total Recorded'
+                              : formatDate(data.date),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[500],
+                          ),
                         ),
                       ],
                     ),
@@ -1748,7 +1796,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: LinearProgressIndicator(
-                  value: total > 0 ? (present / total) : 0,
+                  value: (rate / 100).clamp(0.0, 1.0),
                   minHeight: 8,
                   backgroundColor: Colors.grey.withValues(alpha: 0.2),
                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -1957,7 +2005,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(6),
                   child: LinearProgressIndicator(
-                    value: total > 0 ? (present / total) : 0,
+                    value: (rate / 100).clamp(0.0, 1.0),
                     minHeight: 6,
                     backgroundColor: Colors.grey.withValues(alpha: 0.15),
                     valueColor: AlwaysStoppedAnimation<Color>(rateColor),
@@ -2000,15 +2048,12 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                       final statusColor = isClockedIn
                           ? const Color(0xFF10B981)
                           : const Color(0xFF3B82F6);
-                      final initial = r.teacherName.isNotEmpty
-                          ? r.teacherName[0].toUpperCase()
-                          : '?';
 
                       final inTime = formatTime(r.startTime);
                       final outTime = formatTime(r.endTime);
 
                       return Container(
-                        width: 148,
+                        width: 152,
                         margin: const EdgeInsets.only(right: 10),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
@@ -2027,25 +2072,20 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                               children: [
                                 Stack(
                                   children: [
-                                    Container(
-                                      width: 32,
-                                      height: 32,
-                                      decoration: BoxDecoration(
-                                        color: statusColor.withValues(
-                                          alpha: 0.15,
-                                        ),
-                                        shape: BoxShape.circle,
+                                    ZoomableAvatar(
+                                      imageUrl:
+                                          r.teacherAvatar != null &&
+                                              r.teacherAvatar!.isNotEmpty
+                                          ? r.teacherAvatar
+                                          : null,
+                                      name: r.teacherName,
+                                      heroTag:
+                                          'teacher-recent-att-${r.teacherId}-${r.id}',
+                                      radius: 16,
+                                      backgroundColor: statusColor.withValues(
+                                        alpha: 0.15,
                                       ),
-                                      child: Center(
-                                        child: Text(
-                                          initial,
-                                          style: TextStyle(
-                                            color: statusColor,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ),
+                                      textColor: statusColor,
                                     ),
                                     Positioned(
                                       right: 0,
@@ -2056,41 +2096,48 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                                         decoration: BoxDecoration(
                                           color: statusColor,
                                           shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: Colors.white,
+                                            width: 1.5,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
 
-                                SizedBox(width: 5),
+                                const SizedBox(width: 8),
 
                                 // Name
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      r.teacherName,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 12,
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        r.teacherName,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                      r.designation.isNotEmpty
-                                          ? r.designation
-                                          : l10n.teacher,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 10,
-                                        color: Colors.grey[500],
+                                      Text(
+                                        r.designation.isNotEmpty
+                                            ? r.designation
+                                            : l10n.teacher,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 10,
+                                          color: Colors.grey[500],
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
@@ -2471,25 +2518,58 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                                 color: Colors.purple,
                               ),
                               const SizedBox(width: 8),
-                              if (exam.status.isNotEmpty)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 3,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    exam.status.toUpperCase(),
-                                    style: const TextStyle(
-                                      color: Colors.blue,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
+                              Builder(
+                                builder: (context) {
+                                  String effectiveStatus = exam.status;
+                                  Color badgeColor = Colors.blue;
+                                  if (effectiveStatus.isEmpty &&
+                                      exam.startDate.isNotEmpty) {
+                                    final now = DateTime.now();
+                                    final start = DateTime.tryParse(
+                                      exam.startDate,
+                                    );
+                                    final end = exam.endDate.isNotEmpty
+                                        ? DateTime.tryParse(exam.endDate)
+                                        : null;
+                                    if (start != null) {
+                                      if (now.isBefore(start)) {
+                                        effectiveStatus = 'Upcoming';
+                                        badgeColor = Colors.indigo;
+                                      } else if (end != null &&
+                                          now.isAfter(end)) {
+                                        effectiveStatus = 'Completed';
+                                        badgeColor = Colors.grey;
+                                      } else {
+                                        effectiveStatus = 'Ongoing';
+                                        badgeColor = Colors.teal;
+                                      }
+                                    }
+                                  }
+
+                                  if (effectiveStatus.isEmpty) {
+                                    return const SizedBox.shrink();
+                                  }
+
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
                                     ),
-                                  ),
-                                ),
+                                    decoration: BoxDecoration(
+                                      color: badgeColor.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      effectiveStatus.toUpperCase(),
+                                      style: TextStyle(
+                                        color: badgeColor,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                             ],
                           ),
                           Row(
@@ -2700,18 +2780,30 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            notice.postedBy.isNotEmpty
-                                ? '${notice.postedBy} • ${l10n.forAudience(notice.targetAudience)}'
-                                : l10n.forAudience(notice.targetAudience),
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: Colors.blueGrey,
-                              fontWeight: FontWeight.w600,
+                          Expanded(
+                            child: Builder(
+                              builder: (context) {
+                                final isUuid = RegExp(
+                                  r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+                                ).hasMatch(notice.postedBy);
+                                final author =
+                                    (notice.postedBy.isNotEmpty && !isUuid)
+                                    ? notice.postedBy
+                                    : 'Admin';
+                                return Text(
+                                  '$author • ${l10n.forAudience(notice.targetAudience)}',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.blueGrey,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                );
+                              },
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
+                          const SizedBox(width: 8),
                           Text(
                             formatDate(notice.createdAt),
                             style: const TextStyle(
@@ -2729,6 +2821,353 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
           );
         },
       ),
+    );
+  }
+
+  Widget _buildOnlineClassCard(BuildContext context, OnlineClass onlineClass) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = const Color(0xFF3B82F6); // Professional Blue
+    final primaryLight = primaryColor.withValues(alpha: isDark ? 0.2 : 0.1);
+    final classNameOrMeeting =
+        (onlineClass.className != null && onlineClass.className!.isNotEmpty)
+        ? onlineClass.className!
+        : AppLocalizations.of(context)!.meetingText;
+
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 2,
+      shadowColor: Colors.black26,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+          width: 1,
+        ),
+      ),
+      child: InkWell(
+        onTap: () {
+          _showOnlineClassDetailsBottomSheet(context, onlineClass);
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(left: BorderSide(color: primaryColor, width: 4)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(14.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: primaryLight,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.videocam_rounded,
+                        color: primaryColor,
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            onlineClass.title,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.titleLarge?.color,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            onlineClass.description,
+                            style: TextStyle(
+                              color: isDark
+                                  ? Colors.grey.shade400
+                                  : Colors.grey.shade600,
+                              fontSize: 13,
+                              height: 1.2,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: isDark ? Colors.white10 : Colors.grey.shade100,
+                ),
+                const Spacer(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.group_outlined,
+                                size: 14,
+                                color: isDark
+                                    ? Colors.grey.shade400
+                                    : Colors.grey.shade500,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  classNameOrMeeting,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark
+                                        ? Colors.grey.shade400
+                                        : Colors.grey.shade600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time_rounded,
+                                size: 14,
+                                color: isDark
+                                    ? Colors.grey.shade400
+                                    : Colors.grey.shade500,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                DateFormat(
+                                  'hh:mm a',
+                                ).format(onlineClass.scheduledTime),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark
+                                      ? Colors.grey.shade400
+                                      : Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (onlineClass.meetLink.isNotEmpty)
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          try {
+                            launchUrl(
+                              Uri.parse(onlineClass.meetLink),
+                              mode: LaunchMode.externalApplication,
+                            );
+                          } catch (_) {}
+                        },
+                        icon: const Icon(Icons.video_call_rounded, size: 16),
+                        label: Text(
+                          AppLocalizations.of(context)!.join,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                            fontSize: 13,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                          elevation: 2,
+                          shadowColor: primaryColor.withValues(alpha: 0.4),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showOnlineClassDetailsBottomSheet(
+    BuildContext context,
+    OnlineClass onlineClass,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = const Color(0xFF3B82F6);
+    final classNameOrMeeting =
+        (onlineClass.className != null && onlineClass.className!.isNotEmpty)
+        ? onlineClass.className!
+        : AppLocalizations.of(context)!.meetingText;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  height: 4,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 8.0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      onlineClass.title,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).textTheme.titleLarge?.color,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.group_outlined,
+                          size: 18,
+                          color: primaryColor,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            classNameOrMeeting,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 18,
+                          color: primaryColor,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          DateFormat(
+                            'hh:mm a, dd MMM yyyy',
+                          ).format(onlineClass.scheduledTime),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (onlineClass.description.isNotEmpty) ...[
+                      const SizedBox(height: 20),
+                      Text(
+                        onlineClass.description,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDark
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade700,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                    if (onlineClass.meetLink.isNotEmpty)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            try {
+                              launchUrl(
+                                Uri.parse(onlineClass.meetLink),
+                                mode: LaunchMode.externalApplication,
+                              );
+                            } catch (_) {}
+                          },
+                          icon: const Icon(Icons.video_call_rounded),
+                          label: Text(
+                            AppLocalizations.of(context)!.join,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -3956,12 +4395,25 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
   @override
   Widget build(BuildContext context) {
     final stats = widget.stats;
-    final statusColor = stats.attendanceRate >= 75
-        ? Colors.green
-        : (stats.attendanceRate >= 50 ? Colors.orange : Colors.red);
-
     final subjects = _getUniqueSubjects();
     final displayRecords = _getFilteredRecords();
+
+    final filteredTotal = displayRecords.length;
+    final filteredPresent = displayRecords
+        .where((r) => r.status.toLowerCase() == 'present')
+        .length;
+    final filteredAbsent = displayRecords
+        .where((r) => r.status.toLowerCase() == 'absent')
+        .length;
+    final filteredLeave = displayRecords
+        .where((r) => r.status.toLowerCase() == 'leave')
+        .length;
+    final double displayRate = filteredTotal > 0
+        ? (filteredPresent / filteredTotal) * 100
+        : 0.0;
+    final statusColor = displayRate >= 75
+        ? Colors.green
+        : (displayRate >= 50 ? Colors.orange : Colors.red);
 
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -3984,7 +4436,7 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                           width: 65,
                           height: 65,
                           child: CircularProgressIndicator(
-                            value: stats.attendanceRate / 100,
+                            value: displayRate / 100,
                             strokeWidth: 6,
                             backgroundColor: statusColor.withOpacity(0.1),
                             valueColor: AlwaysStoppedAnimation<Color>(
@@ -3997,7 +4449,7 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              '${stats.attendanceRate.toInt()}%',
+                              '${displayRate.toInt()}%',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -4059,7 +4511,7 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                                 Container(
                                   height: 32,
                                   constraints: const BoxConstraints(
-                                    maxWidth: 80,
+                                    maxWidth: 125,
                                   ),
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 10,
@@ -4128,22 +4580,22 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
                             children: [
                               _buildStatItem(
                                 AppLocalizations.of(context)!.total,
-                                '${stats.total}',
+                                '$filteredTotal',
                                 Colors.grey.shade800,
                               ),
                               _buildStatItem(
                                 AppLocalizations.of(context)!.present,
-                                '${stats.present}',
+                                '$filteredPresent',
                                 Colors.green,
                               ),
                               _buildStatItem(
                                 AppLocalizations.of(context)!.absent,
-                                '${stats.absent}',
+                                '$filteredAbsent',
                                 Colors.red,
                               ),
                               _buildStatItem(
                                 AppLocalizations.of(context)!.leave,
-                                '${stats.leave}',
+                                '$filteredLeave',
                                 Colors.blue,
                               ),
                             ],
@@ -4244,39 +4696,47 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
     }
 
     final color = getStatusColor();
-    final firstLetter = record.studentName.isNotEmpty
-        ? record.studentName[0]
-        : '?';
+    final isPresent = record.status.toLowerCase() == 'present';
+    final isAbsent = record.status.toLowerCase() == 'absent';
 
     return Container(
-      width: 65,
+      width: 68,
       margin: const EdgeInsets.only(right: 12),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Stack(
             children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundColor: color.withOpacity(0.1),
-                child: Text(
-                  firstLetter.toUpperCase(),
-                  style: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
+              ZoomableAvatar(
+                imageUrl: record.avatar != null && record.avatar!.isNotEmpty
+                    ? record.avatar
+                    : null,
+                name: record.studentName,
+                heroTag:
+                    'student-att-${record.studentId}-${record.routineId ?? record.id}',
+                radius: 24,
+                backgroundColor: color.withOpacity(0.12),
+                textColor: color,
               ),
               Positioned(
                 right: 0,
                 bottom: 0,
                 child: Container(
-                  width: 14,
-                  height: 14,
+                  width: 15,
+                  height: 15,
                   decoration: BoxDecoration(
                     color: color,
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      isPresent
+                          ? Icons.check
+                          : (isAbsent ? Icons.close : Icons.circle),
+                      size: 9,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
@@ -4285,11 +4745,25 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
           const SizedBox(height: 6),
           Text(
             record.studentName,
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
           ),
+          if (record.rollNumber != null && record.rollNumber!.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              'Roll ${record.rollNumber}',
+              style: TextStyle(
+                fontSize: 9.5,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+          ],
         ],
       ),
     );
