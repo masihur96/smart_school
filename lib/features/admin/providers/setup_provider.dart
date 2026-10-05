@@ -8,6 +8,31 @@ import '../../../core/constants/api_path.dart';
 import '../../../models/school_models.dart';
 import '../../../services/database_service.dart';
 
+dynamic _schoolDataFuture;
+DateTime? _schoolDataFutureTime;
+
+Future<dynamic> _fetchSchoolDataCached() {
+  final now = DateTime.now();
+  if (_schoolDataFuture != null &&
+      _schoolDataFutureTime != null &&
+      now.difference(_schoolDataFutureTime!).inSeconds < 2) {
+    return _schoolDataFuture;
+  }
+
+  _schoolDataFutureTime = now;
+  _schoolDataFuture = () async {
+    final token = await StorageService.getToken();
+    if (token == null) throw Exception('No authentication token found');
+    return DataProvider().performRequest(
+      'GET',
+      APIPath.schoolData,
+      header: {'Authorization': 'Bearer $token'},
+    );
+  }();
+
+  return _schoolDataFuture;
+}
+
 class ClassSetupNotifier extends ChangeNotifier {
   final DatabaseService _dbService;
   List<ClassRoom> _classes = [];
@@ -62,14 +87,7 @@ class ClassSetupNotifier extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final token = await StorageService.getToken();
-      if (token == null) throw Exception('No authentication token found');
-
-      final response = await DataProvider().performRequest(
-        'GET',
-        APIPath.schoolData,
-        header: {'Authorization': 'Bearer $token'},
-      );
+      final response = await _fetchSchoolDataCached();
 
       if (response != null && response.statusCode == 200) {
         final data = response.data['data'];
@@ -116,7 +134,11 @@ class ClassSetupNotifier extends ChangeNotifier {
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
         final responseData = response.data['data'] ?? response.data;
-        final newId = responseData['uuid']?.toString() ?? responseData['id']?.toString() ?? responseData['_id']?.toString() ?? DateTime.now().toString();
+        final newId =
+            responseData['uuid']?.toString() ??
+            responseData['id']?.toString() ??
+            responseData['_id']?.toString() ??
+            DateTime.now().toString();
 
         _dbService.classes.add(
           ClassRoom(
@@ -146,8 +168,6 @@ class ClassSetupNotifier extends ChangeNotifier {
     try {
       final token = await StorageService.getToken();
       if (token == null) return false;
-
-
 
       final response = await DataProvider().performRequest(
         'PUT',
@@ -256,14 +276,7 @@ class SectionSetupNotifier extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final token = await StorageService.getToken();
-      if (token == null) throw Exception('No authentication token found');
-
-      final response = await DataProvider().performRequest(
-        'GET',
-        APIPath.schoolData,
-        header: {'Authorization': 'Bearer $token'},
-      );
+      final response = await _fetchSchoolDataCached();
 
       if (response != null && response.statusCode == 200) {
         final data = response.data['data'];
@@ -302,14 +315,13 @@ class SectionSetupNotifier extends ChangeNotifier {
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
         final responseData = response.data['data'] ?? response.data;
-        final newId = responseData['_id']?.toString() ?? responseData['id']?.toString() ?? DateTime.now().toString();
+        final newId =
+            responseData['_id']?.toString() ??
+            responseData['id']?.toString() ??
+            DateTime.now().toString();
 
         _dbService.sections.add(
-          Section(
-            id: newId,
-            classId: classId,
-            name: name,
-          ),
+          Section(id: newId, classId: classId, name: name),
         );
         _sections = [..._dbService.sections];
         notifyListeners();
@@ -434,14 +446,7 @@ class SubjectSetupNotifier extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final token = await StorageService.getToken();
-      if (token == null) throw Exception('No authentication token found');
-
-      final response = await DataProvider().performRequest(
-        'GET',
-        APIPath.schoolData,
-        header: {'Authorization': 'Bearer $token'},
-      );
+      final response = await _fetchSchoolDataCached();
 
       if (response != null && response.statusCode == 200) {
         final data = response.data['data'];
@@ -490,7 +495,10 @@ class SubjectSetupNotifier extends ChangeNotifier {
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
         final responseData = response.data['data'] ?? response.data;
-        final newId = responseData['_id']?.toString() ?? responseData['id']?.toString() ?? DateTime.now().toString();
+        final newId =
+            responseData['_id']?.toString() ??
+            responseData['id']?.toString() ??
+            DateTime.now().toString();
 
         _dbService.subjects.add(
           Subject(
