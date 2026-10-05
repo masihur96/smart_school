@@ -698,7 +698,9 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     if (currentDay < 1) currentDay = 1;
     if (currentDay > daysInMonth) currentDay = daysInMonth;
 
-    final activeDays = days.where((d) => d.hasData).toList();
+    final activeDays = days
+        .where((d) => d.hasData || d.day == currentDay)
+        .toList();
     final activeDaysCount = activeDays.length;
 
     int currentDayIndex = activeDays.indexWhere((d) => d.day == currentDay);
@@ -708,7 +710,9 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
 
     final List<FlSpot> spots = [];
     for (int i = 0; i < activeDays.length; i++) {
-      spots.add(FlSpot((i + 1).toDouble(), activeDays[i].attendanceRate));
+      if (activeDays[i].hasData) {
+        spots.add(FlSpot((i + 1).toDouble(), activeDays[i].attendanceRate));
+      }
     }
 
     final monthTitle = summary != null && summary.monthName.isNotEmpty
