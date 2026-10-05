@@ -754,42 +754,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                   ),
                 ),
                 // Today indicator button to quickly center current date
-                TextButton.icon(
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    backgroundColor: Colors.purple.withOpacity(0.08),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  icon: const Icon(
-                    Icons.my_location_rounded,
-                    size: 14,
-                    color: Colors.purple,
-                  ),
-                  label: Text(
-                    'Day $currentDay',
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.purple,
-                    ),
-                  ),
-                  onPressed: () {
-                    _scrollToCurrentDay(
-                      currentDay: currentDay,
-                      dayWidth: dayColumnWidth,
-                      viewportWidth: _dailyChartViewportWidth,
-                      chartWidth: daysInMonth * dayColumnWidth,
-                      animated: true,
-                    );
-                  },
-                ),
-                const SizedBox(width: 4),
+
                 if (canToggle)
                   Padding(
                     padding: const EdgeInsets.only(right: 6.0),
