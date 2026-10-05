@@ -1031,6 +1031,9 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                                             reservedSize: 56,
                                             interval: 1,
                                             getTitlesWidget: (value, meta) {
+                                              if (value % 1 != 0) {
+                                                return const SizedBox.shrink();
+                                              }
                                               final index = value.toInt() - 1;
                                               if (index < 0 ||
                                                   index >= activeDaysCount) {
