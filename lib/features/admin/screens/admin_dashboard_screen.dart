@@ -78,6 +78,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
   /// provider fetch exactly once when it first becomes visible.
   bool _teacherPerfFetched = false;
   bool _studentPerfFetched = false;
+  bool _showYearlyChart = false;
 
   @override
   void initState() {
@@ -472,12 +473,8 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 24),
-                if (provider.monthlyAttendanceOverview != null) ...[
-                  _buildMonthlyAttendanceChart(
-                    provider.monthlyAttendanceOverview!,
-                  ),
-                  const SizedBox(height: 24),
-                ],
+                _buildAttendanceOverviewSection(data, provider),
+                const SizedBox(height: 24),
                 _buildAttendanceCards(data),
                 const SizedBox(height: 24),
                 if (data.recentHomework.isNotEmpty) ...[
@@ -592,7 +589,401 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     );
   }
 
-  Widget _buildMonthlyAttendanceChart(MonthlyAttendanceOverview data) {
+  Widget _buildAttendanceOverviewSection(
+    AdminDashboardData data,
+    AdminDashboardProvider provider,
+  ) {
+    final hasDaily = data.attendStudent.dailyAttendance.isNotEmpty;
+    final hasYearly = provider.monthlyAttendanceOverview != null &&
+        provider.monthlyAttendanceOverview!.data.isNotEmpty;
+
+    if (!hasDaily && !hasYearly) {
+      return const SizedBox.shrink();
+    }
+
+    if (_showYearlyChart && hasYearly) {
+      return _buildMonthlyAttendanceChart(
+        provider.monthlyAttendanceOverview!,
+        canToggle: hasDaily,
+        onToggle: () => setState(() => _showYearlyChart = false),
+      );
+    }
+
+    if (hasDaily) {
+      return _buildDailyAttendanceChart(
+        data.attendStudent,
+        canToggle: hasYearly,
+        onToggle: () => setState(() => _showYearlyChart = true),
+      );
+    }
+
+    return _buildMonthlyAttendanceChart(
+      provider.monthlyAttendanceOverview!,
+      canToggle: false,
+    );
+  }
+
+  Widget _buildDailyAttendanceChart(
+    AttendStudent attendStudent, {
+    bool canToggle = false,
+    VoidCallback? onToggle,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final summary = attendStudent.monthlySummary;
+    final days = attendStudent.dailyAttendance;
+    final daysInMonth =
+        summary?.daysInMonth ?? (days.isNotEmpty ? days.length : 31);
+
+    final List<FlSpot> spots = [];
+    for (final d in days) {
+      if (d.hasData) {
+        spots.add(FlSpot(d.day.toDouble(), d.attendanceRate));
+      }
+    }
+
+    final monthTitle = summary != null && summary.monthName.isNotEmpty
+        ? '${summary.monthName} ${summary.year}'
+        : (summary != null
+            ? '${l10n.monthlyAttendanceOverview} ${summary.year}'
+            : l10n.monthlyAttendanceOverview);
+
+    final avgRate = summary?.attendanceRate ?? attendStudent.attendanceRate;
+    final rateColor = avgRate >= 75
+        ? Colors.green
+        : (avgRate >= 50 ? Colors.orange : Colors.red);
+
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.auto_graph_rounded,
+                    color: Colors.purple,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        monthTitle,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        l10n.studentAttendance,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (canToggle)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6.0),
+                    child: TextButton.icon(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      icon: const Icon(Icons.swap_horiz, size: 16),
+                      label: const Text('Yearly', style: TextStyle(fontSize: 11)),
+                      onPressed: onToggle,
+                    ),
+                  ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: rateColor.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${avgRate.toStringAsFixed(1)}%',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: rateColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (summary != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildSummaryMetric(
+                      'Recorded',
+                      '${summary.daysRecorded}/${summary.daysInMonth}d',
+                      Colors.purple,
+                    ),
+                    _buildSummaryMetric(
+                      l10n.present,
+                      '${summary.totalPresent}',
+                      Colors.green,
+                    ),
+                    _buildSummaryMetric(
+                      l10n.absent,
+                      '${summary.totalAbsent}',
+                      Colors.red,
+                    ),
+                    _buildSummaryMetric(
+                      l10n.leave,
+                      '${summary.totalLeave}',
+                      Colors.orange,
+                    ),
+                    _buildSummaryMetric(
+                      l10n.late,
+                      '${summary.totalLate}',
+                      Colors.amber.shade800,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 190,
+              child: spots.isEmpty
+                  ? Center(
+                      child: Text(
+                        l10n.noRecordsForToday,
+                        style: TextStyle(
+                          color: Colors.grey.shade400,
+                          fontSize: 12,
+                        ),
+                      ),
+                    )
+                  : LineChart(
+                      LineChartData(
+                        gridData: FlGridData(
+                          show: true,
+                          drawVerticalLine: false,
+                          horizontalInterval: 25,
+                          getDrawingHorizontalLine: (value) {
+                            return FlLine(
+                              color: Colors.grey.withOpacity(0.15),
+                              strokeWidth: 1,
+                              dashArray: [5, 5],
+                            );
+                          },
+                        ),
+                        titlesData: FlTitlesData(
+                          show: true,
+                          rightTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          topTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 26,
+                              interval: 5,
+                              getTitlesWidget: (value, meta) {
+                                final dayNum = value.toInt();
+                                if (dayNum >= 1 && dayNum <= daysInMonth) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 6.0),
+                                    child: Text(
+                                      'D$dayNum',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return const Text('');
+                              },
+                            ),
+                          ),
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              interval: 25,
+                              reservedSize: 32,
+                              getTitlesWidget: (value, meta) {
+                                return Text(
+                                  '${value.toInt()}%',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        borderData: FlBorderData(show: false),
+                        minX: 1,
+                        maxX: daysInMonth.toDouble(),
+                        minY: 0,
+                        maxY: 100,
+                        lineBarsData: [
+                          LineChartBarData(
+                            spots: spots,
+                            isCurved: spots.length > 2,
+                            curveSmoothness: 0.25,
+                            color: Colors.purple,
+                            barWidth: 3,
+                            isStrokeCapRound: true,
+                            dotData: FlDotData(
+                              show: true,
+                              getDotPainter: (spot, percent, barData, index) {
+                                return FlDotCirclePainter(
+                                  radius: 3.5,
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                  strokeColor: Colors.purple,
+                                );
+                              },
+                            ),
+                            belowBarData: BarAreaData(
+                              show: true,
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.purple.withOpacity(0.25),
+                                  Colors.purple.withOpacity(0.0),
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
+                            ),
+                          ),
+                        ],
+                        lineTouchData: LineTouchData(
+                          touchTooltipData: LineTouchTooltipData(
+                            getTooltipItems: (touchedSpots) {
+                              return touchedSpots.map((LineBarSpot touchedSpot) {
+                                final dayInt = touchedSpot.x.toInt();
+                                final matchedDay = days.firstWhere(
+                                  (d) => d.day == dayInt,
+                                  orElse: () => DailyAttendance(
+                                    date: '',
+                                    day: dayInt,
+                                    dayOfWeek: '',
+                                    present: 0,
+                                    late: 0,
+                                    absent: 0,
+                                    leave: 0,
+                                    totalPresent: 0,
+                                    total: 0,
+                                    attendanceRate: touchedSpot.y,
+                                    hasData: true,
+                                    isFuture: false,
+                                  ),
+                                );
+                                final dayLabel = matchedDay.dayOfWeek.isNotEmpty
+                                    ? 'Day $dayInt (${matchedDay.dayOfWeek})'
+                                    : 'Day $dayInt';
+                                return LineTooltipItem(
+                                  '$dayLabel\n',
+                                  const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text:
+                                          '${touchedSpot.y.toStringAsFixed(1)}%\n',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text:
+                                          'P:${matchedDay.present} A:${matchedDay.absent} L:${matchedDay.leave}',
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }).toList();
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryMetric(String label, String value, Color color) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 9,
+            color: Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMonthlyAttendanceChart(
+    MonthlyAttendanceOverview data, {
+    bool canToggle = false,
+    VoidCallback? onToggle,
+  }) {
     final l10n = AppLocalizations.of(context)!;
     List<FlSpot> spots = [];
     for (int i = 0; i < data.data.length; i++) {
@@ -626,22 +1017,37 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                   ),
                 ),
                 const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.monthlyAttendanceOverview,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.monthlyAttendanceOverview,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    Text(
-                      l10n.yearLabel(data.year),
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ],
+                      Text(
+                        l10n.yearLabel(data.year),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
                 ),
+                if (canToggle)
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    icon: const Icon(Icons.swap_horiz, size: 16),
+                    label: const Text('Daily', style: TextStyle(fontSize: 11)),
+                    onPressed: onToggle,
+                  ),
               ],
             ),
             const SizedBox(height: 24),
@@ -713,8 +1119,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                         getTitlesWidget: (value, meta) {
                           return Text(
                             '${value.toInt()}%',
-                            style: TextStyle(
-                              // color: Colors.grey[600],
+                            style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
                             ),
@@ -987,6 +1392,12 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                     Colors.orange,
                     Icons.time_to_leave_outlined,
                   ),
+                  _buildStatPill(
+                    l10n.late,
+                    data.late.toString(),
+                    Colors.amber.shade800,
+                    Icons.schedule_rounded,
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
@@ -1069,9 +1480,10 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
   }
 
   String formatTime(String? dateTime) {
-    if (dateTime == null) return '--:--';
+    if (dateTime == null || dateTime.isEmpty) return '--:--';
 
-    final date = DateTime.parse(dateTime).toLocal();
+    final date = DateTime.tryParse(dateTime)?.toLocal();
+    if (date == null) return '--:--';
 
     final hour = date.hour > 12 ? date.hour - 12 : date.hour;
     final minute = date.minute.toString().padLeft(2, '0');
@@ -1473,8 +1885,8 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
   ) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-        margin: const EdgeInsets.symmetric(horizontal: 3),
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        margin: const EdgeInsets.symmetric(horizontal: 2),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(20),
@@ -1482,20 +1894,16 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Icon(icon, size: 14, color: color),
-            // const SizedBox(width: 4),
             Text(
               value,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
             ),
-
-            const SizedBox(width: 4),
-
+            const SizedBox(width: 3),
             Flexible(
               child: Text(
                 label,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 10),
+                style: const TextStyle(fontSize: 9),
               ),
             ),
           ],
@@ -1530,111 +1938,146 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
 
   Widget _buildRecentHomework(List<RecentHomework> homeworkList) {
     return SizedBox(
-      height: 160,
+      height: 165,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: homeworkList.length,
         itemBuilder: (context, index) {
           final hw = homeworkList[index];
           return Card(
-            margin: EdgeInsets.only(right: 5),
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: SizedBox(
-                width: screenSize(context, .85),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            '${hw.className} - ${hw.sectionName}',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.blue,
-                              fontWeight: FontWeight.bold,
+            margin: const EdgeInsets.only(right: 8),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        const AdminHomeworkManagementScreen(),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: SizedBox(
+                  width: screenSize(context, .85),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              hw.sectionName.isNotEmpty
+                                  ? '${hw.className} - ${hw.sectionName}'
+                                  : hw.className,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.blue,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                        Text(
-                          formatDate(hw.dueDate),
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Colors.grey,
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.event_outlined,
+                                size: 12,
+                                color: Colors.grey[500],
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                formatDate(hw.dueDate),
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      hw.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        ],
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      hw.subjectName,
-                      style: TextStyle(color: Colors.grey[700], fontSize: 13),
-                    ),
-                    const Spacer(),
-                    Text(
-                      hw.description,
-                      style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const Spacer(),
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 10,
-                          backgroundColor: Colors.purple.withOpacity(0.2),
-                          backgroundImage: hw.teacherAvatar != null
-                              ? NetworkImage(hw.teacherAvatar!)
-                              : null,
-                          child: hw.teacherAvatar == null
-                              ? Text(
-                                  hw.teacherName.isNotEmpty
-                                      ? hw.teacherName[0].toUpperCase()
-                                      : '?',
-                                  style: const TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.purple,
-                                  ),
-                                )
-                              : null,
+                      const SizedBox(height: 8),
+                      Text(
+                        hw.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            hw.teacherName,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey[800],
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        hw.subjectName,
+                        style: TextStyle(
+                          color: Colors.purple.shade700,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (hw.description.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          hw.description,
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 11,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
-                    ),
-                  ],
+                      const Spacer(),
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 10,
+                            backgroundColor: Colors.purple.withOpacity(0.2),
+                            backgroundImage: hw.teacherAvatar != null &&
+                                    hw.teacherAvatar!.isNotEmpty
+                                ? NetworkImage(hw.teacherAvatar!)
+                                : null,
+                            child: hw.teacherAvatar == null ||
+                                    hw.teacherAvatar!.isEmpty
+                                ? Text(
+                                    hw.teacherName.isNotEmpty
+                                        ? hw.teacherName[0].toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.purple,
+                                    ),
+                                  )
+                                : null,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              hw.teacherName,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[800],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1647,79 +2090,160 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
   Widget _buildCurrentExams(List<CurrentExam> exams) {
     final l10n = AppLocalizations.of(context)!;
     return SizedBox(
-      height: 140,
+      height: 150,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: exams.length,
         itemBuilder: (context, index) {
           final exam = exams[index];
           return Card(
-            margin: const EdgeInsets.only(right: 5),
-
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SizedBox(
-                width: screenSize(context, .85),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Icon(Icons.assignment_turned_in, size: 28),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
+            margin: const EdgeInsets.only(right: 8),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ExamManagementScreen(),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: SizedBox(
+                  width: screenSize(context, .85),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.assignment_turned_in,
+                                size: 24,
+                                color: Colors.purple,
+                              ),
+                              const SizedBox(width: 8),
+                              if (exam.status.isNotEmpty)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    exam.status.toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.blue,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
-                          decoration: BoxDecoration(
-                            color: exam.isPublished
-                                ? Colors.green.withOpacity(0.1)
-                                : Colors.orange.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
+                          Row(
+                            children: [
+                              if (exam.assignments.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 6.0),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.purple.withOpacity(0.08),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      '${exam.assignments.length} subjects',
+                                      style: const TextStyle(
+                                        color: Colors.purple,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: exam.isPublished
+                                      ? Colors.green.withOpacity(0.1)
+                                      : Colors.orange.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  exam.isPublished
+                                      ? l10n.published
+                                      : l10n.draft,
+                                  style: TextStyle(
+                                    color: exam.isPublished
+                                        ? Colors.green
+                                        : Colors.orange,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          child: Text(
-                            exam.isPublished ? l10n.published : l10n.draft,
-                            style: TextStyle(
-                              color: exam.isPublished
-                                  ? Colors.green
-                                  : Colors.orange,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        ],
+                      ),
+                      const Spacer(),
+                      Text(
+                        exam.examName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (exam.description.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          exam.description,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[600],
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
-                    ),
-                    const Spacer(),
-                    Text(
-                      exam.examName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today_outlined,
+                            size: 12,
+                            color: Colors.grey[500],
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            l10n.examDateRange(
+                              formatDate(exam.startDate),
+                              formatDate(exam.endDate),
+                            ),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      exam.description,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      l10n.examDateRange(
-                        formatDate(exam.startDate),
-                        formatDate(exam.endDate),
-                      ),
-                      style: TextStyle(fontSize: 12),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1734,7 +2258,8 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
       return '--';
     }
 
-    final localDate = DateTime.parse(utcDate).toLocal();
+    final localDate = DateTime.tryParse(utcDate)?.toLocal();
+    if (localDate == null) return utcDate;
 
     return DateFormat('dd MMM yyyy').format(localDate);
   }
@@ -1749,96 +2274,114 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
         itemBuilder: (context, index) {
           final notice = notices[index];
           return Card(
-            margin: const EdgeInsets.only(right: 16),
-            child: SizedBox(
-              width: screenSize(context, .9),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: notice.isImportent
-                                ? Colors.red.withOpacity(0.1)
-                                : Colors.purple.withOpacity(0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            notice.isImportent
-                                ? Icons.priority_high
-                                : Icons.notifications_none,
-                            color: notice.isImportent
-                                ? Colors.red
-                                : Colors.purple,
-                            size: 20,
-                          ),
-                        ),
-                        if (notice.isImportent)
+            margin: const EdgeInsets.only(right: 12),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        const NoticeManagementScreen(),
+                  ),
+                );
+              },
+              child: SizedBox(
+                width: screenSize(context, .9),
+                child: Padding(
+                  padding: const EdgeInsets.all(14.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
+                            padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
+                              color: notice.isImportent
+                                  ? Colors.red.withOpacity(0.1)
+                                  : Colors.purple.withOpacity(0.1),
+                              shape: BoxShape.circle,
                             ),
-                            child: Text(
-                              l10n.important,
-                              style: TextStyle(
-                                color: Colors.red,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
+                            child: Icon(
+                              notice.isImportent
+                                  ? Icons.priority_high
+                                  : Icons.notifications_none,
+                              color: notice.isImportent
+                                  ? Colors.red
+                                  : Colors.purple,
+                              size: 18,
+                            ),
+                          ),
+                          if (notice.isImportent)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                l10n.important,
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                      ],
-                    ),
-                    const Spacer(),
-                    Text(
-                      notice.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        ],
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      notice.content,
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          l10n.forAudience(notice.targetAudience),
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.blueGrey,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      const Spacer(),
+                      Text(
+                        notice.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
                         ),
-                        Text(
-                          formatDate(notice.createdAt),
-
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey,
-                          ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        notice.content,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
                         ),
-                      ],
-                    ),
-                  ],
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            notice.postedBy.isNotEmpty
+                                ? '${notice.postedBy} • ${l10n.forAudience(notice.targetAudience)}'
+                                : l10n.forAudience(notice.targetAudience),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.blueGrey,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            formatDate(notice.createdAt),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

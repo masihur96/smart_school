@@ -43,7 +43,10 @@ class AdminDashboardProvider extends ChangeNotifier {
           'GET',
           '${APIPath.baseUrl}/admin/attendance/monthly-overview?year=$currentYear',
           header: {'Authorization': 'Bearer $token'},
-        ),
+        ).catchError((e) {
+          log('Monthly overview fetch error: $e');
+          return null;
+        }),
       ]);
 
       final response = results[0];

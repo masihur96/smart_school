@@ -72,8 +72,11 @@ class AttendStudent {
   final int present;
   final int absent;
   final int leave;
+  final int late;
   final double attendanceRate;
   final List<StudentAttendanceRecord> data;
+  final MonthlySummary? monthlySummary;
+  final List<DailyAttendance> dailyAttendance;
 
   AttendStudent({
     required this.date,
@@ -82,8 +85,11 @@ class AttendStudent {
     required this.present,
     required this.absent,
     required this.leave,
+    this.late = 0,
     required this.attendanceRate,
     required this.data,
+    this.monthlySummary,
+    this.dailyAttendance = const [],
   });
 
   factory AttendStudent.fromJson(Map<String, dynamic> json) {
@@ -94,11 +100,116 @@ class AttendStudent {
       present: int.tryParse(json['present']?.toString() ?? '0') ?? 0,
       absent: int.tryParse(json['absent']?.toString() ?? '0') ?? 0,
       leave: int.tryParse(json['leave']?.toString() ?? '0') ?? 0,
+      late: int.tryParse(json['late']?.toString() ?? '0') ?? 0,
       attendanceRate: double.tryParse(json['attendanceRate']?.toString() ?? '0') ?? 0.0,
       data: (json['data'] as List<dynamic>?)
               ?.map((e) => StudentAttendanceRecord.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
+      monthlySummary: json['monthlySummary'] != null && json['monthlySummary'] is Map<String, dynamic>
+          ? MonthlySummary.fromJson(json['monthlySummary'] as Map<String, dynamic>)
+          : null,
+      dailyAttendance: (json['dailyAttendance'] as List<dynamic>?)
+              ?.map((e) => DailyAttendance.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+}
+
+class MonthlySummary {
+  final int month;
+  final String monthName;
+  final int year;
+  final int totalStudents;
+  final int totalPresent;
+  final int totalLate;
+  final int totalAbsent;
+  final int totalLeave;
+  final int totalAttended;
+  final int totalRecords;
+  final double attendanceRate;
+  final int daysRecorded;
+  final int daysInMonth;
+
+  MonthlySummary({
+    required this.month,
+    required this.monthName,
+    required this.year,
+    required this.totalStudents,
+    required this.totalPresent,
+    required this.totalLate,
+    required this.totalAbsent,
+    required this.totalLeave,
+    required this.totalAttended,
+    required this.totalRecords,
+    required this.attendanceRate,
+    required this.daysRecorded,
+    required this.daysInMonth,
+  });
+
+  factory MonthlySummary.fromJson(Map<String, dynamic> json) {
+    return MonthlySummary(
+      month: int.tryParse(json['month']?.toString() ?? '0') ?? 0,
+      monthName: json['monthName']?.toString() ?? '',
+      year: int.tryParse(json['year']?.toString() ?? '0') ?? 0,
+      totalStudents: int.tryParse(json['totalStudents']?.toString() ?? '0') ?? 0,
+      totalPresent: int.tryParse(json['totalPresent']?.toString() ?? '0') ?? 0,
+      totalLate: int.tryParse(json['totalLate']?.toString() ?? '0') ?? 0,
+      totalAbsent: int.tryParse(json['totalAbsent']?.toString() ?? '0') ?? 0,
+      totalLeave: int.tryParse(json['totalLeave']?.toString() ?? '0') ?? 0,
+      totalAttended: int.tryParse(json['totalAttended']?.toString() ?? '0') ?? 0,
+      totalRecords: int.tryParse(json['totalRecords']?.toString() ?? '0') ?? 0,
+      attendanceRate: double.tryParse(json['attendanceRate']?.toString() ?? '0') ?? 0.0,
+      daysRecorded: int.tryParse(json['daysRecorded']?.toString() ?? '0') ?? 0,
+      daysInMonth: int.tryParse(json['daysInMonth']?.toString() ?? '0') ?? 0,
+    );
+  }
+}
+
+class DailyAttendance {
+  final String date;
+  final int day;
+  final String dayOfWeek;
+  final int present;
+  final int late;
+  final int absent;
+  final int leave;
+  final int totalPresent;
+  final int total;
+  final double attendanceRate;
+  final bool hasData;
+  final bool isFuture;
+
+  DailyAttendance({
+    required this.date,
+    required this.day,
+    required this.dayOfWeek,
+    required this.present,
+    required this.late,
+    required this.absent,
+    required this.leave,
+    required this.totalPresent,
+    required this.total,
+    required this.attendanceRate,
+    required this.hasData,
+    required this.isFuture,
+  });
+
+  factory DailyAttendance.fromJson(Map<String, dynamic> json) {
+    return DailyAttendance(
+      date: json['date']?.toString() ?? '',
+      day: int.tryParse(json['day']?.toString() ?? '0') ?? 0,
+      dayOfWeek: json['dayOfWeek']?.toString() ?? '',
+      present: int.tryParse(json['present']?.toString() ?? '0') ?? 0,
+      late: int.tryParse(json['late']?.toString() ?? '0') ?? 0,
+      absent: int.tryParse(json['absent']?.toString() ?? '0') ?? 0,
+      leave: int.tryParse(json['leave']?.toString() ?? '0') ?? 0,
+      totalPresent: int.tryParse(json['totalPresent']?.toString() ?? '0') ?? 0,
+      total: int.tryParse(json['total']?.toString() ?? '0') ?? 0,
+      attendanceRate: double.tryParse(json['attendanceRate']?.toString() ?? '0') ?? 0.0,
+      hasData: json['hasData'] == true || json['hasData']?.toString() == 'true',
+      isFuture: json['isFuture'] == true || json['isFuture']?.toString() == 'true',
     );
   }
 }
@@ -194,6 +305,13 @@ class RecentHomework {
   final String sectionName;
   final String teacherName;
   final String? teacherAvatar;
+  final String? classId;
+  final String? subjectId;
+  final String? teacherId;
+  final String? sectionId;
+  final String? schoolId;
+  final String? subjectCode;
+  final String? createdAt;
 
   RecentHomework({
     required this.id,
@@ -205,6 +323,13 @@ class RecentHomework {
     required this.sectionName,
     required this.teacherName,
     this.teacherAvatar,
+    this.classId,
+    this.subjectId,
+    this.teacherId,
+    this.sectionId,
+    this.schoolId,
+    this.subjectCode,
+    this.createdAt,
   });
 
   factory RecentHomework.fromJson(Map<String, dynamic> json) {
@@ -213,11 +338,18 @@ class RecentHomework {
       title: json['title']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
       dueDate: json['dueDate']?.toString() ?? '',
-      className: json['classInfo']?['name']?.toString() ?? '',
-      subjectName: json['subjectInfo']?['name']?.toString() ?? '',
-      sectionName: json['sectionInfo']?['name']?.toString() ?? '',
-      teacherName: json['teacherInfo']?['name']?.toString() ?? '',
-      teacherAvatar: json['teacherInfo']?['avatar']?.toString(),
+      className: json['classInfo']?['name']?.toString() ?? json['className']?.toString() ?? '',
+      subjectName: json['subjectInfo']?['name']?.toString() ?? json['subjectName']?.toString() ?? '',
+      sectionName: json['sectionInfo']?['name']?.toString() ?? json['sectionName']?.toString() ?? '',
+      teacherName: json['teacherInfo']?['name']?.toString() ?? json['teacherName']?.toString() ?? '',
+      teacherAvatar: json['teacherInfo']?['avatar']?.toString() ?? json['teacherAvatar']?.toString(),
+      classId: json['classId']?.toString(),
+      subjectId: json['subjectId']?.toString(),
+      teacherId: json['teacherId']?.toString(),
+      sectionId: json['sectionId']?.toString(),
+      schoolId: json['schoolId']?.toString(),
+      subjectCode: json['subjectInfo']?['code']?.toString(),
+      createdAt: json['createdAt']?.toString(),
     );
   }
 }
@@ -230,6 +362,8 @@ class RecentNotice {
   final bool isImportent;
   final String postedBy;
   final String createdAt;
+  final String? avatar;
+  final String? schoolId;
 
   RecentNotice({
     required this.id,
@@ -239,6 +373,8 @@ class RecentNotice {
     required this.isImportent,
     required this.postedBy,
     required this.createdAt,
+    this.avatar,
+    this.schoolId,
   });
 
   factory RecentNotice.fromJson(Map<String, dynamic> json) {
@@ -247,9 +383,14 @@ class RecentNotice {
       title: json['title']?.toString() ?? '',
       content: json['content']?.toString() ?? '',
       targetAudience: json['targetAudience']?.toString() ?? '',
-      isImportent: json['isImportent'] == true || json['isImportent'] == 'true',
+      isImportent: json['isImportent'] == true ||
+          json['isImportent'] == 'true' ||
+          json['isImportant'] == true ||
+          json['isImportant'] == 'true',
       postedBy: json['postedBy']?.toString() ?? '',
       createdAt: json['createdAt']?.toString() ?? '',
+      avatar: json['avatar']?.toString(),
+      schoolId: json['schoolId']?.toString(),
     );
   }
 }
@@ -261,6 +402,8 @@ class CurrentExam {
   final String startDate;
   final String endDate;
   final bool isPublished;
+  final String status;
+  final List<ExamAssignmentSummary> assignments;
 
   CurrentExam({
     required this.id,
@@ -269,16 +412,64 @@ class CurrentExam {
     required this.startDate,
     required this.endDate,
     required this.isPublished,
+    this.status = '',
+    this.assignments = const [],
   });
 
   factory CurrentExam.fromJson(Map<String, dynamic> json) {
     return CurrentExam(
       id: json['id']?.toString() ?? '',
-      examName: json['exam_name']?.toString() ?? '',
+      examName: json['exam_name']?.toString() ?? json['examName']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
-      startDate: json['start_date']?.toString() ?? '',
-      endDate: json['end_date']?.toString() ?? '',
-      isPublished: json['isPublished'] == true || json['isPublished'] == 'true' || json['is_published'] == true || json['is_published'] == 'true',
+      startDate: json['start_date']?.toString() ?? json['startDate']?.toString() ?? '',
+      endDate: json['end_date']?.toString() ?? json['endDate']?.toString() ?? '',
+      isPublished: json['isPublished'] == true ||
+          json['isPublished'] == 'true' ||
+          json['is_published'] == true ||
+          json['is_published'] == 'true',
+      status: json['status']?.toString() ?? '',
+      assignments: (json['assignments'] as List<dynamic>?)
+              ?.map((e) => ExamAssignmentSummary.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+}
+
+class ExamAssignmentSummary {
+  final String id;
+  final String examId;
+  final String className;
+  final String subjectName;
+  final String examinerName;
+  final String date;
+  final String? startTime;
+  final String? endTime;
+  final String syllabus;
+
+  ExamAssignmentSummary({
+    required this.id,
+    required this.examId,
+    required this.className,
+    required this.subjectName,
+    required this.examinerName,
+    required this.date,
+    this.startTime,
+    this.endTime,
+    required this.syllabus,
+  });
+
+  factory ExamAssignmentSummary.fromJson(Map<String, dynamic> json) {
+    return ExamAssignmentSummary(
+      id: json['id']?.toString() ?? '',
+      examId: json['examId']?.toString() ?? '',
+      className: json['class']?['name']?.toString() ?? '',
+      subjectName: json['subject']?['name']?.toString() ?? '',
+      examinerName: json['examiner']?['name']?.toString() ?? '',
+      date: json['date']?.toString() ?? '',
+      startTime: json['start_time']?.toString(),
+      endTime: json['end_time']?.toString(),
+      syllabus: json['syllabus']?.toString() ?? '',
     );
   }
 }
