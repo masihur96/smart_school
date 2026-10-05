@@ -36,20 +36,46 @@ class _AdminHomeworkManagementScreenState
   }
 
   Future<void> _fetchInitialData() async {
-    setState(() => _isLoading = true);
     final schoolId = context.read<AuthNotifier>().user?.schoolId ?? '';
     if (schoolId.isNotEmpty) {
       final classSetup = context.read<ClassSetupNotifier>();
       final sectionSetup = context.read<SectionSetupNotifier>();
       final subjectSetup = context.read<SubjectSetupNotifier>();
       final teachersSetup = context.read<TeachersNotifier>();
-      await classSetup.fetchSchoolData();
-      await sectionSetup.fetchSchoolData();
-      await subjectSetup.fetchSchoolData();
-      await teachersSetup.fetchTeachers();
-      await _onFetchHomework();
+      final homeworkSetup = context.read<HomeworkNotifier>();
+
+      bool needsLoading = classSetup.classes.isEmpty ||
+          sectionSetup.sections.isEmpty ||
+          subjectSetup.subjects.isEmpty ||
+          teachersSetup.teachers.isEmpty ||
+          homeworkSetup.homeworkRecords.isEmpty;
+
+      if (needsLoading) {
+        setState(() => _isLoading = true);
+        if (classSetup.classes.isEmpty) await classSetup.fetchSchoolData();
+        if (sectionSetup.sections.isEmpty) await sectionSetup.fetchSchoolData();
+        if (subjectSetup.subjects.isEmpty) await subjectSetup.fetchSchoolData();
+        if (teachersSetup.teachers.isEmpty) await teachersSetup.fetchTeachers();
+        
+        if (homeworkSetup.homeworkRecords.isEmpty) {
+          await _onFetchHomework();
+        }
+        if (mounted) setState(() => _isLoading = false);
+      }
     }
-    if (mounted) setState(() => _isLoading = false);
+  }
+
+  Future<void> _onRefresh() async {
+    final classSetup = context.read<ClassSetupNotifier>();
+    final sectionSetup = context.read<SectionSetupNotifier>();
+    final subjectSetup = context.read<SubjectSetupNotifier>();
+    final teachersSetup = context.read<TeachersNotifier>();
+    
+    await classSetup.fetchSchoolData();
+    await sectionSetup.fetchSchoolData();
+    await subjectSetup.fetchSchoolData();
+    await teachersSetup.fetchTeachers();
+    await _onFetchHomework();
   }
 
   Future<void> _onFetchHomework() async {
@@ -127,7 +153,7 @@ class _AdminHomeworkManagementScreenState
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _onFetchHomework,
+            onPressed: _onRefresh,
           ),
         ],
       ),
@@ -138,21 +164,26 @@ class _AdminHomeworkManagementScreenState
             const LinearProgressIndicator(color: AppColors.primaryAdmin)
           else
             Expanded(
-              child: homeworkList.isEmpty
-                  ? _buildEmptyState()
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: homeworkList.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final hw = homeworkList[index];
-                        return _HomeworkCard(
-                          homework: hw,
-                          onDelete: () => _deleteHomework(hw.id),
-                          onEdit: () => _editHomework(hw),
-                        );
-                      },
-                    ),
+              child: RefreshIndicator(
+                onRefresh: _onRefresh,
+                color: AppColors.primaryAdmin,
+                child: homeworkList.isEmpty
+                    ? _buildEmptyState()
+                    : ListView.separated(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.all(16),
+                        itemCount: homeworkList.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final hw = homeworkList[index];
+                          return _HomeworkCard(
+                            homework: hw,
+                            onDelete: () => _deleteHomework(hw.id),
+                            onEdit: () => _editHomework(hw),
+                          );
+                        },
+                      ),
+              ),
             ),
         ],
       ),
@@ -340,10 +371,14 @@ class _AdminHomeworkManagementScreenState
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.5,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
           Icon(
             Icons.assignment_outlined,
             size: 80,
@@ -385,6 +420,8 @@ class _AdminHomeworkManagementScreenState
             child: Text(AppLocalizations.of(context)!.resetFilters),
           ),
         ],
+      ),
+        ),
       ),
     );
   }
