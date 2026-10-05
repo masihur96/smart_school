@@ -101,17 +101,18 @@ class ZoomableAvatar extends StatelessWidget {
                                 imageUrl: imageUrl!,
                                 cacheKey: imageUrl!.split('?').first,
                                 fit: BoxFit.cover,
-                                width: MediaQuery.of(context).size.width,
-                                height: MediaQuery.of(context).size.width,
+                                width: MediaQuery.of(context).size.width - 30,
+                                height: MediaQuery.of(context).size.width - 30,
                                 placeholder: (_, __) => const Center(
                                   child: CircularProgressIndicator(
                                     color: Colors.white,
                                   ),
                                 ),
-                                errorWidget: (_, __, ___) => _buildZoomedFallback(),
+                                errorWidget: (_, __, ___) =>
+                                    _buildZoomedFallback(context),
                               ),
                             )
-                          : _buildZoomedFallback(),
+                          : _buildZoomedFallback(context),
                     ),
                   ),
                 ),
@@ -120,7 +121,11 @@ class ZoomableAvatar extends StatelessWidget {
                   right: 16,
                   child: IconButton(
                     onPressed: () => Navigator.pop(ctx),
-                    icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 30,
+                    ),
                     style: IconButton.styleFrom(
                       backgroundColor: Colors.black45,
                       shape: const CircleBorder(),
@@ -135,11 +140,12 @@ class ZoomableAvatar extends StatelessWidget {
     );
   }
 
-  Widget _buildZoomedFallback() {
+  Widget _buildZoomedFallback(BuildContext context) {
+    final size = MediaQuery.of(context).size.width - 30;
     return CircleAvatar(
-      radius: 100,
+      radius: size / 2,
       backgroundColor: backgroundColor,
-      child: _buildFallbackContent(80),
+      child: _buildFallbackContent(size * 0.3),
     );
   }
 }
