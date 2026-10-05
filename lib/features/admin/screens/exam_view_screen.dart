@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
+import 'package:smart_school/core/widgets/zoomable_avatar.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 
 import '../../../models/school_models.dart';
@@ -675,21 +676,18 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
                   ),
                   leading: CircleAvatar(
                     backgroundColor: Colors.indigo.shade50,
-                    child: Text(
-                      student.user?.name[0] ?? 'S',
-                      style: TextStyle(
-                        color: AppColors.primaryAdmin,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: ZoomableAvatar(imageUrl: student.user?.avatar, name: student.user?.name, heroTag: student.user?.designation??"")
                   ),
                   title: Text(
                     student.user?.name ?? 'N/A',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
+                        color: AppColors.primaryAdmin,
+
+                      ),
                     ),
-                  ),
+
                   subtitle: Text(
                     'Roll: ${student.rollId}',
                     style: TextStyle(fontSize: 12),
