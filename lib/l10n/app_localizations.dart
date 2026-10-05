@@ -2285,7 +2285,7 @@ abstract class AppLocalizations {
   /// No description provided for @monthlyAttendanceOverview.
   ///
   /// In en, this message translates to:
-  /// **'Monthly Attendance Overview'**
+  /// **'Monthly Overview'**
   String get monthlyAttendanceOverview;
 
   /// No description provided for @yearLabel.

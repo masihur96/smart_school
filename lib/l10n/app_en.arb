@@ -522,7 +522,7 @@
     }
   },
   "egLabel": "e.g.",
-  "monthlyAttendanceOverview": "Monthly Attendance Overview",
+  "monthlyAttendanceOverview": "Monthly Overview",
   "yearLabel": "Year {year}",
   "@yearLabel": {
     "placeholders": {

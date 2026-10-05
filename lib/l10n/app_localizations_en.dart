@@ -1156,7 +1156,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get egLabel => 'e.g.';
 
   @override
-  String get monthlyAttendanceOverview => 'Monthly Attendance Overview';
+  String get monthlyAttendanceOverview => 'Monthly Overview';
 
   @override
   String yearLabel(int year) {
