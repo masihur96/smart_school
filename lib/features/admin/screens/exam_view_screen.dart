@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -70,6 +72,11 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
     final students = context.read<StudentsNotifier>().students;
     if (students.isEmpty) return;
 
+    // Log the fetched students
+    log('=== FETCHED STUDENTS DATA ===');
+    log(jsonEncode(students.map((e) => e.toJson()).toList()));
+    log('=============================');
+
     // Clear existing values first
     setState(() {
       for (var student in students) {
@@ -85,6 +92,10 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
       subjectId: _selectedAssignment!.subjectId,
       sectionId: _selectedSectionId,
     );
+
+    log('=== FETCHED MARKS DATA ===');
+    log(jsonEncode(marks));
+    log('==========================');
 
     if (!mounted) return;
 
@@ -674,23 +685,60 @@ class _ExamViewScreenState extends State<ExamViewScreen> {
                     horizontal: 16,
                     vertical: 8,
                   ),
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.indigo.shade50,
-                    child: ZoomableAvatar(imageUrl: student.user?.avatar, name: student.user?.name, heroTag: student.user?.designation??"")
+                  leading: Column(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.indigo.shade50,
+                        child: ZoomableAvatar(
+                          imageUrl: student.user?.avatar,
+                          name: student.user?.name,
+                          heroTag: student.user?.designation ?? "",
+                        ),
+                      ),
+                      if (student.user?.designation != null &&
+                          student.user!.designation!.isNotEmpty)
+                        Text(
+                          student.user!.designation!,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey.shade600,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
                   ),
                   title: Text(
                     student.user?.name ?? 'N/A',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                        color: AppColors.primaryAdmin,
-
-                      ),
+                      color: AppColors.primaryAdmin,
                     ),
+                  ),
 
-                  subtitle: Text(
-                    'Roll: ${student.rollId}',
-                    style: TextStyle(fontSize: 12),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Roll: ${student.rollId}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      if (student.user?.classEntity?.name != null ||
+                          student.sectionName != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2.0),
+                          child: Text(
+                            'Class: ${student.user?.classEntity?.name ?? 'N/A'} • Section: ${student.sectionName ?? 'N/A'}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ),
+
+                    ],
                   ),
                   trailing: _getMarksController(student.userId).text.isNotEmpty
                       ? Container(
