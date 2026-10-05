@@ -195,7 +195,9 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
           ]);
         }
 
-        if (mounted && _selectedClassId == null && classNotifier.classes.isNotEmpty) {
+        if (mounted &&
+            _selectedClassId == null &&
+            classNotifier.classes.isNotEmpty) {
           setState(() {
             _selectedClassId = classNotifier.classes.first.id;
             final filteredSections = sectionNotifier.sections
@@ -228,7 +230,9 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
           _loadCompletionData();
         }
       } else {
-        log('Warning: No schoolId found in AuthNotifier during routine management init');
+        log(
+          'Warning: No schoolId found in AuthNotifier during routine management init',
+        );
       }
     });
   }
@@ -250,7 +254,9 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
       sectionNotifier.fetchSections(),
     ]);
 
-    if (mounted && _selectedClassId == null && classNotifier.classes.isNotEmpty) {
+    if (mounted &&
+        _selectedClassId == null &&
+        classNotifier.classes.isNotEmpty) {
       setState(() {
         _selectedClassId = classNotifier.classes.first.id;
         final filteredSections = sectionNotifier.sections
@@ -680,11 +686,11 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
               borderRadius: BorderRadius.circular(10),
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
+                  horizontal: 5,
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7C3AED).withOpacity(0.08),
+                  color: AppColors.primaryAdmin.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -694,16 +700,16 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                     const Icon(
                       Icons.calendar_today_rounded,
                       size: 15,
-                      color: Color(0xFF7C3AED),
+
                     ),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
                         dateStr,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
-                          color: Color(0xFF1E1B4B),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -716,7 +722,7 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF7C3AED),
+                          color: AppColors.primaryAdmin,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -828,7 +834,10 @@ class _RoutineManagementScreenState extends State<RoutineManagementScreen>
                   const SizedBox(height: 20),
                   Text(
                     l10n.selectClass,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -2550,10 +2559,9 @@ class _AddRoutineEntrySheetState extends State<_AddRoutineEntrySheet> {
                                       Text(
                                         _isEditMode
                                             ? (_selectedDays.length > 1
-                                                  ? l10n
-                                                      .updateSaveEntriesFormat(
-                                                        _selectedDays.length,
-                                                      )
+                                                  ? l10n.updateSaveEntriesFormat(
+                                                      _selectedDays.length,
+                                                    )
                                                   : l10n.updateEntry)
                                             : (_selectedDays.length > 1
                                                   ? l10n.saveEntriesFormat(
@@ -2989,7 +2997,6 @@ class _SectionLabel extends StatelessWidget {
     );
   }
 }
-
 
 class _TimePicker extends StatelessWidget {
   final String label;
