@@ -94,7 +94,10 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     if (!_dailyChartScrollController.hasClients) return;
     final dayCenter = (currentDay - 0.5) * dayWidth;
     final maxScroll = _dailyChartScrollController.position.maxScrollExtent;
-    final targetOffset = (dayCenter - (viewportWidth / 2)).clamp(0.0, maxScroll);
+    final targetOffset = (dayCenter - (viewportWidth / 2)).clamp(
+      0.0,
+      maxScroll,
+    );
     if (animated) {
       _dailyChartScrollController.animateTo(
         targetOffset,
@@ -290,9 +293,12 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
             showAtStart: true,
             predicate: (notification) {
               if (notification.metrics.axis != Axis.vertical) return true;
-              if (notification.metrics.pixels >= notification.metrics.maxScrollExtent) {
+              if (notification.metrics.pixels >=
+                  notification.metrics.maxScrollExtent) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted && _bottomBarController.isAttached && !_bottomBarController.isVisible) {
+                  if (mounted &&
+                      _bottomBarController.isAttached &&
+                      !_bottomBarController.isVisible) {
                     _bottomBarController.show();
                   }
                 });
@@ -624,7 +630,8 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     AdminDashboardProvider provider,
   ) {
     final hasDaily = data.attendStudent.dailyAttendance.isNotEmpty;
-    final hasYearly = provider.monthlyAttendanceOverview != null &&
+    final hasYearly =
+        provider.monthlyAttendanceOverview != null &&
         provider.monthlyAttendanceOverview!.data.isNotEmpty;
 
     if (!hasDaily && !hasYearly) {
@@ -676,7 +683,9 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     if (matchedTodayIndex != -1) {
       currentDay = days[matchedTodayIndex].day;
     } else if (attendStudent.date.isNotEmpty) {
-      final matchedByDate = days.indexWhere((d) => d.date == attendStudent.date);
+      final matchedByDate = days.indexWhere(
+        (d) => d.date == attendStudent.date,
+      );
       if (matchedByDate != -1) {
         currentDay = days[matchedByDate].day;
       } else {
@@ -689,18 +698,24 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
     if (currentDay < 1) currentDay = 1;
     if (currentDay > daysInMonth) currentDay = daysInMonth;
 
+    final activeDays = days.where((d) => d.hasData).toList();
+    final activeDaysCount = activeDays.length;
+
+    int currentDayIndex = activeDays.indexWhere((d) => d.day == currentDay);
+    int scrollTarget = currentDayIndex != -1
+        ? currentDayIndex + 1
+        : activeDaysCount;
+
     final List<FlSpot> spots = [];
-    for (final d in days) {
-      if (d.hasData) {
-        spots.add(FlSpot(d.day.toDouble(), d.attendanceRate));
-      }
+    for (int i = 0; i < activeDays.length; i++) {
+      spots.add(FlSpot((i + 1).toDouble(), activeDays[i].attendanceRate));
     }
 
     final monthTitle = summary != null && summary.monthName.isNotEmpty
         ? '${summary.monthName} ${summary.year}'
         : (summary != null
-            ? '${l10n.monthlyAttendanceOverview} ${summary.year}'
-            : l10n.monthlyAttendanceOverview);
+              ? '${l10n.monthlyAttendanceOverview} ${summary.year}'
+              : l10n.monthlyAttendanceOverview);
 
     final avgRate = summary?.attendanceRate ?? attendStudent.attendanceRate;
     final rateColor = avgRate >= 75
@@ -753,8 +768,8 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                     ],
                   ),
                 ),
-                // Today indicator button to quickly center current date
 
+                // Today indicator button to quickly center current date
                 if (canToggle)
                   Padding(
                     padding: const EdgeInsets.only(right: 6.0),
@@ -767,7 +782,10 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                         visualDensity: VisualDensity.compact,
                       ),
                       icon: const Icon(Icons.swap_horiz, size: 16),
-                      label: const Text('Yearly', style: TextStyle(fontSize: 11)),
+                      label: const Text(
+                        'Yearly',
+                        style: TextStyle(fontSize: 11),
+                      ),
                       onPressed: onToggle,
                     ),
                   ),
@@ -794,10 +812,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
             if (summary != null) ...[
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 8,
-                  horizontal: 6,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
                 decoration: BoxDecoration(
                   color: Colors.grey.withOpacity(0.06),
                   borderRadius: BorderRadius.circular(12),
@@ -852,12 +867,14 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                     builder: (context, constraints) {
                       final availableWidth = constraints.maxWidth;
                       const yAxisWidth = 34.0;
-                      final scrollViewportWidth =
-                          math.max(0.0, availableWidth - yAxisWidth);
+                      final scrollViewportWidth = math.max(
+                        0.0,
+                        availableWidth - yAxisWidth,
+                      );
                       _dailyChartViewportWidth = scrollViewportWidth;
                       final chartWidth = math.max(
                         scrollViewportWidth,
-                        daysInMonth * dayColumnWidth,
+                        activeDaysCount * dayColumnWidth,
                       );
 
                       // Center current date on initial layout
@@ -867,7 +884,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                             _dailyChartScrollController.hasClients) {
                           _hasAutoScrolledDailyChart = true;
                           _scrollToCurrentDay(
-                            currentDay: currentDay,
+                            currentDay: scrollTarget,
                             dayWidth: dayColumnWidth,
                             viewportWidth: scrollViewportWidth,
                             chartWidth: chartWidth,
@@ -930,10 +947,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                                   ),
                                   lineBarsData: [
                                     LineChartBarData(
-                                      spots: const [
-                                        FlSpot(0, 0),
-                                        FlSpot(1, 0),
-                                      ],
+                                      spots: const [FlSpot(0, 0), FlSpot(1, 0)],
                                       color: Colors.transparent,
                                       dotData: const FlDotData(show: false),
                                     ),
@@ -958,7 +972,9 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                                         verticalInterval: 1,
                                         getDrawingVerticalLine: (value) {
                                           return FlLine(
-                                            color: Colors.grey.withOpacity(0.08),
+                                            color: Colors.grey.withOpacity(
+                                              0.08,
+                                            ),
                                             strokeWidth: 1,
                                             dashArray: [3, 3],
                                           );
@@ -966,7 +982,9 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                                         horizontalInterval: 25,
                                         getDrawingHorizontalLine: (value) {
                                           return FlLine(
-                                            color: Colors.grey.withOpacity(0.12),
+                                            color: Colors.grey.withOpacity(
+                                              0.12,
+                                            ),
                                             strokeWidth: 1,
                                             dashArray: [5, 5],
                                           );
@@ -974,24 +992,34 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                                       ),
                                       extraLinesData: ExtraLinesData(
                                         verticalLines: [
-                                          VerticalLine(
-                                            x: currentDay.toDouble(),
-                                            color: Colors.purple.withOpacity(0.4),
-                                            strokeWidth: 1.5,
-                                            dashArray: [4, 4],
-                                          ),
+                                          if (currentDayIndex != -1)
+                                            VerticalLine(
+                                              x: (currentDayIndex + 1)
+                                                  .toDouble(),
+                                              color: Colors.purple.withOpacity(
+                                                0.4,
+                                              ),
+                                              strokeWidth: 1.5,
+                                              dashArray: [4, 4],
+                                            ),
                                         ],
                                       ),
                                       titlesData: FlTitlesData(
                                         show: true,
                                         leftTitles: const AxisTitles(
-                                          sideTitles: SideTitles(showTitles: false),
+                                          sideTitles: SideTitles(
+                                            showTitles: false,
+                                          ),
                                         ),
                                         rightTitles: const AxisTitles(
-                                          sideTitles: SideTitles(showTitles: false),
+                                          sideTitles: SideTitles(
+                                            showTitles: false,
+                                          ),
                                         ),
                                         topTitles: const AxisTitles(
-                                          sideTitles: SideTitles(showTitles: false),
+                                          sideTitles: SideTitles(
+                                            showTitles: false,
+                                          ),
                                         ),
                                         bottomTitles: AxisTitles(
                                           sideTitles: SideTitles(
@@ -999,50 +1027,50 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                                             reservedSize: 56,
                                             interval: 1,
                                             getTitlesWidget: (value, meta) {
-                                              final dayNum = value.toInt();
-                                              if (dayNum < 1 || dayNum > daysInMonth) {
+                                              final index = value.toInt() - 1;
+                                              if (index < 0 ||
+                                                  index >= activeDaysCount) {
                                                 return const SizedBox.shrink();
                                               }
-                                              final matchedDay = days.firstWhere(
-                                                (d) => d.day == dayNum,
-                                                orElse: () => DailyAttendance(
-                                                  date: '',
-                                                  day: dayNum,
-                                                  dayOfWeek: '',
-                                                  present: 0,
-                                                  late: 0,
-                                                  absent: 0,
-                                                  leave: 0,
-                                                  totalPresent: 0,
-                                                  total: 0,
-                                                  attendanceRate: 0,
-                                                  hasData: false,
-                                                  isFuture: dayNum > currentDay,
-                                                ),
-                                              );
+                                              final matchedDay =
+                                                  activeDays[index];
+                                              final dayNum = matchedDay.day;
 
-                                              final isToday = dayNum == currentDay;
-                                              final dayOfWeek = matchedDay.dayOfWeek;
-                                              final isWeekend = dayOfWeek == 'Fri' || dayOfWeek == 'Sun';
+                                              final isToday =
+                                                  dayNum == currentDay;
+                                              final dayOfWeek =
+                                                  matchedDay.dayOfWeek;
+                                              final isWeekend =
+                                                  dayOfWeek == 'Fri' ||
+                                                  dayOfWeek == 'Sun';
 
                                               String rateText = '-';
-                                              Color rateColor = Colors.grey.shade400;
+                                              Color rateColor =
+                                                  Colors.grey.shade400;
                                               if (matchedDay.hasData) {
-                                                final rate = matchedDay.attendanceRate;
+                                                final rate =
+                                                    matchedDay.attendanceRate;
                                                 rateText = '${rate.toInt()}%';
                                                 rateColor = rate >= 75
                                                     ? Colors.green.shade700
                                                     : (rate >= 50
-                                                        ? Colors.orange.shade700
-                                                        : Colors.red.shade700);
+                                                          ? Colors
+                                                                .orange
+                                                                .shade700
+                                                          : Colors
+                                                                .red
+                                                                .shade700);
                                               } else if (matchedDay.isFuture) {
                                                 rateText = '';
                                               }
 
                                               return Padding(
-                                                padding: const EdgeInsets.only(top: 6.0),
+                                                padding: const EdgeInsets.only(
+                                                  top: 6.0,
+                                                ),
                                                 child: Column(
-                                                  mainAxisSize: MainAxisSize.min,
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
                                                   children: [
                                                     Text(
                                                       dayOfWeek,
@@ -1054,27 +1082,41 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                                                         color: isToday
                                                             ? Colors.purple
                                                             : (isWeekend
-                                                                ? Colors.red.shade400
-                                                                : Colors.grey.shade600),
+                                                                  ? Colors
+                                                                        .red
+                                                                        .shade400
+                                                                  : Colors
+                                                                        .grey
+                                                                        .shade600),
                                                       ),
                                                     ),
                                                     const SizedBox(height: 2),
                                                     Container(
-                                                      padding: const EdgeInsets.symmetric(
-                                                        horizontal: 6,
-                                                        vertical: 2,
-                                                      ),
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 6,
+                                                            vertical: 2,
+                                                          ),
                                                       decoration: BoxDecoration(
                                                         color: isToday
                                                             ? Colors.purple
-                                                            : (matchedDay.hasData
-                                                                ? Colors.purple.withOpacity(0.08)
-                                                                : Colors.transparent),
+                                                            : (matchedDay
+                                                                      .hasData
+                                                                  ? Colors
+                                                                        .purple
+                                                                        .withOpacity(
+                                                                          0.08,
+                                                                        )
+                                                                  : Colors
+                                                                        .transparent),
                                                         borderRadius:
-                                                            BorderRadius.circular(10),
+                                                            BorderRadius.circular(
+                                                              10,
+                                                            ),
                                                         border: isToday
                                                             ? Border.all(
-                                                                color: Colors.purple,
+                                                                color: Colors
+                                                                    .purple,
                                                                 width: 1.5,
                                                               )
                                                             : null,
@@ -1088,9 +1130,14 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                                                               : FontWeight.w600,
                                                           color: isToday
                                                               ? Colors.white
-                                                              : (matchedDay.isFuture
-                                                                  ? Colors.grey.shade400
-                                                                  : Colors.grey.shade800),
+                                                              : (matchedDay
+                                                                        .isFuture
+                                                                    ? Colors
+                                                                          .grey
+                                                                          .shade400
+                                                                    : Colors
+                                                                          .grey
+                                                                          .shade800),
                                                         ),
                                                       ),
                                                     ),
@@ -1100,12 +1147,15 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                                                         rateText,
                                                         style: TextStyle(
                                                           fontSize: 8.5,
-                                                          fontWeight: FontWeight.bold,
+                                                          fontWeight:
+                                                              FontWeight.bold,
                                                           color: rateColor,
                                                         ),
                                                       )
                                                     else
-                                                      const SizedBox(height: 11),
+                                                      const SizedBox(
+                                                        height: 11,
+                                                      ),
                                                   ],
                                                 ),
                                               );
@@ -1115,7 +1165,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                                       ),
                                       borderData: FlBorderData(show: false),
                                       minX: 0.5,
-                                      maxX: daysInMonth + 0.5,
+                                      maxX: activeDaysCount + 0.5,
                                       minY: 0,
                                       maxY: 100,
                                       lineBarsData: [
@@ -1129,18 +1179,35 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                                           dotData: FlDotData(
                                             show: true,
                                             getDotPainter:
-                                                (spot, percent, barData, index) {
-                                              final isSpotToday =
-                                                  spot.x.toInt() == currentDay;
-                                              return FlDotCirclePainter(
-                                                radius: isSpotToday ? 4.5 : 3.5,
-                                                color: isSpotToday
-                                                    ? Colors.amber
-                                                    : Colors.white,
-                                                strokeWidth: isSpotToday ? 2.5 : 2,
-                                                strokeColor: Colors.purple,
-                                              );
-                                            },
+                                                (
+                                                  spot,
+                                                  percent,
+                                                  barData,
+                                                  index,
+                                                ) {
+                                                  final dataIndex =
+                                                      spot.x.toInt() - 1;
+                                                  final isSpotToday =
+                                                      dataIndex >= 0 &&
+                                                          dataIndex <
+                                                              activeDaysCount
+                                                      ? activeDays[dataIndex]
+                                                                .day ==
+                                                            currentDay
+                                                      : false;
+                                                  return FlDotCirclePainter(
+                                                    radius: isSpotToday
+                                                        ? 4.5
+                                                        : 3.5,
+                                                    color: isSpotToday
+                                                        ? Colors.amber
+                                                        : Colors.white,
+                                                    strokeWidth: isSpotToday
+                                                        ? 2.5
+                                                        : 2,
+                                                    strokeColor: Colors.purple,
+                                                  );
+                                                },
                                           ),
                                           belowBarData: BarAreaData(
                                             show: true,
@@ -1158,30 +1225,20 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                                       lineTouchData: LineTouchData(
                                         touchTooltipData: LineTouchTooltipData(
                                           getTooltipItems: (touchedSpots) {
-                                            return touchedSpots
-                                                .map((LineBarSpot touchedSpot) {
-                                              final dayInt = touchedSpot.x.toInt();
-                                              final matchedDay = days.firstWhere(
-                                                (d) => d.day == dayInt,
-                                                orElse: () => DailyAttendance(
-                                                  date: '',
-                                                  day: dayInt,
-                                                  dayOfWeek: '',
-                                                  present: 0,
-                                                  late: 0,
-                                                  absent: 0,
-                                                  leave: 0,
-                                                  totalPresent: 0,
-                                                  total: 0,
-                                                  attendanceRate: touchedSpot.y,
-                                                  hasData: true,
-                                                  isFuture: false,
-                                                ),
-                                              );
+                                            return touchedSpots.map((
+                                              LineBarSpot touchedSpot,
+                                            ) {
+                                              final index =
+                                                  touchedSpot.x.toInt() - 1;
+                                              final matchedDay =
+                                                  activeDays[index];
+                                              final dayInt = matchedDay.day;
                                               final isSpotToday =
                                                   dayInt == currentDay;
-                                              final dayLabel = matchedDay
-                                                      .dayOfWeek.isNotEmpty
+                                              final dayLabel =
+                                                  matchedDay
+                                                      .dayOfWeek
+                                                      .isNotEmpty
                                                   ? 'Day $dayInt (${matchedDay.dayOfWeek})${isSpotToday ? ' • TODAY' : ''}'
                                                   : 'Day $dayInt${isSpotToday ? ' • TODAY' : ''}';
                                               return LineTooltipItem(
@@ -1198,7 +1255,8 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                                                     style: const TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 11,
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
                                                   ),
                                                   TextSpan(
@@ -2231,8 +2289,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        const AdminHomeworkManagementScreen(),
+                    builder: (context) => const AdminHomeworkManagementScreen(),
                   ),
                 );
               },
@@ -2322,11 +2379,13 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                           CircleAvatar(
                             radius: 10,
                             backgroundColor: Colors.purple.withOpacity(0.2),
-                            backgroundImage: hw.teacherAvatar != null &&
+                            backgroundImage:
+                                hw.teacherAvatar != null &&
                                     hw.teacherAvatar!.isNotEmpty
                                 ? NetworkImage(hw.teacherAvatar!)
                                 : null,
-                            child: hw.teacherAvatar == null ||
+                            child:
+                                hw.teacherAvatar == null ||
                                     hw.teacherAvatar!.isEmpty
                                 ? Text(
                                     hw.teacherName.isNotEmpty
@@ -2560,8 +2619,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        const NoticeManagementScreen(),
+                    builder: (context) => const NoticeManagementScreen(),
                   ),
                 );
               },
@@ -2627,10 +2685,7 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
                       const SizedBox(height: 4),
                       Text(
                         notice.content,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -3336,7 +3391,10 @@ class _AdminDashboardContentState extends State<AdminDashboardContent>
           ),
           TextButton(
             onPressed: () => provider.fetchPerformances(),
-            child: Text(AppLocalizations.of(context)!.retry, style: TextStyle(fontSize: 12)),
+            child: Text(
+              AppLocalizations.of(context)!.retry,
+              style: TextStyle(fontSize: 12),
+            ),
           ),
         ],
       ),
