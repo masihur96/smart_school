@@ -5,6 +5,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/utils/teacher_attendance_pdf_helper.dart';
 
@@ -28,6 +29,7 @@ class _TeacherAttendanceManagementScreenState
   DateTimeRange? _selectedDateRange;
   final TextEditingController _searchController = TextEditingController();
   String _selectedStatus = 'ALL';
+  bool _isFilterExpanded = false;
 
   @override
   void initState() {
@@ -130,6 +132,7 @@ class _TeacherAttendanceManagementScreenState
             'id': teacherId,
             'name': teacherInfo.user?.name ?? l10n.unknownTeacher,
             'designation': teacherInfo.designation,
+            'phone': teacherInfo.user?.phone ?? teacherInfo.user?.phone,
           },
           'teacherId': teacherId,
           'status': 'absent',
@@ -157,6 +160,15 @@ class _TeacherAttendanceManagementScreenState
         foregroundColor: Colors.white,
         actions: [
           IconButton(
+            onPressed: () {
+              setState(() {
+                _isFilterExpanded = !_isFilterExpanded;
+              });
+            },
+            icon: Icon(_isFilterExpanded ? Icons.filter_list_off : Icons.filter_list),
+            tooltip: 'Toggle Filters',
+          ),
+          IconButton(
             onPressed: () => _exportToPdf(context),
             icon: const Icon(Icons.picture_as_pdf),
             tooltip: l10n.exportPdf,
@@ -165,78 +177,85 @@ class _TeacherAttendanceManagementScreenState
       ),
       body: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: l10n.searchByTeacherNameHint,
-                          prefixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(
+          AnimatedCrossFade(
+            firstChild: const SizedBox(width: double.infinity, height: 0),
+            secondChild: Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText: l10n.searchByTeacherNameHint,
+                            prefixIcon: const Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 0,
+                            ),
+                          ),
+                          onChanged: (value) => _fetchData(),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      InkWell(
+                        onTap: () => _selectDate(context),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E1B4B).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 0,
+                          child: const Icon(Icons.calendar_today),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _selectedDateRange != null
+                            ? l10n.dateRangeFormat(
+                                DateFormat('yyyy-MM-dd').format(_selectedDateRange!.start),
+                                DateFormat('yyyy-MM-dd').format(_selectedDateRange!.end),
+                              )
+                            : l10n.dateAllTime,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      if (_searchController.text.isNotEmpty)
+                        Text(
+                          l10n.resultsForFormat(_searchController.text),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue,
                           ),
                         ),
-                        onChanged: (value) => _fetchData(),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    InkWell(
-                      onTap: () => _selectDate(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1E1B4B).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(Icons.calendar_today),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _selectedDateRange != null
-                          ? l10n.dateRangeFormat(
-                              DateFormat('yyyy-MM-dd').format(_selectedDateRange!.start),
-                              DateFormat('yyyy-MM-dd').format(_selectedDateRange!.end),
-                            )
-                          : l10n.dateAllTime,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    if (_searchController.text.isNotEmpty)
-                      Text(
-                        l10n.resultsForFormat(_searchController.text),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.blue,
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _buildStatusFilters(
-                  context: context,
-                  allCount: totalCount,
-                  presentCount: presentCount,
-                  absentCount: absentCount,
-                  isDark: isDark,
-                ),
-              ],
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _buildStatusFilters(
+                    context: context,
+                    allCount: totalCount,
+                    presentCount: presentCount,
+                    absentCount: absentCount,
+                    isDark: isDark,
+                  ),
+                ],
+              ),
             ),
+            crossFadeState: _isFilterExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 300),
           ),
           Expanded(
             child: provider.isLoading
@@ -292,6 +311,11 @@ class _TeacherAttendanceManagementScreenState
                       final inTime = record['startTime'] ?? "--:--";
                       final outTime = record['endTime'] ?? "--:--";
 
+                      final teacherPhone = record['teacher']?['phone']?.toString() ?? 
+                                           record['teacher']?['guardianContact']?.toString() ?? 
+                                           record['teacher']?['user']?['phone']?.toString() ??
+                                           record['phone']?.toString();
+
                       String dateStr = record['date']?.toString() ?? "N/A";
                       if (dateStr != "N/A") {
                         try {
@@ -328,14 +352,37 @@ class _TeacherAttendanceManagementScreenState
                                     ),
                                   ),
                                 ),
-                                title: Text(
-                                  record['teacher']?['name'] ??
-                                      record['teacherName'] ??
-                                      record['name'] ??
-                                      l10n.unknownTeacher,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                title: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        record['teacher']?['name'] ??
+                                            record['teacherName'] ??
+                                            record['name'] ??
+                                            l10n.unknownTeacher,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    if (teacherPhone != null && teacherPhone.isNotEmpty)
+                                      InkWell(
+                                        borderRadius: BorderRadius.circular(20),
+                                        onTap: () async {
+                                          final Uri launchUri = Uri(
+                                            scheme: 'tel',
+                                            path: teacherPhone,
+                                          );
+                                          if (await canLaunchUrl(launchUri)) {
+                                            await launchUrl(launchUri);
+                                          }
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(4.0),
+                                          child: Icon(Icons.phone, color: AppColors.primaryAdmin, size: 16),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
