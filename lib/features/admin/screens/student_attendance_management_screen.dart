@@ -647,6 +647,7 @@ class _StudentAttendanceManagementScreenState
     final statusIcon = _getStatusIcon(record.status);
 
     // Extract student avatar & roll number
+
     final studentAvatar =
         record.student?['avatar'] as String? ??
         record.student?['avatarUrl'] as String? ??
