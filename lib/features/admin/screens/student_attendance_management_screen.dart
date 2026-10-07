@@ -697,44 +697,15 @@ class _StudentAttendanceManagementScreenState
         ),
         child: ExpansionTile(
           trailing: const SizedBox.shrink(),
-          // tilePadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-          // childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-          leading: Column(
-            children: [
-              ZoomableAvatar(
-                imageUrl: studentAvatar?.isNotEmpty == true ? studentAvatar : null,
-                name: record.studentName,
-                heroTag: 'attendance-avatar-${record.studentId}',
-                radius: 22,
-                backgroundColor: statusColor.withValues(alpha: 0.12),
-                textColor: statusColor,
-              ),
-              const SizedBox(width: 8),
-              // Status badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(statusIcon, size: 13, color: statusColor),
-                    const SizedBox(width: 4),
-                    Text(
-                      _getStatusLabel(context, record.status).toUpperCase(),
-                      style: TextStyle(
-                        color: statusColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          tilePadding: const EdgeInsets.only(left: 14, right: 0, top: 8, bottom: 8),
+          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+          leading: ZoomableAvatar(
+            imageUrl: studentAvatar?.isNotEmpty == true ? studentAvatar : null,
+            name: record.studentName,
+            heroTag: 'attendance-avatar-${record.studentId}',
+            radius: 22,
+            backgroundColor: statusColor.withValues(alpha: 0.12),
+            textColor: statusColor,
           ),
           title: Row(
             children: [
@@ -766,7 +737,31 @@ class _StudentAttendanceManagementScreenState
                     }
                   },
                 ),
-
+              const SizedBox(width: 8),
+              // Status badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(statusIcon, size: 13, color: statusColor),
+                    const SizedBox(width: 4),
+                    Text(
+                      _getStatusLabel(context, record.status).toUpperCase(),
+                      style: TextStyle(
+                        color: statusColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
           subtitle: Padding(
