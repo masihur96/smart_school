@@ -4742,26 +4742,30 @@ class _AdminClassPerformanceCardWithSubjectDropdownState
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            record.studentName,
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-          if (record.rollNumber != null && record.rollNumber!.isNotEmpty) ...[
-            const SizedBox(height: 2),
-            Text(
-              'Roll ${record.rollNumber}',
-              style: TextStyle(
-                fontSize: 9.5,
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
-              ),
+          const SizedBox(height: 4),
+          Flexible(
+            child: Text(
+              record.studentName,
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
+            ),
+          ),
+          if (record.rollNumber != null && record.rollNumber!.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Flexible(
+              child: Text(
+                'Roll ${record.rollNumber}',
+                style: TextStyle(
+                  fontSize: 9.5,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
             ),
           ],
         ],

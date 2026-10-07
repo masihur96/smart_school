@@ -13,6 +13,7 @@ import 'package:smart_school/core/utils/student_attendance_pdf_helper.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/models/period_attendance_model.dart';
 import 'package:smart_school/models/school_models.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -632,14 +633,8 @@ class _StudentAttendanceManagementScreenState
     }
   }
 
-  String formatDate(String? utcDate) {
-    if (utcDate == null || utcDate.isEmpty) {
-      return '--';
-    }
-
-    final localDate = DateTime.parse(utcDate).toLocal();
-
-    return DateFormat('dd MMM yyyy, hh:mm a').format(localDate);
+  String formatDate(DateTime date) {
+    return DateFormat('dd MMM yyyy, hh:mm a').format(date.toLocal());
   }
 
   Widget _buildAttendanceCard(
@@ -665,6 +660,13 @@ class _StudentAttendanceManagementScreenState
         record.student?['rollNumber']?.toString() ??
         record.student?['rollId']?.toString() ??
         record.student?['roll_number']?.toString();
+
+    final studentPhone =
+        record.student?['guardianContact']?.toString() ??
+        record.student?['phone']?.toString() ??
+        (record.student?['user'] != null
+            ? record.student!['user']['phone']?.toString()
+            : null);
 
     final className = record.classInfo?.name ?? '';
     final sectionName = record.sectionInfo?.name ?? '';
@@ -694,30 +696,18 @@ class _StudentAttendanceManagementScreenState
           highlightColor: Colors.transparent,
         ),
         child: ExpansionTile(
-          tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-          leading: ZoomableAvatar(
-            imageUrl: studentAvatar?.isNotEmpty == true ? studentAvatar : null,
-            name: record.studentName,
-            heroTag: 'attendance-avatar-${record.studentId}',
-            radius: 22,
-            backgroundColor: statusColor.withValues(alpha: 0.12),
-            textColor: statusColor,
-          ),
-          title: Row(
+          trailing: const SizedBox.shrink(),
+          // tilePadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+          // childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+          leading: Column(
             children: [
-              Expanded(
-                child: Text(
-                  record.studentName.isNotEmpty
-                      ? record.studentName
-                      : l10n.unknownStudent,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+              ZoomableAvatar(
+                imageUrl: studentAvatar?.isNotEmpty == true ? studentAvatar : null,
+                name: record.studentName,
+                heroTag: 'attendance-avatar-${record.studentId}',
+                radius: 22,
+                backgroundColor: statusColor.withValues(alpha: 0.12),
+                textColor: statusColor,
               ),
               const SizedBox(width: 8),
               // Status badge
@@ -744,6 +734,39 @@ class _StudentAttendanceManagementScreenState
                   ],
                 ),
               ),
+            ],
+          ),
+          title: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  record.studentName.isNotEmpty
+                      ? record.studentName
+                      : l10n.unknownStudent,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (studentPhone != null && studentPhone.isNotEmpty)
+                IconButton(
+                  icon: Icon(Icons.phone, color: AppColors.primaryAdmin, size: 20),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () async {
+                    final Uri launchUri = Uri(
+                      scheme: 'tel',
+                      path: studentPhone,
+                    );
+                    if (await canLaunchUrl(launchUri)) {
+                      await launchUrl(launchUri);
+                    }
+                  },
+                ),
+
             ],
           ),
           subtitle: Padding(
@@ -854,7 +877,7 @@ class _StudentAttendanceManagementScreenState
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      formatDate(record.date),
+                      formatDate(record.createdAt),
                       style: TextStyle(
                         fontSize: 11,
                         color: isDark
@@ -915,18 +938,7 @@ class _StudentAttendanceManagementScreenState
                       value: roomNumber,
                       isDark: isDark,
                     ),
-                  ],
-                  if (record.id.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    _buildDetailItem(
-                      icon: Icons.tag_outlined,
-                      iconColor: Colors.purple,
-                      label: l10n.recordIdLabel,
-                      value: record.id.length > 12
-                          ? '${record.id.substring(0, 12)}...'
-                          : record.id,
-                      isDark: isDark,
-                    ),
+
                   ],
                 ],
               ),
