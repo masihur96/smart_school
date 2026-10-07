@@ -26,6 +26,7 @@ class _TeacherAttendanceManagementScreenState
     extends State<TeacherAttendanceManagementScreen> {
   DateTimeRange? _selectedDateRange;
   final TextEditingController _searchController = TextEditingController();
+  String _selectedStatus = 'ALL';
 
   @override
   void initState() {
@@ -82,6 +83,21 @@ class _TeacherAttendanceManagementScreenState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final provider = context.watch<AttendanceManagementProvider>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final allRecords = provider.teacherAttendance;
+    final filteredAttendance = _selectedStatus == 'ALL'
+        ? allRecords
+        : allRecords
+            .where((r) => r['status']?.toString().toUpperCase() == _selectedStatus)
+            .toList();
+
+    final totalCount = allRecords.length;
+    final clockInCount = allRecords.where((r) => r['status']?.toString().toUpperCase() == 'CLOCK-IN').length;
+    final clockOutCount = allRecords.where((r) => r['status']?.toString().toUpperCase() == 'CLOCK-OUT').length;
+    final presentCount = allRecords.where((r) => r['status']?.toString().toUpperCase() == 'PRESENT').length;
+    final absentCount = allRecords.where((r) => r['status']?.toString().toUpperCase() == 'ABSENT').length;
+    final leaveCount = allRecords.where((r) => r['status']?.toString().toUpperCase() == 'LEAVE').length;
 
     return Scaffold(
       appBar: AppBar(
@@ -160,23 +176,70 @@ class _TeacherAttendanceManagementScreenState
                       ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                _buildStatusFilters(
+                  context: context,
+                  allCount: totalCount,
+                  clockInCount: clockInCount,
+                  clockOutCount: clockOutCount,
+                  presentCount: presentCount,
+                  absentCount: absentCount,
+                  leaveCount: leaveCount,
+                  isDark: isDark,
+                ),
               ],
             ),
           ),
           Expanded(
             child: provider.isLoading
-                ? _TeacherAttendanceShimmer(isDark: Theme.of(context).brightness == Brightness.dark)
+                ? _TeacherAttendanceShimmer(isDark: isDark)
                 : provider.error != null
                 ? Center(child: Text(l10n.errorLabel(provider.error!)))
                 : provider.teacherAttendance.isEmpty
                 ? Center(child: Text(l10n.noRecordsFound))
+                : filteredAttendance.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.filter_alt_off_outlined,
+                          size: 48,
+                          color: Colors.grey.shade400,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          l10n.noStatusRecordsFound(
+                            _getStatusLabel(context, _selectedStatus),
+                          ),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? Colors.grey.shade300
+                                : Colors.grey.shade700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _selectedStatus = 'ALL';
+                            });
+                          },
+                          icon: const Icon(Icons.clear_all, size: 18),
+                          label: Text(l10n.showAll),
+                        ),
+                      ],
+                    ),
+                  )
                 : RefreshIndicator(
                     onRefresh: () async => _fetchData(),
                     child: ListView.builder(
-                      itemCount: provider.teacherAttendance.length,
+                      itemCount: filteredAttendance.length,
                       padding: const EdgeInsets.all(16),
                     itemBuilder: (context, index) {
-                      final record = provider.teacherAttendance[index];
+                      final record = filteredAttendance[index];
                       final status = record['status']?.toString().toLowerCase();
                       final inTime = record['startTime'] ?? "--:--";
                       final outTime = record['endTime'] ?? "--:--";
@@ -450,6 +513,156 @@ class _TeacherAttendanceManagementScreenState
       default:
         return Colors.grey;
     }
+  }
+  Widget _buildStatusFilters({
+    required BuildContext context,
+    required int allCount,
+    required int clockInCount,
+    required int clockOutCount,
+    required int presentCount,
+    required int absentCount,
+    required int leaveCount,
+    required bool isDark,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final statusItems = [
+      {
+        'key': 'ALL',
+        'label': l10n.statusAll,
+        'count': allCount,
+        'color': AppColors.primaryAdmin,
+        'icon': Icons.grid_view_rounded,
+      },
+      {
+        'key': 'CLOCK-IN',
+        'label': l10n.statusClockIn,
+        'count': clockInCount,
+        'color': const Color(0xFF10B981),
+        'icon': Icons.login,
+      },
+      {
+        'key': 'CLOCK-OUT',
+        'label': l10n.statusClockOut,
+        'count': clockOutCount,
+        'color': const Color(0xFF3B82F6),
+        'icon': Icons.logout,
+      },
+      {
+        'key': 'PRESENT',
+        'label': l10n.statusPresent,
+        'count': presentCount,
+        'color': const Color(0xFF10B981),
+        'icon': Icons.check_circle_rounded,
+      },
+      {
+        'key': 'ABSENT',
+        'label': l10n.statusAbsent,
+        'count': absentCount,
+        'color': const Color(0xFFEF4444),
+        'icon': Icons.cancel_rounded,
+      },
+      {
+        'key': 'LEAVE',
+        'label': l10n.statusLeave,
+        'count': leaveCount,
+        'color': const Color(0xFFF59E0B),
+        'icon': Icons.event_busy_rounded,
+      },
+    ];
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: statusItems.map((item) {
+          final key = item['key'] as String;
+          final label = item['label'] as String;
+          final count = item['count'] as int;
+          final color = item['color'] as Color;
+          final icon = item['icon'] as IconData;
+          final isSelected = _selectedStatus == key;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  _selectedStatus = key;
+                });
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? color
+                      : (isDark
+                            ? color.withValues(alpha: 0.15)
+                            : color.withValues(alpha: 0.08)),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected ? color : color.withValues(alpha: 0.35),
+                    width: isSelected ? 1.5 : 1.0,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 14,
+                      color: isSelected ? Colors.white : color,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.w600,
+                        color: isSelected ? Colors.white : color,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 1.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Colors.white.withValues(alpha: 0.25)
+                            : (isDark
+                                  ? Colors.grey.shade800
+                                  : Colors.grey.shade200),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        count.toString(),
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected
+                              ? Colors.white
+                              : (isDark
+                                    ? Colors.grey.shade300
+                                    : Colors.grey.shade800),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
   }
 }
 
