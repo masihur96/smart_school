@@ -697,8 +697,8 @@ class _StudentAttendanceManagementScreenState
         ),
         child: ExpansionTile(
           trailing: const SizedBox.shrink(),
-          tilePadding: const EdgeInsets.only(left: 14, right: 0, top: 8, bottom: 8),
-          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+          tilePadding: const EdgeInsets.only(left: 16, right: 0, top: 8, bottom: 8),
+          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           title: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -768,10 +768,8 @@ class _StudentAttendanceManagementScreenState
               const SizedBox(width: 14),
               // Right side: Name, Phone, and Academic Badges
               Expanded(
-                child: Container(
-                  color: Colors.greenAccent,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
@@ -789,11 +787,9 @@ class _StudentAttendanceManagementScreenState
                             ),
                           ),
                           if (studentPhone != null && studentPhone.isNotEmpty)
-                            IconButton(
-                              icon: Icon(Icons.phone, color: AppColors.primaryAdmin, size: 20),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              onPressed: () async {
+                            InkWell(
+                              borderRadius: BorderRadius.circular(20),
+                              onTap: () async {
                                 final Uri launchUri = Uri(
                                   scheme: 'tel',
                                   path: studentPhone,
@@ -802,6 +798,10 @@ class _StudentAttendanceManagementScreenState
                                   await launchUrl(launchUri);
                                 }
                               },
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Icon(Icons.phone, color: AppColors.primaryAdmin, size: 18),
+                              ),
                             ),
                         ],
                       ),
@@ -897,7 +897,7 @@ class _StudentAttendanceManagementScreenState
                     ],
                   ),
                 ),
-              ),
+
             ],
           ),
           children: [
