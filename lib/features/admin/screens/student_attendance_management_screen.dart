@@ -669,6 +669,12 @@ class _StudentAttendanceManagementScreenState
             ? record.student!['user']['phone']?.toString()
             : null);
 
+    final studentEmail =
+        record.student?['email']?.toString() ??
+        (record.student?['user'] != null
+            ? record.student!['user']['email']?.toString()
+            : null);
+
     final className = record.classInfo?.name ?? '';
     final sectionName = record.sectionInfo?.name ?? '';
     final subjectName = record.subjectInfo?.name ?? '';
@@ -773,27 +779,46 @@ class _StudentAttendanceManagementScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: Text(
-                              record.studentName.isNotEmpty
-                                  ? record.studentName
-                                  : l10n.unknownStudent,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  record.studentName.isNotEmpty
+                                      ? record.studentName
+                                      : l10n.unknownStudent,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (studentPhone != null && studentPhone.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2.0),
+                                    child: Text(
+                                      studentPhone,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
-                          if (studentPhone != null && studentPhone.isNotEmpty)
+                          SizedBox(width: 10,),
+                          if (studentEmail != null && studentEmail.isNotEmpty)
                             InkWell(
                               borderRadius: BorderRadius.circular(20),
                               onTap: () async {
                                 final Uri launchUri = Uri(
-                                  scheme: 'tel',
-                                  path: studentPhone,
+                                  scheme: 'mailto',
+                                  path: studentEmail,
                                 );
                                 if (await canLaunchUrl(launchUri)) {
                                   await launchUrl(launchUri);
@@ -823,7 +848,7 @@ class _StudentAttendanceManagementScreenState
                             ),
                         ],
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 6),
                       Wrap(
                         spacing: 6,
                         runSpacing: 4,
