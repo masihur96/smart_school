@@ -13,6 +13,7 @@ import '../../../models/teacher_model.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/attendance_management_provider.dart';
 import '../providers/teacher_provider.dart';
+import '../providers/routine_provider.dart';
 
 class TeacherAttendanceManagementScreen extends StatefulWidget {
   const TeacherAttendanceManagementScreen({super.key});
@@ -34,6 +35,15 @@ class _TeacherAttendanceManagementScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (context.read<AttendanceManagementProvider>().teacherAttendance.isEmpty) {
         _fetchData();
+      }
+      
+      final authProvider = context.read<AuthNotifier>();
+      final schoolId = authProvider.user?.schoolId;
+      if (schoolId != null && context.read<RoutineNotifier>().state.isEmpty) {
+        context.read<RoutineNotifier>().fetchAllRoutines(schoolId);
+      }
+      if (context.read<TeachersNotifier>().teachers.isEmpty) {
+        context.read<TeachersNotifier>().fetchTeachers();
       }
     });
   }
@@ -83,21 +93,62 @@ class _TeacherAttendanceManagementScreenState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final provider = context.watch<AttendanceManagementProvider>();
+    final routineProvider = context.watch<RoutineNotifier>();
+    final teachersProvider = context.watch<TeachersNotifier>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final allRecords = provider.teacherAttendance;
+    // 1. Get the target date
+    final targetDate = _selectedDateRange?.start ?? DateTime.now();
+    final dayOfWeek = DateFormat('EEEE').format(targetDate);
+
+    // 2. Find teachers who have a routine on this day
+    final allRoutines = routineProvider.state.values.expand((e) => e).toList();
+    final teachersWithRoutineIds = allRoutines
+        .where((r) => r.day.toLowerCase() == dayOfWeek.toLowerCase())
+        .map((r) => r.teacherId)
+        .toSet();
+
+    // 3. Clone existing explicit records
+    final List<Map<String, dynamic>> combinedRecords = provider.teacherAttendance
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+
+    // 4. Find which teachers already have a record
+    final explicitlyRecordedTeacherIds = combinedRecords.map((r) {
+      return (r['teacher']?['id'] ?? r['teacher']?['_id'] ?? r['teacherId'] ?? r['userId'])?.toString();
+    }).toSet();
+
+    // 5. Inject ABSENT records for teachers expected today but missing
+    for (final teacherId in teachersWithRoutineIds) {
+      if (teacherId.isNotEmpty && !explicitlyRecordedTeacherIds.contains(teacherId)) {
+        final teacherInfo = teachersProvider.teachers.firstWhere(
+            (t) => t.userId == teacherId, 
+            orElse: () => Teacher(userId: teacherId, user: null));
+            
+        combinedRecords.add({
+          'teacher': {
+            'id': teacherId,
+            'name': teacherInfo.user?.name ?? l10n.unknownTeacher,
+            'designation': teacherInfo.designation,
+          },
+          'teacherId': teacherId,
+          'status': 'absent',
+          'date': targetDate.toIso8601String(),
+          'startTime': null,
+          'endTime': null,
+        });
+      }
+    }
+
     final filteredAttendance = _selectedStatus == 'ALL'
-        ? allRecords
-        : allRecords
+        ? combinedRecords
+        : combinedRecords
             .where((r) => r['status']?.toString().toUpperCase() == _selectedStatus)
             .toList();
 
-    final totalCount = allRecords.length;
-    final clockInCount = allRecords.where((r) => r['status']?.toString().toUpperCase() == 'CLOCK-IN').length;
-    final clockOutCount = allRecords.where((r) => r['status']?.toString().toUpperCase() == 'CLOCK-OUT').length;
-    final presentCount = allRecords.where((r) => r['status']?.toString().toUpperCase() == 'PRESENT').length;
-    final absentCount = allRecords.where((r) => r['status']?.toString().toUpperCase() == 'ABSENT').length;
-    final leaveCount = allRecords.where((r) => r['status']?.toString().toUpperCase() == 'LEAVE').length;
+    final totalCount = combinedRecords.length;
+    final presentCount = combinedRecords.where((r) => r['status']?.toString().toUpperCase() == 'PRESENT').length;
+    final absentCount = combinedRecords.where((r) => r['status']?.toString().toUpperCase() == 'ABSENT').length;
 
     return Scaffold(
       appBar: AppBar(
@@ -180,11 +231,8 @@ class _TeacherAttendanceManagementScreenState
                 _buildStatusFilters(
                   context: context,
                   allCount: totalCount,
-                  clockInCount: clockInCount,
-                  clockOutCount: clockOutCount,
                   presentCount: presentCount,
                   absentCount: absentCount,
-                  leaveCount: leaveCount,
                   isDark: isDark,
                 ),
               ],
@@ -394,13 +442,16 @@ class _TeacherAttendanceManagementScreenState
   }
 
   String formatDate(String? utcDate) {
-    if (utcDate == null || utcDate.isEmpty) {
+    if (utcDate == null || utcDate.isEmpty || utcDate == '--:--' || utcDate == '--') {
       return '--';
     }
 
-    final localDate = DateTime.parse(utcDate).toLocal();
-
-    return DateFormat('hh:mm a').format(localDate);
+    try {
+      final localDate = DateTime.parse(utcDate).toLocal();
+      return DateFormat('hh:mm a').format(localDate);
+    } catch (e) {
+      return utcDate; // Fallback to raw string if parsing fails
+    }
   }
 
   Future<void> _exportToPdf(BuildContext context) async {
@@ -517,11 +568,8 @@ class _TeacherAttendanceManagementScreenState
   Widget _buildStatusFilters({
     required BuildContext context,
     required int allCount,
-    required int clockInCount,
-    required int clockOutCount,
     required int presentCount,
     required int absentCount,
-    required int leaveCount,
     required bool isDark,
   }) {
     final l10n = AppLocalizations.of(context)!;
@@ -532,20 +580,6 @@ class _TeacherAttendanceManagementScreenState
         'count': allCount,
         'color': AppColors.primaryAdmin,
         'icon': Icons.grid_view_rounded,
-      },
-      {
-        'key': 'CLOCK-IN',
-        'label': l10n.statusClockIn,
-        'count': clockInCount,
-        'color': const Color(0xFF10B981),
-        'icon': Icons.login,
-      },
-      {
-        'key': 'CLOCK-OUT',
-        'label': l10n.statusClockOut,
-        'count': clockOutCount,
-        'color': const Color(0xFF3B82F6),
-        'icon': Icons.logout,
       },
       {
         'key': 'PRESENT',
@@ -560,13 +594,6 @@ class _TeacherAttendanceManagementScreenState
         'count': absentCount,
         'color': const Color(0xFFEF4444),
         'icon': Icons.cancel_rounded,
-      },
-      {
-        'key': 'LEAVE',
-        'label': l10n.statusLeave,
-        'count': leaveCount,
-        'color': const Color(0xFFF59E0B),
-        'icon': Icons.event_busy_rounded,
       },
     ];
 
