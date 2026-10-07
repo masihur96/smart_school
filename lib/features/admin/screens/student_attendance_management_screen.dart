@@ -801,7 +801,24 @@ class _StudentAttendanceManagementScreenState
                               },
                               child: Padding(
                                 padding: const EdgeInsets.all(4.0),
-                                child: Icon(Icons.phone, color: AppColors.primaryAdmin, size: 18),
+                                child: Icon(Icons.email_outlined, color: AppColors.primaryAdmin, size: 18),
+                              ),
+                            ),
+                          if (studentPhone != null && studentPhone.isNotEmpty)
+                            InkWell(
+                              borderRadius: BorderRadius.circular(20),
+                              onTap: () async {
+                                final Uri launchUri = Uri(
+                                  scheme: 'tel',
+                                  path: studentPhone,
+                                );
+                                if (await canLaunchUrl(launchUri)) {
+                                  await launchUrl(launchUri);
+                                }
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Icon(Icons.phone_outlined, color: AppColors.primaryAdmin, size: 18),
                               ),
                             ),
                         ],
