@@ -699,191 +699,206 @@ class _StudentAttendanceManagementScreenState
           trailing: const SizedBox.shrink(),
           tilePadding: const EdgeInsets.only(left: 14, right: 0, top: 8, bottom: 8),
           childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-          leading: ZoomableAvatar(
-            imageUrl: studentAvatar?.isNotEmpty == true ? studentAvatar : null,
-            name: record.studentName,
-            heroTag: 'attendance-avatar-${record.studentId}',
-            radius: 22,
-            backgroundColor: statusColor.withValues(alpha: 0.12),
-            textColor: statusColor,
-          ),
           title: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  record.studentName.isNotEmpty
-                      ? record.studentName
-                      : l10n.unknownStudent,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
+              // Left side: Avatar, Status, Roll
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ZoomableAvatar(
+                    imageUrl: studentAvatar?.isNotEmpty == true ? studentAvatar : null,
+                    name: record.studentName,
+                    heroTag: 'attendance-avatar-${record.studentId}',
+                    radius: 22,
+                    backgroundColor: statusColor.withValues(alpha: 0.12),
+                    textColor: statusColor,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (studentPhone != null && studentPhone.isNotEmpty)
-                IconButton(
-                  icon: Icon(Icons.phone, color: AppColors.primaryAdmin, size: 20),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  onPressed: () async {
-                    final Uri launchUri = Uri(
-                      scheme: 'tel',
-                      path: studentPhone,
-                    );
-                    if (await canLaunchUrl(launchUri)) {
-                      await launchUrl(launchUri);
-                    }
-                  },
-                ),
-              const SizedBox(width: 8),
-              // Status badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(statusIcon, size: 13, color: statusColor),
-                    const SizedBox(width: 4),
-                    Text(
-                      _getStatusLabel(context, record.status).toUpperCase(),
-                      style: TextStyle(
-                        color: statusColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
-                        letterSpacing: 0.5,
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(statusIcon, size: 10, color: statusColor),
+                        const SizedBox(width: 2),
+                        Text(
+                          _getStatusLabel(context, record.status).toUpperCase(),
+                          style: TextStyle(
+                            color: statusColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 9,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (rollNumber != null && rollNumber.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        l10n.rollNumberFormat(rollNumber),
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          color: isDark
+                              ? Colors.grey.shade300
+                              : Colors.grey.shade700,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
+                ],
+              ),
+              const SizedBox(width: 14),
+              // Right side: Name, Phone, and Academic Badges
+              Expanded(
+                child: Container(
+                  color: Colors.greenAccent,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              record.studentName.isNotEmpty
+                                  ? record.studentName
+                                  : l10n.unknownStudent,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (studentPhone != null && studentPhone.isNotEmpty)
+                            IconButton(
+                              icon: Icon(Icons.phone, color: AppColors.primaryAdmin, size: 20),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: () async {
+                                final Uri launchUri = Uri(
+                                  scheme: 'tel',
+                                  path: studentPhone,
+                                );
+                                if (await canLaunchUrl(launchUri)) {
+                                  await launchUrl(launchUri);
+                                }
+                              },
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          if (className.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryAdmin.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.school_outlined,
+                                    size: 11,
+                                    color: AppColors.primaryAdmin,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    sectionName.isNotEmpty
+                                        ? l10n.classAndSectionFormat(className, sectionName)
+                                        : className,
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      color: AppColors.primaryAdmin,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          if (subjectName.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.indigo.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.menu_book_outlined,
+                                    size: 11,
+                                    color: Colors.indigo.shade700,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    subjectName,
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      color: Colors.indigo.shade700,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today_outlined,
+                            size: 11,
+                            color: Colors.grey.shade500,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            formatDate(record.createdAt),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDark
+                                  ? Colors.grey.shade400
+                                  : Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
-          ),
-          subtitle: Padding(
-            padding: const EdgeInsets.only(top: 6.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Academic Badges Row (Class, Section, Roll, Subject)
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 4,
-                  children: [
-                    if (className.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryAdmin.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.school_outlined,
-                              size: 11,
-                              color: AppColors.primaryAdmin,
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              sectionName.isNotEmpty
-                                  ? l10n.classAndSectionFormat(className, sectionName)
-                                  : className,
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                color: AppColors.primaryAdmin,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    if (rollNumber != null && rollNumber.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.grey.shade800
-                              : Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          l10n.rollNumberFormat(rollNumber),
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            color: isDark
-                                ? Colors.grey.shade300
-                                : Colors.grey.shade700,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    if (subjectName.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.indigo.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.menu_book_outlined,
-                              size: 11,
-                              color: Colors.indigo.shade700,
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              subjectName,
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                color: Colors.indigo.shade700,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                // Date row
-                Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_today_outlined,
-                      size: 11,
-                      color: Colors.grey.shade500,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      formatDate(record.createdAt),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: isDark
-                            ? Colors.grey.shade400
-                            : Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
           ),
           children: [
             Divider(
