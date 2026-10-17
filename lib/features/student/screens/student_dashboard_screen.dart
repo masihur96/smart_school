@@ -18,6 +18,10 @@ import 'package:smart_school/features/library/widgets/book_grid_card.dart';
 import 'package:smart_school/features/online_class/presentation/screens/online_class_list_screen.dart';
 import 'package:smart_school/features/online_class/providers/online_class_provider.dart';
 import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
+import 'package:smart_school/features/admin/models/academic_calendar_model.dart';
+import 'package:smart_school/features/admin/screens/academic_calendar_detail_screen.dart';
+import 'package:smart_school/features/student/providers/student_academic_calendar_provider.dart';
+import 'package:smart_school/features/student/screens/student_academic_calendar_screen.dart';
 import 'package:smart_school/features/student/screens/student_notice_screen.dart';
 import 'package:smart_school/l10n/app_localizations.dart';
 import 'package:smart_school/models/online_class_model.dart';
@@ -108,6 +112,12 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
         final libraryProvider = context.read<LibraryBookNotifier>();
         if (libraryProvider.books.isEmpty) {
           libraryProvider.fetchBooks();
+        }
+
+        final calendarProvider =
+            context.read<StudentAcademicCalendarProvider>();
+        if (calendarProvider.upcomingEvents.isEmpty) {
+          calendarProvider.fetchUpcomingEvents();
         }
       }
     });
@@ -344,6 +354,9 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
     final provider = context.watch<StudentDashboardProvider>();
     final onlineClassProvider = context.watch<OnlineClassProvider>();
     final libraryProvider = context.watch<LibraryBookNotifier>();
+    final calendarProvider = context.watch<StudentAcademicCalendarProvider>();
+
+    final upcomingEvents = calendarProvider.upcomingEvents;
 
     final upcomingClasses = onlineClassProvider.onlineClasses
         .where(
@@ -386,7 +399,12 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
     }
 
     return RefreshIndicator(
-      onRefresh: () => provider.fetchStudentDashboard(),
+      onRefresh: () async {
+        await Future.wait([
+          provider.fetchStudentDashboard(),
+          calendarProvider.fetchUpcomingEvents(force: true),
+        ]);
+      },
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Column(
@@ -414,6 +432,44 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
                   ),
                   _buildAttendanceSection(context, data, l10n),
                   const SizedBox(height: 14),
+                  if (upcomingEvents.isNotEmpty) ...[
+                    _buildSectionHeader(
+                      l10n.academicCalendar,
+                      onSeeAll: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const StudentAcademicCalendarScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 145,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: upcomingEvents.length > 5
+                            ? 5
+                            : upcomingEvents.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 12.0),
+                            child: SizedBox(
+                              width: MediaQuery.of(context).size.width - 48,
+                              child: _buildUpcomingAcademicEventCard(
+                                context,
+                                upcomingEvents[index],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                   if (upcomingClasses.isNotEmpty) ...[
                     _buildSectionHeader(
                       'Online Classes',
@@ -2544,6 +2600,214 @@ class _StudentDashboardContentState extends State<StudentDashboardContent>
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUpcomingAcademicEventCard(
+    BuildContext context,
+    AcademicCalendarEvent event,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = event.displayColor;
+    final dateFormat = DateFormat('MMM dd, yyyy');
+
+    final dateRangeStr = event.startDateFormatted == event.endDateFormatted
+        ? dateFormat.format(event.startDate)
+        : '${dateFormat.format(event.startDate)} - ${dateFormat.format(event.endDate)}';
+
+    final timeStr = event.isAllDay
+        ? 'All Day'
+        : (event.startTime != null && event.endTime != null
+            ? '${event.startTime} - ${event.endTime}'
+            : (event.startTime ?? 'All Day'));
+
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 2,
+      shadowColor: Colors.black26,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+          width: 1,
+        ),
+      ),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => AcademicCalendarDetailScreen(
+                event: event,
+                isReadOnly: true,
+              ),
+            ),
+          );
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                color: color,
+                width: 4,
+              ),
+            ),
+          ),
+          padding: const EdgeInsets.all(14.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      event.category.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  if (event.isHoliday) ...[
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEF4444).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(
+                            Icons.beach_access_rounded,
+                            size: 11,
+                            color: Color(0xFFEF4444),
+                          ),
+                          SizedBox(width: 3),
+                          Text(
+                            'HOLIDAY',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFEF4444),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const Spacer(),
+                  if (event.academicYear != null)
+                    Text(
+                      event.academicYear!,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                event.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today_outlined,
+                    size: 13,
+                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      dateRangeStr,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: isDark
+                            ? Colors.grey.shade300
+                            : Colors.grey.shade700,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.access_time_rounded,
+                    size: 13,
+                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    timeStr,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: isDark
+                          ? Colors.grey.shade300
+                          : Colors.grey.shade700,
+                    ),
+                  ),
+                ],
+              ),
+              if (event.location != null && event.location!.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 12,
+                      color: isDark
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600,
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        event.location!,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isDark
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

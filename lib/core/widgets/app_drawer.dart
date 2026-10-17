@@ -20,6 +20,7 @@ import 'package:smart_school/features/library/screens/library_dashboard_screen.d
 import 'package:smart_school/features/online_class/presentation/screens/online_class_list_screen.dart';
 import 'package:smart_school/features/profile/presentation/screens/profile_screen.dart';
 import 'package:smart_school/features/setting_management_screen.dart';
+import 'package:smart_school/features/student/screens/student_academic_calendar_screen.dart';
 import 'package:smart_school/features/student/screens/student_attendance_screen.dart';
 import 'package:smart_school/features/student/screens/student_homework_screen.dart';
 import 'package:smart_school/features/student/screens/student_notice_screen.dart';
@@ -357,10 +358,18 @@ class AppDrawer extends StatelessWidget {
           MaterialPageRoute(builder: (_) => StudentHomeworkScreen()),
         );
       }, context),
-      _buildDrawerItem(Icons.calendar_month, l10n.routine, () {
+      _buildDrawerItem(Icons.schedule, l10n.routine, () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => StudentRoutineScreen()),
+        );
+      }, context),
+      _buildDrawerItem(Icons.calendar_month, l10n.academicCalendar, () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const StudentAcademicCalendarScreen(),
+          ),
         );
       }, context),
       _buildDrawerItem(Icons.notifications, l10n.notices, () {
