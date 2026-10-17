@@ -5,6 +5,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:smart_school/core/theme/app_colors.dart';
 import 'package:smart_school/core/utils/teacher_attendance_pdf_helper.dart';
 
@@ -13,6 +14,7 @@ import '../../../models/teacher_model.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/attendance_management_provider.dart';
 import '../providers/teacher_provider.dart';
+import '../providers/routine_provider.dart';
 
 class TeacherAttendanceManagementScreen extends StatefulWidget {
   const TeacherAttendanceManagementScreen({super.key});
@@ -26,6 +28,8 @@ class _TeacherAttendanceManagementScreenState
     extends State<TeacherAttendanceManagementScreen> {
   DateTimeRange? _selectedDateRange;
   final TextEditingController _searchController = TextEditingController();
+  String _selectedStatus = 'ALL';
+  bool _isFilterExpanded = false;
 
   @override
   void initState() {
@@ -33,6 +37,15 @@ class _TeacherAttendanceManagementScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (context.read<AttendanceManagementProvider>().teacherAttendance.isEmpty) {
         _fetchData();
+      }
+      
+      final authProvider = context.read<AuthNotifier>();
+      final schoolId = authProvider.user?.schoolId;
+      if (schoolId != null && context.read<RoutineNotifier>().state.isEmpty) {
+        context.read<RoutineNotifier>().fetchAllRoutines(schoolId);
+      }
+      if (context.read<TeachersNotifier>().teachers.isEmpty) {
+        context.read<TeachersNotifier>().fetchTeachers();
       }
     });
   }
@@ -82,6 +95,63 @@ class _TeacherAttendanceManagementScreenState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final provider = context.watch<AttendanceManagementProvider>();
+    final routineProvider = context.watch<RoutineNotifier>();
+    final teachersProvider = context.watch<TeachersNotifier>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // 1. Get the target date
+    final targetDate = _selectedDateRange?.start ?? DateTime.now();
+    final dayOfWeek = DateFormat('EEEE').format(targetDate);
+
+    // 2. Find teachers who have a routine on this day
+    final allRoutines = routineProvider.state.values.expand((e) => e).toList();
+    final teachersWithRoutineIds = allRoutines
+        .where((r) => r.day.toLowerCase() == dayOfWeek.toLowerCase())
+        .map((r) => r.teacherId)
+        .toSet();
+
+    // 3. Clone existing explicit records
+    final List<Map<String, dynamic>> combinedRecords = provider.teacherAttendance
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+
+    // 4. Find which teachers already have a record
+    final explicitlyRecordedTeacherIds = combinedRecords.map((r) {
+      return (r['teacher']?['id'] ?? r['teacher']?['_id'] ?? r['teacherId'] ?? r['userId'])?.toString();
+    }).toSet();
+
+    // 5. Inject ABSENT records for teachers expected today but missing
+    for (final teacherId in teachersWithRoutineIds) {
+      if (teacherId.isNotEmpty && !explicitlyRecordedTeacherIds.contains(teacherId)) {
+        final teacherInfo = teachersProvider.teachers.firstWhere(
+            (t) => t.userId == teacherId, 
+            orElse: () => Teacher(userId: teacherId, user: null));
+            
+        combinedRecords.add({
+          'teacher': {
+            'id': teacherId,
+            'name': teacherInfo.user?.name ?? l10n.unknownTeacher,
+            'designation': teacherInfo.designation,
+            'phone': teacherInfo.user?.phone ?? teacherInfo.user?.phone,
+          },
+          'teacherId': teacherId,
+          'status': 'absent',
+          'date': targetDate.toIso8601String(),
+          'startTime': null,
+          'endTime': null,
+        });
+      }
+    }
+
+    final filteredAttendance = _selectedStatus == 'ALL'
+        ? combinedRecords
+        : combinedRecords
+            .where((r) => r['status']?.toString().toUpperCase() == _selectedStatus)
+            .toList();
+
+    final totalCount = combinedRecords.length;
+    final presentCount = combinedRecords.where((r) => r['status']?.toString().toUpperCase() == 'PRESENT').length;
+    final absentCount = combinedRecords.where((r) => r['status']?.toString().toUpperCase() == 'ABSENT').length;
 
     return Scaffold(
       appBar: AppBar(
@@ -89,6 +159,15 @@ class _TeacherAttendanceManagementScreenState
         backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
         actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _isFilterExpanded = !_isFilterExpanded;
+              });
+            },
+            icon: Icon(_isFilterExpanded ? Icons.filter_list_off : Icons.filter_list),
+            tooltip: 'Toggle Filters',
+          ),
           IconButton(
             onPressed: () => _exportToPdf(context),
             icon: const Icon(Icons.picture_as_pdf),
@@ -98,88 +177,144 @@ class _TeacherAttendanceManagementScreenState
       ),
       body: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: l10n.searchByTeacherNameHint,
-                          prefixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(
+          AnimatedCrossFade(
+            firstChild: const SizedBox(width: double.infinity, height: 0),
+            secondChild: Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText: l10n.searchByTeacherNameHint,
+                            prefixIcon: const Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 0,
+                            ),
+                          ),
+                          onChanged: (value) => _fetchData(),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      InkWell(
+                        onTap: () => _selectDate(context),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E1B4B).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 0,
+                          child: const Icon(Icons.calendar_today),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _selectedDateRange != null
+                            ? l10n.dateRangeFormat(
+                                DateFormat('yyyy-MM-dd').format(_selectedDateRange!.start),
+                                DateFormat('yyyy-MM-dd').format(_selectedDateRange!.end),
+                              )
+                            : l10n.dateAllTime,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      if (_searchController.text.isNotEmpty)
+                        Text(
+                          l10n.resultsForFormat(_searchController.text),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue,
                           ),
                         ),
-                        onChanged: (value) => _fetchData(),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    InkWell(
-                      onTap: () => _selectDate(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1E1B4B).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(Icons.calendar_today),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _selectedDateRange != null
-                          ? l10n.dateRangeFormat(
-                              DateFormat('yyyy-MM-dd').format(_selectedDateRange!.start),
-                              DateFormat('yyyy-MM-dd').format(_selectedDateRange!.end),
-                            )
-                          : l10n.dateAllTime,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    if (_searchController.text.isNotEmpty)
-                      Text(
-                        l10n.resultsForFormat(_searchController.text),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.blue,
-                        ),
-                      ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _buildStatusFilters(
+                    context: context,
+                    allCount: totalCount,
+                    presentCount: presentCount,
+                    absentCount: absentCount,
+                    isDark: isDark,
+                  ),
+                ],
+              ),
             ),
+            crossFadeState: _isFilterExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 300),
           ),
           Expanded(
             child: provider.isLoading
-                ? _TeacherAttendanceShimmer(isDark: Theme.of(context).brightness == Brightness.dark)
+                ? _TeacherAttendanceShimmer(isDark: isDark)
                 : provider.error != null
                 ? Center(child: Text(l10n.errorLabel(provider.error!)))
                 : provider.teacherAttendance.isEmpty
                 ? Center(child: Text(l10n.noRecordsFound))
+                : filteredAttendance.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.filter_alt_off_outlined,
+                          size: 48,
+                          color: Colors.grey.shade400,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          l10n.noStatusRecordsFound(
+                            _getStatusLabel(context, _selectedStatus),
+                          ),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? Colors.grey.shade300
+                                : Colors.grey.shade700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _selectedStatus = 'ALL';
+                            });
+                          },
+                          icon: const Icon(Icons.clear_all, size: 18),
+                          label: Text(l10n.showAll),
+                        ),
+                      ],
+                    ),
+                  )
                 : RefreshIndicator(
                     onRefresh: () async => _fetchData(),
                     child: ListView.builder(
-                      itemCount: provider.teacherAttendance.length,
+                      itemCount: filteredAttendance.length,
                       padding: const EdgeInsets.all(16),
                     itemBuilder: (context, index) {
-                      final record = provider.teacherAttendance[index];
+                      final record = filteredAttendance[index];
                       final status = record['status']?.toString().toLowerCase();
                       final inTime = record['startTime'] ?? "--:--";
                       final outTime = record['endTime'] ?? "--:--";
+
+                      final teacherPhone = record['teacher']?['phone']?.toString() ?? 
+                                           record['teacher']?['guardianContact']?.toString() ?? 
+                                           record['teacher']?['user']?['phone']?.toString() ??
+                                           record['phone']?.toString();
 
                       String dateStr = record['date']?.toString() ?? "N/A";
                       if (dateStr != "N/A") {
@@ -217,14 +352,37 @@ class _TeacherAttendanceManagementScreenState
                                     ),
                                   ),
                                 ),
-                                title: Text(
-                                  record['teacher']?['name'] ??
-                                      record['teacherName'] ??
-                                      record['name'] ??
-                                      l10n.unknownTeacher,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                title: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        record['teacher']?['name'] ??
+                                            record['teacherName'] ??
+                                            record['name'] ??
+                                            l10n.unknownTeacher,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    if (teacherPhone != null && teacherPhone.isNotEmpty)
+                                      InkWell(
+                                        borderRadius: BorderRadius.circular(20),
+                                        onTap: () async {
+                                          final Uri launchUri = Uri(
+                                            scheme: 'tel',
+                                            path: teacherPhone,
+                                          );
+                                          if (await canLaunchUrl(launchUri)) {
+                                            await launchUrl(launchUri);
+                                          }
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(4.0),
+                                          child: Icon(Icons.phone, color: AppColors.primaryAdmin, size: 16),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,13 +489,16 @@ class _TeacherAttendanceManagementScreenState
   }
 
   String formatDate(String? utcDate) {
-    if (utcDate == null || utcDate.isEmpty) {
+    if (utcDate == null || utcDate.isEmpty || utcDate == '--:--' || utcDate == '--') {
       return '--';
     }
 
-    final localDate = DateTime.parse(utcDate).toLocal();
-
-    return DateFormat('hh:mm a').format(localDate);
+    try {
+      final localDate = DateTime.parse(utcDate).toLocal();
+      return DateFormat('hh:mm a').format(localDate);
+    } catch (e) {
+      return utcDate; // Fallback to raw string if parsing fails
+    }
   }
 
   Future<void> _exportToPdf(BuildContext context) async {
@@ -450,6 +611,132 @@ class _TeacherAttendanceManagementScreenState
       default:
         return Colors.grey;
     }
+  }
+  Widget _buildStatusFilters({
+    required BuildContext context,
+    required int allCount,
+    required int presentCount,
+    required int absentCount,
+    required bool isDark,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final statusItems = [
+      {
+        'key': 'ALL',
+        'label': l10n.statusAll,
+        'count': allCount,
+        'color': AppColors.primaryAdmin,
+        'icon': Icons.grid_view_rounded,
+      },
+      {
+        'key': 'PRESENT',
+        'label': l10n.statusPresent,
+        'count': presentCount,
+        'color': const Color(0xFF10B981),
+        'icon': Icons.check_circle_rounded,
+      },
+      {
+        'key': 'ABSENT',
+        'label': l10n.statusAbsent,
+        'count': absentCount,
+        'color': const Color(0xFFEF4444),
+        'icon': Icons.cancel_rounded,
+      },
+    ];
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: statusItems.map((item) {
+          final key = item['key'] as String;
+          final label = item['label'] as String;
+          final count = item['count'] as int;
+          final color = item['color'] as Color;
+          final icon = item['icon'] as IconData;
+          final isSelected = _selectedStatus == key;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  _selectedStatus = key;
+                });
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? color
+                      : (isDark
+                            ? color.withValues(alpha: 0.15)
+                            : color.withValues(alpha: 0.08)),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected ? color : color.withValues(alpha: 0.35),
+                    width: isSelected ? 1.5 : 1.0,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 14,
+                      color: isSelected ? Colors.white : color,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.w600,
+                        color: isSelected ? Colors.white : color,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 1.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Colors.white.withValues(alpha: 0.25)
+                            : (isDark
+                                  ? Colors.grey.shade800
+                                  : Colors.grey.shade200),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        count.toString(),
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected
+                              ? Colors.white
+                              : (isDark
+                                    ? Colors.grey.shade300
+                                    : Colors.grey.shade800),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
   }
 }
 

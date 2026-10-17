@@ -13,6 +13,7 @@ import 'package:smart_school/core/utils/student_attendance_pdf_helper.dart';
 import 'package:smart_school/features/admin/providers/setup_provider.dart';
 import 'package:smart_school/models/period_attendance_model.dart';
 import 'package:smart_school/models/school_models.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -632,14 +633,8 @@ class _StudentAttendanceManagementScreenState
     }
   }
 
-  String formatDate(String? utcDate) {
-    if (utcDate == null || utcDate.isEmpty) {
-      return '--';
-    }
-
-    final localDate = DateTime.parse(utcDate).toLocal();
-
-    return DateFormat('dd MMM yyyy, hh:mm a').format(localDate);
+  String formatDate(DateTime date) {
+    return DateFormat('dd MMM yyyy, hh:mm a').format(date.toLocal());
   }
 
   Widget _buildAttendanceCard(
@@ -652,6 +647,7 @@ class _StudentAttendanceManagementScreenState
     final statusIcon = _getStatusIcon(record.status);
 
     // Extract student avatar & roll number
+
     final studentAvatar =
         record.student?['avatar'] as String? ??
         record.student?['avatarUrl'] as String? ??
@@ -665,6 +661,19 @@ class _StudentAttendanceManagementScreenState
         record.student?['rollNumber']?.toString() ??
         record.student?['rollId']?.toString() ??
         record.student?['roll_number']?.toString();
+
+    final studentPhone =
+        record.student?['guardianContact']?.toString() ??
+        record.student?['phone']?.toString() ??
+        (record.student?['user'] != null
+            ? record.student!['user']['phone']?.toString()
+            : null);
+
+    final studentEmail =
+        record.student?['email']?.toString() ??
+        (record.student?['user'] != null
+            ? record.student!['user']['email']?.toString()
+            : null);
 
     final className = record.classInfo?.name ?? '';
     final sectionName = record.sectionInfo?.name ?? '';
@@ -694,178 +703,245 @@ class _StudentAttendanceManagementScreenState
           highlightColor: Colors.transparent,
         ),
         child: ExpansionTile(
-          tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-          leading: ZoomableAvatar(
-            imageUrl: studentAvatar?.isNotEmpty == true ? studentAvatar : null,
-            name: record.studentName,
-            heroTag: 'attendance-avatar-${record.studentId}',
-            radius: 22,
-            backgroundColor: statusColor.withValues(alpha: 0.12),
-            textColor: statusColor,
-          ),
+          trailing: const SizedBox.shrink(),
+          tilePadding: const EdgeInsets.only(left: 16, right: 0, top: 8, bottom: 8),
+          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           title: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  record.studentName.isNotEmpty
-                      ? record.studentName
-                      : l10n.unknownStudent,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
+              // Left side: Avatar, Status, Roll
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ZoomableAvatar(
+                    imageUrl: studentAvatar?.isNotEmpty == true ? studentAvatar : null,
+                    name: record.studentName,
+                    heroTag: 'attendance-avatar-${record.studentId}',
+                    radius: 22,
+                    backgroundColor: statusColor.withValues(alpha: 0.12),
+                    textColor: statusColor,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Status badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(statusIcon, size: 13, color: statusColor),
-                    const SizedBox(width: 4),
-                    Text(
-                      _getStatusLabel(context, record.status).toUpperCase(),
-                      style: TextStyle(
-                        color: statusColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
-                        letterSpacing: 0.5,
-                      ),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          subtitle: Padding(
-            padding: const EdgeInsets.only(top: 6.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Academic Badges Row (Class, Section, Roll, Subject)
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 4,
-                  children: [
-                    if (className.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryAdmin.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.school_outlined,
-                              size: 11,
-                              color: AppColors.primaryAdmin,
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              sectionName.isNotEmpty
-                                  ? l10n.classAndSectionFormat(className, sectionName)
-                                  : className,
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                color: AppColors.primaryAdmin,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    if (rollNumber != null && rollNumber.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.grey.shade800
-                              : Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          l10n.rollNumberFormat(rollNumber),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(statusIcon, size: 10, color: statusColor),
+                        const SizedBox(width: 2),
+                        Text(
+                          _getStatusLabel(context, record.status).toUpperCase(),
                           style: TextStyle(
-                            fontSize: 10.5,
-                            color: isDark
-                                ? Colors.grey.shade300
-                                : Colors.grey.shade700,
-                            fontWeight: FontWeight.w600,
+                            color: statusColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 9,
+                            letterSpacing: 0.5,
                           ),
                         ),
+                      ],
+                    ),
+                  ),
+                  if (rollNumber != null && rollNumber.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
                       ),
-                    if (subjectName.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        l10n.rollNumberFormat(rollNumber),
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          color: isDark
+                              ? Colors.grey.shade300
+                              : Colors.grey.shade700,
+                          fontWeight: FontWeight.w600,
                         ),
-                        decoration: BoxDecoration(
-                          color: Colors.indigo.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.menu_book_outlined,
-                              size: 11,
-                              color: Colors.indigo.shade700,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(width: 14),
+              // Right side: Name, Phone, and Academic Badges
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  record.studentName.isNotEmpty
+                                      ? record.studentName
+                                      : l10n.unknownStudent,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (studentPhone != null && studentPhone.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2.0),
+                                    child: Text(
+                                      studentPhone,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
-                            const SizedBox(width: 3),
-                            Text(
-                              subjectName,
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                color: Colors.indigo.shade700,
-                                fontWeight: FontWeight.w600,
+                          ),
+                          SizedBox(width: 10,),
+                          if (studentEmail != null && studentEmail.isNotEmpty)
+                            InkWell(
+                              borderRadius: BorderRadius.circular(20),
+                              onTap: () async {
+                                final Uri launchUri = Uri(
+                                  scheme: 'mailto',
+                                  path: studentEmail,
+                                );
+                                if (await canLaunchUrl(launchUri)) {
+                                  await launchUrl(launchUri);
+                                }
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Icon(Icons.email_outlined, color: AppColors.primaryAdmin, size: 18),
                               ),
                             ),
-                          ],
-                        ),
+                          if (studentPhone != null && studentPhone.isNotEmpty)
+                            InkWell(
+                              borderRadius: BorderRadius.circular(20),
+                              onTap: () async {
+                                final Uri launchUri = Uri(
+                                  scheme: 'tel',
+                                  path: studentPhone,
+                                );
+                                if (await canLaunchUrl(launchUri)) {
+                                  await launchUrl(launchUri);
+                                }
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Icon(Icons.phone_outlined, color: AppColors.primaryAdmin, size: 18),
+                              ),
+                            ),
+                        ],
                       ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                // Date row
-                Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_today_outlined,
-                      size: 11,
-                      color: Colors.grey.shade500,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      formatDate(record.date),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: isDark
-                            ? Colors.grey.shade400
-                            : Colors.grey.shade600,
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          if (className.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryAdmin.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.school_outlined,
+                                    size: 11,
+                                    color: AppColors.primaryAdmin,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    sectionName.isNotEmpty
+                                        ? l10n.classAndSectionFormat(className, sectionName)
+                                        : className,
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      color: AppColors.primaryAdmin,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          if (subjectName.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.indigo.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.menu_book_outlined,
+                                    size: 11,
+                                    color: Colors.indigo.shade700,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    subjectName,
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      color: Colors.indigo.shade700,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today_outlined,
+                            size: 11,
+                            color: Colors.grey.shade500,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            formatDate(record.createdAt),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDark
+                                  ? Colors.grey.shade400
+                                  : Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
+
+            ],
           ),
           children: [
             Divider(
@@ -915,18 +991,7 @@ class _StudentAttendanceManagementScreenState
                       value: roomNumber,
                       isDark: isDark,
                     ),
-                  ],
-                  if (record.id.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    _buildDetailItem(
-                      icon: Icons.tag_outlined,
-                      iconColor: Colors.purple,
-                      label: l10n.recordIdLabel,
-                      value: record.id.length > 12
-                          ? '${record.id.substring(0, 12)}...'
-                          : record.id,
-                      isDark: isDark,
-                    ),
+
                   ],
                 ],
               ),
