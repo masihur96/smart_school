@@ -203,4 +203,9 @@ class APIPath {
   static String academicCalendar = "$baseUrl/admin/academic-calendar";
   static String academicCalendarItem(String id) =>
       "$baseUrl/admin/academic-calendar/$id";
+
+  // Teacher Academic Calendar
+  static String teacherAcademicCalendar = "$baseUrl/teacher/academic-calendar";
+  static String teacherUpcomingAcademicCalendar =
+      "$baseUrl/teacher/academic-calendar/upcoming";
 }

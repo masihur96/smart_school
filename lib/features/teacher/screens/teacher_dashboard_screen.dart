@@ -36,9 +36,13 @@ import '../../notifications/providers/notification_provider.dart';
 import '../data/models/teacher_dashboard_model.dart';
 import '../providers/teacher_dashboard_provider.dart';
 import 'homework_management_screen.dart';
+import 'teacher_academic_calendar_screen.dart';
 import 'teacher_attendance_screen.dart';
 import 'teacher_exam_screen.dart';
 import 'teacher_routine_screen.dart';
+import '../../admin/models/academic_calendar_model.dart';
+import '../../admin/screens/academic_calendar_detail_screen.dart';
+import '../providers/teacher_academic_calendar_provider.dart';
 
 class TeacherDashboardScreen extends StatelessWidget {
   const TeacherDashboardScreen({super.key});
@@ -120,6 +124,12 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
         final libraryProvider = context.read<LibraryBookNotifier>();
         if (libraryProvider.books.isEmpty) {
           libraryProvider.fetchBooks();
+        }
+
+        final calendarProvider =
+            context.read<TeacherAcademicCalendarProvider>();
+        if (calendarProvider.upcomingEvents.isEmpty) {
+          calendarProvider.fetchUpcomingEvents();
         }
       }
     });
@@ -410,6 +420,7 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     final provider = context.watch<TeacherDashboardProvider>();
     final onlineClassProvider = context.watch<OnlineClassProvider>();
     final libraryProvider = context.watch<LibraryBookNotifier>();
+    final calendarProvider = context.watch<TeacherAcademicCalendarProvider>();
 
     final upcomingClasses = onlineClassProvider.onlineClasses
         .where(
@@ -422,6 +433,8 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     final availableBooks = libraryProvider.books
         .where((b) => b.isAvailable)
         .toList();
+
+    final upcomingEvents = calendarProvider.upcomingEvents;
 
     final data = provider.dashboardData;
     final classes = provider.todayClasses
@@ -456,7 +469,14 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
     }
 
     return RefreshIndicator(
-      onRefresh: () => provider.fetchTeacherDashboard(),
+      onRefresh: () async {
+        await provider.fetchTeacherDashboard();
+        if (context.mounted) {
+          context
+              .read<TeacherAcademicCalendarProvider>()
+              .fetchUpcomingEvents(force: true);
+        }
+      },
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Padding(
@@ -521,6 +541,43 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                           child: _buildOnlineClassCard(
                             context,
                             upcomingClasses[index],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+              if (upcomingEvents.isNotEmpty) ...[
+                _buildSectionHeader(
+                  l10n.academicCalendar,
+                  onSeeAll: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const TeacherAcademicCalendarScreen(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 145,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: upcomingEvents.length > 5
+                        ? 5
+                        : upcomingEvents.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 12.0),
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width - 48,
+                          child: _buildUpcomingAcademicEventCard(
+                            context,
+                            upcomingEvents[index],
                           ),
                         ),
                       );
@@ -2064,6 +2121,209 @@ class _TeacherDashboardContentState extends State<TeacherDashboardContent>
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUpcomingAcademicEventCard(
+    BuildContext context,
+    AcademicCalendarEvent event,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = event.displayColor;
+    final dateFormat = DateFormat('MMM dd, yyyy');
+
+    final dateRangeStr = event.startDateFormatted == event.endDateFormatted
+        ? dateFormat.format(event.startDate)
+        : '${dateFormat.format(event.startDate)} - ${dateFormat.format(event.endDate)}';
+
+    final timeStr = event.isAllDay
+        ? 'All Day'
+        : (event.startTime != null && event.endTime != null
+            ? '${event.startTime} - ${event.endTime}'
+            : (event.startTime ?? 'All Day'));
+
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 2,
+      shadowColor: Colors.black26,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+          width: 1,
+        ),
+      ),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => AcademicCalendarDetailScreen(
+                event: event,
+                isReadOnly: true,
+              ),
+            ),
+          );
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                color: color,
+                width: 4,
+              ),
+            ),
+          ),
+          padding: const EdgeInsets.all(14.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      event.category.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  if (event.isHoliday) ...[
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEF4444).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(
+                            Icons.beach_access_rounded,
+                            size: 11,
+                            color: Color(0xFFEF4444),
+                          ),
+                          SizedBox(width: 3),
+                          Text(
+                            'HOLIDAY',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFEF4444),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const Spacer(),
+                  if (event.academicYear != null)
+                    Text(
+                      event.academicYear!,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color:
+                            isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                event.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today_outlined,
+                    size: 13,
+                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      dateRangeStr,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color:
+                            isDark ? Colors.grey.shade300 : Colors.grey.shade700,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.access_time_rounded,
+                    size: 13,
+                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    timeStr,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color:
+                          isDark ? Colors.grey.shade300 : Colors.grey.shade700,
+                    ),
+                  ),
+                ],
+              ),
+              if (event.location != null && event.location!.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 12,
+                      color:
+                          isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        event.location!,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isDark
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
           ),
         ),
       ),

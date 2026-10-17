@@ -9,8 +9,13 @@ import 'package:url_launcher/url_launcher.dart';
 
 class AcademicCalendarDetailScreen extends StatelessWidget {
   final AcademicCalendarEvent event;
+  final bool isReadOnly;
 
-  const AcademicCalendarDetailScreen({super.key, required this.event});
+  const AcademicCalendarDetailScreen({
+    super.key,
+    required this.event,
+    this.isReadOnly = false,
+  });
 
   Future<void> _openAttachment(BuildContext context, String url) async {
     final uri = Uri.tryParse(url);
@@ -90,26 +95,28 @@ class AcademicCalendarDetailScreen extends StatelessWidget {
         backgroundColor: AppColors.primaryAdmin,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            tooltip: 'Edit Event',
-            onPressed: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => AddEditAcademicCalendarScreen(event: event),
-                ),
-              );
-              if (result == true && context.mounted) {
-                Navigator.pop(context); // Close details so refreshed list shows
-              }
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            tooltip: 'Delete Event',
-            onPressed: () => _confirmDelete(context),
-          ),
+          if (!isReadOnly) ...[
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              tooltip: 'Edit Event',
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AddEditAcademicCalendarScreen(event: event),
+                  ),
+                );
+                if (result == true && context.mounted) {
+                  Navigator.pop(context); // Close details so refreshed list shows
+                }
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'Delete Event',
+              onPressed: () => _confirmDelete(context),
+            ),
+          ],
         ],
       ),
       body: SingleChildScrollView(

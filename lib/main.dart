@@ -50,6 +50,7 @@ import 'features/teacher/providers/homework_provider.dart';
 import 'features/teacher/providers/result_provider.dart';
 import 'features/teacher/providers/teacher_attendance_provider.dart';
 import 'features/teacher/providers/teacher_dashboard_provider.dart';
+import 'features/teacher/providers/teacher_academic_calendar_provider.dart';
 import 'features/notifications/providers/notification_provider.dart';
 import 'firebase_options.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -147,6 +148,9 @@ void main() async {
         ChangeNotifierProvider(create: (_) => StudentDashboardProvider()),
         ChangeNotifierProvider(create: (_) => TeacherDashboardProvider()),
         ChangeNotifierProvider(create: (_) => TeacherAttendanceProvider()),
+        ChangeNotifierProvider(
+          create: (_) => TeacherAcademicCalendarProvider(),
+        ),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => AdminDashboardProvider()),
         ChangeNotifierProvider(create: (_) => StudentPerformanceProvider()),
